@@ -38,4 +38,74 @@
 }
 
 
+.content-header { margin-bottom: 15px; }
+        .content-header h1 { font-size: 1.8rem; margin: 0; color: #343a40; }
+
+        /* Card Style */
+        .card {
+            background-color: #ffffff;
+            border: 0 solid rgba(0,0,0,.125);
+            box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+        }
+
+        .card-body { flex: 1 1 auto; padding: 1.25rem; }
+
+        /* Header Layout */
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-title h3 { font-size: 1.5rem; font-weight: 500; margin: 0; color: #1f2d3d; }
+        .project-desc { color: #6c757d; font-size: 0.95rem; margin: 4px 0 8px 0; }
+
+        /* Badges */
+        .badge-custom {
+            display: inline-block; padding: .25em .4em; font-size: 75%; font-weight: 700;
+            line-height: 1; text-align: center; white-space: nowrap; vertical-align: baseline;
+            border-radius: .25rem; background-color: #6c757d; color: #fff;
+        }
+
+        /* View Button */
+        .btn-view {
+            color: #007bff; border-color: #007bff; background: transparent; display: inline-block;
+            font-weight: 400; text-align: center; vertical-align: middle; border: 1px solid #007bff;
+            padding: .25rem .5rem; font-size: .875rem; line-height: 1.5; border-radius: .2rem;
+            transition: all .15s ease-in-out; cursor: pointer; text-decoration: none;
+        }
+        .btn-view:hover { color: #fff; background-color: #007bff; border-color: #007bff; }
+
+        /* Timeline */
+        .timeline-wrapper { display: flex; width: 100%; gap: 4px; }
+        .timeline-item { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .progress-segment { width: 100%; height: 10px; margin-bottom: 8px; }
+        .timeline-item:first-child .progress-segment { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+        .timeline-item:last-child .progress-segment { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+
+        /* AdminLTE Colors */
+        .bg-primary { background-color: #007bff !important; } /* Blue */
+        .bg-success { background-color: #28a745 !important; } /* Green */
+        .bg-warning { background-color: #ffc107 !important; } /* Yellow/Orange */
+        .bg-danger  { background-color: #dc3545 !important; } /* Red */
+        .bg-secondary { background-color: #e9ecef !important; } /* Light Grey */
+
+        /* Text Styles */
+        .meta-text { font-size: 0.85rem; color: #212529; font-weight: 600; line-height: 1.2; }
+        .meta-date { font-size: 0.75rem; color: #6c757d; font-weight: 400; margin-top: 2px; }
+
+        @media (max-width: 576px) {
+            .meta-text { font-size: 0.7rem; }
+            .meta-date { font-size: 0.65rem; }
+            .btn-view { padding: .2rem .4rem; font-size: .75rem; }
+        }
+
 /*# sourceMappingURL=adminlte.min.css.map */

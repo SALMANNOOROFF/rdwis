@@ -171,10 +171,9 @@
     </ul>
   </nav>
   <!-- /.navbar -->
-(main)
-@yield('content')
 
-(/main)
+    @yield('content')
+
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
@@ -228,7 +227,7 @@
 
       <ul class="nav nav-treeview">
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="{{ route('openproject') }}" class="nav-link">
             <i class="fas fa-folder-open nav-icon"></i>
             <p>OPEN PROJECTS</p>
           </a>
