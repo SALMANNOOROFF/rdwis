@@ -25,3 +25,19 @@ Route::get('/addmilestonepr', function () {
 Route::get('/addnewproject', function () {
     return view('projects.addnewproject');
 })->name('addnewproject');
+
+Route::get('/projecthistory', function () {
+    return view('projects.projecthistory');
+})->name('projecthistory');
+
+Route::get('/gantchartpr', function () {
+    return view('projects.gantchartpr');
+})->name('gantchartpr');
+
+Route::get('/openmprs', function () {
+    return view('projects.openmprs');
+})->name('openmprs');
+
+Route::get('/viewmpr', function () {
+    return view('projects.viewmpr');
+})->name('viewmpr');

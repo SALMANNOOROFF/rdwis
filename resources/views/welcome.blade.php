@@ -226,7 +226,7 @@
         </li>
         
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="{{route('openmprs')}}" class="nav-link">
             <i class="fas fa-file-alt nav-icon"></i>
             <p>PREPARE MPR</p>
           </a>

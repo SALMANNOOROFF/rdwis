@@ -114,8 +114,8 @@
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-project-diagram mr-2"></i> Project Management System</h3>
             <div class="card-tools">
-                <button class="btn btn-secondary btn-sm mr-1"><i class="fas fa-history"></i> History</button>
-                <button class="btn btn-secondary btn-sm mr-1"><i class="fas fa-chart-bar"></i> Gantt Chart</button>
+                <a href="{{route('projecthistory')}}"> <button class="btn btn-secondary btn-sm mr-1"><i class="fas fa-history"></i> History</button></a>
+                <a href="{{route('gantchartpr')}}"><button class="btn btn-secondary btn-sm mr-1"><i class="fas fa-chart-bar"></i> Gantt Chart</button></a>
                 <button class="btn btn-outline-primary btn-sm"><i class="fas fa-print"></i></button>
             </div>
         </div>
