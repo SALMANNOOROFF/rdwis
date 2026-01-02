@@ -9,28 +9,33 @@ Route::get('/', function () {
 })->name('index');
 
 
-//for open projects of div
-Route::get('/viewopenproject', function () {
-    return view('projects.open.viewopenproject');
-})->name('viewopenproject');
+//for projects of div
+Route::get('/viewprojects', function () {
+    return view('projects.viewprojects');
+})->name('viewprojects');
 
 Route::get('/openprojectdetails', function () {
-    return view('projects.open.openprojectdetails');
+    return view('projects.openprojectdetails');
 })->name('openprojectdetails');
 
 Route::get('/addmilestonepr', function () {
-    return view('projects.open.addmilestonepr');
+    return view('projects.addmilestonepr');
 })->name('addmilestonepr');
 
-//for close projects ofdiv
-Route::get('/viewcloseproject', function () {
-    return view('projects.close.viewcloseproject');
-})->name('viewcloseproject');
+Route::get('/addnewproject', function () {
+    return view('projects.addnewproject');
+})->name('addnewproject');
 
-Route::get('/closeprojectdetails', function () {
-    return view('projects.close.closeprojectdetails');
-})->name('closeprojectdetails');
+// Purchase Cases (PCs)
 
-Route::get('/addmilestonecpr', function () {
-    return view('projects.close.addmilestonecpr');
-})->name('addmilestonecpr');
+Route::get('/createnewcase', function () {
+    return view('purchase.new_case.createnewcase');
+})->name('createnewcase');
+
+Route::get('/purchasecasedetails', function () {
+    return view('purchase.new_case.purchasecasedetails');
+})->name('purchasecasedetails');
+
+Route::get('/viewpurchasecase', function () {
+    return view('purchase.new_case.viewpurchasecase');
+})->name('viewpurchasecase');

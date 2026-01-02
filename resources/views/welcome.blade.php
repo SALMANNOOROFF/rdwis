@@ -31,7 +31,7 @@
 
   <!-- Preloader -->
   <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+    <img class="animation__shake" src="dist/img/withoutbgrdwlogofull.png" alt="Logoo" height="400px" width="300px">
   </div>
 
   <!-- Navbar -->
@@ -178,7 +178,7 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{route('index')}}" class="brand-link">
-      <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <img src="dist/img/logordwhalf.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light">RDWIS</span>
     </a>
 
@@ -217,45 +217,14 @@
     <p>PROJECTS <i class="right fas fa-angle-left"></i></p>
   </a>
 
-  <ul class="nav nav-treeview">
-
-    <li class="nav-item">
-      <a href="#" class="nav-link">
-        <i class="nav-icon fas fa-folder"></i>
-        <p>PROJECTS <i class="right fas fa-angle-left"></i></p>
-      </a>
-
       <ul class="nav nav-treeview">
         <li class="nav-item">
-          <a href="{{route('viewopenproject')}}" class="nav-link">
+          <a href="{{route('viewprojects')}}" class="nav-link">
             <i class="fas fa-folder-open nav-icon"></i>
-            <p>OPEN PROJECTS</p>
+            <p>PROJECTS</p>
           </a>
         </li>
-
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="fas fa-plus-circle nav-icon"></i>
-            <p>CREATE PROJECT</p>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="{{route('viewcloseproject')}}" class="nav-link">
-            <i class="fas fa-lock nav-icon"></i>
-            <p>CLOSED PROJECTS</p>
-          </a>
-        </li>
-      </ul>
-    </li>
-
-    <li class="nav-item">
-      <a href="#" class="nav-link">
-        <i class="nav-icon fas fa-chart-line"></i>
-        <p>MONTHLY RETURN <i class="right fas fa-angle-left"></i></p>
-      </a>
-
-      <ul class="nav nav-treeview">
+        
         <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="fas fa-file-alt nav-icon"></i>
@@ -263,9 +232,6 @@
           </a>
         </li>
       </ul>
-    </li>
-
-  </ul>
 </li>
 
 <!-- ================= PURCHASE CASES ================= -->
@@ -276,30 +242,21 @@
   </a>
 
   <ul class="nav nav-treeview">
-
     <li class="nav-item">
-      <a href="#" class="nav-link">
+      <a href="{{ route('viewpurchasecase') }}" class="nav-link">
         <i class="fas fa-briefcase nav-icon"></i>
-        <p>PURCHASE CASES (PCs) <i class="right fas fa-angle-left"></i></p>
+        <p>PURCHASE CASES (PCs)</p>
       </a>
-
-      <ul class="nav nav-treeview">
-        <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-folder-open nav-icon"></i><p>OPEN PCs</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-lock nav-icon"></i><p>CLOSED PCs</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-pencil-alt nav-icon"></i><p>DRAFT PCs</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-plus nav-icon"></i><p>CREATE NEW PCs</p></a></li>
-      </ul>
     </li>
 
     <li class="nav-item">
       <a href="#" class="nav-link">
         <i class="fas fa-receipt nav-icon"></i>
-        <p>RECEIPTS <i class="right fas fa-angle-left"></i></p>
+        <p>RECEIPTS</i></p>
       </a>
 
       <ul class="nav nav-treeview">
-        <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-edit nav-icon"></i><p>DRAFT RECEIPTS</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-check nav-icon"></i><p>CLOSED RECEIPTS</p></a></li>
+        <!-- Nested items removed -->
       </ul>
     </li>
 
@@ -310,9 +267,9 @@
         <p>CASES WITHOUT ITEMS</p>
       </a>
     </li>
-
   </ul>
 </li>
+
 
 <!-- ================= HUMAN RESOURCES ================= -->
 <li class="nav-item">
