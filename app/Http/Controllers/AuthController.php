@@ -34,7 +34,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             // Login successful -> Dashboard/Projects pe bhejo
-            return redirect()->intended('view-projects');
+            return redirect()->route('dashboard');
         }
 
         // 3. Login Failed
