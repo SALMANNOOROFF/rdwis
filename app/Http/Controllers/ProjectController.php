@@ -32,12 +32,30 @@ class ProjectController extends Controller
         return view('projects.viewprojects', compact('projects'));
     }
 
-    public function show($id)
+   public function show($id)
     {
-        $project = Project::with('milestones')->where('prj_id', $id)->firstOrFail();
-        return view('projects.openprojectdetails', compact('project'));
-    }
+        $project = Project::with('milestones', 'attachments')->where('prj_id', $id)->firstOrFail();
+        
+        // 1. Calculate Total Spent (From Transactions)
+        $totalSpent = DB::table('fin.transactions')
+            ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
+            ->where('fin.commitments.cmt_docid', $id)
+            ->sum('fin.transactions.trn_amount1');
 
+        // 2. Calculate Balance
+        $balance = $project->prj_propcost - $totalSpent;
+        $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+
+        // 3. Category Data (Mock Logic - Replace with actual Head IDs later)
+        // Filhal hum Spent amount ko divide kar rahe hain graph dikhane ke liye
+        $finData = [
+            'equip' => $totalSpent * 0.45, // 45% Example
+            'hr'    => $totalSpent * 0.35, // 35% Example
+            'misc'  => $totalSpent * 0.20  // 20% Example
+        ];
+
+        return view('projects.openprojectdetails', compact('project', 'totalSpent', 'balance', 'spentPercentage', 'finData'));
+    }
     // --- 2. CREATE PROJECT PAGE (Smart Logic) ---
     // Agar Draft ID mili to wahi khulega, warna naya form
     public function create(Request $request)
@@ -57,14 +75,14 @@ class ProjectController extends Controller
     }
 
     // --- STORE (Phase 1) ---
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $connection = config('database.default'); 
         
         $request->validate([
             'prj_code' => ['required', 'string', 'max:20', Rule::unique("$connection.prj.projects", 'prj_code')],
             'prj_title' => 'required|string|max:255',
-            'prj_aprvdt' => 'required|date',
+            'prj_aprvdt' => 'required|date', // Approval Date Phase 1 mein hi le rahe hain
         ]);
 
         $maxId = Project::max('prj_id');
@@ -76,21 +94,27 @@ class ProjectController extends Controller
         $project->prj_title = $request->prj_title;
         $project->prj_sponsor = $request->prj_sponsor;
         $project->prj_propcost = $request->prj_propcost;
-        $project->prj_aprvdt = $request->prj_aprvdt;
+        
+        // --- NEW FIELDS ADDED HERE ---
+        $project->prj_scope = $request->prj_scope;       // Scope of Work
+        $project->prj_propdt = $request->prj_propdt;     // Proposal Date
+        $project->prj_assigndt = $request->prj_assigndt; // Assigned Date
+        // -----------------------------
+
+        $project->prj_aprvdt = $request->prj_aprvdt;     // Approval Date
         $project->prj_status = 'Draft';
         $project->prj_unt_id = Auth::check() ? Auth::user()->acc_unt_id : 200000;
         $project->prj_rcptdt = now();
         
         $project->save();
 
-        // Handle Files (Ab hum Pura Project Object bhej rahe hain taaki Code utha saken)
+        // Handle Files
         $this->handleUpload($request, $project, 'doc_ppf', 'PPF');
         $this->handleUpload($request, $project, 'doc_urd', 'URD');
 
         return redirect()->route('addnewproject', ['draft_id' => $project->prj_id])
                          ->with('success', 'Phase 1 Saved! Proceed to Work Order details.');
     }
-
     // --- FINALIZE (Phase 2) ---
     public function finalizeProject(Request $request, $id)
     {
@@ -196,6 +220,54 @@ class ProjectController extends Controller
             
             $att->save();
         }
+    }
+
+
+    // --- UPLOAD OTHER DOCUMENT (Custom Name) ---
+    public function storeOtherAttachment(Request $request, $id)
+    {
+        $request->validate([
+            'custom_name' => 'required|string|max:50',
+            'doc_file' => 'required|file|mimes:pdf,jpg,png,doc,docx|max:10240',
+        ]);
+
+        $project = Project::findOrFail($id);
+        
+        // Use existing handleUpload logic but with custom type
+        // Hum 'jat_type' mein user ka diya hua naam save karenge
+        $this->handleUpload($request, $project, 'doc_file', $request->custom_name);
+
+        return redirect()->back()->with('success', 'Document added successfully!');
+    }
+
+    // --- SINGLE FILE UPLOAD (For Detail Page) ---
+    public function uploadSingleAttachment(Request $request, $id)
+    {
+        $request->validate([
+            'single_file' => 'required|file',
+            'doc_type' => 'required|string'
+        ]);
+
+        $project = Project::findOrFail($id);
+        
+        // Reuse handleUpload logic
+        $this->handleUpload($request, $project, 'single_file', $request->doc_type);
+
+        return redirect()->back()->with('success', $request->doc_type . ' Uploaded Successfully!');
+    }
+
+    // --- DELETE ATTACHMENT ---
+    public function deleteAttachment($id)
+    {
+        $attachment = PrjAttachment::findOrFail($id);
+        
+        // Physical file delete (Optional but good practice)
+        // Note: Humara view logic path change kar deta hai, isliye path ko carefully handle karein
+        // Filhal sirf DB se ura rahe hain taaki error na aaye
+        
+        $attachment->delete();
+
+        return redirect()->back()->with('success', 'Document deleted successfully.');
     }
     // --- Milestones ---
     public function createMilestone($id)
