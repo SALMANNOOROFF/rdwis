@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PurchaseController;
+
 
 
 /*
@@ -64,7 +66,40 @@ Route::get('/attachment/view/{id}', [ProjectController::class, 'viewAttachment']
     // Step 3: Save Report
     Route::post('/project/{id}/save-mpr', [ProjectController::class, 'storeMpr'])->name('mpr.store');
 
+// ... baki routes upar rehne dein ...
+// --- Other Static Pages ---
+Route::get('/projecthistory', function () {
+    return view('projects.projecthistory');
+})->name('projecthistory');
 
+Route::get('/gantchartpr', function () {
+    return view('projects.gantchartpr');
+})->name('gantchartpr');
+
+// --- Purchase Management Module ---
+
+// 1. Create New Case Form
+Route::get('/purchase/create', function () {
+    return view('purchase.new_case.createnewcase');
+})->name('createnewcase');
+
+// 2. View All Purchase Cases (dynamic data load)
+Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
+
+// 3. Purchase Case Details (dynamic ID)
+Route::get('/purchase/details/{id}', [PurchaseController::class, 'show'])->name('purchasecasedetails');
+
+// 4. Minute Sheet & Printing
+Route::get('/minute-sheet', function () {
+    return view('purchase.new_case.minutesheet');
+})->name('minutesheet');
+
+Route::get('/print-minute', function () {
+    return view('purchase.new_case.print_minute');
+})->name('purchase.new_case.print_minute');
+
+// 5. Quote Save (POST)
+Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])->name('quotes.store');
     // --- Other Static Pages ---
   
     Route::get('/gantchartpr', function () { return view('projects.gantchartpr'); })->name('gantchartpr');
@@ -74,4 +109,4 @@ Route::get('/attachment/view/{id}', [ProjectController::class, 'viewAttachment']
     Route::get('/purchasecasedetails', function () { return view('purchase.new_case.purchasecasedetails'); })->name('purchasecasedetails');
     Route::get('/viewpurchasecase', function () { return view('purchase.new_case.viewpurchasecase'); })->name('viewpurchasecase');
 
-});
+}); // group close
