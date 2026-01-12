@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PurchaseController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -87,19 +89,24 @@ Route::middleware('auth')->group(function () {
         return view('projects.viewmpr');
     })->name('viewmpr');
 
+// ... baki routes upar rehne dein ...
 
-    Route::get('/createnewcase', function () {
+    // --- Purchase Management Module ---
+
+    // 1. Create New Case Form
+    Route::get('/purchase/create', function () {
         return view('purchase.new_case.createnewcase');
     })->name('createnewcase');
 
-    Route::get('/purchasecasedetails', function () {
-        return view('purchase.new_case.purchasecasedetails');
-    })->name('purchasecasedetails');
+    // 2. View All Purchase Cases (YAHAN DATA LOAD HOGA)
+    // Purana static route hata kar sirf ye rakhein:
+    Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
 
-    Route::get('/viewpurchasecase', function () {
-        return view('purchase.new_case.viewpurchasecase');
-    })->name('viewpurchasecase');
+    // 3. Purchase Case Details (DYNAMIC ID)
+    // Purana static route hata kar sirf ye rakhein:
+    Route::get('/purchase/details/{id}', [PurchaseController::class, 'show'])->name('purchasecasedetails');
 
+    // 4. Minute Sheet & Printing
     Route::get('/minute-sheet', function () {
         return view('purchase.new_case.minutesheet');
     })->name('minutesheet');
@@ -108,5 +115,7 @@ Route::middleware('auth')->group(function () {
         return view('purchase.new_case.print_minute');
     })->name('purchase.new_case.print_minute');
 
+    // Quote save karne ka method ab PurchaseController mein point karega
+Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])->name('quotes.store');
 
-});
+}); // group close

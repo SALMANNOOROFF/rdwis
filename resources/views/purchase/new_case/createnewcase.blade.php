@@ -42,6 +42,8 @@
     /* Custom width utilities to fine-tune */
     .w-label-small { width: 60px; }
     .w-label-medium { width: 80px; }
+
+    
 </style>
 
 <div class="content-wrapper">
@@ -203,14 +205,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group row">
-                                        <label class="col-3 col-form-label align-right">Minute</label>
-                                        <div class="col-9">
-                                            <input type="text" class="form-control">
-                                        </div>
-                                    </div>
-                                </div>
+                               
                             </div>
 
                             <!-- ROW 2 -->
@@ -250,6 +245,14 @@
                                         <label class="col-3 col-form-label align-right">Status</label>
                                         <div class="col-9 pt-1">
                                             <span style="font-weight: bold; font-size: 13px;">Draft</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div class="col-md-4">
+                                    <div class="form-group row">
+                                        <label class="col-3 col-form-label align-right">Firms</label>
+                                        <div class="col-9">
+                                            <input type="text" class="form-control">
                                         </div>
                                     </div>
                                 </div>
