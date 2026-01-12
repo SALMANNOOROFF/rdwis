@@ -3,39 +3,31 @@
 @section('content')
 <div class="content-wrapper">
     <style>
-        .card-history {
-            border-top: 3px solid #007bff; /* AdminLTE Primary Blue */
-        }
+        .card-history { border-top: 3px solid #007bff; }
         .table thead th {
-            background-color: #f4f6f9;
-            color: #495057;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            border-bottom-width: 2px;
+            background-color: #f4f6f9; color: #495057; text-transform: uppercase;
+            font-size: 0.85rem; letter-spacing: 0.5px; border-bottom-width: 2px;
         }
-        .badge-month {
-            font-size: 0.85rem;
-            padding: 5px 10px;
-            font-weight: 500;
-        }
-        .text-finalize { color: #28a745; font-weight: 600; }
-        .text-forward { color: #17a2b8; font-weight: 600; }
-        .text-edit { color: #ffc107; font-weight: 600; }
+        .badge-month { font-size: 0.85rem; padding: 5px 10px; font-weight: 500; min-width: 80px; }
         
-        /* Row Hover Effect */
-        .table-hover tbody tr:hover {
-            background-color: rgba(0,123,255,.05);
-        }
+        /* Dynamic Colors for Actions */
+        .act-initiation { color: #28a745; font-weight: 600; } /* Green */
+        .act-execution { color: #17a2b8; font-weight: 600; }  /* Teal */
+        .act-attachment { color: #007bff; font-weight: 600; } /* Blue */
+        .act-milestone { color: #ffc107; font-weight: 600; }  /* Yellow */
+        .act-update { color: #6c757d; font-weight: 600; }     /* Grey */
+
+        .table-hover tbody tr:hover { background-color: rgba(0,123,255,.05); }
+        .desc-text { font-size: 0.9rem; color: #555; }
+        .prj-code-tag { font-size: 0.75rem; background: #eee; padding: 2px 6px; border-radius: 4px; margin-right: 5px; color: #333; }
     </style>
 
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0 text-dark"><i class="fas fa-history mr-2"></i>Project History</h1>
+                    <h1 class="m-0 text-dark"><i class="fas fa-history mr-2"></i>Global Project History</h1>
                 </div>
-                
             </div>
         </div>
     </div>
@@ -46,11 +38,8 @@
                 <div class="col-12">
                     <div class="card card-history shadow-sm">
                         <div class="card-header">
-                            <h3 class="card-title">Action Logs & Progress Tracking</h3>
+                            <h3 class="card-title">Detailed Audit Trail & Logs</h3>
                             <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="maximize">
-                                    <i class="fas fa-expand"></i>
-                                </button>
                                 <button class="btn btn-sm btn-outline-secondary ml-2" onclick="window.print()">
                                     <i class="fas fa-print mr-1"></i> Print
                                 </button>
@@ -62,63 +51,78 @@
                                 <table class="table table-hover table-striped m-0">
                                     <thead>
                                         <tr>
-                                            <th style="width: 20%">Date & Time</th>
-                                            <th style="width: 15%">Month</th>
-                                            <th style="width: 15%">Action</th>
-                                            <th style="width: 15%">By</th>
-                                            <th style="width: 15%">To</th>
-                                            <th class="text-center" style="width: 20%">Progress</th>
+                                            <th style="width: 18%">Date & Time</th>
+                                            <th style="width: 10%">Month</th>
+                                            <th style="width: 15%">Action Type</th>
+                                            <th style="width: 35%">Description / Details</th>
+                                            <th style="width: 12%">User</th>
+                                            <th class="text-center" style="width: 10%">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php
-                                            $historyData = [
-                                                ['31 Dec 21 10:11:11', 'Nov 21', 'Finalize', 'DR&D', '-', true],
-                                                ['08 Dec 21 12:23:23', 'Nov 21', 'Forward', 'DCom', 'DR&D', false],
-                                                ['28 Oct 21 11:17:17', 'Sep 21', 'Finalize', 'DR&D', '-', false],
-                                                ['28 Sep 21 9:10:10', 'Sep 21', 'Forward', 'DCom', 'DR&D', false],
-                                                ['24 Sep 21 11:31:31', 'Aug 21', 'Finalize', 'DR&D', '-', false],
-                                                ['15 Jun 21 14:54:54', 'May 21', 'Edit', 'DR&D', '-', false],
-                                                ['05 May 21 9:30:30', 'Apr 21', 'Finalize', 'DR&D', '-', false]
-                                            ];
-                                        @endphp
-
-                                        @foreach($historyData as $row)
+                                        @forelse($activities as $log)
                                         <tr>
-                                            <td class="text-muted font-weight-light">{{ $row[0] }}</td>
-                                            <td><span class="badge badge-secondary badge-month">{{ $row[1] }}</span></td>
+                                            {{-- 1. Date Time --}}
+                                            <td class="text-muted font-weight-light">
+                                                <i class="far fa-clock mr-1 small"></i>
+                                                {{ \Carbon\Carbon::parse($log->created_at)->format('d M Y H:i:s') }}
+                                            </td>
+
+                                            {{-- 2. Month Badge --}}
                                             <td>
-                                                @if($row[2] == 'Finalize')
-                                                    <span class="text-finalize"><i class="fas fa-check-circle mr-1"></i>{{ $row[2] }}</span>
-                                                @elseif($row[2] == 'Forward')
-                                                    <span class="text-forward"><i class="fas fa-paper-plane mr-1"></i>{{ $row[2] }}</span>
+                                                <span class="badge badge-secondary badge-month">
+                                                    {{ \Carbon\Carbon::parse($log->created_at)->format('M Y') }}
+                                                </span>
+                                            </td>
+
+                                            {{-- 3. Action Type with Icon --}}
+                                            <td>
+                                                @if($log->pja_action == 'Initiation')
+                                                    <span class="act-initiation"><i class="fas fa-plus-circle mr-1"></i> Initiated</span>
+                                                @elseif($log->pja_action == 'Execution')
+                                                    <span class="act-execution"><i class="fas fa-cogs mr-1"></i> Execution</span>
+                                                @elseif($log->pja_action == 'Attachment')
+                                                    <span class="act-attachment"><i class="fas fa-paperclip mr-1"></i> Upload</span>
+                                                @elseif($log->pja_action == 'Milestone')
+                                                    <span class="act-milestone"><i class="fas fa-flag mr-1"></i> Milestone</span>
                                                 @else
-                                                    <span class="text-edit"><i class="fas fa-pen-alt mr-1"></i>{{ $row[2] }}</span>
+                                                    <span class="act-update"><i class="fas fa-edit mr-1"></i> {{ $log->pja_action }}</span>
                                                 @endif
                                             </td>
-                                            <td><span class="text-dark font-weight-bold">{{ $row[3] }}</span></td>
-                                            <td>{{ $row[4] }}</td>
+
+                                            {{-- 4. Description --}}
+                                            <td>
+                                                <span class="prj-code-tag">{{ $log->prj_code }}</span>
+                                                <span class="desc-text">{{ $log->pja_details }}</span>
+                                            </td>
+
+                                            {{-- 5. User --}}
+                                            <td>
+                                                <span class="text-dark font-weight-bold small">
+                                                    <i class="fas fa-user-circle text-muted mr-1"></i> {{ $log->pja_user }}
+                                                </span>
+                                            </td>
+
+                                            {{-- 6. Status Icon --}}
                                             <td class="text-center">
-                                                <div class="icheck-primary d-inline">
-                                                    <input type="checkbox" id="check{{$loop->index}}" {{ $row[5] ? 'checked' : '' }} disabled>
-                                                    <label for="check{{$loop->index}}"></label>
-                                                </div>
+                                                <i class="fas fa-check-circle text-success" title="Logged Successfully"></i>
                                             </td>
                                         </tr>
-                                        @endforeach
+                                        @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <i class="fas fa-history fa-3x mb-3 text-light"></i><br>
+                                                No history records found. Start working on projects to see logs here.
+                                            </td>
+                                        </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         
                         <div class="card-footer clearfix">
-                            <span class="text-muted small">Showing last 15 actions</span>
-                            <ul class="pagination pagination-sm m-0 float-right">
-                                <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
-                            </ul>
+                            <span class="text-muted small">Showing latest activities</span>
                         </div>
                     </div>
                 </div>
@@ -126,5 +130,4 @@
         </div>
     </section>
 </div>
-
 @endsection

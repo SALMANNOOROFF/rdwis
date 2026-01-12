@@ -38,6 +38,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/save-project', [ProjectController::class, 'store'])->name('save-project');
     Route::post('/finalize-project/{id}', [ProjectController::class, 'finalizeProject'])->name('finalize-project');
     Route::get('/openprojectdetails/{id}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::post('/project/{id}/upload-other', [ProjectController::class, 'storeOtherAttachment'])->name('projects.upload-other');
+      Route::get('/projecthistory', [ProjectController::class, 'projectHistory'])->name('projecthistory');
+    // Single Upload from Detail Page
+Route::post('/project/{id}/upload-single', [ProjectController::class, 'uploadSingleAttachment'])->name('projects.upload.single');
+
+// Delete Attachment Route
+Route::get('/attachment/delete/{id}', [ProjectController::class, 'deleteAttachment'])->name('attachment.delete');
 // View Attachment Route
 Route::get('/attachment/view/{id}', [ProjectController::class, 'viewAttachment'])->name('attachment.view');
 
@@ -93,5 +100,13 @@ Route::get('/print-minute', function () {
 
 // 5. Quote Save (POST)
 Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])->name('quotes.store');
+    // --- Other Static Pages ---
+  
+    Route::get('/gantchartpr', function () { return view('projects.gantchartpr'); })->name('gantchartpr');
+    
+    // --- Purchase Cases ---
+    Route::get('/createnewcase', function () { return view('purchase.new_case.createnewcase'); })->name('createnewcase');
+    Route::get('/purchasecasedetails', function () { return view('purchase.new_case.purchasecasedetails'); })->name('purchasecasedetails');
+    Route::get('/viewpurchasecase', function () { return view('purchase.new_case.viewpurchasecase'); })->name('viewpurchasecase');
 
 }); // group close

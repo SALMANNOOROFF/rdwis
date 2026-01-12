@@ -50,7 +50,7 @@
                                     <div class="dropdown-divider"></div>
                                     <button class="btn btn-xs btn-link text-danger p-0"
                                             onclick="clearCodeFilter()">
-                                        Clear Selection
+                                            Clear Selection
                                     </button>
                                 </div>
                             </div>
@@ -81,13 +81,12 @@
                             </select>
                         </div>
 
-                        {{-- MAIN STATUS (UPDATED WITH DRAFT) --}}
+                        {{-- MAIN STATUS --}}
                         <div class="col-md-3 mb-2">
                             <label class="small text-muted">Main Status</label>
                             <div class="btn-group btn-block shadow-sm">
                                 <button class="btn btn-sm btn-outline-primary active filter-btn-main" onclick="setMainFilter('all', this)">All</button>
                                 <button class="btn btn-sm btn-outline-primary filter-btn-main" onclick="setMainFilter('open', this)">Open</button>
-                                {{-- NEW DRAFT BUTTON ADDED HERE --}}
                                 <button class="btn btn-sm btn-outline-warning filter-btn-main" onclick="setMainFilter('draft', this)">Drafts</button>
                                 <button class="btn btn-sm btn-outline-success filter-btn-main" onclick="setMainFilter('closed', this)">Closed</button>
                             </div>
@@ -109,29 +108,51 @@
                 
                 @php
                     $status = Str::lower($project->prj_status);
-                    
-                    // Stage Logic
+
+                    // --- Determine Stage Name ---
                     $currentStage = 'Approved'; 
                     if($status == 'draft') $currentStage = 'Draft';
                     elseif($project->prj_startdt) $currentStage = 'Started';
                     elseif($status == 'open') $currentStage = 'Work In Progress';
                     elseif($status == 'closed') $currentStage = 'EDC'; 
+
+                    // --- PROGRESS LOGIC (UPDATED) ---
+                    $level = 0;
+                    
+                    // Level 1: Approved
+                    if ($status !== 'draft' && $project->prj_aprvdt) {
+                        $level = 1;
+                    }
+                    // Level 2: Started
+                    if ($project->prj_startdt) {
+                        $level = 2;
+                    }
+                    // Level 3: Open / In Progress
+                    if ($status === 'open') {
+                        $level = 3;
+                    }
+                    
+                    // Level 4: Closed (Highest Priority)
+                    // Logic Update: Check if Status is Closed OR if Date is Available
+                    if ($status === 'closed' || $status === 'completed' || !empty($project->prj_estenddt)) {
+                        $level = 4;
+                    }
                 @endphp
 
                 <div class="col-12 project-card-wrapper">
-                    <div class="card project-card shadow-sm mb-4"
+                    <div class="card project-card shadow-sm mb-2"
                          data-code="{{ $project->prj_code }}"
                          data-status="{{ $status }}"
                          data-stage="{{ strtolower($currentStage) }}"
                          data-date="{{ \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') }}">
 
-                        <div class="card-body">
+                        <div class="card-body p-3">
 
                             {{-- PROJECT HEADER --}}
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h3 class="mb-1 text-primary">{{ $project->prj_code }}</h3>
-                                    <div class="text-muted font-weight-bold">{{ $project->prj_title }}</div>
+                                    <h5 class="mb-0 text-primary font-weight-bold" style="font-size: 1.1rem;">{{ $project->prj_code }}</h5>
+                                    <div class="text-dark" style="font-size: 0.9rem;">{{ $project->prj_title }}</div>
 
                                     @php
                                         $badge = match($status){
@@ -142,51 +163,66 @@
                                         };
                                     @endphp
 
-                                    <span class="badge {{ $badge }} px-3 py-2 mt-2" style="border-radius: 4px;">
+                                    <span class="badge {{ $badge }} px-2 py-1 mt-1" style="border-radius: 4px; font-size: 0.7rem;">
                                         {{ strtoupper($project->prj_status) }}
                                     </span>
                                 </div>
 
                                 {{-- ACTION BUTTON LOGIC --}}
+                                <div>
                                 @if($status == 'draft')
-                                    {{-- Agar Draft hai to wapis Form par bhejo --}}
                                     <a href="{{ route('addnewproject', ['draft_id' => $project->prj_id]) }}"
-                                       class="btn btn-warning btn-sm px-4 font-weight-bold shadow-sm" style="border-radius: 20px;">
-                                        <i class="fas fa-pen mr-1"></i> Continue Editing
+                                       class="btn btn-warning btn-xs px-3 font-weight-bold shadow-sm" style="border-radius: 20px;">
+                                        <i class="fas fa-pen mr-1"></i> Edit
                                     </a>
                                 @else
-                                    {{-- Agar Open/Closed hai to Detail page par bhejo --}}
                                     <a href="{{ route('projects.show', $project->prj_id) }}"
-                                       class="btn btn-outline-primary btn-sm px-4 shadow-sm" style="border-radius: 20px;">
-                                        View Project <i class="fas fa-arrow-right ml-1"></i>
+                                       class="btn btn-outline-primary btn-xs px-3 shadow-sm" style="border-radius: 20px;">
+                                        View <i class="fas fa-arrow-right ml-1"></i>
                                     </a>
                                 @endif
+                                </div>
                             </div>
 
-                            {{-- TIMELINE --}}
-                            <div class="timeline-wrapper mt-4">
+                            {{-- TIMELINE (VISUALS) --}}
+                            <div class="timeline-wrapper mt-3">
+                                
+                                {{-- 1. Approval --}}
                                 <div class="timeline-item">
-                                    <div class="progress-segment {{ ($status!='draft') ? 'bg-primary' : 'bg-secondary' }}"></div>
+                                    {{-- Green if Level 4, else Blue if done, else Grey --}}
+                                    <div class="progress-segment {{ $level == 4 ? 'bg-success' : ($level >= 1 ? 'bg-primary' : 'bg-secondary') }}"></div>
                                     <div class="meta-text">Approval</div>
-                                    <div class="meta-date">{{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M Y') : '--' }}</div>
+                                    <div class="meta-date">
+                                        {{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M y') : '--' }}
+                                    </div>
                                 </div>
 
+                                {{-- 2. Start --}}
                                 <div class="timeline-item">
-                                    <div class="progress-segment {{ ($project->prj_startdt) ? 'bg-primary' : 'bg-secondary' }}"></div>
+                                    <div class="progress-segment {{ $level == 4 ? 'bg-success' : ($level >= 2 ? 'bg-primary' : 'bg-secondary') }}"></div>
                                     <div class="meta-text">Start</div>
-                                    <div class="meta-date">{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d M Y') : '--' }}</div>
+                                    <div class="meta-date">
+                                        {{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d M y') : '--' }}
+                                    </div>
                                 </div>
 
+                                {{-- 3. In Progress --}}
                                 <div class="timeline-item">
-                                    <div class="progress-segment {{ $status=='open' ? 'bg-success':'bg-secondary' }}"></div>
+                                    {{-- Green if Level 3 OR 4 --}}
+                                    <div class="progress-segment {{ $level >= 3 ? 'bg-success' : 'bg-secondary' }}"></div>
                                     <div class="meta-text">In Progress</div>
                                 </div>
 
+                                {{-- 4. Closed --}}
                                 <div class="timeline-item">
-                                    <div class="progress-segment {{ $status=='closed' ? 'bg-success' : 'bg-secondary' }}"></div>
+                                    {{-- Green ONLY if Level 4 (Closed/Date Available) --}}
+                                    <div class="progress-segment {{ $level == 4 ? 'bg-success' : 'bg-secondary' }}"></div>
                                     <div class="meta-text">Closed</div>
-                                    <div class="meta-date">{{ $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt)->format('d M Y') : 'TBD' }}</div>
+                                    <div class="meta-date">
+                                        {{ $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt)->format('d M y') : '--' }}
+                                    </div>
                                 </div>
+
                             </div>
 
                         </div>
@@ -209,7 +245,6 @@
 
 {{-- JAVASCRIPT LOGIC --}}
 <script>
-    // State Management
     let currentMainStatus = 'all';
     let selectedCodes = [];
 
@@ -217,7 +252,7 @@
         populateCodeFilter();
     });
 
-    // 1. Populate the Multi-Select Filter Dynamically
+    // 1. Populate Filter
     function populateCodeFilter() {
         const cards = document.querySelectorAll('.project-card');
         const uniqueCodes = new Set();
@@ -237,7 +272,7 @@
         });
     }
 
-    // 2. Filter the Code List
+    // 2. Filter Search
     function filterCodeList(input) {
         const filter = input.value.toUpperCase();
         const divs = document.getElementById('codeListContainer').getElementsByTagName('div');
@@ -251,7 +286,7 @@
         }
     }
 
-    // 3. Update Selected Codes Array
+    // 3. Update Selected
     function updateSelectedCodes() {
         const checkboxes = document.querySelectorAll('.code-checkbox:checked');
         selectedCodes = Array.from(checkboxes).map(cb => cb.value);
@@ -268,18 +303,15 @@
         updateSelectedCodes();
     }
 
-    // 4. Handle Main Status Buttons (All/Open/Draft/Closed)
+    // 4. Main Status Logic
     function setMainFilter(status, btn) {
         currentMainStatus = status;
-        
-        // Update UI styling
         document.querySelectorAll('.filter-btn-main').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-
         applyFilters();
     }
 
-    // 5. MASTER FILTER FUNCTION (UPDATED)
+    // 5. Apply Filters
     function applyFilters() {
         const stageFilter = document.getElementById('stageFilter').value.toLowerCase();
         const dateFrom = document.getElementById('dateFrom').value;
@@ -291,22 +323,18 @@
         cards.forEach(wrapper => {
             const card = wrapper.querySelector('.project-card');
             
-            // Get Data Attributes
             const code = card.dataset.code;
-            const status = card.dataset.status.toLowerCase(); // open/closed/draft
+            const status = card.dataset.status.toLowerCase(); 
             const stage = card.dataset.stage.toLowerCase();   
-            const date = card.dataset.date; // YYYY-MM-DD
+            const date = card.dataset.date; 
 
-            // Logic Checks
             let show = true;
 
-            // A. Check Main Status
             if (currentMainStatus !== 'all') {
                 if (currentMainStatus === 'draft') {
                     if (status !== 'draft') show = false;
                 }
                 else if (currentMainStatus === 'open') {
-                    // Open mein Draft nahi dikhana, aur Closed nahi dikhana
                     if (status === 'closed' || status === 'completed' || status === 'draft') show = false;
                 }
                 else if (currentMainStatus === 'closed') {
@@ -314,21 +342,17 @@
                 }
             }
 
-            // B. Check Code (Multi-Select)
             if (selectedCodes.length > 0 && !selectedCodes.includes(code)) {
                 show = false;
             }
 
-            // C. Check Stage Dropdown
             if (stageFilter !== 'all' && stage !== stageFilter) {
                 show = false;
             }
 
-            // D. Check Date Range
             if (dateFrom && date < dateFrom) show = false;
             if (dateTo && date > dateTo) show = false;
 
-            // Toggle Visibility
             wrapper.style.display = show ? 'block' : 'none';
             if(show) visibleCount++;
         });
@@ -337,31 +361,40 @@
     }
 </script>
 
-{{-- STYLES --}}
 <style>
     .project-card {
         border: none;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        border-left: 5px solid transparent; 
+        border-radius: 8px; 
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent; 
+        min-height: 100px; 
     }
     .project-card[data-status="open"] { border-left-color: #007bff; }
     .project-card[data-status="closed"] { border-left-color: #28a745; }
-    .project-card[data-status="draft"] { border-left-color: #ffc107; } /* Yellow for Draft */
+    .project-card[data-status="draft"] { border-left-color: #ffc107; }
 
     .project-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        transform: translateY(-2px); 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
     }
 
-    /* Timeline Styles */
+    /* Timeline Styles - COMPACT */
     .timeline-wrapper { display: flex; justify-content: space-between; position: relative; }
     .timeline-item { text-align: center; flex: 1; position: relative; z-index: 2; }
-    .progress-segment { height: 8px; border-radius: 4px; margin-bottom: 8px; background-color: #e9ecef; transition: background-color 0.3s; }
+    
+    .progress-segment { 
+        height: 5px; 
+        border-radius: 3px; 
+        margin-bottom: 4px; 
+        background-color: #e9ecef; 
+        transition: background-color 0.3s; 
+    }
+    
     .progress-segment.bg-primary { background-color: #007bff !important; }
     .progress-segment.bg-success { background-color: #28a745 !important; }
-    .meta-text { font-weight: 700; font-size: 0.85rem; color: #495057; }
-    .meta-date { font-size: 0.75rem; color: #adb5bd; margin-top: 4px; }
+    
+    .meta-text { font-weight: 700; font-size: 0.75rem; color: #495057; }
+    .meta-date { font-size: 0.65rem; color: #adb5bd; margin-top: 2px; }
 
     /* Custom Scrollbar for Dropdown */
     .dropdown-menu::-webkit-scrollbar { width: 6px; }
@@ -375,7 +408,6 @@
         color: #fff !important;
         border-color: #007BFF !important;
     }
-    /* Draft Button Active State */
     .btn-group .btn-outline-warning.active {
         background-color: #ffc107 !important;
         color: #212529 !important;
