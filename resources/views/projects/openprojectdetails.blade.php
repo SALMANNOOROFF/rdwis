@@ -249,7 +249,9 @@
                     </div>
                     <div class="col-md-4 text-right">
                         <div class="header-controls justify-content-end">
-                            <a href="{{ route('projecthistory') }}" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold"><i class="fas fa-list-alt mr-1"></i> View MPRs</a>
+                            <a href="{{ route('projecthistory', ['project_id' => $project->prj_id]) }}" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold">
+    <i class="fas fa-list-alt mr-1"></i> View MPRs
+</a>
                             <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm font-weight-bold px-3"><i class="fas fa-plus-circle mr-1"></i> Create MPR</a>
                         </div>
                     </div>
@@ -421,9 +423,7 @@
                     {{-- RIGHT COLUMN: Vertical Milestone Progress (3 Columns Width) --}}
                     <div class="col-lg-4">
                         
-                        
-
-                        <h6 class="font-weight-bold text-dark mb-3 mt-4"><i class="fas fa-chart-line text-primary mr-1"></i> Milestone Timeline</h6>
+                    <h6 class="font-weight-bold text-dark mb-3 mt-4"><i class="fas fa-chart-line text-primary mr-1"></i> Milestone Timeline</h6>
                         
                         {{-- 2. VERTICAL TIMELINE --}}
                         <div class="card shadow-sm border-0">

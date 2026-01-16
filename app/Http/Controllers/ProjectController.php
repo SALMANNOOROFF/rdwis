@@ -32,29 +32,47 @@ class ProjectController extends Controller
         return view('projects.viewprojects', compact('projects'));
     }
 
-    public function show($id)
-    {
-        $project = Project::with('milestones', 'attachments')->where('prj_id', $id)->firstOrFail();
-        
-        // 1. Calculate Total Spent (From Transactions)
-        $totalSpent = DB::table('fin.transactions')
-            ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
-            ->where('fin.commitments.cmt_docid', $id)
-            ->sum('fin.transactions.trn_amount1');
+   public function show($id)
+{
+    $project = Project::with('milestones', 'attachments')->where('prj_id', $id)->firstOrFail();
+    
+    // 1. Calculate Total Spent
+    $totalSpent = DB::table('fin.transactions')
+        ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
+        ->where('fin.commitments.cmt_docid', $id)
+        ->sum('fin.transactions.trn_amount1');
 
-        // 2. Calculate Balance
-        $balance = $project->prj_propcost - $totalSpent;
-        $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+    // 2. Balance
+    $balance = $project->prj_propcost - $totalSpent;
+    $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
 
-        // 3. Category Data (Mock Logic)
-        $finData = [
-            'equip' => $totalSpent * 0.45,
-            'hr'    => $totalSpent * 0.35,
-            'misc'  => $totalSpent * 0.20
-        ];
+    // 3. Category Data
+    $finData = [
+        'equip' => $totalSpent * 0.45,
+        'hr'    => $totalSpent * 0.35,
+        'misc'  => $totalSpent * 0.20
+    ];
 
-        return view('projects.openprojectdetails', compact('project', 'totalSpent', 'balance', 'spentPercentage', 'finData'));
-    }
+    // --- NEW: MPR STATISTICS LOGIC ---
+    // Count Submitted
+    $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
+
+    // Calculate Expected/Left based on Duration (Months)
+    $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : \Carbon\Carbon::now();
+    $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : \Carbon\Carbon::now();
+    
+    // Total duration in months
+    $totalMonths = $startDate->diffInMonths($endDate);
+    if($totalMonths < 1) $totalMonths = 1; // Minimum 1 month
+
+    // Left = Total Duration - Submitted
+    $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
+
+    return view('projects.openprojectdetails', compact(
+        'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
+        'mprsSubmitted', 'mprsLeft', 'totalMonths' // <-- Ye variables pass kiye hain
+    ));
+}
 
     // --- 2. CREATE PROJECT PAGE (Smart Logic) ---
     public function create(Request $request)
@@ -424,17 +442,34 @@ class ProjectController extends Controller
     }
 
     // --- GLOBAL PROJECT HISTORY (New Function) ---
-    public function projectHistory()
-    {
-        $activities = DB::table('project_activities')
-            ->join('prj.projects', 'project_activities.pja_prj_id', '=', 'prj.projects.prj_id')
-            ->select('project_activities.*', 'prj.projects.prj_title', 'prj.projects.prj_code')
-            ->orderBy('created_at', 'desc')
-            ->get();
+   public function projectHistory(Request $request)
+{
+    // Agar URL mein ?project_id=123 hai, to sirf uski MPRs dikhao
+    if ($request->has('project_id')) {
+        $projectId = $request->project_id;
+        $project = Project::find($projectId);
 
-        return view('projects.projecthistory', compact('activities'));
+        // Fetch MPRs for this project
+        $mprHistory = PrgHistory::where('pgh_xprj_id', $projectId)
+            ->orderBy('pgh_dtg', 'desc')
+            ->get();
+            
+        $viewType = 'mpr_list'; // View ko batane ke liye ke ye MPRs hain
+
+        return view('projects.projecthistory', compact('mprHistory', 'project', 'viewType'));
     }
 
+    // Warna purana Global Audit Log dikhao
+    $activities = DB::table('project_activities')
+        ->join('prj.projects', 'project_activities.pja_prj_id', '=', 'prj.projects.prj_id')
+        ->select('project_activities.*', 'prj.projects.prj_title', 'prj.projects.prj_code')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    $viewType = 'global_log';
+
+    return view('projects.projecthistory', compact('activities', 'viewType'));
+}
     // --- HELPER: LOG ACTIVITY ---
     private function logActivity($projectId, $action, $details)
     {
