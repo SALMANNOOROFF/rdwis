@@ -49,59 +49,126 @@
         h6[data-toggle="collapse"] i.fa-chevron-down { transition: transform 0.3s ease; }
         h6[data-toggle="collapse"][aria-expanded="true"] i.fa-chevron-down { transform: rotate(180deg); }
 
-        /* --- VERTICAL TIMELINE STYLES --- */
-        .v-timeline-wrapper { position: relative; padding-left: 15px; margin-top: 10px; }
-        .v-timeline-line {
-            position: absolute; left: 6px; top: 0; bottom: 0; width: 3px; background: #e9ecef; border-radius: 2px;
-        }
-        .v-timeline-item { position: relative; padding-left: 25px; margin-bottom: 25px; }
-        .v-timeline-item:last-child { margin-bottom: 0; }
+          /* --- OVERALL STEPS WIZARD (Fixed Labels & Status) --- */
+        /* --- OVERALL STEPS WIZARD (Slim Version) --- */
+.steps-container { 
+    position: relative; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 35px;   /* was 60px */
+    margin-top: 35px;      /* was 50px */
+    padding: 0 10px; 
+}
 
-        .v-dot {
-            position: absolute; left: -1px; top: 0; width: 16px; height: 16px;
-            border-radius: 50%; background: #fff; border: 3px solid #adb5bd; z-index: 2;
-            transition: all 0.3s;
-        }
-        .v-timeline-item.completed .v-dot { background: #28a745; border-color: #28a745; }
-        .v-timeline-item.active .v-dot { 
-            background: #fff; border-color: #007bff; transform: scale(1.2); 
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.15); 
-        }
-        
-        .v-content { display: flex; flex-direction: column; }
-        .v-ms-name { font-size: 0.8rem; font-weight: 700; color: #495057; line-height: 1.3; white-space: normal; } 
-        .v-ms-date { font-size: 0.7rem; color: #adb5bd; margin-top: 2px; font-weight: 600; }
-        .v-timeline-item.active .v-ms-name { color: #007bff; }
-        .v-timeline-item.active .v-ms-date { color: #007bff; }
-        
-        /* --- Today Marker for Vertical (Red Dot) --- */
-        .v-today-marker {
-            position: absolute; left: 0px; 
-            width: 15px; height: 15px;
-            background: #dc3545; z-index: 5; border-radius: 50%;
-            border: 2px solid #fff; box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
-            transition: top 1s ease;
-        }
-        .v-today-date {
-            position: absolute; left: 20px; top: -5px;
-            background: #dc3545; color: #fff;
-            font-size: 0.65rem; padding: 2px 8px;
-            border-radius: 10px; font-weight: 700;
-            white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .v-today-date::before {
-            content: ''; position: absolute; left: -4px; top: 6px;
-            border-width: 4px 4px 4px 0; border-style: solid;
-            border-color: transparent #dc3545 transparent transparent;
-        }
+.steps-track { 
+    position: absolute; 
+    top: 50%; 
+    left: 0; 
+    width: 100%; 
+    height: 3px;           /* was 4px */
+    background: #e9ecef; 
+    transform: translateY(-50%); 
+    z-index: 1; 
+    border-radius: 2px; 
+}
 
-        /* --- CURRENT MILESTONE COMPACT CARD --- */
-        .current-ms-card-v { 
-            background: #f8f9fa; border: 1px solid #e1e4e8; border-radius: 8px; 
-            padding: 15px; position: relative; margin-bottom: 20px; 
+        .steps-fill { height: 100%; background: #28a745; transition: width 0.4s ease; border-radius: 2px; }
+        
+        .step-item { 
+            position: relative; z-index: 2; width: 32px; height: 32px; 
+            display: flex; justify-content: center; align-items: center; cursor: pointer; 
         }
-        .ms-v-progress-bg { height: 6px; background: #e2e6ea; border-radius: 3px; position: relative; margin: 25px 0 10px 0; }
-        .ms-v-progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #007bff, #00c6ff); }
+        .step-dot {
+            width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 3px solid #e9ecef;
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem; 
+            color: #adb5bd; transition: all 0.3s; position: relative; z-index: 2;
+        }
+        .step-item.completed .step-dot { background: #28a745; border-color: #28a745; color: #fff; }
+        .step-item.active .step-dot { background: #007bff; border-color: #007bff; color: #fff; transform: scale(1.2); box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15); }
+
+        /* Labels (MS-1) */
+        .step-label { 
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%); 
+            font-size: 0.65rem; font-weight: 700; color: #888; white-space: nowrap; 
+        }
+        .step-item.active .step-label { color: #007bff; }
+
+        /* Dates (With Year) */
+        .step-date { 
+            position: absolute; bottom: -30px; width: 100px; left: 50%; margin-left: -50px; 
+            text-align: center; font-size: 0.6rem; color: #6c757d; white-space: nowrap; font-weight: 500;
+        }
+        .step-item.active .step-date { color: #007bff; font-weight: 700; }
+
+        /* Step Tooltip */
+        .step-tooltip {
+            display: none; position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%);
+            background: #343a40; color: #fff; padding: 6px 10px; border-radius: 4px; 
+            font-size: 0.7rem; white-space: nowrap; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .step-tooltip::after {
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;
+            border-width: 5px; border-style: solid; border-color: #343a40 transparent transparent transparent;
+        }
+        .step-item:hover .step-tooltip { display: block; }
+
+  /* --- OVERALL MARKER (BOTTOM WITH UP POINTER) --- */
+.overall-today-marker {
+    position: absolute;
+    top: 50%;
+    width: 2px;
+    height: 35px;
+    background: transparent;
+    z-index: 5;
+    transition: left 1s ease;
+}
+
+.overall-today-marker .status-bubble{
+    position: absolute;
+    top: 42px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 10px;
+    border-radius: 14px;
+    font-size: .6rem;
+    font-weight: 700;
+    color: #fff;              /* FORCE WHITE */
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 3px 8px rgba(0,0,0,.2);
+}
+
+
+/* Triangle */
+.overall-today-marker .status-bubble::before{
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid red;
+
+}
+
+
+.status-bubble.late { 
+    background: #dc3545; 
+    box-shadow: 0 0 10px rgba(220,53,69,.5);
+}
+
+.status-bubble.ontrack { 
+    background: #28a745; 
+    box-shadow: 0 0 10px rgba(40,167,69,.5);
+}
+
+
 
         /* --- MILESTONE TABLE --- */
         .milestone-container { background: #fff; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; }
@@ -156,62 +223,118 @@
         .emp-detail-row { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
     </style>
 
-    @php
-        // 1. DATES & EDC
+  @php
+        // 1. DATES & EDC LOGIC
         $today = \Carbon\Carbon::now()->startOfDay();
         $edc = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : null;
         $edcClass = 'text-success';
-        if ($edc && $today->greaterThan($edc)) { $edcClass = 'text-danger'; }
+        if ($edc && $today->greaterThan($edc)) {
+            $edcClass = 'text-danger'; 
+        }
 
         // 2. MILESTONE LOGIC
+        // Sort and re-index milestones
         $milestones = $project->milestones->sortBy('msn_targetdt')->values(); 
+        
         $nextMilestone = $milestones->where('msn_status', '!=', 'Completed')->first();
         $totalMilestones = $milestones->count();
         $completedMilestones = $milestones->where('msn_status', 'Completed')->count();
         
-        // Header Status
-        $isOverdue = false; $statusMsg = "All Done"; $statusClass = "text-secondary";
+        // Header Status Logic
+        $isOverdue = false;
+        $statusMsg = "All Done";
+        $statusClass = "text-secondary";
+        
         if ($nextMilestone && $nextMilestone->msn_targetdt) {
             $target = \Carbon\Carbon::parse($nextMilestone->msn_targetdt)->startOfDay();
             $diff = $today->diffInDays($target, false);
-            if ($diff < 0) { $isOverdue = true; $statusMsg = abs($diff) . " Days Late"; $statusClass = "text-danger"; } 
-            else { $statusMsg = $diff . " Days Left"; $statusClass = "text-success"; }
+            if ($diff < 0) { 
+                $isOverdue = true; $statusMsg = abs($diff) . " Days Late"; $statusClass = "text-danger"; 
+            } else { 
+                $statusMsg = $diff . " Days Left"; $statusClass = "text-success"; 
+            }
         }
 
-        // 3. PROGRESS LOGIC (Vertical Marker)
+        // 3. PROGRESS LOGIC (FIXED)
+        // Initialize Variables to avoid Undefined Error
+        $overallPercent = 0;
+        $overallTimePercent = 0;
+
+        // A. Task Completion % (Green Line)
+        if ($totalMilestones > 0) {
+            if ($totalMilestones > 1) {
+                // Steps calculation (e.g., 1 of 3 is 0%, 2 of 3 is 50%, 3 of 3 is 100%)
+                $overallPercent = ($completedMilestones / ($totalMilestones - 1)) * 100;
+            } elseif ($totalMilestones == 1 && $completedMilestones == 1) {
+                $overallPercent = 100;
+            }
+        }
+        // Clamp values
+        if($overallPercent > 100) $overallPercent = 100;
+        if($overallPercent < 0) $overallPercent = 0;
+
+
+        // B. Overall Time Progress (Red Marker Position)
         $firstMs = $milestones->first();
         $lastMs = $milestones->last();
         $prjStart = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : ($firstMs ? \Carbon\Carbon::parse($firstMs->msn_targetdt) : $today);
         $prjEnd = $lastMs ? \Carbon\Carbon::parse($lastMs->msn_targetdt) : $today;
         
+        // Ensure End Date is not before Start Date
+        if ($prjEnd->lessThan($prjStart)) {
+             $prjEnd = $prjStart->copy()->addDay();
+        }
+
         $totalDaysSpan = $prjStart->diffInDays($prjEnd);
         if($totalDaysSpan == 0) $totalDaysSpan = 1;
+
         $daysPassedTotal = $prjStart->diffInDays($today, false);
+        
+        // Calculate Time %
         $overallTimePercent = ($daysPassedTotal / $totalDaysSpan) * 100;
+        
+        // Clamp values
         if($overallTimePercent < 0) $overallTimePercent = 0;
         if($overallTimePercent > 100) $overallTimePercent = 100;
 
-        // 4. CURRENT MILESTONE DEEP DIVE
-        $currStart = null; $currEnd = null; $currProgress = 0; $currDaysTotal = 0; $currDaysPassed = 0; $isLate = false; $activeMsIndex = 0; 
+        // 4. CURRENT MILESTONE DEEP DIVE LOGIC
+        $currStart = null;
+        $currEnd = null;
+        $currProgress = 0;
+        $currDaysTotal = 0;
+        $currDaysPassed = 0;
+        $isLate = false;
+        $activeMsIndex = 0; 
+
         if ($nextMilestone) {
-            $activeMsIndex = $milestones->search(function($ms) use ($nextMilestone) { return $ms->msn_id === $nextMilestone->msn_id; }) + 1;
+            $activeMsIndex = $milestones->search(function($ms) use ($nextMilestone) {
+                return $ms->msn_id === $nextMilestone->msn_id;
+            }) + 1;
+
             $currEnd = \Carbon\Carbon::parse($nextMilestone->msn_targetdt);
             $currStart = \Carbon\Carbon::parse($project->prj_startdt); 
             $prev = $milestones->where('msn_targetdt', '<', $nextMilestone->msn_targetdt)->last();
-            if ($prev) $currStart = \Carbon\Carbon::parse($prev->msn_targetdt);
+            if ($prev) {
+                $currStart = \Carbon\Carbon::parse($prev->msn_targetdt);
+            }
 
             $currDaysTotal = $currStart->diffInDays($currEnd);
             if($currDaysTotal == 0) $currDaysTotal = 1;
+
             $currDaysPassed = $currStart->diffInDays($today, false); 
-            if ($today->greaterThan($currStart)) $currProgress = ($currDaysPassed / $currDaysTotal) * 100;
+            
+            if ($today->greaterThan($currStart)) {
+                $currProgress = ($currDaysPassed / $currDaysTotal) * 100;
+            }
             if ($currProgress < 0) $currProgress = 0;
             if ($currProgress > 100) { $currProgress = 100; $isLate = true; }
             if ($today->greaterThan($currEnd)) $isLate = true;
+
         } elseif ($completedMilestones == $totalMilestones && $totalMilestones > 0) {
             $currProgress = 100;
         }
 
-        // 5. DATA
+        // 5. DATA (Dummy/Static for now)
         $team = [
             ['id'=>1, 'name'=>'Ali Khan', 'role'=>'Project Manager', 'email'=>'ali@rdwis.com', 'phone'=>'0300-1234567', 'img'=>asset('dist/img/profile-1.jfif')],
             ['id'=>2, 'name'=>'Sara Ahmed', 'role'=>'Senior Architect', 'email'=>'sara@rdwis.com', 'phone'=>'0300-7654321', 'img'=>asset('dist/img/profile-1.jfif')],
@@ -223,7 +346,6 @@
         $allAttachments = $project->attachments;
         $otherDocsCount = $allAttachments->whereNotIn('jat_type', $fixedDocs)->count();
     @endphp
-
     <div class="container-fluid">
         
         {{-- TOP CARD --}}
@@ -293,11 +415,11 @@
     </div>
 
     {{-- MISC KNOB --}}
-    <div class="finance-box">
+    <!-- <div class="finance-box">
         <input type="text" class="knob" value="20" data-skin="tron" data-thickness="0.2" data-width="90"
                data-height="90" data-fgColor="#a770ef" data-readonly="true">
         <div class="finance-title">Misc</div>
-    </div>
+    </div> -->
 </div>
 
                                     </div>
@@ -332,10 +454,15 @@
 
                         <hr class="my-4">
 
-                        <div class="d-flex justify-content-between align-items-center mb-2" data-toggle="collapse" data-target="#filesCollapse" style="cursor:pointer;">
+                        <div class="d-flex justify-content-between align-items-center mb-2"
+     data-toggle="collapse"
+     data-target="#filesCollapse"
+     aria-expanded="false"
+     style="cursor:pointer;">
                             <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-folder-open text-primary mr-1"></i> Files</h6><i class="fas fa-chevron-down"></i>
                         </div>
-                        <div class="collapse show" id="filesCollapse">
+                        <div class="collapse" id="filesCollapse">
+
                             @foreach($fixedDocs as $index => $doc)
                                 @php $existingFile = $allAttachments->where('jat_type', $doc)->first(); @endphp
                                 <div class="doc-card shadow-sm" style="{{ $existingFile ? 'border-left-color: #28a745; background-color: #f8fff9;' : '' }}">
@@ -360,7 +487,66 @@
                     </div>
 
                     {{-- CENTER COLUMN: Milestone Table (6 Columns Width) --}}
-                    <div class="col-lg-6">
+                    <div class="col-lg-10">
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-chart-line text-primary mr-1"></i> Milestone Progress</h6>
+                        </div>
+
+                        <div class="card shadow-sm mb-4 border-0">
+                            <div class="card-body p-3">
+                                
+                                {{-- 1. OVERALL JOURNEY (Stepped Wizard with Tooltips & Marker) --}}
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <small class="text-uppercase text-muted font-weight-bold">Overall Journey</small>
+                                        <span class="badge badge-light border">{{ $completedMilestones }} / {{ $totalMilestones }} Completed</span>
+                                    </div>
+                                    <div class="steps-container">
+                                        <div class="steps-track">
+                                            <div class="steps-fill" style="width: {{ $overallPercent }}%;"></div>
+                                            
+                                          <div class="overall-today-marker"
+     style="left: {{ $overallTimePercent }}%;"
+     data-date="{{ \Carbon\Carbon::now()->format('d M Y') }}">
+
+    <div class="status-bubble {{ $isOverdue ? 'late' : 'ontrack' }}">
+        <div style="font-size:0.55rem; opacity:.9;">
+            {{ \Carbon\Carbon::now()->format('d M Y') }}
+        </div>
+        <div style="font-size:0.65rem; font-weight:800;">
+            {{ $statusMsg }}
+        </div>
+    </div>
+</div>
+
+                                        </div>
+                                        @foreach($milestones as $ms)
+                                            @php 
+                                                $stepClass = '';
+                                                if(Str::lower($ms->msn_status) == 'completed') $stepClass = 'completed';
+                                                elseif($ms->msn_id == optional($nextMilestone)->msn_id) $stepClass = 'active';
+                                                $msDate = \Carbon\Carbon::parse($ms->msn_targetdt)->format('d M Y'); 
+                                            @endphp
+                                            <div class="step-item {{ $stepClass }}">
+                                                <div class="step-label">MS-{{ $loop->iteration }}</div>
+                                                <div class="step-dot">
+                                                    @if($stepClass == 'completed') <i class="fas fa-check text-white" style="font-size:0.5rem"></i> @else {{ $loop->iteration }} @endif
+                                                </div>
+                                                <div class="step-date">{{ $msDate }}</div>
+                                                <div class="step-tooltip">
+                                                    <strong>{{ Str::limit($ms->msn_desc, 30) }}</strong><br>
+                                                    <span class="text-xs text-light">Target: {{ $msDate }}</span>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-list-ol text-primary mr-1"></i> Milestones Detail</h6>
                             </div>
@@ -389,74 +575,7 @@
                                 </table>
                             </div>
                         </div>
-                         {{-- 1. CURRENT MILESTONE DEEP DIVE (Compact) --}}
-                         <h6 class="font-weight-bold text-dark mb-3 mt-4"><i class="fas fa-chart-line text-primary mr-1"></i> Current Milestone</h6>
-                        @if($nextMilestone)
-                        <div class="current-ms-card-v shadow-sm">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <h6 class="font-weight-bold text-primary m-0" style="font-size: 0.8rem;">
-                                    Current: MS-{{ $activeMsIndex }}
-                                </h6>
-                                <span class="badge {{ $isLate ? 'badge-danger' : 'badge-success' }}">{{ $isLate ? 'Late' : 'On Track' }}</span>
-                            </div>
-                            
-                            {{-- [UPDATED] Removed limit, showing FULL description --}}
-                            <small class="text-dark font-weight-bold d-block mb-2">{{ $nextMilestone->msn_desc }}</small>
-                            
-                            {{-- Floating Today Marker inside Progress --}}
-                            <div class="ms-v-progress-bg">
-                                <div class="ms-v-progress-fill" style="width: {{ $currProgress }}%;"></div>
-                                <div style="position: absolute; left: {{ $currProgress }}%; top: -20px; transform: translateX(-50%); text-align: center; z-index: 10;">
-                                    <span class="badge badge-danger" style="font-size: 0.6rem; padding: 2px 4px;">{{ $today->format('d M') }}</span>
-                                    <div style="width: 2px; height: 26px; background: #dc3545; margin: 0 auto;"></div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between text-xs text-muted mt-1">
-                                <span>{{ $currStart->format('d M') }}</span>
-                                <span>{{ $currEnd->format('d M') }}</span>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-
-                    {{-- RIGHT COLUMN: Vertical Milestone Progress (3 Columns Width) --}}
-                    <div class="col-lg-4">
-                        
-                    <h6 class="font-weight-bold text-dark mb-3 mt-4"><i class="fas fa-chart-line text-primary mr-1"></i> Milestone Timeline</h6>
-                        
-                        {{-- 2. VERTICAL TIMELINE --}}
-                        <div class="card shadow-sm border-0">
-                            <div class="card-body p-3">
-                                <div class="v-timeline-wrapper">
-                                    <div class="v-timeline-line"></div>
-                                    
-                                    {{-- Today Marker (Red Dot + Date Label) --}}
-                                    <div class="v-today-marker" style="top: {{ $overallTimePercent }}%;">
-                                        <div class="v-today-date">{{ $today->format('d M') }}</div>
-                                    </div>
-
-                                    @foreach($milestones as $ms)
-                                        @php 
-                                            $stepClass = '';
-                                            if(Str::lower($ms->msn_status) == 'completed') $stepClass = 'completed';
-                                            elseif($ms->msn_id == optional($nextMilestone)->msn_id) $stepClass = 'active';
-                                            $msDate = \Carbon\Carbon::parse($ms->msn_targetdt)->format('d M Y'); 
-                                        @endphp
-                                        
-                                        <div class="v-timeline-item {{ $stepClass }}">
-                                            <div class="v-dot"></div>
-                                            <div class="v-content">
-                                                {{-- [UPDATED] Removed limit, showing FULL description --}}
-                                                <div class="v-ms-name">MS-{{ $loop->iteration }}: {{ $ms->msn_desc }}</div>
-                                                <div class="v-ms-date">{{ $msDate }}</div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-
+                       
                     </div>
 
                 </div>
