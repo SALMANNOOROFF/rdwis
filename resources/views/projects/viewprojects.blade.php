@@ -127,41 +127,48 @@
 
                         <div class="card-body">
 
-                            {{-- PROJECT HEADER --}}
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h3 class="mb-1 text-primary">{{ $project->prj_code }}</h3>
-                                    <div class="text-muted font-weight-bold">{{ $project->prj_title }}</div>
+{{-- PROJECT HEADER --}}
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h3 class="mb-1 text-primary">{{ $project->prj_code }}</h3>
+        <div class="text-muted font-weight-bold">{{ $project->prj_title }}</div>
 
-                                    @php
-                                        $badge = match($status){
-                                            'open'   => 'badge-primary',
-                                            'closed' => 'badge-success',
-                                            'draft'  => 'badge-warning',
-                                            default  => 'badge-secondary'
-                                        };
-                                    @endphp
+        @php
+            $badge = match($status) {
+                'open'      => 'badge-primary',
+                'closed'    => 'badge-success',
+                'draft'     => 'badge-warning',
+                'cancelled' => 'badge-danger',   // Added Cancelled
+                default     => 'badge-secondary'
+            };
+        @endphp
 
-                                    <span class="badge {{ $badge }} px-3 py-2 mt-2" style="border-radius: 4px;">
-                                        {{ strtoupper($project->prj_status) }}
-                                    </span>
-                                </div>
+        <span class="badge {{ $badge }} px-3 py-2 mt-2" style="border-radius: 4px;">
+            {{ strtoupper($status == 'cancelled' ? 'Cancelled' : $project->prj_status) }}
+        </span>
+    </div>
 
-                                {{-- ACTION BUTTON LOGIC --}}
-                                @if($status == 'draft')
-                                    {{-- Agar Draft hai to wapis Form par bhejo --}}
-                                    <a href="{{ route('addnewproject', ['draft_id' => $project->prj_id]) }}"
-                                       class="btn btn-warning btn-sm px-4 font-weight-bold shadow-sm" style="border-radius: 20px;">
-                                        <i class="fas fa-pen mr-1"></i> Continue Editing
-                                    </a>
-                                @else
-                                    {{-- Agar Open/Closed hai to Detail page par bhejo --}}
-                                    <a href="{{ route('projects.show', $project->prj_id) }}"
-                                       class="btn btn-outline-primary btn-sm px-4 shadow-sm" style="border-radius: 20px;">
-                                        View Project <i class="fas fa-arrow-right ml-1"></i>
-                                    </a>
-                                @endif
-                            </div>
+    {{-- ACTION BUTTON LOGIC --}}
+    @if($status == 'draft')
+        {{-- Agar Draft hai to wapis Form par bhejo --}}
+        <a href="{{ route('addnewproject', ['draft_id' => $project->prj_id]) }}"
+           class="btn btn-warning btn-sm px-4 font-weight-bold shadow-sm" style="border-radius: 20px;">
+            <i class="fas fa-pen mr-1"></i> Continue Editing
+        </a>
+    @elseif($status == 'cancelled')
+        {{-- Agar Cancelled hai to koi action nahi ya disabled button --}}
+        <button class="btn btn-danger btn-sm px-4 font-weight-bold shadow-sm" style="border-radius: 20px;" disabled>
+            Cancelled
+        </button>
+    @else
+        {{-- Agar Open/Closed hai to Detail page par bhejo --}}
+        <a href="{{ route('projects.show', $project->prj_id) }}"
+           class="btn btn-outline-primary btn-sm px-4 shadow-sm" style="border-radius: 20px;">
+            View Project <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    @endif
+</div>
+
 
                             {{-- TIMELINE --}}
                             <div class="timeline-wrapper mt-4">

@@ -1,8 +1,8 @@
 @extends('welcome')
-
 @section('content')
 <div class="content-wrapper bg-white">
     <style>
+        /* ... (Purana CSS same rahega) ... */
         .page-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 10px; }
         .page-title { color: #007bff; font-weight: 700; font-size: 26px; display: flex; align-items: center; }
         .page-title i { margin-right: 12px; }
@@ -13,18 +13,10 @@
         .status-toggle { display: flex; border: 1px solid #007bff; border-radius: 6px; overflow: hidden; }
         .status-toggle .btn { flex: 1; border: none; border-radius: 0; padding: 8px 15px; font-size: 13px; font-weight: 600; background: #fff; color: #007bff; }
         .status-toggle .btn.active { background-color: #007bff; color: #fff; }
-        
-        .table-container { 
-            border: 1px solid #eee; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-            min-height: 400px;
-            background: #fff;
-        }
+        .table-container { border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); min-height: 400px; background: #fff; }
         .custom-table { width: 100%; margin-bottom: 0; }
         .custom-table thead th { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; color: #495057; font-size: 13px; font-weight: 700; text-transform: uppercase; padding: 15px; }
-        .custom-table tbody td { padding: 15px; vertical-align: middle; font-size: 14px; border-top: 1px solid #f1f1f1; }
+        .custom-table tbody td { vertical-align: middle; font-size: 14px; border-top: 1px solid #f1f1f1; }
         .custom-table tbody tr:hover { background-color: #f1f7ff; }
         .stage-indicator { font-weight: 600; font-size: 13px; }
         .stage-indicator i { font-size: 10px; margin-right: 5px; }
@@ -33,7 +25,6 @@
 
     <div class="content">
         <div class="container-fluid">
-            
             <div class="page-header">
                 <div class="page-title"><i class="fas fa-folder-open"></i> All Purchase Cases</div>
                 <a href="{{ route('createnewcase') }}" class="btn btn-new-project"><i class="fas fa-plus-circle mr-1"></i> New Case</a>
@@ -80,13 +71,15 @@
                 <table class="table custom-table" id="casesTable">
                     <thead>
                         <tr>
-                            <th style="width: 8%">Case Code</th>
-                                                        <th style="width: 10%" class="text-right">Sub Total Without Tax</th>
-                            <th style="width: 12%" class="text-right">Final Total</th>
-                            <th style="width: 30%">Title / Description</th>
+                            <th style="width: 8%">Code</th>
+                            <th style="width: 12%">Head / For</th>
+                            <th style="width: 20%">Title / Description</th>
+                            <!-- ✅ NAYA COLUMN -->
+                            <th style="width: 12%">Case Date</th>
+                            <th style="width: 10%" class="text-right">Sub Total</th>
+                            <th style="width: 10%" class="text-right">Final Total</th>
                             <th style="width: 15%">Current Stage</th>
-
-                            <th style="width: 15%" class="text-center">Action</th>
+                            <th style="width: 13%" class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,20 +94,30 @@
                                     {{ $pcs->pcs_type }}-{{ $pcs->pcs_id }}
                                 </td>
 
-                                                                {{-- Sub Total Column --}}
-                                <td class="text-right text-price">
-                                    {{ number_format($pcs->pcs_midprice ?? 0, 2) }}
+                                <td>
+                                    <span class="font-weight-bold text-dark">{{ $pcs->project->prj_code ?? $pcs->pcs_hed_id }}</span>
                                 </td>
-                                {{-- Final Total Column --}}
-                                <td class="text-right text-price text-primary">
-                                    {{ number_format($pcs->pcs_price ?? 0, 2) }}
-                                </td>
+
                                 <td>
                                     <div class="text-truncate" style="max-width: 250px;" title="{{ $pcs->pcs_title }}">
                                         {{ $pcs->pcs_title }}
                                     </div>
-                                    <small class="text-muted"><i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($pcs->pcs_date)->format('d M, Y') }}</small>
                                 </td>
+
+                                <!-- ✅ DATE SEPARATE COLUMN MEIN -->
+                                <td>
+                                    <span class="text-muted small font-weight-bold">
+                                        <i class="far fa-calendar-alt mr-1"></i> {{ \Carbon\Carbon::parse($pcs->pcs_date)->format('d M, Y') }}
+                                    </span>
+                                </td>
+
+                                <td class="text-right text-price">
+                                    {{ number_format($pcs->pcs_midprice ?? 0, 2) }}
+                                </td>
+                                <td class="text-right text-price text-primary">
+                                    {{ number_format($pcs->pcs_price ?? 0, 2) }}
+                                </td>
+                                
                                 <td>
                                     @php
                                         $stageColor = match($dbStatus) {
@@ -132,13 +135,14 @@
 
                                 <td class="text-center">
                                     <a href="{{ route('purchasecasedetails', $pcs->pcs_id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                        View Detail
+                                        View
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr id="noDataRow">
-                                <td colspan="6" class="text-center py-5 text-muted">
+                                <!-- ✅ COLSPAN 8 KIYA -->
+                                <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="fas fa-folder-open fa-3x mb-3"></i><br>
                                     No purchase cases found.
                                 </td>
@@ -147,7 +151,6 @@
                     </tbody>
                 </table>
             </div> 
-
         </div>
     </div>
 </div>

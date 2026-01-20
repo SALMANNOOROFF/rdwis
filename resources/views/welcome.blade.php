@@ -147,31 +147,46 @@
         </li>
 
         <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-shopping-cart"></i>
-              <p>PURCHASE CASES <i class="right fas fa-angle-left"></i></p>
+    <a href="#" class="nav-link">
+        <i class="nav-icon fas fa-shopping-cart"></i>
+        <p>
+            PURCHASE CASES
+            <i class="right fas fa-angle-left"></i>
+        </p>
+    </a>
+
+    <ul class="nav nav-treeview">
+        <li class="nav-item">
+            <a href="{{ route('viewpurchasecase') }}" class="nav-link">
+                <i class="fas fa-briefcase nav-icon"></i>
+                <p>PURCHASE CASES (PCs)</p>
             </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{{ route('viewpurchasecase') }}" class="nav-link">
-                  <i class="fas fa-briefcase nav-icon"></i>
-                  <p>PURCHASE CASES (PCs)</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-receipt nav-icon"></i>
-                  <p>RECEIPTS</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="cases-without-items.php" class="nav-link">
-                  <i class="fas fa-exclamation-triangle nav-icon"></i>
-                  <p>CASES WITHOUT ITEMS</p>
-                </a>
-              </li>
-            </ul>
         </li>
+
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="fas fa-receipt nav-icon"></i>
+                <p>RECEIPTS</p>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="cases-without-items.php" class="nav-link">
+                <i class="fas fa-exclamation-triangle nav-icon"></i>
+                <p>CASES WITHOUT ITEMS</p>
+            </a>
+        </li>
+
+<li class="nav-item">
+    <a href="{{ route('purchase.reports.index') }}" class="nav-link">
+        <i class="fas fa-file-alt nav-icon"></i>
+        <p>IT LETTER / CS</p>
+    </a>
+</li>  
+
+    </ul>
+</li>
+
 
         <li class="nav-item">
             <a href="#" class="nav-link">

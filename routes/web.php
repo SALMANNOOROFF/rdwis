@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\PurchaseController;
 
 
@@ -72,9 +73,10 @@ Route::get('/gantchartpr', function () {
 // --- Purchase Management Module ---
 
 // 1. Create New Case Form
-Route::get('/purchase/create', function () {
-    return view('purchase.new_case.createnewcase');
-})->name('createnewcase');
+// SAHI: Sirf yeh wala rasta rakhein jo Controller ko point kare
+Route::get('/purchase/create', [PurchaseController::class, 'create'])->name('createnewcase');
+
+Route::get('/get-last-minute/{headId}', [PurchaseController::class, 'getLastMinute'])->name('get.last.minute');
 
 // 2. View All Purchase Cases (dynamic data load)
 Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
@@ -94,4 +96,24 @@ Route::get('/print-minute', function () {
 // 5. Quote Save (POST)
 Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])->name('quotes.store');
 
+
+
+
+// Sidebar link aur Form page ke liye
+Route::get('/purchase/it-reports', [ReportsController::class, 'index'])->name('purchase.reports.index');
+
+// Form Submit karne ke liye
+Route::post('/generate-comparative', [ReportsController::class, 'generateComparative'])->name('reports.generate.comparative');
+Route::post('/generate-it-letter', [ReportsController::class, 'generateITLetter'])->name('reports.generate.itletter');
+
+// controller for attachments upload
+Route::post('/purchase/upload', [PurchaseController::class, 'uploadAttachment'])->name('purchase.upload');
+
+Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
+
+
+Route::post('/purchase/store', [App\Http\Controllers\PurchaseController::class, 'store'])->name('purchase.store');
+
+// Route for releasing the case (Changing status to Under Scrutiny)
+Route::post('/purchase/release/{id}', [PurchaseController::class, 'releaseCase'])->name('purchase.release');
 }); // group close

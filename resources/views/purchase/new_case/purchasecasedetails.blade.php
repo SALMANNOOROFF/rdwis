@@ -1,359 +1,642 @@
 @extends('welcome')
 
 @section('content')
-<div class="content-wrapper bg-white">
+<div class="content-wrapper bg-white {{ trim($purchase->pcs_status) !== 'Draft' ? 'case-locked' : '' }}">
     <style>
-        /* Global Typography & Theme */
-        .card-body, .modal-body, .signature-block, label, input, select, textarea {
-            font-family: Arial, sans-serif !important;
-            font-size: 12pt !important;
+        /* Typography & Theme */
+        body, .card-body, label, input, select, textarea, .meta-text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            font-size: 13px !important;
         }
-        .card { border-top: 3px solid #007bff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; margin: 20px; }
-        .card-header { background-color: #f8f9fa; border-bottom: 1px solid #eee; padding: 15px 20px; }
+
+        /* --- 3-COLUMN GRID SETUP --- */
+        .main-content-grid { 
+            display: flex; 
+            gap: 20px; 
+            margin-bottom: 15px; 
+            align-items: stretch; /* Teeno columns ki height barabar karne ke liye */
+            flex-wrap: nowrap;
+        }
         
-        /* Grids */
-        .top-info-grid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 15px; margin-bottom: 15px; align-items: stretch; }
-        .quotation-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; align-items: stretch; }
-        .date-grid { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #ebedf2; border-radius: 8px; height: 100%; overflow: hidden; }
-        .section-header { border-left: 4px solid #007bff; padding: 8px 12px; margin-bottom: 15px; background: #f8f9fa; border-radius: 0 4px 4px 0; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Table Formatting */
+        .timeline-container { flex: 0 0 260px; } 
+        .left-container { flex: 1.8; min-width: 500px; } 
+        .right-container { flex: 1.2; min-width: 350px; } 
+
+        /* Full Height Cards */
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border-radius: 10px;
+            background: #fff;
+            height: 100%; /* Card container ki poori height lega */
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0;
+        }
+        .card-body {
+            flex: 1; /* Content kam ho tab bhi body stretch hogi */
+            padding: 20px;
+        }
+        .date-grid { height: 100%; }
+
+        /* Form Controls */
+        label { font-weight: 600; color: #333; margin-bottom: 5px; display: block; }
+        .form-control { border-radius: 6px; border: 1px solid #ced4da; height: 40px; }
+        .form-control:read-only { background-color: #f6f8fa; border: 1px solid #e9ecef; }
+
+        /* Tables */
         .readable-table { width: 100%; border-collapse: collapse; }
-        .readable-table th { background: #f4f6f9; padding: 10px; text-transform: uppercase; border-bottom: 2px solid #dee2e6; font-size: 0.75rem; color: #666; white-space: nowrap; }
-        .readable-table td { padding: 8px 10px; vertical-align: top; border-bottom: 1px solid #eee; color: #333; line-height: 1.4; }
-        .item-description-cell { white-space: normal !important; min-width: 250px; word-break: break-word; }
-        .col-small { white-space: nowrap; width: 1%; }
+        .readable-table th { background: #f4f6f9; padding: 12px; color: #555; font-weight: bold; }
+        .readable-table td { padding: 10px; border-bottom: 1px solid #f1f3f5; vertical-align: middle; }
 
-        .signature-block { margin-top: 40px; float: right; text-align: center; font-weight: bold; line-height: 1.3; min-width: 180px; }
-        .firm-scroll-box { height: 250px; overflow-y: auto; border: 1px solid #ced4da; background: #fff; border-radius: 4px; }
-        .bg-success-light { background-color: rgba(40, 167, 69, 0.1) !important; border: 1px solid #28a745 !important; }
+        /* Buttons */
+        .btn-xs { font-size: 0.75rem; padding: 3px 8px; }
+        .btn-sm { font-size: 0.85rem; }
 
-        /* NESTED MODAL FIXES */
-        .modal { overflow-y: auto !important; }
-        .modal-backdrop.show:nth-of-type(even) { z-index: 1059 !important; }
-        #newFirmModal, #detailedCSModal { z-index: 1061 !important; }
+        /* Vertical Timeline CSS */
+        .timeline-vertical-container { display: flex; flex-direction: column; padding: 10px 5px; }
+        .stepper-item { position: relative; display: flex; flex-direction: row; align-items: flex-start; padding-bottom: 25px; }
+        .stepper-item::after {
+            content: ""; position: absolute; left: 15px; top: 32px; width: 3px;
+            height: calc(100% - 32px); background-color: #e9ecef; z-index: 1;
+        }
+        .stepper-item:last-child::after { content: none; }
+        .stepper-item.completed::after { background-color: #28a745; }
+        .stepper-item.active::after { background: linear-gradient(to bottom, #28a745, #e9ecef); }
 
-        .form-actions { background: #fff; padding: 20px; border-top: 1px solid #dee2e6; text-align: right; margin-top: 20px; }
-        @media (max-width: 1400px) { .top-info-grid { grid-template-columns: 1fr 1fr; } }
+        .stepper-icon {
+            width: 32px; height: 32px; border-radius: 50%; background-color: #fff;
+            border: 3px solid #e9ecef; display: flex; align-items: center; justify-content: center;
+            z-index: 2; font-size: 12px; color: #adb5bd; flex-shrink: 0; margin-right: 15px;
+        }
+        .stepper-item.completed .stepper-icon { background-color: #28a745; border-color: #28a745; color: #fff; }
+        .stepper-item.active .stepper-icon { background-color: #007bff; border-color: #007bff; color: #fff; animation: pulse-blue 2s infinite; }
+
+        .stepper-label { font-size: 12px; font-weight: 700; color: #6c757d; line-height: 1.2; margin-bottom: 4px; }
+        .stepper-date { font-size: 10px; color: #999; background: #f8f9fa; padding: 2px 8px; border-radius: 10px; }
+        .stepper-item.completed .stepper-label { color: #28a745; }
+        .stepper-item.active .stepper-label { color: #007bff; }
+
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 123, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+        }
+
+        @media (max-width: 1200px) { 
+            .main-content-grid { flex-direction: column; }
+            .timeline-container, .left-container, .right-container { flex: 1; min-width: 100%; }
+        }
+
+.firm-scroll-box {
+    max-height: 300px; /* Adjust height as needed */
+    overflow-y: auto;
+}
+/* ======================
+   CASE LOCKED DEFAULT
+   ====================== */
+
+/* Wrapper */
+.case-locked {
+    position: relative;
+}
+
+/* -----------------------
+   Locked Inputs / Selects / Textareas
+   ----------------------- */
+.case-locked input:not(.unlock),
+.case-locked textarea:not(.unlock),
+.case-locked select:not(.unlock) {
+    pointer-events: none;          
+    background-color: #f6f8fa !important;
+    border-color: #e9ecef !important;
+    color: #6c757d !important;
+    position: relative; /* needed for pseudo */
+}
+
+/* -----------------------
+   Locked Buttons
+   ----------------------- */
+.case-locked button:not(.unlock),
+.case-locked .btn:not(.unlock) {
+    pointer-events: none;          
+    opacity: 0.45 !important;
+    filter: grayscale(100%);
+    cursor: not-allowed !important;
+    position: relative; /* needed for pseudo */
+}
+
+/* -----------------------
+   Cursor for everything else (exclude unlock)
+   ----------------------- */
+.case-locked :not(.unlock):not(.unlock *) {
+    cursor: not-allowed !important;
+}
+
+/* ======================
+   HOVER: Show LOCK SIGN ONLY
+   ====================== */
+
+/* Inputs / Textareas / Selects */
+.case-locked input:not(.unlock):hover::after,
+.case-locked textarea:not(.unlock):hover::after,
+.case-locked select:not(.unlock):hover::after {
+    content: "🚫";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+/* Buttons */
+.case-locked button:not(.unlock):hover::after,
+.case-locked .btn:not(.unlock):hover::after {
+    content: "🚫";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+/* Short Status Flow Styling */
+.status-flow-container {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border-left: 5px solid #007bff;
+}
+
+.stage-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.stage-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #999;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.stage-value {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.current-box { color: #007bff; }
+.next-box { color: #6c757d; }
+
+.flow-arrow {
+    margin: 0 25px;
+    color: #dee2e6;
+    font-size: 18px;
+}
+
     </style>
+<!-- TOP HEADER CARD -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
 
-    <div class="card">
-        <div class="card-header text-right">
-            <h3 class="card-title float-left"><i class="fas fa-file-invoice-dollar mr-2 text-primary"></i> Purchase Case Details</h3>
-            <button class="btn btn-secondary btn-sm">Adv. Payment</button>
-            <a href="{{ route('minutesheet') }}" class="btn btn-secondary btn-sm text-white">Minute</a>
-            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-print"></i></button>
-        </div>
-
-<div class="card-body">
-            <!-- Case Title -->
-            <div class="form-group mb-4">
-                <label><i class="fas fa-tag mr-1 text-primary"></i> Case Title</label>
-                <div class="d-flex align-items-center">
-                    <input type="text" class="form-control form-control-lg" value="{{ $purchase->pcs_title }}" readonly style="border-left: 4px solid #007bff; font-weight: 600; flex-grow: 1;">
-                    <button class="btn btn-primary btn-lg ml-2 shadow-sm" type="button" data-toggle="modal" data-target="#caseAttachmentModal" style="white-space: nowrap; border-radius: 8px; font-size: 14px;">
-                        <i class="fas fa-paperclip mr-1"></i> Attachments
-                    </button>
-                </div>
+        <!-- TITLE + ACTION BUTTONS -->
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <label class="text-primary mb-0 font-weight-bold" style="font-size:16px !important;">
+                    <i class="fas fa-tag mr-1"></i> {{ $purchase->pcs_title }}
+                </label>
             </div>
 
-            <div class="top-info-grid">
-                <!-- Core Info & Financials -->
-                <div class="date-grid" style="grid-column: span 2;">
-                    <div class="row gx-2 gy-2">
-                      <!-- Left Column -->
-        <div class="col-md-6 border-end pe-2">
-            
-            <!-- Row 1: ID & Date -->
-            <div class="row gx-2 gy-2">
-                <div class="col-6">
-                    <label>Case ID</label>
-                    <input type="text" class="form-control" value="PC-{{ $purchase->pcs_id }}" readonly>
-                </div>
-                <div class="col-6">
-                    <label>Date</label>
-                    <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}" readonly>
-                </div>
-            </div>
-
-            <!-- Row 2: Firm Name -->
-            @php $lowestQuote = $purchase->quotes->sortBy('qte_price')->first(); @endphp
-            <div class="form-group mt-2">
-                <label>Firm Name (L1)</label>
-                <input type="text" class="form-control" 
-                       value="{{ $lowestQuote ? ($lowestQuote->firm->frm_name ?? $lowestQuote->qte_firmname) : 'Waiting for Quotes...' }}" 
-                       readonly style="border-left: 4px solid #28a745; font-weight: bold;">
-            </div>
-
-            <!-- Row 3: Terms -->
-            <label>Terms</label>
-            <textarea class="form-control" rows="2" readonly>{{ $purchase->pcs_remarks ?? 'Standard terms apply.' }}</textarea>
-
-
-
-        </div>
-
-                        <!-- Right Column -->
-                        <div class="col-md-6 ps-2">
-                            <div class="row gx-2 gy-2">
-                                <div class="col-6"><label>Head</label><input type="text" class="form-control" value="{{ $purchase->pcs_hed_id }}" readonly></div>
-                                <div class="col-6"><label>Status</label><input type="text" class="form-control font-weight-bold" value="{{ $purchase->pcs_status }}" readonly style="color: #28a745;"></div>
-                                @php
-                                    $taxLabel = ''; $taxValue = 0;
-                                    if(!empty($purchase->pcs_midtax) && $purchase->pcs_midtax > 0) { $taxLabel = 'SST'; $taxValue = $purchase->pcs_midtax; } 
-                                    elseif(!empty($purchase->pcs_inttax) && $purchase->pcs_inttax > 0) { $taxLabel = 'GST'; $taxValue = $purchase->pcs_inttax; }
-                                @endphp
-                                <div class="col-6"><label>{{ $taxLabel }}</label><input type="text" class="form-control text-end" value="{{ number_format($taxValue, 2) }}" readonly></div>
-                                <div class="col-6"><label>Total Price (PKR)</label><input type="text" class="form-control text-end font-weight-bold text-primary" value="{{ number_format($purchase->pcs_price, 2) }}" readonly></div>
-                            </div>
-                                        <!-- 3. Timeline Section -->
-    <div class="timeline-container p-3 rounded" style="background-color: #f8f9fa; border: 1px solid #e9ecef; margin-top: 20px;">
-        <label class="text-muted mb-2" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">
-            <i class="fas fa-history mr-1"></i> Case Progress
-        </label>
-        
-        <div class="timeline-wrapper">
-            @php
-                // 1. Define Linear Stages (The Ideal Path)
-                $timelineSteps = [
-                    0 => ['label' => 'Draft',          'date' => $purchase->pcs_date],
-                    1 => ['label' => 'Under Scrutiny', 'date' => null], // Add logic for specific dates if available
-                    2 => ['label' => 'Approved',       'date' => null],
-                    3 => ['label' => 'Fulfilled',      'date' => null]
-                ];
-
-                // 2. Get Current Status from Database
-                $currentStatus = trim($purchase->pcs_status); 
-
-                // 3. Map Database Status to Timeline Index
-                $statusMapping = [
-                    'Draft'          => 0,
-                    'Under Scrutiny' => 1,
-                    'Approved'       => 2,
-                    'Fulfilled'      => 3,
-                    'Cancelled'      => -1 // Special Case
-                ];
-
-                // Get active index (Default to 0 if unknown)
-                $activeIndex = $statusMapping[$currentStatus] ?? 0;
-            @endphp
-
-            @foreach($timelineSteps as $index => $step)
+            <div class="d-flex align-items-center">
                 @php
-                    $barColor = 'bg-secondary'; // Default (Future/Gray)
-                    $textColor = '#888';
-
-                    if ($activeIndex === -1) {
-                        // CASE: CANCELLED
-                        // Sirf pehla step Red karein ya sab Gray
-                        $barColor = ($index === 0) ? 'bg-danger' : 'bg-secondary';
-                        $textColor = ($index === 0) ? '#dc3545' : '#888'; // Red text for first step
-                    } else {
-                        // NORMAL FLOW
-                        if ($index < $activeIndex) {
-                            $barColor = 'bg-success'; // Past (Green)
-                            $textColor = '#28a745';
-                        } elseif ($index == $activeIndex) {
-                            // Agar Fulfilled (Last Step) hai to Green, warna Blue (Current)
-                            $barColor = ($activeIndex == 3) ? 'bg-success' : 'bg-primary';
-                            $textColor = ($activeIndex == 3) ? '#28a745' : '#007bff';
-                        }
-                    }
+                    $currentStatus = trim($purchase->pcs_status);
                 @endphp
 
-                <div class="timeline-item">
-                    <!-- Progress Bar -->
-                    <div class="progress-segment {{ $barColor }}"></div>
-                    
-                    <!-- Label -->
-                    <div class="meta-text" style="color: {{ $textColor }}; font-weight: 600;">
-                        {{ $step['label'] }}
-                    </div>
+                {{-- Draft only buttons --}}
+                @if($currentStatus === 'Draft')
+                    <button class="btn btn-primary btn-sm mr-1 shadow-sm">Adv. Payment</button>
 
-                    <!-- Date (Only for first step or logic based) -->
-                    @if($index == 0 && $step['date'])
-                        <div class="meta-date">({{ \Carbon\Carbon::parse($step['date'])->format('d M') }})</div>
-                    @endif
-                </div>
-            @endforeach
+                    <a href="{{ route('minutesheet') }}"
+                       class="btn btn-primary btn-sm mr-1 text-white shadow-sm">
+                        Minute
+                    </a>
+
+                    <button class="btn btn-primary btn-sm shadow-sm">
+                        <i class="fas fa-print mr-1"></i> Print
+                    </button>
+                @endif
+
+                {{-- Always visible --}}
+                <button class="btn btn-primary btn-sm mr-1 shadow-sm ml-1 unlock"
+                        type="button"
+                        data-toggle="modal"
+                        data-target="#caseAttachmentModal">
+                    <i class="fas fa-paperclip mr-1"></i> Attachments
+                </button>
+            </div>
         </div>
-        
-        {{-- Show Cancelled Message Explicitly if Status is Cancelled --}}
-        @if($activeIndex === -1)
-            <div class="text-center mt-2">
-                <span class="badge badge-danger">CASE CANCELLED</span>
+
+        {{-- ================= STATUS FLOW LOGIC ================= --}}
+        @php
+            $subTotal = 0;
+            foreach($purchase->items as $item) {
+                $subTotal += ($item->pci_qty * $item->pci_price);
+            }
+
+            $commonStart = ['Draft', 'Under Scrutiny', 'Forward to MD'];
+            $commonEnd   = [
+                'Approved',
+                'Email to MTSS',
+                'PO Issued by MTSS',
+                'Docs Submitted to Fin',
+                'Docs Forward to MTSS',
+                'Cheque Ready',
+                'Cheque Collected'
+            ];
+
+            if ($subTotal < 400000) {
+                $workflowSteps = array_merge($commonStart, $commonEnd);
+            } elseif ($subTotal < 1000000) {
+                $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DDG'], $commonEnd);
+            } else {
+                $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DG'], $commonEnd);
+            }
+
+            $activeIndex = array_search($currentStatus, $workflowSteps);
+            if ($activeIndex === false) $activeIndex = 0;
+
+            $currentLabel = $workflowSteps[$activeIndex];
+            $nextLabel = $workflowSteps[$activeIndex + 1] ?? 'Process Completed';
+        @endphp
+
+        {{-- ================= STATUS DISPLAY ================= --}}
+        @if($currentStatus === 'Draft')
+            <!-- ONLY DRAFT (NO NEXT) -->
+            <div class="status-flow-container mt-3">
+                <div class="stage-box current-box w-100 text-left">
+                    <span class="stage-label">Current Stage</span>
+                    <span class="stage-value">
+                        <i class="fas fa-dot-circle mr-1"></i> Draft
+                    </span>
+                </div>
+            </div>
+        @else
+            <!-- NORMAL FLOW -->
+            <div class="status-flow-container mt-3">
+                <div class="stage-box current-box">
+                    <span class="stage-label">Previous Stage</span>
+                    <span class="stage-value">
+                        <i class="fas fa-dot-circle mr-1"></i> {{ $currentLabel }}
+                    </span>
+                </div>
+
+                <div class="flow-arrow">
+                    <i class="fas fa-long-arrow-alt-right"></i>
+                </div>
+
+                <div class="stage-box next-box">
+                    <span class="stage-label">Current Stage</span>
+                    <span class="stage-value">
+                        <i class="fas fa-arrow-circle-right mr-1"></i> {{ $nextLabel }}
+                    </span>
+                </div>
             </div>
         @endif
+
     </div>
-    <!-- End Timeline -->
+</div>
+
+
+    <!-- MAIN CONTENT GRID -->
+    <div class="main-content-grid m-4">
+@php
+    $currentStatus = trim($purchase->pcs_status);
+@endphp
+
+@if($currentStatus !== 'Draft')
+    <!-- COLUMN 1: TIMELINE -->
+    <div class="timeline-container">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pb-0 pt-4">
+                <h6 class="text-uppercase text-secondary font-weight-bold"
+                    style="letter-spacing: 1px; font-size: 12px;">
+                    <i class="fas fa-stream mr-2"></i> Case Workflow
+                </h6>
+            </div>
+
+            <div class="card-body">
+                @php
+                    $subTotal = 0;
+                    foreach($purchase->items as $item) {
+                        $subTotal += ($item->pci_qty * $item->pci_price);
+                    }
+
+                    $commonStart = ['Draft', 'Under Scrutiny', 'Forward to MD'];
+                    $commonEnd   = ['Approved', 'Email to MTSS', 'PO Issued by MTSS', 'Docs Submitted to Fin', 'Docs Forward to MTSS', 'Cheque Ready', 'Cheque Collected'];
+
+                    if ($subTotal < 400000)
+                        $workflowSteps = array_merge($commonStart, $commonEnd);
+                    elseif ($subTotal < 1000000)
+                        $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DDG'], $commonEnd);
+                    else
+                        $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DG'], $commonEnd);
+
+                    $activeIndex = array_search($currentStatus, $workflowSteps) ?: 0;
+                    $purchaseHistory = $purchase->history ?? collect([]);
+                @endphp
+
+                <div class="timeline-vertical-container">
+                    @foreach($workflowSteps as $index => $stepLabel)
+                        @php
+                            $historyDate = null;
+                            $hEntry = $purchaseHistory
+                                ->filter(fn($h) => stripos($h->status ?? '', $stepLabel) !== false)
+                                ->sortByDesc('created_at')
+                                ->first();
+
+                            if($hEntry)
+                                $historyDate = \Carbon\Carbon::parse($hEntry->created_at)->format('d M Y');
+
+                            $stateClass = 'pending';
+                            $statusText = '-';
+                            $icon = '<i class="fas fa-circle" style="font-size: 8px;"></i>';
+
+                            if ($index <= $activeIndex) {
+                                $stateClass = 'completed';
+                                $statusText = $historyDate ?: 'Completed';
+                                $icon = '<i class="fas fa-check"></i>';
+                            } elseif ($index == $activeIndex + 1) {
+                                $stateClass = 'active';
+                                $statusText = 'Processing';
+                                $icon = '<i class="fas fa-spinner fa-spin"></i>';
+                            }
+                        @endphp
+
+                        <div class="stepper-item {{ $stateClass }}">
+                            <div class="stepper-icon">{!! $icon !!}</div>
+                            <div class="stepper-content">
+                                <div class="stepper-label">{{ $stepLabel }}</div>
+                                <div class="stepper-date">{{ $statusText }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+            </div>
+        </div>
+    </div>
+@endif
+
+
+        <!-- COLUMN 2: CASE DETAILS & QUOTATIONS -->
+        <div class="left-container">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="date-grid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <div class="col-6"><label>Case ID</label><input type="text" class="form-control" value="PC-{{ $purchase->pcs_id }}" readonly></div>
+                                    <div class="col-6"><label>Date</label><input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}" readonly></div>
+                                </div>
+                                @php $lowestQuote = $purchase->quotes->sortBy('qte_price')->first(); @endphp
+                                <div class="form-group mb-3">
+                                    <label>Firm Name (L1)</label>
+                                    <input type="text" class="form-control font-weight-bold" value="{{ $lowestQuote ? ($lowestQuote->firm->frm_name ?? $lowestQuote->qte_firmname) : 'Waiting...' }}" readonly style="border-left: 4px solid #28a745;">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label>Terms</label>
+                                    <textarea class="form-control" rows="1">{{ $purchase->pcs_remarks ?? 'No Terms Found ...' }}</textarea>
+                                </div> 
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <div class="col-6"><label>Head</label><input type="text" class="form-control" value="{{ $purchase->project->prj_code ?? 'N/A' }}" readonly></div>
+                                    
+                                    <div class="col-6"><label>Status</label><input type="text" class="form-control font-weight-bold text-success" value="{{ $purchase->pcs_status }}" readonly></div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6"><label>GST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($purchase->pcs_midtax ?? 0, 2) }}" readonly></div>
+                                    <div class="col-6"><label>SST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($purchase->pcs_inttax ?? 0, 2) }}" readonly></div>
+                                    <div class="col-6 mt-2"><label>Sub Total</label><input type="text" class="form-control text-right" value="{{ number_format($purchase->pcs_midprice ?? 0, 2) }}" readonly></div>
+                                    <div class="col-6 mt-2"><label>Final Total</label><input type="text" class="form-control text-right font-weight-bold text-primary" value="{{ number_format($purchase->pcs_price ?? 0, 2) }}" readonly style="background-color:#eef3ff;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quotations Section -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="text-primary mb-0 font-weight-bold"><i class="fas fa-list-ol mr-1"></i> Received Quotations</label>
+                                <div>
+                                    <button class="btn btn-xs btn-outline-primary unlock" data-toggle="modal" data-target="#detailedCSModal"><i class="fas fa-medal"></i> Comparative Statement</button>
+                                    <button class="btn btn-xs btn-outline-primary" data-toggle="modal" data-target="#addQuoteModal"><i class="fas fa-plus"></i> Add</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive border rounded">
+                                <table class="readable-table table-hover mb-0">
+                                    <thead>
+                                        <tr><th>#</th><th>FIRM NAME</th><th class="text-right">PRICE</th><th class="text-center">TECH.</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($purchase->quotes as $quote)
+                                        <tr>
+                                            <td>{{ $quote->qte_num }}</td>
+                                            <td class="font-weight-bold">{{ $quote->firm->frm_name ?? $quote->qte_firmname }}</td>
+                                            <td class="text-right text-primary font-weight-bold">{{ number_format($quote->qte_price, 2) }}</td>
+                                            <td class="text-center"><span class="badge badge-success">Yes</span></td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Items Summary -->
-                <div class="date-grid">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="mb-0">Items Summary</label>
-                        <div class="d-flex" style="gap: 5px;">
-                            <button class="btn btn-outline-primary btn-sm"  data-toggle="modal" data-target="#viewItemsModal">See Details</button>
-                            <button class="btn btn-outline-primary btn-sm"  data-toggle="modal" data-target="#addItemModal"><i class="fas fa-plus"></i></button>
+        <!-- COLUMN 3: ITEMS SUMMARY -->
+        <div class="right-container">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <label class="mb-0 text-secondary font-weight-bold"><i class="fas fa-boxes mr-1"></i> Items Summary</label>
+                        <div>
+                            <button class="btn btn-xs btn-outline-primary unlock" data-toggle="modal" data-target="#viewItemsModal">Details</button>
+                            <button class="btn btn-xs btn-outline-primary" data-toggle="modal" data-target="#addItemModal"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
-                    <div style="overflow-x: auto; flex-grow: 1;">
-                        <table class="readable-table">
-                            <thead><tr><th class="col-small">#</th><th>Desc</th><th class="col-small">Qty</th><th class="col-small text-right">Price</th></tr></thead>
+                    <div class="table-responsive border rounded flex-grow-1" style="max-height: 600px; overflow-y: auto;">
+                        <table class="readable-table table-striped mb-0">
+                            <thead>
+                                <tr><th>#</th><th>DESC</th><th>QTY</th><th class="text-right">TOTAL</th></tr>
+                            </thead>
                             <tbody>
                                 @foreach($purchase->items as $item)
-                                <tr><td>{{ $item->pci_serial }}</td><td class="item-description-cell small">{{ $item->pci_desc }}</td><td>{{ $item->pci_qty }}</td><td class="text-right font-weight-bold">{{ number_format($item->pci_qty * $item->pci_price, 2) }}</td></tr>
+                                <tr>
+                                    <td>{{ $item->pci_serial }}</td>
+                                    <td class="small">{{ Str::limit($item->pci_desc, 30) }}</td>
+                                    <td>{{ $item->pci_qty }}</td>
+                                    <td class="text-right font-weight-bold">{{ number_format($item->pci_qty * $item->pci_price, 2) }}</td>
+                                </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
+                    
+                   <!-- FOOTER ACTIONS -->
+<div class="mt-auto pt-4 text-right">
+    <!-- Back Button (always visible) -->
+    <button onclick="history.back()" class="btn btn-outline-secondary mr-2 unlock">Back</button>
 
-            <!-- Quotations Grid -->
-            <div class="quotation-info-grid">
-                <div class="date-grid">
-                    <div class="section-header">
-                        <div class="d-flex align-items-center"><h4>Received Quotations</h4><select class="form-control form-control-sm ml-2" style="width: 110px;"><option>With Tax</option></select></div>
-                        <div class="d-flex" style="gap: 5px;">
-                            <button class="btn btn-outline-success btn-sm"  data-toggle="modal" data-target="#bestPricingModal"><i class="fas fa-medal"></i> Best Price</button>
-                            <button class="btn btn-outline-primary btn-sm"  data-toggle="modal" data-target="#addQuoteModal"><i class="fas fa-plus"></i> Add Quote</button>
-                        </div>
-                    </div>
-                    <table class="readable-table">
-                        <thead><tr><th>Number</th><th>Firm Name</th><th class="text-right">Price</th><th>Tech.</th></tr></thead>
-                        <tbody>
-                            @foreach($purchase->quotes as $quote)
-                            <tr><td>{{ $quote->qte_num }}</td><td class="font-weight-bold">{{ $quote->firm->frm_name ?? $quote->qte_firmname }}</td><td class="text-right text-primary font-weight-bold">{{ number_format($quote->qte_price, 2) }}</td><td><span class="badge bg-success">Yes</span></td></tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div> 
-            </div>
-
-            <div class="form-actions">
-<button onclick="history.back()" class="btn btn-primary">Back</button>
-                <button type="submit" class="btn btn-primary">Release Case</button>
-            </div>
-        </div>  
-    </div>
+    <!-- Release Case Form (only if Draft) -->
+    @if(trim($purchase->pcs_status) === 'Draft')
+        <form action="{{ route('purchase.release', $purchase->pcs_id) }}" method="POST" style="display: inline-block;">
+            @csrf
+            <button type="submit" class="btn btn-primary px-4 shadow" onclick="return confirm('Are you sure you want to release this case for scrutiny?')">
+                <i class="fas fa-paper-plane mr-1"></i> Release Case
+            </button>
+        </form>
+    @endif
 </div>
 
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 <!-- ========================= MODALS AREA ========================= -->
 
-<!-- Quote Entry Modal with Editable Tax Inputs -->
+<!-- Quote Entry Modal (Redesigned) -->
 <div class="modal fade" id="addQuoteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content" style="border-top: 5px solid #007bff;">
-            <div class="modal-header bg-light py-2">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-sm rounded-lg">
+            <!-- Modal Header -->
+            <div class="modal-header border-bottom-0">
                 <h5 class="modal-title font-weight-bold">Quote Entry</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
+
+            <!-- Modal Body -->
             <div class="modal-body p-0">
                 <div class="row no-gutters">
-                    <!-- Left Sidebar (Unchanged) -->
-                    <div class="col-md-3 border-right p-3 bg-light">
-                        <label class="text-primary font-weight-bold">Select Firm</label>
-                        <div class="firm-scroll-box mb-2">
-                            <ul class="list-group list-group-flush small">
-                                @foreach($firms as $firm) 
-                                    <li class="list-group-item list-group-item-action py-1 border-bottom firm-select-item" data-id="{{ $firm->id }}" data-name="{{ $firm->name }}">
-                                        {{ $firm->name }}
-                                    </li> 
+
+                    <!-- Left Sidebar: Firm Selection -->
+                    <div class="col-md-3 border-right p-4 bg-light">
+                        <label class="font-weight-bold mb-2">Select Firm</label>
+                        <div class="firm-scroll-box mb-3" style="max-height: 300px; overflow-y:auto;">
+                            <ul class="list-group list-group-flush small" id="firm-list">
+                                @foreach($firms as $firm)
+                                <li class="list-group-item list-group-item-action py-2 firm-select-item"
+                                    style="cursor:pointer;" data-id="{{ $firm->id }}">
+                                    {{ $firm->name }}
+                                </li>
                                 @endforeach
                             </ul>
                         </div>
-                        <button class="btn btn-xs btn-outline-secondary btn-block mb-3" data-toggle="modal" data-target="#newFirmModal">New Firm</button>
-                        <div class="form-group mb-2"><label class="small text-muted">Number</label><input type="text" class="form-control form-control-sm"></div>
-                        <div class="form-group"><label class="small text-muted">Acceptable</label><select class="form-control form-control-sm"><option>Yes</option><option>No</option></select></div>
-                    </div>
+                        <button class="btn btn-outline-secondary btn-sm btn-block mb-3" data-toggle="modal" data-target="#newFirmModal">
+                            + New Firm
+                        </button>
 
-                    <!-- Right Side: Items & Manual Tax Inputs -->
-                    <div class="col-md-9 p-3 d-flex flex-column">
-                        <div class="table-responsive" style="min-height: 350px;">
-                            <table class="table table-sm table-bordered">
-                                <thead class="bg-light small">
-                                    <tr>
-                                        <th style="width: 50px;">Ser</th>
-                                        <th>Description</th>
-                                        <th style="width: 60px;">Qty</th>
-                                        <th style="width: 120px;">Unit Price</th>
-                                        <th style="width: 120px;">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($purchase->items as $idx => $item)
-                                    <tr class="quote-item-row" data-type="{{ in_array((int)$item->pci_type, [7, 2]) ? 'goods' : 'service' }}">
-                                        <td class="text-center">{{ $idx+1 }}</td>
-                                        <td class="small">{{ $item->pci_desc }}</td>
-                                        <td class="text-center qty-val">{{ $item->pci_qty }}</td>
-                                        <td><input type="number" class="form-control form-control-sm text-right border-0 bg-light quote-price-input" placeholder="0.00" step="0.01"></td>
-                                        <td class="text-right font-weight-bold row-total">0.00</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        <input type="hidden" id="selected_firm_id">
+
+                        <div class="form-group mb-2">
+                            <label class="small text-muted">Quote Number</label>
+                            <input type="text" id="quote_number" class="form-control form-control-sm">
                         </div>
 
-                        <!-- Manual Tax & Totals Section -->
+                        <div class="form-group">
+                            <label class="small text-muted">Acceptable</label>
+                            <select id="quote_tech_accept" class="form-control form-control-sm">
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Items & Calculation -->
+                    <div class="col-md-9 p-4 d-flex flex-column">
+                        <div class="table-responsive" style="max-height:350px; overflow-y:auto;">
+                            <table class="table table-sm table-hover table-bordered">
+    <thead class="thead-light small">
+        <tr>
+            <th style="width:50px;">#</th>
+            <th>Description</th>
+            <th style="width:60px;">Qty</th>
+            <th style="width:120px;">Unit Price</th>
+            <th style="width:120px;">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($purchase->items as $idx => $item)
+        <tr class="quote-item-row" 
+            data-pci-id="{{ $item->pci_id }}" 
+            data-type="{{ in_array((int)$item->pci_type,[7,2])?'goods':'service' }}">
+            <td class="text-center align-middle">{{ $idx+1 }}</td>
+            <td class="small align-middle" style="white-space: nowrap;">{{ $item->pci_desc }}</td>
+            <td class="text-center align-middle qty-val" style="white-space: nowrap;">{{ $item->pci_qty }}</td>
+            <td class="text-right align-middle" style="white-space: nowrap;">
+                <input type="number" 
+                       class="form-control form-control-sm border-0 bg-light text-right quote-price-input"
+                       value="{{ isset($item->pci_price)?number_format($item->pci_price,2,'.',''):'' }}" 
+                       step="0.01">
+            </td>
+            <td class="text-right font-weight-bold align-middle row-total" style="white-space: nowrap;">{{ number_format($item->pci_qty * $item->pci_price,2) }}</td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+
+                        </div>
+
+                        <!-- Totals Section -->
                         <div class="mt-auto border-top pt-3">
-                            <div class="row">
-                                <div class="col-md-6 offset-md-6">
-                                    <!-- Subtotal -->
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small font-weight-bold text-muted">Sub-Total (Excl. Tax):</span>
+                            <div class="row justify-content-end">
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="small text-muted font-weight-bold">Sub-Total:</span>
                                         <span id="modal-subtotal" class="font-weight-bold">0.00</span>
                                     </div>
-                                    
-                                    <!-- Editable GST Input -->
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small text-primary">GST Amount (Manual/Auto):</span>
-                                        <input type="number" id="input-gst" class="form-control form-control-sm text-right font-weight-bold text-primary" style="width: 120px; border: 1px dashed #007bff;" value="0.00" step="0.01">
+
+                                    <div class="d-flex justify-content-between mb-2 align-items-center">
+                                        <span class="small text-muted">GST Amount:</span>
+                                        <input type="hidden" id="gst-rate" value="18">
+                                        <input type="number" id="input-gst" class="form-control form-control-sm text-right"
+                                               style="width: 120px; border: 1px dashed #6c757d;" value="0.00" step="0.01" readonly>
                                     </div>
 
-                                    <!-- Editable SST Input -->
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small text-info">SST Amount (Manual/Auto):</span>
-                                        <input type="number" id="input-sst" class="form-control form-control-sm text-right font-weight-bold text-info" style="width: 120px; border: 1px dashed #17a2b8;" value="0.00" step="0.01">
+                                    <div class="d-flex justify-content-between mb-2 align-items-center">
+                                        <span class="small text-muted">SST Amount:</span>
+                                        <input type="number" id="input-sst" class="form-control form-control-sm text-right"
+                                               style="width: 120px; border: 1px dashed #6c757d;" value="0.00" step="0.01">
                                     </div>
 
-                                    <!-- Final Grand Total -->
-                                    <div class="d-flex justify-content-between align-items-center py-2 border-top">
-                                        <span class="h5 font-weight-bold">Final Quoted Price:</span>
-                                        <span class="h5 font-weight-bold text-primary" id="modal-final-total">0.00</span>
+                                    <div class="d-flex justify-content-between border-top pt-2">
+                                        <span class="h5 font-weight-bold">Final Price:</span>
+                                        <span class="h5 font-weight-bold" id="modal-final-total">0.00</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-primary px-4 shadow">Save Quote</button></div>
-        </div>
-    </div>
-</div>
 
-<!-- 2. Modal: Best Pricing Analysis -->
-<div class="modal fade" id="bestPricingModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered">
-        <div class="modal-content" style="border-top: 5px solid #28a745;">
-            <div class="modal-header bg-light py-2"><h6 class="modal-title font-weight-bold text-success"><i class="fas fa-medal"></i> Best Price Analysis</h6><button type="button" class="close" data-dismiss="modal">&times;</button></div>
-            <div class="modal-body p-0">
-                <table class="table table-sm table-bordered text-center mb-0">
-                    <thead class="bg-light"><tr><th>Rank</th><th>Vendor</th><th>Total Price</th></tr></thead>
-                    <tbody>
-                        @php $sorted = $purchase->quotes->sortBy('qte_price'); @endphp
-                        @foreach($sorted as $q)
-                        <tr @if($loop->first) style="background-color: #d4edda;" @endif>
-                            <td>L{{ $loop->iteration }}</td><td class="text-left">{{ $q->firm->frm_name ?? $q->qte_firmname }}</td><td class="font-weight-bold">{{ number_format($q->qte_price, 2) }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <!-- Modal Footer -->
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-primary px-4" id="btn-save-quote">Save Quote</button>
             </div>
-            <div class="modal-footer py-1"><button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#detailedCSModal">View Detailed Comparative</button></div>
         </div>
     </div>
 </div>
@@ -385,7 +668,7 @@
                                     <th colspan="2" class="align-middle {{ $loop->first ? 'bg-l1-header text-white' : 'text-primary' }}">
                                         {{ $q->firm->frm_name ?? $q->qte_firmname }}
                                         @if($loop->first) 
-                                            <br><span class="badge badge-light text-primary">L1 WINNER</span> 
+                                            <br><span class="badge badge-light text-primary">WINNER</span> 
                                         @else
                                             <br><span class="badge badge-secondary">L{{ $loop->iteration }}</span>
                                         @endif
@@ -439,7 +722,6 @@
             </div>
             <div class="modal-footer bg-light py-1">
                 <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary btn-sm"><i class="fas fa-file-pdf mr-1"></i> Export CS</button>
             </div>
         </div>
     </div>
@@ -486,15 +768,169 @@
     <div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content shadow-lg" style="border-top: 4px solid #6c757d;"><div class="modal-header bg-light py-1"><h6>New Firm</h6><button class="close" data-dismiss="modal">&times;</button></div><div class="modal-body"><input type="text" class="form-control form-control-sm" placeholder="Firm Name"></div><div class="modal-footer py-1"><button class="btn btn-sm btn-primary">Save</button></div></div></div>
 </div>
 
-<!-- 6. Modal: Add Item Entry -->
+<!-- Add Item Modal -->
 <div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg"><div class="modal-content" style="border-top: 5px solid #6c757d;"><div class="modal-header bg-light py-2"><h5>Item Entry</h5><button class="close" data-dismiss="modal">&times;</button></div><div class="modal-body p-3"><div class="row mb-2"><div class="col-3"><label>S No</label><input type="text" class="form-control"></div><div class="col-9"><label>Description</label><input type="text" class="form-control"></div></div><div class="row"><div class="col-3"><label>Qty</label><input type="number" class="form-control"></div><div class="col-3"><label>Price</label><input type="text" class="form-control"></div><div class="col-3"><label>Type</label><select class="form-control"><option>Permanent</option></select></div><div class="col-3"><label>Subhead</label><select class="form-control"><option>Equipment</option></select></div></div></div><div class="modal-footer"><button class="btn btn-primary btn-sm">Add to List</button></div></div></div>
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content shadow-sm" style="border-top:4px solid #0d6efd;">
+
+            <!-- Header -->
+            <div class="modal-header py-2 bg-light">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle text-primary mr-1"></i>
+                    Add Item Entry
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+
+                <!-- Row 1 -->
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label class="small font-weight-bold">S.No</label>
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-9">
+                        <label class="small font-weight-bold">Description</label>
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <label class="small font-weight-bold">Quantity</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-3">
+                        <label class="small font-weight-bold">Unit Price</label>
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-3">
+                        <label class="small font-weight-bold">Type</label>
+                        <select class="form-control form-control-sm">
+                            <option value="">Select</option>
+                            <option>Permanent</option>
+                            <option>Consumable</option>
+                        </select>
+                    </div>
+
+                    <div class="col-3">
+                        <label class="small font-weight-bold">Sub Head</label>
+                        <select class="form-control form-control-sm">
+                            <option value="">Select</option>
+                            <option>Equipment</option>
+                            <option>Service</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer py-2">
+                <button class="btn btn-secondary btn-sm" data-dismiss="modal">
+                    Cancel
+                </button>
+                <button class="btn btn-primary btn-sm">
+                    <i class="fas fa-check mr-1"></i> Add to List
+                </button>
+            </div>
+
+        </div>
+    </div>
 </div>
+
 
 <!-- 7. Modal: Case Attachments -->
 <div class="modal fade" id="caseAttachmentModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-md"><div class="modal-content" style="border-top: 5px solid #007bff;"><div class="modal-header"><h5>Documents</h5><button class="close" data-dismiss="modal">&times;</button></div><div class="modal-body text-center"><div class="border-dashed p-4 bg-light">Drag & Drop Area</div></div></div></div>
+    <div class="modal-dialog modal-md">
+        <div class="modal-content" style="border-top: 5px solid #007bff;">
+            
+            <div class="modal-header bg-light py-2">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-paperclip mr-2 text-primary"></i> Documents
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body p-0">
+                
+                <!-- List of Existing Attachments -->
+                <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+                    @forelse($purchase->attachments as $file)
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                @php
+                                    $ext = strtolower(pathinfo($file->pat_path, PATHINFO_EXTENSION));
+                                    $icon = match($ext) {
+                                        'pdf' => 'fa-file-pdf text-danger',
+                                        'jpg', 'jpeg', 'png' => 'fa-file-image text-primary',
+                                        'doc', 'docx' => 'fa-file-word text-info',
+                                        'xls', 'xlsx' => 'fa-file-excel text-success',
+                                        default => 'fa-file text-secondary'
+                                    };
+                                @endphp
+                                <i class="fas {{ $icon }} fa-lg mr-3"></i>
+                                <div>
+                                    <h6 class="mb-0" style="font-size: 13px; font-weight: 600;">
+                                        <a href="{{ asset('storage/' . $file->pat_path) }}" target="_blank" class="text-dark">
+                                            {{ basename($file->pat_path) }}
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted text-uppercase">{{ $file->pat_type }}</small>
+                                </div>
+                            </div>
+                            <a href="{{ asset('storage/' . $file->pat_path) }}" target="_blank" class="btn btn-sm btn-light border">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    @empty
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-gray-300"></i><br>
+                            No documents uploaded yet.
+                        </div>
+                    @endforelse
+                </div>
+
+                <!-- Upload New Section -->
+<div class="p-3 border-top bg-light">
+    <!-- FORM START -->
+    @if(trim($purchase->pcs_status) === 'Draft')
+        <form action="{{ route('purchase.upload') }}"    method="POST" enctype="multipart/form-data" id="uploadForm">
+            @csrf
+            <input type="hidden" name="pcs_id" value="{{ $purchase->pcs_id }}">
+
+            <div class="border-dashed p-4 text-center bg-white position-relative" 
+                 style="border: 2px dashed #007bff; border-radius: 6px; cursor: pointer; transition: 0.3s;"
+                 onmouseover="this.style.backgroundColor='#f0f8ff'" 
+                 onmouseout="this.style.backgroundColor='white'">
+                
+                <i class="fas fa-plus-circle fa-2x text-primary mb-2"></i>
+                <p class="mb-0 text-dark font-weight-bold small">Click to Upload File</p>
+                <span class="text-muted" style="font-size: 10px;">(PDF, JPG, PNG, DOCX)</span>
+
+                <!-- File Input (Invisible but covers the area) -->
+                <input type="file" name="file" required
+                       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;"
+                       onchange="document.getElementById('uploadForm').submit();">
+            </div>
+        </form>
+    @endif
+    <!-- FORM END -->
 </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <!-- 8. Modal: Add Not Received -->
 <div class="modal fade" id="addNotReceivedModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -506,10 +942,8 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // ----- FIXED STACKED MODAL LOGIC -----
-    // This requires Bootstrap JS (for modal events). 
-    // If you also want to remove jQuery Bootstrap dependency, additional adjustments needed.
-    document.querySelectorAll('.modal').forEach(function(modal) {
-        modal.addEventListener('hidden.bs.modal', function() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', () => {
             if (document.querySelectorAll('.modal.show').length > 0) {
                 document.body.classList.add('modal-open');
             }
@@ -518,80 +952,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ----- Auto Signature Date -----
     const now = new Date();
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     const sigDateEl = document.getElementById('sig-date-display');
-    if (sigDateEl) {
+    if(sigDateEl) {
         sigDateEl.innerHTML = `&nbsp;&nbsp; ${months[now.getMonth()]} ${now.getFullYear().toString().substr(-2)}`;
     }
 
-    // ----- Real-time Math for Quote Entry -----
-    function updateFinalPrice() {
+    // ----- Quote Calculation Logic -----
+    function updateModalTotals() {
         let subtotal = 0;
+        let totalGst = 0;
+        let totalSst = 0;
 
-        document.querySelectorAll('.row-total').forEach(function(el) {
-            let val = parseFloat(el.textContent.replace(/,/g, '')) || 0;
-            subtotal += val;
+        document.querySelectorAll('.quote-item-row').forEach(row => {
+            const qty = parseFloat(row.querySelector('.qty-val').textContent) || 0;
+            const price = parseFloat(row.querySelector('.quote-price-input').value) || 0;
+            const type = row.dataset.type;
+            const lineTotal = qty * price;
+
+            // Update row total
+            row.querySelector('.row-total').textContent = lineTotal.toLocaleString(undefined,{minimumFractionDigits:2});
+
+            subtotal += lineTotal;
+
+            if(type === 'goods') totalGst += lineTotal * 0.18;
+            else totalSst += lineTotal * 0.13;
         });
 
-        let gst = parseFloat(document.getElementById('input-gst').value) || 0;
-        let sst = parseFloat(document.getElementById('input-sst').value) || 0;
-        let finalTotal = subtotal + gst + sst;
-
+        // Update Subtotal
         const subtotalEl = document.getElementById('modal-subtotal');
+        if(subtotalEl) subtotalEl.textContent = subtotal.toLocaleString(undefined,{minimumFractionDigits:2});
+
+        // Update GST & SST
+        const gstEl = document.getElementById('input-gst');
+        const sstEl = document.getElementById('input-sst');
+        if(gstEl) gstEl.value = totalGst.toFixed(2);
+        if(sstEl) sstEl.value = totalSst.toFixed(2);
+
+        // Final total
         const finalTotalEl = document.getElementById('modal-final-total');
-        if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString(undefined, {minimumFractionDigits: 2});
-        if (finalTotalEl) finalTotalEl.textContent = finalTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+        if(finalTotalEl) finalTotalEl.textContent = (subtotal + totalGst + totalSst).toLocaleString(undefined,{minimumFractionDigits:2});
     }
 
-    // Input event for quote price
-    document.querySelectorAll('.quote-price-input').forEach(function(input) {
-        input.addEventListener('input', function() {
-            let row = input.closest('tr');
-            let qty = parseFloat(row.querySelector('.qty-val').textContent) || 0;
-            let up = parseFloat(input.value) || 0;
-            row.querySelector('.row-total').textContent = (qty * up).toLocaleString(undefined, {minimumFractionDigits: 2});
-
-            // Auto Calculation Logic
-            let totalGst = 0;
-            let totalSst = 0;
-
-            document.querySelectorAll('.quote-item-row').forEach(function(r) {
-                let q = parseFloat(r.querySelector('.qty-val').textContent) || 0;
-                let u = parseFloat(r.querySelector('.quote-price-input').value) || 0;
-                let type = r.dataset.type; // goods or service
-
-                let lineTotal = q * u;
-                r.querySelector('.row-total').textContent = lineTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
-
-                if (type === 'goods') {
-                    totalGst += lineTotal * 0.18;
-                } else {
-                    totalSst += lineTotal * 0.13;
-                }
-            });
-
-            const gstEl = document.getElementById('input-gst');
-            const sstEl = document.getElementById('input-sst');
-            if (gstEl) gstEl.value = totalGst.toFixed(2);
-            if (sstEl) sstEl.value = totalSst.toFixed(2);
-
-            updateFinalPrice();
-        });
+    // Attach event listeners
+    document.querySelectorAll('.quote-price-input').forEach(input => {
+        input.addEventListener('input', updateModalTotals);
     });
 
-    // Input event for manual GST/SST change
-    const taxInputs = ['input-gst', 'input-sst'];
-    taxInputs.forEach(function(id) {
+    ['input-gst','input-sst'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', function() {
-                updateFinalPrice();
-            });
-        }
+        if(el) el.addEventListener('input', updateModalTotals);
     });
 
+    // Initial calculation on page load
+    updateModalTotals();
 });
 </script>
-
-
 @endsection
