@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\PurchaseController;
 
 /*
@@ -78,18 +79,17 @@ Route::middleware('auth')->group(function () {
     // PURCHASE MANAGEMENT
     // ====================================================
 
-    // Create New Case
-    Route::get('/purchase/create', function () {
-        return view('purchase.new_case.createnewcase');
-    })->name('createnewcase');
-
-    // View Purchase Cases (Controller based)
+    // Purchase Case Lifecycle
+    Route::get('/purchase/create', [PurchaseController::class, 'create'])->name('createnewcase');
+    Route::post('/purchase/store', [PurchaseController::class, 'store'])->name('purchase.store');
     Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
-
-    // Purchase Case Details
     Route::get('/purchase/details/{id}', [PurchaseController::class, 'show'])->name('purchasecasedetails');
+    Route::post('/purchase/release/{id}', [PurchaseController::class, 'releaseCase'])->name('purchase.release');
 
-    // Minute Sheet
+    // Minute Sheet & Logic
+    Route::get('/get-last-minute/{headId}', [PurchaseController::class, 'getLastMinute'])->name('get.last.minute');
+    Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
+    
     Route::get('/minute-sheet', function () {
         return view('purchase.new_case.minutesheet');
     })->name('minutesheet');
@@ -98,7 +98,15 @@ Route::middleware('auth')->group(function () {
         return view('purchase.new_case.print_minute');
     })->name('purchase.new_case.print_minute');
 
-    // Store Quote
+    // Quotes & Attachments
     Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])->name('quotes.store');
+    Route::post('/purchase/upload', [PurchaseController::class, 'uploadAttachment'])->name('purchase.upload');
 
-});
+    // ====================================================
+    // REPORTS & IT GENERATION
+    // ====================================================
+    Route::get('/purchase/it-reports', [ReportsController::class, 'index'])->name('purchase.reports.index');
+    Route::post('/generate-comparative', [ReportsController::class, 'generateComparative'])->name('reports.generate.comparative');
+    Route::post('/generate-it-letter', [ReportsController::class, 'generateITLetter'])->name('reports.generate.itletter');
+
+}); // End of Auth Middleware Group
