@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/attachment/view/{id}', [ProjectController::class, 'viewAttachment'])->name('attachment.view');
 
     // Milestones
+    Route::post('/milestone/mark-complete', [ProjectController::class, 'markMilestoneComplete'])->name('milestone.complete');   
     Route::get('/project/{id}/add-milestone', [ProjectController::class, 'createMilestone'])->name('projects.add-milestone');
     Route::post('/project/{id}/save-milestone', [ProjectController::class, 'storeMilestone'])->name('projects.store-milestone');
     Route::get('/project/{id}/spendings', [ProjectController::class, 'projectSpendings'])->name('projects.spendings');

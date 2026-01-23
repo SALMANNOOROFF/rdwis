@@ -345,7 +345,24 @@ class ProjectController extends Controller
         return redirect()->route('projects.show', $milestone->msn_xprj_id)
                          ->with('success', 'Milestone Updated Successfully!');
     }
+// ProjectController.php ke andar add karein
 
+public function markMilestoneComplete(Request $request)
+{
+    $request->validate([
+        'msn_id' => 'required|exists:prj.milestones,msn_id',
+        'achieved_date' => 'required|date'
+    ]);
+
+    $milestone = Milestone::find($request->msn_id);
+    if($milestone) {
+        $milestone->msn_achvdt = $request->achieved_date;
+        $milestone->msn_status = 'Completed'; // Status auto-update
+        $milestone->save();
+    }
+
+    return redirect()->back()->with('success', 'Milestone marked as Completed!');
+}
     public function deleteMilestone($id)
     {
         $milestone = Milestone::where('msn_id', $id)->firstOrFail();
