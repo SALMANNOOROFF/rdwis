@@ -348,21 +348,22 @@ class ProjectController extends Controller
 // ProjectController.php ke andar add karein
 
 public function markMilestoneComplete(Request $request)
-{
-    $request->validate([
-        'msn_id' => 'required|exists:prj.milestones,msn_id',
-        'achieved_date' => 'required|date'
-    ]);
+    {
+        $request->validate([
+            // Fix: Use the Model class instead of the raw string to handle schema correctly
+            'msn_id' => ['required', Rule::exists(Milestone::class, 'msn_id')],
+            'achieved_date' => 'required|date'
+        ]);
 
-    $milestone = Milestone::find($request->msn_id);
-    if($milestone) {
-        $milestone->msn_achvdt = $request->achieved_date;
-        $milestone->msn_status = 'Completed'; // Status auto-update
-        $milestone->save();
+        $milestone = Milestone::find($request->msn_id);
+        if($milestone) {
+            $milestone->msn_achvdt = $request->achieved_date;
+            $milestone->msn_status = 'Completed'; // Status auto-update
+            $milestone->save();
+        }
+
+        return redirect()->back()->with('success', 'Milestone marked as Completed!');
     }
-
-    return redirect()->back()->with('success', 'Milestone marked as Completed!');
-}
     public function deleteMilestone($id)
     {
         $milestone = Milestone::where('msn_id', $id)->firstOrFail();
