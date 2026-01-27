@@ -27,7 +27,14 @@
         <div class="container-fluid">
             <div class="page-header">
                 <div class="page-title"><i class="fas fa-folder-open"></i> All Purchase Cases</div>
-                <a href="{{ route('createnewcase') }}" class="btn btn-new-project"><i class="fas fa-plus-circle mr-1"></i> New Case</a>
+                <a href="{{ route('items.hub') }}" class="btn btn-new-project">
+    <i class="fas fa-boxes mr-1"></i>
+    Items Management
+</a>
+
+
+
+</li>
             </div>
 
             <!-- FILTER BAR SECTION -->

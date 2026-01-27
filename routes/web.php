@@ -109,4 +109,23 @@ Route::middleware('auth')->group(function () {
     Route::post('/generate-comparative', [ReportsController::class, 'generateComparative'])->name('reports.generate.comparative');
     Route::post('/generate-it-letter', [ReportsController::class, 'generateITLetter'])->name('reports.generate.itletter');
 
+    // Page open karne ke liye
+Route::get('/items/master-entry', [PurchaseController::class, 'createMasterItem'])->name('items.master.create');
+
+// Data save karne ke liye
+Route::post('/items/master-store', [PurchaseController::class, 'storeMasterItem'])->name('items.master.store');
+
+// Page open karne ke liye
+Route::get('/purchase/items/bulk-entry', [PurchaseController::class, 'createBulkItem'])->name('items.bulk.create');
+
+// Data save karne ke liye
+Route::post('/purchase/items/bulk-store', [PurchaseController::class, 'storeBulkItem'])->name('items.bulk.store');
+
+Route::get('/purchase/items/batches', [PurchaseController::class, 'listBatches'])->name('items.batch.list');
+Route::get('/purchase/items/batch/{id}', [PurchaseController::class, 'viewBatch'])->name('items.batch.view');
+
+Route::get('/purchase/items/management', [PurchaseController::class, 'itemsHub'])->name('items.hub');
+
+// Delete Batch Route
+Route::delete('/purchase/items/batch/delete/{id}', [PurchaseController::class, 'deleteBatch'])->name('items.batch.delete');
 }); // End of Auth Middleware Group

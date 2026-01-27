@@ -473,7 +473,7 @@
                             <button class="btn btn-xs btn-outline-primary" data-toggle="modal" data-target="#addItemModal"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
-                    <div class="table-responsive border rounded flex-grow-1" style="max-height: 600px; overflow-y: auto;">
+                    <div class="table-responsive border rounded grow" style="max-height: 600px; overflow-y: auto;">
                         <table class="readable-table table-striped mb-0">
                             <thead>
                                 <tr><th>#</th><th>DESC</th><th>QTY</th><th class="text-right">TOTAL</th></tr>

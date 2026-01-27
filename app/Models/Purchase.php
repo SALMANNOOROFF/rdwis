@@ -2,8 +2,18 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Model;
+
+class Item extends Model
+{
+    // 'pur' schema and 'items' table
+    protected $table = 'pur.items';
+    
+    protected $primaryKey = 'id';
+    public $timestamps = false; // If table doesn't have timestamps
+
+    protected $fillable = ['name', 'is_active'];
+}
 
 class Purchase extends Model
 {
@@ -12,22 +22,22 @@ class Purchase extends Model
     protected $primaryKey = 'pcs_id';
     public $timestamps = false;
 
-    // Fillable fields for mass assignment
- protected $fillable = [
-    'pcs_title',
-    'pcs_date',
-    'pcs_status',
-    'pcs_type',
-    'pcs_unt_id',
-    'pcs_hed_id',
-    'pcs_effhed_id',
-    'pcs_effunt_id',
-    'pcs_price',
-    'pcs_remarks',
-    'pcs_subject',
-    'pcs_minute'
-];
-
+    // Fillable fields
+    protected $fillable = [
+        'pcs_title',
+        'pcs_date',
+        'pcs_status',
+        'pcs_type',
+        'pcs_unt_id',
+        'pcs_hed_id',
+        'pcs_effhed_id',
+        'pcs_effunt_id',
+        'pcs_price',
+        'pcs_remarks',
+        'pcs_subject',
+        'pcs_minute',
+        'items',
+    ];
 
     /**
      * Relationship: Purchase belongs to a Project (Head)
@@ -68,7 +78,4 @@ class Purchase extends Model
     {
         return $this->hasMany(PurAttachment::class, 'pat_objid', 'pcs_id');
     }
-
-
 }
-
