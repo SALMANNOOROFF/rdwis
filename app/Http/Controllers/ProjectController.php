@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Milestone;
 use App\Models\PrgHistory; 
+use App\Models\Unit; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB; 
@@ -501,4 +502,18 @@ public function markMilestoneComplete(Request $request)
             'updated_at' => now(),
         ]);
     }
+
+
+   public function sordIndex()
+{
+    // 1. Saari Divisions uthao ('prj' area wali) dropdown ke liye
+    $divisions = Unit::where('unt_area', 'prj')->orderBy('unt_name', 'asc')->get();
+
+    // 2. Saare Projects uthao (Unit relation ke sath taake naam dikha sakein)
+    // Hum 'paginate' nahi use kar rahe kyunki aapka existing page JS filtering use karta hai
+    $projects = Project::with('unit')->orderBy('prj_id', 'desc')->get();
+
+    // 3. Naye View par bhejo
+    return view('sord.projects', compact('projects', 'divisions'));
+}
 }

@@ -8,42 +8,44 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    // Login Page Show Karna
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Login Process Karna
     public function login(Request $request)
     {
-        // 1. Validation
         $request->validate([
             'username' => 'required',
             'userpass' => 'required',
         ]);
 
-        // 2. Credentials check karna
-        // Note: Hum yahan assume kar rahe hain ke DB mein password Hashed (Bcrypt) hai.
-        // Agar DB mein password plain text hai, to logic badalni padegi.
         $credentials = [
             'acc_username' => $request->username,
-            'password' => $request->userpass // Laravel internal check ke liye 'password' key mangta hai
+            'password' => $request->userpass 
         ];
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            // Login successful -> Dashboard/Projects pe bhejo
+            
+            $user = Auth::user();
+
+            // --- DB BASED REDIRECTION ---
+            
+            // Agar unit area 'prjrdw' hai
+            if ($user->isSORD()) {
+                return redirect()->route('sord.dashboard');
+            }
+
+            // Agar unit area 'prj' hai (ya koi aur)
             return redirect()->route('dashboard');
         }
 
-        // 3. Login Failed
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
+            'username' => 'Invalid Credentials.',
         ]);
     }
 
-    // Logout Function
     public function logout(Request $request)
     {
         Auth::logout();
