@@ -22,27 +22,30 @@
                     <tbody>
                         @forelse($documents as $doc)
                         <tr>
-                            <td>{{ $doc->doc_id }}</td>
+                            <td>{{ $doc->doc_ref_no ?? $doc->doc_id }}</td>
                             <td>{{ $doc->project->prj_title }}</td>
                             <td>
-                                <span class="badge badge-warning">
-                                    {{ $doc->creator->unit->unt_name ?? 'Unknown Division' }}
+                                <span class="font-weight-bold text-dark">
+                                    {{ $doc->creator->unit->unt_name ?? 'Division' }}
                                 </span>
                                 <br>
-                                <small>{{ $doc->creator->acc_name }}</small>
+                                {{-- Show Role if available, else name --}}
+                                <small class="text-muted">
+                                    <i class="fas fa-user-tag mr-1"></i>
+                                    {{ $doc->creator->role->rol_desig ?? $doc->creator->acc_name }}
+                                </small>
                             </td>
-                            <td>{{ $doc->updated_at->format('d-M-Y') }}</td>
-                            <td><span class="badge badge-info">{{ $doc->status }}</span></td>
+                            <td>{{ $doc->updated_at->format('d M, Y') }}</td>
+                            <td><span class="badge badge-warning">{{ $doc->status }}</span></td>
                             <td>
-                                {{-- Jab SORD view karega, wahi page khulega lekin ab owner SORD hai to wo edit kar sakega --}}
                                 <a href="{{ route('sord.review_mpr', $doc->prj_id) }}" class="btn btn-sm btn-primary shadow-sm">
-        <i class="fas fa-search-plus mr-1"></i> Review / Action
-    </a>
+                                    <i class="fas fa-search-plus mr-1"></i> Review
+                                </a>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center py-4">No Pending MPRs found.</td>
+                            <td colspan="6" class="text-center py-5 text-muted">No Pending MPRs found.</td>
                         </tr>
                         @endforelse
                     </tbody>

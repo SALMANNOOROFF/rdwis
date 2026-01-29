@@ -1,3 +1,17 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\Document;
+use App\Models\DocumentVersion;
+use App\Models\Project;
+use App\Models\User;
+
+class MprController extends Controller
+{
 public function storeMPR(Request $request)
 {
     $user = Auth::user();
@@ -74,4 +88,6 @@ public function storeMPR(Request $request)
     }
 
     return redirect()->back()->with('success', 'MPR Updated Successfully!');
-}
+
+    
+}}

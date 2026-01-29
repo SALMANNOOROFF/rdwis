@@ -16,22 +16,23 @@ use App\Models\PrjAttachment;
 class ProjectController extends Controller
 {
     // --- 1. VIEW PROJECTS (With Filters) ---
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user) return redirect()->route('login');
-        
-        $query = Project::where('prj_unt_id', $user->acc_unt_id);
+   public function index(Request $request)
+{
+    $user = Auth::user();
+    if (!$user) return redirect()->route('login');
+    
+    // --- FIX: 'with(\'document\')' add kiya hai taake status dashboard par dikhe ---
+    $query = Project::with('document')->where('prj_unt_id', $user->acc_unt_id);
 
-        // Filter Logic
-        if ($request->has('status') && $request->status != 'All') {
-            $query->where('prj_status', $request->status);
-        }
-
-        $projects = $query->orderBy('prj_id', 'desc')->get();
-        
-        return view('projects.viewprojects', compact('projects'));
+    // Filter Logic
+    if ($request->has('status') && $request->status != 'All') {
+        $query->where('prj_status', $request->status);
     }
+
+    $projects = $query->orderBy('prj_id', 'desc')->get();
+    
+    return view('projects.viewprojects', compact('projects'));
+}
 
    public function show($id)
 {

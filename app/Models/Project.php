@@ -50,4 +50,11 @@ class Project extends Model
         return $this->hasMany(PrjAttachment::class, 'jat_objid', 'prj_id')
                     ->where('jat_objtype', 'Project');
     }
+
+
+    // --- NEW RELATIONSHIP (Jo Missing Thi) ---
+    public function document() {
+        // Project ka ek Document (MPR) hota hai
+        return $this->hasOne(Document::class, 'prj_id', 'prj_id');
+    }
 }

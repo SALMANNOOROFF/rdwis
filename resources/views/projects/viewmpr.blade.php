@@ -58,16 +58,51 @@
     <section class="content">
         <div class="container-fluid">
 
-            {{-- BACK BUTTON --}}
-            <a href="{{ route('projects.show', $project->prj_id) }}" class="btn btn-sm btn-secondary mb-3 shadow-sm">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Project Details
-            </a>
+            {{-- HEADER: BACK BUTTON LOGIC --}}
+            <div class="row mb-3">
+                <div class="col-6">
+                    @if(Auth::user()->isSORD())
+                        <a href="{{ route('sord.inbox') }}" class="btn btn-sm btn-secondary shadow-sm">
+                            <i class="fas fa-arrow-left mr-1"></i> Back to Inbox
+                        </a>
+                    @else
+                        <a href="{{ route('projects.show', $project->prj_id) }}" class="btn btn-sm btn-secondary shadow-sm">
+                            <i class="fas fa-arrow-left mr-1"></i> Back to Project Details
+                        </a>
+                    @endif
+                </div>
+                <div class="col-6 text-right">
+                    @if($document)
+                        <span class="badge badge-info p-2">Ref: {{ $document->doc_ref_no ?? $document->doc_id }}</span>
+                    @endif
+                </div>
+            </div>
 
-            {{-- LOCK ALERT (If file is with SORD) --}}
-            @if(!$isEditable && $document)
+            {{-- 1. ALERT: RETURNED FOR CORRECTION (Red) --}}
+            @if(isset($isReturned) && $isReturned)
+                <div class="alert alert-danger shadow-lg border-0">
+                    <div class="d-flex align-items-start">
+                        <div class="mr-3"><i class="fas fa-exclamation-circle fa-2x"></i></div>
+                        <div>
+                            <h5 class="font-weight-bold">Returned for Correction!</h5>
+                            <p class="mb-1">
+                                This document was returned by 
+                                <strong>{{ $document->latestVersion->actor->role->rol_desig ?? 'Reviewing Authority' }}</strong>.
+                            </p>
+                            <div class="bg-white text-danger p-2 rounded border border-danger">
+                                <strong>Reason:</strong> "{{ $document->latestVersion->remarks }}"
+                            </div>
+                            <small class="mt-2 d-block text-white-50">Please update the values below and forward again.</small>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- 2. ALERT: LOCKED FILE (Yellow) --}}
+            @if(!$isEditable && $document && !$isReturned)
                 <div class="alert alert-warning shadow-sm border-0">
                     <h5><i class="icon fas fa-lock"></i> File Locked!</h5>
-                    This MPR is currently with <strong>{{ $document->currentOwner->acc_name ?? 'SORD' }}</strong> for review. You cannot edit it until it is returned.
+                    This MPR is currently with <strong>{{ $document->currentOwner->role->rol_desig ?? ($document->currentOwner->acc_name ?? 'SORD') }}</strong> for review. You cannot edit it until it is returned.
                 </div>
             @endif
 
@@ -100,7 +135,7 @@
                                         <div class="form-group">
                                             <label>Physical Progress (%) <span class="text-danger">*</span></label>
                                             <div class="input-group">
-                                                <input type="number" name="physical_progress" class="form-control" 
+                                                <input type="number" name="physical_progress" class="form-control font-weight-bold" 
                                                        value="{{ $latestData['physical_progress'] ?? '' }}" 
                                                        min="0" max="100" step="0.1" required
                                                        {{ !$isEditable ? 'disabled' : '' }}>
@@ -117,7 +152,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Rs.</span>
                                                 </div>
-                                                <input type="number" name="financial_progress" class="form-control" 
+                                                <input type="number" name="financial_progress" class="form-control font-weight-bold" 
                                                        value="{{ $latestData['financial_progress'] ?? '' }}"
                                                        {{ !$isEditable ? 'disabled' : '' }}>
                                             </div>
@@ -134,98 +169,133 @@
 
                                 <div class="alert alert-light border mt-3">
                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle mr-1"></i> Author: 
-                                        <strong>{{ Auth::user()->acc_name ?? Auth::user()->acc_username }}</strong>
+                                        <i class="fas fa-info-circle mr-1"></i> Current User: 
+                                        <strong>{{ Auth::user()->role->rol_desig ?? Auth::user()->acc_username }}</strong>
                                    </small>
                                 </div>
                             </div>
                             
-                            {{-- FOOTER BUTTONS --}}
+                            {{-- FOOTER BUTTONS (Dynamic based on Role) --}}
                             @if($isEditable)
-                            <div class="card-footer bg-white border-top d-flex justify-content-between">
-                                <button type="submit" name="action" value="save" class="btn btn-secondary shadow-sm">
-                                    <i class="fas fa-save mr-1"></i> Save Draft
-                                </button>
-                                <button type="submit" name="action" value="forward" class="btn btn-success px-4 shadow-sm" onclick="return confirm('Are you sure you want to forward this to SORD? You will not be able to edit it until returned.');">
-                                    <i class="fas fa-paper-plane mr-1"></i> Forward to SORD
-                                </button>
+                            <div class="card-footer bg-white border-top">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    
+                                    {{-- Save Draft (Everyone) --}}
+                                    <button type="submit" name="action" value="save" class="btn btn-secondary shadow-sm">
+                                        <i class="fas fa-save mr-1"></i> Save Draft
+                                    </button>
+
+                                    <div class="d-flex gap-2">
+                                        {{-- LOGIC: Are we SORD or Division? --}}
+                                        @if(Auth::user()->isSORD())
+                                            
+                                            {{-- SORD Actions --}}
+                                            <button type="submit" name="action" value="return" class="btn btn-warning text-white shadow-sm mr-2" 
+                                                onclick="return confirm('Return this document to Division for correction?');">
+                                                <i class="fas fa-undo-alt mr-1"></i> Return to Division
+                                            </button>
+                                            <button type="button" class="btn btn-dark shadow-sm" disabled title="Coming Soon">
+                                                Forward to MD <i class="fas fa-arrow-right ml-1"></i>
+                                            </button>
+
+                                        @else
+                                            
+                                            {{-- Division Actions --}}
+                                            <button type="submit" name="action" value="forward" class="btn btn-success px-4 shadow-sm" 
+                                                onclick="return confirm('Are you sure you want to forward this to SORD? You will not be able to edit it until returned.');">
+                                                <i class="fas fa-paper-plane mr-1"></i> Forward to SORD
+                                            </button>
+
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                             @endif
                         </form>
                     </div>
                 </div>
 
-                {{-- RIGHT SIDE: HISTORY --}}
-                <div class="mpr-right">
-                    
-                    {{-- Milestone Box (Kept from your old code) --}}
-                    {{-- Assuming $currentMilestone is passed from Controller --}}
-                    @if(isset($currentMilestone))
-                    <div class="milestone-context-box mb-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-crosshairs mr-1 text-warning"></i> Current Target</h6>
-                            <span class="badge badge-warning text-white">{{ $currentMilestone->msn_status }}</span>
+               
+{{-- RIGHT SIDE HISTORY SECTION KO IS SE REPLACE KAREIN --}}
+
+<div class="mpr-right">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-history mr-1"></i> Workflow History</h6>
+    </div>
+
+    <div class="history-scroll-box">
+        @if($document && $document->history->count() > 0)
+            @foreach($document->history as $log)
+                
+                {{-- Dynamic Color based on Action --}}
+                @php
+                    $borderClass = 'border-left-primary'; // Default Blue
+                    $bgClass = 'bg-white';
+                    $icon = 'fa-paper-plane';
+
+                    if($log->action_type == 'Returned') {
+                        $borderClass = 'border-left-danger'; // Red for Return
+                        $bgClass = 'bg-light-danger'; // Light Red BG
+                        $icon = 'fa-undo';
+                    } elseif($log->action_type == 'Forwarded MD' || $log->action_type == 'Approved') {
+                        $borderClass = 'border-left-success'; // Green for Final
+                        $bgClass = 'bg-light-success';
+                        $icon = 'fa-check-circle';
+                    }
+                @endphp
+
+                <style>
+                    .border-left-primary { border-left: 4px solid #007bff; }
+                    .border-left-danger { border-left: 4px solid #dc3545; }
+                    .border-left-success { border-left: 4px solid #28a745; }
+                    .bg-light-danger { background-color: #fff5f5; }
+                    .bg-light-success { background-color: #f0fff4; }
+                </style>
+
+                <div class="card shadow-sm mb-2 {{ $borderClass }} {{ $bgClass }}">
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-xs text-muted font-weight-bold text-uppercase">
+                                {{ $log->action_type }}
+                            </span>
+                            <span class="text-xs text-muted">
+                                {{ \Carbon\Carbon::parse($log->created_at)->format('d M, h:i A') }}
+                            </span>
                         </div>
-                        <p class="mb-2 text-dark font-weight-bold" style="font-size: 1.1rem; line-height: 1.2;">{{ Str::limit($currentMilestone->msn_desc, 60) }}</p>
-                        <div class="d-flex justify-content-between text-muted small">
-                            <span><i class="far fa-calendar-alt mr-1"></i> Target:</span>
-                            <span class="font-weight-bold text-danger">{{ \Carbon\Carbon::parse($currentMilestone->msn_targetdt)->format('d M, Y') }}</span>
+                        
+                        <div class="mt-1">
+                            <span class="font-weight-bold text-dark" style="font-size: 0.9rem;">
+                                <i class="fas {{ $icon }} mr-1 text-secondary"></i>
+                                {{-- FROM: Sender Role --}}
+                                {{ $log->sender->role->rol_desig ?? ($log->sender->acc_name ?? 'System') }}
+                            </span>
+                            
+                            <i class="fas fa-arrow-right mx-1 text-muted text-xs"></i>
+                            
+                            <span class="font-weight-bold text-dark" style="font-size: 0.9rem;">
+                                {{-- TO: Receiver Role --}}
+                                @if($log->to_user_id == 0)
+                                    MD / Final
+                                @else
+                                    {{ $log->receiver->role->rol_desig ?? 'User' }}
+                                @endif
+                            </span>
                         </div>
+
+                        @if($log->notes)
+                            <div class="mt-2 p-2 bg-white border rounded text-sm text-secondary font-italic">
+                                "{{ $log->notes }}"
+                            </div>
+                        @endif
                     </div>
-                    @endif
+                </div>
 
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-                            <h6 class="font-weight-bold text-secondary m-0">Version History</h6>
-                            @if($document)
-                                <span class="badge badge-light border">{{ $document->versions->count() }} Versions</span>
-                            @endif
-                        </div>
-
-                        <div class="history-scroll-box">
-                            @if($document && $document->versions->count() > 0)
-                                @foreach($document->versions as $ver)
-                                    <div class="history-item {{ $loop->first ? 'latest' : '' }}">
-                                        
-                                        {{-- COPY BUTTON --}}
-                                        <button type="button" class="copy-btn shadow-sm" onclick="copyToClipboard(this, 'desc-{{ $ver->ver_id }}')" title="Copy Text">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-
-                                        @if($loop->first)
-                                            <div class="latest-badge"><i class="fas fa-star mr-1"></i> LATEST v{{ $ver->version_no }}</div>
-                                        @endif
-
-                                        <div class="d-flex justify-content-between mb-1 align-items-center">
-                                            <span class="history-date text-primary">
-                                                <i class="far fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($ver->action_date)->format('d M, Y h:i A') }}
-                                            </span>
-                                            @if(!$loop->first)
-                                                <span class="badge badge-secondary">v{{ $ver->version_no }}</span>
-                                            @endif
-                                        </div>
-                                        
-                                        {{-- Content Display --}}
-                                        <div class="history-desc mt-2" id="desc-{{ $ver->ver_id }}">
-                                            <strong>Physical:</strong> {{ $ver->content_data['physical_progress'] ?? '0' }}% | 
-                                            <strong>Financial:</strong> Rs. {{ number_format((float)($ver->content_data['financial_progress'] ?? 0)) }}
-                                            <hr class="my-1">
-                                            {{ $ver->remarks }}
-                                        </div>
-                                        
-                                        <div class="mt-2 text-right border-top pt-2">
-                                            <small class="text-muted font-italic">Action by: <strong>{{ $ver->actor->acc_name ?? 'User' }}</strong></small>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @else
-                                <div class="text-center py-4 text-muted border rounded bg-white">
-                                    <i class="fas fa-file-alt mb-2 fa-2x text-light"></i><br>No MPR history found.
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div> 
+            @endforeach
+        @else
+            <div class="text-center text-muted py-4">No history found.</div>
+        @endif
+    </div>
+</div>
             </div>
         </div>
     </section>
@@ -235,45 +305,23 @@
 <script>
     function copyToClipboard(btn, elementId) {
         var textToCopy = document.getElementById(elementId).innerText;
-        
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                showCopiedFeedback(btn);
-            }).catch(err => {
-                fallbackCopyText(textToCopy, btn);
-            });
-        } else {
-            fallbackCopyText(textToCopy, btn);
-        }
+            navigator.clipboard.writeText(textToCopy).then(() => { showCopiedFeedback(btn); }).catch(err => { fallbackCopyText(textToCopy, btn); });
+        } else { fallbackCopyText(textToCopy, btn); }
     }
-
     function fallbackCopyText(text, btn) {
         var textArea = document.createElement("textarea");
         textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
+        textArea.style.position = "fixed"; textArea.style.left = "-9999px";
         document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            showCopiedFeedback(btn);
-        } catch (err) {
-            alert('Copy failed manually select text.');
-        }
+        textArea.focus(); textArea.select();
+        try { document.execCommand('copy'); showCopiedFeedback(btn); } catch (err) { alert('Copy failed.'); }
         document.body.removeChild(textArea);
     }
-
     function showCopiedFeedback(btn) {
         var icon = btn.querySelector('i');
-        icon.classList.remove('fa-copy');
-        icon.classList.add('fa-check');
-        icon.style.color = '#28a745';
-        setTimeout(function() {
-            icon.classList.remove('fa-check');
-            icon.classList.add('fa-copy');
-            icon.style.color = '';
-        }, 2000);
+        icon.classList.remove('fa-copy'); icon.classList.add('fa-check'); icon.style.color = '#28a745';
+        setTimeout(function() { icon.classList.remove('fa-check'); icon.classList.add('fa-copy'); icon.style.color = ''; }, 2000);
     }
 </script>
 @endsection
