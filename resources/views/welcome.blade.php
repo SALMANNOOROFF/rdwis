@@ -42,7 +42,7 @@
       <li class="nav-item">
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
-     <li class="nav-item d-none d-sm-inline-block">
+      <li class="nav-item d-none d-sm-inline-block">
          @if(Auth::check() && Auth::user()->isSORD())
             <a href="{{ route('sord.dashboard') }}" class="nav-link">Home (SORD)</a>
          @else
@@ -117,8 +117,7 @@
     <div class="sidebar">
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-           <!-- <img src="{{ asset('dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image"> -->
-        </div>
+           </div>
         <div class="info">
           <a href="#" class="d-block">{{ Auth::user()->acc_desig ?? 'User' }}</a>
         </div>
@@ -126,13 +125,13 @@
 
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-       {{-- ========================================================= --}}
+        
+    {{-- ========================================================= --}}
     {{-- CASE 1: SO R&D (Area: 'prjrdw') --}}
-    {{-- Hum isay PEHLE check karenge taake priority mile --}}
     {{-- ========================================================= --}}
     @if(Auth::user()->isSORD())
 
-    <!-- <li class="nav-header">SOR & D MODULE</li> -->
+    <li class="nav-header">SOR & D MODULE</li>
 
     <li class="nav-item">
         <a href="{{ route('sord.dashboard') }}" class="nav-link {{ Request::routeIs('sord.dashboard') ? 'active' : '' }}">
@@ -140,112 +139,123 @@
             <p>Dashboard</p>
         </a>
     </li>
+
+    {{-- NEW: INBOX LINK --}}
+    <li class="nav-item">
+        <a href="{{ route('sord.inbox') }}" class="nav-link {{ Request::routeIs('sord.inbox') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-inbox"></i>
+            <p>
+                Inbox / Approvals
+                <span class="badge badge-info right">New</span>
+            </p>
+        </a>
+    </li>
     
     <li class="nav-item">
-                <a href="{{ route('sord.all_projects') }}" class="nav-link {{ Request::routeIs('sord.all_projects') ? 'active' : '' }}">
-                  <i class="fas fa-folder-open nav-icon"></i>
-                  <p>PROJECTS</p>
-                </a>
-            </li>
+        <a href="{{ route('sord.all_projects') }}" class="nav-link {{ Request::routeIs('sord.all_projects') ? 'active' : '' }}">
+            <i class="fas fa-layer-group nav-icon"></i>
+            <p>All Projects</p>
+        </a>
+    </li>
 
     <li class="nav-item">
-        <a href="" class="nav-link">
-            <i class="nav-icon fas fa-list"></i>
+        <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-list-ol"></i>
             <p>Schedule of Rates</p>
         </a>
     </li>
 
-          {{-- ========================================================= --}}
-          {{-- CASE 1: AGAR USER 'DIVISION' KA HAI (Old Sidebar) --}}
-          {{-- ========================================================= --}}
-        @elseif(Auth::user()->isDivision())
+    {{-- ========================================================= --}}
+    {{-- CASE 2: AGAR USER 'DIVISION' KA HAI (Old Sidebar) --}}
+    {{-- ========================================================= --}}
+    @elseif(Auth::user()->isDivision())
 
-            <li class="nav-item">
-                <a href="{{ route('dashboard') }}" class="nav-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-tachometer-alt"></i>
-                  <p>Dashboard</p>
-                </a>
-            </li>
+        <li class="nav-item">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>Dashboard</p>
+            </a>
+        </li>
 
-            <li class="nav-item">
-                <a href="{{ route('view-projects') }}" class="nav-link {{ Request::routeIs('view-projects*') ? 'active' : '' }}">
-                  <i class="fas fa-folder-open nav-icon"></i>
-                  <p>PROJECTS</p>
-                </a>
-            </li>
+        <li class="nav-item">
+            <a href="{{ route('view-projects') }}" class="nav-link {{ Request::routeIs('view-projects*') ? 'active' : '' }}">
+                <i class="fas fa-folder-open nav-icon"></i>
+                <p>PROJECTS</p>
+            </a>
+        </li>
 
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="nav-icon fas fa-shopping-cart"></i>
-                    <p>PURCHASE CASES <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                        <a href="{{ route('viewpurchasecase') }}" class="nav-link">
-                            <i class="fas fa-briefcase nav-icon"></i>
-                            <p>PURCHASE CASES (PCs)</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="fas fa-receipt nav-icon"></i>
-                            <p>RECEIPTS</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('purchase.reports.index') }}" class="nav-link">
-                            <i class="fas fa-file-alt nav-icon"></i>
-                            <p>IT LETTER / CS</p>
-                        </a>
-                    </li>  
-                </ul>
-            </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-shopping-cart"></i>
+                <p>PURCHASE CASES <i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="{{ route('viewpurchasecase') }}" class="nav-link">
+                        <i class="fas fa-briefcase nav-icon"></i>
+                        <p>PURCHASE CASES (PCs)</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-receipt nav-icon"></i>
+                        <p>RECEIPTS</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('purchase.reports.index') }}" class="nav-link">
+                        <i class="fas fa-file-alt nav-icon"></i>
+                        <p>IT LETTER / CS</p>
+                    </a>
+                </li>  
+            </ul>
+        </li>
 
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-users"></i>
-                  <p>HUMAN RESOURCES <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user-check nav-icon"></i><p>CURRENT</p></a></li>
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-calendar-check nav-icon"></i><p>ATTENDANCE</p></a></li>
-                </ul>
-            </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-users"></i>
+                <p>HUMAN RESOURCES <i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user-check nav-icon"></i><p>CURRENT</p></a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-calendar-check nav-icon"></i><p>ATTENDANCE</p></a></li>
+            </ul>
+        </li>
 
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-money-check-alt nav-icon"></i>
-                  <p>SALARY REQUISITIONS <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-edit nav-icon"></i><p>DRAFT</p></a></li>
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-lock nav-icon"></i><p>CLOSED</p></a></li>
-                </ul>
-            </li>
-            
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-coins"></i>
-                  <p>FINANCE <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-wallet nav-icon"></i><p>ACCOUNTS</p></a></li>
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-hand-holding-usd nav-icon"></i><p>LOANS</p></a></li>
-                </ul>
-            </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="fas fa-money-check-alt nav-icon"></i>
+                <p>SALARY REQUISITIONS <i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-edit nav-icon"></i><p>DRAFT</p></a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-lock nav-icon"></i><p>CLOSED</p></a></li>
+            </ul>
+        </li>
+        
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-coins"></i>
+                <p>FINANCE <i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-wallet nav-icon"></i><p>ACCOUNTS</p></a></li>
+                <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-hand-holding-usd nav-icon"></i><p>LOANS</p></a></li>
+            </ul>
+        </li>
 
-         
-          {{-- ========================================================= --}}
-          {{-- CASE 3: UNKNOWN / NO ACCESS --}}
-          {{-- ========================================================= --}}
-          @else
-            <li class="nav-item">
-                <a href="#" class="nav-link text-danger">
-                    <i class="nav-icon fas fa-exclamation-circle"></i>
-                    <p>No Access Assigned</p>
-                </a>
-            </li>
-        @endif
+        
+        {{-- ========================================================= --}}
+        {{-- CASE 3: UNKNOWN / NO ACCESS --}}
+        {{-- ========================================================= --}}
+        @else
+        <li class="nav-item">
+            <a href="#" class="nav-link text-danger">
+                <i class="nav-icon fas fa-exclamation-circle"></i>
+                <p>No Access Assigned</p>
+            </a>
+        </li>
+    @endif
 
         </ul>
       </nav>
