@@ -8,6 +8,8 @@ use App\Models\Document;
 use App\Models\DocumentVersion;
 use App\Models\DocumentHistory;
 use App\Models\User;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
 
 class MprController extends Controller
 {
@@ -171,4 +173,88 @@ class MprController extends Controller
         return back()->with('error', $e->getMessage());
     }
 }
+
+// --- 4. COMPILE REPORT FUNCTION (YE MISSING THA) ---
+    public function compileMprReport()
+    {
+        $user = Auth::user();
+
+        // 1. Fetch Data (Same logic as inbox)
+        $documents = Document::with(['project', 'creator.unit', 'latestVersion', 'currentOwner'])
+                             ->where(function($query) use ($user) {
+                                 $query->where('current_owner_id', $user->acc_unt_id)
+                                       ->orWhere('status', 'Returned');
+                             })
+                             ->orderBy('updated_at', 'desc')
+                             ->get();
+
+        if ($documents->isEmpty()) {
+            return redirect()->back()->with('error', 'No MPRs found to compile.');
+        }
+
+        // 2. Initialize PHPWord
+        $phpWord = new PhpWord();
+        $section = $phpWord->addSection();
+
+        // Title
+        $section->addText('Compiled Monthly Progress Report', ['bold' => true, 'size' => 16], ['align' => 'center']);
+        $section->addText('Generated on: ' . now()->format('d M, Y'), ['italic' => true, 'size' => 10], ['align' => 'center']);
+        $section->addTextBreak(1);
+
+        // 3. Loop through MPRs
+        foreach($documents as $doc) {
+            $projectName = $doc->project->prj_title ?? 'Unknown Project';
+            $divisionName = $doc->creator->unit->unt_name ?? 'Unknown Division';
+            $status = $doc->status;
+            
+            // Content extract karo
+            $content = "No content available.";
+            if($doc->latestVersion && isset($doc->latestVersion->content_data['mpr_content'])) {
+                $content = $doc->latestVersion->content_data['mpr_content'];
+            }
+
+            // --- Write to Word ---
+            
+            // Project Name
+            $section->addText($projectName, ['bold' => true, 'size' => 14, 'color' => '1F497D']);
+            
+            // Details Table
+            $table = $section->addTable(['borderSize' => 6, 'borderColor' => '999999', 'cellMargin' => 50]);
+            $table->addRow();
+            $table->addCell(4000)->addText("Division:", ['bold' => true]);
+            $table->addCell(5000)->addText($divisionName);
+            
+            $table->addRow();
+            $table->addCell(4000)->addText("Status:", ['bold' => true]);
+            $table->addCell(5000)->addText($status);
+
+            $section->addTextBreak(1);
+            
+            // Content
+            $section->addText("Description / Progress:", ['bold' => true, 'underline' => 'single']);
+            
+            // Line breaks handle karna
+            $lines = explode("\n", $content);
+            foreach($lines as $line) {
+                $section->addText(trim($line));
+            }
+
+            // Separator
+            $section->addTextBreak(1);
+            $section->addText("----------------------------------------------------------------", ['color' => 'CCCCCC']);
+            $section->addTextBreak(1);
+        }
+
+        // 4. Download
+        $fileName = 'MPR_Report_' . now()->format('Ymd_His') . '.docx';
+        $temp_file = tempnam(sys_get_temp_dir(), $fileName);
+        
+        $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save($temp_file);
+
+        return response()->download($temp_file, $fileName)->deleteFileAfterSend(true);
+    }
+
+
+
 }

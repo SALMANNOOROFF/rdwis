@@ -146,6 +146,7 @@ Route::middleware('auth')->group(function () {
         // Actions
         // URL Banega: /sord/action | Name Banega: sord.action
         Route::post('/action', [MprController::class, 'sordAction'])->name('action');
+        Route::get('/compile-report', [MprController::class, 'compileMprReport'])->name('compile_report');
 
     });
 }); // End Auth

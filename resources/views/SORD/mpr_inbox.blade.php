@@ -4,9 +4,18 @@
 <div class="content-wrapper pt-3">
     <div class="container-fluid">
         <div class="card card-primary card-outline">
-            <div class="card-header">
+            {{-- HEADER UPDATE START --}}
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title">Incoming MPRs (Approval Queue)</h3>
+                
+                {{-- COMPILE BUTTON --}}
+                <div class="card-tools">
+                     <a href="{{ route('sord.compile_report') }}" class="btn btn-success btn-sm shadow-sm">
+                        <i class="fas fa-file-word mr-1"></i> Compile Report (.docx)
+                    </a>
+                </div>
             </div>
+            {{-- HEADER UPDATE END --}}
             <div class="card-body p-0">
                 <table class="table table-hover table-striped">
                     <thead>
