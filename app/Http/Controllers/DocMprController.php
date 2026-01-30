@@ -12,7 +12,7 @@ use App\Models\User;
 
 class DocMprController extends Controller
 {
-    // --- 1. DIVISION: VIEW MPR ---
+    // --- 1. VIEW MPR ---
     public function view($projectId)
     {
         $user = Auth::user();
@@ -24,24 +24,24 @@ class DocMprController extends Controller
                             }, 'versions.actor.role', 'currentOwner.role', 'creator.role', 'history.sender.role'])
                             ->first();
 
-        // --- PERMISSION LOGIC FOR DIVISION ---
+        // Permissions
         $isEditable = true;
         $isReturned = false;
         $isFinalized = false;
 
         if ($document) {
-            // Case 1: Agar file Mere paas nahi hai -> LOCKED
+            // Case 1: Agar file mere paas nahi hai
             if ($document->current_owner_id != $user->acc_id) {
                 $isEditable = false;
             }
             
-            // Case 2: Agar Status Returned hai -> OPEN FOR EDIT (Notification Flag)
+            // Case 2: Status Returned Check
             if ($document->status == 'Returned' && $document->current_owner_id == $user->acc_id) {
                 $isEditable = true;
                 $isReturned = true;
             }
 
-            // Case 3: Finalize ho chuka hai -> LOCKED
+            // Case 3: Finalized
             if (in_array($document->status, ['Approved', 'Forwarded to MD'])) {
                 $isEditable = false;
                 $isFinalized = true;
@@ -51,7 +51,7 @@ class DocMprController extends Controller
         return view('projects.viewmpr', compact('project', 'document', 'isEditable', 'isReturned', 'isFinalized'));
     }
 
-    // --- 2. SORD: REVIEW PAGE ---
+    // --- 2. SORD REVIEW ---
     public function sordReview($projectId)
     {
         $user = Auth::user();
@@ -65,12 +65,9 @@ class DocMprController extends Controller
              return redirect()->route('sord.inbox')->with('error', 'Document not found.');
         }
 
-        // --- NEW LOGIC: STAY ON PAGE BUT LOCK ---
-        // Agar file mere paas hai -> Editable = True
-        // Agar file wapis bhej di hai -> Editable = False (Lekin page khulega)
+        // EDITABLE CHECK: Sirf tab edit hoga jab file mere paas ho
         $isEditable = ($document->current_owner_id == $user->acc_id);
 
-        // Versions for Split View
         $versions = $document->versions()->orderBy('ver_id', 'desc')->take(2)->get();
         $latestVersion = $versions->first(); 
         $divisionVersion = $versions->count() > 1 ? $versions->get(1) : $versions->first();
@@ -78,20 +75,24 @@ class DocMprController extends Controller
         return view('sord.review_mpr', compact('project', 'document', 'latestVersion', 'divisionVersion', 'isEditable'));
     }
 
-    // --- 3. MAIN ACTION HANDLER ---
+    // --- 3. STORE (DIRECT DB UPDATE FIX) ---
     public function store(Request $request, $projectId)
     {
         $user = Auth::user();
         
+        // Debugging ke liye: Agar DB update na ho to neeche wali line uncomment karein
+        // dd($request->all()); 
+
         DB::beginTransaction();
 
         try {
+            // 1. Get or Create Document
             $document = Document::firstOrCreate(
                 ['prj_id' => $projectId],
                 ['doc_type' => 'MPR', 'creator_id' => $user->acc_id, 'current_owner_id' => $user->acc_id, 'status' => 'Draft']
             );
 
-            // Version Logic
+            // 2. Create Version
             $lastVer = $document->versions()->orderBy('ver_id', 'desc')->first();
             $newVerNo = number_format((float)($lastVer->version_no ?? 0) + 0.1, 1);
 
@@ -104,54 +105,69 @@ class DocMprController extends Controller
                 'action_date' => now()
             ]);
 
-            // --- ACTIONS ---
+            // 3. HANDLE ACTIONS (USING DIRECT DB UPDATE)
             
-            // 1. FORWARD TO SORD
+            // --- ACTION: FORWARD TO SORD ---
             if ($request->action == 'forward') {
                 $sordUser = $this->getSordUser();
-                if (!$sordUser) {
-                    // Fallback to specific user if Unit logic fails (Testing)
-                    $sordUser = User::where('acc_username', 'nislam2')->first();
-                }
                 
-                if($sordUser) {
-                    $document->current_owner_id = $sordUser->acc_id;
-                    $document->status = 'Pending Review';
-                    $document->save();
+                if(!$sordUser) $sordUser = User::where('acc_username', 'nislam2')->first(); // Fallback
+
+                if ($sordUser) {
+                    // FORCE UPDATE
+                    DB::table('doc.documents')
+                        ->where('doc_id', $document->doc_id)
+                        ->update([
+                            'current_owner_id' => $sordUser->acc_id,
+                            'status' => 'Pending Review',
+                            'updated_at' => now()
+                        ]);
+
                     $this->logHistory($document->doc_id, $user->acc_id, $sordUser->acc_id, 'Forwarded', 'Sent to SORD');
+                } else {
+                    throw new \Exception("SORD User not found.");
                 }
             }
 
-            // 2. RETURN TO DIVISION
+            // --- ACTION: RETURN TO DIVISION ---
             elseif ($request->action == 'return') {
-                $document->current_owner_id = $document->creator_id; // Wapis Division
-                $document->status = 'Returned';
-                $document->save();
-                $this->logHistory($document->doc_id, $user->acc_id, $document->creator_id, 'Returned', 'Returned to Division');
+                
+                $originalCreator = $document->creator_id;
+
+                // FORCE UPDATE
+                DB::table('doc.documents')
+                    ->where('doc_id', $document->doc_id)
+                    ->update([
+                        'current_owner_id' => $originalCreator,
+                        'status' => 'Returned',
+                        'updated_at' => now()
+                    ]);
+
+                $this->logHistory($document->doc_id, $user->acc_id, $originalCreator, 'Returned', 'Returned to Division');
             }
 
-            // 3. FINALIZE / FORWARD MD
+            // --- ACTION: FINALIZE ---
             elseif ($request->action == 'finalize') {
-                $document->current_owner_id = 0; // Lock
-                $document->status = 'Forwarded to MD'; 
-                $document->save();
+                
+                // FORCE UPDATE
+                DB::table('doc.documents')
+                    ->where('doc_id', $document->doc_id)
+                    ->update([
+                        'current_owner_id' => 0, // Lock
+                        'status' => 'Forwarded to MD',
+                        'updated_at' => now()
+                    ]);
+
                 $this->logHistory($document->doc_id, $user->acc_id, 0, 'Forwarded MD', 'Forwarded to MD');
             }
 
             DB::commit();
 
-            // --- REDIRECT BACK (Stay on same page) ---
-            if ($user->isSORD()) {
-                // SORD wahi rahega taake dekh sake ke "Returned" ho gaya hai
-                return redirect()->back()->with('success', 'Action processed: ' . $document->status);
-            } else {
-                // Division wapis projects pe ja sakta hai ya wahi reh sakta hai
-                return redirect()->route('view-projects')->with('success', 'MPR Status Updated.');
-            }
+            return redirect()->back()->with('success', 'Action Processed Successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', 'System Error: ' . $e->getMessage());
         }
     }
 
@@ -168,7 +184,6 @@ class DocMprController extends Controller
 
     public function sordInbox() {
         $user = Auth::user();
-        // Inbox mein wo dikhao jo mere paas hain
         $documents = Document::where('current_owner_id', $user->acc_id)
                              ->where('status', '!=', 'Approved') 
                              ->with(['project', 'creator.role', 'creator.unit']) 

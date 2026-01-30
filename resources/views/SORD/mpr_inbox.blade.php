@@ -28,19 +28,35 @@
                                 <span class="font-weight-bold text-dark">
                                     {{ $doc->creator->unit->unt_name ?? 'Division' }}
                                 </span>
-                                <br>
-                                {{-- Show Role if available, else name --}}
-                                <small class="text-muted">
-                                    <i class="fas fa-user-tag mr-1"></i>
-                                    {{ $doc->creator->role->rol_desig ?? $doc->creator->acc_name }}
-                                </small>
                             </td>
                             <td>{{ $doc->updated_at->format('d M, Y') }}</td>
-                            <td><span class="badge badge-warning">{{ $doc->status }}</span></td>
                             <td>
-                                <a href="{{ route('sord.review_mpr', $doc->prj_id) }}" class="btn btn-sm btn-primary shadow-sm">
-                                    <i class="fas fa-search-plus mr-1"></i> Review
-                                </a>
+                                {{-- Status Badge Logic --}}
+                                @if($doc->status == 'Returned')
+                                    <span class="badge badge-danger">{{ $doc->status }}</span>
+                                @elseif($doc->status == 'Finalized')
+                                    <span class="badge badge-success">{{ $doc->status }}</span>
+                                @else
+                                    <span class="badge badge-warning">{{ $doc->status }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                {{-- Action Button Logic --}}
+                                @if($doc->status == 'Returned')
+                                    {{-- Locked View --}}
+                                    <a href="{{ route('sord.review_mpr', $doc->doc_id) }}" class="btn btn-sm btn-secondary shadow-sm">
+                                        <i class="fas fa-eye mr-1"></i> View (Returned)
+                                    </a>
+                                @elseif($doc->status == 'Finalized')
+                                     <a href="{{ route('sord.review_mpr', $doc->doc_id) }}" class="btn btn-sm btn-success shadow-sm">
+                                        <i class="fas fa-check mr-1"></i> Completed
+                                    </a>
+                                @else
+                                    {{-- Active Review --}}
+                                    <a href="{{ route('sord.review_mpr', $doc->doc_id) }}" class="btn btn-sm btn-primary shadow-sm">
+                                        <i class="fas fa-edit mr-1"></i> Review
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @empty

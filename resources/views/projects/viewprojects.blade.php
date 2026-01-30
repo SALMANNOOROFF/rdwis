@@ -78,16 +78,20 @@
                     $budget = $project->prj_propcost > 0 ? $project->prj_propcost : 0;
                     $spent = 0; 
                     $spentPercentage = ($budget > 0) ? ($spent / $budget) * 100 : 0;
+                    
+                    // Dynamic Border Color
+                    $borderColor = '#007bff';
+                    if($docStatus == 'Returned') $borderColor = '#dc3545';
+                    if($docStatus == 'Finalized') $borderColor = '#28a745';
                 @endphp
 
                 <div class="col-12 project-card-wrapper">
-                    {{-- FIXED BORDER COLOR: BLUE (#007bff) --}}
                     <div class="card project-card shadow-sm mb-3"
                          data-code="{{ $project->prj_code }}"
                          data-status="{{ $status }}"
                          data-docstatus="{{ $docStatus }}" 
-                         data-date="{{ \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') }}"
-                         style="border-left: 5px solid #007bff;">
+                         data-date="{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') : '' }}"
+                         style="border-left: 5px solid {{ $borderColor }};">
                         
                         <div class="card-body p-0">
                             <div class="row no-gutters align-items-center" style="min-height: 120px;">
@@ -127,49 +131,51 @@
                                 </div>
 
                                 {{-- RIGHT: MPR STATUS & ACTIONS --}}
-                                <div class="col-md-4 p-3 text-center bg-light-blue" style="border-radius: 0 12px 12px 0;">
+                                <div class="col-md-4 p-3 d-flex flex-column justify-content-between bg-light-blue" style="border-radius: 0 12px 12px 0;">
                                     
-                                    {{-- 1. MPR STATUS BADGE --}}
-                                    <div class="mb-3">
-                                        <h6 class="text-primary font-weight-bold mb-1" style="font-size: 0.85rem;">MPR Status</h6>
+                                    {{-- 1. MPR STATUS (With optional Action Button next to it) --}}
+                                    <div class="mt-1 text-center">
+                                        <h6 class="text-primary font-weight-bold mb-2" style="font-size: 0.85rem;">MPR Status</h6>
                                         
-                                        @if($docStatus == 'Returned')
-                                            <span class="badge badge-danger p-2 px-3 shadow-sm pulse-button">
-                                                <i class="fas fa-exclamation-circle mr-1"></i> RETURNED
-                                            </span>
-                                        @elseif($docStatus == 'Pending Review')
-                                            <span class="badge badge-warning p-2 px-3 shadow-sm">
-                                                <i class="fas fa-clock mr-1"></i> SENT FOR REVIEW
-                                            </span>
-                                        @elseif($docStatus == 'Approved' || $docStatus == 'Forwarded to MD')
-                                            <span class="badge badge-success p-2 px-3 shadow-sm">
-                                                <i class="fas fa-check-circle mr-1"></i> FINALIZED
-                                            </span>
-                                        @elseif($status == 'draft')
-                                            <span class="badge badge-secondary p-2 px-3">DRAFT PROJECT</span>
-                                        @else
-                                            <span class="badge badge-light border p-2 px-3">NOT STARTED</span>
-                                        @endif
+                                        <div class="d-flex justify-content-center align-items-center flex-wrap">
+                                            @if($docStatus == 'Returned')
+                                                {{-- RETURNED: Badge + Fix Button --}}
+                                                <span class="badge badge-danger p-2 px-3 shadow-sm pulse-button mr-2">
+                                                    <i class="fas fa-exclamation-triangle mr-1"></i> RETURNED
+                                                </span>
+                                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-outline-danger btn-xs font-weight-bold shadow-sm" title="Fix & Resubmit">
+                                                    <i class="fas fa-tools"></i> Fix
+                                                </a>
+                                            @elseif($docStatus == 'Draft')
+                                                 {{-- DRAFT: Badge + Edit Button --}}
+                                                <span class="badge badge-secondary p-2 px-3 mr-2">DRAFT SAVED</span>
+                                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-outline-info btn-xs font-weight-bold shadow-sm" title="Continue Editing">
+                                                    <i class="fas fa-pen"></i> Edit
+                                                </a>
+                                            @elseif($docStatus == 'Pending Review' || $docStatus == 'Pending Approval')
+                                                <span class="badge badge-warning p-2 px-3 shadow-sm">
+                                                    <i class="fas fa-clock mr-1"></i> SENT FOR REVIEW
+                                                </span>
+                                            @elseif($docStatus == 'Under Review by SORD')
+                                                <span class="badge badge-info p-2 px-3 shadow-sm">
+                                                    <i class="fas fa-search mr-1"></i> UNDER REVIEW
+                                                </span>
+                                            @elseif($docStatus == 'Approved' || $docStatus == 'Finalized' || $docStatus == 'Forwarded to MD')
+                                                <span class="badge badge-success p-2 px-3 shadow-sm">
+                                                    <i class="fas fa-check-circle mr-1"></i> FINALIZED
+                                                </span>
+                                            @else
+                                                <span class="badge badge-light border p-2 px-3">NOT STARTED</span>
+                                            @endif
+                                        </div>
                                     </div>
 
-                                    {{-- 2. ACTION BUTTONS (LOGIC UPDATED) --}}
-                                    
-                                    @if($docStatus == 'Returned')
-                                        {{-- CASE: RETURNED -> Button points to MPR Page (To Fix) --}}
-                                        <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-danger btn-sm shadow btn-block font-weight-bold rounded-pill">
-                                            <i class="fas fa-tools mr-1"></i> Fix & Resubmit
-                                        </a>
-                                    @elseif($status == 'draft')
-                                        {{-- CASE: DRAFT -> Edit Project --}}
-                                        <a href="{{ route('addnewproject', ['draft_id' => $project->prj_id]) }}" class="btn btn-warning btn-sm shadow-sm btn-block font-weight-bold rounded-pill">
-                                            <i class="fas fa-pen mr-1"></i> Edit Project
-                                        </a>
-                                    @else
-                                        {{-- CASE: NORMAL/APPROVED/SENT -> View Project Details --}}
+                                    {{-- 2. MAIN BUTTON: VIEW PROJECT DETAILS (Always at bottom) --}}
+                                    <div class="mt-3">
                                         <a href="{{ route('projects.show', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm btn-block font-weight-bold rounded-pill">
                                             <i class="fas fa-eye mr-1"></i> View Project Details
                                         </a>
-                                    @endif
+                                    </div>
 
                                 </div>
                             </div>
@@ -216,18 +222,13 @@
             
             let show = true;
 
-            // STATUS FILTERS
             if (currentMainStatus !== 'all') {
                 if (currentMainStatus === 'returned' && docStatus !== 'Returned') show = false;
-                else if (currentMainStatus === 'draft' && status !== 'draft') show = false;
-                else if (currentMainStatus === 'closed' && status !== 'closed') show = false;
                 else if (currentMainStatus === 'open' && (status === 'closed' || status === 'draft')) show = false;
+                else if (currentMainStatus === 'closed' && status !== 'closed') show = false;
             }
 
-            // CODE SEARCH
             if (codeSearch && !code.includes(codeSearch)) show = false;
-
-            // DATE
             if (dateFrom && date < dateFrom) show = false;
             if (dateTo && date > dateTo) show = false;
 
@@ -244,11 +245,10 @@
     .project-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important; }
     .bg-light-blue { background-color: #f8fbff; border-left: 1px solid #f1f1f1; }
     
-    /* Animation for Returned Badge/Button */
     @keyframes pulse-red {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
     }
     .pulse-button { animation: pulse-red 2s infinite; }
 </style>

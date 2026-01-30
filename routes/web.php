@@ -7,6 +7,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DocMprController; // <--- YE IMPORT ZAROORI HAI
+use App\Http\Controllers\MprController;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,7 +119,7 @@ Route::middleware('auth')->group(function () {
     }); // End Division Group
 
 
-    // ====================================================
+
     // GROUP B: SORD SPECIFIC ROUTES
     // ====================================================
     Route::group(['prefix' => 'sord', 'as' => 'sord.', 'middleware' => function ($request, $next) {
@@ -132,14 +133,19 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/all-projects', [ProjectController::class, 'sordIndex'])->name('all_projects');
         
-        // --- FIXED INBOX ROUTE ---
-        // URL banega: /sord/inbox
-        // Route Name banega: sord.inbox
-        Route::get('/inbox', [DocMprController::class, 'sordInbox'])->name('inbox');
+        // --- CORRECTED LINES ---
+        
+        // Inbox
+        // URL Banega: /sord/inbox | Name Banega: sord.inbox
+        Route::get('/inbox', [MprController::class, 'sordInbox'])->name('inbox');
+        
+        // Review Page
+        // URL Banega: /sord/review/{id} | Name Banega: sord.review_mpr
+        Route::get('/review/{doc_id}', [MprController::class, 'reviewMpr'])->name('review_mpr');
+        
+        // Actions
+        // URL Banega: /sord/action | Name Banega: sord.action
+        Route::post('/action', [MprController::class, 'sordAction'])->name('action');
 
-        Route::get('/approvals', function() { return "Approvals Page Coming Soon"; })->name('approvals');
-        Route::get('/rates', function() { return "SOR Page Coming Soon"; })->name('rates');
-// --- NEW: SORD REVIEW PAGE ROUTE ---
-    Route::get('/review-mpr/{id}', [DocMprController::class, 'sordReview'])->name('review_mpr');
     });
 }); // End Auth

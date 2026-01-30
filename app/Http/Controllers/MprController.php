@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -7,87 +6,169 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Document;
 use App\Models\DocumentVersion;
-use App\Models\Project;
+use App\Models\DocumentHistory;
 use App\Models\User;
 
 class MprController extends Controller
 {
-public function storeMPR(Request $request)
-{
-    $user = Auth::user();
-    $projectId = $request->project_id;
-    
-    // 1. Check if Document Already Exists for this Month/Project
-    $document = Document::where('prj_id', $projectId)
-                        ->where('status', '!=', 'Approved') // Agar open hai to wahi uthao
-                        ->first();
+    // 1. SORD Inbox (UPDATED: Ab Returned files bhi dikhayega)
+    public function sordInbox()
+    {
+        $user = Auth::user();
+        
+        // Logic: Wo documents dikhao jo:
+        // 1. SORD (Mere) paas hain (current_owner_id = me)
+        // 2. YA jinka status 'Returned' hai (Taake wo inbox se gayab na hon)
+        $documents = Document::with(['project', 'creator.unit', 'latestVersion'])
+                             ->where(function($query) use ($user) {
+                                 $query->where('current_owner_id', $user->acc_id)
+                                       ->orWhere('status', 'Returned'); // <--- YE LINE ADD KI HAI
+                             })
+                             ->orderBy('updated_at', 'desc')
+                             ->get();
 
-    if (!$document) {
-        // --- CREATE NEW DOCUMENT (Pehli dafa) ---
-        $document = Document::create([
-            'prj_id' => $projectId,
-            'doc_type' => 'MPR',
-            'creator_id' => $user->acc_id,
-            'current_owner_id' => $user->acc_id, // Pehle mere paas hi rahega draft mein
-            'status' => 'Draft'
-        ]);
-        
-        $newVersionNo = '1.0';
-    } else {
-        // --- EXISTING DOCUMENT UPDATE ---
-        // Permission Check: Kya mein owner hoon?
-        if ($document->current_owner_id != $user->acc_id) {
-            return response()->json(['error' => 'You do not have permission to edit this file right now. It is with ' . $document->currentOwner->acc_name]);
-        }
-        
-        // Calculate new version number (Simple Logic)
-        $lastVer = $document->latestVersion->version_no ?? '0.0';
-        $newVersionNo = number_format((float)$lastVer + 0.1, 1);
+        return view('SORD.mpr_inbox', compact('documents'));
     }
 
-    // 2. CREATE NEW VERSION (Snapshot of Data)
-    // Sara form data JSON mein save karalo
-    $contentData = [
-        'financial_progress' => $request->financial_progress,
-        'physical_progress' => $request->physical_progress,
-        'issues' => $request->issues,
-        // Aur jo bhi fields hain...
-    ];
-
-    DocumentVersion::create([
-        'doc_id' => $document->doc_id,
-        'version_no' => $newVersionNo,
-        'content_data' => $contentData,
-        'remarks' => $request->remarks ?? 'Updated by Division',
-        'action_by' => $user->acc_id,
-        'action_date' => now()
-    ]);
-
-    // 3. HANDLE FORWARDING (Agar user ne "Send to SORD" click kiya)
-    if ($request->action == 'forward_to_sord') {
+    // 2. Review Page (UPDATED: Locking Logic)
+    public function reviewMpr($doc_id)
+    {
+        $document = Document::with(['project', 'versions'])->findOrFail($doc_id);
         
-        // SORD User ko dhoondo (Logic aapke User model se ayega)
-        // Temporary logic: Find user with role SORD linked to this project/unit
-        $sordUser = User::where('acc_username', 'nislam2')->first(); // Example logic
+        $divisionVersion = $document->versions()
+                                    ->where('action_by', $document->creator_id)
+                                    ->orderBy('ver_id', 'desc')
+                                    ->first();
 
-        if ($sordUser) {
-            // Document ka owner change karo
-            $document->current_owner_id = $sordUser->acc_id;
-            $document->status = 'Pending Approval';
-            $document->save();
+        $sordVersion = $document->versions()
+                                ->where('action_by', Auth::id())
+                                ->orderBy('ver_id', 'desc')
+                                ->first();
 
-            // History Log
-            \DB::table('doc.document_history')->insert([
+        // LOCKING LOGIC:
+        // Agar status 'Returned' hai ya 'Finalized' hai, to page LOCKED (false) hoga
+        $isEditable = true;
+        if ($document->status == 'Returned' || $document->status == 'Finalized' || $document->status == 'Forwarded to MD') {
+            $isEditable = false; 
+        }
+
+        return view('SORD.review_mpr', compact('document', 'divisionVersion', 'sordVersion', 'isEditable'));
+    }
+
+    // 3. Action Handler (Same as before)
+    public function sordAction(Request $request)
+    {
+        $user = Auth::user();
+        $docId = $request->doc_id;
+        $action = $request->action;
+
+        return DB::transaction(function () use ($request, $user, $docId, $action) {
+            
+            $document = Document::findOrFail($docId);
+            
+            $contentData = [
+                'physical_progress' => $request->physical_progress,
+                'financial_progress' => $request->financial_progress,
+                'issues' => $request->issues,
+            ];
+
+            // Version Create
+            $lastVer = DocumentVersion::where('doc_id', $docId)->orderBy('ver_id', 'desc')->first();
+            $newVerNo = $lastVer ? $lastVer->version_no + 0.1 : 1.0;
+
+            DocumentVersion::create([
+                'doc_id' => $docId,
+                'version_no' => $newVerNo,
+                'content_data' => $contentData,
+                'remarks' => $request->remarks,
+                'action_by' => $user->acc_id,
+                'action_date' => now()
+            ]);
+
+            if ($action == 'save') {
+                $document->status = 'Under Review by SORD';
+                $document->save();
+                $msg = 'Draft saved successfully.';
+            } 
+            elseif ($action == 'forward') {
+                // Forward Logic...
+                $document->current_owner_id = 0; // Or MD ID
+                $document->status = 'Finalized';
+                $document->save();
+                
+                DocumentHistory::create([
+                    'doc_id' => $docId,
+                    'from_user_id' => $user->acc_id,
+                    'to_user_id' => 0,
+                    'action_type' => 'Forwarded',
+                    'notes' => $request->remarks,
+                    'created_at' => now()
+                ]);
+                $msg = 'MPR Forwarded/Finalized.';
+            } 
+            elseif ($action == 'return') {
+                // Return Logic
+                $document->current_owner_id = $document->creator_id; // Wapis Division ko
+                $document->status = 'Returned'; // Status set
+                $document->save();
+
+                DocumentHistory::create([
+                    'doc_id' => $docId,
+                    'from_user_id' => $user->acc_id,
+                    'to_user_id' => $document->creator_id,
+                    'action_type' => 'Returned',
+                    'notes' => $request->remarks,
+                    'created_at' => now()
+                ]);
+
+                $msg = 'MPR Returned to Division.';
+            }
+
+            return redirect()->route('sord.inbox')->with('success', $msg);
+        });
+    }
+
+    public function handleSordAction(Request $request) {
+    DB::beginTransaction();
+    try {
+        $user = Auth::user();
+        $document = Document::findOrFail($request->doc_id);
+        $action = $request->input('action'); // 'return' or 'finalize'
+
+        if ($action == 'return') {
+            // Flow: SORD -> Division (Creator)
+            $document->status = 'Returned';
+            $document->current_owner_id = $document->creator_id; 
+            
+            DocumentHistory::create([
                 'doc_id' => $document->doc_id,
                 'from_user_id' => $user->acc_id,
-                'to_user_id' => $sordUser->acc_id,
-                'action_type' => 'Forwarded',
+                'to_user_id' => $document->creator_id,
+                'action_type' => 'Returned',
+                'notes' => $request->sord_remarks, // Correction instructions
+                'created_at' => now()
+            ]);
+        } 
+        elseif ($action == 'forward') {
+            $document->status = 'Finalized';
+            $document->current_owner_id = 0; // Lock forever
+            
+            DocumentHistory::create([
+                'doc_id' => $document->doc_id,
+                'from_user_id' => $user->acc_id,
+                'to_user_id' => 0,
+                'action_type' => 'Finalized',
+                'notes' => 'MPR Approved and Finalized',
                 'created_at' => now()
             ]);
         }
+
+        $document->save();
+        DB::commit();
+        return redirect()->route('sord.inbox')->with('success', 'Action recorded');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
     }
-
-    return redirect()->back()->with('success', 'MPR Updated Successfully!');
-
-    
-}}
+}
+}
