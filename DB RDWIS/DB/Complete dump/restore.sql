@@ -69,6 +69,15 @@ CREATE SCHEMA cen;
 ALTER SCHEMA cen OWNER TO postgres;
 
 --
+-- Name: doc; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+CREATE SCHEMA doc;
+
+
+ALTER SCHEMA doc OWNER TO postgres;
+
+--
 -- Name: fin; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
@@ -447,6 +456,125 @@ CREATE TABLE cen.version (
 
 
 ALTER TABLE cen.version OWNER TO postgres;
+
+--
+-- Name: document_history; Type: TABLE; Schema: doc; Owner: postgres
+--
+
+CREATE TABLE doc.document_history (
+    hist_id integer NOT NULL,
+    doc_id integer NOT NULL,
+    from_user_id integer,
+    to_user_id integer,
+    action_type character varying(50),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    notes text
+);
+
+
+ALTER TABLE doc.document_history OWNER TO postgres;
+
+--
+-- Name: document_history_hist_id_seq; Type: SEQUENCE; Schema: doc; Owner: postgres
+--
+
+CREATE SEQUENCE doc.document_history_hist_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE doc.document_history_hist_id_seq OWNER TO postgres;
+
+--
+-- Name: document_history_hist_id_seq; Type: SEQUENCE OWNED BY; Schema: doc; Owner: postgres
+--
+
+ALTER SEQUENCE doc.document_history_hist_id_seq OWNED BY doc.document_history.hist_id;
+
+
+--
+-- Name: document_versions; Type: TABLE; Schema: doc; Owner: postgres
+--
+
+CREATE TABLE doc.document_versions (
+    ver_id integer NOT NULL,
+    doc_id integer NOT NULL,
+    version_no character varying(20) NOT NULL,
+    content_data jsonb,
+    remarks text,
+    action_by integer NOT NULL,
+    action_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE doc.document_versions OWNER TO postgres;
+
+--
+-- Name: document_versions_ver_id_seq; Type: SEQUENCE; Schema: doc; Owner: postgres
+--
+
+CREATE SEQUENCE doc.document_versions_ver_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE doc.document_versions_ver_id_seq OWNER TO postgres;
+
+--
+-- Name: document_versions_ver_id_seq; Type: SEQUENCE OWNED BY; Schema: doc; Owner: postgres
+--
+
+ALTER SEQUENCE doc.document_versions_ver_id_seq OWNED BY doc.document_versions.ver_id;
+
+
+--
+-- Name: documents; Type: TABLE; Schema: doc; Owner: postgres
+--
+
+CREATE TABLE doc.documents (
+    doc_id integer NOT NULL,
+    prj_id integer NOT NULL,
+    doc_type character varying(50) DEFAULT 'MPR'::character varying,
+    doc_ref_no character varying(100),
+    current_owner_id integer,
+    creator_id integer NOT NULL,
+    status character varying(50) DEFAULT 'Draft'::character varying,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE doc.documents OWNER TO postgres;
+
+--
+-- Name: documents_doc_id_seq; Type: SEQUENCE; Schema: doc; Owner: postgres
+--
+
+CREATE SEQUENCE doc.documents_doc_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE doc.documents_doc_id_seq OWNER TO postgres;
+
+--
+-- Name: documents_doc_id_seq; Type: SEQUENCE OWNED BY; Schema: doc; Owner: postgres
+--
+
+ALTER SEQUENCE doc.documents_doc_id_seq OWNED BY doc.documents.doc_id;
+
 
 --
 -- Name: commitments; Type: TABLE; Schema: fin; Owner: postgres
@@ -2764,6 +2892,27 @@ ALTER TABLE pur.quotes ALTER COLUMN qte_id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
+-- Name: document_history hist_id; Type: DEFAULT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.document_history ALTER COLUMN hist_id SET DEFAULT nextval('doc.document_history_hist_id_seq'::regclass);
+
+
+--
+-- Name: document_versions ver_id; Type: DEFAULT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.document_versions ALTER COLUMN ver_id SET DEFAULT nextval('doc.document_versions_ver_id_seq'::regclass);
+
+
+--
+-- Name: documents doc_id; Type: DEFAULT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.documents ALTER COLUMN doc_id SET DEFAULT nextval('doc.documents_doc_id_seq'::regclass);
+
+
+--
 -- Name: failed_jobs id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -2804,7 +2953,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 COPY aud.audattachments (aat_objtype, aat_objid, aat_type, aat_path, aat_id) FROM stdin;
 \.
-COPY aud.audattachments (aat_objtype, aat_objid, aat_type, aat_path, aat_id) FROM '$$PATH$$/5642.dat';
+COPY aud.audattachments (aat_objtype, aat_objid, aat_type, aat_path, aat_id) FROM '$$PATH$$/5679.dat';
 
 --
 -- Data for Name: busdata; Type: TABLE DATA; Schema: aud; Owner: postgres
@@ -2812,7 +2961,7 @@ COPY aud.audattachments (aat_objtype, aat_objid, aat_type, aat_path, aat_id) FRO
 
 COPY aud.busdata (bdt_id, bdt_username, bdt_dtg, bdt_action, bdt_formname, bdt_controlname, bdt_fieldname, bdt_recordid, btd_oldvalue, btd_newvalue, bdt_empname, bdt_empdesig) FROM stdin;
 \.
-COPY aud.busdata (bdt_id, bdt_username, bdt_dtg, bdt_action, bdt_formname, bdt_controlname, bdt_fieldname, bdt_recordid, btd_oldvalue, btd_newvalue, bdt_empname, bdt_empdesig) FROM '$$PATH$$/5644.dat';
+COPY aud.busdata (bdt_id, bdt_username, bdt_dtg, bdt_action, bdt_formname, bdt_controlname, bdt_fieldname, bdt_recordid, btd_oldvalue, btd_newvalue, bdt_empname, bdt_empdesig) FROM '$$PATH$$/5681.dat';
 
 --
 -- Data for Name: revcomps; Type: TABLE DATA; Schema: aud; Owner: postgres
@@ -2820,7 +2969,7 @@ COPY aud.busdata (bdt_id, bdt_username, bdt_dtg, bdt_action, bdt_formname, bdt_c
 
 COPY aud.revcomps (rvc_id, rvc_rev_id, rvc_table, rvc_detail, rvc_rowid, rvc_action, rvc_type) FROM stdin;
 \.
-COPY aud.revcomps (rvc_id, rvc_rev_id, rvc_table, rvc_detail, rvc_rowid, rvc_action, rvc_type) FROM '$$PATH$$/5646.dat';
+COPY aud.revcomps (rvc_id, rvc_rev_id, rvc_table, rvc_detail, rvc_rowid, rvc_action, rvc_type) FROM '$$PATH$$/5683.dat';
 
 --
 -- Data for Name: revdata; Type: TABLE DATA; Schema: aud; Owner: postgres
@@ -2828,7 +2977,7 @@ COPY aud.revcomps (rvc_id, rvc_rev_id, rvc_table, rvc_detail, rvc_rowid, rvc_act
 
 COPY aud.revdata (rvd_id, rvd_rev_id, rvd_table, rvd_rowid, rvd_attrib, rvd_oldvalue, rvd_newvalue, rvd_datatype, rvd_type, rvd_conversion, rvd_colname, rvd_alias) FROM stdin;
 \.
-COPY aud.revdata (rvd_id, rvd_rev_id, rvd_table, rvd_rowid, rvd_attrib, rvd_oldvalue, rvd_newvalue, rvd_datatype, rvd_type, rvd_conversion, rvd_colname, rvd_alias) FROM '$$PATH$$/5648.dat';
+COPY aud.revdata (rvd_id, rvd_rev_id, rvd_table, rvd_rowid, rvd_attrib, rvd_oldvalue, rvd_newvalue, rvd_datatype, rvd_type, rvd_conversion, rvd_colname, rvd_alias) FROM '$$PATH$$/5685.dat';
 
 --
 -- Data for Name: revs; Type: TABLE DATA; Schema: aud; Owner: postgres
@@ -2836,7 +2985,7 @@ COPY aud.revdata (rvd_id, rvd_rev_id, rvd_table, rvd_rowid, rvd_attrib, rvd_oldv
 
 COPY aud.revs (rev_id, rev_obj, rev_releasedtg, rev_closedtg, rev_objid, rev_reason, rev_status, rev_unt_id, rev_date, rev_type, rev_intunt_id, rev_ref) FROM stdin;
 \.
-COPY aud.revs (rev_id, rev_obj, rev_releasedtg, rev_closedtg, rev_objid, rev_reason, rev_status, rev_unt_id, rev_date, rev_type, rev_intunt_id, rev_ref) FROM '$$PATH$$/5650.dat';
+COPY aud.revs (rev_id, rev_obj, rev_releasedtg, rev_closedtg, rev_objid, rev_reason, rev_status, rev_unt_id, rev_date, rev_type, rev_intunt_id, rev_ref) FROM '$$PATH$$/5687.dat';
 
 --
 -- Data for Name: accounts; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2844,7 +2993,7 @@ COPY aud.revs (rev_id, rev_obj, rev_releasedtg, rev_closedtg, rev_objid, rev_rea
 
 COPY cen.accounts (acc_id, acc_unt_id, acc_level, acc_type, acc_reportlevel, acc_username, acc_pass, acc_startdt, acc_status, acc_enddt, acc_name, acc_title, acc_rank, acc_desig, acc_desigshort, acc_desigtype, acc_lowerm, acc_upperm, acc_access, acc_lowers, acc_uppers, acc_untname, acc_untnamesh, acc_unttype, acc_auth, acc_untarea) FROM stdin;
 \.
-COPY cen.accounts (acc_id, acc_unt_id, acc_level, acc_type, acc_reportlevel, acc_username, acc_pass, acc_startdt, acc_status, acc_enddt, acc_name, acc_title, acc_rank, acc_desig, acc_desigshort, acc_desigtype, acc_lowerm, acc_upperm, acc_access, acc_lowers, acc_uppers, acc_untname, acc_untnamesh, acc_unttype, acc_auth, acc_untarea) FROM '$$PATH$$/5652.dat';
+COPY cen.accounts (acc_id, acc_unt_id, acc_level, acc_type, acc_reportlevel, acc_username, acc_pass, acc_startdt, acc_status, acc_enddt, acc_name, acc_title, acc_rank, acc_desig, acc_desigshort, acc_desigtype, acc_lowerm, acc_upperm, acc_access, acc_lowers, acc_uppers, acc_untname, acc_untnamesh, acc_unttype, acc_auth, acc_untarea) FROM '$$PATH$$/5689.dat';
 
 --
 -- Data for Name: globalvars; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2852,7 +3001,7 @@ COPY cen.accounts (acc_id, acc_unt_id, acc_level, acc_type, acc_reportlevel, acc
 
 COPY cen.globalvars (gvar_name, gvar_value, gvar_type, gvar_remarks) FROM stdin;
 \.
-COPY cen.globalvars (gvar_name, gvar_value, gvar_type, gvar_remarks) FROM '$$PATH$$/5653.dat';
+COPY cen.globalvars (gvar_name, gvar_value, gvar_type, gvar_remarks) FROM '$$PATH$$/5690.dat';
 
 --
 -- Data for Name: heads; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2860,7 +3009,7 @@ COPY cen.globalvars (gvar_name, gvar_value, gvar_type, gvar_remarks) FROM '$$PAT
 
 COPY cen.heads (hed_id, hed_name, hed_type, hed_code, hed_opendt, hed_closedt, hed_transtype, hed_unt_id, hed_prj_id) FROM stdin;
 \.
-COPY cen.heads (hed_id, hed_name, hed_type, hed_code, hed_opendt, hed_closedt, hed_transtype, hed_unt_id, hed_prj_id) FROM '$$PATH$$/5654.dat';
+COPY cen.heads (hed_id, hed_name, hed_type, hed_code, hed_opendt, hed_closedt, hed_transtype, hed_unt_id, hed_prj_id) FROM '$$PATH$$/5691.dat';
 
 --
 -- Data for Name: levels; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2868,7 +3017,7 @@ COPY cen.heads (hed_id, hed_name, hed_type, hed_code, hed_opendt, hed_closedt, h
 
 COPY cen.levels (lvl_id, lvl_cat) FROM stdin;
 \.
-COPY cen.levels (lvl_id, lvl_cat) FROM '$$PATH$$/5655.dat';
+COPY cen.levels (lvl_id, lvl_cat) FROM '$$PATH$$/5692.dat';
 
 --
 -- Data for Name: roles; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2876,7 +3025,7 @@ COPY cen.levels (lvl_id, lvl_cat) FROM '$$PATH$$/5655.dat';
 
 COPY cen.roles (rol_xunt_id, rol_level, rol_desig, rol_desigshort, rol_type, rol_reportlevel, rol_access, rol_authprj) FROM stdin;
 \.
-COPY cen.roles (rol_xunt_id, rol_level, rol_desig, rol_desigshort, rol_type, rol_reportlevel, rol_access, rol_authprj) FROM '$$PATH$$/5656.dat';
+COPY cen.roles (rol_xunt_id, rol_level, rol_desig, rol_desigshort, rol_type, rol_reportlevel, rol_access, rol_authprj) FROM '$$PATH$$/5693.dat';
 
 --
 -- Data for Name: routes; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2884,7 +3033,7 @@ COPY cen.roles (rol_xunt_id, rol_level, rol_desig, rol_desigshort, rol_type, rol
 
 COPY cen.routes (rte_doc, rte_steps) FROM stdin;
 \.
-COPY cen.routes (rte_doc, rte_steps) FROM '$$PATH$$/5657.dat';
+COPY cen.routes (rte_doc, rte_steps) FROM '$$PATH$$/5694.dat';
 
 --
 -- Data for Name: units; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2892,7 +3041,7 @@ COPY cen.routes (rte_doc, rte_steps) FROM '$$PATH$$/5657.dat';
 
 COPY cen.units (unt_id, unt_type, unt_name, unt_namesh, unt_alowerlimit, unt_aupperlimit, unt_nlowerlimit, unt_nupperlimit, unt_area, unt_leadname, unt_leadtitle, unt_leadrank, unt_leaddesig, unt_leaddesigshort) FROM stdin;
 \.
-COPY cen.units (unt_id, unt_type, unt_name, unt_namesh, unt_alowerlimit, unt_aupperlimit, unt_nlowerlimit, unt_nupperlimit, unt_area, unt_leadname, unt_leadtitle, unt_leadrank, unt_leaddesig, unt_leaddesigshort) FROM '$$PATH$$/5658.dat';
+COPY cen.units (unt_id, unt_type, unt_name, unt_namesh, unt_alowerlimit, unt_aupperlimit, unt_nlowerlimit, unt_nupperlimit, unt_area, unt_leadname, unt_leadtitle, unt_leadrank, unt_leaddesig, unt_leaddesigshort) FROM '$$PATH$$/5695.dat';
 
 --
 -- Data for Name: version; Type: TABLE DATA; Schema: cen; Owner: postgres
@@ -2900,7 +3049,31 @@ COPY cen.units (unt_id, unt_type, unt_name, unt_namesh, unt_alowerlimit, unt_aup
 
 COPY cen.version (ver_version, ver_compat) FROM stdin;
 \.
-COPY cen.version (ver_version, ver_compat) FROM '$$PATH$$/5659.dat';
+COPY cen.version (ver_version, ver_compat) FROM '$$PATH$$/5696.dat';
+
+--
+-- Data for Name: document_history; Type: TABLE DATA; Schema: doc; Owner: postgres
+--
+
+COPY doc.document_history (hist_id, doc_id, from_user_id, to_user_id, action_type, created_at, notes) FROM stdin;
+\.
+COPY doc.document_history (hist_id, doc_id, from_user_id, to_user_id, action_type, created_at, notes) FROM '$$PATH$$/5832.dat';
+
+--
+-- Data for Name: document_versions; Type: TABLE DATA; Schema: doc; Owner: postgres
+--
+
+COPY doc.document_versions (ver_id, doc_id, version_no, content_data, remarks, action_by, action_date) FROM stdin;
+\.
+COPY doc.document_versions (ver_id, doc_id, version_no, content_data, remarks, action_by, action_date) FROM '$$PATH$$/5830.dat';
+
+--
+-- Data for Name: documents; Type: TABLE DATA; Schema: doc; Owner: postgres
+--
+
+COPY doc.documents (doc_id, prj_id, doc_type, doc_ref_no, current_owner_id, creator_id, status, created_at, updated_at) FROM stdin;
+\.
+COPY doc.documents (doc_id, prj_id, doc_type, doc_ref_no, current_owner_id, creator_id, status, created_at, updated_at) FROM '$$PATH$$/5828.dat';
 
 --
 -- Data for Name: commitments; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2908,7 +3081,7 @@ COPY cen.version (ver_version, ver_compat) FROM '$$PATH$$/5659.dat';
 
 COPY fin.commitments (cmt_id, cmt_docid, cmt_type, cmt_date, cmt_amount, cmt_status, cmt_effhed_id, cmt_effunt_id, cmt_hed_id, cmt_unt_id, cmt_sudohed) FROM stdin;
 \.
-COPY fin.commitments (cmt_id, cmt_docid, cmt_type, cmt_date, cmt_amount, cmt_status, cmt_effhed_id, cmt_effunt_id, cmt_hed_id, cmt_unt_id, cmt_sudohed) FROM '$$PATH$$/5660.dat';
+COPY fin.commitments (cmt_id, cmt_docid, cmt_type, cmt_date, cmt_amount, cmt_status, cmt_effhed_id, cmt_effunt_id, cmt_hed_id, cmt_unt_id, cmt_sudohed) FROM '$$PATH$$/5697.dat';
 
 --
 -- Data for Name: contractsverif; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2916,7 +3089,7 @@ COPY fin.commitments (cmt_id, cmt_docid, cmt_type, cmt_date, cmt_amount, cmt_sta
 
 COPY fin.contractsverif (cvf_ctr_id, cvf_verif, cvf_dtg) FROM stdin;
 \.
-COPY fin.contractsverif (cvf_ctr_id, cvf_verif, cvf_dtg) FROM '$$PATH$$/5662.dat';
+COPY fin.contractsverif (cvf_ctr_id, cvf_verif, cvf_dtg) FROM '$$PATH$$/5699.dat';
 
 --
 -- Data for Name: empeffheads; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2924,7 +3097,7 @@ COPY fin.contractsverif (cvf_ctr_id, cvf_verif, cvf_dtg) FROM '$$PATH$$/5662.dat
 
 COPY fin.empeffheads (eeh_emp_id, eeh_emphed_id, eeh_dtg, eeh_status, eeh_remarks, eeh_sudohed) FROM stdin;
 \.
-COPY fin.empeffheads (eeh_emp_id, eeh_emphed_id, eeh_dtg, eeh_status, eeh_remarks, eeh_sudohed) FROM '$$PATH$$/5663.dat';
+COPY fin.empeffheads (eeh_emp_id, eeh_emphed_id, eeh_dtg, eeh_status, eeh_remarks, eeh_sudohed) FROM '$$PATH$$/5700.dat';
 
 --
 -- Data for Name: loanadjustments; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2932,7 +3105,7 @@ COPY fin.empeffheads (eeh_emp_id, eeh_emphed_id, eeh_dtg, eeh_status, eeh_remark
 
 COPY fin.loanadjustments (lad_string, lad_amount, lad_remarks, lad_id, lad_dtg, lad_from, lad_to) FROM stdin;
 \.
-COPY fin.loanadjustments (lad_string, lad_amount, lad_remarks, lad_id, lad_dtg, lad_from, lad_to) FROM '$$PATH$$/5664.dat';
+COPY fin.loanadjustments (lad_string, lad_amount, lad_remarks, lad_id, lad_dtg, lad_from, lad_to) FROM '$$PATH$$/5701.dat';
 
 --
 -- Data for Name: loanremarks; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2940,7 +3113,7 @@ COPY fin.loanadjustments (lad_string, lad_amount, lad_remarks, lad_id, lad_dtg, 
 
 COPY fin.loanremarks (lrm_string, lrm_remarks) FROM stdin;
 \.
-COPY fin.loanremarks (lrm_string, lrm_remarks) FROM '$$PATH$$/5666.dat';
+COPY fin.loanremarks (lrm_string, lrm_remarks) FROM '$$PATH$$/5703.dat';
 
 --
 -- Data for Name: msncosts; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2948,7 +3121,7 @@ COPY fin.loanremarks (lrm_string, lrm_remarks) FROM '$$PATH$$/5666.dat';
 
 COPY fin.msncosts (mct_prj_id, mct_hed_id, mct_msn_id, mct_cost, mct_msn_idd) FROM stdin;
 \.
-COPY fin.msncosts (mct_prj_id, mct_hed_id, mct_msn_id, mct_cost, mct_msn_idd) FROM '$$PATH$$/5667.dat';
+COPY fin.msncosts (mct_prj_id, mct_hed_id, mct_msn_id, mct_cost, mct_msn_idd) FROM '$$PATH$$/5704.dat';
 
 --
 -- Data for Name: salorders; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2956,7 +3129,7 @@ COPY fin.msncosts (mct_prj_id, mct_hed_id, mct_msn_id, mct_cost, mct_msn_idd) FR
 
 COPY fin.salorders (sor_id, sor_hed_id, sor_releasedtg, sor_status, sor_remarks, sor_srq_id, sor_closedtg, sor_unt_id, sor_month, sor_netsalary, sor_salary, sor_emp_id, sor_effhed_id, sor_empnamecomp, sor_bnkacctitle, sor_effunt_id, sor_bnkaccdetail, sor_ctrsalary, sor_checked, sor_contracts, sor_noloan, sor_transtype, sor_sudohed, sor_remarks2, sor_type, sor_grosalary, sor_arrears, sor_dues, sor_overwork, sor_underwork, sor_loaned, sor_withheld, sor_award, sor_penalty, sor_paidalready) FROM stdin;
 \.
-COPY fin.salorders (sor_id, sor_hed_id, sor_releasedtg, sor_status, sor_remarks, sor_srq_id, sor_closedtg, sor_unt_id, sor_month, sor_netsalary, sor_salary, sor_emp_id, sor_effhed_id, sor_empnamecomp, sor_bnkacctitle, sor_effunt_id, sor_bnkaccdetail, sor_ctrsalary, sor_checked, sor_contracts, sor_noloan, sor_transtype, sor_sudohed, sor_remarks2, sor_type, sor_grosalary, sor_arrears, sor_dues, sor_overwork, sor_underwork, sor_loaned, sor_withheld, sor_award, sor_penalty, sor_paidalready) FROM '$$PATH$$/5668.dat';
+COPY fin.salorders (sor_id, sor_hed_id, sor_releasedtg, sor_status, sor_remarks, sor_srq_id, sor_closedtg, sor_unt_id, sor_month, sor_netsalary, sor_salary, sor_emp_id, sor_effhed_id, sor_empnamecomp, sor_bnkacctitle, sor_effunt_id, sor_bnkaccdetail, sor_ctrsalary, sor_checked, sor_contracts, sor_noloan, sor_transtype, sor_sudohed, sor_remarks2, sor_type, sor_grosalary, sor_arrears, sor_dues, sor_overwork, sor_underwork, sor_loaned, sor_withheld, sor_award, sor_penalty, sor_paidalready) FROM '$$PATH$$/5705.dat';
 
 --
 -- Data for Name: salorders_shd; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2964,7 +3137,7 @@ COPY fin.salorders (sor_id, sor_hed_id, sor_releasedtg, sor_status, sor_remarks,
 
 COPY fin.salorders_shd (sod_sor_id, sod_type, sod_subhead, sod_ratio) FROM stdin;
 \.
-COPY fin.salorders_shd (sod_sor_id, sod_type, sod_subhead, sod_ratio) FROM '$$PATH$$/5669.dat';
+COPY fin.salorders_shd (sod_sor_id, sod_type, sod_subhead, sod_ratio) FROM '$$PATH$$/5706.dat';
 
 --
 -- Data for Name: sharesalloc; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2972,7 +3145,7 @@ COPY fin.salorders_shd (sod_sor_id, sod_type, sod_subhead, sod_ratio) FROM '$$PA
 
 COPY fin.sharesalloc (sha_hed_id, sha_ficmt_id, sha_focmt_id, sha_transtype, sha_id, sha_cf, sha_pcc, sha_prj, sha_prj_sal, sha_prj_pur) FROM stdin;
 \.
-COPY fin.sharesalloc (sha_hed_id, sha_ficmt_id, sha_focmt_id, sha_transtype, sha_id, sha_cf, sha_pcc, sha_prj, sha_prj_sal, sha_prj_pur) FROM '$$PATH$$/5671.dat';
+COPY fin.sharesalloc (sha_hed_id, sha_ficmt_id, sha_focmt_id, sha_transtype, sha_id, sha_cf, sha_pcc, sha_prj, sha_prj_sal, sha_prj_pur) FROM '$$PATH$$/5708.dat';
 
 --
 -- Data for Name: sharesinstall; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2980,7 +3153,7 @@ COPY fin.sharesalloc (sha_hed_id, sha_ficmt_id, sha_focmt_id, sha_transtype, sha
 
 COPY fin.sharesinstall (shi_hed_id, shi_fitrn_id, shi_fotrn_id, shi_id, shi_cf, shi_pcc, shi_msn_idd, shi_prj) FROM stdin;
 \.
-COPY fin.sharesinstall (shi_hed_id, shi_fitrn_id, shi_fotrn_id, shi_id, shi_cf, shi_pcc, shi_msn_idd, shi_prj) FROM '$$PATH$$/5673.dat';
+COPY fin.sharesinstall (shi_hed_id, shi_fitrn_id, shi_fotrn_id, shi_id, shi_cf, shi_pcc, shi_msn_idd, shi_prj) FROM '$$PATH$$/5710.dat';
 
 --
 -- Data for Name: subheads; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2988,7 +3161,7 @@ COPY fin.sharesinstall (shi_hed_id, shi_fitrn_id, shi_fotrn_id, shi_id, shi_cf, 
 
 COPY fin.subheads (sbh_hed_id, sbh_name, sbh_alloc, sbh_id) FROM stdin;
 \.
-COPY fin.subheads (sbh_hed_id, sbh_name, sbh_alloc, sbh_id) FROM '$$PATH$$/5675.dat';
+COPY fin.subheads (sbh_hed_id, sbh_name, sbh_alloc, sbh_id) FROM '$$PATH$$/5712.dat';
 
 --
 -- Data for Name: subheads_zzz; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -2996,7 +3169,7 @@ COPY fin.subheads (sbh_hed_id, sbh_name, sbh_alloc, sbh_id) FROM '$$PATH$$/5675.
 
 COPY fin.subheads_zzz (sbh_hed_id, sbh_name, sbh_alloc) FROM stdin;
 \.
-COPY fin.subheads_zzz (sbh_hed_id, sbh_name, sbh_alloc) FROM '$$PATH$$/5677.dat';
+COPY fin.subheads_zzz (sbh_hed_id, sbh_name, sbh_alloc) FROM '$$PATH$$/5714.dat';
 
 --
 -- Data for Name: transactions; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -3004,7 +3177,7 @@ COPY fin.subheads_zzz (sbh_hed_id, sbh_name, sbh_alloc) FROM '$$PATH$$/5677.dat'
 
 COPY fin.transactions (trn_id, trn_cmt_id, trn_date, trn_amount1, trn_balance, trn_seq, trn_tax1, trn_amount2, trn_transtype, trn_noloan) FROM stdin;
 \.
-COPY fin.transactions (trn_id, trn_cmt_id, trn_date, trn_amount1, trn_balance, trn_seq, trn_tax1, trn_amount2, trn_transtype, trn_noloan) FROM '$$PATH$$/5678.dat';
+COPY fin.transactions (trn_id, trn_cmt_id, trn_date, trn_amount1, trn_balance, trn_seq, trn_tax1, trn_amount2, trn_transtype, trn_noloan) FROM '$$PATH$$/5715.dat';
 
 --
 -- Data for Name: transfers; Type: TABLE DATA; Schema: fin; Owner: postgres
@@ -3012,7 +3185,7 @@ COPY fin.transactions (trn_id, trn_cmt_id, trn_date, trn_amount1, trn_balance, t
 
 COPY fin.transfers (trf_id, trf_date, trf_type, trf_title, trf_amount, trf_fromhed, trf_fromunt, trf_tohed, trf_tount, trf_status) FROM stdin;
 \.
-COPY fin.transfers (trf_id, trf_date, trf_type, trf_title, trf_amount, trf_fromhed, trf_fromunt, trf_tohed, trf_tount, trf_status) FROM '$$PATH$$/5680.dat';
+COPY fin.transfers (trf_id, trf_date, trf_type, trf_title, trf_amount, trf_fromhed, trf_fromunt, trf_tohed, trf_tount, trf_status) FROM '$$PATH$$/5717.dat';
 
 --
 -- Data for Name: facils; Type: TABLE DATA; Schema: frm; Owner: postgres
@@ -3020,7 +3193,7 @@ COPY fin.transfers (trf_id, trf_date, trf_type, trf_title, trf_amount, trf_fromh
 
 COPY frm.facils (fcl_xfrm_id, fcl_facil) FROM stdin;
 \.
-COPY frm.facils (fcl_xfrm_id, fcl_facil) FROM '$$PATH$$/5682.dat';
+COPY frm.facils (fcl_xfrm_id, fcl_facil) FROM '$$PATH$$/5719.dat';
 
 --
 -- Data for Name: firmz; Type: TABLE DATA; Schema: frm; Owner: postgres
@@ -3028,7 +3201,7 @@ COPY frm.facils (fcl_xfrm_id, fcl_facil) FROM '$$PATH$$/5682.dat';
 
 COPY frm.firmz (frm_id, frm_name, frm_entity, frm_type, frm_group, frm_emp, frm_points, frm_black, frm_notes, frm_id_old, frm_ntn, frm_gst) FROM stdin;
 \.
-COPY frm.firmz (frm_id, frm_name, frm_entity, frm_type, frm_group, frm_emp, frm_points, frm_black, frm_notes, frm_id_old, frm_ntn, frm_gst) FROM '$$PATH$$/5683.dat';
+COPY frm.firmz (frm_id, frm_name, frm_entity, frm_type, frm_group, frm_emp, frm_points, frm_black, frm_notes, frm_id_old, frm_ntn, frm_gst) FROM '$$PATH$$/5720.dat';
 
 --
 -- Data for Name: info; Type: TABLE DATA; Schema: frm; Owner: postgres
@@ -3036,7 +3209,7 @@ COPY frm.firmz (frm_id, frm_name, frm_entity, frm_type, frm_group, frm_emp, frm_
 
 COPY frm.info (inf_xmsc_id, inf_xmsc_entity, inf_type, inf_value) FROM stdin;
 \.
-COPY frm.info (inf_xmsc_id, inf_xmsc_entity, inf_type, inf_value) FROM '$$PATH$$/5685.dat';
+COPY frm.info (inf_xmsc_id, inf_xmsc_entity, inf_type, inf_value) FROM '$$PATH$$/5722.dat';
 
 --
 -- Data for Name: offices; Type: TABLE DATA; Schema: frm; Owner: postgres
@@ -3044,7 +3217,7 @@ COPY frm.info (inf_xmsc_id, inf_xmsc_entity, inf_type, inf_value) FROM '$$PATH$$
 
 COPY frm.offices (off_id, off_entity, off_xfrm_id, off_name, off_type, off_address, off_city) FROM stdin;
 \.
-COPY frm.offices (off_id, off_entity, off_xfrm_id, off_name, off_type, off_address, off_city) FROM '$$PATH$$/5686.dat';
+COPY frm.offices (off_id, off_entity, off_xfrm_id, off_name, off_type, off_address, off_city) FROM '$$PATH$$/5723.dat';
 
 --
 -- Data for Name: persons; Type: TABLE DATA; Schema: frm; Owner: postgres
@@ -3052,7 +3225,7 @@ COPY frm.offices (off_id, off_entity, off_xfrm_id, off_name, off_type, off_addre
 
 COPY frm.persons (per_id, per_entity, per_xfrm_id, per_title, per_name, per_desig, per_dept, per_exprt) FROM stdin;
 \.
-COPY frm.persons (per_id, per_entity, per_xfrm_id, per_title, per_name, per_desig, per_dept, per_exprt) FROM '$$PATH$$/5688.dat';
+COPY frm.persons (per_id, per_entity, per_xfrm_id, per_title, per_name, per_desig, per_dept, per_exprt) FROM '$$PATH$$/5725.dat';
 
 --
 -- Data for Name: projects; Type: TABLE DATA; Schema: frm; Owner: postgres
@@ -3060,7 +3233,7 @@ COPY frm.persons (per_id, per_entity, per_xfrm_id, per_title, per_name, per_desi
 
 COPY frm.projects (prj_xfrm_id, prj_name, prj_scope, prj_awarddt, prj_status, prj_compdt, prj_tech, prj_cost) FROM stdin;
 \.
-COPY frm.projects (prj_xfrm_id, prj_name, prj_scope, prj_awarddt, prj_status, prj_compdt, prj_tech, prj_cost) FROM '$$PATH$$/5690.dat';
+COPY frm.projects (prj_xfrm_id, prj_name, prj_scope, prj_awarddt, prj_status, prj_compdt, prj_tech, prj_cost) FROM '$$PATH$$/5727.dat';
 
 --
 -- Data for Name: specs; Type: TABLE DATA; Schema: frm; Owner: postgres
@@ -3068,7 +3241,7 @@ COPY frm.projects (prj_xfrm_id, prj_name, prj_scope, prj_awarddt, prj_status, pr
 
 COPY frm.specs (spc_xfrm_id, spc_spec) FROM stdin;
 \.
-COPY frm.specs (spc_xfrm_id, spc_spec) FROM '$$PATH$$/5691.dat';
+COPY frm.specs (spc_xfrm_id, spc_spec) FROM '$$PATH$$/5728.dat';
 
 --
 -- Data for Name: applicants; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3076,7 +3249,7 @@ COPY frm.specs (spc_xfrm_id, spc_spec) FROM '$$PATH$$/5691.dat';
 
 COPY hr.applicants (apl_id, apl_cnic, apl_name, apl_discip, apl_qualif, apl_spec, apl_paddress, apl_dob, apl_dtg, apl_marital, apl_ntnlty, apl_pob, apl_taddress, apl_mobile, apl_landline, apl_gender, apl_mobile2, apl_rank, apl_status, apl_remarks, apl_appliedfor, apl_currentsal, apl_expectedsal, apl_experience, apl_expjoindt, apl_email, apl_father, apl_unt_id) FROM stdin;
 \.
-COPY hr.applicants (apl_id, apl_cnic, apl_name, apl_discip, apl_qualif, apl_spec, apl_paddress, apl_dob, apl_dtg, apl_marital, apl_ntnlty, apl_pob, apl_taddress, apl_mobile, apl_landline, apl_gender, apl_mobile2, apl_rank, apl_status, apl_remarks, apl_appliedfor, apl_currentsal, apl_expectedsal, apl_experience, apl_expjoindt, apl_email, apl_father, apl_unt_id) FROM '$$PATH$$/5694.dat';
+COPY hr.applicants (apl_id, apl_cnic, apl_name, apl_discip, apl_qualif, apl_spec, apl_paddress, apl_dob, apl_dtg, apl_marital, apl_ntnlty, apl_pob, apl_taddress, apl_mobile, apl_landline, apl_gender, apl_mobile2, apl_rank, apl_status, apl_remarks, apl_appliedfor, apl_currentsal, apl_expectedsal, apl_experience, apl_expjoindt, apl_email, apl_father, apl_unt_id) FROM '$$PATH$$/5731.dat';
 
 --
 -- Data for Name: applicjobs; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3084,7 +3257,7 @@ COPY hr.applicants (apl_id, apl_cnic, apl_name, apl_discip, apl_qualif, apl_spec
 
 COPY hr.applicjobs (apj_company, apj_jobtitle, apj_repto, apj_team, apj_from, apj_to, apj_resp, apj_ach, apj_id, apj_apl_id, apj_city) FROM stdin;
 \.
-COPY hr.applicjobs (apj_company, apj_jobtitle, apj_repto, apj_team, apj_from, apj_to, apj_resp, apj_ach, apj_id, apj_apl_id, apj_city) FROM '$$PATH$$/5692.dat';
+COPY hr.applicjobs (apj_company, apj_jobtitle, apj_repto, apj_team, apj_from, apj_to, apj_resp, apj_ach, apj_id, apj_apl_id, apj_city) FROM '$$PATH$$/5729.dat';
 
 --
 -- Data for Name: applicqualifs; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3092,7 +3265,7 @@ COPY hr.applicjobs (apj_company, apj_jobtitle, apj_repto, apj_team, apj_from, ap
 
 COPY hr.applicqualifs (apq_id, apq_type, apq_level, apq_name, apq_inst, apq_duration, apq_unit, apq_enddt, apq_apl_id, apq_grade, apq_license, apq_spec) FROM stdin;
 \.
-COPY hr.applicqualifs (apq_id, apq_type, apq_level, apq_name, apq_inst, apq_duration, apq_unit, apq_enddt, apq_apl_id, apq_grade, apq_license, apq_spec) FROM '$$PATH$$/5696.dat';
+COPY hr.applicqualifs (apq_id, apq_type, apq_level, apq_name, apq_inst, apq_duration, apq_unit, apq_enddt, apq_apl_id, apq_grade, apq_license, apq_spec) FROM '$$PATH$$/5733.dat';
 
 --
 -- Data for Name: attendance; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3100,7 +3273,7 @@ COPY hr.applicqualifs (apq_id, apq_type, apq_level, apq_name, apq_inst, apq_dura
 
 COPY hr.attendance (att_id, att_emp_id, att_empnamecomp, att_unt_id, att_startdt, att_enddt, att_1, att_2, att_3, att_4, att_5, att_6, att_7, att_8, att_9, att_10, att_11, att_12, att_13, att_14, att_15, att_16, att_17, att_18, att_19, att_20, att_21, att_22, att_23, att_24, att_25, att_26, att_27, att_28, att_29, att_30, att_31, att_locked1, att_locked2, att_eahreplace) FROM stdin;
 \.
-COPY hr.attendance (att_id, att_emp_id, att_empnamecomp, att_unt_id, att_startdt, att_enddt, att_1, att_2, att_3, att_4, att_5, att_6, att_7, att_8, att_9, att_10, att_11, att_12, att_13, att_14, att_15, att_16, att_17, att_18, att_19, att_20, att_21, att_22, att_23, att_24, att_25, att_26, att_27, att_28, att_29, att_30, att_31, att_locked1, att_locked2, att_eahreplace) FROM '$$PATH$$/5697.dat';
+COPY hr.attendance (att_id, att_emp_id, att_empnamecomp, att_unt_id, att_startdt, att_enddt, att_1, att_2, att_3, att_4, att_5, att_6, att_7, att_8, att_9, att_10, att_11, att_12, att_13, att_14, att_15, att_16, att_17, att_18, att_19, att_20, att_21, att_22, att_23, att_24, att_25, att_26, att_27, att_28, att_29, att_30, att_31, att_locked1, att_locked2, att_eahreplace) FROM '$$PATH$$/5734.dat';
 
 --
 -- Data for Name: bdapps; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3108,7 +3281,7 @@ COPY hr.attendance (att_id, att_emp_id, att_empnamecomp, att_unt_id, att_startdt
 
 COPY hr.bdapps (bda_brd_id, bda_apl_id) FROM stdin;
 \.
-COPY hr.bdapps (bda_brd_id, bda_apl_id) FROM '$$PATH$$/5699.dat';
+COPY hr.bdapps (bda_brd_id, bda_apl_id) FROM '$$PATH$$/5736.dat';
 
 --
 -- Data for Name: bdmems; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3116,7 +3289,7 @@ COPY hr.bdapps (bda_brd_id, bda_apl_id) FROM '$$PATH$$/5699.dat';
 
 COPY hr.bdmems (bdm_id, bdm_brd_id, bdm_name, bdm_rank) FROM stdin;
 \.
-COPY hr.bdmems (bdm_id, bdm_brd_id, bdm_name, bdm_rank) FROM '$$PATH$$/5700.dat';
+COPY hr.bdmems (bdm_id, bdm_brd_id, bdm_name, bdm_rank) FROM '$$PATH$$/5737.dat';
 
 --
 -- Data for Name: bnkaccounts; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3124,7 +3297,7 @@ COPY hr.bdmems (bdm_id, bdm_brd_id, bdm_name, bdm_rank) FROM '$$PATH$$/5700.dat'
 
 COPY hr.bnkaccounts (bac_id, bac_emp_id, bac_bnkname, bac_bchname, bac_bchcode, bac_acctitle, bac_accnum, bac_bchcity, bac_selforpay) FROM stdin;
 \.
-COPY hr.bnkaccounts (bac_id, bac_emp_id, bac_bnkname, bac_bchname, bac_bchcode, bac_acctitle, bac_accnum, bac_bchcity, bac_selforpay) FROM '$$PATH$$/5701.dat';
+COPY hr.bnkaccounts (bac_id, bac_emp_id, bac_bnkname, bac_bchname, bac_bchcode, bac_acctitle, bac_accnum, bac_bchcity, bac_selforpay) FROM '$$PATH$$/5738.dat';
 
 --
 -- Data for Name: boards; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3132,7 +3305,7 @@ COPY hr.bnkaccounts (bac_id, bac_emp_id, bac_bnkname, bac_bchname, bac_bchcode, 
 
 COPY hr.boards (brd_id, brd_date, brd_status, brd_hir_id) FROM stdin;
 \.
-COPY hr.boards (brd_id, brd_date, brd_status, brd_hir_id) FROM '$$PATH$$/5703.dat';
+COPY hr.boards (brd_id, brd_date, brd_status, brd_hir_id) FROM '$$PATH$$/5740.dat';
 
 --
 -- Data for Name: contractplans; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3140,7 +3313,7 @@ COPY hr.boards (brd_id, brd_date, brd_status, brd_hir_id) FROM '$$PATH$$/5703.da
 
 COPY hr.contractplans (cpn_id, cpn_ctr_id, cpn_startdt, cpn_enddt, cpn_hed_id) FROM stdin;
 \.
-COPY hr.contractplans (cpn_id, cpn_ctr_id, cpn_startdt, cpn_enddt, cpn_hed_id) FROM '$$PATH$$/5705.dat';
+COPY hr.contractplans (cpn_id, cpn_ctr_id, cpn_startdt, cpn_enddt, cpn_hed_id) FROM '$$PATH$$/5742.dat';
 
 --
 -- Data for Name: contracts; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3148,7 +3321,7 @@ COPY hr.contractplans (cpn_id, cpn_ctr_id, cpn_startdt, cpn_enddt, cpn_hed_id) F
 
 COPY hr.contracts (ctr_unt_id, ctr_num, ctr_startdt, ctr_enddt, ctr_date, ctr_jobtitle, ctr_grade, ctr_salary, ctr_hed_id, ctr_id, ctr_prob, ctr_probsal, ctr_termindt, ctr_remarks, ctr_path, ctr_type, ctr_path2) FROM stdin;
 \.
-COPY hr.contracts (ctr_unt_id, ctr_num, ctr_startdt, ctr_enddt, ctr_date, ctr_jobtitle, ctr_grade, ctr_salary, ctr_hed_id, ctr_id, ctr_prob, ctr_probsal, ctr_termindt, ctr_remarks, ctr_path, ctr_type, ctr_path2) FROM '$$PATH$$/5707.dat';
+COPY hr.contracts (ctr_unt_id, ctr_num, ctr_startdt, ctr_enddt, ctr_date, ctr_jobtitle, ctr_grade, ctr_salary, ctr_hed_id, ctr_id, ctr_prob, ctr_probsal, ctr_termindt, ctr_remarks, ctr_path, ctr_type, ctr_path2) FROM '$$PATH$$/5744.dat';
 
 --
 -- Data for Name: empattachments; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3156,7 +3329,7 @@ COPY hr.contracts (ctr_unt_id, ctr_num, ctr_startdt, ctr_enddt, ctr_date, ctr_jo
 
 COPY hr.empattachments (eat_objtype, eat_objid, eat_type, eat_path, eat_id) FROM stdin;
 \.
-COPY hr.empattachments (eat_objtype, eat_objid, eat_type, eat_path, eat_id) FROM '$$PATH$$/5709.dat';
+COPY hr.empattachments (eat_objtype, eat_objid, eat_type, eat_path, eat_id) FROM '$$PATH$$/5746.dat';
 
 --
 -- Data for Name: emps; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3164,7 +3337,7 @@ COPY hr.empattachments (eat_objtype, eat_objid, eat_type, eat_path, eat_id) FROM
 
 COPY hr.emps (emp_id, emp_cnic, emp_name, emp_joindt, emp_locked, emp_rank, emp_status, emp_remarks, emp_unt_id, emp_hed_id, emp_lastdt, emp_title, emp_photodest) FROM stdin;
 \.
-COPY hr.emps (emp_id, emp_cnic, emp_name, emp_joindt, emp_locked, emp_rank, emp_status, emp_remarks, emp_unt_id, emp_hed_id, emp_lastdt, emp_title, emp_photodest) FROM '$$PATH$$/5713.dat';
+COPY hr.emps (emp_id, emp_cnic, emp_name, emp_joindt, emp_locked, emp_rank, emp_status, emp_remarks, emp_unt_id, emp_hed_id, emp_lastdt, emp_title, emp_photodest) FROM '$$PATH$$/5750.dat';
 
 --
 -- Data for Name: empsexta; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3172,7 +3345,7 @@ COPY hr.emps (emp_id, emp_cnic, emp_name, emp_joindt, emp_locked, emp_rank, emp_
 
 COPY hr.empsexta (empexta_emp_id, emp_discip, emp_qualif, emp_spec, emp_paddress, emp_dob, emp_marital, emp_ntnlty, emp_pob, emp_taddress, emp_mobile, emp_landline, emp_gender, emp_mobile2, emp_email, emp_father) FROM stdin;
 \.
-COPY hr.empsexta (empexta_emp_id, emp_discip, emp_qualif, emp_spec, emp_paddress, emp_dob, emp_marital, emp_ntnlty, emp_pob, emp_taddress, emp_mobile, emp_landline, emp_gender, emp_mobile2, emp_email, emp_father) FROM '$$PATH$$/5714.dat';
+COPY hr.empsexta (empexta_emp_id, emp_discip, emp_qualif, emp_spec, emp_paddress, emp_dob, emp_marital, emp_ntnlty, emp_pob, emp_taddress, emp_mobile, emp_landline, emp_gender, emp_mobile2, emp_email, emp_father) FROM '$$PATH$$/5751.dat';
 
 --
 -- Data for Name: empsextb; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3180,7 +3353,7 @@ COPY hr.empsexta (empexta_emp_id, emp_discip, emp_qualif, emp_spec, emp_paddress
 
 COPY hr.empsextb (empextb_emp_id, emp_nokname, emp_nokrelation, emp_nokcnic, emp_emername, emp_emerrelation, emp_emermobile, emp_idmark, emp_height, emp_caste, emp_religion, emp_sect, emp_police, emp_political) FROM stdin;
 \.
-COPY hr.empsextb (empextb_emp_id, emp_nokname, emp_nokrelation, emp_nokcnic, emp_emername, emp_emerrelation, emp_emermobile, emp_idmark, emp_height, emp_caste, emp_religion, emp_sect, emp_police, emp_political) FROM '$$PATH$$/5715.dat';
+COPY hr.empsextb (empextb_emp_id, emp_nokname, emp_nokrelation, emp_nokcnic, emp_emername, emp_emerrelation, emp_emermobile, emp_idmark, emp_height, emp_caste, emp_religion, emp_sect, emp_police, emp_political) FROM '$$PATH$$/5752.dat';
 
 --
 -- Data for Name: empsextc; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3188,7 +3361,7 @@ COPY hr.empsextb (empextb_emp_id, emp_nokname, emp_nokrelation, emp_nokcnic, emp
 
 COPY hr.empsextc (empextc_emp_id, emp_cnum, emp_cissuedt, emp_cexpdt, emp_secclear) FROM stdin;
 \.
-COPY hr.empsextc (empextc_emp_id, emp_cnum, emp_cissuedt, emp_cexpdt, emp_secclear) FROM '$$PATH$$/5716.dat';
+COPY hr.empsextc (empextc_emp_id, emp_cnum, emp_cissuedt, emp_cexpdt, emp_secclear) FROM '$$PATH$$/5753.dat';
 
 --
 -- Data for Name: hirings; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3196,7 +3369,7 @@ COPY hr.empsextc (empextc_emp_id, emp_cnum, emp_cissuedt, emp_cexpdt, emp_seccle
 
 COPY hr.hirings (hir_id, hir_hhd_id, hir_reference, hir_date, hir_jobtitle, hir_grade, hir_salarymin, hir_salarymax) FROM stdin;
 \.
-COPY hr.hirings (hir_id, hir_hhd_id, hir_reference, hir_date, hir_jobtitle, hir_grade, hir_salarymin, hir_salarymax) FROM '$$PATH$$/5717.dat';
+COPY hr.hirings (hir_id, hir_hhd_id, hir_reference, hir_date, hir_jobtitle, hir_grade, hir_salarymin, hir_salarymax) FROM '$$PATH$$/5754.dat';
 
 --
 -- Data for Name: hrheads; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3204,7 +3377,7 @@ COPY hr.hirings (hir_id, hir_hhd_id, hir_reference, hir_date, hir_jobtitle, hir_
 
 COPY hr.hrheads (hhd_id, hhd_dpt_id, hhd_name) FROM stdin;
 \.
-COPY hr.hrheads (hhd_id, hhd_dpt_id, hhd_name) FROM '$$PATH$$/5718.dat';
+COPY hr.hrheads (hhd_id, hhd_dpt_id, hhd_name) FROM '$$PATH$$/5755.dat';
 
 --
 -- Data for Name: jobs; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3212,7 +3385,7 @@ COPY hr.hrheads (hhd_id, hhd_dpt_id, hhd_name) FROM '$$PATH$$/5718.dat';
 
 COPY hr.jobs (job_company, job_jobtitle, job_repto, job_team, job_from, job_to, job_resp, job_ach, job_emp_id, job_id, job_city) FROM stdin;
 \.
-COPY hr.jobs (job_company, job_jobtitle, job_repto, job_team, job_from, job_to, job_resp, job_ach, job_emp_id, job_id, job_city) FROM '$$PATH$$/5719.dat';
+COPY hr.jobs (job_company, job_jobtitle, job_repto, job_team, job_from, job_to, job_resp, job_ach, job_emp_id, job_id, job_city) FROM '$$PATH$$/5756.dat';
 
 --
 -- Data for Name: qualifs; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3220,7 +3393,7 @@ COPY hr.jobs (job_company, job_jobtitle, job_repto, job_team, job_from, job_to, 
 
 COPY hr.qualifs (qlf_id, qlf_type, qlf_level, qlf_name, qlf_inst, qlf_duration, qlf_unit, qlf_enddt, qlf_emp_id, qlf_grade, qlf_license, qlf_spec) FROM stdin;
 \.
-COPY hr.qualifs (qlf_id, qlf_type, qlf_level, qlf_name, qlf_inst, qlf_duration, qlf_unit, qlf_enddt, qlf_emp_id, qlf_grade, qlf_license, qlf_spec) FROM '$$PATH$$/5711.dat';
+COPY hr.qualifs (qlf_id, qlf_type, qlf_level, qlf_name, qlf_inst, qlf_duration, qlf_unit, qlf_enddt, qlf_emp_id, qlf_grade, qlf_license, qlf_spec) FROM '$$PATH$$/5748.dat';
 
 --
 -- Data for Name: salreqs; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3228,7 +3401,7 @@ COPY hr.qualifs (qlf_id, qlf_type, qlf_level, qlf_name, qlf_inst, qlf_duration, 
 
 COPY hr.salreqs (srq_id, srq_emp_id, srq_empnamecomp, srq_unt_id, srq_hed_id, srq_effunt_id, srq_effhed_id, srq_month, srq_unpaiddays, srq_salary, srq_status, srq_remarks, srq_releasedtg, srq_closedtg, srq_fulfilment, srq_ctrsalary, srq_grosalary, srq_netsalary, srq_bnkaccdetail, srq_bnkacctitle, srq_contracts, srq_checked, srq_arrears, srq_dues, srq_overwork, srq_underwork, srq_loaned, srq_withheld, srq_award, srq_penalty, srq_paidalready, srq_paidholidays, srq_remarks2, srq_sudohed) FROM stdin;
 \.
-COPY hr.salreqs (srq_id, srq_emp_id, srq_empnamecomp, srq_unt_id, srq_hed_id, srq_effunt_id, srq_effhed_id, srq_month, srq_unpaiddays, srq_salary, srq_status, srq_remarks, srq_releasedtg, srq_closedtg, srq_fulfilment, srq_ctrsalary, srq_grosalary, srq_netsalary, srq_bnkaccdetail, srq_bnkacctitle, srq_contracts, srq_checked, srq_arrears, srq_dues, srq_overwork, srq_underwork, srq_loaned, srq_withheld, srq_award, srq_penalty, srq_paidalready, srq_paidholidays, srq_remarks2, srq_sudohed) FROM '$$PATH$$/5723.dat';
+COPY hr.salreqs (srq_id, srq_emp_id, srq_empnamecomp, srq_unt_id, srq_hed_id, srq_effunt_id, srq_effhed_id, srq_month, srq_unpaiddays, srq_salary, srq_status, srq_remarks, srq_releasedtg, srq_closedtg, srq_fulfilment, srq_ctrsalary, srq_grosalary, srq_netsalary, srq_bnkaccdetail, srq_bnkacctitle, srq_contracts, srq_checked, srq_arrears, srq_dues, srq_overwork, srq_underwork, srq_loaned, srq_withheld, srq_award, srq_penalty, srq_paidalready, srq_paidholidays, srq_remarks2, srq_sudohed) FROM '$$PATH$$/5760.dat';
 
 --
 -- Data for Name: vehicles; Type: TABLE DATA; Schema: hr; Owner: postgres
@@ -3236,7 +3409,7 @@ COPY hr.salreqs (srq_id, srq_emp_id, srq_empnamecomp, srq_unt_id, srq_hed_id, sr
 
 COPY hr.vehicles (vcl_id, vcl_emp_id, vcl_type, vcl_maker, vcl_variant, vcl_year, vcl_regis, vcl_color) FROM stdin;
 \.
-COPY hr.vehicles (vcl_id, vcl_emp_id, vcl_type, vcl_maker, vcl_variant, vcl_year, vcl_regis, vcl_color) FROM '$$PATH$$/5725.dat';
+COPY hr.vehicles (vcl_id, vcl_emp_id, vcl_type, vcl_maker, vcl_variant, vcl_year, vcl_regis, vcl_color) FROM '$$PATH$$/5762.dat';
 
 --
 -- Data for Name: inaattachments; Type: TABLE DATA; Schema: ina; Owner: postgres
@@ -3244,7 +3417,7 @@ COPY hr.vehicles (vcl_id, vcl_emp_id, vcl_type, vcl_maker, vcl_variant, vcl_year
 
 COPY ina.inaattachments (iat_objtype, iat_objid, iat_type, iat_path, iat_id) FROM stdin;
 \.
-COPY ina.inaattachments (iat_objtype, iat_objid, iat_type, iat_path, iat_id) FROM '$$PATH$$/5727.dat';
+COPY ina.inaattachments (iat_objtype, iat_objid, iat_type, iat_path, iat_id) FROM '$$PATH$$/5764.dat';
 
 --
 -- Data for Name: invatcomps; Type: TABLE DATA; Schema: ina; Owner: postgres
@@ -3252,7 +3425,7 @@ COPY ina.inaattachments (iat_objtype, iat_objid, iat_type, iat_path, iat_id) FRO
 
 COPY ina.invatcomps (iac_id, iac_ias_id, iac_qty, iac_qtyunit, iac_parent_id, iac_isparent, iac_isassembly, iac_location, iac_group, iac_person, iac_dtg, iac_dispdate, iac_dispdtg, iac_status, iac_remarks, iac_details, iac_shared) FROM stdin;
 \.
-COPY ina.invatcomps (iac_id, iac_ias_id, iac_qty, iac_qtyunit, iac_parent_id, iac_isparent, iac_isassembly, iac_location, iac_group, iac_person, iac_dtg, iac_dispdate, iac_dispdtg, iac_status, iac_remarks, iac_details, iac_shared) FROM '$$PATH$$/5729.dat';
+COPY ina.invatcomps (iac_id, iac_ias_id, iac_qty, iac_qtyunit, iac_parent_id, iac_isparent, iac_isassembly, iac_location, iac_group, iac_person, iac_dtg, iac_dispdate, iac_dispdtg, iac_status, iac_remarks, iac_details, iac_shared) FROM '$$PATH$$/5766.dat';
 
 --
 -- Data for Name: invatlocs; Type: TABLE DATA; Schema: ina; Owner: postgres
@@ -3260,7 +3433,7 @@ COPY ina.invatcomps (iac_id, iac_ias_id, iac_qty, iac_qtyunit, iac_parent_id, ia
 
 COPY ina.invatlocs (ial_id, ial_ias_id, ial_date, ial_unt_id, ial_location, ial_custgroup, ial_custperson) FROM stdin;
 \.
-COPY ina.invatlocs (ial_id, ial_ias_id, ial_date, ial_unt_id, ial_location, ial_custgroup, ial_custperson) FROM '$$PATH$$/5731.dat';
+COPY ina.invatlocs (ial_id, ial_ias_id, ial_date, ial_unt_id, ial_location, ial_custgroup, ial_custperson) FROM '$$PATH$$/5768.dat';
 
 --
 -- Data for Name: invats; Type: TABLE DATA; Schema: ina; Owner: postgres
@@ -3268,7 +3441,7 @@ COPY ina.invatlocs (ial_id, ial_ias_id, ial_date, ial_unt_id, ial_location, ial_
 
 COPY ina.invats (ias_id, ias_pcs_id, ias_pci_id, ias_desc, ias_details, ias_spec_id, ias_qty, ias_qtyunit, ias_unt_id, ias_prj_id, ias_effhed_id, ias_chargedate, ias_price, ias_type, ias_subtype, ias_dtg, ias_type2) FROM stdin;
 \.
-COPY ina.invats (ias_id, ias_pcs_id, ias_pci_id, ias_desc, ias_details, ias_spec_id, ias_qty, ias_qtyunit, ias_unt_id, ias_prj_id, ias_effhed_id, ias_chargedate, ias_price, ias_type, ias_subtype, ias_dtg, ias_type2) FROM '$$PATH$$/5733.dat';
+COPY ina.invats (ias_id, ias_pcs_id, ias_pci_id, ias_desc, ias_details, ias_spec_id, ias_qty, ias_qtyunit, ias_unt_id, ias_prj_id, ias_effhed_id, ias_chargedate, ias_price, ias_type, ias_subtype, ias_dtg, ias_type2) FROM '$$PATH$$/5770.dat';
 
 --
 -- Data for Name: invatspecs; Type: TABLE DATA; Schema: ina; Owner: postgres
@@ -3276,7 +3449,7 @@ COPY ina.invats (ias_id, ias_pcs_id, ias_pci_id, ias_desc, ias_details, ias_spec
 
 COPY ina.invatspecs (iap_ias_id, iap_specname, iap_specvalue) FROM stdin;
 \.
-COPY ina.invatspecs (iap_ias_id, iap_specname, iap_specvalue) FROM '$$PATH$$/5735.dat';
+COPY ina.invatspecs (iap_ias_id, iap_specname, iap_specvalue) FROM '$$PATH$$/5772.dat';
 
 --
 -- Data for Name: invenitems; Type: TABLE DATA; Schema: ina; Owner: postgres
@@ -3284,7 +3457,7 @@ COPY ina.invatspecs (iap_ias_id, iap_specname, iap_specvalue) FROM '$$PATH$$/573
 
 COPY ina.invenitems (ini_id, ini_inv_id, ini_qty, ini_qtyunit, ini_parent_id, ini_isparent, ini_isassembly, ini_location, ini_group, ini_person, ini_dtg, ini_dispdate, ini_dispdtg, ini_status, ini_remarks) FROM stdin;
 \.
-COPY ina.invenitems (ini_id, ini_inv_id, ini_qty, ini_qtyunit, ini_parent_id, ini_isparent, ini_isassembly, ini_location, ini_group, ini_person, ini_dtg, ini_dispdate, ini_dispdtg, ini_status, ini_remarks) FROM '$$PATH$$/5736.dat';
+COPY ina.invenitems (ini_id, ini_inv_id, ini_qty, ini_qtyunit, ini_parent_id, ini_isparent, ini_isassembly, ini_location, ini_group, ini_person, ini_dtg, ini_dispdate, ini_dispdtg, ini_status, ini_remarks) FROM '$$PATH$$/5773.dat';
 
 --
 -- Data for Name: inventory; Type: TABLE DATA; Schema: ina; Owner: postgres
@@ -3292,7 +3465,7 @@ COPY ina.invenitems (ini_id, ini_inv_id, ini_qty, ini_qtyunit, ini_parent_id, in
 
 COPY ina.inventory (inv_id, inv_pcs_id, inv_pci_id, inv_desc, inv_details, inv_spec_id, inv_qty, inv_qtyunit, inv_unt_id, inv_chargedate, inv_price, inv_type, inv_subtype, inv_dtg, inv_prj_id) FROM stdin;
 \.
-COPY ina.inventory (inv_id, inv_pcs_id, inv_pci_id, inv_desc, inv_details, inv_spec_id, inv_qty, inv_qtyunit, inv_unt_id, inv_chargedate, inv_price, inv_type, inv_subtype, inv_dtg, inv_prj_id) FROM '$$PATH$$/5737.dat';
+COPY ina.inventory (inv_id, inv_pcs_id, inv_pci_id, inv_desc, inv_details, inv_spec_id, inv_qty, inv_qtyunit, inv_unt_id, inv_chargedate, inv_price, inv_type, inv_subtype, inv_dtg, inv_prj_id) FROM '$$PATH$$/5774.dat';
 
 --
 -- Data for Name: comments; Type: TABLE DATA; Schema: prj; Owner: postgres
@@ -3300,7 +3473,7 @@ COPY ina.inventory (inv_id, inv_pcs_id, inv_pci_id, inv_desc, inv_details, inv_s
 
 COPY prj.comments (cmt_xpgh_id, cmt_id, cmt_dtg, cmt_comment, cmt_author, cmt_status) FROM stdin;
 \.
-COPY prj.comments (cmt_xpgh_id, cmt_id, cmt_dtg, cmt_comment, cmt_author, cmt_status) FROM '$$PATH$$/5738.dat';
+COPY prj.comments (cmt_xpgh_id, cmt_id, cmt_dtg, cmt_comment, cmt_author, cmt_status) FROM '$$PATH$$/5775.dat';
 
 --
 -- Data for Name: events; Type: TABLE DATA; Schema: prj; Owner: postgres
@@ -3308,7 +3481,7 @@ COPY prj.comments (cmt_xpgh_id, cmt_id, cmt_dtg, cmt_comment, cmt_author, cmt_st
 
 COPY prj.events (evt_id, evt_name, evt_doer, evt_effectee, evt_dtg, evt_xprj_id, evt_xpgh_id, evt_xcmt_id) FROM stdin;
 \.
-COPY prj.events (evt_id, evt_name, evt_doer, evt_effectee, evt_dtg, evt_xprj_id, evt_xpgh_id, evt_xcmt_id) FROM '$$PATH$$/5740.dat';
+COPY prj.events (evt_id, evt_name, evt_doer, evt_effectee, evt_dtg, evt_xprj_id, evt_xpgh_id, evt_xcmt_id) FROM '$$PATH$$/5777.dat';
 
 --
 -- Data for Name: milestones; Type: TABLE DATA; Schema: prj; Owner: postgres
@@ -3316,7 +3489,7 @@ COPY prj.events (evt_id, evt_name, evt_doer, evt_effectee, evt_dtg, evt_xprj_id,
 
 COPY prj.milestones (msn_id, msn_xprj_id, msn_type, msn_desc, msn_cost, msn_startdt, msn_targetdt, msn_achvdt, msn_comp, msn_pay, msn_paydt, msn_status, msn_rem, msn_idd) FROM stdin;
 \.
-COPY prj.milestones (msn_id, msn_xprj_id, msn_type, msn_desc, msn_cost, msn_startdt, msn_targetdt, msn_achvdt, msn_comp, msn_pay, msn_paydt, msn_status, msn_rem, msn_idd) FROM '$$PATH$$/5742.dat';
+COPY prj.milestones (msn_id, msn_xprj_id, msn_type, msn_desc, msn_cost, msn_startdt, msn_targetdt, msn_achvdt, msn_comp, msn_pay, msn_paydt, msn_status, msn_rem, msn_idd) FROM '$$PATH$$/5779.dat';
 
 --
 -- Data for Name: mprgroup; Type: TABLE DATA; Schema: prj; Owner: postgres
@@ -3324,7 +3497,7 @@ COPY prj.milestones (msn_id, msn_xprj_id, msn_type, msn_desc, msn_cost, msn_star
 
 COPY prj.mprgroup (mgp_id, mgp_name, mgp_dtg, mgp_status) FROM stdin;
 \.
-COPY prj.mprgroup (mgp_id, mgp_name, mgp_dtg, mgp_status) FROM '$$PATH$$/5744.dat';
+COPY prj.mprgroup (mgp_id, mgp_name, mgp_dtg, mgp_status) FROM '$$PATH$$/5781.dat';
 
 --
 -- Data for Name: prghistory; Type: TABLE DATA; Schema: prj; Owner: postgres
@@ -3332,7 +3505,7 @@ COPY prj.mprgroup (mgp_id, mgp_name, mgp_dtg, mgp_status) FROM '$$PATH$$/5744.da
 
 COPY prj.prghistory (pgh_xprj_id, pgh_id, pgh_dtg, pgh_progress, pgh_author, pgh_status, pgh_closedtg, pgh_level, pgh_group, pgh_trail, pgh_trailinherited, pgh_underedit, pgh_path) FROM stdin;
 \.
-COPY prj.prghistory (pgh_xprj_id, pgh_id, pgh_dtg, pgh_progress, pgh_author, pgh_status, pgh_closedtg, pgh_level, pgh_group, pgh_trail, pgh_trailinherited, pgh_underedit, pgh_path) FROM '$$PATH$$/5746.dat';
+COPY prj.prghistory (pgh_xprj_id, pgh_id, pgh_dtg, pgh_progress, pgh_author, pgh_status, pgh_closedtg, pgh_level, pgh_group, pgh_trail, pgh_trailinherited, pgh_underedit, pgh_path) FROM '$$PATH$$/5783.dat';
 
 --
 -- Data for Name: prjattachments; Type: TABLE DATA; Schema: prj; Owner: postgres
@@ -3340,7 +3513,7 @@ COPY prj.prghistory (pgh_xprj_id, pgh_id, pgh_dtg, pgh_progress, pgh_author, pgh
 
 COPY prj.prjattachments (jat_objtype, jat_objid, jat_type, jat_path, jat_id) FROM stdin;
 \.
-COPY prj.prjattachments (jat_objtype, jat_objid, jat_type, jat_path, jat_id) FROM '$$PATH$$/5748.dat';
+COPY prj.prjattachments (jat_objtype, jat_objid, jat_type, jat_path, jat_id) FROM '$$PATH$$/5785.dat';
 
 --
 -- Data for Name: projects; Type: TABLE DATA; Schema: prj; Owner: postgres
@@ -3348,7 +3521,7 @@ COPY prj.prjattachments (jat_objtype, jat_objid, jat_type, jat_path, jat_id) FRO
 
 COPY prj.projects (prj_title, prj_id, prj_startdt, prj_id_old, prj_scope, prj_sponsor, prj_rcptdt, prj_assigndt, prj_propdt, prj_propcost, prj_aprvdt, prj_aprvcost, prj_estenddt, prj_cfycost, prj_status, prj_enddt, prj_rem, prj_notes, prj_notes1, prj_unt_id, prj_reporting, prj_code) FROM stdin;
 \.
-COPY prj.projects (prj_title, prj_id, prj_startdt, prj_id_old, prj_scope, prj_sponsor, prj_rcptdt, prj_assigndt, prj_propdt, prj_propcost, prj_aprvdt, prj_aprvcost, prj_estenddt, prj_cfycost, prj_status, prj_enddt, prj_rem, prj_notes, prj_notes1, prj_unt_id, prj_reporting, prj_code) FROM '$$PATH$$/5750.dat';
+COPY prj.projects (prj_title, prj_id, prj_startdt, prj_id_old, prj_scope, prj_sponsor, prj_rcptdt, prj_assigndt, prj_propdt, prj_propcost, prj_aprvdt, prj_aprvcost, prj_estenddt, prj_cfycost, prj_status, prj_enddt, prj_rem, prj_notes, prj_notes1, prj_unt_id, prj_reporting, prj_code) FROM '$$PATH$$/5787.dat';
 
 --
 -- Data for Name: cache; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3356,7 +3529,7 @@ COPY prj.projects (prj_title, prj_id, prj_startdt, prj_id_old, prj_scope, prj_sp
 
 COPY public.cache (key, value, expiration) FROM stdin;
 \.
-COPY public.cache (key, value, expiration) FROM '$$PATH$$/5781.dat';
+COPY public.cache (key, value, expiration) FROM '$$PATH$$/5818.dat';
 
 --
 -- Data for Name: cache_locks; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3364,7 +3537,7 @@ COPY public.cache (key, value, expiration) FROM '$$PATH$$/5781.dat';
 
 COPY public.cache_locks (key, owner, expiration) FROM stdin;
 \.
-COPY public.cache_locks (key, owner, expiration) FROM '$$PATH$$/5782.dat';
+COPY public.cache_locks (key, owner, expiration) FROM '$$PATH$$/5819.dat';
 
 --
 -- Data for Name: failed_jobs; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3372,7 +3545,7 @@ COPY public.cache_locks (key, owner, expiration) FROM '$$PATH$$/5782.dat';
 
 COPY public.failed_jobs (id, uuid, connection, queue, payload, exception, failed_at) FROM stdin;
 \.
-COPY public.failed_jobs (id, uuid, connection, queue, payload, exception, failed_at) FROM '$$PATH$$/5787.dat';
+COPY public.failed_jobs (id, uuid, connection, queue, payload, exception, failed_at) FROM '$$PATH$$/5824.dat';
 
 --
 -- Data for Name: job_batches; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3380,7 +3553,7 @@ COPY public.failed_jobs (id, uuid, connection, queue, payload, exception, failed
 
 COPY public.job_batches (id, name, total_jobs, pending_jobs, failed_jobs, failed_job_ids, options, cancelled_at, created_at, finished_at) FROM stdin;
 \.
-COPY public.job_batches (id, name, total_jobs, pending_jobs, failed_jobs, failed_job_ids, options, cancelled_at, created_at, finished_at) FROM '$$PATH$$/5785.dat';
+COPY public.job_batches (id, name, total_jobs, pending_jobs, failed_jobs, failed_job_ids, options, cancelled_at, created_at, finished_at) FROM '$$PATH$$/5822.dat';
 
 --
 -- Data for Name: jobs; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3388,7 +3561,7 @@ COPY public.job_batches (id, name, total_jobs, pending_jobs, failed_jobs, failed
 
 COPY public.jobs (id, queue, payload, attempts, reserved_at, available_at, created_at) FROM stdin;
 \.
-COPY public.jobs (id, queue, payload, attempts, reserved_at, available_at, created_at) FROM '$$PATH$$/5784.dat';
+COPY public.jobs (id, queue, payload, attempts, reserved_at, available_at, created_at) FROM '$$PATH$$/5821.dat';
 
 --
 -- Data for Name: migrations; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3396,7 +3569,7 @@ COPY public.jobs (id, queue, payload, attempts, reserved_at, available_at, creat
 
 COPY public.migrations (id, migration, batch) FROM stdin;
 \.
-COPY public.migrations (id, migration, batch) FROM '$$PATH$$/5776.dat';
+COPY public.migrations (id, migration, batch) FROM '$$PATH$$/5813.dat';
 
 --
 -- Data for Name: password_reset_tokens; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3404,7 +3577,7 @@ COPY public.migrations (id, migration, batch) FROM '$$PATH$$/5776.dat';
 
 COPY public.password_reset_tokens (email, token, created_at) FROM stdin;
 \.
-COPY public.password_reset_tokens (email, token, created_at) FROM '$$PATH$$/5779.dat';
+COPY public.password_reset_tokens (email, token, created_at) FROM '$$PATH$$/5816.dat';
 
 --
 -- Data for Name: project_activities; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3412,7 +3585,7 @@ COPY public.password_reset_tokens (email, token, created_at) FROM '$$PATH$$/5779
 
 COPY public.project_activities (pja_id, pja_prj_id, pja_action, pja_details, pja_user, created_at, updated_at) FROM stdin;
 \.
-COPY public.project_activities (pja_id, pja_prj_id, pja_action, pja_details, pja_user, created_at, updated_at) FROM '$$PATH$$/5789.dat';
+COPY public.project_activities (pja_id, pja_prj_id, pja_action, pja_details, pja_user, created_at, updated_at) FROM '$$PATH$$/5826.dat';
 
 --
 -- Data for Name: sessions; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3420,7 +3593,7 @@ COPY public.project_activities (pja_id, pja_prj_id, pja_action, pja_details, pja
 
 COPY public.sessions (id, user_id, ip_address, user_agent, payload, last_activity) FROM stdin;
 \.
-COPY public.sessions (id, user_id, ip_address, user_agent, payload, last_activity) FROM '$$PATH$$/5780.dat';
+COPY public.sessions (id, user_id, ip_address, user_agent, payload, last_activity) FROM '$$PATH$$/5817.dat';
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -3428,7 +3601,7 @@ COPY public.sessions (id, user_id, ip_address, user_agent, payload, last_activit
 
 COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at) FROM stdin;
 \.
-COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at) FROM '$$PATH$$/5778.dat';
+COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at) FROM '$$PATH$$/5815.dat';
 
 --
 -- Data for Name: noquotes; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3436,7 +3609,7 @@ COPY public.users (id, name, email, email_verified_at, password, remember_token,
 
 COPY pur.noquotes (nqt_id, nqt_pcs_id, nqt_frm_id) FROM stdin;
 \.
-COPY pur.noquotes (nqt_id, nqt_pcs_id, nqt_frm_id) FROM '$$PATH$$/5753.dat';
+COPY pur.noquotes (nqt_id, nqt_pcs_id, nqt_frm_id) FROM '$$PATH$$/5790.dat';
 
 --
 -- Data for Name: purattachments; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3444,7 +3617,7 @@ COPY pur.noquotes (nqt_id, nqt_pcs_id, nqt_frm_id) FROM '$$PATH$$/5753.dat';
 
 COPY pur.purattachments (pat_objtype, pat_objid, pat_type, pat_path, pat_id) FROM stdin;
 \.
-COPY pur.purattachments (pat_objtype, pat_objid, pat_type, pat_path, pat_id) FROM '$$PATH$$/5755.dat';
+COPY pur.purattachments (pat_objtype, pat_objid, pat_type, pat_path, pat_id) FROM '$$PATH$$/5792.dat';
 
 --
 -- Data for Name: purcaseitems; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3452,7 +3625,7 @@ COPY pur.purattachments (pat_objtype, pat_objid, pat_type, pat_path, pat_id) FRO
 
 COPY pur.purcaseitems (pci_pri_id, pci_serial, pci_desc, pci_estprice, pci_qty, pci_qtyunit, pci_id, pci_pcs_id, pci_price, pci_fulfilment, pci_type, pci_subtype, pci_category, pci_type2, pci_subhead) FROM stdin;
 \.
-COPY pur.purcaseitems (pci_pri_id, pci_serial, pci_desc, pci_estprice, pci_qty, pci_qtyunit, pci_id, pci_pcs_id, pci_price, pci_fulfilment, pci_type, pci_subtype, pci_category, pci_type2, pci_subhead) FROM '$$PATH$$/5757.dat';
+COPY pur.purcaseitems (pci_pri_id, pci_serial, pci_desc, pci_estprice, pci_qty, pci_qtyunit, pci_id, pci_pcs_id, pci_price, pci_fulfilment, pci_type, pci_subtype, pci_category, pci_type2, pci_subhead) FROM '$$PATH$$/5794.dat';
 
 --
 -- Data for Name: purcaseminuterefs; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3460,7 +3633,7 @@ COPY pur.purcaseitems (pci_pri_id, pci_serial, pci_desc, pci_estprice, pci_qty, 
 
 COPY pur.purcaseminuterefs (pmr_pcm_id, pmr_min, pmr_title, pmr_date, pmr_from, pmr_flag, pmr_ref, pmr_encl) FROM stdin;
 \.
-COPY pur.purcaseminuterefs (pmr_pcm_id, pmr_min, pmr_title, pmr_date, pmr_from, pmr_flag, pmr_ref, pmr_encl) FROM '$$PATH$$/5759.dat';
+COPY pur.purcaseminuterefs (pmr_pcm_id, pmr_min, pmr_title, pmr_date, pmr_from, pmr_flag, pmr_ref, pmr_encl) FROM '$$PATH$$/5796.dat';
 
 --
 -- Data for Name: purcaseminutes; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3468,7 +3641,7 @@ COPY pur.purcaseminuterefs (pmr_pcm_id, pmr_min, pmr_title, pmr_date, pmr_from, 
 
 COPY pur.purcaseminutes (pcm_id, pcm_texta, pcm_textb, pcm_textc, pcm_textd, pcm_texte, pcm_lwoamount, pcm_minute, pcm_purcases, pcm_eqdue, pcm_hrdue, pcm_msdue, pcm_date) FROM stdin;
 \.
-COPY pur.purcaseminutes (pcm_id, pcm_texta, pcm_textb, pcm_textc, pcm_textd, pcm_texte, pcm_lwoamount, pcm_minute, pcm_purcases, pcm_eqdue, pcm_hrdue, pcm_msdue, pcm_date) FROM '$$PATH$$/5760.dat';
+COPY pur.purcaseminutes (pcm_id, pcm_texta, pcm_textb, pcm_textc, pcm_textd, pcm_texte, pcm_lwoamount, pcm_minute, pcm_purcases, pcm_eqdue, pcm_hrdue, pcm_msdue, pcm_date) FROM '$$PATH$$/5797.dat';
 
 --
 -- Data for Name: purcases; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3476,7 +3649,7 @@ COPY pur.purcaseminutes (pcm_id, pcm_texta, pcm_textb, pcm_textc, pcm_textd, pcm
 
 COPY pur.purcases (pcs_id, pcs_date, pcs_remarks, pcs_status, pcs_unt_id, pcs_hed_id, pcs_purreqs, pcs_releasedtg, pcs_effhed_id, pcs_intprice, pcs_inttax, pcs_midprice, pcs_midtax, pcs_price, pcs_title, pcs_frm_id, pcs_type, pcs_effunt_id, pcs_intunt_id, pcs_transtype, pcs_noloan, pcs_sudohed, pcs_minute, pcs_recomm, pcs_quotetype, pcs_approvedtg, pcs_closedtg) FROM stdin;
 \.
-COPY pur.purcases (pcs_id, pcs_date, pcs_remarks, pcs_status, pcs_unt_id, pcs_hed_id, pcs_purreqs, pcs_releasedtg, pcs_effhed_id, pcs_intprice, pcs_inttax, pcs_midprice, pcs_midtax, pcs_price, pcs_title, pcs_frm_id, pcs_type, pcs_effunt_id, pcs_intunt_id, pcs_transtype, pcs_noloan, pcs_sudohed, pcs_minute, pcs_recomm, pcs_quotetype, pcs_approvedtg, pcs_closedtg) FROM '$$PATH$$/5751.dat';
+COPY pur.purcases (pcs_id, pcs_date, pcs_remarks, pcs_status, pcs_unt_id, pcs_hed_id, pcs_purreqs, pcs_releasedtg, pcs_effhed_id, pcs_intprice, pcs_inttax, pcs_midprice, pcs_midtax, pcs_price, pcs_title, pcs_frm_id, pcs_type, pcs_effunt_id, pcs_intunt_id, pcs_transtype, pcs_noloan, pcs_sudohed, pcs_minute, pcs_recomm, pcs_quotetype, pcs_approvedtg, pcs_closedtg) FROM '$$PATH$$/5788.dat';
 
 --
 -- Data for Name: purcases_shd; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3484,7 +3657,7 @@ COPY pur.purcases (pcs_id, pcs_date, pcs_remarks, pcs_status, pcs_unt_id, pcs_he
 
 COPY pur.purcases_shd (pcd_pcs_id, pcd_subhead, pcd_ratio, pcd_type) FROM stdin;
 \.
-COPY pur.purcases_shd (pcd_pcs_id, pcd_subhead, pcd_ratio, pcd_type) FROM '$$PATH$$/5762.dat';
+COPY pur.purcases_shd (pcd_pcs_id, pcd_subhead, pcd_ratio, pcd_type) FROM '$$PATH$$/5799.dat';
 
 --
 -- Data for Name: purreceiptitems; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3492,7 +3665,7 @@ COPY pur.purcases_shd (pcd_pcs_id, pcd_subhead, pcd_ratio, pcd_type) FROM '$$PAT
 
 COPY pur.purreceiptitems (pti_id, pti_prt_id, pti_desc, pti_qty, pti_qtyunit, pti_pci_id, pti_pri_id, pti_serial) FROM stdin;
 \.
-COPY pur.purreceiptitems (pti_id, pti_prt_id, pti_desc, pti_qty, pti_qtyunit, pti_pci_id, pti_pri_id, pti_serial) FROM '$$PATH$$/5767.dat';
+COPY pur.purreceiptitems (pti_id, pti_prt_id, pti_desc, pti_qty, pti_qtyunit, pti_pci_id, pti_pri_id, pti_serial) FROM '$$PATH$$/5804.dat';
 
 --
 -- Data for Name: purreceipts; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3500,7 +3673,7 @@ COPY pur.purreceiptitems (pti_id, pti_prt_id, pti_desc, pti_qty, pti_qtyunit, pt
 
 COPY pur.purreceipts (prt_id, prt_date, prt_unt_id, prt_prj_id, prt_status, prt_pcs_id, prt_dtg) FROM stdin;
 \.
-COPY pur.purreceipts (prt_id, prt_date, prt_unt_id, prt_prj_id, prt_status, prt_pcs_id, prt_dtg) FROM '$$PATH$$/5765.dat';
+COPY pur.purreceipts (prt_id, prt_date, prt_unt_id, prt_prj_id, prt_status, prt_pcs_id, prt_dtg) FROM '$$PATH$$/5802.dat';
 
 --
 -- Data for Name: purreqitems; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3508,7 +3681,7 @@ COPY pur.purreceipts (prt_id, prt_date, prt_unt_id, prt_prj_id, prt_status, prt_
 
 COPY pur.purreqitems (pri_prq_id, pri_serial, pri_desc, pri_price, pri_qty, pri_qtyunit, pri_type, pri_category, pri_id, pri_fulfilment, pri_appqty, pri_remarks, pri_subtype) FROM stdin;
 \.
-COPY pur.purreqitems (pri_prq_id, pri_serial, pri_desc, pri_price, pri_qty, pri_qtyunit, pri_type, pri_category, pri_id, pri_fulfilment, pri_appqty, pri_remarks, pri_subtype) FROM '$$PATH$$/5763.dat';
+COPY pur.purreqitems (pri_prq_id, pri_serial, pri_desc, pri_price, pri_qty, pri_qtyunit, pri_type, pri_category, pri_id, pri_fulfilment, pri_appqty, pri_remarks, pri_subtype) FROM '$$PATH$$/5800.dat';
 
 --
 -- Data for Name: purreqs; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3516,7 +3689,7 @@ COPY pur.purreqitems (pri_prq_id, pri_serial, pri_desc, pri_price, pri_qty, pri_
 
 COPY pur.purreqs (prq_id, prq_date, prq_unt_id, prq_hed_id, prq_status, prq_fulfilled, prq_dtg, prq_effhed_id, prq_appeffhed_id, prq_intunt_id, prq_desc, prq_minute) FROM stdin;
 \.
-COPY pur.purreqs (prq_id, prq_date, prq_unt_id, prq_hed_id, prq_status, prq_fulfilled, prq_dtg, prq_effhed_id, prq_appeffhed_id, prq_intunt_id, prq_desc, prq_minute) FROM '$$PATH$$/5769.dat';
+COPY pur.purreqs (prq_id, prq_date, prq_unt_id, prq_hed_id, prq_status, prq_fulfilled, prq_dtg, prq_effhed_id, prq_appeffhed_id, prq_intunt_id, prq_desc, prq_minute) FROM '$$PATH$$/5806.dat';
 
 --
 -- Data for Name: quoteitems; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3524,7 +3697,7 @@ COPY pur.purreqs (prq_id, prq_date, prq_unt_id, prq_hed_id, prq_status, prq_fulf
 
 COPY pur.quoteitems (qti_qte_id, qti_serial, qti_desc, qti_price, qti_qty, qti_qtyunit, qti_id, qti_pcsdesc, qti_pci_id) FROM stdin;
 \.
-COPY pur.quoteitems (qti_qte_id, qti_serial, qti_desc, qti_price, qti_qty, qti_qtyunit, qti_id, qti_pcsdesc, qti_pci_id) FROM '$$PATH$$/5771.dat';
+COPY pur.quoteitems (qti_qte_id, qti_serial, qti_desc, qti_price, qti_qty, qti_qtyunit, qti_id, qti_pcsdesc, qti_pci_id) FROM '$$PATH$$/5808.dat';
 
 --
 -- Data for Name: quotes; Type: TABLE DATA; Schema: pur; Owner: postgres
@@ -3532,7 +3705,7 @@ COPY pur.quoteitems (qti_qte_id, qti_serial, qti_desc, qti_price, qti_qty, qti_q
 
 COPY pur.quotes (qte_date, qte_firmname, qte_pcs_id, qte_num, qte_id, qte_price, qte_frm_id, qte_techaccept, qte_recomm, qte_midprice, qte_midtax, qte_intprice, qte_inttax, qte_quotetype) FROM stdin;
 \.
-COPY pur.quotes (qte_date, qte_firmname, qte_pcs_id, qte_num, qte_id, qte_price, qte_frm_id, qte_techaccept, qte_recomm, qte_midprice, qte_midtax, qte_intprice, qte_inttax, qte_quotetype) FROM '$$PATH$$/5773.dat';
+COPY pur.quotes (qte_date, qte_firmname, qte_pcs_id, qte_num, qte_id, qte_price, qte_frm_id, qte_techaccept, qte_recomm, qte_midprice, qte_midtax, qte_intprice, qte_inttax, qte_quotetype) FROM '$$PATH$$/5810.dat';
 
 --
 -- Name: audattachments_aat_id_seq; Type: SEQUENCE SET; Schema: aud; Owner: postgres
@@ -3567,6 +3740,27 @@ SELECT pg_catalog.setval('aud.revdata_rvd_id_seq', 362, true);
 --
 
 SELECT pg_catalog.setval('aud.revs_rev_id_seq', 249, true);
+
+
+--
+-- Name: document_history_hist_id_seq; Type: SEQUENCE SET; Schema: doc; Owner: postgres
+--
+
+SELECT pg_catalog.setval('doc.document_history_hist_id_seq', 53, true);
+
+
+--
+-- Name: document_versions_ver_id_seq; Type: SEQUENCE SET; Schema: doc; Owner: postgres
+--
+
+SELECT pg_catalog.setval('doc.document_versions_ver_id_seq', 65, true);
+
+
+--
+-- Name: documents_doc_id_seq; Type: SEQUENCE SET; Schema: doc; Owner: postgres
+--
+
+SELECT pg_catalog.setval('doc.documents_doc_id_seq', 29, true);
 
 
 --
@@ -3839,7 +4033,7 @@ SELECT pg_catalog.setval('public.migrations_id_seq', 4, true);
 -- Name: project_activities_pja_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.project_activities_pja_id_seq', 25, true);
+SELECT pg_catalog.setval('public.project_activities_pja_id_seq', 27, true);
 
 
 --
@@ -4044,6 +4238,30 @@ ALTER TABLE ONLY cen.units
 
 ALTER TABLE ONLY cen.version
     ADD CONSTRAINT version_pk PRIMARY KEY (ver_version);
+
+
+--
+-- Name: document_history document_history_pkey; Type: CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.document_history
+    ADD CONSTRAINT document_history_pkey PRIMARY KEY (hist_id);
+
+
+--
+-- Name: document_versions document_versions_pkey; Type: CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.document_versions
+    ADD CONSTRAINT document_versions_pkey PRIMARY KEY (ver_id);
+
+
+--
+-- Name: documents documents_pkey; Type: CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.documents
+    ADD CONSTRAINT documents_pkey PRIMARY KEY (doc_id);
 
 
 --
@@ -4865,6 +5083,54 @@ ALTER TABLE ONLY cen.accounts
 
 ALTER TABLE ONLY cen.roles
     ADD CONSTRAINT roles_fk FOREIGN KEY (rol_xunt_id) REFERENCES cen.units(unt_id);
+
+
+--
+-- Name: documents fk_doc_creator; Type: FK CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.documents
+    ADD CONSTRAINT fk_doc_creator FOREIGN KEY (creator_id) REFERENCES cen.accounts(acc_id);
+
+
+--
+-- Name: documents fk_doc_owner; Type: FK CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.documents
+    ADD CONSTRAINT fk_doc_owner FOREIGN KEY (current_owner_id) REFERENCES cen.accounts(acc_id);
+
+
+--
+-- Name: documents fk_doc_project; Type: FK CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.documents
+    ADD CONSTRAINT fk_doc_project FOREIGN KEY (prj_id) REFERENCES prj.projects(prj_id);
+
+
+--
+-- Name: document_history fk_hist_doc; Type: FK CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.document_history
+    ADD CONSTRAINT fk_hist_doc FOREIGN KEY (doc_id) REFERENCES doc.documents(doc_id);
+
+
+--
+-- Name: document_versions fk_ver_actor; Type: FK CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.document_versions
+    ADD CONSTRAINT fk_ver_actor FOREIGN KEY (action_by) REFERENCES cen.accounts(acc_id);
+
+
+--
+-- Name: document_versions fk_ver_doc; Type: FK CONSTRAINT; Schema: doc; Owner: postgres
+--
+
+ALTER TABLE ONLY doc.document_versions
+    ADD CONSTRAINT fk_ver_doc FOREIGN KEY (doc_id) REFERENCES doc.documents(doc_id) ON DELETE CASCADE;
 
 
 --
