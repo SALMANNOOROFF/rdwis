@@ -226,18 +226,17 @@
                         @endif
                     </div>
 
+                    {{-- REMOVED ACTION BUTTONS FOR SORD (READ ONLY VIEW) --}}
                     <div class="col-md-4 text-right">
                         <div class="header-controls justify-content-end">
-                            {{-- LOG HISTORY BUTTON (NEW) --}}
-                            <a href="{{ route('projecthistory', ['project_id' => $project->prj_id]) }}" class="btn btn-outline-info btn-sm shadow-sm font-weight-bold">
+                            {{-- LOG HISTORY BUTTON --}}
+                            <a href="{{ route('projecthistory', ['project_id' => $project->prj_id]) }}" class="btn btn-outline-info btn-sm shadow-sm font-weight-bold mr-2">
                                 <i class="fas fa-history mr-1"></i> Log History
                             </a>
 
-                            <a href="{{ route('projecthistory', $project->prj_id) }}" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold">
-                                <i class="fas fa-list-alt mr-1"></i> View MPRs
-                            </a>
-                            <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm font-weight-bold px-3">
-                                <i class="fas fa-plus-circle mr-1"></i> Create MPR
+                            {{-- BACK BUTTON --}}
+                            <a href="{{ route('sord.all_projects') }}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+                                <i class="fas fa-arrow-left mr-1"></i> Back to List
                             </a>
                         </div>
                     </div>
@@ -313,12 +312,6 @@
                     </div>
                 @endif
             @endforeach
-
-            @if(count($team) > $displayLimit)
-                <button type="button" class="more-staff-btn" onclick="openAllStaffModal()">
-                    <i class="fas fa-plus"></i>
-                </button>
-            @endif
         </div>
     </div>
 </div>
@@ -440,8 +433,6 @@
 .achieved-marker.late .achieved-date{
     color: #dc3545;
 }
-
-
 </style>
 <!-- ================= PROGRESS ROW ================= -->
 <div class="row mt-4">
@@ -493,25 +484,23 @@
 
         if ($achievedDate) {
           // milestone ka percent on progress bar
-$milestoneIndex = $loop->index;
-$milestonePercent = ($milestoneIndex / max(1, $totalMilestones - 1)) * 100;
+        $milestoneIndex = $loop->index;
+        $milestonePercent = ($milestoneIndex / max(1, $totalMilestones - 1)) * 100;
 
-// achieved vs target difference
-$diffDays = $achievedDate->diffInDays($targetDate, false);
+        // achieved vs target difference
+        $diffDays = $achievedDate->diffInDays($targetDate, false);
 
-// 1 day = kitna percent shift kare
-$oneDayPercent = 100 / max(1, $totalDaysSpan);
+        // 1 day = kitna percent shift kare
+        $oneDayPercent = 100 / max(1, $totalDaysSpan);
 
-// final achieved position
-$achievedPercent = $milestonePercent + ($diffDays * $oneDayPercent);
+        // final achieved position
+        $achievedPercent = $milestonePercent + ($diffDays * $oneDayPercent);
 
-// clamp 0–100
-$achievedPercent = max(0, min(100, $achievedPercent));
+        // clamp 0–100
+        $achievedPercent = max(0, min(100, $achievedPercent));
 
         }
     @endphp
-{{-- ACHIEVED FLAG (ON PROGRESS LINE) --}}
-
 
     <div class="step-item {{ $stepClass }}"
      onclick="openMilestoneDetail(
@@ -520,7 +509,6 @@ $achievedPercent = max(0, min(100, $achievedPercent));
         '{{ $achievedDate ? $achievedDate->format('d M Y') : 'Not achieved' }}',
         '{{ $isLate ? 'Late' : 'On Time' }}'
      )">
-
 
         {{-- MS LABEL --}}
         <div class="step-label">MS-{{ $loop->iteration }}</div>
@@ -602,10 +590,6 @@ $achievedPercent = max(0, min(100, $achievedPercent));
             <h6 class="font-weight-bold m-0 text-dark">
                 <i class="fas fa-list-ol text-primary mr-2"></i> Milestones Detail
             </h6>
-            <!-- <a href="{{ route('projects.add-milestone', $project->prj_id) }}"
-               class="btn btn-primary btn-sm shadow-sm">
-                <i class="fas fa-plus mr-1"></i> Add Milestone
-            </a> -->
         </div>
 
         <div class="milestone-container shadow-sm">
@@ -619,8 +603,6 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                             <th>Target</th>
                             <th>Achieved</th>
                             <th>Status</th>
-                            <th class="text-right"></th>
-                            <!-- <th class="text-right">Action</th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -636,10 +618,7 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                                             {{ \Carbon\Carbon::parse($milestone->msn_achvdt)->format('d M, Y') }}
                                         </span>
                                     @else
-                                        <button class="btn btn-sm btn-outline-primary rounded-circle"
-                                                onclick="openAchieveModal('{{ $milestone->msn_id }}')">
-                                            <i class="fas fa-calendar-check"></i>
-                                        </button>
+                                        -
                                     @endif
                                 </td>
                                 <td>
@@ -648,11 +627,6 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                                     @else
                                         <span class="badge badge-warning text-white px-3">{{ $milestone->msn_status }}</span>
                                     @endif
-                                </td>
-                                <td class="text-right">
-                                    <!-- <a href="{{ route('milestone.edit', $milestone->msn_id) }}" class="text-warning">
-                                        <i class="fas fa-pen"></i>
-                                    </a> -->
                                 </td>
                             </tr>
                         @empty
@@ -729,13 +703,6 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                                     <div class="d-flex align-items-center">
                                         @if($existingFile)
                                             <a href="{{ route('attachment.view', $existingFile->jat_id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-circle mr-1"><i class="fas fa-eye"></i></a>
-                                            <a href="{{ route('attachment.delete', $existingFile->jat_id) }}" class="btn btn-sm btn-outline-danger rounded-circle mr-1 text-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
-                                        @else
-                                            <div style="width: 28px; height: 28px;"><form action="{{ route('projects.upload.single', $project->prj_id) }}" method="POST" enctype="multipart/form-data" id="form-{{$index}}">@csrf <input type="hidden" name="doc_type" value="{{ $doc }}">
-                                            <label for="file-{{$index}}" class="btn rounded-circle d-flex align-items-center justify-content-center" style="width:28px; height:28px; cursor:pointer; padding:0; background-color:#007BFF; color:#fff; border:none;"> 
-                                                <i class="fas fa-upload" style="font-size: 0.9rem;"></i>
-                                            </label>
-                                <input type="file" id="file-{{$index}}" name="single_file" class="file-input-hidden" onchange="document.getElementById('form-{{$index}}').submit()"></form></div>
                                         @endif
                                     </div>
                                 </div>
@@ -754,32 +721,6 @@ $achievedPercent = max(0, min(100, $achievedPercent));
 
 
     <!-- MODALS -->
-    <!-- Achieve Date Modal -->
-    <div class="modal fade glass-modal" id="achieveDateModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title font-weight-bold"><i class="fas fa-check-circle mr-2"></i>Enter Achieved Date</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-                </div>
-                <form action="{{ route('milestone.complete') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="msn_id" id="modal_msn_id">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Select Date <span class="text-danger">*</span></label>
-                            <input type="date" name="achieved_date" class="form-control" required max="{{ date('Y-m-d') }}">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">Mark as Completed</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Other Docs Modal -->
     <div class="modal fade glass-modal" id="otherDocsModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -789,75 +730,17 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                     <button class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <div class="card card-body bg-light border mb-4">
-                        <h6 class="text-primary font-weight-bold mb-3">Upload New Document</h6>
-                        <form action="{{ route('projects.upload-other', $project->prj_id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="row">
-                                <div class="col-md-5"><input type="text" name="custom_name" class="form-control form-control-sm" placeholder="Document Name" required></div>
-                                <div class="col-md-5"><input type="file" name="doc_file" class="form-control-file form-control-sm" required></div>
-                                <div class="col-md-2"><button type="submit" class="btn btn-success btn-sm btn-block">Upload</button></div>
-                            </div>
-                        </form>
-                    </div>
                     <h6 class="font-weight-bold text-dark">Existing Files</h6>
                     <table class="table table-bordered table-sm mt-2 bg-white">
                         <thead class="bg-light"><tr><th>#</th><th>Document Name</th><th>Action</th></tr></thead>
                         <tbody>
-                            @forelse($allAttachments->whereNotIn('jat_type', $fixedDocs) as $index => $att)
+                             @foreach($allAttachments->whereNotIn('jat_type', $fixedDocs) as $att)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td><i class="fas fa-file-alt text-muted mr-2"></i> <strong>{{ $att->jat_type }}</strong></td>
+                                    <td>{{ $att->jat_type }}</td>
                                     <td>
-                                        <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-info px-2">View</a>
-                                        <a href="{{ route('attachment.delete', $att->jat_id) }}" class="btn btn-xs btn-danger px-2" onclick="return confirm('Delete?')">Delete</a>
+                                        <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-info"><i class="fas fa-eye"></i></a>
                                     </td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="3" class="text-center text-muted">No additional documents.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Employee & All Staff Modals (same as before) -->
-    <div class="modal fade" id="employeeDetailModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-body text-center p-4">
-                    <img src="" id="empModalImg" class="emp-modal-img shadow-sm">
-                    <h4 id="empModalName" class="font-weight-bold mb-1"></h4>
-                    <p id="empModalRole" class="text-primary mb-4"></p>
-                    <div class="text-left mt-3">
-                        <div class="emp-detail-row"><span class="emp-label">Email</span><span id="empModalEmail" class="text-dark"></span></div>
-                        <div class="emp-detail-row"><span class="emp-label">Phone</span><span id="empModalPhone" class="text-dark"></span></div>
-                    </div>
-                    <button type="button" class="btn btn-secondary btn-block mt-4" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="allStaffModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title">Project Team</h5>
-                    <button class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body p-0">
-                    <table class="table table-striped m-0">
-                        <thead class="bg-primary text-white"><tr><th>Image</th><th>Name</th><th>Role</th><th>Contact</th></tr></thead>
-                        <tbody>
-                            @foreach($team as $member)
-                                <tr>
-                                    <td><img src="{{ $member['img'] }}" class="rounded-circle" width="35"></td>
-                                    <td class="font-weight-bold">{{ $member['name'] }}</td>
-                                    <td>{{ $member['role'] }}</td>
-                                    <td>{{ $member['phone'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -866,71 +749,28 @@ $achievedPercent = max(0, min(100, $achievedPercent));
             </div>
         </div>
     </div>
-
-    <!-- Scripts -->
-    <script>
-
-        function openMilestoneDetail(title, target, achieved, status){
-    document.getElementById('msTitle').innerText = title;
-    document.getElementById('msTarget').innerText = target;
-    document.getElementById('msAchieved').innerText = achieved;
-    document.getElementById('msStatus').innerText = status;
-    $('#milestoneDetailModal').modal('show');
-}
-
-        function openOtherDocsModal() { $('#otherDocsModal').modal('show'); }
-        function openEmployeeModal(name, role, img, email, phone) {
-            document.getElementById('empModalName').innerText = name;
-            document.getElementById('empModalRole').innerText = role;
-            document.getElementById('empModalImg').src = img;
-            document.getElementById('empModalEmail').innerText = email;
-            document.getElementById('empModalPhone').innerText = phone;
-            $('#employeeDetailModal').modal('show');
-        }
-        function openAllStaffModal() { $('#allStaffModal').modal('show'); }
-
-        function openAchieveModal(msnId) {
-            document.getElementById('modal_msn_id').value = msnId;
-            $('#achieveDateModal').modal('show');
-        }
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js"></script>
-    <script>
-    $(function () {
-        $('.knob').knob({
-            draw: function () {
-                if (this.$.data('skin') == 'tron') {
-                    var a = this.angle(this.cv),
-                        sa = this.startAngle,
-                        sat = this.startAngle,
-                        ea = sa + a,
-                        eat = sat + a,
-                        r = true;
-                    this.g.lineWidth = this.lineWidth;
-                    this.o.cursor && (sat = eat - 0.3) && (eat = eat + 0.3);
-                    if (this.o.displayPrevious) {
-                        ea = this.startAngle + this.angle(this.value);
-                        this.o.cursor && (sa = ea - 0.3) && (ea = ea + 0.3);
-                        this.g.beginPath();
-                        this.g.strokeStyle = this.previousColor;
-                        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false);
-                        this.g.stroke();
-                    }
-                    this.g.beginPath();
-                    this.g.strokeStyle = r ? this.o.fgColor : this.fgColor;
-                    this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
-                    this.g.stroke();
-                    this.g.lineWidth = 2;
-                    this.g.beginPath();
-                    this.g.strokeStyle = this.o.fgColor;
-                    this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
-                    this.g.stroke();
-                    return false;
-                }
-            }
-        });
-    });
-    </script>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js"></script>
+<script>
+    $(function() {
+        $(".knob").knob();
+    });
+
+    function openEmployeeModal(name, role, img, email, phone) {
+        // Implement modal view logic if needed
+    }
+
+    function openMilestoneDetail(title, target, achieved, status) {
+        $('#msTitle').text(title);
+        $('#msTarget').text(target);
+        $('#msAchieved').text(achieved);
+        $('#msStatus').text(status);
+        $('#milestoneDetailModal').modal('show');
+    }
+
+    function openOtherDocsModal() {
+        $('#otherDocsModal').modal('show');
+    }
+</script>
 @endsection

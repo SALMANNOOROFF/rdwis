@@ -1,31 +1,57 @@
 @extends('welcome')
 
 @section('content')
-<div class="content-wrapper pt-3">
+@php
+    $actionRequiredCount = 0;
+    foreach($projects as $p) {
+         $d = $p->document;
+         if($d && ($d->status == 'Pending Review' || $d->status == 'Under Review by SORD')) {
+             $actionRequiredCount++;
+         }
+    }
+@endphp
+
+<div class="content-wrapper pt-2">
 
     {{-- HEADER --}}
-    <div class="content-header">
+    <div class="content-header pb-1">
         <div class="container-fluid">
-            <div class="row mb-3">
+            
+            {{-- NOTIFICATION ALERT --}}
+            @if($actionRequiredCount > 0)
+            <div class="alert alert-warning shadow-sm border-left-warning d-flex align-items-center mb-3 text-dark">
+                <i class="fas fa-bell fa-lg text-warning mr-3"></i>
+                <div>
+                    <strong>Action Required!</strong>
+                    You have <span class="badge badge-warning mx-1 text-dark">{{ $actionRequiredCount }}</span> MPR(s) waiting for your review.
+                </div>
+            </div>
+            @endif
+
+            <div class="row mb-2">
                 <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h1 id="page-heading" class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-layer-group mr-1"></i> All Divisions Projects
+                    <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem;">
+                        <i class="fas fa-layer-group mr-1"></i> All Divisions Projects <span class="text-muted text-sm ml-2">({{ $projects->count() }})</span>
                     </h1>
-                    {{-- SORD user shayad naya project na banaye, sirf view kare. Agar banana hai to button rakhein --}}
-                    {{-- <a href="#" class="btn btn-primary shadow-sm px-4" style="border-radius: 20px;">
-                        <i class="fas fa-plus-circle mr-1"></i> New Project
-                    </a> --}}
+                    <div>
+                        <a href="{{ route('sord.compile_report') }}" class="btn btn-info btn-sm shadow-sm px-4 rounded-pill mr-2">
+                            <i class="fas fa-file-word mr-1"></i> Generate Report
+                        </a>
+                        <a href="{{ route('sord.mpr_log') }}" class="btn btn-primary btn-sm shadow-sm px-4 rounded-pill">
+                            <i class="fas fa-list-alt mr-1"></i> Global MPR Log
+                        </a>
+                    </div>
                 </div>
             </div>
 
             {{-- FILTER CARD --}}
-            <div class="card card-outline card-primary shadow-sm mb-4">
-                <div class="card-body py-3">
+            <div class="card card-outline card-primary shadow-sm mb-2">
+                <div class="card-body py-2">
                     <div class="row align-items-end">
                         
-                        {{-- 1. NEW DIVISION FILTER --}}
-                        <div class="col-md-3 mb-2">
-                            <label class="small text-muted">Select Division</label>
+                        {{-- DIVISION FILTER (SORD SPECIFIC) --}}
+                        <div class="col-md-3 mb-1">
+                            <label class="small text-muted mb-0">Select Division</label>
                             <select id="divisionFilter" class="form-control form-control-sm" onchange="applyFilters()">
                                 <option value="all">All Divisions</option>
                                 @foreach($divisions as $div)
@@ -34,22 +60,19 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2 mb-2">
-                            <label class="small text-muted">From Date</label>
-                            <input type="date" id="dateFrom" class="form-control form-control-sm" onchange="applyFilters()">
+                        <div class="col-md-3 mb-1">
+                             <label class="small text-muted mb-0">Search</label>
+                             <input type="text" id="codeSearch" class="form-control form-control-sm" placeholder="Code or Title..." onkeyup="applyFilters()">
                         </div>
-                        <div class="col-md-2 mb-2">
-                            <label class="small text-muted">To Date</label>
-                            <input type="date" id="dateTo" class="form-control form-control-sm" onchange="applyFilters()">
-                        </div>
-                        <div class="col-md-2 mb-2">
-                            <label class="small text-muted">Stage</label>
-                            <select id="stageFilter" class="form-control form-control-sm" onchange="applyFilters()">
-                                <option value="all">All</option>
-                                <option value="draft">Draft</option>
-                                <option value="approved">Approved</option>
-                                <option value="started">Started</option>
-                                <option value="closed">Closed</option>
+
+                         <div class="col-md-3 mb-2">
+                            <label class="small text-muted">MPR Status</label>
+                            <select id="mprStatusFilter" class="form-control form-control-sm" onchange="applyFilters()">
+                                <option value="all">All Statuses</option>
+                                <option value="action required">Action Required</option>
+                                <option value="awaited from division">Awaited From Division</option>
+                                <option value="returned to division">Returned</option>
+                                <option value="completed">Completed</option>
                             </select>
                         </div>
                         <div class="col-md-3 mb-2">
@@ -60,6 +83,7 @@
                                 <button class="btn btn-sm btn-outline-success filter-btn-main" onclick="setMainFilter('closed', this)">Closed</button>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -69,157 +93,213 @@
     {{-- CONTENT --}}
     <div class="content">
         <div class="container-fluid">
-            <div class="row" id="projectsContainer">
-                @forelse($projects as $project)
-                @php
-                    $status = Str::lower($project->prj_status);
-                    $today = \Carbon\Carbon::now();
-                    $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : null;
-                    $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : null;
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+                        <table class="table table-hover table-striped mb-0 text-nowrap" id="projectsTable">
+                            <thead class="bg-light text-muted sticky-top shadow-sm" style="z-index: 1;">
+                                <tr>
+                                    <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th>
+                                    <th style="width: 30%;">Project Details</th>
+                                    <th style="width: 20%;">Timeline</th>
+                                    <th style="width: 20%;">Financials</th>
+                                    <th style="width: 25%;" class="text-center p-2">MPR Status</th>
+                                </tr>
+                            </thead>
+                            
+                            @forelse($projects->groupBy('unit.unt_name') as $divisionName => $divProjects)
+                            @php
+                                $divId = Str::slug($divisionName) . '-projects';
+                                $divCount = $divProjects->count();
 
-                    if ($status !== 'draft' && $endDate && $today->greaterThan($endDate)) {
-                        $status = 'closed'; 
-                    }
+                                // Calculate breakdown for header badges
+                                $redCount = 0;   // Action Required / Returned
+                                $blueCount = 0;  // Awaited / Draft
+                                $greenCount = 0; // Completed
 
-                    $timePercentage = 0;
-                    if ($startDate && $endDate) {
-                        $totalDays = $startDate->diffInDays($endDate);
-                        $daysPassed = $startDate->diffInDays($today);
-                        if ($totalDays > 0 && $today->greaterThan($startDate)) {
-                            $timePercentage = ($daysPassed / $totalDays) * 100;
-                        }
-                        if ($timePercentage > 100) $timePercentage = 100;
-                        if ($today->lessThan($startDate)) $timePercentage = 0;
-                    } elseif ($status == 'closed') {
-                        $timePercentage = 100;
-                    }
+                                foreach($divProjects as $p) {
+                                    $d = $p->document;
+                                    $st = $d ? $d->status : 'Not Started';
 
-                    $budget = $project->prj_propcost > 0 ? $project->prj_propcost : 0;
-                    $spent = 0; 
-                    if($status == 'closed') $spent = $budget * 0.95; 
-                    elseif($status == 'open') $spent = $budget * ($timePercentage / 100);
-                    
-                    $spentPercentage = ($budget > 0) ? ($spent / $budget) * 100 : 0;
-                    if($spentPercentage > 100) $spentPercentage = 100;
-
-                    // Knob Color Logic
-                    $knobColor = '#dc3545'; // Red (Default Spent)
-                    if($status == 'closed') $knobColor = '#28a745'; // Green if closed
-                    if($status == 'draft') $knobColor = '#ffc107'; // Yellow if draft
-
-                    // Mockup MPR Data
-                    $totalMonths = 12; 
-                    if ($startDate && $endDate) {
-                        $totalMonths = (int) round($startDate->diffInMonths($endDate));
-                        if ($totalMonths < 1) {
-                            $totalMonths = 1;
-                        }
-                    }
-                    $mprSubmitted = (int) round(($timePercentage / 100) * $totalMonths);
-                    $mprRemaining = (int) max(0, $totalMonths - $mprSubmitted);
-                @endphp
-
-                <div class="col-12 project-card-wrapper">
-                    <div class="card project-card shadow-sm mb-3"
-                        data-code="{{ $project->prj_code }}"
-                        data-status="{{ $status }}"
-                        data-division="{{ $project->prj_unt_id }}" 
-                        data-date="{{ \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') }}">
-
-                        <div class="card-body p-0">
-                            <div class="row no-gutters align-items-center" style="min-height: 120px;">
-                                
-                                {{-- LEFT --}}
-                                <div class="col-md-3 p-3 border-right">
-                                    <div class="mb-2">
-                                        <span class="badge badge-dark px-2 mr-1">{{ $project->unit->unt_name ?? 'Unknown Division' }}</span>
-                                        @if($status == 'draft') <span class="badge badge-warning px-2">DRAFT</span>
-                                        @elseif($status == 'closed') <span class="badge badge-success px-2">COMPLETED</span>
-                                        @else <span class="badge badge-primary px-2">IN PROGRESS</span> @endif
-                                    </div>
-                                    <div class="mb-1">
-                                        <span class="text-muted small font-weight-bold">Code: </span>
-                                        <span class="badge badge-light border text-dark">{{ $project->prj_code }}</span>
-                                    </div>
-                                    <h6 class="text-dark font-weight-bold text-truncate" title="{{ $project->prj_title }}">{{ $project->prj_title }}</h6>
-                                </div>
-
-                                {{-- CENTER: TIMELINE & JQUERY KNOB --}}
-                                <div class="col-md-6 p-3 border-right">
-                                    <div class="row h-100 align-items-center">
-                                        
-                                        {{-- Timeline --}}
-                                        <div class="col-md-7 border-right">
-                                            <small class="text-muted text-uppercase font-weight-bold mb-2 d-block">Timeline</small>
-                                            <div class="d-flex justify-content-between small text-muted mb-1 px-1">
-                                                <span>{{ $startDate ? $startDate->format('d M y') : '--' }}</span>
-                                                <span>{{ $endDate ? $endDate->format('d M y') : '--' }}</span>
-                                            </div>
-                                            <div class="progress" style="height: 10px; border-radius: 5px; background: #e9ecef;">
-                                                <div class="progress-bar {{ $status == 'closed' ? 'bg-success' : 'bg-info' }}" role="progressbar" style="width: {{ $timePercentage }}%"></div>
-                                            </div>
-                                            <div class="text-center mt-1"><small class="text-dark font-weight-bold">{{ round($timePercentage) }}% Elapsed</small></div>
+                                    if(in_array($st, ['Pending Review', 'Under Review by SORD', 'Returned to Division', 'Returned'])) {
+                                        $redCount++;
+                                    } elseif(in_array($st, ['Finalized', 'Approved', 'Forwarded to MD'])) {
+                                        $greenCount++;
+                                    } else {
+                                        $blueCount++;
+                                    }
+                                }
+                            @endphp
+                            
+                            {{-- DIVISION HEADER (Clickable for Collapse) --}}
+                            <tbody class="division-group" data-division-id="{{ $divProjects->first()->unit->unt_id ?? '' }}">
+                                <tr class="bg-light division-header collapsed" role="button" data-toggle="collapse" data-target="#{{ $divId }}" aria-expanded="false" aria-controls="{{ $divId }}" style="cursor: pointer;">
+                                    <td colspan="5" class="font-weight-bold text-dark py-2 px-3" style="background-color: #e9ecef;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>
+                                                <i class="fas fa-building text-secondary mr-2"></i> {{ $divisionName ?? 'Unknown Division' }}
+                                                <span class="badge badge-pill badge-secondary ml-2" title="Total Projects">{{ $divCount }} Total</span>
+                                                
+                                                @if($redCount > 0)
+                                                <span class="badge badge-pill badge-danger ml-1" title="Action Required / Returned">{{ $redCount }}</span>
+                                                @endif
+                                                @if($blueCount > 0)
+                                                <span class="badge badge-pill badge-info ml-1" title="Awaited">{{ $blueCount }}</span>
+                                                @endif
+                                                @if($greenCount > 0)
+                                                <span class="badge badge-pill badge-success ml-1" title="Completed">{{ $greenCount }}</span>
+                                                @endif
+                                            </span>
+                                            <i class="fas fa-chevron-down text-muted small"></i>
                                         </div>
+                                    </td>
+                                </tr>
+                            </tbody>
 
-                                        {{-- jQuery Knob --}}
-                                        <div class="col-md-5 text-center">
-                                            <div style="position:relative; display:inline-block;">
-                                                <input type="text" class="knob" value="{{ round($spentPercentage) }}" 
-                                                    data-width="70" 
-                                                    data-height="70" 
-                                                    data-fgColor="{{ $knobColor }}"
-                                                    data-readonly="true"
-                                                    data-thickness=".2"
-                                                    data-skin="tron"
-                                                >
-                                            </div>
-                                            <div class="mt-1" style="font-size: 0.65rem;">
-                                                <span class="text-muted d-block">Total: {{ number_format($budget/1000000, 1) }}M</span>
-                                                <span class="text-danger font-weight-bold d-block">Spent: {{ number_format($spent/1000000, 1) }}M</span>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                {{-- RIGHT --}}
-                                <div class="col-md-3 p-3 text-center bg-light-blue" style="border-radius: 0 12px 12px 0;">
-                                    <h6 class="text-primary font-weight-bold mb-2" style="font-size: 0.85rem;"><i class="fas fa-file-invoice mr-1"></i> MPR Status</h6>
-                                    <div class="d-flex justify-content-center gap-2 mb-3">
-                                        <div class="badge-group text-center mx-1"><span class="badge badge-info p-2 d-block mb-1">{{ $totalMonths }}</span><small class="text-muted" style="font-size: 0.6rem;">TOTAL</small></div>
-                                        <div class="badge-group text-center mx-1"><span class="badge badge-success p-2 d-block mb-1">{{ $mprSubmitted }}</span><small class="text-muted" style="font-size: 0.6rem;">SENT</small></div>
-                                        <div class="badge-group text-center mx-1"><span class="badge badge-danger p-2 d-block mb-1">{{ $mprRemaining }}</span><small class="text-muted" style="font-size: 0.6rem;">LEFT</small></div>
-                                    </div>
+                            {{-- PROJECTS LIST (Collapsible Body - DEFAULT HIDDEN) --}}
+                            <tbody id="{{ $divId }}" class="collapse project-list-body">
+                                @foreach($divProjects as $project)
+                                @php
+                                    $status = Str::lower($project->prj_status);
                                     
-                                    {{-- SORD only views details --}}
-                                    <a href="{{ route('projects.show', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm btn-block font-weight-bold rounded-pill"><i class="fas fa-eye mr-1"></i> View Details</a>
-                                </div>
+                                    // --- DOCUMENT STATUS CHECK ---
+                                    $doc = $project->document; 
+                                    $docStatus = $doc ? $doc->status : 'Not Started';
+                                    
+                                    // --- SORD MAPPING LOGIC ---
+                                    if($docStatus == 'Pending Review' || $docStatus == 'Under Review by SORD') $docStatus = 'Action Required';
+                                    elseif($docStatus == 'Not Started' || $docStatus == 'Draft') $docStatus = 'Awaited from Division';
+                                    elseif($docStatus == 'Returned') $docStatus = 'Returned to Division';
+                                    elseif($docStatus == 'Finalized' || $docStatus == 'Approved' || $docStatus == 'Forwarded to MD') $docStatus = 'Finalized';
 
-                            </div>
-                        </div>
+                                    // --- Calculation Logic ---
+                                    $today = \Carbon\Carbon::now();
+                                    $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : null;
+                                    $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : null;
+                                    
+                                    $timePercentage = 0;
+                                    if ($startDate && $endDate && $status != 'closed') {
+                                        $totalDays = $startDate->diffInDays($endDate);
+                                        $daysPassed = $startDate->diffInDays($today);
+                                        if ($totalDays > 0 && $today->greaterThan($startDate)) {
+                                            $timePercentage = ($daysPassed / $totalDays) * 100;
+                                        }
+                                        $timePercentage = min(100, max(0, $timePercentage));
+                                    } elseif ($status == 'closed') {
+                                        $timePercentage = 100;
+                                    }
+                                    
+                                    $budget = $project->prj_propcost > 0 ? $project->prj_propcost : 0;
+                                    $spent = 0; 
+                                    $spentPercentage = ($budget > 0) ? ($spent / $budget) * 100 : 0;
+                                    
+                                    // Status Color Class
+                                    $statusClass = 'text-secondary';
+                                    if($docStatus == 'Action Required') $statusClass = 'text-warning font-weight-bold';
+                                    elseif($docStatus == 'Finalized') $statusClass = 'text-success font-weight-bold';
+                                    elseif($docStatus == 'Awaited from Division' || $docStatus == 'Returned to Division') $statusClass = 'text-info font-weight-bold';
+                                @endphp
+
+                                <tr class="project-row" 
+                                    data-code="{{ strtolower($project->prj_code) }}"
+                                    data-title="{{ strtolower($project->prj_title) }}"
+                                    data-status="{{ $status }}"
+                                    data-division="{{ $project->prj_unt_id }}"
+                                    data-mpr-status="{{ strtolower($docStatus) }}"
+                                    data-date="{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') : '' }}">
+                                    
+                                    {{-- 1. LEFT ACTION BUTTON --}}
+                                    <td class="align-middle p-0 text-center border-right">
+                                        <a href="{{ route('sord.project_details', $project->prj_id) }}" class="vertical-btn d-block text-white bg-primary shadow-hover h-100" title="View Details">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </td>
+
+                                    {{-- Project Details --}}
+                                    <td class="align-middle p-2">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <span class="font-weight-bold text-primary mr-2" style="font-size: 1rem;">{{ $project->prj_code }}</span>
+                                            @if($status == 'open')
+                                                <span class="badge badge-success px-2 py-0"><i class="fas fa-circle text-xs mr-1"></i> Open</span>
+                                            @elseif($status == 'closed')
+                                                <span class="badge badge-secondary px-2 py-0"><i class="fas fa-check-circle text-xs mr-1"></i> Closed</span>
+                                            @else
+                                                <span class="badge badge-info px-2 py-0 text-capitalize">{{ $project->prj_status }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-dark small text-truncate" style="max-width: 350px;" title="{{ $project->prj_title }}">
+                                            {{ $project->prj_title }}
+                                        </div>
+                                    </td>
+
+                                    {{-- Timeline --}}
+                                    <td class="align-middle p-2">
+                                        <div class="d-flex justify-content-between small text-muted text-xs mb-1">
+                                            <span>Starts: {{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d-M-Y') : 'N/A' }}</span>
+                                            <span class="text-info font-weight-bold">{{ round($timePercentage) }}%</span>
+                                        </div>
+                                        <div class="progress progress-xs rounded-pill" style="height: 4px;">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ $timePercentage }}%"></div>
+                                        </div>
+                                    </td>
+
+                                    {{-- Financials --}}
+                                    <td class="align-middle p-2">
+                                        <div class="d-flex justify-content-between text-dark text-xs mb-1">
+                                            <span class="font-weight-bold">{{ number_format($project->prj_propcost / 1000000, 2) }} M</span>
+                                            <span class="text-success font-weight-bold">{{ round($spentPercentage) }}%</span>
+                                        </div>
+                                        <div class="progress progress-xs rounded-pill" style="height: 4px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $spentPercentage }}%"></div>
+                                        </div>
+                                    </td>
+
+                                    {{-- MPR Status & Action (Centered) --}}
+                                    <td class="align-middle text-center p-2">
+                                        {{-- STATUS DISPLAY --}}
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <span class="{{ $statusClass }} text-sm mr-2 text-wrap" style="max-width: 140px; text-align: center;">
+                                                {{ $docStatus }}
+                                            </span>
+
+                                            {{-- ACTION BUTTONS --}}
+                                            @if($docStatus == 'Action Required')
+                                                <a href="{{ route('sord.review_mpr', $doc->doc_id) }}" class="btn btn-xs btn-primary shadow-sm rounded-circle" title="Review Now" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-pencil-alt text-xs"></i>
+                                                </a>
+                                            @elseif($docStatus == 'Returned to Division')
+                                                <a href="{{ route('sord.review_mpr', $doc->doc_id) }}" class="btn btn-xs btn-outline-danger shadow-sm rounded-circle" title="View Status" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-eye text-xs"></i>
+                                                </a>
+                                            @elseif($docStatus == 'Finalized')
+                                                 <a href="{{ route('sord.review_mpr', $doc->doc_id) }}" class="btn btn-xs btn-outline-dark shadow-sm rounded-circle" title="View Finalized Data" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-eye text-xs"></i>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            @empty
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="fas fa-folder-open fa-3x mb-3 d-block text-gray-300"></i>
+                                        No projects found.
+                                    </td>
+                                </tr>
+                            </tbody>
+                            @endforelse
+                        </table>
                     </div>
                 </div>
-
-                @empty
-                    <div class="col-12"><div class="alert alert-light text-center border shadow-sm py-5"><h5>No projects found.</h5></div></div>
-                @endforelse
             </div>
         </div>
     </div>
 </div>
 
-{{-- SCRIPTS (Filter Logic + jQuery Knob) --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js"></script>
 <script>
-    // Initialize Knob
-    $(function() {
-        $(".knob").knob({
-            'format' : function (value) {
-                return value + '%';
-            }
-        });
-    });
-
     let currentMainStatus = 'all';
 
     function setMainFilter(status, btn) {
@@ -231,60 +311,123 @@
 
     function applyFilters() {
         const divisionFilter = document.getElementById('divisionFilter').value;
-        const stageFilter = document.getElementById('stageFilter').value.toLowerCase();
-        const dateFrom = document.getElementById('dateFrom').value;
-        const dateTo = document.getElementById('dateTo').value;
+        const codeSearch = document.getElementById('codeSearch') ? document.getElementById('codeSearch').value.toLowerCase() : '';
+        const mprStatusFilter = document.getElementById('mprStatusFilter').value.toLowerCase();
+        
+        // Hide/Show entire division groups based on filters
+        // Logic: 
+        // 1. Iterate through groups.
+        // 2. If division filter is active, hide groups that don't match.
+        // 3. Iterate through rows in visible groups.
+        // 4. Apply other filters.
+        // 5. If all rows in a group are hidden, hide the group header too.
 
-        const cards = document.querySelectorAll('.project-card-wrapper');
-        let visibleCount = 0;
+        const divisionGroups = document.querySelectorAll('.division-group');
+        let totalVisible = 0;
 
-        cards.forEach(wrapper => {
-            const card = wrapper.querySelector('.project-card');
+        divisionGroups.forEach(group => {
+            const groupId = group.dataset.divisionId;
+            const targetBodyId = group.querySelector('tr').dataset.target.substring(1); // Remove '#'
+            const projectBody = document.getElementById(targetBodyId);
+            const rows = projectBody.querySelectorAll('.project-row');
+            
+            let groupVisible = true;
 
-            const status = card.dataset.status.toLowerCase();
-            const division = card.dataset.division;
-            const date = new Date(card.dataset.date); // parse the date string into a Date object
-
-            let show = true;
-
-            // ===== MAIN STATUS =====
-            if (currentMainStatus !== 'all' && status !== currentMainStatus) {
-                show = false;
+            // 1. Division Filter (Top Level)
+            if (divisionFilter !== 'all' && groupId != divisionFilter) {
+                groupVisible = false;
             }
 
-            // ===== STAGE FILTER =====
-            if (stageFilter !== 'all' && status !== stageFilter) {
-                show = false;
+            if (!groupVisible) {
+                group.style.display = 'none';
+                projectBody.style.display = 'none'; // Ensure content hidden
+                return; // Skip processing rows for hidden group
+            } else {
+                group.style.display = '';
+                // Ensure body is visible if it was collapsed by user interaction?? No, respect filter.
+                // We should probably show it if it matches the filter, but respect the 'collapse' state if unmodified?
+                // For simplified UX, let's keep user state or default state.
+                // projectBody.style.display = ''; // Don't force display, it might be collapsed
             }
 
-            // ===== DATE FILTER =====
-            if (dateFrom && new Date(dateFrom) > date) show = false;
-            if (dateTo && new Date(dateTo) < date) show = false;
+            // 2. Row Level Filters
+            let visibleRowsInGroup = 0;
+            rows.forEach(row => {
+                const code = row.dataset.code;
+                const title = row.dataset.title;
+                const status = row.dataset.status;
+                const mprStatus = row.dataset.mprStatus;
+                
+                let show = true;
 
-            // ===== DIVISION FILTER =====
-            if (divisionFilter !== 'all' && division != divisionFilter) {
-                show = false;
+                // Effective Status Logic (Treat 'finalized' MPR as 'closed')
+                let effectiveStatus = status;
+                if(mprStatus === 'finalized') {
+                    effectiveStatus = 'closed';
+                }
+
+                // Main Status Filter
+                if (currentMainStatus !== 'all') {
+                    if (currentMainStatus === 'open' && (effectiveStatus === 'closed' || effectiveStatus === 'draft')) show = false;
+                    else if (currentMainStatus === 'closed' && effectiveStatus !== 'closed') show = false;
+                }
+
+                // MPR Status Filter
+                if (mprStatusFilter !== 'all' && mprStatus !== mprStatusFilter) show = false;
+
+                // Search Filter
+                if (codeSearch && !code.includes(codeSearch) && !title.includes(codeSearch)) show = false;
+                
+                row.style.display = show ? 'table-row' : 'none';
+                if(show) visibleRowsInGroup++;
+            });
+
+            // 3. Auto-Hide Group if no matching rows
+            if (visibleRowsInGroup === 0) {
+                group.style.display = 'none';
+                projectBody.classList.remove('show'); // Collapse empty groups
+            } else {
+                group.style.display = ''; // Show header
+                totalVisible += visibleRowsInGroup;
             }
-
-            wrapper.style.display = show ? 'block' : 'none';
-            if (show) visibleCount++;
         });
 
-        document.getElementById('page-heading').innerHTML =
-            `<i class="fas fa-layer-group mr-1"></i> All Divisions Projects (${visibleCount})`;
+        // Update count
+        const headingEl = document.getElementById('page-heading');
+        if(headingEl) {
+             // Keep original text, just update count
+             const originalText = 'All Divisions Projects'; 
+             headingEl.innerHTML = `<i class="fas fa-layer-group mr-1"></i> ${originalText} <span class="text-muted text-sm ml-2">(${totalVisible})</span>`;
+        }
     }
 </script>
 
 <style>
-    .project-card { border: none; border-radius: 12px; transition: transform 0.2s; border-left: 5px solid #ccc; background: #fff; }
-    .project-card[data-status="open"] { border-left-color: #007bff; }
-    .project-card[data-status="closed"] { border-left-color: #28a745; }
-    .project-card[data-status="draft"] { border-left-color: #ffc107; }
-    .project-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important; }
-    .bg-light-blue { background-color: #f8fbff; }
-    .filter-btn-main.active {
-        background-color: #007bff;
-        color: #fff;
+    /* Compact Table Styling */
+    .table td { vertical-align: middle; font-size: 0.85rem; padding: 0.35rem !important; }
+    .btn-xs { padding: 0.1rem 0.3rem; font-size: 0.7rem; line-height: 1.1; border-radius: 4px; }
+    .text-xs { font-size: 0.7rem; }
+    
+    /* Sticky Header */
+    .sticky-top { position: sticky; top: 0; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
+
+    /* Vertical Action Button */
+    .vertical-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 50px; /* Reduced to match user requests */
+        min-height: 100%;
+        transition: background-color 0.2s;
+        border-radius: 0; /* Flat look with column */
+    }
+    .vertical-btn:hover {
+        background-color: #0056b3 !important; /* Darker blue on hover */
+    }
+    .shadow-hover:hover {
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
     }
 </style>
+
 @endsection

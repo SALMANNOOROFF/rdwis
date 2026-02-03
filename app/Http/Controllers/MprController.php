@@ -37,6 +37,9 @@ class MprController extends Controller
     {
         $document = Document::with(['project', 'versions'])->findOrFail($doc_id);
         
+        // Fetch absolute latest version to show current state
+        $latestVersion = $document->versions()->orderBy('ver_id', 'desc')->first();
+
         $divisionVersion = $document->versions()
                                     ->where('action_by', $document->creator_id)
                                     ->orderBy('ver_id', 'desc')
@@ -54,7 +57,7 @@ class MprController extends Controller
             $isEditable = false; 
         }
 
-        return view('SORD.review_mpr', compact('document', 'divisionVersion', 'sordVersion', 'isEditable'));
+        return view('SORD.review_mpr', compact('document', 'divisionVersion', 'sordVersion', 'latestVersion', 'isEditable'));
     }
 
     // 3. Action Handler (Same as before)
@@ -68,15 +71,21 @@ class MprController extends Controller
             
             $document = Document::findOrFail($docId);
             
-            $contentData = [
-                'physical_progress' => $request->physical_progress,
-                'financial_progress' => $request->financial_progress,
-                'issues' => $request->issues,
-            ];
-
             // Version Create
             $lastVer = DocumentVersion::where('doc_id', $docId)->orderBy('ver_id', 'desc')->first();
             $newVerNo = $lastVer ? $lastVer->version_no + 0.1 : 1.0;
+
+            // FIX: Preserve existing content if SORD is just adding remarks/status change
+            // SORD actions typically don't edit the progress fields, so $request->physical_progress might be null.
+            // We must merge with previous data to avoid overwriting with nulls.
+            $existingContent = $lastVer ? $lastVer->content_data : [];
+
+            $contentData = [
+                'mpr_content' => $request->has('mpr_content') ? $request->mpr_content : ($existingContent['mpr_content'] ?? null),
+            ];
+
+            // Filter out nulls so we don't save {"mpr_content": null} if it's empty
+            $contentData = array_filter($contentData, function($v) { return !is_null($v) && $v !== ''; });
 
             DocumentVersion::create([
                 'doc_id' => $docId,
@@ -94,19 +103,21 @@ class MprController extends Controller
             } 
             elseif ($action == 'forward') {
                 // Forward Logic...
-                $document->current_owner_id = 0; // Or MD ID
+                // FIX: Don't set owner to 0 as it violates FK. Keep it as current user (SORD) or use NULL if allowed.
+                // Assuming keeping it as SORD user is safer for now, status 'Finalized' will prevent edits.
+                $document->current_owner_id = $user->acc_id; 
                 $document->status = 'Finalized';
                 $document->save();
                 
                 DocumentHistory::create([
                     'doc_id' => $docId,
                     'from_user_id' => $user->acc_id,
-                    'to_user_id' => 0,
-                    'action_type' => 'Forwarded',
+                    'to_user_id' => $user->acc_id, // Self (Finalized)
+                    'action_type' => 'Finalized', // Changed from Forwarded to match status logic
                     'notes' => $request->remarks,
                     'created_at' => now()
                 ]);
-                $msg = 'MPR Forwarded/Finalized.';
+                $msg = 'MPR Finalized.';
             } 
             elseif ($action == 'return') {
                 // Return Logic
@@ -126,7 +137,7 @@ class MprController extends Controller
                 $msg = 'MPR Returned to Division.';
             }
 
-            return redirect()->route('sord.inbox')->with('success', $msg);
+            return redirect()->route('sord.all_projects')->with('success', $msg);
         });
     }
 
@@ -153,12 +164,12 @@ class MprController extends Controller
         } 
         elseif ($action == 'forward') {
             $document->status = 'Finalized';
-            $document->current_owner_id = 0; // Lock forever
+            $document->current_owner_id = $user->acc_id; // Keep with SORD, status locks it
             
             DocumentHistory::create([
                 'doc_id' => $document->doc_id,
                 'from_user_id' => $user->acc_id,
-                'to_user_id' => 0,
+                'to_user_id' => $user->acc_id,
                 'action_type' => 'Finalized',
                 'notes' => 'MPR Approved and Finalized',
                 'created_at' => now()
@@ -174,75 +185,99 @@ class MprController extends Controller
     }
 }
 
-// --- 4. COMPILE REPORT FUNCTION (YE MISSING THA) ---
+// --- 4. COMPILE REPORT FUNCTION ---
     public function compileMprReport()
     {
         $user = Auth::user();
 
         // 1. Fetch Data (Same logic as inbox)
-        $documents = Document::with(['project', 'creator.unit', 'latestVersion', 'currentOwner'])
+        $documents = Document::with(['project', 'creator.unit', 'latestVersion', 'currentOwner', 'history' => function($q) {
+                                 $q->orderBy('created_at', 'desc');
+                             }])
                              ->where(function($query) use ($user) {
-                                 $query->where('current_owner_id', $user->acc_unt_id)
-                                       ->orWhere('status', 'Returned');
+                                 $query->whereIn('status', ['Finalized', 'Forwarded to MD', 'Returned']);
                              })
                              ->orderBy('updated_at', 'desc')
                              ->get();
-
-        if ($documents->isEmpty()) {
-            return redirect()->back()->with('error', 'No MPRs found to compile.');
-        }
 
         // 2. Initialize PHPWord
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
 
-        // Title
-        $section->addText('Compiled Monthly Progress Report', ['bold' => true, 'size' => 16], ['align' => 'center']);
-        $section->addText('Generated on: ' . now()->format('d M, Y'), ['italic' => true, 'size' => 10], ['align' => 'center']);
+        // Title & Timestamp
+        $section->addText('SORD Monthly Progress Report (MPR)', ['bold' => true, 'size' => 16], ['align' => 'center']);
+        $section->addText('Generated: ' . now()->format('d F Y, h:i A'), ['italic' => true, 'size' => 10], ['align' => 'center']);
         $section->addTextBreak(1);
 
-        // 3. Loop through MPRs
-        foreach($documents as $doc) {
-            $projectName = $doc->project->prj_title ?? 'Unknown Project';
-            $divisionName = $doc->creator->unit->unt_name ?? 'Unknown Division';
-            $status = $doc->status;
-            
-            // Content extract karo
-            $content = "No content available.";
-            if($doc->latestVersion && isset($doc->latestVersion->content_data['mpr_content'])) {
-                $content = $doc->latestVersion->content_data['mpr_content'];
+        if ($documents->isEmpty()) {
+            $section->addText("No Finalized or Returned MPRs found for this period.", ['bold' => true, 'color' => 'FF0000'], ['align' => 'center']);
+        } else {
+            // 3. Loop through MPRs
+            foreach($documents as $doc) {
+                $projectName = $doc->project->prj_title ?? 'Unknown Project';
+                $projectCode = $doc->project->prj_code ?? 'N/A';
+                $divisionName = $doc->creator->unit->unt_name ?? 'Unknown Division';
+                $status = $doc->status;
+                
+                // --- Extract MPR Content ---
+                $content = "No content available.";
+                if($doc->latestVersion && isset($doc->latestVersion->content_data)) {
+                    $d = $doc->latestVersion->content_data;
+                    // Try to get 'mpr_content' first, fallback to 'physical_progress' if old data
+                    $content = $d['mpr_content'] ?? ($d['physical_progress'] ?? 'No content.');
+                }
+
+                // --- Extract Return Remarks (if applicable) ---
+                $returnRemarks = null;
+                if ($status == 'Returned') {
+                    // Find the last 'Returned' action in history
+                    $lastReturn = $doc->history->firstWhere('action_type', 'Returned');
+                    if ($lastReturn) {
+                        $returnRemarks = $lastReturn->notes;
+                    }
+                }
+
+                // --- Write to Word ---
+                
+                // Header Block (Project Title)
+                $table = $section->addTable(['borderSize' => 6, 'borderColor' => '999999', 'cellMargin' => 80, 'width' => 100 * 50]);
+                $table->addRow();
+                $table->addCell(9000)->addText($projectCode . ' - ' . $projectName, ['bold' => true, 'size' => 11, 'color' => '1F497D']);
+                
+                // Meta Info
+                $section->addTextBreak(0);
+                $textrun = $section->addTextRun();
+                $textrun->addText("Division: ", ['bold' => true]);
+                $textrun->addText($divisionName . "  |  ");
+                $textrun->addText("Status: ", ['bold' => true]);
+                $textrun->addText($status, ['bold' => true, 'color' => ($status == 'Returned' ? 'FF0000' : '008000')]);
+
+                $section->addTextBreak(1);
+                
+                // CONTENT (Single Block)
+                $section->addText("MPR Report / Progress:", ['bold' => true, 'underline' => 'single', 'size' => 10]);
+                $lines = explode("\n", $content);
+                foreach($lines as $line) $section->addText(trim($line), ['size' => 10]);
+                
+                // --- SORD REMARKS (Only if Returned) ---
+                if ($status == 'Returned' && $returnRemarks) {
+                    $section->addTextBreak(1);
+                    $table = $section->addTable(['borderSize' => 6, 'borderColor' => 'FF0000', 'cellMargin' => 80, 'width' => 100 * 50]);
+                    $table->addRow();
+                    $cell = $table->addCell(9000, ['bgColor' => 'FFEBEB']);
+                    $cell->addText("SORD REJECTION / RETURN REMARKS:", ['bold' => true, 'color' => 'FF0000', 'size' => 10]);
+                    
+                    $lines = explode("\n", $returnRemarks);
+                    foreach($lines as $line) {
+                        $cell->addText(trim($line), ['italic' => true, 'size' => 10]);
+                    }
+                }
+
+                // Separator
+                $section->addTextBreak(1);
+                $section->addText("________________________________________________________________________________", ['color' => 'E0E0E0']);
+                $section->addTextBreak(1);
             }
-
-            // --- Write to Word ---
-            
-            // Project Name
-            $section->addText($projectName, ['bold' => true, 'size' => 14, 'color' => '1F497D']);
-            
-            // Details Table
-            $table = $section->addTable(['borderSize' => 6, 'borderColor' => '999999', 'cellMargin' => 50]);
-            $table->addRow();
-            $table->addCell(4000)->addText("Division:", ['bold' => true]);
-            $table->addCell(5000)->addText($divisionName);
-            
-            $table->addRow();
-            $table->addCell(4000)->addText("Status:", ['bold' => true]);
-            $table->addCell(5000)->addText($status);
-
-            $section->addTextBreak(1);
-            
-            // Content
-            $section->addText("Description / Progress:", ['bold' => true, 'underline' => 'single']);
-            
-            // Line breaks handle karna
-            $lines = explode("\n", $content);
-            foreach($lines as $line) {
-                $section->addText(trim($line));
-            }
-
-            // Separator
-            $section->addTextBreak(1);
-            $section->addText("----------------------------------------------------------------", ['color' => 'CCCCCC']);
-            $section->addTextBreak(1);
         }
 
         // 4. Download
@@ -257,4 +292,15 @@ class MprController extends Controller
 
 
 
+    // 5. Global MPR Log (New)
+    public function sordLog()
+    {
+        // Fetch all history related to MPRs (Forwarded or Returned)
+        $logs = DocumentHistory::with(['document.project', 'fromUser.unit', 'toUser'])
+                               ->whereIn('action_type', ['Forwarded', 'Returned', 'Finalized'])
+                               ->orderBy('created_at', 'desc')
+                               ->paginate(20);
+
+        return view('SORD.mpr_log', compact('logs'));
+    }
 }

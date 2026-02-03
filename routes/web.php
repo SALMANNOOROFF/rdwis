@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DocMprController; // <--- YE IMPORT ZAROORI HAI
 use App\Http\Controllers\MprController;
+use App\Http\Controllers\DivHrController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +82,7 @@ Route::middleware('auth')->group(function () {
         // --- NEW MPR SYSTEM (USING DocMprController) ---
         // (Yeh line replace kar rahi hai purane ProjectController logic ko)
         Route::get('/project/{id}/view-mpr', [DocMprController::class, 'view'])->name('mpr.view');
+        Route::get('/project/{id}/mpr-report', [DocMprController::class, 'generateReport'])->name('mpr.report');
         Route::post('/project/{id}/mpr/store', [DocMprController::class, 'store'])->name('mpr.store');
 
         // Old History Route (Keep if needed for other things)
@@ -116,6 +118,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/generate-comparative', [ReportsController::class, 'generateComparative'])->name('reports.generate.comparative');
         Route::post('/generate-it-letter', [ReportsController::class, 'generateITLetter'])->name('reports.generate.itletter');
 
+         // HR 
+        Route::get('/divhr/employelist', [DivHrController::class, 'employeelist'])->name('divhr.employelist');
+        Route::prefix('divhr')->group(function () {
+
+            Route::get('/employeelist', [DivHrController::class, 'employeelist'])
+                ->name('divhr.employelist');
+
+            Route::get('/employee/{id}', [DivHrController::class, 'employeedetail'])
+                ->name('divhr.employeedetail');
+
+        });
+
     }); // End Division Group
 
 
@@ -147,6 +161,12 @@ Route::middleware('auth')->group(function () {
         // URL Banega: /sord/action | Name Banega: sord.action
         Route::post('/action', [MprController::class, 'sordAction'])->name('action');
         Route::get('/compile-report', [MprController::class, 'compileMprReport'])->name('compile_report');
+        
+        // SORD Project Details (Read Only)
+        Route::get('/project-details/{id}', [ProjectController::class, 'sordShow'])->name('project_details');
+
+        // Global MPR Log
+        Route::get('/mpr-log', [MprController::class, 'sordLog'])->name('mpr_log');
 
     });
 }); // End Auth

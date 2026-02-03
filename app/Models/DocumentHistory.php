@@ -19,13 +19,21 @@ class DocumentHistory extends Model
         'created_at'
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
     // --- Relationships (Taake View mein Naam dikha sakein) ---
     
-    public function sender() {
+    public function fromUser() {
         return $this->belongsTo(User::class, 'from_user_id', 'acc_id');
     }
 
-    public function receiver() {
+    public function toUser() {
         return $this->belongsTo(User::class, 'to_user_id', 'acc_id');
+    }
+
+    public function document() {
+        return $this->belongsTo(Document::class, 'doc_id', 'doc_id');
     }
 }

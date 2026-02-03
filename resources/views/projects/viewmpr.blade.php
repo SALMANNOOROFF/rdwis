@@ -78,33 +78,19 @@
                 </div>
             </div>
 
-            {{-- 1. ALERT: RETURNED FOR CORRECTION (Red) --}}
-            @if(isset($isReturned) && $isReturned)
-                <div class="alert alert-danger shadow-lg border-0">
-                    <div class="d-flex align-items-start">
-                        <div class="mr-3"><i class="fas fa-exclamation-circle fa-2x"></i></div>
-                        <div>
-                            <h5 class="font-weight-bold">Returned for Correction!</h5>
-                            <p class="mb-1">
-                                This document was returned by 
-                                <strong>{{ $document->latestVersion->actor->role->rol_desig ?? 'Reviewing Authority' }}</strong>.
-                            </p>
-                            <div class="bg-white text-danger p-2 rounded border border-danger">
-                                <strong>Reason:</strong> "{{ $document->latestVersion->remarks }}"
-                            </div>
-                            <small class="mt-2 d-block text-white-50">Please update the values below and forward again.</small>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            {{-- 2. ALERT: LOCKED FILE (Yellow) --}}
-            @if(!$isEditable && $document && !$isReturned)
-                <div class="alert alert-warning shadow-sm border-0">
-                    <h5><i class="icon fas fa-lock"></i> File Locked!</h5>
-                    This MPR is currently with <strong>{{ $document->currentOwner->role->rol_desig ?? ($document->currentOwner->acc_name ?? 'SORD') }}</strong> for review. You cannot edit it until it is returned.
-                </div>
-            @endif
+            {{-- STATUS LINE (Simple Text) --}}
+            <div class="mb-3">
+                @if(isset($isReturned) && $isReturned)
+                    <h5 class="text-danger font-weight-bold">
+                        <i class="fas fa-exclamation-circle mr-1"></i> Returned by {{ $document->latestVersion->actor->role->rol_desig ?? 'Reviewer' }}: 
+                        <span class="bg-warning px-2 rounded text-dark" style="font-size: 0.9em;">"{{ $document->latestVersion->remarks }}"</span>
+                    </h5>
+                @elseif(!$isEditable && $document)
+                    <h5 class="text-info font-weight-bold">
+                        <i class="fas fa-lock mr-1"></i> Status: {{ $document->status }} (Currently with {{ $document->currentOwner->role->rol_desig ?? ($document->currentOwner->acc_name ?? 'SORD') }})
+                    </h5>
+                @endif
+            </div>
 
             <div class="mpr-wrapper">
                 
@@ -126,44 +112,30 @@
                                 
                                 {{-- Retrieve Latest Data --}}
                                 @php
-                                    $latestData = $document && $document->latestVersion ? $document->latestVersion->content_data : [];
-                                    $remarks = $document && $document->latestVersion ? $document->latestVersion->remarks : '';
+                                    $latestVer = $document ? $document->latestVersion : null;
+                                    $latestData = $latestVer ? $latestVer->content_data : [];
+                                    $remarks = $latestVer ? $latestVer->remarks : '';
+
+                                    // FIX: If Returned and Content is Empty, fetch from Previous Version (Division's Draft)
+                                    if(isset($isReturned) && $isReturned && empty($latestData['mpr_content'])) {
+                                        $prevVer = $document->versions->take(2)->last(); 
+                                        if($prevVer && $prevVer->ver_id != $latestVer->ver_id) {
+                                             $latestData['mpr_content'] = $prevVer->content_data['mpr_content'] ?? '';
+                                        }
+                                    }
                                 @endphp
 
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Physical Progress (%) <span class="text-danger">*</span></label>
-                                            <div class="input-group">
-                                                <input type="number" name="physical_progress" class="form-control font-weight-bold" 
-                                                       value="{{ $latestData['physical_progress'] ?? '' }}" 
-                                                       min="0" max="100" step="0.1" required
-                                                       {{ !$isEditable ? 'disabled' : '' }}>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Financial Progress (Rs)</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Rs.</span>
-                                                </div>
-                                                <input type="number" name="financial_progress" class="form-control font-weight-bold" 
-                                                       value="{{ $latestData['financial_progress'] ?? '' }}"
-                                                       {{ !$isEditable ? 'disabled' : '' }}>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="form-group">
+                                    <label>MPR Main Report <span class="text-danger">*</span></label>
+                                    <textarea name="mpr_content" class="form-control font-weight-bold" rows="12" 
+                                              placeholder="Enter the detailed Monthly Progress Report here..." required
+                                              {{ !$isEditable ? 'disabled' : '' }}>{{ $latestData['mpr_content'] ?? '' }}</textarea>
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Work Description / Issues / Remarks <span class="text-danger">*</span></label>
-                                    <textarea name="remarks" class="form-control" rows="8" 
-                                              placeholder="Enter detailed progress update, issues, or remarks here..." required
+                                    <label>Remarks / Issues (Optional)</label>
+                                    <textarea name="remarks" class="form-control" rows="3" 
+                                              placeholder="Any additional remarks or issues..."
                                               {{ !$isEditable ? 'disabled' : '' }}>{{ $remarks }}</textarea>
                                 </div>
 

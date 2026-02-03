@@ -54,15 +54,16 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-0">
                     {{-- ADDED FIXED HEIGHT AND OVERFLOW FOR STICKY HEADER SCROLLING --}}
-                    <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+                    {{-- TABLE CONTENT --}}
+                    <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="projectsTable">
                             <thead class="bg-light text-muted sticky-top shadow-sm" style="z-index: 1;">
                                 <tr>
-                                    <th style="width: 25%;">Project Details</th>
-                                    <th style="width: 20%;">Timeline</th>
-                                    <th style="width: 20%;">Financials</th>
-                                    <th style="width: 25%;">MPR Status</th>
-                                    <th style="width: 10%;" class="text-right">Action</th>
+                                    <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th> {{-- Action --}}
+                                    <th style="width: 35%;" class="p-2">Project</th>
+                                    <th style="width: 20%;" class="p-2">Timeline</th>
+                                    <th style="width: 20%;" class="p-2">Financials</th>
+                                    <th style="width: 20%;" class="text-right p-2">MPR Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,8 +75,11 @@
                                     $doc = $project->document; 
                                     $docStatus = $doc ? $doc->status : 'Not Started';
                                     
-                                    // --- Change 'Not Started' to 'Pending' ---
-                                    if($docStatus == 'Not Started') $docStatus = 'Pending';
+                                    // --- Change 'Not Started' to 'Action Awaited' ---
+                                    if($docStatus == 'Not Started' || $docStatus == 'Draft') $docStatus = 'Action Awaited';
+
+                                    // --- Change 'Pending Review' to 'Forwarded' ---
+                                    if($docStatus == 'Pending Review' || $docStatus == 'Under Review by SORD') $docStatus = 'Forwarded';
 
                                     // --- Calculation Logic ---
                                     $today = \Carbon\Carbon::now();
@@ -102,7 +106,8 @@
                                     $statusClass = 'text-secondary';
                                     if($docStatus == 'Returned') $statusClass = 'text-danger font-weight-bold';
                                     elseif($docStatus == 'Finalized' || $docStatus == 'Approved') $statusClass = 'text-success font-weight-bold';
-                                    elseif($docStatus == 'Pending Review' || $docStatus == 'Under Review by SORD') $statusClass = 'text-warning font-weight-bold';
+                                    elseif($docStatus == 'Forwarded') $statusClass = 'text-info font-weight-bold';
+                                    elseif($docStatus == 'Action Awaited') $statusClass = 'text-warning font-weight-bold';
                                 @endphp
 
                                 <tr class="project-row" 
@@ -112,71 +117,67 @@
                                     data-docstatus="{{ $docStatus }}" 
                                     data-date="{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') : '' }}">
                                     
-                                    {{-- Project Details --}}
-                                    <td class="align-middle">
-                                        <div class="font-weight-bold text-primary">{{ $project->prj_code }}</div>
-                                        {{-- REPLACED UNIT NAME WITH PROJECT STATUS --}}
-                                        <div class="small">
+                                    {{-- 1. LEFT ACTION BUTTON (Tall & Slim) --}}
+                                    <td class="align-middle p-0 text-center border-right">
+                                        <a href="{{ route('projects.show', $project->prj_id) }}" class="vertical-btn d-block text-white bg-primary shadow-hover h-100" title="View Details">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </td>
+
+                                    {{-- 2. PROJECT DETAILS (Code + Status on one line, Title below) --}}
+                                    <td class="align-middle p-2">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <span class="font-weight-bold text-primary mr-2" style="font-size: 1rem;">{{ $project->prj_code }}</span>
                                             @if($status == 'open')
-                                                <span class="text-success"><i class="fas fa-circle text-xs mr-1"></i>Open</span>
+                                                <span class="badge badge-success px-2 py-0"><i class="fas fa-circle text-xs mr-1"></i> Open</span>
                                             @elseif($status == 'closed')
-                                                <span class="text-muted"><i class="fas fa-check-circle text-xs mr-1"></i>Closed</span>
+                                                <span class="badge badge-secondary px-2 py-0"><i class="fas fa-check-circle text-xs mr-1"></i> Closed</span>
                                             @else
-                                                <span class="text-secondary text-capitalize">{{ $project->prj_status }}</span>
+                                                <span class="badge badge-info px-2 py-0 text-capitalize">{{ $project->prj_status }}</span>
                                             @endif
                                         </div>
-                                        <div class="text-dark small text-wrap mt-1" style="max-width: 300px; line-height: 1.2;" title="{{ $project->prj_title }}">
+                                        <div class="text-dark small text-truncate" style="max-width: 350px;" title="{{ $project->prj_title }}">
                                             {{ $project->prj_title }}
                                         </div>
                                     </td>
 
-                                    {{-- Timeline --}}
-                                    <td class="align-middle">
-                                        <div class="d-flex justify-content-between small text-muted mb-1">
-                                            <span>Start: {{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d-M-Y') : 'N/A' }}</span>
+                                    {{-- 3. TIMELINE --}}
+                                    <td class="align-middle p-2">
+                                        <div class="d-flex justify-content-between text-muted text-xs mb-1">
+                                            <span>{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d-M-Y') : 'N/A' }}</span>
+                                            <span class="text-info font-weight-bold">{{ round($timePercentage) }}%</span>
                                         </div>
-                                        <div class="progress progress-xs rounded-pill mb-1" style="height: 6px;">
+                                        <div class="progress progress-xs rounded-pill" style="height: 4px;">
                                             <div class="progress-bar bg-info" role="progressbar" style="width: {{ $timePercentage }}%"></div>
                                         </div>
-                                        <div class="small text-right text-info">{{ round($timePercentage) }}% Elapsed</div>
                                     </td>
 
-                                    {{-- Financials --}}
-                                    <td class="align-middle">
-                                        <div class="font-weight-bold text-dark mb-1">
-                                            {{ number_format($project->prj_propcost / 1000000, 2) }} M
+                                    {{-- 4. FINANCIALS --}}
+                                    <td class="align-middle p-2">
+                                        <div class="d-flex justify-content-between text-dark text-xs mb-1">
+                                            <span class="font-weight-bold">{{ number_format($project->prj_propcost / 1000000, 2) }} M</span>
+                                            <span class="text-success font-weight-bold">{{ round($spentPercentage) }}%</span>
                                         </div>
-                                        <div class="progress progress-xs rounded-pill mb-1" style="height: 6px;">
+                                        <div class="progress progress-xs rounded-pill" style="height: 4px;">
                                             <div class="progress-bar bg-success" role="progressbar" style="width: {{ $spentPercentage }}%"></div>
                                         </div>
-                                        <div class="small text-right text-success">{{ round($spentPercentage) }}% Utilized</div>
                                     </td>
 
-                                    {{-- MPR Status & Buttons (Aligned Side-by-Side) --}}
-                                    <td class="align-middle">
-                                        <div class="d-flex align-items-center">
-                                            <span class="{{ $statusClass }} mr-2">
-                                                {{ $docStatus }}
-                                            </span>
+                                    {{-- 5. MPR STATUS (Far Right) --}}
+                                    <td class="align-middle text-right p-2">
+                                        <div class="d-flex align-items-center justify-content-end">
+                                            <span class="{{ $statusClass }} text-sm mr-2">{{ $docStatus }}</span>
                                             
-                                            {{-- MOVED BUTTONS HERE --}}
                                             @if($docStatus == 'Returned')
-                                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-xs btn-outline-danger shadow-sm" title="Fix & Resubmit">
-                                                    <i class="fas fa-tools mr-1"></i> Fix
+                                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-xs btn-outline-danger shadow-sm rounded-circle" title="Fix & Resubmit" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-tools text-xs"></i>
                                                 </a>
-                                            @elseif($docStatus == 'Draft')
-                                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-xs btn-outline-info shadow-sm" title="Continue Editing">
-                                                    <i class="fas fa-pen mr-1"></i> Edit
+                                            @elseif($docStatus == 'Draft' || $docStatus == 'Action Awaited')
+                                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-xs btn-outline-primary shadow-sm rounded-circle" title="Edit MPR" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-pen text-xs"></i>
                                                 </a>
                                             @endif
                                         </div>
-                                    </td>
-
-                                    {{-- Action --}}
-                                    <td class="text-right align-middle">
-                                        <a href="{{ route('projects.show', $project->prj_id) }}" class="btn btn-xs btn-primary shadow-sm px-2 rounded-pill" title="View Details">
-                                            <i class="fas fa-eye mr-1"></i> View
-                                        </a>
                                     </td>
                                 </tr>
                                 @empty
@@ -244,12 +245,29 @@
 </script>
 
 <style>
-    /* Table Styling Overrides */
-    .table td { vertical-align: middle; font-size: 0.9rem; }
-    .btn-xs { padding: 0.2rem 0.6rem; font-size: 0.75rem; line-height: 1.4; border-radius: 4px; }
+    /* Compact Table Styling */
+    .table td { vertical-align: middle; font-size: 0.85rem; padding: 0.5rem; }
+    .btn-xs { padding: 0.1rem 0.4rem; font-size: 0.7rem; line-height: 1.2; border-radius: 4px; }
     .text-xs { font-size: 0.7rem; }
     
-    /* Sticky Header Styling */
+    /* Sticky Header */
     .sticky-top { position: sticky; top: 0; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
+
+    /* Vertical Action Button */
+    .vertical-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 60px; /* Fixed height for the button bar */
+        transition: background-color 0.2s;
+        border-radius: 0 4px 4px 0; /* Rounded right corners */
+    }
+    .vertical-btn:hover {
+        background-color: #0056b3 !important; /* Darker blue on hover */
+    }
+    .shadow-hover:hover {
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
 </style>
 @endsection

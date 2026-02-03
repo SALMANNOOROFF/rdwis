@@ -21,7 +21,7 @@ class DocMprController extends Controller
         $document = Document::where('prj_id', $projectId)
                             ->with(['versions' => function($q){
                                 $q->orderBy('ver_id', 'desc');
-                            }, 'versions.actor.role', 'currentOwner.role', 'creator.role', 'history.sender.role'])
+                            }, 'versions.actor.role', 'currentOwner.role', 'creator.role', 'history.fromUser.role'])
                             ->first();
 
         // Permissions
@@ -150,15 +150,18 @@ class DocMprController extends Controller
             elseif ($request->action == 'finalize') {
                 
                 // FORCE UPDATE
+                // FIX: Avoiding '0' for foreign key constraint. Setting to SORD User (Current)
                 DB::table('doc.documents')
                     ->where('doc_id', $document->doc_id)
                     ->update([
-                        'current_owner_id' => 0, // Lock
+                        'current_owner_id' => $user->acc_id, 
                         'status' => 'Forwarded to MD',
                         'updated_at' => now()
                     ]);
 
-                $this->logHistory($document->doc_id, $user->acc_id, 0, 'Forwarded MD', 'Forwarded to MD');
+                // For history, we also avoid 0 if possible, or use nullable if schema supports. 
+                // Assuming keeping it valid is safer.
+                $this->logHistory($document->doc_id, $user->acc_id, $user->acc_id, 'Forwarded MD', 'Forwarded to MD');
             }
 
             DB::commit();

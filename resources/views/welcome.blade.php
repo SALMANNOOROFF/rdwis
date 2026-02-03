@@ -141,15 +141,7 @@
       </li>
 
       {{-- NEW: INBOX LINK --}}
-      <li class="nav-item">
-          <a href="{{ route('sord.inbox') }}" class="nav-link {{ Request::routeIs('sord.inbox') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-inbox"></i>
-              <p>
-                  Inbox / Approvals
-                  <span class="badge badge-info right">New</span>
-              </p>
-          </a>
-      </li>
+
       
       <li class="nav-item">
           <a href="{{ route('sord.all_projects') }}" class="nav-link {{ Request::routeIs('sord.all_projects') ? 'active' : '' }}">
@@ -217,7 +209,7 @@
                   <p>HUMAN RESOURCES <i class="right fas fa-angle-left"></i></p>
               </a>
               <ul class="nav nav-treeview">
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user-check nav-icon"></i><p>CURRENT</p></a></li>
+                  <li class="nav-item"><a href="{{ route('divhr.employelist') }}" class="nav-link"><i class="fas fa-user-check nav-icon"></i><p>CURRENT</p></a></li>
                   <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-calendar-check nav-icon"></i><p>ATTENDANCE</p></a></li>
               </ul>
           </li>

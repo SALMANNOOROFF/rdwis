@@ -517,4 +517,40 @@ public function markMilestoneComplete(Request $request)
     // 3. Naye View par bhejo
     return view('sord.projects', compact('projects', 'divisions'));
 }
+
+   // --- SORD READ-ONLY PROJECT DETAILS ---
+   public function sordShow($id)
+   {
+       $project = Project::with('milestones', 'attachments')->where('prj_id', $id)->firstOrFail();
+       
+       // 1. Calculate Total Spent
+       $totalSpent = DB::table('fin.transactions')
+           ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
+           ->where('fin.commitments.cmt_docid', $id)
+           ->sum('fin.transactions.trn_amount1');
+
+       // 2. Balance
+       $balance = $project->prj_propcost - $totalSpent;
+       $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+
+       // 3. Category Data
+       $finData = [
+           'equip' => $totalSpent * 0.45,
+           'hr'    => $totalSpent * 0.35,
+           'misc'  => $totalSpent * 0.20
+       ];
+
+       // --- MPR STATISTICS --
+       $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
+       $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : \Carbon\Carbon::now();
+       $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : \Carbon\Carbon::now();
+       $totalMonths = $startDate->diffInMonths($endDate);
+       if($totalMonths < 1) $totalMonths = 1;
+       $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
+
+       return view('SORD.project_details', compact(
+           'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
+           'mprsSubmitted', 'mprsLeft', 'totalMonths'
+       ));
+   }
 }

@@ -41,12 +41,13 @@
                             <td>{{ $doc->updated_at->format('d M, Y') }}</td>
                             <td>
                                 {{-- Status Badge Logic --}}
+                                {{-- Status Text Logic --}}
                                 @if($doc->status == 'Returned')
-                                    <span class="badge badge-danger">{{ $doc->status }}</span>
+                                    <span class="text-danger font-weight-bold">{{ $doc->status }}</span>
                                 @elseif($doc->status == 'Finalized')
-                                    <span class="badge badge-success">{{ $doc->status }}</span>
+                                    <span class="text-success font-weight-bold">{{ $doc->status }}</span>
                                 @else
-                                    <span class="badge badge-warning">{{ $doc->status }}</span>
+                                    <span class="text-primary font-weight-bold">{{ $doc->status }}</span>
                                 @endif
                             </td>
                             <td>
