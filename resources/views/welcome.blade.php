@@ -170,6 +170,13 @@
           </li>
 
           <li class="nav-item">
+              <a href="{{ route('puritems.index') }}" class="nav-link {{ Request::routeIs('puritems.*') ? 'active' : '' }}">
+                  <i class="fas fa-boxes nav-icon"></i>
+                  <p>Items & RFQ</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
               <a href="{{ route('view-projects') }}" class="nav-link {{ Request::routeIs('view-projects*') ? 'active' : '' }}">
                   <i class="fas fa-folder-open nav-icon"></i>
                   <p>PROJECTS</p>

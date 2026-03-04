@@ -9,6 +9,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DocMprController; // <--- YE IMPORT ZAROORI HAI
 use App\Http\Controllers\MprController;
 use App\Http\Controllers\DivHrController;
+use App\Http\Controllers\PurItemsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -117,6 +118,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase/it-reports', [ReportsController::class, 'index'])->name('purchase.reports.index');
         Route::post('/generate-comparative', [ReportsController::class, 'generateComparative'])->name('reports.generate.comparative');
         Route::post('/generate-it-letter', [ReportsController::class, 'generateITLetter'])->name('reports.generate.itletter');
+
+        Route::prefix('puritems')->group(function () {
+            Route::get('/', [PurItemsController::class, 'index'])->name('puritems.index');
+            Route::post('/item', [PurItemsController::class, 'createItem'])->name('puritems.item.create');
+            Route::post('/rfq/preview', [PurItemsController::class, 'rfqPreview'])->name('puritems.rfq.preview');
+            Route::post('/rfq/submit', [PurItemsController::class, 'rfqSubmit'])->name('puritems.rfq.submit');
+            Route::get('/rfqs', [PurItemsController::class, 'rfqList'])->name('puritems.rfq.list');
+            Route::post('/setup', [PurItemsController::class, 'setup'])->name('puritems.setup');
+            Route::post('/populate', [PurItemsController::class, 'populate'])->name('puritems.populate');
+        });
 
          // HR 
         Route::get('/divhr/employelist', [DivHrController::class, 'employeelist'])->name('divhr.employelist');
