@@ -45,7 +45,12 @@ class PurchaseController extends Controller
     /**
      * Show create new purchase case form
      */
-    public function create()
+    public function select()
+    {
+        return view('purchase.new_case.select');
+    }
+
+    public function create(Request $request)
     {
         $maxId = DB::table('pur.purcases')->max('pcs_id');
         $nextId = $maxId ? ($maxId + 1) : 1;
@@ -60,7 +65,8 @@ class PurchaseController extends Controller
                     ->orderBy('unt_name', 'asc')
                     ->get();
 
-        return view('purchase.new_case.createnewcase', compact('nextId', 'heads', 'units'));
+        $initialType = (string) $request->query('type', 'major');
+        return view('purchase.new_case.createnewcase', compact('nextId', 'heads', 'units', 'initialType'));
     }
 
     /**

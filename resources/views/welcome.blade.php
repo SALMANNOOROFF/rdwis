@@ -169,12 +169,7 @@
               </a>
           </li>
 
-          <li class="nav-item">
-              <a href="{{ route('puritems.index') }}" class="nav-link {{ Request::routeIs('puritems.*') ? 'active' : '' }}">
-                  <i class="fas fa-boxes nav-icon"></i>
-                  <p>Items & RFQ</p>
-              </a>
-          </li>
+          
 
           <li class="nav-item">
               <a href="{{ route('view-projects') }}" class="nav-link {{ Request::routeIs('view-projects*') ? 'active' : '' }}">
@@ -196,12 +191,6 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a href="#" class="nav-link">
-                          <i class="fas fa-receipt nav-icon"></i>
-                          <p>RECEIPTS</p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
                       <a href="{{ route('purchase.reports.index') }}" class="nav-link">
                           <i class="fas fa-file-alt nav-icon"></i>
                           <p>IT LETTER / CS</p>
@@ -211,13 +200,28 @@
           </li>
 
           <li class="nav-item">
+              <a href="{{ route('purchase.select') }}" class="nav-link {{ Request::routeIs('purchase.select') ? 'active' : '' }}">
+                  <i class="fas fa-cart-plus nav-icon"></i>
+                  <p>PURCHASE CASE (NEW)</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-users"></i>
                   <p>HUMAN RESOURCES <i class="right fas fa-angle-left"></i></p>
               </a>
               <ul class="nav nav-treeview">
-                  <li class="nav-item"><a href="{{ route('divhr.employelist') }}" class="nav-link"><i class="fas fa-user-check nav-icon"></i><p>CURRENT</p></a></li>
-                  <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-calendar-check nav-icon"></i><p>ATTENDANCE</p></a></li>
+                  <li class="nav-item">
+                      <a href="{{ route('divhr.employelist') }}" class="nav-link {{ Request::routeIs('divhr.employelist') ? 'active' : '' }}">
+                          <i class="fas fa-user-check nav-icon"></i><p>CURRENT</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('divhr.attendance') }}" class="nav-link {{ Request::routeIs('divhr.attendance') ? 'active' : '' }}">
+                          <i class="fas fa-calendar-check nav-icon"></i><p>ATTENDANCE</p>
+                      </a>
+                  </li>
               </ul>
           </li>
 

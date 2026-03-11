@@ -6,106 +6,106 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\PurItem;
-use App\Models\PurCategory;
-use App\Models\PurSubcategory;
-use App\Models\PurItemPrice;
 use App\Models\PurRfq;
 use App\Models\PurRfqItem;
 
 class PurItemsController extends Controller
 {
-    public function setup()
+    public function setupPurnew()
     {
-        $path = base_path('DB RDWIS/DB/puritems-schema.sql');
-        $sql = file_get_contents($path);
-        DB::unprepared($sql);
-        return redirect()->route('puritems.index');
-    }
-
-    public function populate()
-    {
-        $path = base_path('DB RDWIS/DB/puritems-import.sql');
-        $sql = file_get_contents($path);
-        DB::unprepared($sql);
-        return redirect()->route('puritems.index');
+        $path = base_path('DB RDWIS/DB/Individual Sql Files/purnew.sql');
+        if (file_exists($path)) {
+            $sql = file_get_contents($path);
+            DB::unprepared($sql);
+        }
+        return redirect()->route('purnew.create');
     }
 
     public function index(Request $request)
     {
-        $q = PurItem::query();
-        if ($request->filled('cat')) $q->where('itm_cat_id', $request->integer('cat'));
-        if ($request->filled('sub')) $q->where('itm_sub_id', $request->integer('sub'));
-        if ($request->filled('term')) $q->whereRaw('LOWER(itm_title) LIKE ?', ['%'.strtolower((string)$request->input('term')).'%']);
-        if (Auth::user() && Auth::user()->unit) $q->where('itm_unt_id', Auth::user()->unit->unt_id);
-        if ($request->boolean('mine') && Auth::user()) $q->where('itm_acc_id', Auth::user()->acc_id);
-        $items = $q->orderBy('itm_title')->limit(300)->with('latestPrice')->get();
-        $cats = PurCategory::orderBy('cat_name')->get();
-        $subs = PurSubcategory::orderBy('sub_name')->get();
+        return redirect()->route('purnew.create');
+    }
+    
+    public function indexLayout(Request $request)
+    {
+        $term = (string)$request->input('term', '');
+        $unitId = Auth::user() && Auth::user()->unit ? Auth::user()->unit->unt_id : null;
+        $q = DB::table('purnew.items as t')
+            ->selectRaw(
+                't.*,
+                (SELECT i.price
+                   FROM purnew.rfq_items i
+                   JOIN purnew.rfq r ON r.rfq_id=i.rfq_id
+                  WHERE i.item_id=t.item_id ' . ($unitId ? 'AND r.pcs_unt_id = '.$unitId : '') . '
+                  ORDER BY r.pcs_date DESC, r.rfq_id DESC
+                  LIMIT 1) AS last_price,
+                (
+                  COALESCE((
+                    SELECT SUM(inv.inv_qty)
+                      FROM ina.inventory inv
+                     WHERE LOWER(inv.inv_desc)=LOWER(t.title) ' . ($unitId ? 'AND inv.inv_unt_id = '.$unitId : '') . '
+                  ),0)
+                  -
+                  COALESCE((
+                    SELECT SUM(ii.ini_qty)
+                      FROM ina.invenitems ii
+                     WHERE ii.ini_inv_id IN (
+                       SELECT inv.inv_id FROM ina.inventory inv
+                        WHERE LOWER(inv.inv_desc)=LOWER(t.title) ' . ($unitId ? 'AND inv.inv_unt_id = '.$unitId : '') . '
+                     )
+                       AND ii.ini_dispdate IS NOT NULL
+                  ),0)
+                ) AS stock_qty'
+            );
+        if ($term !== '') {
+            $q->whereRaw('LOWER(t.title) LIKE ?', ['%'.strtolower($term).'%']);
+        }
+        if ($unitId) {
+            $q->where('t.unt_id', $unitId);
+        }
+        $items = $q->orderBy('t.title')->limit(300)->get();
         $filters = [
             'term' => (string)$request->input('term', ''),
-            'cat' => $request->input('cat'),
-            'sub' => $request->input('sub'),
-            'mine' => $request->boolean('mine')
+            'cat' => null,
+            'sub' => null,
+            'mine' => false
         ];
-        return view('puritems.index', compact('items','cats','subs','filters'));
+        return view('puritems.index_layout', compact('items','filters'));
     }
 
     public function createItem(Request $request)
     {
         $data = $request->validate([
             'title' => 'required|string',
-            'desc' => 'nullable|string',
-            'qtyunit' => 'required|string',
-            'cat_id' => 'nullable|integer',
-            'sub_id' => 'nullable|integer',
-            'base' => 'required|numeric',
-            'gst' => 'nullable|numeric',
-            'sst' => 'nullable|numeric'
+            'type' => 'nullable|integer',
+            'subtype' => 'nullable|string',
+            'serial' => 'nullable|integer'
         ]);
         $u = Auth::user();
         $item = null;
         DB::transaction(function () use ($data, $u, &$item) {
             $item = PurItem::firstOrCreate(
                 [
-                    'itm_title' => strtolower(trim($data['title'])),
-                    'itm_qtyunit' => $data['qtyunit'],
-                    'itm_unt_id' => $u && $u->unit ? $u->unit->unt_id : null,
-                    'itm_hed_id' => null,
-                    'itm_acc_id' => $u ? $u->acc_id : null
+                    'title' => strtolower(trim($data['title'])),
+                    'unt_id' => $u && $u->unit ? $u->unit->unt_id : null
                 ],
                 [
-                    'itm_desc' => $data['desc'] ?? $data['title'],
-                    'itm_cat_id' => $data['cat_id'] ?? null,
-                    'itm_sub_id' => $data['sub_id'] ?? null
+                    'type' => $data['type'] ?? null,
+                    'subtype' => $data['subtype'] ?? null,
+                    'serial' => $data['serial'] ?? null
                 ]
             );
-            $gst = $data['gst'] ?? 0;
-            $sst = $data['sst'] ?? 0;
-            $gross = ($data['base'] + $gst + $sst);
-            PurItemPrice::create([
-                'prc_itm_id' => $item->itm_id,
-                'prc_base' => $data['base'],
-                'prc_gst' => $gst,
-                'prc_sst' => $sst,
-                'prc_gross' => $gross,
-                'prc_qty' => 1,
-                'prc_qtyunit' => $data['qtyunit'],
-                'effective_date' => now()->toDateString(),
-            ]);
         });
-        $item->load('latestPrice');
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'ok' => true,
                 'item' => [
-                    'itm_id' => $item->itm_id,
-                    'title' => $item->itm_title,
-                    'qtyunit' => $item->itm_qtyunit,
-                    'price' => $item->latestPrice ? (float)$item->latestPrice->prc_gross : 0
+                    'item_id' => $item->item_id,
+                    'title' => $item->title
                 ]
             ]);
         }
-        return redirect()->route('puritems.index');
+        return redirect()->route('purnew.create');
     }
 
     public function rfqPreview(Request $request)
@@ -114,22 +114,12 @@ class PurItemsController extends Controller
         $total = 0;
         $rows = [];
         foreach ($payload as $row) {
-            $item = PurItem::find($row['itm_id']);
-            $price = null;
-            if (!empty($row['prc_id'])) $price = PurItemPrice::find($row['prc_id']);
-            if (!$price) $price = PurItemPrice::where('prc_itm_id', $row['itm_id'])->orderByDesc('effective_date')->first();
-            $qty = isset($row['qty']) ? (float)$row['qty'] : 1;
-            $priceOverride = isset($row['price']) ? (float)$row['price'] : null;
-            $unit = $priceOverride !== null ? $priceOverride : ($price ? (float)$price->prc_gross : 0);
-            $line = $unit * $qty;
-            $total += $line;
+            $item = PurItem::find($row['item_id']);
+            $price = isset($row['price']) ? (float)$row['price'] : 0;
+            $total += $price;
             $rows[] = [
                 'item'=>$item,
-                'price'=>$price,
-                'qty'=>$qty,
-                'line'=>$line,
-                'unit'=>$unit,
-                'priceOverride'=>$priceOverride
+                'price'=>$price
             ];
         }
         return view('puritems.rfq_preview', compact('rows','total'));
@@ -139,64 +129,62 @@ class PurItemsController extends Controller
     {
         $payload = $request->input('items', []);
         $u = Auth::user();
+        $nextId = ((int) DB::table('purnew.rfq')->max('rfq_id')) + 1;
         $rfq = PurRfq::create([
-            'rfq_title' => $request->input('title','Draft RFQ'),
-            'rfq_unt_id' => $u && $u->unit ? $u->unit->unt_id : null,
-            'rfq_created_by' => $u ? $u->acc_id : null,
-            'rfq_status' => 'draft',
-            'rfq_total' => 0
+            'rfq_id' => $nextId,
+            'pcs_date' => now()->toDateString(),
+            'pcs_title' => $request->input('title','Draft RFQ'),
+            'pcs_unt_id' => $u && $u->unit ? $u->unit->unt_id : null,
+            'pcs_hed_id' => null,
+            'pcs_effhed_id' => null,
+            'pcs_effunt_id' => null
         ]);
         $total = 0;
         foreach ($payload as $row) {
-            $price = null;
-            if (!empty($row['prc_id'])) $price = PurItemPrice::find($row['prc_id']);
-            $qty = isset($row['qty']) ? (float)$row['qty'] : 1;
-            $item = PurItem::find($row['itm_id']);
-            if (!$price) {
-                if (isset($row['price'])) {
-                    $gross = (float)$row['price'];
-                    $price = PurItemPrice::create([
-                        'prc_itm_id' => $item->itm_id,
-                        'prc_base' => $gross,
-                        'prc_gst' => 0,
-                        'prc_sst' => 0,
-                        'prc_gross' => $gross,
-                        'prc_qty' => 1,
-                        'prc_qtyunit' => $item ? $item->itm_qtyunit : 'unit',
-                        'effective_date' => now()->toDateString(),
-                    ]);
-                } else {
-                    $price = PurItemPrice::where('prc_itm_id', $row['itm_id'])->orderByDesc('effective_date')->first();
-                }
-            }
-            $unit = isset($row['price']) ? (float)$row['price'] : ($price ? (float)$price->prc_gross : 0);
-            $line = $unit * $qty;
+            $price = isset($row['price']) ? (float)$row['price'] : 0;
             PurRfqItem::create([
-                'rfi_rfq_id' => $rfq->rfq_id,
-                'rfi_itm_id' => $row['itm_id'],
-                'rfi_price_id' => $price ? $price->prc_id : null,
-                'rfi_qty' => $qty,
-                'rfi_total' => $line
+                'rfq_id' => $rfq->rfq_id,
+                'item_id' => $row['item_id'],
+                'est_price' => $price,
+                'price' => $price
             ]);
-            $total += $line;
+            $total += $price;
         }
-        $rfq->rfq_total = $total;
-        $rfq->save();
-        return redirect()->route('puritems.index');
+        return redirect()->route('purnew.groups');
     }
 
     public function rfqList(Request $request)
     {
+        return redirect()->route('purnew.groups');
+    }
+    
+    public function rfqListLayout(Request $request)
+    {
         $u = Auth::user();
-        $q = PurRfq::query();
+        $q = DB::table('purnew.rfq as r')
+            ->leftJoin('purnew.rfq_items as i', 'i.rfq_id', '=', 'r.rfq_id')
+            ->select('r.*', DB::raw('COALESCE(SUM(i.price),0) as total'))
+            ->groupBy('r.rfq_id','r.pcs_date','r.pcs_title','r.pcs_unt_id','r.pcs_hed_id','r.pcs_effhed_id','r.pcs_effunt_id');
         if ($u && $u->unit) {
-            $q->where('rfq_unt_id', $u->unit->unt_id);
+            $q->where('r.pcs_unt_id', $u->unit->unt_id);
         }
         if ($request->filled('term')) {
             $term = '%'.strtolower((string)$request->input('term')).'%';
-            $q->whereRaw('LOWER(rfq_title) LIKE ?', [$term]);
+            $q->whereRaw('LOWER(r.pcs_title) LIKE ?', [$term]);
         }
-        $rfqs = $q->orderByDesc('rfq_id')->limit(200)->get();
-        return view('puritems.rfq_list', compact('rfqs'));
+        $rfqs = $q->orderByDesc('r.rfq_id')->limit(200)->get();
+        return view('puritems.rfq_list_layout', compact('rfqs'));
+    }
+
+    public function rfqShowLayout($id)
+    {
+        $rfq = PurRfq::findOrFail($id);
+        $items = DB::table('purnew.rfq_items as i')
+            ->leftJoin('purnew.items as t', 'i.item_id', '=', 't.item_id')
+            ->select('i.*','t.title')
+            ->where('i.rfq_id', $id)
+            ->get();
+        $total = $items->sum('price');
+        return view('puritems.rfq_show_layout', compact('rfq','items','total'));
     }
 }

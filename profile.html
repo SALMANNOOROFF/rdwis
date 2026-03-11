@@ -1,8 +1,9 @@
-@extends('welcome')
+<!DOCTYPE html>
+<html lang="en">
 
-@section('content')
-<div class="content-wrapper pt-2">
-
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Employee Profile - Jonathan Pierce</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
   <link
@@ -111,36 +112,35 @@
       </div>
     </header>
     <div class="grid grid-cols-12 gap-6">
-      <div class="col-span-12 lg:col-span-3 space-y-7">
+      <div class="col-span-12 lg:col-span-3 space-y-6">
         <!-- ===== EMPLOYEE PROFILE CARD ===== -->
         <div
           class="bg-white dark:bg-slate-800 rounded-xl shadow-refined border border-slate-200/60 dark:border-slate-700 p-6 overflow-hidden relative text-center">
           <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
           <div class="relative mb-4 inline-block">
-            <img alt="{{ $emp->emp_name ?? 'Employee' }}"
+            <img alt="Jonathan Pierce"
               class="w-20 h-20 rounded-full border-4 border-slate-50 dark:border-slate-900 shadow-md object-cover"
-              src="{{ $emp->emp_photodest ? asset($emp->emp_photodest) : 'https://ui-avatars.com/api/?name='.urlencode($emp->emp_name ?? 'Employee').'&background=2563eb&color=ffffff' }}" />
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1bJoSvLWaUEvY8bQ1GelzXFgA4xPz2N463E0PpFjsXKU1WaAO9JvYAJCsRbWMU3myOXm1gO6gBr2F3eZCjkqNmVvHSHzYN5KhYGa_3vezLxlHcxfXOJxvcF-5bSqeehClPpRIeEIxyQmKoD7WbFF8HYb4-4YkqhE17sWDyABTd9S-90EaLzBIFWpfGxG2I7TmWiiWJPRQEDeKDwDPn90Uk8Q3inr2hcwAkSvwmgn9Yuumpjg5iCVEXUL0LW-eDEAxYKMR9ontSg" />
           </div>
-          <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">{{ $emp->emp_name ?? $id }}</h2>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $emp->emp_title ?? ($emp->emp_rank ?? '') }}</p>
-          <div class="mt-4 space-y-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+          <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">Jonathan Pierce</h2>
+          <!-- Designation below name -->
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Senior UI Designer</p>
+          <div class="mt-4 space-y-4 pt-4 border-t border-slate-100 dark:border-slate-700">
             <div class="flex justify-between text-xs py-0.5">
               <span class="text-slate-400 font-medium text-left">Employee ID</span>
-              <span class="font-bold text-slate-900 dark:text-white">{{ $emp->emp_id ?? $id }}</span>
+              <span class="font-bold text-slate-900 dark:text-white">EMP-002</span>
             </div>
             <div class="flex justify-between text-xs py-0.5">
               <span class="text-slate-400 font-medium text-left">Joined</span>
-              <span class="font-bold text-slate-900 dark:text-white">
-                {{ !empty($emp->emp_joindt) ? \Carbon\Carbon::parse($emp->emp_joindt)->format('d-M-Y') : '—' }}
-              </span>
+              <span class="font-bold text-slate-900 dark:text-white">Jan 12, 2023</span>
             </div>
             <div class="flex justify-between text-xs py-0.5">
               <span class="text-slate-400 font-medium text-left">CNIC</span>
-              <span class="font-bold text-slate-900 dark:text-white">{{ $emp->emp_cnic ?? '—' }}</span>
+              <span class="font-bold text-slate-900 dark:text-white">42101-1234567-8</span>
             </div>
             <div class="flex justify-between text-xs py-0.5">
               <span class="text-slate-400 font-medium text-left">Personal Contact</span>
-              <span class="font-bold text-slate-900 dark:text-white">{{ $empA->emp_mobile ?? $empA->emp_mobile2 ?? '—' }}</span>
+              <span class="font-bold text-slate-900 dark:text-white">+1 (555) 987-6543</span>
             </div>
           </div>
         </div>
@@ -151,55 +151,20 @@
             <span class="material-icons-outlined text-primary text-lg">phone_in_talk</span>
             <h3 class="font-bold text-sm text-slate-900 dark:text-white">SOS</h3>
           </div>
-          @if(!empty($kin) || !empty($emer))
-            @if($kinSame && !empty($kin))
-              <div class="space-y-3">
-                <div class="flex justify-between text-xs py-0.5">
-                  <span class="text-slate-400 font-medium">Relation</span>
-                  <span class="font-bold text-slate-900 dark:text-white">{{ $kin['relation'] ?? '—' }}</span>
-                </div>
-                <div class="flex justify-between text-xs py-0.5">
-                  <span class="text-slate-400 font-medium">Phone</span>
-                  <span class="font-bold text-slate-900 dark:text-white">{{ $emer['mobile'] ?? '—' }}</span>
-                </div>
-              </div>
-            @else
-              <div class="space-y-3">
-                <div>
-                  <div class="text-[10px] font-black uppercase text-slate-500 mb-1">Next of Kin</div>
-                  <div class="flex justify-between text-xs py-0.5">
-                    <span class="text-slate-400 font-medium">Name</span>
-                    <span class="font-bold text-slate-900 dark:text-white">{{ $kin['name'] ?? '—' }}</span>
-                  </div>
-                  <div class="flex justify-between text-xs py-0.5">
-                    <span class="text-slate-400 font-medium">Relation</span>
-                    <span class="font-bold text-slate-900 dark:text-white">{{ $kin['relation'] ?? '—' }}</span>
-                  </div>
-                  <div class="flex justify-between text-xs py-0.5">
-                    <span class="text-slate-400 font-medium">CNIC</span>
-                    <span class="font-bold text-slate-900 dark:text-white">{{ $kin['cnic'] ?? '—' }}</span>
-                  </div>
-                </div>
-                <div>
-                  <div class="text-[10px] font-black uppercase text-slate-500 mb-1">Emergency Contact</div>
-                  <div class="flex justify-between text-xs py-0.5">
-                    <span class="text-slate-400 font-medium">Name</span>
-                    <span class="font-bold text-slate-900 dark:text-white">{{ $emer['name'] ?? '—' }}</span>
-                  </div>
-                  <div class="flex justify-between text-xs py-0.5">
-                    <span class="text-slate-400 font-medium">Relation</span>
-                    <span class="font-bold text-slate-900 dark:text-white">{{ $emer['relation'] ?? '—' }}</span>
-                  </div>
-                  <div class="flex justify-between text-xs py-0.5">
-                    <span class="text-slate-400 font-medium">Phone</span>
-                    <span class="font-bold text-slate-900 dark:text-white">{{ $emer['mobile'] ?? '—' }}</span>
-                  </div>
-                </div>
-              </div>
-            @endif
-          @else
-            <div class="text-xs text-slate-500">No contact info</div>
-          @endif
+          <div class="space-y-3">
+            <div class="flex justify-between text-xs py-0.5">
+              <span class="text-slate-400 font-medium">Relation</span>
+              <span class="font-bold text-slate-900 dark:text-white">Sister</span>
+            </div>
+            <div class="flex justify-between text-xs py-0.5">
+              <span class="text-slate-400 font-medium">Email</span>
+              <span class="font-bold text-slate-900 dark:text-white">jonathan.pierce@company.com</span>
+            </div>
+            <div class="flex justify-between text-xs py-0.5">
+              <span class="text-slate-400 font-medium">Phone</span>
+              <span class="font-bold text-slate-900 dark:text-white">+1 (555) 410-2234</span>
+            </div>
+          </div>
         </div>
 
         <div
@@ -243,17 +208,15 @@
               <div class="grid grid-cols-3 gap-3 mb-4">
                 <div>
                   <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold">Department</p>
-                  <p class="font-semibold text-slate-900 dark:text-white text-sm">{{ $authUnit->unt_name ?? ($base->eff_unit_name ?? ($emp->unt_name ?? '—')) }}</p>
+                  <p class="font-semibold text-slate-900 dark:text-white text-sm">Product Design</p>
                 </div>
                 <div>
                   <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold">Designation</p>
-                  <p class="font-semibold text-slate-900 dark:text-white text-sm">{{ $currentContract->ctr_jobtitle ?? ($emp->emp_title ?? '—') }}</p>
+                  <p class="font-semibold text-slate-900 dark:text-white text-sm">Lead Designer</p>
                 </div>
                 <div>
                   <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold">Next Review</p>
-                  <p class="font-semibold text-slate-900 dark:text-white text-sm">
-                    {{ !empty($currentContract->ctr_enddt) ? \Carbon\Carbon::parse($currentContract->ctr_enddt)->format('d-M-Y') : '—' }}
-                  </p>
+                  <p class="font-semibold text-slate-900 dark:text-white text-sm">Jul 1st, 2026</p>
                 </div>
               </div>
               <div
@@ -261,31 +224,14 @@
                 <div>
                   <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1 font-bold">Current Annual Salary
                   </p>
-                  @php
-                    $monthlyNet = $base->srq_netsalary ?? $base->srq_salary ?? null;
-                    $annualNet = $monthlyNet ? $monthlyNet * 12 : null;
-                  @endphp
-                  <p class="text-xl font-black text-slate-900 dark:text-white">
-                    {{ $annualNet ? number_format($annualNet) : '—' }}
-                  </p>
+                  <p class="text-xl font-black text-slate-900 dark:text-white">$95,500 <span
+                      class="text-emerald-500 text-[10px] font-bold ml-1">↑ 16.4%</span></p>
                 </div>
                 <div>
                   <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1.5 font-bold">Probation Period</p>
-                  @php
-                    $probRaw = $currentContract->ctr_prob ?? null;
-                    $probPct = null;
-                    if (is_numeric($probRaw) && $probRaw >= 0 && $probRaw <= 100) {
-                      $probPct = (int)$probRaw;
-                    } elseif (!empty($probRaw) && !empty($currentContract->ctr_startdt)) {
-                      $months = (int)$probRaw;
-                      $daysTotal = max(1, $months * 30);
-                      $daysPassed = \Carbon\Carbon::parse($currentContract->ctr_startdt)->diffInDays(now());
-                      $probPct = max(0, min(100, (int)round(($daysPassed / $daysTotal) * 100)));
-                    }
-                  @endphp
                   <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden mt-1.5">
-                    <div class="bg-emerald-500 h-full flex items-center justify-end pr-1.5" style="width: {{ $probPct ?? 0 }}%">
-                      <span class="text-[7px] text-white font-bold">{{ $probPct !== null ? ($probPct.'%') : '—' }}</span>
+                    <div class="bg-emerald-500 h-full flex items-center justify-end pr-1.5" style="width: 45%">
+                      <span class="text-[7px] text-white font-bold">45%</span>
                     </div>
                   </div>
                 </div>
@@ -295,7 +241,7 @@
               <h4 class="text-[10px] text-slate-400 uppercase tracking-widest mb-3 font-bold">Previous Contracts History
               </h4>
               <div id="contractsWrapper"
-                class="border border-slate-100 dark:border-slate-700/50 rounded-xl relative contracts-scroll" style="height: 140px;">
+                class="border border-slate-100 dark:border-slate-700/50 rounded-xl relative contracts-scroll">
                 <table class="w-full text-left text-[11px]">
                   <thead
                     class="sticky top-0 z-10 bg-slate-50/80 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700"
@@ -321,25 +267,39 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-50 dark:divide-slate-700/50">
-                    @forelse(($contractsHistory ?? collect()) as $c)
-                      @php
-                        $label = $c->status_label ?? '—';
-                        $cls = $label === 'Active' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
-                              : ($label === 'Future' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                              : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300');
-                      @endphp
-                      <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                        <td class="px-2 py-2 font-medium text-slate-900 dark:text-white" style="max-width: 120px;">{{ $c->ctr_jobtitle ?? '—' }}</td>
-                        <td class="px-3 py-2 font-bold text-slate-700 dark:text-slate-300">{{ $c->ctr_salary ? number_format($c->ctr_salary) : '—' }}</td>
-                        <td class="px-2 py-2 text-slate-500">{{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('M Y') : '—' }}</td>
-                        <td class="px-2 py-2 text-slate-500">{{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('M Y') : '—' }}</td>
-                        <td class="px-2 py-2 text-center">
-                          <span style="margin-left: -30px;" class="px-2 py-0.5 {{ $cls }} rounded-full text-[8px] font-black uppercase tracking-wider">{{ $label }}</span>
-                        </td>
-                      </tr>
-                    @empty
-                      <tr><td colspan="5" class="px-3 py-2 text-center text-slate-500">No contracts</td></tr>
-                    @endforelse
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                      <td class="px-2 py-2 font-medium text-slate-900 dark:text-white" style="max-width: 100px;">Senior
+                        Designer</td>
+                      <td class="px-3 py-2 font-bold text-slate-700 dark:text-slate-300">$82,000</td>
+                      <td class="px-2 py-2 text-slate-500">Jun 2022</td>
+                      <td class="px-2 py-2 text-slate-500">Jan 2023</td>
+                      <td class="px-2 py-2 text-center">
+                        <span style="margin-left: -30px;"
+                          class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[8px] font-black uppercase tracking-wider">Completed</span>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                      <td class="px-2 py-2 font-medium text-slate-900 dark:text-white" style="max-width: 100px;">Manager
+                      </td>
+                      <td class="px-3 py-2 font-bold text-slate-700 dark:text-slate-300">$29,000</td>
+                      <td class="px-2 py-2 text-slate-500">Jun 2022</td>
+                      <td class="px-2 py-2 text-slate-500">Jan 2023</td>
+                      <td class="px-2 py-2 text-center">
+                        <span style="margin-left: -30px;"
+                          class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[8px] font-black uppercase tracking-wider">Completed</span>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                      <td class="px-2 py-2 font-medium text-slate-900 dark:text-white" style="max-width: 100px;">
+                        Employee</td>
+                      <td class="px-3 py-2 font-bold text-slate-700 dark:text-slate-300">$10,000</td>
+                      <td class="px-2 py-2 text-slate-500">Jun 2022</td>
+                      <td class="px-2 py-2 text-slate-500">Jan 2023</td>
+                      <td class="px-2 py-2 text-center">
+                        <span style="margin-left: -30px;"
+                          class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[8px] font-black uppercase tracking-wider">Completed</span>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -353,14 +313,9 @@
                   <span class="material-icons-outlined text-primary text-lg">auto_graph</span>
                   <h3 class="font-bold text-sm text-slate-900 dark:text-white">Salary Progression</h3>
                 </div>
-                @php
-                  $gFirst = $firstContract->ctr_salary ?? null;
-                  $gLast = $lastContract->ctr_salary ?? null;
-                  $g = ($gFirst && $gLast && $gFirst > 0) ? round((($gLast - $gFirst)/$gFirst)*100, 1) : null;
-                @endphp
                 <span
                   class="text-[8px] font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-md border border-emerald-100/50 dark:border-emerald-800/50 uppercase tracking-tighter">Growth
-                  {{ $g !== null ? ($g > 0 ? '+' : '').$g.'%' : '—' }}</span>
+                  +28.2%</span>
               </div>
               <div class="flex-grow flex items-end justify-center relative min-h-[90px] px-1 mb-3">
                 <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 400 200">
@@ -392,12 +347,12 @@
                 <div style="display: flex; align-items: center; flex-direction: row-reverse; justify-content: space-between; height: 30px;"
                   class="p-1.5 bg-slate-50/80 dark:bg-slate-900/40 rounded-lg border border-slate-100 dark:border-slate-700/50">
                   <p class="text-[7px] text-slate-400 uppercase font-black tracking-widest mb-0.5">Base Start</p>
-                  <p class="text-xs font-black text-slate-900 dark:text-white">{{ !empty($firstContract?->ctr_salary) ? number_format($firstContract->ctr_salary) : '—' }}</p>
+                  <p class="text-xs font-black text-slate-900 dark:text-white">$74,500</p>
                 </div>
                 <div style="display: flex; align-items: center; flex-direction: row-reverse; justify-content: space-between; height: 30px;"
                   class="p-1.5 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-100/30 dark:border-blue-800/30">
                   <p class="text-[7px] text-primary uppercase font-black tracking-widest mb-0.5">Current</p>
-                  <p class="text-xs font-black text-slate-900 dark:text-white">{{ !empty($lastContract?->ctr_salary) ? number_format($lastContract->ctr_salary) : '—' }}</p>
+                  <p class="text-xs font-black text-slate-900 dark:text-white">$95,500</p>
                 </div>
               </div>
             </div>
@@ -406,7 +361,7 @@
               <div class="flex items-center gap-2 mb-2">
                 <h3 class="font-bold text-sm text-slate-900 dark:text-white">Previous Projects</h3>
               </div>
-              <div id="projectsWrapper" class="border border-slate-100 dark:border-slate-700/50 rounded-xl relative contracts-scroll" style="height: 120px;">
+              <div id="projectsWrapper" class="border border-slate-100 dark:border-slate-700/50 rounded-xl relative contracts-scroll">
                 <table class="w-full text-left text-[11px]">
                   <thead class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
                     <tr>
@@ -425,15 +380,21 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-50 dark:divide-slate-700/50">
-                    @forelse($previousProjects ?? [] as $pp)
-                      <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                        <td class="px-3 py-1.5 font-medium text-slate-900 dark:text-white" style="max-width: 160px;">{{ $pp->prj_title ?? '—' }}</td>
-                        <td class="px-3 py-1.5 text-slate-500">{{ !empty($pp->ctr_startdt) ? \Carbon\Carbon::parse($pp->ctr_startdt)->format('M Y') : '—' }}</td>
-                        <td class="px-3 py-1.5 text-slate-500">{{ !empty($pp->ctr_enddt) ? \Carbon\Carbon::parse($pp->ctr_enddt)->format('M Y') : '—' }}</td>
-                      </tr>
-                    @empty
-                      <tr><td colspan="3" class="px-3 py-2 text-center text-slate-500">No projects</td></tr>
-                    @endforelse
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                      <td class="px-3 py-1.5 font-medium text-slate-900 dark:text-white" style="max-width: 140px;">Design System Revamp</td>
+                      <td class="px-3 py-1.5 text-slate-500">Aug 2024</td>
+                      <td class="px-3 py-1.5 text-slate-500">Jan 2025</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                      <td class="px-3 py-1.5 font-medium text-slate-900 dark:text-white" style="max-width: 140px;">Mobile App UI Refresh</td>
+                      <td class="px-3 py-1.5 text-slate-500">Feb 2025</td>
+                      <td class="px-3 py-1.5 text-slate-500">Jun 2025</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
+                      <td class="px-3 py-1.5 font-medium text-slate-900 dark:text-white" style="max-width: 140px;">RDWIS</td>
+                      <td class="px-3 py-1.5 text-slate-500">Feb 2025</td>
+                      <td class="px-3 py-1.5 text-slate-500">Jun 2025</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -453,23 +414,18 @@
                       <h3 class="font-bold text-slate-900 dark:text-white">Education Details</h3>
                     </div>
                     <div class="space-y-4">
-                      @php
-                        $deg = ($degrees ?? collect())->first();
-                      @endphp
                       <div>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Degree</p>
-                        <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $deg->qlf_name ?? '—' }}</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">M.S. in Interaction Design</p>
                       </div>
                       <div>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Institution</p>
-                        <p class="text-xs font-bold text-slate-900 dark:text-white">{{ $deg->qlf_inst ?? '—' }}</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">Stanford University</p>
                       </div>
                       <div class="flex justify-between items-end">
                         <div>
                           <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Duration</p>
-                          <p class="text-xs font-bold text-slate-900 dark:text-white">
-                            {{ !empty($deg?->qlf_duration) ? ($deg->qlf_duration.' '.($deg->qlf_unit ?? '')) : (!empty($deg?->qlf_enddt) ? \Carbon\Carbon::parse($deg->qlf_enddt)->format('Y') : '—') }}
-                          </p>
+                          <p class="text-xs font-bold text-slate-900 dark:text-white">2013 - 2015</p>
                         </div>
                         <span class="material-icons-outlined text-slate-200 dark:text-slate-700 text-2xl">verified</span>
                       </div>
@@ -485,16 +441,18 @@
                       <h3 class="font-bold text-slate-900 dark:text-white">Certifications</h3>
                     </div>
                     <ul class="space-y-4">
-                      @forelse(($certs ?? collect())->take(5) as $ct)
-                        <li class="flex justify-between items-center">
-                          <span class="text-xs font-bold text-slate-800 dark:text-slate-300">{{ $ct->qlf_name ?? '—' }}</span>
-                          <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[8px] font-black uppercase">
-                            {{ !empty($ct->qlf_enddt) ? \Carbon\Carbon::parse($ct->qlf_enddt)->format('Y') : ($ct->qlf_level ?? '—') }}
-                          </span>
-                        </li>
-                      @empty
-                        <li class="text-xs text-slate-500">No certifications</li>
-                      @endforelse
+                      <li class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-300">Google UX Prof.</span>
+                        <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-md text-[8px] font-black uppercase">Certified</span>
+                      </li>
+                      <li class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-300">Advanced Design</span>
+                        <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[8px] font-black uppercase">2023</span>
+                      </li>
+                      <li class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-300">Human Factors</span>
+                        <span class="px-2 py-0.5 bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-md text-[8px] font-black uppercase">2021</span>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -527,64 +485,77 @@
     <div class="space-y-4">
       <div class="flex justify-between items-center">
         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Years in Service</span>
-        <span class="text-xs font-bold text-slate-900 dark:text-white">{{ $yearsInService !== null ? $yearsInService.' years' : '—' }}</span>
+        <span class="text-xs font-bold text-slate-900 dark:text-white">5.3 years</span>
       </div>
       <div class="flex justify-between items-center">
         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Last Promotion</span>
-        @php
-          $lastProm = $lastContract->ctr_date ?? ($lastContract->ctr_startdt ?? ($lastContract->ctr_enddt ?? null));
-        @endphp
-        <span class="text-xs font-bold text-slate-900 dark:text-white">{{ $lastProm ? \Carbon\Carbon::parse($lastProm)->format('M Y') : '—' }}</span>
+        <span class="text-xs font-bold text-slate-900 dark:text-white">Jun 2023</span>
       </div>
-      
-      <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-700/60">
-        <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Previous Jobs</div>
-        <ul class="space-y-1.5">
-          @forelse(($jobs ?? collect())->take(5) as $jb)
-            <li class="flex items-center justify-between text-xs">
-              <span class="font-semibold text-slate-900 dark:text-white" style="max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                {{ $jb->job_jobtitle ?? '—' }} @ {{ $jb->job_company ?? '—' }}
-              </span>
-              <span class="text-slate-500">
-                {{ !empty($jb->job_from) ? \Carbon\Carbon::parse($jb->job_from)->format('M Y') : '—' }}
-                —
-                {{ !empty($jb->job_to) ? \Carbon\Carbon::parse($jb->job_to)->format('M Y') : 'Present' }}
-              </span>
-            </li>
-          @empty
-            <li class="text-xs text-slate-500">No previous jobs</li>
-          @endforelse
-        </ul>
+      <div class="flex justify-between items-center">
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Current Band</span>
+        <span class="text-xs font-bold text-slate-900 dark:text-white">SBM - 2</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Rating</span>
+        <span class="text-xs font-bold flex items-center gap-1 text-slate-900 dark:text-white">
+          4.8 <span class="material-icons-outlined text-[10px] text-amber-400">star</span>
+        </span>
       </div>
     </div>
   </div>
 
   <!-- Kin Details -->
-  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-refined border border-slate-200/60 dark:border-slate-700 p-6">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-refined border border-slate-200/60 dark:border-slate-700 p-2 pt-4">
     <div class="flex items-center gap-2 mb-4">
       <span class="material-icons-outlined text-primary text-xl">people_outline</span>
       <h3 class="font-bold text-slate-900 dark:text-white">Kin Details</h3>
     </div>
-    <div class="flex items-center gap-2 mb-3">
-      <button id="kinTabNk" type="button" class="px-3 py-1.5 text-xs font-bold rounded-md border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600">Next of Kin</button>
-      <button id="kinTabEc" type="button" class="px-3 py-1.5 text-xs font-bold rounded-md border border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600">Emergency Contact</button>
-    </div>
-    <div id="kinPanelNk" class="space-y-1.5 hidden">
-      <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Next of Kin</div>
-      <div class="flex justify-between text-xs"><span class="text-slate-400">Name</span><span class="font-bold text-slate-900 dark:text-white">{{ $kin['name'] ?? '—' }}</span></div>
-      <div class="flex justify-between text-xs"><span class="text-slate-400">Relation</span><span class="font-bold text-slate-900 dark:text-white">{{ $kin['relation'] ?? '—' }}</span></div>
-      <div class="flex justify-between text-xs"><span class="text-slate-400">CNIC</span><span class="font-bold text-slate-900 dark:text-white">{{ $kin['cnic'] ?? '—' }}</span></div>
-    </div>
-    <div id="kinPanelEc" class="space-y-1.5 hidden">
-      <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Emergency Contact</div>
-      <div class="flex justify-between text-xs"><span class="text-slate-400">Name</span><span class="font-bold text-slate-900 dark:text-white">{{ $emer['name'] ?? '—' }}</span></div>
-      <div class="flex justify-between text-xs"><span class="text-slate-400">Relation</span><span class="font-bold text-slate-900 dark:text-white">{{ $emer['relation'] ?? '—' }}</span></div>
-      <div class="flex justify-between text-xs"><span class="text-slate-400">Phone</span><span class="font-bold text-slate-900 dark:text-white">{{ $emer['mobile'] ?? '—' }}</span></div>
+
+    <!-- Inline Buttons -->
+    <div class="flex flex-wrap gap-2">
+      <div>
+        <button 
+          class="text-xs font-bold text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-700 px-3 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600"
+          onclick="toggleDetail('kinName')">Name</button>
+        <div id="kinName" class="text-xs font-semibold text-slate-900 dark:text-white mt-1 hidden">Jane Doe</div>
+      </div>
+
+      <div>
+        <button 
+          class="text-xs font-bold text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-700 px-3 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600"
+          onclick="toggleDetail('kinRelation')">Relation</button>
+        <div id="kinRelation" class="text-xs font-semibold text-slate-900 dark:text-white mt-1 hidden">Sister</div>
+      </div>
+
+      <div>
+        <button 
+          class="text-xs font-bold text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-700 px-3 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600"
+          onclick="toggleDetail('kinCNIC')">CNIC</button>
+        <div id="kinCNIC" class="text-xs font-semibold text-slate-900 dark:text-white mt-1 hidden">12345-6789012-3</div>
+      </div>
+
+      <div>
+        <button 
+          class="text-xs font-bold text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-700 px-3 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600"
+          onclick="toggleDetail('kinAddress')">Address</button>
+        <div id="kinAddress" class="text-xs font-semibold text-slate-900 dark:text-white mt-1 hidden">123 Main St, New York, USA</div>
+      </div>
+
+      <div>
+        <button 
+          class="text-xs font-bold text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-700 px-3 py-2 rounded hover:bg-slate-300 dark:hover:bg-slate-600"
+          onclick="toggleDetail('kinPhone')">Phone</button>
+        <div id="kinPhone" class="text-xs font-semibold text-slate-900 dark:text-white mt-1 hidden">+1 234 567 890</div>
+      </div>
     </div>
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+function toggleDetail(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
+</script>
         </div>
       </div>
     </div>
@@ -657,23 +628,7 @@
         pHeaderHeight = pHh;
       });
     });
-    document.addEventListener('DOMContentLoaded', function () {
-      var nkBtn = document.getElementById('kinTabNk');
-      var ecBtn = document.getElementById('kinTabEc');
-      var nkPanel = document.getElementById('kinPanelNk');
-      var ecPanel = document.getElementById('kinPanelEc');
-      function activate(target) {
-        if (!nkPanel || !ecPanel) return;
-        nkPanel.classList.add('hidden');
-        ecPanel.classList.add('hidden');
-        if (target === 'nk') nkPanel.classList.remove('hidden');
-        if (target === 'ec') ecPanel.classList.remove('hidden');
-      }
-      if (nkBtn) nkBtn.addEventListener('click', function(){ activate('nk'); });
-      if (ecBtn) ecBtn.addEventListener('click', function(){ activate('ec'); });
-    });
   </script>
 </body>
 
-</div>
-@endsection
+</html>

@@ -6,14 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurRfqItem extends Model
 {
-    protected $table = 'puritems.rfq_items';
-    protected $primaryKey = 'rfi_id';
+    protected $table = 'purnew.rfq_items';
+    protected $primaryKey = 'rfq_item_id';
     public $timestamps = false;
-    protected $fillable = ['rfi_rfq_id','rfi_itm_id','rfi_price_id','rfi_qty','rfi_total'];
+    protected $fillable = ['rfq_id','item_id','est_price','price'];
 
     public function rfq()
     {
-        return $this->belongsTo(PurRfq::class, 'rfi_rfq_id', 'rfq_id');
+        return $this->belongsTo(PurRfq::class, 'rfq_id', 'rfq_id');
     }
 }
-

@@ -27,7 +27,7 @@
         <div class="container-fluid">
             <div class="page-header">
                 <div class="page-title"><i class="fas fa-folder-open"></i> All Purchase Cases</div>
-                <a href="{{ route('createnewcase') }}" class="btn btn-new-project"><i class="fas fa-plus-circle mr-1"></i> New Case</a>
+                <a href="{{ route('purchase.select') }}" class="btn btn-new-project"><i class="fas fa-plus-circle mr-1"></i> New Case</a>
             </div>
 
             <!-- FILTER BAR SECTION -->

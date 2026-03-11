@@ -86,7 +86,7 @@
         <!-- Switcher -->
         <div class="text-center">
             <div class="switcher-container">
-                <button class="switcher-btn active" id="btn-major" onclick="showForm('major')">Major Purchase</button>
+                <button class="switcher-btn" id="btn-major" onclick="showForm('major')">Major Purchase</button>
                 <button class="switcher-btn" id="btn-incidental" onclick="showForm('incidental')">Incidental Exp.</button>
                 <button class="switcher-btn" id="btn-tada" onclick="showForm('tada')">TA / DA</button>
             </div>
@@ -232,6 +232,12 @@
     }
 
     $(document).ready(function() {
+        const initial = "{{ $initialType ?? 'major' }}";
+        if (['major','incidental','tada'].includes(initial)) {
+            showForm(initial);
+        } else {
+            showForm('major');
+        }
         // AJAX: Fetch Minute Number based on Project Head
         $('#head_select_box').on('change', function() {
             var headId = $(this).val();

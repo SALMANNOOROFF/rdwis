@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurItemPrice extends Model
 {
-    protected $table = 'puritems.prices';
+    protected $table = 'purnew.prices';
     protected $primaryKey = 'prc_id';
     public $timestamps = false;
     protected $fillable = [
@@ -18,4 +18,3 @@ class PurItemPrice extends Model
         return $this->belongsTo(PurItem::class, 'prc_itm_id', 'itm_id');
     }
 }
-

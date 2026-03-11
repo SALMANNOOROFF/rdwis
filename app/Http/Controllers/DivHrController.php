@@ -117,11 +117,52 @@ class DivHrController extends Controller
                 return $row;
             });
 
+        $firstContract = DB::table('hr.contracts')
+            ->where('ctr_num', $id)
+            ->orderBy('ctr_startdt', 'asc')
+            ->first();
+        $lastContract = DB::table('hr.contracts')
+            ->where('ctr_num', $id)
+            ->orderBy('ctr_startdt', 'desc')
+            ->first();
+
+        $ext = DB::table('hr.empsextb')
+            ->where('empextb_emp_id', $id)
+            ->first();
+        $kin = null;
+        $emer = null;
+        $kinSame = false;
+        if ($ext) {
+            $kin = [
+                'name' => $ext->emp_nokname ?? null,
+                'relation' => $ext->emp_nokrelation ?? null,
+                'cnic' => $ext->emp_nokcnic ?? null,
+            ];
+            $emer = [
+                'name' => $ext->emp_emername ?? null,
+                'relation' => $ext->emp_emerrelation ?? null,
+                'mobile' => $ext->emp_emermobile ?? null,
+            ];
+            if (!empty($kin['name']) && !empty($emer['name'])) {
+                $kinSame = strtolower(trim($kin['name'])) === strtolower(trim($emer['name']))
+                    && strtolower(trim($kin['relation'] ?? '')) === strtolower(trim($emer['relation'] ?? ''));
+            }
+        }
+
         $salaryProgression = DB::table('fin.salorders')
             ->where('sor_emp_id', $id)
             ->selectRaw('EXTRACT(YEAR FROM sor_month)::int as yr, SUM(sor_netsalary)::bigint as total')
             ->groupBy('yr')
             ->orderBy('yr')
+            ->get();
+
+        $previousProjects = DB::table('hr.contracts as c')
+            ->leftJoin('cen.heads as h', 'h.hed_id', '=', 'c.ctr_hed_id')
+            ->leftJoin('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+            ->where('c.ctr_num', $id)
+            ->whereNotNull('h.hed_prj_id')
+            ->select('p.prj_title', 'c.ctr_startdt', 'c.ctr_enddt')
+            ->orderBy('c.ctr_startdt', 'desc')
             ->get();
 
         $degrees = DB::table('hr.qualifs')
@@ -151,19 +192,146 @@ class DivHrController extends Controller
             $yearsInService = round(Carbon::parse($emp->emp_joindt)->floatDiffInYears(Carbon::now()), 1);
         }
 
+        $empA = DB::table('hr.empsexta')->where('empexta_emp_id', $id)->first();
+        $authUnit = null;
+        if (Auth::user() && (Auth::user()->acc_unt_id ?? null)) {
+            $authUnit = DB::table('cen.units')->where('unt_id', Auth::user()->acc_unt_id)->first();
+        }
+
         return view('divhr.employee-details', compact(
             'id',
             'emp',
+            'empA',
+            'authUnit',
             'base',
             'subheads',
             'currentContract',
             'contractsHistory',
+            'firstContract',
+            'lastContract',
+            'kin',
+            'emer',
+            'kinSame',
             'salaryProgression',
+            'previousProjects',
             'degrees',
             'certs',
             'vehicles',
             'jobs',
             'yearsInService'
         ));
+    }
+
+    public function attendance(Request $request)
+    {
+        $monthStr = $request->input('month', Carbon::now()->format('Y-m'));
+        $first = Carbon::parse($monthStr.'-01')->startOfMonth();
+        $last = $first->copy()->endOfMonth();
+        $days = (int) $first->daysInMonth;
+        $unitId = Auth::user() ? (Auth::user()->acc_unt_id ?? (Auth::user()->unit->unt_id ?? null)) : null;
+        // Pull all division employees and LEFT JOIN latest attendance row overlapping the month
+        $rows = collect(DB::select("
+            SELECT e.emp_id, e.emp_name, 
+                   a.att_id, a.att_emp_id, a.att_empnamecomp, a.att_unt_id,
+                   a.att_startdt, a.att_enddt,
+                   a.att_1, a.att_2, a.att_3, a.att_4, a.att_5, a.att_6, a.att_7, a.att_8, a.att_9, a.att_10,
+                   a.att_11, a.att_12, a.att_13, a.att_14, a.att_15, a.att_16, a.att_17, a.att_18, a.att_19, a.att_20,
+                   a.att_21, a.att_22, a.att_23, a.att_24, a.att_25, a.att_26, a.att_27, a.att_28, a.att_29, a.att_30, a.att_31
+            FROM hr.emps e
+            LEFT JOIN LATERAL (
+                SELECT *
+                FROM hr.attendance a
+                WHERE a.att_emp_id = e.emp_id::text
+                  AND a.att_startdt <= ?::date
+                  AND a.att_enddt >= ?::date
+                ORDER BY a.att_startdt DESC, a.att_id DESC
+                LIMIT 1
+            ) a ON TRUE
+            WHERE e.emp_unt_id = COALESCE(?::int, e.emp_unt_id)
+            ORDER BY e.emp_name ASC
+        ", [$last->toDateString(), $first->toDateString(), $unitId]));
+
+        $data = $rows->map(function($r) use ($days) {
+            $vals = [];
+            for ($d=1;$d<=31;$d++) {
+                $col = 'att_'.$d;
+                $vals[$d] = isset($r->$col) && $r->$col !== null ? strtoupper($r->$col) : null;
+            }
+            $present = 0;
+            for ($d=1;$d<=$days;$d++) {
+                $v = $vals[$d];
+                if ($v === 'P') $present++;
+            }
+            return [
+                'emp_id' => $r->emp_id,
+                'name' => $r->emp_name,
+                'vals' => $vals,
+                'present' => $present,
+                'percent' => $days>0 ? round($present*100/$days) : 0
+            ];
+        });
+        $weekdays = [];
+        for ($d=1;$d<=$days;$d++) {
+            $weekdays[$d] = $first->copy()->addDays($d-1)->format('D');
+        }
+        return view('divhr.attendance', [
+            'month' => $first->format('Y-m'),
+            'first' => $first->toDateString(),
+            'last' => $last->toDateString(),
+            'days' => $days,
+            'list' => $data,
+            'weekdays' => $weekdays
+        ]);
+    }
+
+    public function attendanceSave(Request $request)
+    {
+        $monthStr = $request->input('month');
+        if (!$monthStr) return redirect()->route('divhr.attendance');
+        $first = Carbon::parse($monthStr.'-01')->startOfMonth();
+        $last = $first->copy()->endOfMonth();
+        $payload = json_decode((string)$request->input('payload_json','[]'), true) ?: [];
+        $unitId = Auth::user() ? (Auth::user()->acc_unt_id ?? (Auth::user()->unit->unt_id ?? null)) : null;
+        $byEmp = [];
+        foreach ($payload as $row) {
+            $eid = (string)($row['emp_id'] ?? '');
+            $day = (int)($row['day'] ?? 0);
+            $val = strtoupper((string)($row['val'] ?? ''));
+            if ($val === 'CL') $val = 'C';
+            if ($eid === '' || $day < 1 || $day > 31) continue;
+            if (!isset($byEmp[$eid])) $byEmp[$eid] = [];
+            $byEmp[$eid][$day] = ($val === '' ? null : substr($val,0,1));
+        }
+        if (empty($byEmp)) return redirect()->route('divhr.attendance', ['month'=>$monthStr]);
+        foreach ($byEmp as $eid => $changes) {
+            $emp = DB::table('hr.emps')->where('emp_id', $eid)->first();
+            if (!$emp) continue;
+            $row = DB::table('hr.attendance')
+                ->where('att_emp_id', (string)$eid)
+                ->where('att_startdt', $first->toDateString())
+                ->where('att_enddt', $last->toDateString())
+                ->first();
+            if (!$row) {
+                DB::table('hr.attendance')->insert([
+                    'att_emp_id' => (string)$eid,
+                    'att_empnamecomp' => $emp->emp_name,
+                    'att_unt_id' => $unitId ?? $emp->emp_unt_id,
+                    'att_startdt' => $first->toDateString(),
+                    'att_enddt' => $last->toDateString()
+                ]);
+            }
+            $upd = [];
+            foreach ($changes as $d=>$v) {
+                $upd['att_'.$d] = $v;
+            }
+            if (!empty($upd)) {
+                DB::table('hr.attendance')
+                    ->where('att_emp_id', (string)$eid)
+                    ->where('att_startdt', $first->toDateString())
+                    ->where('att_enddt', $last->toDateString())
+                    ->update($upd);
+            }
+        }
+        return redirect()->route('divhr.attendance', ['month'=>$monthStr]);
     }
 }

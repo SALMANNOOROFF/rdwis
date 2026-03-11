@@ -6,14 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurRfq extends Model
 {
-    protected $table = 'puritems.rfqs';
+    protected $table = 'purnew.rfq';
     protected $primaryKey = 'rfq_id';
+    public $incrementing = false;
+    protected $keyType = 'int';
     public $timestamps = false;
-    protected $fillable = ['rfq_title','rfq_unt_id','rfq_created_by','rfq_status','rfq_total'];
+    protected $fillable = ['rfq_id','pcs_date','pcs_title','pcs_unt_id','pcs_hed_id','pcs_effhed_id','pcs_effunt_id'];
 
     public function lines()
     {
-        return $this->hasMany(PurRfqItem::class, 'rfi_rfq_id', 'rfq_id');
+        return $this->hasMany(PurRfqItem::class, 'rfq_id', 'rfq_id');
     }
 }
-

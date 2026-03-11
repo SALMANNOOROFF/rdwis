@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
 
         // --- PURCHASE & REPORTS (Same as before) ---
         Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
+        Route::get('/purchase/select', [PurchaseController::class, 'select'])->name('purchase.select');
         Route::get('/purchase/create', [PurchaseController::class, 'create'])->name('createnewcase');
         Route::post('/purchase/store', [PurchaseController::class, 'store'])->name('purchase.store');
         Route::get('/purchase/details/{id}', [PurchaseController::class, 'show'])->name('purchasecasedetails');
@@ -119,14 +120,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/generate-comparative', [ReportsController::class, 'generateComparative'])->name('reports.generate.comparative');
         Route::post('/generate-it-letter', [ReportsController::class, 'generateITLetter'])->name('reports.generate.itletter');
 
-        Route::prefix('puritems')->group(function () {
-            Route::get('/', [PurItemsController::class, 'index'])->name('puritems.index');
-            Route::post('/item', [PurItemsController::class, 'createItem'])->name('puritems.item.create');
-            Route::post('/rfq/preview', [PurItemsController::class, 'rfqPreview'])->name('puritems.rfq.preview');
-            Route::post('/rfq/submit', [PurItemsController::class, 'rfqSubmit'])->name('puritems.rfq.submit');
-            Route::get('/rfqs', [PurItemsController::class, 'rfqList'])->name('puritems.rfq.list');
-            Route::post('/setup', [PurItemsController::class, 'setup'])->name('puritems.setup');
-            Route::post('/populate', [PurItemsController::class, 'populate'])->name('puritems.populate');
+        // Puritems legacy routes removed in favor of purnew
+
+        // Purnew (layout-integrated, uses DB RDWIS/DB/Individual Sql Files/purnew.sql)
+        Route::prefix('purnew')->group(function () {
+            Route::get('/create', [PurItemsController::class, 'indexLayout'])->name('purnew.create');
+            Route::get('/groups', [PurItemsController::class, 'rfqListLayout'])->name('purnew.groups');
+            Route::post('/item', [PurItemsController::class, 'createItem'])->name('purnew.item.create');
+            Route::post('/rfq/preview', [PurItemsController::class, 'rfqPreview'])->name('purnew.rfq.preview');
+            Route::post('/rfq/submit', [PurItemsController::class, 'rfqSubmit'])->name('purnew.rfq.submit');
+            Route::get('/group/{id}', [PurItemsController::class, 'rfqShowLayout'])->name('purnew.group.show');
+            Route::post('/setup', [PurItemsController::class, 'setupPurnew'])->name('purnew.setup');
         });
 
          // HR 
@@ -138,6 +142,11 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/employee/{id}', [DivHrController::class, 'employeedetail'])
                 ->name('divhr.employeedetail');
+
+            Route::get('/attendance', [DivHrController::class, 'attendance'])
+                ->name('divhr.attendance');
+            Route::post('/attendance/save', [DivHrController::class, 'attendanceSave'])
+                ->name('divhr.attendance.save');
 
         });
 
