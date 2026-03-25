@@ -70,6 +70,14 @@ class PurchaseController extends Controller
     }
 
     /**
+     * Show Consultancy form (Outsourcing)
+     */
+    public function consultancyCreate()
+    {
+        return view('purchase.new_case.consultancy_form');
+    }
+
+    /**
      * Store a new purchase case
      */
     public function store(Request $request)

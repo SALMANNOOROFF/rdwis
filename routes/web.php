@@ -123,6 +123,7 @@ Route::middleware('auth')->group(function () {
         // Puritems legacy routes removed in favor of purnew
 
         // Purnew (layout-integrated, uses DB RDWIS/DB/Individual Sql Files/purnew.sql)
+        Route::get('/purnew/consultancy/create', [PurchaseController::class, 'consultancyCreate'])->name('purnew.consultancy.create');
         Route::prefix('purnew')->group(function () {
             Route::get('/create', [PurItemsController::class, 'indexLayout'])->name('purnew.create');
             Route::get('/groups', [PurItemsController::class, 'rfqListLayout'])->name('purnew.groups');
@@ -131,6 +132,16 @@ Route::middleware('auth')->group(function () {
             Route::post('/rfq/submit', [PurItemsController::class, 'rfqSubmit'])->name('purnew.rfq.submit');
             Route::get('/group/{id}', [PurItemsController::class, 'rfqShowLayout'])->name('purnew.group.show');
             Route::post('/setup', [PurItemsController::class, 'setupPurnew'])->name('purnew.setup');
+
+            // Quotation System
+            Route::get('/quotes/{rfqId}', [PurItemsController::class, 'getQuotationData'])->name('purnew.quotes.get');
+            Route::get('/quotes/{rfqId}/items', [PurItemsController::class, 'rfqItemsJson'])->name('purnew.quotes.items');
+            Route::post('/quotes/save', [PurItemsController::class, 'saveQuotation'])->name('purnew.quotes.save');
+            Route::post('/quotes/delete-column', [PurItemsController::class, 'deleteQuotationColumn'])->name('purnew.quotes.deleteColumn');
+            Route::post('/quotes/accept', [PurItemsController::class, 'acceptQuote'])->name('purnew.quotes.accept');
+            Route::post('/quotes/accept-item', [PurItemsController::class, 'acceptItemQuote'])->name('purnew.quotes.acceptItem');            // Group Management
+            Route::delete('/group/{id}', [PurItemsController::class, 'deleteGroup'])->name('purnew.group.delete');
+            Route::get('/group/{id}/details', [PurItemsController::class, 'groupDetailsJson'])->name('purnew.group.details');
         });
 
          // HR 

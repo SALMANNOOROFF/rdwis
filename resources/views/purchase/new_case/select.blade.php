@@ -1,4 +1,4 @@
-@extends('welcome')
+  @extends('welcome')
 @section('content')
 
 <div class="purchase-wrapper">
@@ -70,11 +70,15 @@
     background: rgba(255, 255, 255, 0.88);
   }
 
-  /* Color accent strips per card */
+  /* ─── COLOR ACCENT STRIPS ─── */
+  /* ROW 1: Material, Outsourcing, Civil → ALL BLUE */
   .glass-card.accent-blue::after  { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+
+  /* ROW 2: Training + TA/DA → AMBER/YELLOW */
   .glass-card.accent-amber::after { background: linear-gradient(135deg, #f59e0b, #f97316); }
+
+  /* Miscellaneous → GREEN */
   .glass-card.accent-green::after { background: linear-gradient(135deg, #10b981, #059669); }
-  .glass-card.accent-purple::after{ background: linear-gradient(135deg, #8b5cf6, #6366f1); }
 
   .glass-card::after {
     content: '';
@@ -99,10 +103,14 @@
     font-size: 1.4rem;
   }
 
+  /* ROW 1 icons → BLUE */
   .icon-blue   { background: rgba(59,130,246,0.12); color: #3b82f6; }
+
+  /* ROW 2 icons → AMBER */
   .icon-amber  { background: rgba(245,158,11,0.12); color: #f59e0b; }
+
+  /* MISC icon → GREEN */
   .icon-green  { background: rgba(16,185,129,0.12); color: #10b981; }
-  .icon-purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
 
   .gc-title {
     font-size: 1.05rem;
@@ -279,12 +287,6 @@
   /* Row gap fix */
   .card-row { margin-bottom: 20px; }
 
-  /* Outsourcing sub-grid outside card */
-  #outsourcingGrid {
-    margin-top: 20px;
-    animation: fadeSlideIn 0.28s cubic-bezier(.34,1.56,.64,1);
-  }
-
 </style>
 
 <div class="content p-4">
@@ -296,9 +298,9 @@
       <p>Please select a category to proceed</p>
     </div>
 
-    <!-- ROW 1: Material | Outsourcing | Civil -->
+    <!-- ROW 1: Material | Outsourcing | Civil → ALL BLUE -->
     <div class="row card-row">
-      <!-- Material / Equipment -->
+      <!-- Material / Equipment → BLUE -->
       <div class="col-md-4 mb-3">
         <div class="glass-card accent-blue h-100" id="card-material">
           <div class="card-icon-wrap icon-blue"><i class="fas fa-cubes"></i></div>
@@ -308,15 +310,15 @@
         </div>
       </div>
 
-      <!-- Outsourcing -->
+      <!-- Outsourcing → BLUE -->
       <div class="col-md-4 mb-3">
-        <div class="glass-card accent-amber h-100" id="card-outsourcing">
-          <div class="card-icon-wrap icon-amber"><i class="fas fa-user-tie"></i></div>
+        <div class="glass-card accent-blue h-100" id="card-outsourcing">
+          <div class="card-icon-wrap icon-blue"><i class="fas fa-user-tie"></i></div>
           <div class="gc-title">Outsourcing</div>
           <div class="gc-sub">External services procurement</div>
-          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#f59e0b"></i> Services &nbsp;•&nbsp; Consultancy</span>
+          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> Services &nbsp;•&nbsp; Consultancy</span>
 
-          <!-- Inline sub-grid -->
+          <!-- Inline sub-grid (kept for structure, hidden by default) -->
           <div class="sub-grid-wrapper" id="outsourcingSubGrid">
             <div class="row">
               <div class="col-6">
@@ -326,7 +328,7 @@
                 </a>
               </div>
               <div class="col-6">
-                <a class="sq-card" href="{{ route('createnewcase', ['type'=>'consultancy']) }}">
+                <a class="sq-card" href="{{ route('purnew.consultancy.create') }}">
                   <div class="sq-title">Consultancy</div>
                   <div class="sq-sub">Professional advice</div>
                 </a>
@@ -336,25 +338,25 @@
         </div>
       </div>
 
-      <!-- Civil Works -->
+      <!-- Civil Works → BLUE -->
       <div class="col-md-4 mb-3">
-        <div class="glass-card accent-green h-100" id="card-civil">
-          <div class="card-icon-wrap icon-green"><i class="fas fa-hard-hat"></i></div>
+        <div class="glass-card accent-blue h-100" id="card-civil">
+          <div class="card-icon-wrap icon-blue"><i class="fas fa-hard-hat"></i></div>
           <div class="gc-title">Civil Works / Upfit</div>
           <div class="gc-sub">Civil works and facility upfit</div>
-          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#10b981"></i> BOQs &nbsp;•&nbsp; Work Orders</span>
+          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> BOQs &nbsp;•&nbsp; Work Orders</span>
         </div>
       </div>
     </div>
 
-    <!-- ROW: Training + TA/DA -->
+    <!-- ROW 2: Training + TA/DA → AMBER/YELLOW -->
     <div class="row card-row">
       <div class="col-md-6 mb-3">
-        <div class="glass-card accent-purple h-100" id="card-training">
-          <div class="card-icon-wrap icon-purple"><i class="fas fa-chalkboard-teacher"></i></div>
+        <div class="glass-card accent-amber h-100" id="card-training">
+          <div class="card-icon-wrap icon-amber"><i class="fas fa-chalkboard-teacher"></i></div>
           <div class="gc-title">Training</div>
           <div class="gc-sub">Workshops and trainings</div>
-          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#8b5cf6"></i> Create</span>
+          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#f59e0b"></i> Create</span>
         </div>
       </div>
       <div class="col-md-6 mb-3">
@@ -366,13 +368,14 @@
         </div>
       </div>
     </div>
-    <!-- ROW 2: Miscellaneous (full width) -->
+
+    <!-- ROW 3: Miscellaneous → GREEN -->
     <div class="row card-row">
       <div class="col-md-12">
-        <div class="glass-card accent-purple" id="card-misc" style="cursor:pointer">
+        <div class="glass-card accent-green" id="card-misc" style="cursor:pointer">
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center" style="gap:14px">
-              <div class="card-icon-wrap icon-purple" style="margin-bottom:0"><i class="fas fa-shapes"></i></div>
+              <div class="card-icon-wrap icon-green" style="margin-bottom:0"><i class="fas fa-shapes"></i></div>
               <div>
                 <div class="gc-title" style="margin-bottom:2px">Miscellaneous</div>
                 <div class="gc-sub" style="margin-bottom:0">Other expense categories</div>
@@ -381,7 +384,6 @@
             <span class="gc-chip" id="misc-toggle-icon"><i class="fas fa-chevron-down" style="font-size:.75rem"></i></span>
           </div>
 
-          <!-- Misc inline sub-grid (disabled in favor of modal) -->
           <div class="sub-grid-wrapper" id="misc-grid"></div>
         </div>
       </div>
@@ -412,7 +414,7 @@
             </a>
           </div>
           <div class="col-6 pl-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
+            <a href="{{ route('purnew.consultancy.create') }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
               <span class="btn-icon"><i class="fas fa-user-tie"></i></span>
               <span>Consultancy</span>
             </a>
@@ -549,7 +551,8 @@
       </div>
     </div>
   </div>
-  </div>
+</div>
+
 <!-- ─── MATERIAL MODAL ─── -->
 <div class="modal fade" id="materialModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" style="max-width:400px" role="document">
@@ -608,6 +611,7 @@
   document.getElementById('card-training').addEventListener('click', function () {
     $('#trainingModal').modal('show');
   });
+
   // TA/DA card → modal
   document.getElementById('card-tada').addEventListener('click', function () {
     $('#tadaModal').modal('show');

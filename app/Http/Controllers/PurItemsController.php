@@ -173,7 +173,8 @@ class PurItemsController extends Controller
             $q->whereRaw('LOWER(r.pcs_title) LIKE ?', [$term]);
         }
         $rfqs = $q->orderByDesc('r.rfq_id')->limit(200)->get();
-        return view('puritems.rfq_list_layout', compact('rfqs'));
+        $firms = DB::table('frm.firmz')->orderBy('frm_name')->get();
+        return view('puritems.rfq_list_layout', compact('rfqs', 'firms'));
     }
 
     public function rfqShowLayout($id)
@@ -186,5 +187,211 @@ class PurItemsController extends Controller
             ->get();
         $total = $items->sum('price');
         return view('puritems.rfq_show_layout', compact('rfq','items','total'));
+    }
+
+    // =============================================
+    // QUOTATION SYSTEM METHODS
+    // =============================================
+
+    public function rfqItemsJson($rfqId)
+    {
+        $items = DB::table('purnew.rfq_items as i')
+            ->leftJoin('purnew.items as t', 'i.item_id', '=', 't.item_id')
+            ->select('i.rfq_item_id', 'i.rfq_id', 'i.item_id', 'i.est_price', 'i.price', 't.title')
+            ->where('i.rfq_id', $rfqId)
+            ->get();
+
+        return response()->json($items);
+    }
+
+    public function deleteGroup($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            // First delete all quotes related to items of this RFQ
+            // The constraint is on rfq_item_id and rfq_id, so we can delete by rfq_id directly
+            DB::table('purnew.rfq_quotes')->where('rfq_id', $id)->delete();
+            
+            // Delete items
+            DB::table('purnew.rfq_items')->where('rfq_id', $id)->delete();
+            
+            // Delete the RFQ itself
+            DB::table('purnew.rfq')->where('rfq_id', $id)->delete();
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Group deleted successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Error deleting group: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function groupDetailsJson($id) 
+    {
+        // Get all items in the RFQ
+        $items = DB::table('purnew.rfq_items as i')
+            ->leftJoin('purnew.items as t', 'i.item_id', '=', 't.item_id')
+            ->select('i.rfq_item_id', 'i.rfq_id', 'i.item_id', 'i.est_price', 'i.price as accepted_price', 't.title')
+            ->where('i.rfq_id', $id)
+            ->get();
+            
+        // Get all quotes to populate the item dropdowns
+        $allQuotes = DB::table('purnew.rfq_quotes as q')
+            ->join('frm.firmz as f', 'q.frm_id', '=', 'f.frm_id')
+            ->where('q.rfq_id', $id)
+            ->select('q.rfq_item_id', 'q.frm_id', 'f.frm_name as vendor_name', 'q.quoted_price', 'q.is_accepted')
+            ->get();
+
+        // Attach vendor info to items
+        foreach ($items as $item) {
+            $itemQuotes = $allQuotes->where('rfq_item_id', $item->rfq_item_id)->values();
+            $item->available_quotes = $itemQuotes;
+            
+            $acceptedQuote = $itemQuotes->firstWhere('is_accepted', true);
+            if ($acceptedQuote) {
+                $item->vendor_name = $acceptedQuote->vendor_name;
+                $item->vendor_id = $acceptedQuote->frm_id;
+                $item->accepted_price = $acceptedQuote->quoted_price;
+                $item->has_accepted_quote = true;
+            } else {
+                $item->vendor_name = null;
+                $item->vendor_id = null;
+                $item->has_accepted_quote = false;
+            }
+        }
+
+        return response()->json($items);
+    }
+
+    public function getQuotationData($rfqId)
+    {
+        $quotes = DB::table('purnew.rfq_quotes as q')
+            ->join('frm.firmz as f', 'f.frm_id', '=', 'q.frm_id')
+            ->join('purnew.rfq_items as ri', 'ri.rfq_item_id', '=', 'q.rfq_item_id')
+            ->select('q.*', 'f.frm_name', 'ri.item_id')
+            ->where('q.rfq_id', $rfqId)
+            ->orderBy('q.frm_id')
+            ->get();
+
+        return response()->json($quotes);
+    }
+
+    public function saveQuotation(Request $request)
+    {
+        $request->validate([
+            'rfq_id' => 'required|integer',
+            'rfq_item_id' => 'required|integer',
+            'frm_id' => 'required|integer',
+            'quoted_price' => 'required|numeric',
+        ]);
+
+        DB::statement("
+            INSERT INTO purnew.rfq_quotes (rfq_id, rfq_item_id, frm_id, quoted_price, created_at)
+            VALUES (?, ?, ?, ?, NOW())
+            ON CONFLICT (rfq_id, rfq_item_id, frm_id)
+            DO UPDATE SET quoted_price = EXCLUDED.quoted_price
+        ", [
+            $request->rfq_id,
+            $request->rfq_item_id,
+            $request->frm_id,
+            $request->quoted_price,
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteQuotationColumn(Request $request)
+    {
+        $request->validate([
+            'rfq_id' => 'required|integer',
+            'frm_id' => 'required|integer',
+        ]);
+
+        DB::table('purnew.rfq_quotes')
+            ->where('rfq_id', $request->rfq_id)
+            ->where('frm_id', $request->frm_id)
+            ->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function acceptQuote(Request $request)
+    {
+        $request->validate([
+            'rfq_id' => 'required|integer',
+            'frm_id' => 'required|integer',
+        ]);
+
+        // Reset all accepted flags for this RFQ
+        DB::table('purnew.rfq_quotes')
+            ->where('rfq_id', $request->rfq_id)
+            ->update(['is_accepted' => false]);
+
+        // Set accepted for chosen vendor
+        DB::table('purnew.rfq_quotes')
+            ->where('rfq_id', $request->rfq_id)
+            ->where('frm_id', $request->frm_id)
+            ->update(['is_accepted' => true]);
+
+        // Update rfq_items.price with the accepted vendor's quoted_price
+        $acceptedQuotes = DB::table('purnew.rfq_quotes')
+            ->where('rfq_id', $request->rfq_id)
+            ->where('frm_id', $request->frm_id)
+            ->get();
+
+        foreach ($acceptedQuotes as $q) {
+            DB::table('purnew.rfq_items')
+                ->where('rfq_item_id', $q->rfq_item_id)
+                ->update(['price' => $q->quoted_price]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function acceptItemQuote(Request $request)
+    {
+        $request->validate([
+            'rfq_item_id' => 'required|integer',
+            'frm_id' => 'required|integer',
+        ]);
+
+        $rfqItemId = $request->rfq_item_id;
+        $rfqId = DB::table('purnew.rfq_items')->where('rfq_item_id', $rfqItemId)->value('rfq_id');
+
+        if (!$rfqId) {
+            return response()->json(['success' => false, 'message' => 'Item not found'], 404);
+        }
+
+        // Reset all accepted flags for this specific item
+        DB::table('purnew.rfq_quotes')
+            ->where('rfq_id', $rfqId)
+            ->where('rfq_item_id', $rfqItemId)
+            ->update(['is_accepted' => false]);
+
+        if ($request->frm_id > 0) {
+            DB::table('purnew.rfq_quotes')
+                ->where('rfq_id', $rfqId)
+                ->where('rfq_item_id', $rfqItemId)
+                ->where('frm_id', $request->frm_id)
+                ->update(['is_accepted' => true]);
+
+            $quotedPrice = DB::table('purnew.rfq_quotes')
+                ->where('rfq_id', $rfqId)
+                ->where('rfq_item_id', $rfqItemId)
+                ->where('frm_id', $request->frm_id)
+                ->value('quoted_price');
+
+            DB::table('purnew.rfq_items')
+                ->where('rfq_item_id', $rfqItemId)
+                ->update(['price' => $quotedPrice]);
+        } else {
+            // Unassigned fallback back to 0
+             DB::table('purnew.rfq_items')
+                ->where('rfq_item_id', $rfqItemId)
+                ->update(['price' => 0]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }
