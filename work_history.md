@@ -72,6 +72,19 @@
 
 ---
 
+## Session #3 — 2026-03-26 (RFQ Layout Finalization)
+
+### 🎯 Session Focus
+- Complete the RFQ Procurement Quotation module UI.
+- Assure pixel-perfect UI.
+- Fix bugs relating to modal `<i class="fas fa-times"></i>` clicks not appropriately triggering Bootstrap's native dismiss attributes.
+
+### 💻 Frontend Progress
+- Fixed the cross close buttons on the `trackingModal` and `editGroupModal` by implementing inline `bootstrap.Modal.getInstance()?.hide()` to completely bypass click interception from SVG contents, while perfectly maintaining all desired UI/UX aesthetics.
+- The Procurement RFQ UI update has now been finalized and locked as complete.
+
+---
+
 > **⚡ Operational Rules Applied:**
 > - ✅ Read Before Write — `software_db.md` reviewed before any code changes
 > - ✅ Auto-Update — Both files updated with every schema/feature discussion
