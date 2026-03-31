@@ -114,10 +114,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/training/books/create', [TrainingController::class, 'createBook'])->name('training.books.create');
         Route::get('/training/license', [TrainingController::class, 'indexLicense'])->name('training.license.index');
         Route::get('/training/license/create', [TrainingController::class, 'createLicense'])->name('training.license.create');
+        Route::get('/training/purchase/create', [TrainingController::class, 'createPurchase'])->name('training.purchase.create');
         Route::get('/training/{id}', [TrainingController::class, 'show'])->name('training.show');
         Route::post('/training/store', [TrainingController::class, 'store'])->name('training.store');
         Route::post('/training/books/store', [TrainingController::class, 'storeBook'])->name('training.books.store');
         Route::post('/training/license/store', [TrainingController::class, 'storeLicense'])->name('training.license.store');
+        Route::post('/training/purchase/store', [TrainingController::class, 'storePurchase'])->name('training.purchase.store');
         Route::get('/get-last-minute/{headId}', [PurchaseController::class, 'getLastMinute'])->name('get.last.minute');
         Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
         Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
@@ -127,6 +129,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase/it-reports', [ReportsController::class, 'index'])->name('purchase.reports.index');
         Route::post('/generate-comparative', [ReportsController::class, 'generateComparative'])->name('reports.generate.comparative');
         Route::post('/generate-it-letter', [ReportsController::class, 'generateITLetter'])->name('reports.generate.itletter');
+        Route::get('/get-next-minute-training/{headId}', [TrainingController::class, 'getNextMinuteNumber'])->name('training.get.next.minute');
 
         // Puritems legacy routes removed in favor of purnew
 

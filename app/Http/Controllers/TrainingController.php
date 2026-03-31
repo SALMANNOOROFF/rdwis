@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TrainingController extends Controller
 {
@@ -15,8 +16,27 @@ class TrainingController extends Controller
 
     public function create()
     {
-        // View for raising a new training case
-        return view('training.create');
+        $maxId = DB::table('pur.purcases')->max('pcs_id');
+        $nextId = $maxId ? ($maxId + 1) : 1;
+
+        $heads = DB::table('cen.heads')
+                    ->select('hed_id', 'hed_name', 'hed_code')
+                    ->orderBy('hed_name', 'asc')
+                    ->get();
+
+        return view('training.create', compact('nextId', 'heads'));
+    }
+
+    public function getNextMinuteNumber($headId)
+    {
+        $maxMinute = DB::table('pur.purcases')
+                        ->where('pcs_hed_id', $headId)
+                        ->max('pcs_minute');
+
+        return response()->json([
+            'next_minute' => $maxMinute ? ($maxMinute + 1) : 1,
+            'last_minute' => $maxMinute ?? 0
+        ]);
     }
 
     public function show($id)
@@ -166,6 +186,27 @@ class TrainingController extends Controller
     {
         // View for raising a standalone license procurement case
         return view('training.license');
+    }
+
+    public function createPurchase()
+    {
+        // Dummy catalog for training related purchases
+        $items = [
+            (object)['id' => 1, 'title' => 'Multimedia Projector (4K)', 'category' => 'Hardware', 'last_price' => 85000, 'stock_qty' => 5],
+            (object)['id' => 2, 'title' => 'High-End Developer Laptop', 'category' => 'Hardware', 'last_price' => 250000, 'stock_qty' => 12],
+            (object)['id' => 3, 'title' => 'Digital Whiteboard (Interative)', 'category' => 'Hardware', 'last_price' => 120000, 'stock_qty' => 3],
+            (object)['id' => 4, 'title' => 'Training Stationery Kit (Bulk)', 'category' => 'Stationery', 'last_price' => 1500, 'stock_qty' => 100],
+            (object)['id' => 5, 'title' => 'VR Training Headset', 'category' => 'Hardware', 'last_price' => 95000, 'stock_qty' => 8],
+            (object)['id' => 6, 'title' => 'AWS / Cloud Training Vouchers', 'category' => 'Certification', 'last_price' => 45000, 'stock_qty' => 50],
+        ];
+
+        return view('training.purchase', compact('items'));
+    }
+
+    public function storePurchase(Request $request)
+    {
+        // Placeholder for saving purchase data
+        return response()->json(['success' => true, 'message' => 'Training purchase case raised successfully']);
     }
 
     public function storeLicense(Request $request)

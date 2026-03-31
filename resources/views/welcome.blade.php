@@ -174,6 +174,8 @@
               </a>
           </li>
 
+{{-- Hiding Old Purchase System as requested --}}
+          {{-- 
           <li class="nav-item">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-shopping-cart"></i>
@@ -194,11 +196,12 @@
                   </li>  
               </ul>
           </li>
+          --}}
 
           <li class="nav-item">
               <a href="{{ route('purchase.select') }}" class="nav-link {{ Request::routeIs('purchase.select') ? 'active' : '' }}">
                   <i class="fas fa-cart-plus nav-icon"></i>
-                  <p>PURCHASE CASE (NEW)</p>
+                  <p>PURCHASE CASE</p>
               </a>
           </li>
 

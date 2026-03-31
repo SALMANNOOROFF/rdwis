@@ -68,20 +68,11 @@
                         {{-- 3. Regulatory References & Docs --}}
                         <div class="card shadow-sm border-0 mb-3" style="background:var(--rd-surface);border-radius:10px;">
                             <div class="card-header border-0 pb-0 bg-transparent">
-                                <h6 class="card-title font-weight-bold text-white" style="font-size: 0.9rem;">3. Legal Compliance & Reference</h6>
+                                <h6 class="card-title font-weight-bold text-white" style="font-size: 0.9rem;">3. Reference</h6>
                             </div>
                             <div class="card-body pt-2 pb-2">
                                 {{-- Regulatory Reference Block --}}
-                                <div class="bg-dark p-2 border border-secondary mb-3" style="border-radius:8px; background: rgba(0,0,0,0.2) !important;">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="badge badge-primary mr-2">PPRA Rule 3C</span>
-                                        <span class="extra-small text-white font-weight-bold">CONSULTANCY SERVICES</span>
-                                    </div>
-                                    <p class="mb-0 text-muted" style="font-size: 0.75rem; line-height: 1.3;">
-                                        "Quality-Based Selection (QBS) shall be the preferred method for complex consultancy where quality is the primary objective." 
-                                        <br><span class="text-info font-italic">— Source: Punjab Procurement Rules 2014 & Federal Rules 2004.</span>
-                                    </p>
-                                </div>
+                                
 
                                 <div class="row">
                                     <div class="col-md-12 mb-2">

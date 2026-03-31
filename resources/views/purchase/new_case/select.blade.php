@@ -309,7 +309,7 @@
 
     <!-- HEADING -->
     <div class="page-heading">
-      <h1>PURCHASE CASES</h1>
+      <h1>PURCHASE CASE</h1>
       <p>Please select a category to proceed</p>
     </div>
 

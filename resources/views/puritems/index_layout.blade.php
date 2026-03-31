@@ -644,11 +644,10 @@
       <div class="sinc-nav-title">
         <span class="nt-icon"><i class="fas fa-boxes"></i></span>
         Purchase Case
-        <span style="font-size:.7rem;font-weight:500;color:var(--rd-text2);margin-left:2px">/ New</span>
       </div>
       <div class="sinc-nav-divider"></div>
       <a href="{{ route('purnew.create') }}" class="sinc-nav-btn primary">
-        <i class="fas fa-plus-circle"></i> Create New
+        <i class="fas fa-plus-circle"></i> Create Case
       </a>
       <a href="{{ route('purnew.groups') }}" class="sinc-nav-btn outline">
         <i class="fas fa-layer-group"></i> Grouping
