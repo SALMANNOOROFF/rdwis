@@ -23,6 +23,17 @@
         .nav-header {
             color: var(--rd-text3) !important;
         }
+
+        .user-panel .info a,
+        .user-panel .info small {
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .user-panel .info small {
+            display: block;
+        }
     </style>
   </head>
 
@@ -41,6 +52,8 @@
         <li class="nav-item d-none d-sm-inline-block">
           @if(Auth::check() && Auth::user()->isSORD())
               <a href="{{ route('sord.dashboard') }}" class="nav-link">Home (SORD)</a>
+          @elseif(Auth::check() && strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
+              <a href="{{ route('admin.dashboard') }}" class="nav-link">Home (Admin)</a>
           @else
               <a href="{{ route('dashboard') }}" class="nav-link">Home (Division)</a>
           @endif
@@ -115,7 +128,14 @@
           <div class="image">
             </div>
           <div class="info">
-            <a href="#" class="d-block">{{ Auth::user()->acc_desig ?? 'User' }}</a>
+            @if(Auth::check())
+                <a href="#" class="d-block">
+                    {{ Auth::user()->acc_rank }} {{ Auth::user()->acc_name }}<br>
+                    <small>{{ Auth::user()->acc_desig }} —<wbr> {{ Auth::user()->acc_untname }}</small>
+                </a>
+            @else
+                <a href="#" class="d-block">Guest</a>
+            @endif
           </div>
         </div>
 
@@ -265,6 +285,30 @@
                   <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-wallet nav-icon"></i><p>ACCOUNTS</p></a></li>
                   <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-hand-holding-usd nav-icon"></i><p>LOANS</p></a></li>
               </ul>
+          </li>
+
+      @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
+          <li class="nav-header">SYSTEM ADMIN</li>
+
+          <li class="nav-item">
+              <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <p>Dashboard</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('admin.accounts.index') }}" class="nav-link {{ Request::routeIs('admin.accounts.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-users-cog"></i>
+                  <p>Accounts</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('admin.reversals.index') }}" class="nav-link {{ Request::routeIs('admin.reversals.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-undo-alt"></i>
+                  <p>Data Reversals</p>
+              </a>
           </li>
 
           

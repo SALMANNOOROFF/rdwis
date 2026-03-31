@@ -2,23 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use App\Models\Unit;
 
-class User extends Authenticatable
+class CenAccount extends Authenticatable
 {
-    use HasFactory, Notifiable;
-
     protected $table = 'cen.accounts';
     protected $primaryKey = 'acc_id';
-    public $timestamps = false; 
+    public $timestamps = false;
     protected $rememberTokenName = null;
-
-    protected $fillable = [
-        'acc_username', 'acc_pass', 'acc_unt_id', 'acc_desig', 'acc_level',
-    ];
 
     protected $hidden = ['acc_pass'];
 
@@ -37,18 +28,10 @@ class User extends Authenticatable
         return $this->acc_pass;
     }
 
-    // --- RELATIONSHIPS ---
-    public function role()
+    public function getAuthIdentifierName()
     {
-        return $this->belongsTo(Role::class, 'acc_desig', 'rol_desig');
+        return 'acc_id';
     }
-
-    public function unit()
-    {
-        return $this->belongsTo(Unit::class, 'acc_unt_id', 'unt_id');
-    }
-
-    // --- ROLE & AREA HELPERS ---
 
     public function isSORD()
     {
@@ -59,10 +42,6 @@ class User extends Authenticatable
 
     public function isDivision()
     {
-        if ($this->isSORD()) {
-            return false;
-        }
-
         return $this->normalizedArea() === 'prj';
     }
 
@@ -95,16 +74,6 @@ class User extends Authenticatable
         }
 
         return $unitId >= $this->acc_lowers && $unitId <= $this->acc_uppers;
-    }
-
-    public function isSingleUnitAccess(): bool
-    {
-        return $this->acc_access === 'single';
-    }
-
-    public function isMultiUnitAccess(): bool
-    {
-        return $this->acc_access === 'multiple';
     }
 
     public function unitRange(): array

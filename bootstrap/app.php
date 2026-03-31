@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\CheckArea;
+use App\Http\Middleware\ForcePasswordChange;
+use App\Http\Middleware\RequireApprover;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,7 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'area' => CheckArea::class,
+            'approver' => RequireApprover::class,
+            'force_password_change' => ForcePasswordChange::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

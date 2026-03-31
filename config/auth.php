@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'default_password' => env('DEFAULT_PASSWORD', '12345'),
 
     /*
     |--------------------------------------------------------------------------
@@ -38,7 +39,7 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'cen_accounts',
         ],
     ],
 
@@ -60,15 +61,10 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+        'cen_accounts' => [
+            'driver' => 'cen_accounts',
+            'model' => App\Models\CenAccount::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*
