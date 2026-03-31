@@ -3,26 +3,25 @@
 @section('content')
 <div class="content-wrapper">
     <style>
-        .card-history { border-top: 3px solid #007bff; }
+        .card-history { border-top: 3px solid var(--rd-accent); }
         .table thead th {
-            background-color: #f4f6f9; color: #495057; text-transform: uppercase;
+            background-color: var(--rd-surface2); color: var(--rd-text2); text-transform: uppercase;
             font-size: 0.85rem; letter-spacing: 0.5px; border-bottom-width: 2px;
         }
         /* Styling specifically for MPR */
-        .mpr-desc { font-size: 0.9rem; color: #333; line-height: 1.5; white-space: pre-wrap; }
-        .mpr-date { font-weight: 700; color: #007bff; }
+        .mpr-desc { font-size: 0.9rem; color: var(--rd-text1); line-height: 1.5; white-space: pre-wrap; }
+        .mpr-date { font-weight: 700; color: var(--rd-accent); }
     </style>
-
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
                     @if(isset($viewType) && $viewType == 'mpr_list')
-                        <h1 class="m-0 text-dark">
+                        <h1 class="m-0">
                             <i class="fas fa-file-invoice mr-2"></i> MPR History: <span class="text-primary">{{ $project->prj_code }}</span>
                         </h1>
                     @else
-                        <h1 class="m-0 text-dark"><i class="fas fa-history mr-2"></i>Global Project History</h1>
+                        <h1 class="m-0"><i class="fas fa-history mr-2"></i>Global Project History</h1>
                     @endif
                 </div>
             </div>

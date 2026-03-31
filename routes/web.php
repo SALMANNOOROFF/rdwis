@@ -10,6 +10,7 @@ use App\Http\Controllers\DocMprController; // <--- YE IMPORT ZAROORI HAI
 use App\Http\Controllers\MprController;
 use App\Http\Controllers\DivHrController;
 use App\Http\Controllers\PurItemsController;
+use App\Http\Controllers\TrainingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,10 +52,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- DASHBOARDS ---
-    Route::get('/dashboard', function () {
-        if (Auth::user()->isSORD()) return redirect()->route('sord.dashboard');
-        return view('index');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/sord/dashboard', function () {
         if (Auth::user()->isDivision()) return redirect()->route('dashboard');
@@ -106,10 +104,20 @@ Route::middleware('auth')->group(function () {
         // --- PURCHASE & REPORTS (Same as before) ---
         Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
         Route::get('/purchase/select', [PurchaseController::class, 'select'])->name('purchase.select');
-        Route::get('/purchase/create', [PurchaseController::class, 'create'])->name('createnewcase');
+        Route::get('/purchase/new/{type}', [PurchaseController::class, 'unifiedCreate'])->name('purchase.unified.create');
         Route::post('/purchase/store', [PurchaseController::class, 'store'])->name('purchase.store');
         Route::get('/purchase/details/{id}', [PurchaseController::class, 'show'])->name('purchasecasedetails');
         Route::post('/purchase/release/{id}', [PurchaseController::class, 'releaseCase'])->name('purchase.release');
+        Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
+        Route::get('/training/create', [TrainingController::class, 'create'])->name('training.create');
+        Route::get('/training/books', [TrainingController::class, 'indexBook'])->name('training.books.index');
+        Route::get('/training/books/create', [TrainingController::class, 'createBook'])->name('training.books.create');
+        Route::get('/training/license', [TrainingController::class, 'indexLicense'])->name('training.license.index');
+        Route::get('/training/license/create', [TrainingController::class, 'createLicense'])->name('training.license.create');
+        Route::get('/training/{id}', [TrainingController::class, 'show'])->name('training.show');
+        Route::post('/training/store', [TrainingController::class, 'store'])->name('training.store');
+        Route::post('/training/books/store', [TrainingController::class, 'storeBook'])->name('training.books.store');
+        Route::post('/training/license/store', [TrainingController::class, 'storeLicense'])->name('training.license.store');
         Route::get('/get-last-minute/{headId}', [PurchaseController::class, 'getLastMinute'])->name('get.last.minute');
         Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
         Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
@@ -123,7 +131,6 @@ Route::middleware('auth')->group(function () {
         // Puritems legacy routes removed in favor of purnew
 
         // Purnew (layout-integrated, uses DB RDWIS/DB/Individual Sql Files/purnew.sql)
-        Route::get('/purnew/consultancy/create', [PurchaseController::class, 'consultancyCreate'])->name('purnew.consultancy.create');
         Route::prefix('purnew')->group(function () {
             Route::get('/create', [PurItemsController::class, 'indexLayout'])->name('purnew.create');
             Route::get('/groups', [PurItemsController::class, 'rfqListLayout'])->name('purnew.groups');
@@ -140,6 +147,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/quotes/delete-column', [PurItemsController::class, 'deleteQuotationColumn'])->name('purnew.quotes.deleteColumn');
             Route::post('/quotes/accept', [PurItemsController::class, 'acceptQuote'])->name('purnew.quotes.accept');
             Route::post('/quotes/accept-item', [PurItemsController::class, 'acceptItemQuote'])->name('purnew.quotes.acceptItem');            // Group Management
+            Route::get('/vendors', [PurItemsController::class, 'vendorsJson'])->name('purnew.vendors');
             Route::delete('/group/{id}', [PurItemsController::class, 'deleteGroup'])->name('purnew.group.delete');
             Route::get('/group/{id}/details', [PurItemsController::class, 'groupDetailsJson'])->name('purnew.group.details');
         });

@@ -50,7 +50,10 @@ class PurchaseController extends Controller
         return view('purchase.new_case.select');
     }
 
-    public function create(Request $request)
+    /**
+     * unified dynamic creation view
+     */
+    public function unifiedCreate(Request $request, $type)
     {
         $maxId = DB::table('pur.purcases')->max('pcs_id');
         $nextId = $maxId ? ($maxId + 1) : 1;
@@ -59,26 +62,17 @@ class PurchaseController extends Controller
                     ->select('hed_id', 'hed_name', 'hed_code')
                     ->orderBy('hed_name', 'asc')
                     ->get();
-
-        $units = DB::table('cen.units')
-                    ->select('unt_id', 'unt_name')
-                    ->orderBy('unt_name', 'asc')
-                    ->get();
-
-        $initialType = (string) $request->query('type', 'major');
-        return view('purchase.new_case.createnewcase', compact('nextId', 'heads', 'units', 'initialType'));
+        
+        // Use the refined split-view form for consultancy and services (Outsourcing)
+        if (in_array($type, ['consultancy', 'services'])) {
+            return view('purchase.new_case.consultancy_form', compact('nextId', 'heads', 'type'));
+        }
+                    
+        return view('purchase.new_case.unified_form', compact('nextId', 'heads', 'type'));
     }
 
     /**
-     * Show Consultancy form (Outsourcing)
-     */
-    public function consultancyCreate()
-    {
-        return view('purchase.new_case.consultancy_form');
-    }
-
-    /**
-     * Store a new purchase case
+     * Store a new purchase case (Unified logic support)
      */
     public function store(Request $request)
     {
@@ -97,6 +91,12 @@ class PurchaseController extends Controller
         $pcs->pcs_date = $request->pcs_date;
         $pcs->pcs_title = $request->pcs_title;
         $pcs->pcs_minute = $request->pcs_minute;
+        
+        // Handle remarks_JSON to pcs_remarks
+        if ($request->has('remarks_JSON')) {
+            $pcs->pcs_remarks = json_encode($request->remarks_JSON);
+        }
+
         $pcs->pcs_status = 'Draft';
 
         // SETTING UNIT ID FROM LOGIN USER

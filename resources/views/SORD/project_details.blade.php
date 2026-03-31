@@ -3,45 +3,45 @@
 <div class="content-wrapper pt-3">
     <style>
         /* --- GLOBAL & UTILS --- */
-        .card-primary.card-outline { border-top: 3px solid #007bff; }
-        .bg-light-blue { background-color: #f4f7fa; }
+        .card-primary.card-outline { border-top: 3px solid var(--rd-accent); }
+        .bg-light-blue { background-color: var(--rd-bg); }
         
         /* --- HEADER & CONTROLS --- */
         .header-controls { display: flex; align-items: center; gap: 8px; }
         .milestone-box-compact {
-            background: #ffffff; border: 1px solid #e9ecef; border-radius: 30px;
+            background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 30px;
             padding: 8px 20px; display: inline-flex; align-items: center; justify-content: space-between;
-            min-width: 380px; height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            min-width: 380px; height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         /* --- INFO PANEL --- */
-        .info-panel { background: #fff; border: 1px solid #e1e4e8; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); display: flex; overflow: visible; }
+        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; overflow: visible; }
         .info-left-content { flex: 1; padding: 15px; display: flex; align-items: center; }
-        .info-right-team { width: 350px; background: #fff; border-left: 1px solid #e9ecef; padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; }
-        .info-label { font-size: 0.7rem; text-transform: uppercase; color: #8898aa; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-        .info-value { font-size: 0.9rem; color: #32325d; font-weight: 600; line-height: 1.4; }
-        .cost-tag { background: #e0fdf4; color: #0f5132; padding: 4px 10px; border-radius: 4px; font-weight: 700; border: 1px solid #b7eb8f; display: inline-block; }
+        .info-right-team { width: 350px; background: var(--rd-surface); border-left: 1px solid var(--rd-border); padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; }
+        .info-label { font-size: 0.7rem; text-transform: uppercase; color: var(--rd-text3); font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+        .info-value { font-size: 0.9rem; color: var(--rd-text1); font-weight: 600; line-height: 1.4; }
+        .cost-tag { background: var(--rd-success-soft); color: var(--rd-success); padding: 4px 10px; border-radius: 4px; font-weight: 700; border: 1px solid var(--rd-success); display: inline-block; }
         /* --- TEAM SECTION --- */
         .team-section-container { display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; }
         .team-avatar-wrapper { width: 42px; height: 42px; margin-left: -10px; position: relative; z-index: 10; cursor: pointer; transition: transform 0.2s; }
         .team-avatar-wrapper:hover { transform: scale(1.2); z-index: 100; margin: 0 5px; }
-        .team-avatar-wrapper img { width: 42px; height: 42px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11); object-fit: cover; background: #fff; }
-        .more-staff-btn { width: 42px; height: 42px; border-radius: 50%; background: #fff; color: #525f7f; border: 2px dashed #dee2e6; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-left: 5px; z-index: 0; }
+        .team-avatar-wrapper img { width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--rd-surface); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); object-fit: cover; background: var(--rd-surface); }
+        .more-staff-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--rd-surface); color: var(--rd-text2); border: 2px dashed var(--rd-border); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-left: 5px; z-index: 0; }
         
         /* --- DATES & DOCS --- */
-        .date-grid-item { position: relative; padding-left: 10px; margin-bottom: 12px; border-left: 2px solid #e9ecef; }
-        .date-grid-item.active { border-left-color: #007bff; }
-        .date-grid-item.done { border-left-color: #28a745; }
-        .d-title { font-size: 0.65rem; font-weight: 700; color: #6c757d; text-transform: uppercase; display: block; line-height: 1; margin-bottom: 3px; }
-        .d-value { font-size: 0.8rem; color: #343a40; font-weight: 600; line-height: 1; }
-        .doc-card { background: #fff; border: 1px solid #e9ecef; border-left: 3px solid #007bff; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
-        .doc-card:hover { transform: translateX(3px); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .date-grid-item { position: relative; padding-left: 10px; margin-bottom: 12px; border-left: 2px solid var(--rd-border); }
+        .date-grid-item.active { border-left-color: var(--rd-accent); }
+        .date-grid-item.done { border-left-color: var(--rd-success); }
+        .d-title { font-size: 0.65rem; font-weight: 700; color: var(--rd-text3); text-transform: uppercase; display: block; line-height: 1; margin-bottom: 3px; }
+        .d-value { font-size: 0.8rem; color: var(--rd-text1); font-weight: 600; line-height: 1; }
+        .doc-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-left: 3px solid var(--rd-accent); border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+        .doc-card:hover { transform: translateX(3px); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         .doc-content { display: flex; align-items: center; overflow: hidden; margin-right: 10px; }
-        .doc-icon { width: 28px; height: 28px; background: #f4f6f9; color: #007bff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 0.75rem; flex-shrink: 0; }
-        .doc-title { font-size: 0.8rem; font-weight: 600; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .doc-icon { width: 28px; height: 28px; background: var(--rd-surface2); color: var(--rd-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 0.75rem; flex-shrink: 0; }
+        .doc-title { font-size: 0.8rem; font-weight: 600; color: var(--rd-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .file-input-hidden { display: none !important; }
-        .doc-card.other { border-left-color: #6f42c1; cursor: pointer; background: #fbf9ff; }
-        .doc-card.other:hover { background-color: #f3ebff; }
-        .doc-icon.other { color: #6f42c1; background-color: #e9dff7; }
+        .doc-card.other { border-left-color: var(--rd-accent); cursor: pointer; background: var(--rd-surface); }
+        .doc-card.other:hover { background-color: var(--rd-surface2); }
+        .doc-icon.other { color: var(--rd-accent); background-color: var(--rd-accent-soft); }
         h6[data-toggle="collapse"] i.fa-chevron-down { transition: transform 0.3s ease; }
         h6[data-toggle="collapse"][aria-expanded="true"] i.fa-chevron-down { transform: rotate(180deg); }
 
@@ -51,39 +51,39 @@
             margin-bottom: 35px; margin-top: 35px; padding: 0 10px;
         }
         .steps-track {
-            position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: #e9ecef;
+            position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: var(--rd-border);
             transform: translateY(-50%); z-index: 1; border-radius: 2px;
         }
-        .steps-fill { height: 100%; background: #28a745; transition: width 0.4s ease; border-radius: 2px; }
+        .steps-fill { height: 100%; background: var(--rd-success); transition: width 0.4s ease; border-radius: 2px; }
         .step-item {
             position: relative; z-index: 2; width: 32px; height: 32px;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .step-dot {
-            width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 3px solid #e9ecef;
+            width: 32px; height: 32px; border-radius: 50%; background: var(--rd-surface); border: 3px solid var(--rd-border);
             display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem;
-            color: #adb5bd; transition: all 0.3s; position: relative; z-index: 2;
+            color: var(--rd-text3); transition: all 0.3s; position: relative; z-index: 2;
         }
-        .step-item.completed .step-dot { background: #28a745; border-color: #28a745; color: #fff; }
-        .step-item.active .step-dot { background: #007bff; border-color: #007bff; color: #fff; transform: scale(1.2); box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15); }
+        .step-item.completed .step-dot { background: var(--rd-success); border-color: var(--rd-success); color: #fff; }
+        .step-item.active .step-dot { background: var(--rd-accent); border-color: var(--rd-accent); color: #fff; transform: scale(1.2); box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.15); }
         .step-label {
             position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
-            font-size: 0.65rem; font-weight: 700; color: #888; white-space: nowrap;
+            font-size: 0.65rem; font-weight: 700; color: var(--rd-text3); white-space: nowrap;
         }
-        .step-item.active .step-label { color: #007bff; }
+        .step-item.active .step-label { color: var(--rd-accent); }
         .step-date {
             position: absolute; bottom: -30px; width: 100px; left: 50%; margin-left: -50px;
-            text-align: center; font-size: 0.6rem; color: #6c757d; white-space: nowrap; font-weight: 500;
+            text-align: center; font-size: 0.6rem; color: var(--rd-text3); white-space: nowrap; font-weight: 500;
         }
-        .step-item.active .step-date { color: #007bff; font-weight: 700; }
+        .step-item.active .step-date { color: var(--rd-accent); font-weight: 700; }
         .step-tooltip {
             display: none; position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%);
-            background: #343a40; color: #fff; padding: 6px 10px; border-radius: 4px;
-            font-size: 0.7rem; white-space: nowrap; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            background: var(--rd-surface3); color: var(--rd-text1); padding: 6px 10px; border-radius: 4px;
+            font-size: 0.7rem; white-space: nowrap; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
         .step-tooltip::after {
             content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;
-            border-width: 5px; border-style: solid; border-color: #343a40 transparent transparent transparent;
+            border-width: 5px; border-style: solid; border-color: var(--rd-surface3) transparent transparent transparent;
         }
         .step-item:hover .step-tooltip { display: block; }
 
@@ -96,37 +96,37 @@
             position: absolute; top: 42px; left: 50%; transform: translateX(-50%);
             display: flex; flex-direction: column; align-items: center; gap: 3px;
             padding: 6px 10px; border-radius: 14px; font-size: .6rem; font-weight: 700;
-            color: #fff; text-align: center; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,.2);
+            color: #fff; text-align: center; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,0.4);
         }
         .overall-today-marker .status-bubble::before{
             content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
             border-left: 6px solid transparent; border-right: 6px solid transparent;
-            border-bottom: 6px solid red;
+            border-bottom: 6px solid var(--rd-danger);
         }
-        .status-bubble.late { background: #dc3545; box-shadow: 0 0 10px rgba(220,53,69,.5); }
-        .status-bubble.ontrack { background: #28a745; box-shadow: 0 0 10px rgba(40,167,69,.5); }
+        .status-bubble.late { background: var(--rd-danger); box-shadow: 0 0 10px rgba(220,53,69,0.3); }
+        .status-bubble.ontrack { background: var(--rd-success); box-shadow: 0 0 10px rgba(40,167,69,0.3); }
 
         /* --- MILESTONE TABLE --- */
-        .milestone-container { background: #fff; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; }
+        .milestone-container { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; overflow: hidden; }
         .milestone-scroll-box { max-height: 450px; overflow-y: auto; }
-        .table-custom thead th { background: #f8f9fa; color: #6c757d; text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid #e9ecef; padding: 12px 15px; position: sticky; top: 0; z-index: 5; }
-        .table-custom tbody td { padding: 10px 15px; vertical-align: middle; color: #525f7f; font-size: 0.85rem; border-bottom: 1px solid #f0f0f0; }
+        .table-custom thead th { background: var(--rd-surface2); color: var(--rd-text3); text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid var(--rd-border); padding: 12px 15px; position: sticky; top: 0; z-index: 5; }
+        .table-custom tbody td { padding: 10px 15px; vertical-align: middle; color: var(--rd-text2); font-size: 0.85rem; border-bottom: 1px solid var(--rd-border); }
 
         /* --- FINANCE KNobs --- */
         .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
         .finance-box {
-            width: 120px; height: 140px; background: #fff; border-radius: 14px; padding: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.06); display: flex; flex-direction: column;
+            width: 120px; height: 140px; background: var(--rd-surface); border-radius: 14px; padding: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2); display: flex; flex-direction: column;
             align-items: center; justify-content: center;
         }
         .finance-box canvas { width: 90px; height: 90px; }
-        .finance-title { margin-top: 10px; font-size: 11px; font-weight: 800; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
+        .finance-title { margin-top: 10px; font-size: 11px; font-weight: 800; color: var(--rd-text3); text-transform: uppercase; letter-spacing: 0.5px; }
 
       
         /* --- MODAL --- */
-        .glass-modal .modal-content { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); }
-        .emp-modal-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #f4f6f9; margin-bottom: 15px; }
-        .emp-detail-row { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
+        .glass-modal .modal-content { background: var(--rd-surface); border-radius: 15px; border: 1px solid var(--rd-border2); }
+        .emp-modal-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--rd-surface2); margin-bottom: 15px; }
+        .emp-detail-row { border-bottom: 1px solid var(--rd-border); padding: 10px 0; display: flex; justify-content: space-between; }
     </style>
 
    @php
@@ -198,7 +198,7 @@
                                 <i class="fas fa-flag-checkered mr-1"></i> EDC: {{ $edc ? $edc->format('d M, Y') : 'TBD' }}
                             </span>
                         </div>
-                        <h4 class="text-dark font-weight-bold m-0 text-truncate" title="{{ $project->prj_title }}">
+                        <h4 class="text-white font-weight-bold m-0 text-truncate" title="{{ $project->prj_title }}">
                             {{ $project->prj_title }}
                         </h4>
                     </div>
@@ -213,7 +213,7 @@
                                     </span>
                                 </div>
                                 <div class="text-left flex-grow-1" style="min-width:0;">
-                                    <div class="font-weight-bold text-dark text-truncate" style="max-width:160px;" title="{{ $nextMilestone->msn_desc }}">
+                                    <div class="font-weight-bold text-white text-truncate" style="max-width:160px;" title="{{ $nextMilestone->msn_desc }}">
                                         {{ $nextMilestone->msn_desc }}
                                     </div>
                                     <small class="text-muted">Target: {{ \Carbon\Carbon::parse($nextMilestone->msn_targetdt)->format('d M, Y') }}</small>
@@ -256,7 +256,7 @@
                     </span>
                 </div>
                 <div>
-                    <h6 class="text-dark font-weight-bold mb-1" style="font-size:0.95rem;">Scope of Work</h6>
+                    <h6 class="text-white font-weight-bold mb-1" style="font-size:0.95rem;">Scope of Work</h6>
                     <p class="text-muted m-0" style="font-size:0.85rem; line-height:1.45;">
                         {{ Str::limit($project->prj_scope ?? 'No scope defined.', 110) }}
                     </p>
@@ -268,7 +268,7 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <span class="d-block text-muted text-uppercase small fw-bold">Total Budget</span>
-                            <span class="d-block text-dark fw-bold fs-5">
+                            <span class="d-block text-white fw-bold fs-5">
                                 Rs. {{ number_format($project->prj_propcost / 1_000_000, 2) }} M
                             </span>
                         </div>
@@ -315,12 +315,12 @@
         </div>
     </div>
 </div>
-<style>
+    <style>
 /* ===== START & END RED SQUARES ===== */
 .edge-box {
     width: 44px;
     height: 44px;
-    background: #dc3545;
+    background: var(--rd-danger);
     color: #fff;
     font-size: 0.6rem;
     font-weight: 700;
@@ -345,20 +345,20 @@
 }
 
 .step-item.completed .step-dot {
-    background: #28a745;
-    border-color: #28a745;
+    background: var(--rd-success);
+    border-color: var(--rd-success);
 }
 
 .step-item.active .step-dot {
-    background: #007bff;
-    border-color: #007bff;
+    background: var(--rd-accent);
+    border-color: var(--rd-accent);
 }
 
 /* ===== TODAY BUBBLE WITH FLAG ===== */
 .today-bubble {
     position: absolute;
     top: -45px;
-    background: #dc3545;
+    background: var(--rd-danger);
     color: #fff;
     padding: 5px 10px;
     border-radius: 14px;
@@ -372,7 +372,7 @@
     top: -20px;
     left: 50%;
     transform: translateX(-50%);
-    color: #dc3545;
+    color: var(--rd-danger);
     font-size: 14px;
 }
 
@@ -387,13 +387,13 @@
     gap: 4px;
     font-size: 0.6rem;
     font-weight: 700;
-    color: #28a745;
+    color: var(--rd-success);
     white-space: nowrap;
 }
 
 .achieved-wrap .flag {
     font-size: 11px;
-    color: #28a745;
+    color: var(--rd-success);
 
 }.achieved-marker{
     position: absolute;
@@ -424,14 +424,14 @@
 .achieved-marker.ontime i,
 .achieved-marker.ontime .achieved-ms,
 .achieved-marker.ontime .achieved-date{
-    color: #28a745;
+    color: var(--rd-success);
 }
 
 /* LATE */
 .achieved-marker.late i,
 .achieved-marker.late .achieved-ms,
 .achieved-marker.late .achieved-date{
-    color: #dc3545;
+    color: var(--rd-danger);
 }
 </style>
 <!-- ================= PROGRESS ROW ================= -->
@@ -440,7 +440,7 @@
     <div class="col-lg-12">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="font-weight-bold m-0 text-dark">
+            <h6 class="font-weight-bold m-0 text-white">
                 <i class="fas fa-chart-line text-primary mr-2"></i> Milestone Progress
             </h6>
             <span class="badge badge-light border">
@@ -587,7 +587,7 @@
     <div class="col-lg-10 col-md-9">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="font-weight-bold m-0 text-dark">
+            <h6 class="font-weight-bold m-0 text-white">
                 <i class="fas fa-list-ol text-primary mr-2"></i> Milestones Detail
             </h6>
         </div>
@@ -648,7 +648,7 @@
 
         <div class="sticky-top" style="top:20px;">
 
-            <h6 class="font-weight-bold text-dark mb-3">
+            <h6 class="font-weight-bold text-white mb-3">
                 <i class="fas fa-calendar-alt text-primary mr-2"></i> Key Dates
             </h6>
 
@@ -692,7 +692,7 @@
             <hr class="my-3">
 
                         <div class="d-flex justify-content-between align-items-center mb-2" data-toggle="collapse" data-target="#filesCollapse" aria-expanded="false" style="cursor:pointer;">
-                            <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-folder-open text-primary mr-1"></i> Documents </h6><i class="fas fa-chevron-down"></i>
+                            <h6 class="font-weight-bold m-0 text-white"><i class="fas fa-folder-open text-primary mr-1"></i> Documents </h6><i class="fas fa-chevron-down"></i>
                         </div>
                         <div class="collapse" id="filesCollapse">
 
@@ -730,7 +730,7 @@
                     <button class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <h6 class="font-weight-bold text-dark">Existing Files</h6>
+                    <h6 class="font-weight-bold text-white">Existing Files</h6>
                     <table class="table table-bordered table-sm mt-2 bg-white">
                         <thead class="bg-light"><tr><th>#</th><th>Document Name</th><th>Action</th></tr></thead>
                         <tbody>

@@ -14,45 +14,45 @@
         
         /* History Card Standard */
         .history-item {
-            background: #fff; border-left: 4px solid #17a2b8; border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 12px; padding: 15px; 
+            background: var(--rd-surface); border-left: 4px solid var(--rd-info); border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-bottom: 12px; padding: 15px; 
             transition: all 0.2s; position: relative;
         }
-        .history-item:hover { transform: translateX(2px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
+        .history-item:hover { transform: translateX(2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
         
         /* Latest Item Style */
         .history-item.latest {
-            border-left: 6px solid #28a745;
-            background-color: #fafffb;
+            border-left: 6px solid var(--rd-success);
+            background-color: var(--rd-success-soft);
             transform: scale(1.01);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.15);
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.2);
             margin-bottom: 20px;
-            border: 1px solid #e1e4e8;
-            border-left: 6px solid #28a745;
+            border: 1px solid var(--rd-border);
+            border-left: 6px solid var(--rd-success);
         }
         
         .latest-badge {
             font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;
-            background: #28a745; color: white; padding: 2px 8px; border-radius: 4px;
+            background: var(--rd-success); color: white; padding: 2px 8px; border-radius: 4px;
             margin-bottom: 8px; display: inline-block; font-weight: bold;
         }
 
-        .history-date { font-size: 0.75rem; color: #6c757d; font-weight: 700; text-transform: uppercase; }
-        .history-title { font-weight: 700; color: #343a40; font-size: 0.95rem; margin-bottom: 4px; }
-        .history-desc { font-size: 0.85rem; color: #555; white-space: pre-wrap; line-height: 1.5; }
+        .history-date { font-size: 0.75rem; color: var(--rd-text3); font-weight: 700; text-transform: uppercase; }
+        .history-title { font-weight: 700; color: var(--rd-text1); font-size: 0.95rem; margin-bottom: 4px; }
+        .history-desc { font-size: 0.85rem; color: var(--rd-text2); white-space: pre-wrap; line-height: 1.5; }
         
         /* Copy Button */
         .copy-btn {
             position: absolute; top: 10px; right: 10px;
-            background: #f8f9fa; border: 1px solid #dee2e6; color: #6c757d;
+            background: var(--rd-surface2); border: 1px solid var(--rd-border); color: var(--rd-text3);
             width: 32px; height: 32px; border-radius: 4px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: 0.2s; z-index: 10;
         }
-        .copy-btn:hover { background: #e2e6ea; color: #007bff; border-color: #007bff; }
+        .copy-btn:hover { background: var(--rd-surface3); color: var(--rd-accent); border-color: var(--rd-accent); }
         .copy-btn:active { transform: scale(0.95); }
 
-        .milestone-context-box { background: #fff; border-top: 4px solid #ffc107; border-radius: 4px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .milestone-context-box { background: var(--rd-surface); border-top: 4px solid var(--rd-warning); border-radius: 4px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     </style>
 
     <section class="content">
@@ -83,7 +83,7 @@
                 @if(isset($isReturned) && $isReturned)
                     <h5 class="text-danger font-weight-bold">
                         <i class="fas fa-exclamation-circle mr-1"></i> Returned by {{ $document->latestVersion->actor->role->rol_desig ?? 'Reviewer' }}: 
-                        <span class="bg-warning px-2 rounded text-dark" style="font-size: 0.9em;">"{{ $document->latestVersion->remarks }}"</span>
+                        <span class="bg-warning px-2 rounded text-white" style="font-size: 0.9em;">"{{ $document->latestVersion->remarks }}"</span>
                     </h5>
                 @elseif(!$isEditable && $document)
                     <h5 class="text-info font-weight-bold">
@@ -192,7 +192,7 @@
 
 <div class="mpr-right">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-history mr-1"></i> Workflow History</h6>
+        <h6 class="font-weight-bold m-0 text-white"><i class="fas fa-history mr-1"></i> Workflow History</h6>
     </div>
 
     <div class="history-scroll-box">
@@ -217,11 +217,11 @@
                 @endphp
 
                 <style>
-                    .border-left-primary { border-left: 4px solid #007bff; }
-                    .border-left-danger { border-left: 4px solid #dc3545; }
-                    .border-left-success { border-left: 4px solid #28a745; }
-                    .bg-light-danger { background-color: #fff5f5; }
-                    .bg-light-success { background-color: #f0fff4; }
+                    .border-left-primary { border-left: 4px solid var(--rd-accent); }
+                    .border-left-danger { border-left: 4px solid var(--rd-danger); }
+                    .border-left-success { border-left: 4px solid var(--rd-success); }
+                    .bg-light-danger { background-color: var(--rd-danger-soft); }
+                    .bg-light-success { background-color: var(--rd-success-soft); }
                 </style>
 
                 <div class="card shadow-sm mb-2 {{ $borderClass }} {{ $bgClass }}">
@@ -236,7 +236,7 @@
                         </div>
                         
                         <div class="mt-1">
-                            <span class="font-weight-bold text-dark" style="font-size: 0.9rem;">
+                            <span class="font-weight-bold text-white" style="font-size: 0.9rem;">
                                 <i class="fas {{ $icon }} mr-1 text-secondary"></i>
                                 {{-- FROM: Sender Role --}}
                                 {{ $log->sender->role->rol_desig ?? ($log->sender->acc_name ?? 'System') }}
@@ -244,7 +244,7 @@
                             
                             <i class="fas fa-arrow-right mx-1 text-muted text-xs"></i>
                             
-                            <span class="font-weight-bold text-dark" style="font-size: 0.9rem;">
+                            <span class="font-weight-bold text-white" style="font-size: 0.9rem;">
                                 {{-- TO: Receiver Role --}}
                                 @if($log->to_user_id == 0)
                                     MD / Final
@@ -255,7 +255,7 @@
                         </div>
 
                         @if($log->notes)
-                            <div class="mt-2 p-2 bg-white border rounded text-sm text-secondary font-italic">
+                            <div class="mt-2 p-2 rounded text-sm text-secondary font-italic" style="background: var(--rd-surface2); border: 1px solid var(--rd-border);">
                                 "{{ $log->notes }}"
                             </div>
                         @endif

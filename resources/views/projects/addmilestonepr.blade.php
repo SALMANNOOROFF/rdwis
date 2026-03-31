@@ -8,17 +8,16 @@
 
         /* Card Styling */
         .card {
-            background-color: #fff;
-            box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+            background-color: var(--rd-surface);
+            box-shadow: 0 0 1px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.4);
             border-radius: 0.25rem;
             width: 100%;
-            
-            border-top: 3px solid #007BFF; /* Info Cyan color */
+            border-top: 3px solid var(--rd-accent);
         }
 
         .card-header {
             background-color: transparent;
-            border-bottom: 1px solid rgba(0,0,0,.125);
+            border-bottom: 1px solid var(--rd-border);
             padding: 1rem 1.25rem;
         }
 
@@ -26,7 +25,7 @@
             font-size: 1.25rem;
             font-weight: 500;
             margin: 0;
-            color: #1f2d3d;
+            color: var(--rd-text1);
         }
 
         .card-body { padding: 2rem; }

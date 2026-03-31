@@ -9,7 +9,7 @@
 
   .sinc-wrapper {
     min-height: 100vh;
-    background: #f5f7fa;
+    background: var(--rd-bg);
     font-family: 'DM Sans', sans-serif;
     padding: 32px 32px 56px;
   }
@@ -25,7 +25,7 @@
   .sinc-page-title {
     font-size: 1.25rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--rd-text1);
     letter-spacing: -.3px;
     display: flex;
     align-items: center;
@@ -36,8 +36,8 @@
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    background: #eff6ff;
-    color: #3b82f6;
+    background: var(--rd-accent-soft);
+    color: var(--rd-accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -46,7 +46,7 @@
 
   .sinc-page-sub {
     font-size: .78rem;
-    color: #94a3b8;
+    color: var(--rd-text3);
     font-weight: 500;
     margin-top: 1px;
     margin-left: 48px;
@@ -57,10 +57,10 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--rd-border);
     border-radius: 10px;
-    background: #fff;
-    color: #64748b;
+    background: var(--rd-surface);
+    color: var(--rd-text2);
     font-size: .82rem;
     font-weight: 600;
     text-decoration: none;
@@ -75,8 +75,8 @@
 
   /* ── Main card ── */
   .sinc-card {
-    background: #fff;
-    border: 1.5px solid #e8edf4;
+    background: var(--rd-surface);
+    border: 1.5px solid var(--rd-border);
     border-radius: 18px;
     overflow: hidden;
   }
@@ -87,15 +87,15 @@
     align-items: center;
     gap: 14px;
     padding: 18px 24px;
-    border-bottom: 1.5px solid #f1f5f9;
-    background: #fff;
+    border-bottom: 1.5px solid var(--rd-border2);
+    background: var(--rd-surface);
     flex-wrap: wrap;  
   }
 
   .save-bar label {
     font-size: .82rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--rd-text2);
     white-space: nowrap;
     margin: 0;
     letter-spacing: .2px;
@@ -106,22 +106,22 @@
     min-width: 240px;
     max-width: 380px;
     height: 40px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--rd-border);
     border-radius: 10px;
     padding: 0 14px;
     font-family: 'DM Sans', sans-serif;
     font-size: .88rem;
     font-weight: 600;
-    color: #0f172a;
-    background: #f8fafc;
+    color: var(--rd-text1);
+    background: var(--rd-surface2);
     transition: border-color .18s ease, box-shadow .18s ease;
     outline: none;
   }
 
   .save-bar .rfq-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
-    background: #fff;
+    border-color: var(--rd-accent);
+    box-shadow: 0 0 0 3px var(--rd-accent-soft);
+    background: var(--rd-surface);
   }
 
   .save-bar .rfq-input::placeholder { color: #94a3b8; font-weight: 500; }
@@ -133,7 +133,7 @@
     padding: 0 20px;
     height: 40px;
     border-radius: 10px;
-    background: #3b82f6;
+    background: var(--rd-accent);
     color: #fff;
     font-family: 'DM Sans', sans-serif;
     font-size: .85rem;
@@ -163,15 +163,15 @@
   }
 
   .rfq-table thead tr {
-    background: #f8fafc;
-    border-bottom: 1.5px solid #e8edf4;
+    background: var(--rd-surface2);
+    border-bottom: 1.5px solid var(--rd-border);
   }
 
   .rfq-table thead th {
     padding: 12px 18px;
     font-size: .72rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--rd-text3);
     letter-spacing: .5px;
     text-transform: uppercase;
     white-space: nowrap;
@@ -180,15 +180,15 @@
   .rfq-table thead th.text-right { text-align: right; }
 
   .rfq-table tbody tr {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--rd-border2);
     transition: background .12s ease;
   }
 
-  .rfq-table tbody tr:hover { background: #f8fafc; }
+  .rfq-table tbody tr:hover { background: var(--rd-surface2); }
 
   .rfq-table tbody td {
     padding: 13px 18px;
-    color: #334155;
+    color: var(--rd-text1);
     font-weight: 500;
     vertical-align: middle;
   }
@@ -203,8 +203,8 @@
     width: 26px;
     height: 26px;
     border-radius: 7px;
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--rd-surface2);
+    color: var(--rd-text3);
     font-size: .75rem;
     font-weight: 700;
   }
@@ -212,20 +212,20 @@
   /* Item name */
   .item-name {
     font-weight: 600;
-    color: #0f172a;
+    color: var(--rd-text1);
   }
 
   /* Price */
   .price-cell {
     font-weight: 700;
-    color: #0f172a;
+    color: var(--rd-text1);
     font-variant-numeric: tabular-nums;
     letter-spacing: -.2px;
   }
 
   .price-prefix {
     font-size: .74rem;
-    color: #94a3b8;
+    color: var(--rd-text3);
     font-weight: 500;
     margin-right: 2px;
   }
@@ -236,8 +236,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 24px;
-    background: #f8fafc;
-    border-top: 1.5px solid #e8edf4;
+    background: var(--rd-surface2);
+    border-top: 1.5px solid var(--rd-border);
     flex-wrap: wrap;
     gap: 8px;
   }
@@ -245,7 +245,7 @@
   .rfq-footer .item-count {
     font-size: .78rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--rd-text3);
   }
 
   .grand-total-wrap {
@@ -257,7 +257,7 @@
   .grand-total-label {
     font-size: .78rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--rd-text2);
     text-transform: uppercase;
     letter-spacing: .4px;
   }
@@ -265,22 +265,29 @@
   .grand-total-value {
     font-size: 1.2rem;
     font-weight: 800;
-    color: #3b82f6;
+    color: var(--rd-accent);
     letter-spacing: -.5px;
   }
 
   .grand-total-value .currency {
     font-size: .8rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--rd-text3);
     margin-right: 3px;
   }
 
-  @media (max-width: 600px) {
-    .sinc-wrapper { padding: 18px 14px 40px; }
-    .save-bar { flex-direction: column; align-items: stretch; }
-    .save-bar .rfq-input { max-width: 100%; }
+  @media (max-width: 768px) {
+    .sinc-wrapper { padding: 16px 12px 32px; }
+    .sinc-topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .sinc-page-sub { margin-left: 0; }
+    .sinc-card { border-radius: 12px; }
+    .save-bar { padding: 14px 16px; flex-direction: column; align-items: stretch; }
+    .save-bar .rfq-input { max-width: 100%; min-width: 0; }
     .btn-save { width: 100%; justify-content: center; }
+    .rfq-table thead th { padding: 10px; font-size: .65rem; }
+    .rfq-table tbody td { padding: 10px; font-size: .8rem; }
+    .rfq-footer { flex-direction: column; align-items: center; text-align: center; padding: 20px; }
+    .grand-total-wrap { margin-top: 10px; }
   }
 </style>
 
@@ -312,7 +319,7 @@
         class="rfq-input"
         name="title"
         placeholder="Enter RFQ title"
-        value="Draft RFQ"
+        value="{{ request('title', 'Draft RFQ') }}"
       >
       <button type="submit" class="btn-save">
         <i class="fas fa-check"></i> Save &amp; Create RFQ

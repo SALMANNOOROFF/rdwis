@@ -30,32 +30,47 @@ class PurItemsController extends Controller
     {
         $term = (string)$request->input('term', '');
         $unitId = Auth::user() && Auth::user()->unit ? Auth::user()->unit->unt_id : null;
+
+        $lastPriceSub = DB::table('purnew.rfq_items as i')
+            ->join('purnew.rfq as r', 'r.rfq_id', '=', 'i.rfq_id')
+            ->when($unitId, function ($qq) use ($unitId) {
+                $qq->where('r.pcs_unt_id', $unitId);
+            })
+            ->selectRaw('DISTINCT ON (i.item_id) i.item_id, i.price as last_price')
+            ->orderBy('i.item_id')
+            ->orderByDesc('r.pcs_date')
+            ->orderByDesc('r.rfq_id');
+
+        $invInSub = DB::table('ina.inventory as inv')
+            ->when($unitId, function ($qq) use ($unitId) {
+                $qq->where('inv.inv_unt_id', $unitId);
+            })
+            ->selectRaw('LOWER(inv.inv_desc) as inv_key, SUM(inv.inv_qty) as in_qty')
+            ->groupBy(DB::raw('LOWER(inv.inv_desc)'));
+
+        $invOutSub = DB::table('ina.invenitems as ii')
+            ->join('ina.inventory as inv', 'inv.inv_id', '=', 'ii.ini_inv_id')
+            ->when($unitId, function ($qq) use ($unitId) {
+                $qq->where('inv.inv_unt_id', $unitId);
+            })
+            ->whereNotNull('ii.ini_dispdate')
+            ->selectRaw('LOWER(inv.inv_desc) as inv_key, SUM(ii.ini_qty) as out_qty')
+            ->groupBy(DB::raw('LOWER(inv.inv_desc)'));
+
         $q = DB::table('purnew.items as t')
-            ->selectRaw(
-                't.*,
-                (SELECT i.price
-                   FROM purnew.rfq_items i
-                   JOIN purnew.rfq r ON r.rfq_id=i.rfq_id
-                  WHERE i.item_id=t.item_id ' . ($unitId ? 'AND r.pcs_unt_id = '.$unitId : '') . '
-                  ORDER BY r.pcs_date DESC, r.rfq_id DESC
-                  LIMIT 1) AS last_price,
-                (
-                  COALESCE((
-                    SELECT SUM(inv.inv_qty)
-                      FROM ina.inventory inv
-                     WHERE LOWER(inv.inv_desc)=LOWER(t.title) ' . ($unitId ? 'AND inv.inv_unt_id = '.$unitId : '') . '
-                  ),0)
-                  -
-                  COALESCE((
-                    SELECT SUM(ii.ini_qty)
-                      FROM ina.invenitems ii
-                     WHERE ii.ini_inv_id IN (
-                       SELECT inv.inv_id FROM ina.inventory inv
-                        WHERE LOWER(inv.inv_desc)=LOWER(t.title) ' . ($unitId ? 'AND inv.inv_unt_id = '.$unitId : '') . '
-                     )
-                       AND ii.ini_dispdate IS NOT NULL
-                  ),0)
-                ) AS stock_qty'
+            ->leftJoinSub($lastPriceSub, 'lp', function ($join) {
+                $join->on('lp.item_id', '=', 't.item_id');
+            })
+            ->leftJoinSub($invInSub, 'inv_in', function ($join) {
+                $join->on('inv_in.inv_key', '=', DB::raw('LOWER(t.title)'));
+            })
+            ->leftJoinSub($invOutSub, 'inv_out', function ($join) {
+                $join->on('inv_out.inv_key', '=', DB::raw('LOWER(t.title)'));
+            })
+            ->select(
+                't.*',
+                DB::raw('COALESCE(lp.last_price, 0) as last_price'),
+                DB::raw('(COALESCE(inv_in.in_qty, 0) - COALESCE(inv_out.out_qty, 0)) as stock_qty')
             );
         if ($term !== '') {
             $q->whereRaw('LOWER(t.title) LIKE ?', ['%'.strtolower($term).'%']);
@@ -173,8 +188,7 @@ class PurItemsController extends Controller
             $q->whereRaw('LOWER(r.pcs_title) LIKE ?', [$term]);
         }
         $rfqs = $q->orderByDesc('r.rfq_id')->limit(200)->get();
-        $firms = DB::table('frm.firmz')->orderBy('frm_name')->get();
-        return view('puritems.rfq_list_layout', compact('rfqs', 'firms'));
+        return view('puritems.rfq_list_layout', compact('rfqs'));
     }
 
     public function rfqShowLayout($id)
@@ -393,5 +407,23 @@ class PurItemsController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function vendorsJson(Request $request)
+    {
+        $term = strtolower(trim((string) $request->input('term', '')));
+        $limit = (int) $request->input('limit', 200);
+        if ($limit < 1) $limit = 200;
+        if ($limit > 1000) $limit = 1000;
+
+        $q = DB::table('frm.firmz')
+            ->select('frm_id', 'frm_name')
+            ->orderBy('frm_name', 'asc');
+
+        if ($term !== '') {
+            $q->whereRaw('LOWER(frm_name) LIKE ?', ['%'.$term.'%']);
+        }
+
+        return response()->json($q->limit($limit)->get());
     }
 }

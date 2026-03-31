@@ -6,50 +6,54 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
 
+  body, html {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--rd-bg);
+  }
+
   .purchase-wrapper {
     min-height: 100vh;
-    background: #f0f4f8;
+    background: var(--rd-bg);
     font-family: 'Outfit', sans-serif;
     padding: 32px 0 48px;
   }
 
+  /* ─── TYPOGRAPHY & HEADER ─── */
   .page-heading {
     text-align: center;
-    margin-bottom: 36px;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 2;
   }
 
   .page-heading h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #1e293b;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
+    font-weight: 900;
+    font-size: 2.3rem;
+    color: var(--rd-text1);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
   }
-
   .page-heading p {
-    color: #64748b;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    color: var(--rd-text3);
     font-weight: 500;
   }
 
   /* ─── MAIN GLASS CARDS ─── */
   .glass-card {
+    background: var(--rd-surface);
+    border-radius: 24px;
+    padding: 32px 28px;
+    border: 1px solid var(--rd-border2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
-    background: rgba(255, 255, 255, 0.72);
-    border-radius: 20px;
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
-    box-shadow:
-      0 4px 24px rgba(100, 116, 139, 0.10),
-      0 1.5px 4px rgba(100, 116, 139, 0.08),
-      inset 0 1px 0 rgba(255,255,255,0.95);
-    backdrop-filter: blur(20px) saturate(1.6);
-    -webkit-backdrop-filter: blur(20px) saturate(1.6);
-    padding: 28px 26px 24px;
-    cursor: pointer;
-    transition: transform 0.22s cubic-bezier(.34,1.56,.64,1),
-                box-shadow 0.22s ease,
-                background 0.18s ease;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   .glass-card::before {
@@ -58,16 +62,13 @@
     top: 0; left: 0; right: 0;
     height: 2px;
     border-radius: 20px 20px 0 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   }
 
   .glass-card:hover {
-    transform: translateY(-5px) scale(1.01);
-    box-shadow:
-      0 12px 40px rgba(100, 116, 139, 0.18),
-      0 4px 12px rgba(100, 116, 139, 0.10),
-      inset 0 1px 0 rgba(255,255,255,0.95);
-    background: rgba(255, 255, 255, 0.88);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-color: var(--rd-accent-soft);
   }
 
   /* ─── COLOR ACCENT STRIPS ─── */
@@ -92,51 +93,60 @@
 
   .glass-card:hover::after { opacity: 1; }
 
+  /* Icon circle */
   .card-icon-wrap {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 16px;
-    font-size: 1.4rem;
+    font-size: 1.7rem;
+    margin-bottom: 24px;
+    transition: transform 0.3s ease;
+  }
+
+  .glass-card:hover .card-icon-wrap {
+    transform: scale(1.05) rotate(-3deg);
   }
 
   /* ROW 1 icons → BLUE */
-  .icon-blue   { background: rgba(59,130,246,0.12); color: #3b82f6; }
+  .icon-blue   { background: var(--rd-accent-soft); color: var(--rd-accent); }
 
   /* ROW 2 icons → AMBER */
-  .icon-amber  { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .icon-amber  { background: var(--rd-warning-soft); color: var(--rd-warning); }
 
   /* MISC icon → GREEN */
-  .icon-green  { background: rgba(16,185,129,0.12); color: #10b981; }
+  .icon-green  { background: var(--rd-success-soft); color: var(--rd-success); }
 
+  /* Typo inside cards */
   .gc-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 4px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--rd-text1);
+    margin-bottom: 8px;
+    line-height: 1.2;
   }
-
   .gc-sub {
-    font-size: 0.84rem;
-    color: #64748b;
-    font-weight: 500;
-    margin-bottom: 16px;
+    font-size: 0.95rem;
+    color: var(--rd-text2);
+    margin-bottom: 24px;
+    line-height: 1.4;
+    font-weight: 400;
   }
 
   .gc-chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: rgba(100,116,139,0.09);
-    color: #475569;
-    font-size: 0.76rem;
-    font-weight: 600;
-    letter-spacing: 0.2px;
+    gap: 8px;
+    background: var(--rd-surface2);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--rd-text2);
+    letter-spacing: 0.3px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
   }
 
   /* ─── EXPANDABLE SUB-GRID (inline) ─── */
@@ -164,11 +174,9 @@
     height: 110px;
     padding: 16px;
     border-radius: 16px;
-    background: rgba(255,255,255,0.75);
-    border: 1.5px solid rgba(255,255,255,0.9);
-    box-shadow:
-      0 2px 12px rgba(100,116,139,0.09),
-      inset 0 1px 0 rgba(255,255,255,0.9);
+    background: var(--rd-surface);
+    border: 1.5px solid var(--rd-border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     text-decoration: none;
@@ -181,33 +189,33 @@
 
   .sq-card:hover {
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 8px 28px rgba(100,116,139,0.15);
-    background: rgba(255,255,255,0.92);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    background: var(--rd-surface2);
     text-decoration: none;
   }
 
   .sq-title {
     font-size: 0.88rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--rd-text1);
     margin-bottom: 3px;
     line-height: 1.2;
   }
 
   .sq-sub {
     font-size: 0.74rem;
-    color: #94a3b8;
+    color: var(--rd-text3);
     font-weight: 500;
   }
 
   /* ─── MODAL OVERRIDES ─── */
   .modal-content {
-    background: rgba(255, 255, 255, 0.85) !important;
+    background: var(--rd-surface) !important;
     backdrop-filter: blur(28px) saturate(1.8) !important;
     -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    border: 1.5px solid var(--rd-border2) !important;
     border-radius: 24px !important;
-    box-shadow: 0 24px 64px rgba(30, 41, 59, 0.16) !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4) !important;
     font-family: 'Outfit', sans-serif;
   }
 
@@ -219,7 +227,7 @@
   .modal-title {
     font-weight: 700 !important;
     font-size: 1.1rem !important;
-    color: #1e293b !important;
+    color: var(--rd-text1) !important;
   }
 
   .modal-body {
@@ -282,15 +290,22 @@
     font-size: 1.4rem;
   }
 
-  .modal-header .close:hover { color: #1e293b; }
+  .modal-header .close:hover { color: var(--rd-text1); }
 
   /* Row gap fix */
-  .card-row { margin-bottom: 20px; }
+  .card-row { margin-bottom: 24px; }
 
+  /* Elegance Background Accent */
+  .page-accent {
+      position: absolute; top: 0; left: 0; right: 0; height: 350px;
+      background: linear-gradient(180deg, var(--rd-surface2) 0%, transparent 100%);
+      pointer-events: none; z-index: 0;
+  }
 </style>
 
-<div class="content p-4">
-  <div class="container-fluid" style="max-width:1000px">
+<div class="content p-4" style="position:relative; min-height:100vh; background:var(--rd-bg);">
+  <div class="page-accent"></div>
+  <div class="container-fluid" style="max-width:1200px; position:relative; z-index:1; padding-top:20px;">
 
     <!-- HEADING -->
     <div class="page-heading">
@@ -298,7 +313,7 @@
       <p>Please select a category to proceed</p>
     </div>
 
-    <!-- ROW 1: Material | Outsourcing | Civil → ALL BLUE -->
+    <!-- ROW 1: Material | Outsourcing | Miscellaneous -->
     <div class="row card-row">
       <!-- Material / Equipment → BLUE -->
       <div class="col-md-4 mb-3">
@@ -317,29 +332,24 @@
           <div class="gc-title">Outsourcing</div>
           <div class="gc-sub">External services procurement</div>
           <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> Services &nbsp;•&nbsp; Consultancy</span>
-
-          <!-- Inline sub-grid (kept for structure, hidden by default) -->
-          <div class="sub-grid-wrapper" id="outsourcingSubGrid">
-            <div class="row">
-              <div class="col-6">
-                <a class="sq-card" href="{{ route('createnewcase', ['type'=>'services']) }}">
-                  <div class="sq-title">Services</div>
-                  <div class="sq-sub">External services</div>
-                </a>
-              </div>
-              <div class="col-6">
-                <a class="sq-card" href="{{ route('purnew.consultancy.create') }}">
-                  <div class="sq-title">Consultancy</div>
-                  <div class="sq-sub">Professional advice</div>
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      <!-- Civil Works → BLUE -->
+      <!-- Miscellaneous → GREEN -->
       <div class="col-md-4 mb-3">
+        <div class="glass-card accent-green h-100" id="card-misc" style="cursor:pointer">
+          <div class="card-icon-wrap icon-green"><i class="fas fa-shapes"></i></div>
+          <div class="gc-title">Miscellaneous</div>
+          <div class="gc-sub">Other expense categories</div>
+          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#10b981"></i> Multiple</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Civil | TA/DA -->
+    <div class="row card-row">
+      <!-- Civil Works → BLUE -->
+      <div class="col-md-6 mb-3">
         <div class="glass-card accent-blue h-100" id="card-civil">
           <div class="card-icon-wrap icon-blue"><i class="fas fa-hard-hat"></i></div>
           <div class="gc-title">Civil Works / Upfit</div>
@@ -347,18 +357,8 @@
           <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> BOQs &nbsp;•&nbsp; Work Orders</span>
         </div>
       </div>
-    </div>
 
-    <!-- ROW 2: Training + TA/DA → AMBER/YELLOW -->
-    <div class="row card-row">
-      <div class="col-md-6 mb-3">
-        <div class="glass-card accent-amber h-100" id="card-training">
-          <div class="card-icon-wrap icon-amber"><i class="fas fa-chalkboard-teacher"></i></div>
-          <div class="gc-title">Training</div>
-          <div class="gc-sub">Workshops and trainings</div>
-          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#f59e0b"></i> Create</span>
-        </div>
-      </div>
+      <!-- TA/DA → AMBER -->
       <div class="col-md-6 mb-3">
         <div class="glass-card accent-amber h-100" id="card-tada">
           <div class="card-icon-wrap icon-amber"><i class="fas fa-suitcase-rolling"></i></div>
@@ -369,84 +369,10 @@
       </div>
     </div>
 
-    <!-- ROW 3: Miscellaneous → GREEN -->
-    <div class="row card-row">
-      <div class="col-md-12">
-        <div class="glass-card accent-green" id="card-misc" style="cursor:pointer">
-          <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center" style="gap:14px">
-              <div class="card-icon-wrap icon-green" style="margin-bottom:0"><i class="fas fa-shapes"></i></div>
-              <div>
-                <div class="gc-title" style="margin-bottom:2px">Miscellaneous</div>
-                <div class="gc-sub" style="margin-bottom:0">Other expense categories</div>
-              </div>
-            </div>
-            <span class="gc-chip" id="misc-toggle-icon"><i class="fas fa-chevron-down" style="font-size:.75rem"></i></span>
-          </div>
-
-          <div class="sub-grid-wrapper" id="misc-grid"></div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<!-- ─── OUTSOURCING MODAL ─── -->
-<div class="modal fade" id="outsourcingModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width:460px" role="document">
-    <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <div>
-          <div style="font-size:.75rem;font-weight:600;color:#94a3b8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Outsourcing</div>
-          <h5 class="modal-title">Choose a type</h5>
-        </div>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="row" style="gap:0">
-          <div class="col-6 pr-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
-              <span class="btn-icon"><i class="fas fa-concierge-bell"></i></span>
-              <span>Services</span>
-            </a>
-          </div>
-          <div class="col-6 pl-2">
-            <a href="{{ route('purnew.consultancy.create') }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
-              <span class="btn-icon"><i class="fas fa-user-tie"></i></span>
-              <span>Consultancy</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ─── CIVIL MODAL ─── -->
-<div class="modal fade" id="civilModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width:420px" role="document">
-    <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <div>
-          <div style="font-size:.75rem;font-weight:600;color:#94a3b8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Civil Works / Upfit</div>
-          <h5 class="modal-title">Proceed</h5>
-        </div>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <a href="{{ route('createnewcase', ['type'=>'major']) }}" class="modal-sq-btn btn-primary d-flex w-100">
-          <span class="btn-icon"><i class="fas fa-hard-hat"></i></span>
-          <span>Create Case</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ─── MISC MODAL ─── -->
 <div class="modal fade" id="miscModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -454,7 +380,7 @@
     <div class="modal-content">
       <div class="modal-header border-0 pb-0">
         <div>
-          <div style="font-size:.75rem;font-weight:600;color:#94a3b8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Miscellaneous</div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--rd-text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Miscellaneous</div>
           <h5 class="modal-title">Select a sub-category</h5>
         </div>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -464,39 +390,25 @@
       <div class="modal-body">
         <div class="row">
           <div class="col-12 col-md-4 mb-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
+            <a href="{{ route('purchase.unified.create', ['type'=>'transport']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
               <span class="btn-icon"><i class="fas fa-shuttle-van"></i></span>
               <span>Transport</span>
             </a>
           </div>
           <div class="col-12 col-md-4 mb-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
-              <span class="btn-icon"><i class="fas fa-book"></i></span>
-              <span>Books</span>
-            </a>
-          </div>
-          <div class="col-12 col-md-4 mb-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
-              <span class="btn-icon"><i class="fas fa-file-signature"></i></span>
-              <span>License Fees</span>
-            </a>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12 col-md-4 mb-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
+            <a href="{{ route('purchase.unified.create', ['type'=>'internet']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
               <span class="btn-icon"><i class="fas fa-wifi"></i></span>
               <span>Phone / Internet</span>
             </a>
           </div>
           <div class="col-12 col-md-4 mb-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
+            <a href="{{ route('purchase.unified.create', ['type'=>'publishing']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
               <span class="btn-icon"><i class="fas fa-newspaper"></i></span>
               <span>Pub. / Reg. Fees</span>
             </a>
           </div>
           <div class="col-12 col-md-4 mb-2">
-            <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
+            <a href="{{ route('purchase.unified.create', ['type'=>'stationery']) }}" class="modal-sq-btn btn-outline-primary d-flex w-100">
               <span class="btn-icon"><i class="fas fa-pen"></i></span>
               <span>Stationery</span>
             </a>
@@ -507,51 +419,7 @@
   </div>
 </div>
 
-<!-- ─── TRAINING MODAL ─── -->
-<div class="modal fade" id="trainingModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width:420px" role="document">
-    <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <div>
-          <div style="font-size:.75rem;font-weight:600;color:#94a3b8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Training</div>
-          <h5 class="modal-title">Proceed</h5>
-        </div>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <a href="{{ route('createnewcase', ['type'=>'incidental']) }}" class="modal-sq-btn btn-primary d-flex w-100">
-          <span class="btn-icon"><i class="fas fa-chalkboard-teacher"></i></span>
-          <span>Create Case</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ─── TA/DA MODAL ─── -->
-<div class="modal fade" id="tadaModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" style="max-width:420px" role="document">
-    <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <div>
-          <div style="font-size:.75rem;font-weight:600;color:#94a3b8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">TA / DA</div>
-          <h5 class="modal-title">Proceed</h5>
-        </div>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <a href="{{ route('createnewcase', ['type'=>'tada']) }}" class="modal-sq-btn btn-primary d-flex w-100">
-          <span class="btn-icon"><i class="fas fa-suitcase-rolling"></i></span>
-          <span>Create Case</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ─── MATERIAL MODAL ─── -->
 <div class="modal fade" id="materialModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -559,7 +427,7 @@
     <div class="modal-content">
       <div class="modal-header border-0 pb-0">
         <div>
-          <div style="font-size:.75rem;font-weight:600;color:#94a3b8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Material / Equipment</div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--rd-text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px">Material / Equipment</div>
           <h5 class="modal-title">What would you like to do?</h5>
         </div>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -592,14 +460,14 @@
     $('#materialModal').modal('show');
   });
 
-  // Outsourcing card → modal
+  // Outsourcing card → redirect directly to consultancy
   document.getElementById('card-outsourcing').addEventListener('click', function () {
-    $('#outsourcingModal').modal('show');
+    window.location.href = "{{ route('purchase.unified.create', ['type'=>'consultancy']) }}";
   });
 
-  // Civil card → modal
+  // Civil card → redirect
   document.getElementById('card-civil').addEventListener('click', function () {
-    $('#civilModal').modal('show');
+    window.location.href = "{{ route('purchase.unified.create', ['type'=>'civil']) }}";
   });
 
   // Misc card → modal
@@ -607,14 +475,9 @@
     $('#miscModal').modal('show');
   });
 
-  // Training card → modal
-  document.getElementById('card-training').addEventListener('click', function () {
-    $('#trainingModal').modal('show');
-  });
-
-  // TA/DA card → modal
+  // TA/DA card → redirect
   document.getElementById('card-tada').addEventListener('click', function () {
-    $('#tadaModal').modal('show');
+    window.location.href = "{{ route('purchase.unified.create', ['type'=>'tada']) }}";
   });
 </script>
 

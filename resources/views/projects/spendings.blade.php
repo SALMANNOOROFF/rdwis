@@ -4,18 +4,18 @@
 <div class="content-wrapper pt-3">
     <style>
         .finance-card {
-            border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transition: transform 0.2s; overflow: hidden; position: relative;
         }
         .finance-card:hover { transform: translateY(-3px); }
-        .fc-icon { position: absolute; right: 15px; top: 15px; font-size: 3rem; opacity: 0.1; }
+        .fc-icon { position: absolute; right: 15px; top: 15px; font-size: 3rem; opacity: 0.05; }
         
         /* Toggle Switch Style */
-        .toggle-container { display: flex; background: #e9ecef; border-radius: 25px; p-1; width: fit-content; margin: 0 auto; }
-        .toggle-btn { padding: 8px 25px; border-radius: 25px; border: none; background: transparent; font-weight: 600; color: #6c757d; cursor: pointer; transition: all 0.3s; }
-        .toggle-btn.active { background: #007bff; color: white; box-shadow: 0 2px 5px rgba(0,123,255,0.3); }
+        .toggle-container { display: flex; background: var(--rd-surface2); border-radius: 25px; padding: 4px; width: fit-content; margin: 0 auto; }
+        .toggle-btn { padding: 8px 25px; border-radius: 25px; border: none; background: transparent; font-weight: 600; color: var(--rd-text3); cursor: pointer; transition: all 0.3s; }
+        .toggle-btn.active { background: var(--rd-accent); color: white; box-shadow: 0 2px 5px rgba(0,123,255,0.3); }
 
-        .table-custom thead th { background: #f8f9fa; color: #495057; border-bottom: 2px solid #dee2e6; }
+        .table-custom thead th { background: var(--rd-surface2); color: var(--rd-text2); border-bottom: 2px solid var(--rd-border); }
     </style>
 
     <div class="container-fluid">
@@ -183,7 +183,20 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true }
+                y: { 
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: 'var(--rd-text3)' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: 'var(--rd-text3)' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: 'var(--rd-text2)' }
+                }
             }
         }
     });

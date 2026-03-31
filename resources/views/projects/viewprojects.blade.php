@@ -251,7 +251,7 @@
     .text-xs { font-size: 0.7rem; }
     
     /* Sticky Header */
-    .sticky-top { position: sticky; top: 0; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
+    .sticky-top { position: sticky; top: 0; background-color: var(--rd-surface2); border-bottom: 2px solid var(--rd-border); }
 
     /* Vertical Action Button */
     .vertical-btn {
@@ -264,7 +264,7 @@
         border-radius: 0 4px 4px 0; /* Rounded right corners */
     }
     .vertical-btn:hover {
-        background-color: #0056b3 !important; /* Darker blue on hover */
+        background-color: var(--rd-accent-dark) !important; /* Darker blue on hover */
     }
     .shadow-hover:hover {
         box-shadow: inset 0 0 10px rgba(0,0,0,0.1);

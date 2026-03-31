@@ -34,7 +34,7 @@
                             <td>{{ $doc->doc_ref_no ?? $doc->doc_id }}</td>
                             <td>{{ $doc->project->prj_title }}</td>
                             <td>
-                                <span class="font-weight-bold text-dark">
+                                <span class="font-weight-bold" style="color: var(--rd-text1);">
                                     {{ $doc->creator->unit->unt_name ?? 'Division' }}
                                 </span>
                             </td>

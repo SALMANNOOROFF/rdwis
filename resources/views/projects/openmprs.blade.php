@@ -14,7 +14,7 @@
 
                 <div class="card-body p-0">
                     <table class="table table-striped table-hover">
-                        <thead class="bg-light">
+                        <thead style="background: var(--rd-surface2); color: var(--rd-text2);">
                             <tr>
                                 <th>Code</th>
                                 <th>Project Title</th>

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/jqvmap/jqvmap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/rdwis-dark.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
@@ -20,12 +21,7 @@
     <style>
         /* Custom Sidebar Override for Cleaner Look */
         .nav-header {
-            background-color: #343a40;
-            color: #c2c7d0;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #4b545c;
-            margin-bottom: 5px;
+            color: var(--rd-text3) !important;
         }
     </style>
   </head>
@@ -207,6 +203,27 @@
           </li>
 
           <li class="nav-item">
+              <a href="{{ route('training.index') }}" class="nav-link {{ Request::routeIs('training.index') || Request::routeIs('training.create') ? 'active' : '' }}">
+                  <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                  <p>TRAINING</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('training.books.index') }}" class="nav-link {{ Request::routeIs('training.books.*') ? 'active' : '' }}">
+                  <i class="fas fa-book nav-icon"></i>
+                  <p>BOOKS PROCUREMENT</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('training.license.index') }}" class="nav-link {{ Request::routeIs('training.license.*') ? 'active' : '' }}">
+                  <i class="fas fa-file-signature nav-icon"></i>
+                  <p>LICENCE / FEES</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-users"></i>
                   <p>HUMAN RESOURCES <i class="right fas fa-angle-left"></i></p>
@@ -297,6 +314,7 @@
   <script src="{{ asset('dist/js/demo.js') }}"></script>
   <script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
 
+  @stack('scripts')
   @yield('scripts')
 
   </body>

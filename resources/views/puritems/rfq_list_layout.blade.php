@@ -3,31 +3,31 @@
 
 <div class="content-wrapper p-0">
   <div class="container-fluid p-0">
-    <div class="sinc-wrapper">
+    <div class="sinc-wrapper" data-module="procurement">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
   :root {
-    --accent:        #4361ee;
-    --accent-soft:   #eef0fd;
-    --accent-hover:  #3451d1;
-    --success:       #2d9e6b;
-    --success-soft:  #edfaf4;
-    --danger:        #e24c4c;
-    --danger-soft:   #fef2f2;
-    --warning:       #d97706;
-    --warning-soft:  #fffbeb;
-    --text-primary:  #1a2035;
-    --text-secondary:#64748b;
-    --text-muted:    #94a3b8;
-    --border:        #e8ecf0;
-    --border-light:  #f1f5f9;
-    --surface:       #ffffff;
-    --bg:            #f4f6fa;
-    --sidebar-bg:    #f8fafc;
-    --shadow-sm:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md:     0 4px 16px rgba(0,0,0,0.08);
-    --shadow-lg:     0 10px 30px rgba(0,0,0,0.10);
+    --accent:        var(--rd-accent);
+    --accent-soft:   var(--rd-accent-soft);
+    --accent-hover:  var(--rd-accent-dark);
+    --success:       var(--rd-success);
+    --success-soft:  var(--rd-success-soft);
+    --danger:        var(--rd-danger);
+    --danger-soft:   var(--rd-danger-soft);
+    --warning:       var(--rd-warning);
+    --warning-soft:  var(--rd-warning-soft);
+    --text-primary:  var(--rd-text1);
+    --text-secondary:var(--rd-text2);
+    --text-muted:    var(--rd-text3);
+    --border:        var(--rd-border);
+    --border-light:  var(--rd-border2);
+    --surface:       var(--rd-surface);
+    --bg:            var(--rd-bg);
+    --sidebar-bg:    var(--rd-surface2);
+    --shadow-sm:     0 2px 4px rgba(0,0,0,0.2);
+    --shadow-md:     0 4px 16px rgba(0,0,0,0.3);
+    --shadow-lg:     0 10px 30px rgba(0,0,0,0.4);
     --radius-sm:     6px;
     --radius-md:     10px;
     --radius-lg:     14px;
@@ -98,7 +98,7 @@
     gap: 6px;
     transition: background .15s, border-color .15s;
   }
-  .btn-secondary-soft:hover { background: var(--border-light); border-color: #d1d5db; color: var(--text-primary); }
+  .btn-secondary-soft:hover { background: var(--border-light); border-color: var(--rd-border); color: var(--text-primary); }
 
   /* ── Search ── */
   .search-wrap {
@@ -133,7 +133,7 @@
   }
   .search-box input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(67,97,238,.12);
+    box-shadow: 0 0 0 3px var(--rd-accent-soft);
   }
   .search-box input::placeholder { color: var(--text-muted); }
 
@@ -166,7 +166,7 @@
     vertical-align: middle;
   }
   .rfq-table tbody tr.main-row:last-child td { border-bottom: none; }
-  .rfq-table tbody tr.main-row:hover td { background: #fafbff; }
+  .rfq-table tbody tr.main-row:hover td { background: var(--rd-surface2); }
 
   .rfq-id-badge {
     display: inline-block;
@@ -206,7 +206,7 @@
   .icon-btn:hover                { background: var(--border-light); color: var(--text-primary); }
   .icon-btn.danger:hover         { background: var(--danger-soft);  color: var(--danger); }
   .icon-btn.primary:hover        { background: var(--accent-soft);  color: var(--accent); }
-  .icon-btn.info:hover           { background: #e0f2fe; color: #0284c7; }
+  .icon-btn.info:hover           { background: var(--rd-info-soft); color: var(--rd-info); }
 
   /* ── Details Row ── */
   .details-row { background: var(--sidebar-bg); }
@@ -238,7 +238,7 @@
     vertical-align: middle;
   }
   .sub-table tbody tr:last-child td { border-bottom: none; }
-  .sub-table tbody tr:hover td { background: #fafbff; }
+  .sub-table tbody tr:hover td { background: var(--rd-surface2); }
 
   /* ── Vendor Select (inline) ── */
   .vendor-inline-select {
@@ -419,7 +419,8 @@
   .vendor-col-header {
     background: var(--surface) !important;
     padding: 0 !important;
-    min-width: 180px !important;
+    min-width: 200px !important;
+    width: 200px !important;
     border-bottom: none !important;
     border-right: 1px solid var(--border-light) !important;
   }
@@ -427,26 +428,27 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 12px;
+    padding: 8px 2px;
   }
   .vendor-header-select {
-    flex: 1;
+    width: 180px;
+    max-width: 180px;
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 5px 8px;
     font-weight: 600;
-    font-size: 0.77rem;
+    font-size: 0.82rem;
     color: var(--text-primary);
     background: var(--surface);
     outline: none;
-    min-width: 0;
     cursor: pointer;
     transition: border-color .15s;
+    overflow: hidden;
   }
   .vendor-header-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(67,97,238,.1); }
   .remove-col-btn {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border: none;
     background: transparent;
     color: var(--text-muted);
@@ -465,14 +467,15 @@
   .price-input-cell {
     padding: 5px 8px !important;
     border-right: 1px solid var(--border-light) !important;
-    min-width: 180px;
+    min-width: 150px;
+    width: 150px;
     background: var(--surface);
   }
   .price-input {
     width: 100%;
     border: 1px solid var(--border) !important;
     border-radius: 5px !important;
-    font-size: 0.8rem !important;
+    font-size: 0.82rem !important;
     padding: 5px 8px !important;
     font-weight: 500;
     color: var(--text-primary);
@@ -487,7 +490,7 @@
 
   /* total footer cells */
   .total-cell-inner {
-    padding: 10px 14px;
+    padding: 10px 8px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -941,7 +944,35 @@
 
 <script>
 const csrfToken = '{{ csrf_token() }}';
-const firmsList = @json($firms);
+let firmsList = [];
+let firmsLoaded = false;
+let firmsLoadingPromise = null;
+
+function upsertFirm(frmId, frmName) {
+    if (!frmId) return;
+    const idStr = frmId.toString();
+    const exists = firmsList.some(f => (f.frm_id ?? f.id)?.toString() === idStr);
+    if (exists) return;
+    firmsList.push({ frm_id: frmId, frm_name: frmName || ('Vendor #' + frmId) });
+}
+
+function ensureFirmsLoaded() {
+    if (firmsLoaded) return Promise.resolve(firmsList);
+    if (firmsLoadingPromise) return firmsLoadingPromise;
+    firmsLoadingPromise = fetch(`{{ route('purnew.vendors') }}?limit=1000`)
+        .then(r => r.json())
+        .then(list => {
+            firmsList = Array.isArray(list) ? list : [];
+            firmsLoaded = true;
+            return firmsList;
+        })
+        .catch(() => {
+            firmsList = [];
+            firmsLoaded = true;
+            return firmsList;
+        });
+    return firmsLoadingPromise;
+}
 let currentGroupItems = [];
 let activeVendorColumns = [];
 
@@ -1201,14 +1232,16 @@ function openQuotationModal(rfqId, rfqTitle) {
     quotationModalInstance.show();
 
     Promise.all([
+        ensureFirmsLoaded(),
         fetch(`{{ url('purnew/quotes') }}/${rfqId}/items`).then(r => r.json()),
         fetch(`{{ url('purnew/quotes') }}/${rfqId}`).then(r => r.json())
-    ]).then(([items, existingQuotes]) => {
+    ]).then(([, items, existingQuotes]) => {
         currentGroupItems = items || [];
         renderQuotationTable();
         showToast('Table ready — add vendors to start quoting', 'success');
 
         if (existingQuotes?.length > 0) {
+            existingQuotes.forEach(q => upsertFirm(q.frm_id, q.frm_name));
             const vendorGroups = existingQuotes.reduce((acc, row) => {
                 if (!acc[row.frm_id]) acc[row.frm_id] = [];
                 acc[row.frm_id].push(row);
@@ -1320,7 +1353,7 @@ function debounce(func, wait) {
 
 function addNewVendorColumn(initialFrmId = null) {
     const colId = Date.now() + Math.random().toString(36).substr(2, 9);
-    activeVendorColumns.push(colId);
+    activeVendorColumns.unshift(colId);
 
     const headerRow = document.getElementById('quote_header_row');
     const th = document.createElement('th');
@@ -1333,24 +1366,30 @@ function addNewVendorColumn(initialFrmId = null) {
             </select>
             <button class="remove-col-btn" onclick="removeVendorColumn('${colId}')" title="Remove"><i class="fas fa-times" style="font-size:.7rem;"></i></button>
         </div>`;
-    headerRow.appendChild(th);
+    headerRow.insertBefore(th, headerRow.children[1]);
 
     const select = th.querySelector('select');
-    updateVendorOptions(select);
-    if (initialFrmId) select.value = initialFrmId;
+    ensureFirmsLoaded().then(() => {
+        updateVendorOptions(select);
+        if (initialFrmId) select.value = initialFrmId;
+        updateVendorOptions(select);
+    });
 
     document.querySelectorAll('#quote_body tr').forEach(row => {
-        row.appendChild(createVendorInputCell(row.dataset.itemId, colId));
+        row.insertBefore(createVendorInputCell(row.dataset.itemId, colId), row.children[1]);
     });
 
     const totalTd = document.createElement('td');
     totalTd.setAttribute('data-col-id', colId);
     totalTd.className = 'border-end';
-    totalTd.style.minWidth = '180px';
+    totalTd.style.minWidth = '150px';
+    totalTd.style.width = '150px';
     totalTd.style.background = 'var(--surface)';
     totalTd.style.padding = '0';
     totalTd.innerHTML = `<div class="total-cell-inner"><div class="total-sub">PKR 0.00</div><div class="total-main">PKR 0.00</div></div>`;
-    document.getElementById('quote_total_row').appendChild(totalTd);
+
+    const totalRow = document.getElementById('quote_total_row');
+    totalRow.insertBefore(totalTd, totalRow.children[1]);
 
     select.onchange = () => {
         const hasVendor = select.value !== '';

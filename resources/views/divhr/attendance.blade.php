@@ -17,20 +17,20 @@
       </div>
       <div class="card-body p-0 table-responsive">
         <table class="table table-sm table-bordered mb-0">
-          <thead class="thead-light">
+          <thead class="bg-dark" style="background-color: var(--rd-surface2) !important; color: #fff !important;">
             <tr>
               <th style="width:60px">#</th>
               <th style="min-width:200px">Employee</th>
 @for($d=1;$d<=$days;$d++)
               <th class="text-center" style="width:32px">{{ $d }}</th>
 @endfor
-              <th style="width:90px" class="text-center">%</th>
+              <th style="width:90px; color: #fff;" class="text-center">%</th>
             </tr>
             <tr>
               <th></th>
               <th></th>
 @for($d=1;$d<=$days;$d++)
-              <th class="text-center text-muted" style="font-weight:normal">{{ $weekdays[$d] }}</th>
+              <th class="text-center" style="font-weight:normal; color: #ccc;">{{ $weekdays[$d] }}</th>
 @endfor
               <th></th>
             </tr>
@@ -43,7 +43,7 @@
 @for($d=1;$d<=$days;$d++)
 @php $v = $row['vals'][$d] ?? null; @endphp
               <td class="text-center">
-                <select class="form-control form-control-sm att" data-day="{{ $d }}">
+                <select class="form-control form-control-sm att bg-dark text-white border-secondary" data-day="{{ $d }}">
                   <option value="" {{ empty($v)?'selected':'' }}></option>
                   <option value="P" {{ $v==='P'?'selected':'' }}>P</option>
                   <option value="A" {{ $v==='A'?'selected':'' }}>A</option>
@@ -55,7 +55,7 @@
               <td class="text-center">{{ $row['percent'] }}%</td>
             </tr>
 @empty
-            <tr><td colspan="{{ 2+$days+1 }}" class="text-center text-muted">No attendance</td></tr>
+            <tr><td colspan="{{ 2+$days+1 }}" class="text-center text-white">No attendance</td></tr>
 @endforelse
           </tbody>
         </table>

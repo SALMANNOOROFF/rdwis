@@ -19,19 +19,19 @@
             
             {{-- NOTIFICATION ALERT --}}
             @if($actionRequiredCount > 0)
-            <div class="alert alert-warning shadow-sm border-left-warning d-flex align-items-center mb-3 text-dark">
+            <div class="alert alert-warning shadow-sm border-left-warning d-flex align-items-center mb-3">
                 <i class="fas fa-bell fa-lg text-warning mr-3"></i>
                 <div>
                     <strong>Action Required!</strong>
-                    You have <span class="badge badge-warning mx-1 text-dark">{{ $actionRequiredCount }}</span> MPR(s) waiting for your review.
+                    You have <span class="badge badge-warning mx-1 text-white">{{ $actionRequiredCount }}</span> MPR(s) waiting for your review.
                 </div>
             </div>
             @endif
 
             <div class="row mb-2">
                 <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem;">
-                        <i class="fas fa-layer-group mr-1"></i> All Divisions Projects <span class="text-muted text-sm ml-2">({{ $projects->count() }})</span>
+                    <h1 id="page-heading" class="m-0 font-weight-bold" style="font-size: 1.5rem; color: var(--rd-accent);">
+                        <i class="fas fa-layer-group mr-1"></i> All Divisions Projects <span class="text-sm ml-2" style="color: var(--rd-text3);">({{ $projects->count() }})</span>
                     </h1>
                     <div>
                         <a href="{{ route('sord.compile_report') }}" class="btn btn-info btn-sm shadow-sm px-4 rounded-pill mr-2">
@@ -97,7 +97,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="projectsTable">
-                            <thead class="bg-light text-muted sticky-top shadow-sm" style="z-index: 1;">
+                            <thead class="sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2); color: var(--rd-text3);">
                                 <tr>
                                     <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th>
                                     <th style="width: 30%;">Project Details</th>
@@ -134,7 +134,7 @@
                             {{-- DIVISION HEADER (Clickable for Collapse) --}}
                             <tbody class="division-group" data-division-id="{{ $divProjects->first()->unit->unt_id ?? '' }}">
                                 <tr class="bg-light division-header collapsed" role="button" data-toggle="collapse" data-target="#{{ $divId }}" aria-expanded="false" aria-controls="{{ $divId }}" style="cursor: pointer;">
-                                    <td colspan="5" class="font-weight-bold text-dark py-2 px-3" style="background-color: #e9ecef;">
+                                    <td colspan="5" class="font-weight-bold py-2 px-3" style="background-color: var(--rd-surface2); color: var(--rd-text1);">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span>
                                                 <i class="fas fa-building text-secondary mr-2"></i> {{ $divisionName ?? 'Unknown Division' }}
@@ -227,7 +227,7 @@
                                                 <span class="badge badge-info px-2 py-0 text-capitalize">{{ $project->prj_status }}</span>
                                             @endif
                                         </div>
-                                        <div class="text-dark small text-truncate" style="max-width: 350px;" title="{{ $project->prj_title }}">
+                                        <div class="text-truncate small" style="max-width: 350px; color: var(--rd-text1);" title="{{ $project->prj_title }}">
                                             {{ $project->prj_title }}
                                         </div>
                                     </td>
@@ -245,7 +245,7 @@
 
                                     {{-- Financials --}}
                                     <td class="align-middle p-2">
-                                        <div class="d-flex justify-content-between text-dark text-xs mb-1">
+                                        <div class="d-flex justify-content-between text-xs mb-1" style="color: var(--rd-text1);">
                                             <span class="font-weight-bold">{{ number_format($project->prj_propcost / 1000000, 2) }} M</span>
                                             <span class="text-success font-weight-bold">{{ round($spentPercentage) }}%</span>
                                         </div>
@@ -409,7 +409,7 @@
     .text-xs { font-size: 0.7rem; }
     
     /* Sticky Header */
-    .sticky-top { position: sticky; top: 0; background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
+    .sticky-top { position: sticky; top: 0; background-color: var(--rd-surface2); border-bottom: 2px solid var(--rd-border); }
 
     /* Vertical Action Button */
     .vertical-btn {
@@ -423,10 +423,10 @@
         border-radius: 0; /* Flat look with column */
     }
     .vertical-btn:hover {
-        background-color: #0056b3 !important; /* Darker blue on hover */
+        background-color: var(--rd-accent-dark) !important; /* Darker blue on hover */
     }
     .shadow-hover:hover {
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
     }
 </style>
 

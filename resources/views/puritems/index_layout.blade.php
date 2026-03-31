@@ -13,7 +13,7 @@
     display: flex;
     flex-direction: column;
     height: calc(100vh - 57px); /* subtract AdminLTE navbar */
-    background: #f5f7fa;
+    background: var(--rd-bg);
     font-family: 'DM Sans', sans-serif;
     overflow: hidden;
   }
@@ -25,8 +25,8 @@
     justify-content: space-between;
     padding: 0 24px;
     height: 52px;
-    background: #fff;
-    border-bottom: 1.5px solid #e8edf4;
+    background: var(--rd-surface);
+    border-bottom: 1.5px solid var(--rd-border);
     flex-shrink: 0;
     gap: 12px;
   }
@@ -40,7 +40,7 @@
   .sinc-nav-title {
     font-size: .95rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--rd-text1);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -49,15 +49,15 @@
   .sinc-nav-title .nt-icon {
     width: 30px; height: 30px;
     border-radius: 8px;
-    background: #eff6ff;
-    color: #3b82f6;
+    background: var(--rd-accent-soft);
+    color: var(--rd-accent);
     display: flex; align-items: center; justify-content: center;
     font-size: .82rem;
   }
 
   .sinc-nav-divider {
     width: 1px; height: 20px;
-    background: #e2e8f0;
+    background: var(--rd-border);
   }
 
   .sinc-nav-btn {
@@ -85,9 +85,9 @@
   .sinc-nav-btn.primary:hover { background: #2563eb; color: #fff; text-decoration: none; }
 
   .sinc-nav-btn.outline {
-    background: #fff;
-    color: #475569;
-    border-color: #e2e8f0;
+    background: var(--rd-surface);
+    color: var(--rd-text2);
+    border-color: var(--rd-border);
   }
 
   .sinc-nav-btn.outline:hover { border-color: #3b82f6; color: #3b82f6; text-decoration: none; }
@@ -97,10 +97,35 @@
   ══════════════════════════════════════════ */
   .sinc-panels {
     display: grid;
-    grid-template-columns: 300px 1fr 320px;
+    grid-template-columns: 450px 1fr 420px;
     flex: 1;
     overflow: hidden;
     gap: 0;
+  }
+
+  /* ── Responsive Grid ── */
+  @media (max-width: 1400px) {
+    .sinc-panels { grid-template-columns: 380px 1fr 350px; }
+  }
+
+  @media (max-width: 1100px) {
+    .sinc-panels { grid-template-columns: 300px 1fr 300px; }
+  }
+
+  @media (max-width: 1024px) {
+    .sinc-panels { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
+    .sinc-page { height: auto; overflow-y: auto; }
+    .panel { min-height: 400px; border-left: none !important; border-bottom: 2px solid var(--rd-border); }
+    .panel-body { max-height: 500px; }
+  }
+
+  @media (max-width: 768px) {
+    .sinc-navbar { flex-direction: column; height: auto; padding: 12px; gap: 8px; align-items: flex-start; }
+    .sinc-nav-divider { display: none; }
+    .panel { min-height: auto; }
+    .panel-body { max-height: 400px; }
+    .config-fields { grid-template-columns: 1fr; }
+    .grand-total-bar { position: sticky; bottom: 0; z-index: 10; border-top: 2px solid rgba(255,255,255,.2); }
   }
 
   /* ── Panel shared ── */
@@ -108,11 +133,11 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #f5f7fa;
+    background: var(--rd-bg);
   }
 
   .panel + .panel {
-    border-left: 1.5px solid #e8edf4;
+    border-left: 1.5px solid var(--rd-border);
   }
 
   .panel-head {
@@ -120,15 +145,15 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px 12px;
-    background: #fff;
-    border-bottom: 1.5px solid #f1f5f9;
+    background: var(--rd-surface);
+    border-bottom: 1.5px solid var(--rd-border2);
     flex-shrink: 0;
   }
 
   .panel-head-title {
     font-size: .82rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--rd-text1);
     display: flex;
     align-items: center;
     gap: 7px;
@@ -152,22 +177,22 @@
   ══════════════════════════════════════════ */
   .search-wrap {
     padding: 12px 14px;
-    border-bottom: 1px solid #f1f5f9;
-    background: #fff;
+    border-bottom: 1px solid var(--rd-border2);
+    background: var(--rd-surface);
   }
 
   .search-box {
     display: flex;
     align-items: center;
     gap: 0;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--rd-border);
     border-radius: 10px;
     overflow: hidden;
-    background: #f8fafc;
+    background: var(--rd-surface2);
     transition: border-color .15s ease;
   }
 
-  .search-box:focus-within { border-color: #3b82f6; background: #fff; }
+  .search-box:focus-within { border-color: #3b82f6; background: var(--rd-surface); }
 
   .search-box input {
     flex: 1;
@@ -176,7 +201,7 @@
     padding: 9px 12px;
     font-family: 'DM Sans', sans-serif;
     font-size: .82rem;
-    color: #0f172a;
+    color: var(--rd-text1);
     outline: none;
   }
 
@@ -203,22 +228,22 @@
     align-items: center;
     justify-content: space-between;
     padding: 11px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    background: #fff;
+    border-bottom: 1px solid var(--rd-border2);
+    background: var(--rd-surface);
     cursor: pointer;
     transition: background .12s ease;
     gap: 10px;
   }
 
-  .inv-item:hover { background: #f0f7ff; }
-  .inv-item.active { background: #eff6ff; border-left: 3px solid #3b82f6; }
+  .inv-item:hover { background: var(--rd-surface2); }
+  .inv-item.active { background: var(--rd-accent-soft); border-left: 3px solid var(--rd-accent); }
 
   .inv-item-info { flex: 1; min-width: 0; }
 
   .inv-item-name {
     font-size: .82rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--rd-text1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -227,7 +252,7 @@
 
   .inv-item-sub {
     font-size: .7rem;
-    color: #94a3b8;
+    color: var(--rd-text2);
     font-weight: 500;
   }
 
@@ -248,13 +273,13 @@
     white-space: nowrap;
   }
 
-  .stock-badge.in  { background: #dcfce7; color: #16a34a; }
-  .stock-badge.out { background: #fee2e2; color: #dc2626; }
+  .stock-badge.in  { background: var(--rd-success-soft); color: var(--rd-success); }
+  .stock-badge.out { background: var(--rd-danger-soft); color: var(--rd-danger); }
 
   .btn-quick-add {
-    border: 1.5px solid #3b82f6;
-    background: #fff;
-    color: #3b82f6;
+    border: 1.5px solid var(--rd-accent);
+    background: var(--rd-surface);
+    color: var(--rd-accent);
     border-radius: 7px;
     font-size: .7rem;
     font-weight: 700;
@@ -279,8 +304,8 @@
 
   /* Config card */
   .config-card {
-    background: #fff;
-    border: 1.5px solid #e8edf4;
+    background: var(--rd-surface);
+    border: 1.5px solid var(--rd-border);
     border-radius: 16px;
     overflow: hidden;
   }
@@ -295,9 +320,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
-    background: #f8fafc;
+    background: var(--rd-surface2);
     border-radius: 12px;
-    border: 1.5px solid #e8edf4;
+    border: 1.5px solid var(--rd-border);
     margin-bottom: 18px;
     min-height: 54px;
     gap: 12px;
@@ -306,7 +331,7 @@
   .selected-item-name {
     font-size: .92rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--rd-text1);
   }
 
   .selected-item-placeholder {
@@ -338,7 +363,7 @@
     display: block;
     font-size: .7rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--rd-text3);
     letter-spacing: .4px;
     text-transform: uppercase;
     margin-bottom: 6px;
@@ -347,29 +372,29 @@
   .cfg-input {
     width: 100%;
     height: 42px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--rd-border);
     border-radius: 10px;
     padding: 0 12px;
     font-family: 'DM Sans', sans-serif;
     font-size: .88rem;
     font-weight: 600;
-    color: #0f172a;
-    background: #f8fafc;
+    color: var(--rd-text1);
+    background: var(--rd-surface2);
     outline: none;
     transition: border-color .15s ease, box-shadow .15s ease;
   }
 
   .cfg-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
-    background: #fff;
+    border-color: var(--rd-accent);
+    box-shadow: 0 0 0 3px var(--rd-accent-soft);
+    background: var(--rd-surface);
   }
 
   .cfg-input::placeholder { color: #94a3b8; font-weight: 400; }
 
   .cfg-input[readonly] {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--rd-surface3);
+    color: var(--rd-text3);
     cursor: not-allowed;
   }
 
@@ -412,8 +437,8 @@
 
   .queue-item {
     padding: 13px 18px;
-    border-bottom: 1px solid #f1f5f9;
-    background: #fff;
+    border-bottom: 1px solid var(--rd-border2);
+    background: var(--rd-surface);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -432,7 +457,7 @@
   .qi-name {
     font-size: .82rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--rd-text1);
     flex: 1;
     min-width: 0;
     line-height: 1.3;
@@ -469,25 +494,25 @@
   .qi-price-input {
     width: 100px;
     height: 30px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--rd-border);
     border-radius: 7px;
     padding: 0 8px;
     font-family: 'DM Sans', sans-serif;
     font-size: .78rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--rd-text1);
     text-align: right;
-    background: #f8fafc;
+    background: var(--rd-surface2);
     outline: none;
     transition: border-color .12s ease;
   }
 
-  .qi-price-input:focus { border-color: #3b82f6; background: #fff; }
+  .qi-price-input:focus { border-color: #3b82f6; background: var(--rd-surface); }
 
   .qi-line-total {
     font-size: .82rem;
     font-weight: 800;
-    color: #3b82f6;
+    color: var(--rd-accent);
     white-space: nowrap;
     min-width: 70px;
     text-align: right;
@@ -574,43 +599,39 @@
      MODAL
   ══════════════════════════════════════════ */
   .modal-content {
-    border: 1.5px solid #e8edf4 !important;
+    background: var(--rd-surface) !important;
+    border: 1.5px solid var(--rd-border) !important;
     border-radius: 18px !important;
-    box-shadow: 0 16px 48px rgba(15,23,42,.12) !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important;
     font-family: 'DM Sans', sans-serif;
     overflow: hidden;
   }
 
   .modal-header {
-    border-bottom: 1.5px solid #f1f5f9 !important;
+    border-bottom: 1.5px solid var(--rd-border2) !important;
     padding: 18px 22px 14px !important;
   }
 
-  .modal-title { font-weight: 800 !important; font-size: 1rem !important; color: #0f172a !important; }
+  .modal-title { font-weight: 800 !important; font-size: 1rem !important; color: var(--rd-text1) !important; }
 
   .modal-header .close { color: #94a3b8; opacity: 1; }
 
   .modal-body { padding: 18px 22px !important; }
 
   .modal-body .form-control {
-    border: 1.5px solid #e2e8f0;
+    background: var(--rd-surface2);
+    border: 1.5px solid var(--rd-border);
+    color: var(--rd-text1);
     border-radius: 9px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .86rem;
     padding: 8px 12px;
     height: auto;
   }
 
   .modal-body .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
 
-  .modal-footer { border-top: 1.5px solid #f1f5f9 !important; padding: 14px 22px !important; }
+  .modal-footer { border-top: 1.5px solid var(--rd-border2) !important; padding: 14px 22px !important; }
 
-  @media (max-width: 900px) {
-    .sinc-panels { grid-template-columns: 1fr; overflow: auto; }
-    .panel { min-height: 300px; }
-    .panel + .panel { border-left: none; border-top: 1.5px solid #e8edf4; }
-    .sinc-page { height: auto; overflow: auto; }
-  }
+
 </style>
 
 <div class="content-wrapper p-0">
@@ -623,7 +644,7 @@
       <div class="sinc-nav-title">
         <span class="nt-icon"><i class="fas fa-boxes"></i></span>
         Purchase Case
-        <span style="font-size:.7rem;font-weight:500;color:#94a3b8;margin-left:2px">/ New</span>
+        <span style="font-size:.7rem;font-weight:500;color:var(--rd-text2);margin-left:2px">/ New</span>
       </div>
       <div class="sinc-nav-divider"></div>
       <a href="{{ route('purnew.create') }}" class="sinc-nav-btn primary">
@@ -642,7 +663,7 @@
   <div class="sinc-panels">
 
     <!-- ══ LEFT: INVENTORY MASTER ══ -->
-    <div class="panel" style="background:#fff">
+    <div class="panel" style="background: var(--rd-bg)">
       <div class="panel-head">
         <div class="panel-head-title">
           <i class="fas fa-database"></i> Inventory Master
@@ -697,7 +718,7 @@
 
     <!-- ══ CENTER: ITEM CONFIG ══ -->
     <div class="panel">
-      <div class="panel-head" style="background:#fff">
+      <div class="panel-head" style="background: var(--rd-surface)">
         <div class="panel-head-title">
           <i class="fas fa-sliders-h"></i> Item Configuration
         </div>
@@ -706,7 +727,7 @@
         </button>
       </div>
 
-      <div class="panel-body" style="background:#f5f7fa">
+      <div class="panel-body" style="background: var(--rd-bg)">
         <div class="center-panel-body">
 
           <div class="config-card">
@@ -715,7 +736,7 @@
               <!-- Selected item display -->
               <div class="selected-item-display">
                 <div id="cfg-selected-name" class="selected-item-placeholder">
-                  <i class="fas fa-hand-pointer mr-1" style="color:#cbd5e1"></i>
+                  <i class="fas fa-hand-pointer mr-1" style="color:var(--rd-text3)"></i>
                   Pick an item from the left panel
                 </div>
                 <span class="selected-stock-badge out" id="cfg-stock-badge" style="display:none"></span>
@@ -752,7 +773,7 @@
     </div>
 
     <!-- ══ RIGHT: PURCHASE QUEUE ══ -->
-    <div class="panel" style="background:#fff">
+    <div class="panel" style="background: var(--rd-bg)">
       <div class="panel-head">
         <div class="panel-head-title">
           <i class="fas fa-shopping-cart"></i> Purchase Queue
@@ -821,6 +842,29 @@
   </div>
 </div>
 
+<!-- ══ CONFIRM GROUP MODAL ══ -->
+<div class="modal fade" id="modal-confirm-group-name" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:450px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-layer-group mr-2" style="color:#3b82f6"></i>Confirm Group Name</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <label class="small text-muted mb-2">Please provide a name for this RFQ / Grouping</label>
+        <input type="text" id="modal-rfq-title" class="form-control" placeholder="e.g. IT Equipment for R&D..." required>
+        <div id="modal-rfq-error" class="text-danger small mt-2" style="display:none">Please enter a valid name.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="sinc-nav-btn outline" data-dismiss="modal">Back to Queue</button>
+        <button type="button" id="btn-final-submit" class="sinc-nav-btn primary">
+          <i class="fas fa-check-circle mr-1"></i> Proceed to Preview
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -884,7 +928,7 @@
     const badgeEl = document.getElementById('cfg-stock-badge');
 
     nameEl.classList.remove('selected-item-placeholder');
-    nameEl.innerHTML = '<span style="font-size:.82rem;font-weight:800;color:#0f172a">' + title + '</span>';
+    nameEl.innerHTML = '<span style="font-size:.82rem;font-weight:800;color:var(--rd-text1)">' + title + '</span>';
 
     badgeEl.style.display = 'inline-flex';
     if (parseFloat(stock) > 0) {
@@ -943,11 +987,25 @@
     renderQueue();
   });
 
-  /* ── Confirm Group / Preview ── */
+  /* ── Confirm Group / Show Name Modal ── */
   document.getElementById('btn-preview').addEventListener('click', function () {
     if (group.length === 0) { alert('Add at least one item.'); return; }
+    $('#modal-confirm-group-name').modal('show');
+  });
+
+  /* ── Final Submit from Modal ── */
+  document.getElementById('btn-final-submit').addEventListener('click', function () {
+    const title = document.getElementById('modal-rfq-title').value.trim();
+    if (!title) {
+        document.getElementById('modal-rfq-error').style.display = 'block';
+        return;
+    }
+    document.getElementById('modal-rfq-error').style.display = 'none';
+
+    // Build form and submit
     const f = $('<form method="post" action="{{ route('purnew.rfq.preview') }}"></form>');
     f.append('<input type="hidden" name="_token" value="{{ csrf_token() }}">');
+    f.append('<input type="hidden" name="title" value="' + title + '">');
     group.forEach(function (it, i) {
       f.append('<input type="hidden" name="items[' + i + '][item_id]" value="' + it.item_id + '">');
       f.append('<input type="hidden" name="items[' + i + '][price]" value="' + (it.price || 0) + '">');

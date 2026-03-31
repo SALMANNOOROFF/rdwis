@@ -82,6 +82,9 @@
 ### 💻 Frontend Progress
 - Fixed the cross close buttons on the `trackingModal` and `editGroupModal` by implementing inline `bootstrap.Modal.getInstance()?.hide()` to completely bypass click interception from SVG contents, while perfectly maintaining all desired UI/UX aesthetics.
 - The Procurement RFQ UI update has now been finalized and locked as complete.
+- **Unified Dynamic Purchase Form**: Replaced the scattered form inputs (`createnewcase.blade.php`, `consultancy_form.blade.php`) with a single highly interactive view (`unified_form.blade.php`). Added category-specific layouts (for TA/DA, Training, Civil Works, Consultancy, Transport, Books, etc.) complete with custom color themes, icons, interactive dynamic row generation, and smart toast notifications.
+- **Transport Specialization**: Implemented a dynamic JS toggle inside the Transport view that serves two wildly distinct forms based on user choice: "Non-Recurrent" (rates, days, generic vehicles) vs "Recurrent" (driver provisions, pick and drop metrics, frequencies, etc).
+- **Training Customization**: Applied contextual logic to the Training form which dynamically spawns and correctly enforces "required" attributes on specific modules (External, Online, In-house) based directly on the selected Training Type field.
 
 ---
 

@@ -5,15 +5,15 @@
     <style>
         /* --- GLOBAL & CARD STYLES --- */
         .card-add-project {
-            border-top: 4px solid #007bff;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--rd-accent);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             border-radius: 8px;
             overflow: hidden;
         }
 
         .form-header {
-            background: #fff;
-            border-bottom: 1px solid #eee;
+            background: var(--rd-surface);
+            border-bottom: 1px solid var(--rd-border);
             padding: 15px 25px;
             display: flex;
             justify-content: space-between;
@@ -23,7 +23,7 @@
         .form-title {
             font-size: 1.25rem;
             font-weight: 700;
-            color: #333;
+            color: var(--rd-text1);
             margin: 0;
         }
 
@@ -39,40 +39,40 @@
             font-weight: 600;
             padding: 5px 12px;
             border-radius: 20px;
-            color: #aaa;
-            background: #f8f9fa;
-            border: 1px solid #eee;
+            color: var(--rd-text3);
+            background: var(--rd-surface2);
+            border: 1px solid var(--rd-border);
             transition: all 0.3s;
         }
 
         .step-pill.active {
-            background: #007bff;
+            background: var(--rd-accent);
             color: #fff;
-            border-color: #007bff;
-            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+            border-color: var(--rd-accent);
+            box-shadow: 0 2px 5px rgba(79, 140, 255, 0.3);
         }
 
         .step-pill.completed {
-            background: #28a745;
+            background: var(--rd-success);
             color: #fff;
-            border-color: #28a745;
+            border-color: var(--rd-success);
         }
 
         .step-line {
             width: 30px;
             height: 2px;
-            background: #eee;
+            background: var(--rd-border);
         }
 
         .step-line.filled {
-            background: #28a745;
+            background: var(--rd-success);
         }
 
         /* --- DOC CARD --- */
         .doc-card {
-            background: #fff;
-            border: 1px solid #e9ecef;
-            border-left: 3px solid #007bff;
+            background: var(--rd-surface);
+            border: 1px solid var(--rd-border);
+            border-left: 3px solid var(--rd-accent);
             border-radius: 6px;
             padding: 10px 15px;
             margin-bottom: 10px;
@@ -84,14 +84,14 @@
 
         .doc-card:hover {
             transform: translateX(3px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .doc-icon {
             width: 35px;
             height: 35px;
-            background: #f4f6f9;
-            color: #007bff;
+            background: var(--rd-surface2);
+            color: var(--rd-accent);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -102,12 +102,12 @@
         .doc-title {
             font-size: 0.9rem;
             font-weight: 600;
-            color: #444;
+            color: var(--rd-text1);
         }
 
         .doc-desc {
             font-size: 0.75rem;
-            color: #888;
+            color: var(--rd-text3);
         }
 
         .file-input-hidden {
@@ -116,12 +116,12 @@
 
         /* --- TABLES --- */
         .table-custom thead th {
-            background: #f8f9fa;
-            color: #6c757d;
+            background: var(--rd-surface2);
+            color: var(--rd-text3);
             font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid #dee2e6;
+            border-bottom: 2px solid var(--rd-border);
         }
 
         .table-custom tbody td {
@@ -430,12 +430,12 @@
             labelBtn.classList.add('btn-success');
             labelBtn.innerHTML = '<i class="fas fa-check"></i>';
             labelBtn.style.color = '#fff';
-            parent.style.borderColor = '#28a745';
-            parent.style.backgroundColor = '#f8fff9';
-            parent.querySelector('.doc-icon').style.color = '#28a745';
-            parent.querySelector('.doc-icon').style.backgroundColor = '#e0fdf4';
+            parent.style.borderColor = 'var(--rd-success)';
+            parent.style.backgroundColor = 'var(--rd-success-soft)';
+            parent.querySelector('.doc-icon').style.color = 'var(--rd-success)';
+            parent.querySelector('.doc-icon').style.backgroundColor = 'var(--rd-surface2)';
             parent.querySelector('.doc-desc').innerText = input.files[0].name;
-            parent.querySelector('.doc-desc').style.color = '#28a745';
+            parent.querySelector('.doc-desc').style.color = 'var(--rd-success)';
         }
     }
 </script>

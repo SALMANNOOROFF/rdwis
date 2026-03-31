@@ -1,23 +1,23 @@
 @extends('welcome')
 @section('content')
-<div class="content-wrapper bg-white">
+<div class="content-wrapper bg-transparent">
     <style>
         /* ... (Purana CSS same rahega) ... */
         .page-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 10px; }
-        .page-title { color: #007bff; font-weight: 700; font-size: 26px; display: flex; align-items: center; }
+        .page-title { color: var(--rd-accent); font-weight: 700; font-size: 26px; display: flex; align-items: center; }
         .page-title i { margin-right: 12px; }
-        .btn-new-project { background-color: #007bff; color: white; border-radius: 25px; padding: 8px 20px; font-weight: 600; border: none; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
-        .filter-container { border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px 20px; background-color: #fff; margin-bottom: 20px; }
-        .filter-item label { display: block; font-size: 11px; font-weight: 700; color: #888; margin-bottom: 5px; text-transform: uppercase; }
-        .form-control, .form-select { height: 40px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; }
-        .status-toggle { display: flex; border: 1px solid #007bff; border-radius: 6px; overflow: hidden; }
-        .status-toggle .btn { flex: 1; border: none; border-radius: 0; padding: 8px 15px; font-size: 13px; font-weight: 600; background: #fff; color: #007bff; }
-        .status-toggle .btn.active { background-color: #007bff; color: #fff; }
-        .table-container { border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); min-height: 400px; background: #fff; }
+        .btn-new-project { background-color: var(--rd-accent); color: white; border-radius: 25px; padding: 8px 20px; font-weight: 600; border: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); }
+        .filter-container { border: 1px solid var(--rd-border); border-radius: 8px; padding: 15px 20px; background-color: var(--rd-surface); margin-bottom: 20px; }
+        .filter-item label { display: block; font-size: 11px; font-weight: 700; color: var(--rd-text3); margin-bottom: 5px; text-transform: uppercase; }
+        .form-control, .form-select { height: 40px; border: 1px solid var(--rd-border); border-radius: 6px; font-size: 14px; background: var(--rd-surface2); color: var(--rd-text1); }
+        .status-toggle { display: flex; border: 1px solid var(--rd-accent); border-radius: 6px; overflow: hidden; }
+        .status-toggle .btn { flex: 1; border: none; border-radius: 0; padding: 8px 15px; font-size: 13px; font-weight: 600; background: var(--rd-surface); color: var(--rd-accent); }
+        .status-toggle .btn.active { background-color: var(--rd-accent); color: #fff; }
+        .table-container { border: 1px solid var(--rd-border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-height: 400px; background: var(--rd-surface); }
         .custom-table { width: 100%; margin-bottom: 0; }
-        .custom-table thead th { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; color: #495057; font-size: 13px; font-weight: 700; text-transform: uppercase; padding: 15px; }
-        .custom-table tbody td { vertical-align: middle; font-size: 14px; border-top: 1px solid #f1f1f1; }
-        .custom-table tbody tr:hover { background-color: #f1f7ff; }
+        .custom-table thead th { background-color: var(--rd-surface2); border-bottom: 2px solid var(--rd-border); color: var(--rd-text2); font-size: 13px; font-weight: 700; text-transform: uppercase; padding: 15px; }
+        .custom-table tbody td { vertical-align: middle; font-size: 14px; border-top: 1px solid var(--rd-border2); color: var(--rd-text1); }
+        .custom-table tbody tr:hover { background-color: var(--rd-surface2); }
         .stage-indicator { font-weight: 600; font-size: 13px; }
         .stage-indicator i { font-size: 10px; margin-right: 5px; }
         .text-price { font-family: 'Courier New', Courier, monospace; font-weight: 700; }
@@ -95,7 +95,7 @@
                                 </td>
 
                                 <td>
-                                    <span class="font-weight-bold text-dark">{{ $pcs->project->prj_code ?? $pcs->pcs_hed_id }}</span>
+                                    <span class="font-weight-bold text-light">{{ $pcs->project->prj_code ?? $pcs->pcs_hed_id }}</span>
                                 </td>
 
                                 <td>

@@ -5,17 +5,17 @@
     <style>
         /* Main Container - AdminLTE Blue Theme */
         .gantt-wrapper {
-            background-color: #fff;
+            background-color: var(--rd-surface);
             margin: 20px;
-            border-top: 4px solid #007bff; /* Standard AdminLTE Blue */
-            box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+            border-top: 4px solid var(--rd-accent);
+            box-shadow: 0 0 1px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.4);
             border-radius: 0.25rem;
         }
 
         /* Header - Professional Admin Blue */
         .gantt-header-top {
-            background-color: #007bff; 
-            background-image: linear-gradient(180deg, #007bff 0%, #0069d9 100%);
+            background-color: var(--rd-accent); 
+            background-image: linear-gradient(180deg, var(--rd-accent) 0%, var(--rd-accent-dark) 100%);
             color: white;
             padding: 20px;
             text-align: center;
@@ -27,35 +27,35 @@
         .gantt-grid {
             display: grid;
             grid-template-columns: 300px 1fr;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--rd-border);
         }
 
         /* Left Side Labels */
         .gantt-labels {
-            background: #f8f9fa;
-            border-right: 2px solid #007bff33;
+            background: var(--rd-surface);
+            border-right: 2px solid var(--rd-border);
         }
         .gantt-label-header {
             height: 50px;
-            background: #e9ecef;
-            border-bottom: 2px solid #dee2e6;
+            background: var(--rd-surface2);
+            border-bottom: 2px solid var(--rd-border);
         }
         .label-item {
             height: 70px;
             padding: 10px 20px;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid var(--rd-border);
             display: flex;
             align-items: center;
             font-size: 0.9rem;
-            color: #495057;
+            color: var(--rd-text2);
             font-weight: 600;
         }
 
         /* Timeline / Months Header */
-        .timeline-scroll { overflow-x: auto; position: relative; background: #fff; }
+        .timeline-scroll { overflow-x: auto; position: relative; background: var(--rd-surface); }
         .timeline-months {
             display: flex;
-            background: #343a40; /* AdminLTE Dark Sidebar Color */
+            background: var(--rd-surface3);
             color: #fff;
             height: 50px;
         }
@@ -66,7 +66,7 @@
             line-height: 50px;
             font-size: 0.85rem;
             font-weight: 600;
-            border-right: 1px solid #4b545c;
+            border-right: 1px solid var(--rd-border);
             text-transform: uppercase;
         }
 
@@ -74,11 +74,11 @@
         .timeline-row {
             height: 70px;
             position: relative;
-            border-bottom: 1px solid #eee;
-            background-image: linear-gradient(to right, #f1f1f1 1px, transparent 1px);
+            border-bottom: 1px solid var(--rd-border);
+            background-image: linear-gradient(to right, var(--rd-border) 1px, transparent 1px);
             background-size: 140px 100%;
         }
-        .timeline-row:hover { background-color: #f0f7ff; }
+        .timeline-row:hover { background-color: var(--rd-surface2); }
 
         /* Shapes - Blue Theme */
         .milestone-diamond {
@@ -92,38 +92,38 @@
         }
         .milestone-diamond:hover { transform: rotate(45deg) scale(1.2); cursor: pointer; }
         
-        .diamond-completed { background-color: #007bff; border: 2px solid #0056b3; }
-        .diamond-pending { background-color: #fff; border: 2px solid #007bff; }
+        .diamond-completed { background-color: var(--rd-accent); border: 2px solid var(--rd-accent-dark); }
+        .diamond-pending { background-color: var(--rd-surface); border: 2px solid var(--rd-accent); }
 
         .activity-bar {
             height: 14px;
             position: absolute;
             top: 28px;
             border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .bar-completed { background-color: #007bff; }
-        .bar-remaining { border: 2px solid #007bff; background: #fff; }
+        .bar-completed { background-color: var(--rd-accent); }
+        .bar-remaining { border: 2px solid var(--rd-accent); background: var(--rd-surface); }
 
         /* Footer Legend - Clean Admin Style */
         .gantt-footer-legend {
-            background-color: #f4f6f9;
+            background-color: var(--rd-bg);
             padding: 20px;
             display: flex;
             justify-content: center;
             gap: 30px;
-            border-top: 1px solid #dee2e6;
+            border-top: 1px solid var(--rd-border);
         }
         .legend-box {
             display: flex;
             align-items: center;
-            background: #fff;
+            background: var(--rd-surface);
             padding: 8px 15px;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--rd-border);
             border-radius: 4px;
             font-size: 0.85rem;
-            color: #333;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            color: var(--rd-text1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         .color-sample { width: 30px; height: 12px; margin-right: 10px; border-radius: 2px; }
         .diamond-sample { width: 12px; height: 12px; transform: rotate(45deg); margin-right: 15px; }

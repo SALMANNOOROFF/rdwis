@@ -13,8 +13,8 @@
                     <form method="get" action="{{ route('divhr.employelist') }}" class="ml-auto">
                         @php $st = request('status','Current'); @endphp
                         <div class="btn-group shadow-sm">
-                            <a href="{{ route('divhr.employelist',['status'=>'Current','term'=>request('term')]) }}" class="btn btn-sm btn-outline-primary {{ $st=='Current'?'active':'' }}">Current</a>
-                            <a href="{{ route('divhr.employelist',['status'=>'Previous','term'=>request('term')]) }}" class="btn btn-sm btn-outline-success {{ $st=='Previous'?'active':'' }}">Previous</a>
+                            <a href="{{ route('divhr.employelist',['status'=>'Current','term'=>request('term')]) }}" class="btn btn-sm btn-primary {{ $st=='Current'?'active':'secondary' }}" style="{{ $st=='Current' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Current</a>
+                            <a href="{{ route('divhr.employelist',['status'=>'Previous','term'=>request('term')]) }}" class="btn btn-sm btn-success {{ $st=='Previous'?'active':'secondary' }}" style="{{ $st=='Previous' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Previous</a>
                         </div>
                     </form>
                 </div>
@@ -44,17 +44,17 @@
                     <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="employeesTable">
                             @php $st = request('status','Current'); @endphp
-                            <thead class="bg-light text-muted sticky-top shadow-sm" style="z-index: 1;">
+                            <thead class="bg-dark text-muted sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2) !important; border-bottom: 2px solid var(--rd-border);">
                                 <tr>
-                                    <th class="text-center p-2 col-eye"><i class="fas fa-eye"></i></th>
-                                    <th class="p-2" style="width: 28%;">Name</th>
-                                    <th style="width: 14%;" class="p-2">Employee ID</th>
-                                    <th style="width: 14%;" class="p-2">Joined</th>
+                                    <th class="text-center p-2 col-eye" style="width: 20px; color: var(--rd-text2);"><i class="fas fa-eye"></i></th>
+                                    <th class="p-2" style="width: 30%; color: var(--rd-text2);">Name</th>
+                                    <th style="width: 15%; color: var(--rd-text2);" class="p-2">Employee ID</th>
+                                    <th style="width: 14%; color: var(--rd-text2);" class="p-2">Joined</th>
                                     @if($st === 'Previous')
-                                      <th style="width: 14%;" class="p-2">Release Date</th>
+                                      <th style="width: 14%; color: var(--rd-text2);" class="p-2">Release Date</th>
                                     @endif
-                                    <th style="width: 20%;" class="p-2">Head/Contract</th>
-                                    <th style="width: 10%;" class="text-right p-2">Status</th>
+                                    <th style="width: 20%; color: var(--rd-text2);" class="p-2">Head/Contract</th>
+                                    <th style="width: 10%; color: var(--rd-text2);" class="text-right p-2">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -71,16 +71,16 @@
                                     data-name="{{ strtolower($emp->emp_name) }}"
                                     data-id="{{ strtolower($emp->emp_id) }}"
                                     data-status="{{ strtolower($status) }}">
-                                    <td class="align-middle p-0 text-center border-right col-eye">
-                                        <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="vertical-btn d-block text-white bg-primary" title="View Details" style="height:28px;">
-                                            <i class="fas fa-chevron-right" style="font-size:.7rem"></i>
+                                    <td class="align-middle text-center p-2 col-eye" style="width: 50px;">
+                                        <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="btn btn-xs btn-primary shadow-sm" style="width: 30px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;">
+                                            <i class="fas fa-chevron-right text-xs"></i>
                                         </a>
                                     </td>
-                                    <td class="align-middle p-2">
-                                        <span class="font-weight-bold text-primary" style="font-size: 1rem;">{{ $emp->emp_name }}</span>
+                                    <td class="align-middle p-2 text-truncate">
+                                        <span class="font-weight-bold" style="font-size: 1rem; color: #fff;">{{ $emp->emp_name }}</span>
                                     </td>
                                     <td class="align-middle p-2">
-                                        <span class="font-weight-bold">{{ $emp->emp_id }}</span>
+                                        <span class="font-weight-bold" style="color: var(--rd-text2);">{{ $emp->emp_id }}</span>
                                     </td>
                                     <td class="align-middle p-2">
                                         {{ $join ? $join->format('d-M-Y') : 'N/A' }}
@@ -137,13 +137,14 @@ document.addEventListener('DOMContentLoaded', applyEmpFilters);
 </script>
 
 <style>
-.table td{vertical-align:middle;font-size:.95rem;padding:.6rem}
+.table td{vertical-align:middle;font-size:.95rem;padding:.6rem; border-top-color: var(--rd-border) !important; color: var(--rd-text1);}
 .btn-xs{padding:.1rem .4rem;font-size:.7rem;line-height:1.2;border-radius:4px}
 .text-xs{font-size:.7rem}
-.sticky-top{position:sticky;top:0;background-color:#f8f9fa;border-bottom:2px solid #dee2e6}
-.vertical-btn{display:flex;align-items:center;justify-content:center;width:100%;height:28px;transition:background-color .2s;border-radius:0 4px 4px 0}
-.vertical-btn:hover{background-color:#0056b3!important}
-.col-eye{width:3%;min-width:36px}
+.sticky-top{position:sticky;top:0;background-color:var(--rd-surface2);border-bottom:2px solid var(--rd-border)}
+.vertical-btn{display:flex;align-items:center;justify-content:center;width:100%;height:100%;transition:all .2s;border-radius:0 4px 4px 0;}
+.vertical-btn:hover{background-color:var(--rd-accent-hover)!important;}
+.shadow-hover:hover { box-shadow: inset 0 0 10px rgba(0,0,0,0.2) !important; }
+.col-eye{width:50px; min-width:50px; max-width:50px;}
 </style>
 
 @endsection
