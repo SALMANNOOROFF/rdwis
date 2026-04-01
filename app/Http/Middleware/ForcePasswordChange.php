@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use App\Models\CenAccount;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class ForcePasswordChange
 {
@@ -22,7 +22,7 @@ class ForcePasswordChange
         }
 
         $defaultPassword = (string) config('auth.default_password', '12345');
-        if (Hash::check($defaultPassword, (string) ($user->acc_pass ?? ''))) {
+        if (CenAccount::verifyPassword((string) ($user?->acc_username ?? ''), $defaultPassword, (string) ($user->acc_pass ?? ''))) {
             if ($request->isMethod('get') && ! $request->session()->has('password_change.intended')) {
                 $request->session()->put('password_change.intended', $request->fullUrl());
             }
@@ -33,4 +33,3 @@ class ForcePasswordChange
         return $next($request);
     }
 }
-

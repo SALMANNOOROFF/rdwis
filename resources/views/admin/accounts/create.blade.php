@@ -132,7 +132,7 @@
                     }
                     roleSelect.append('<option value="">Select role...</option>');
                     data.forEach(function (role) {
-                        const label = role.rol_level + ' — ' + role.rol_desig + ' (' + role.rol_desigshort + ', ' + role.rol_access + ', ' + role.rol_authprj + ')';
+                        const label = role.rol_level + ' — ' + role.rol_desig + ' (' + role.rol_desigshort + ', ' + role.rol_access + ', ' + role.rol_auth + ')';
                         roleSelect.append(
                             $('<option>', {
                                 value: role.rol_level,

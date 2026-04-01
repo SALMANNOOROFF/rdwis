@@ -65,7 +65,7 @@
                                 </td>
                                 <td><span class="badge badge-info text-uppercase">{{ $acc->acc_untarea }}</span></td>
                                 <td>
-                                    @if($acc->acc_auth === 'approver')
+                                    @if(in_array(strtolower(trim((string) $acc->acc_auth)), ['approver', 'editor'], true))
                                         <span class="badge badge-success">Approver</span>
                                     @else
                                         <span class="badge badge-secondary">Viewer</span>

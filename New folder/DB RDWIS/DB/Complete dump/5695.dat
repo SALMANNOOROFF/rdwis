@@ -1,0 +1,19 @@
+100000	Institute	Navy Research and Development Institute	NRDI	100000	999999	100000	119999	Nrdi	\N	\N	\N	\N	\N
+180000	Department	Projects Department	Projects	160000	999999	180000	199999	Prj	\N	\N	\N	\N	\N
+860000	Department	Information Technology Department	IT	160000	999999	860000	879999	It	\N	\N	\N	\N	\N
+200000	Division	Communication Division	Comm	160000	999999	200000	249999	Prj	Aleem Mushtaq	Dr	Captain PN	Director Communication Division	Director Comm
+250000	Division	Enabling Technology Division	Enab	160000	999999	250000	299999	Prj	Hammad Raza	Dr	Capt PN	Director Enabling Technologies	Dir ET
+160000	Wing	Research and Development Wing	RDW	160000	999999	160000	179999	Rdw	\N	\N	\N	\N	\N
+400000	Division	System of Systems Engineering Division	SoSE	160000	999999	400000	449999	Prj	Sajid Saleem	Dr	Capt PN	Director System of Systems Engineering Division	Director SoSE
+880000	Department	Information System Department	IS	160000	999999	880000	899999	Is	Adnan Mustafa	\N	Lt Cdr (Rtd)	Manager Information System	Manager IS
+990000	External	External	EXT	0	0	0	0	\N	\N	\N	\N	\N	\N
+820000	Department	Human Resource Department	HR	160000	999999	820000	839999	Hr	Asif Ali	\N	Lt Cdr PN	Staff Officer HR	SO HR
+300000	Division	Naval Weapons System Division	NWS	160000	999999	300000	349999	Prj	Attaullah Memon	Dr	Commodore	Director Naval Weapon Systems	Director NWS
+10000	Head Quarters	Head Quarters	HQs NRD	100000	999999	10000	99999	Hqs					\N
+350000	Division	Sensors Division	Sensors	160000	999999	350000	399999	Prj	TARIQ MAIRAJ	DR	Commodore	Director Sensors	Director Sensors
+840000	Department	Administration Department	Admin	160000	999999	840000	859999	Adm	Assad Mahmood	\N	Lt Cdr PN	SO Admin	SO Admin
+800000	Department	Finance Department	Finance	160000	999999	800000	819999	Fin	Syed Arif Raza Zaidi	\N	Lt Cdr (R) Pakistan Navy	Director Finance	Director Finance
+450000	Division	Systems Division	Sys	160000	999999	450000	499999	Prj	Syed Sajjad Haider Zaidi	Dr.	Cdre	PI Systems	PI Systems
+\.
+
+

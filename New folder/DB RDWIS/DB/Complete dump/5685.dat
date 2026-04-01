@@ -1,0 +1,348 @@
+132	116	fin_salorders	2636	sor_transtype	With GST	Without GST	int4	2	i	sor_id	\N
+133	116	fin_salorders	2698	sor_transtype	With GST	Without GST	int4	2	i	sor_id	\N
+134	116	fin_transactions	3675	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+135	116	fin_transactions	3676	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+136	116	fin_transactions	3743	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+137	116	fin_transactions	3744	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+138	116	fin_transactions	3745	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+139	116	fin_sharesalloc	28	sha_transtype	With GST	Without GST	int4	3	i	sha_id	\N
+140	116	pur_purcases	1079	pcs_transtype	With GST	Without GST	int4	2	i	pcs_id	\N
+141	116	pur_purcases	1093	pcs_transtype	With GST	Without GST	int4	2	i	pcs_id	\N
+142	116	fin_commitments	3562	cmt_amount	868000	741880	int4	2	\N	cmt_id	\N
+143	116	cen_heads	200012	hed_transtype	With GST	Without GST	int4	1	i	hed_id	\N
+128	114	pur_purcases	1047	pcs_midtax	55693	58968.9	numeric	1	\N	pcs_id	\N
+129	114	pur_purcases	1047	pcs_price	383298	386573.9	numeric	1	\N	pcs_id	\N
+130	115	pur_purcases	1048	pcs_midtax	5180.75	5485.5	numeric	1	\N	pcs_id	\N
+131	115	pur_purcases	1048	pcs_price	74655.75	74960.5	numeric	1	\N	pcs_id	\N
+178	136	pur_purcases	1083	pcs_midtax	92650	98100	int4	1	\N	pcs_id	\N
+179	136	pur_purcases	1083	pcs_price	637650	643100	int4	1	\N	pcs_id	\N
+180	140	fin_transfers	69	trf_amount_x1	206000000	224920000	int4	1	\N	trf_id	\N
+181	140	fin_transfers	70	trf_amount_x2	55681624	60932726	int4	1	\N	trf_id	\N
+182	140	(none)	(none)	rdw_share	150318376	163987274	numeric	1	\N	(none)	\N
+183	140	fin_sharesalloc	26	sha_c1	134018376	147687274	int4	1	\N	sha_id	\N
+184	140	fin_commitments	3098	cmt_amount_x2	55681624	60932726	int4	3	n	cmt_id	\N
+185	140	fin_commitments	3097	cmt_amount_x1	206000000	224920000	int4	3	\N	cmt_id	\N
+144	119	fin_salorders	2636	sor_transtype	With GST	Without GST	int4	2	i	sor_id	\N
+145	119	fin_salorders	2698	sor_transtype	With GST	Without GST	int4	2	i	sor_id	\N
+146	119	fin_transactions	3675	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+147	119	fin_transactions	3676	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+148	119	fin_transactions	3743	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+149	119	fin_transactions	3744	trn_transtype	With GST	Without GST	int4	2	i	trn_id	\N
+150	119	fin_sharesalloc	28	sha_transtype	With GST	Without GST	int4	3	i	sha_id	\N
+151	119	pur_purcases	1079	pcs_transtype	With GST	Without GST	int4	2	i	pcs_id	\N
+152	119	pur_purcases	1093	pcs_transtype	With GST	Without GST	int4	2	i	pcs_id	\N
+153	119	fin_commitments	3562	cmt_amount	868000	741880	int4	2	\N	cmt_id	\N
+154	119	cen_heads	200012	hed_transtype	With GST	Without GST	int4	1	i	hed_id	\N
+172	133	fin_transfers	73	trf_amount_x1	3837188	5755782	int4	1	\N	trf_id	\N
+173	133	fin_transfers	74	trf_amount_x2	1037188	1555782	int4	1	\N	trf_id	\N
+174	133	(none)	(none)	rdw_share	2800000	4200000	numeric	1	\N	(none)	\N
+175	133	fin_sharesalloc	27	sha_c1	2000000	3400000	int4	1	\N	sha_id	\N
+176	133	fin_commitments	3330	cmt_amount_x2	1037188	1555782	int4	3	n	cmt_id	\N
+177	133	fin_commitments	3329	cmt_amount_x1	3837188	5755782	int4	3	\N	cmt_id	\N
+71	73	hr_contracts	408	ctr_enddt	31-Jan-2024	31-Jan-2023	date	1	\N	ctr_id	\N
+75	76	fin_transactions	3170	trn_amount1_x2	21159017	21159018	numeric	1	n	trn_id	\N
+76	76	(none)	90	rdw_share	57120983	57120982	numeric	1	\N		\N
+77	76	fin_sharesinstall	90	shi_c3	2093378	2093377	numeric	1	\N	shi_id	\N
+78	76	fin_transactions	3170	trn_amount2_x2	21159017	21159018	numeric	3	n	trn_id	\N
+79	77	fin_transactions	3170	trn_amount1_x2	21159017	21159018	numeric	1	n	trn_id	\N
+80	77	(none)	90	rdw_share	57120983	57120982	numeric	1	\N		\N
+81	77	fin_sharesinstall	90	shi_c1	50926983	50926982	numeric	1	\N	shi_id	\N
+82	77	fin_transactions	3170	trn_amount2_x2	21159017	21159018	numeric	3	n	trn_id	\N
+83	78	pur_purcases	602	pcs_midtax	228996	216743.88	numeric	1	\N	pcs_id	\N
+84	78	pur_purcases	602	pcs_price	1695685	1683432.88	numeric	1	\N	pcs_id	\N
+85	79	pur_purcases	666	pcs_midtax	112528	88192	numeric	1	\N	pcs_id	\N
+86	79	pur_purcases	666	pcs_price	790928	766592	numeric	1	\N	pcs_id	\N
+87	80	pur_purcases	574	pcs_midtax	127320	111147.7	numeric	1	\N	pcs_id	\N
+88	80	pur_purcases	574	pcs_price	905530	889357.7	numeric	1	\N	pcs_id	\N
+39	58	fin_commitments	623	cmt_amount_x2	637408	637399	numeric	3	n	cmt_id	\N
+43	59	fin_commitments	1926	cmt_amount_x2	2700000	2702991	numeric	3	n	cmt_id	\N
+47	60	fin_commitments	1922	cmt_amount_x2	4320000	4324786	numeric	3	n	cmt_id	\N
+51	61	fin_commitments	1924	cmt_amount_x2	2800000	2784081	numeric	3	n	cmt_id	\N
+54	63	fin_commitments	1743	cmt_amount_x2	3310000	3315000	numeric	3	n	cmt_id	\N
+55	63	fin_commitments	1741	cmt_amount_x1	12260000	12265000	numeric	3	\N	cmt_id	\N
+58	65	fin_commitments	1743	cmt_amount_x2	3310000	3315300	numeric	3	n	cmt_id	\N
+59	65	fin_commitments	1741	cmt_amount_x1	12260000	12265300	numeric	3	\N	cmt_id	\N
+38	58	fin_sharesalloc	23	sha_c2	1720715	1720724	numeric	1	\N	sha_id	\N
+42	59	fin_sharesalloc	4	sha_c1	5000000	4997009	numeric	1	\N	sha_id	\N
+32	57	(none)	83	rdw_share	1696979	1878979	numeric	1	\N		\N
+37	58	(none)	23	rdw_share	1720715	1720724	numeric	1	\N		\N
+41	59	(none)	4	rdw_share	7300000	7297009	numeric	1	\N		\N
+45	60	(none)	11	rdw_share	11680000	11675214	numeric	1	\N		\N
+49	61	(none)	5	rdw_share	7500000	7515919	numeric	1	\N		\N
+61	66	(none)	2	rdw_share	1764720	1764705	numeric	1	\N		\N
+64	67	(none)	4	rdw_share	3529440	3529412	numeric	1	\N		\N
+67	68	(none)	6	rdw_share	4411800	4411765	numeric	1	\N		\N
+72	74	pur_purcases	693	pcs_remarks	50% advanced payment and 50% payment on deliver	100% payment on delivery	text	1	\N	pcs_id	\N
+89	81	pur_purcases	333	pcs_midtax	185000	185300	numeric	1	\N	pcs_id	\N
+90	81	pur_purcases	333	pcs_price	1275300	1275600	numeric	1	\N	pcs_id	\N
+91	82	pur_purcases	428	pcs_midtax	341504	321891	numeric	1	\N	pcs_id	\N
+92	82	pur_purcases	428	pcs_price	2350356	2330743	numeric	1	\N	pcs_id	\N
+93	83	pur_purcases	465	pcs_midtax	918420	175988.93	numeric	1	\N	pcs_id	\N
+94	83	pur_purcases	465	pcs_price	116809	-625622.07	numeric	1	\N	pcs_id	\N
+95	84	pur_purcases	458	pcs_midtax	220337	200337	numeric	1	\N	pcs_id	\N
+96	84	pur_purcases	458	pcs_price	1378787	1358787	numeric	1	\N	pcs_id	\N
+46	60	fin_sharesalloc	11	sha_c1	8000000	7995214	numeric	1	\N	sha_id	\N
+50	61	fin_sharesalloc	5	sha_c1	6500000	6515919	numeric	1	\N	sha_id	\N
+33	57	fin_sharesinstall	83	shi_c1	1459402	1615922	numeric	1	\N	shi_id	\N
+34	57	fin_sharesinstall	83	shi_c3	237577	263057	numeric	1	\N	shi_id	\N
+31	57	fin_transactions	2788	trn_amount1_x2	878021	696021	numeric	1	n	trn_id	\N
+35	57	fin_transactions	2788	trn_amount2_x2	878021	696021	numeric	3	n	trn_id	\N
+60	66	fin_transactions	1	trn_amount1_x2	441180	441195	numeric	1	n	trn_id	\N
+62	66	fin_transactions	1	trn_amount2_x2	441180	441195	numeric	3	n	trn_id	\N
+63	67	fin_transactions	7	trn_amount1_x2	882360	882388	numeric	1	n	trn_id	\N
+65	67	fin_transactions	7	trn_amount2_x2	882360	882388	numeric	3	n	trn_id	\N
+66	68	fin_transactions	12	trn_amount1_x2	1102950	1102985	numeric	1	n	trn_id	\N
+68	68	fin_transactions	12	trn_amount2_x2	1102950	1102985	int4	3	n	trn_id	\N
+36	58	fin_transfers	3	trf_amount_x2	637408	637399	int4	1	\N	trf_id	\N
+40	59	fin_transfers	54	trf_amount_x2	2700000	2702991	int4	1	\N	trf_id	\N
+44	60	fin_transfers	50	trf_amount_x2	4320000	4324786	int4	1	\N	trf_id	\N
+48	61	fin_transfers	52	trf_amount_x2	2800000	2784081	int4	1	\N	trf_id	\N
+52	63	fin_transfers	47	trf_amount_x1	12260000	12265000	int4	1	\N	trf_id	\N
+53	63	fin_transfers	48	trf_amount_x2	3310000	3315000	int4	1	\N	trf_id	\N
+56	65	fin_transfers	47	trf_amount_x1	12260000	12265300	int4	1	\N	trf_id	\N
+57	65	fin_transfers	48	trf_amount_x2	3310000	3315300	int4	1	\N	trf_id	\N
+2	11	hr_contracts	194	ctr_enddt	31 Mar 22	18 May 22	date	1	\N	ctr_id	\N
+10	15	hr_contracts	285	ctr_enddt	31 Mar 22	07 Nov 22	date	1	\N	ctr_id	\N
+4	12	hr_contracts	210	ctr_enddt	31 Mar 22	30 May 22	date	1	\N	ctr_id	\N
+8	14	hr_contracts	259	ctr_enddt	04 Feb 22	31 Jul 22	date	1	\N	ctr_id	\N
+5	12	hr_contracts	210	ctr_termindt		31 Mar 22	date	1	\N	ctr_id	\N
+9	14	hr_contracts	259	ctr_termindt		04 Feb 22	date	1	\N	ctr_id	\N
+3	11	hr_contracts	194	ctr_termindt		31 Mar 22	date	1	\N	ctr_id	\N
+11	15	hr_contracts	285	ctr_termindt		31 Mar 22	date	1	\N	ctr_id	\N
+1	10	hr_contracts	205	ctr_termindt		30 Apr 22	date	1	\N	ctr_id	\N
+13	16	hr_contracts	364	ctr_termindt		30 Apr 22	date	1	\N	ctr_id	\N
+7	13	hr_contracts	227	ctr_termindt		31 Mar 22	date	1	\N	ctr_id	\N
+6	13	hr_contracts	227	ctr_enddt	31 Mar 22	11 Aug 22	date	1	\N	ctr_id	\N
+14	17	hr_contracts	374	ctr_startdt	01 Jul 22	01 May 22	date	1	\N	ctr_id	\N
+12	16	hr_contracts	364	ctr_startdt	01 May 22	01 July 21	date	1	\N	ctr_id	\N
+15	32	hr_contracts	259	ctr_enddt	04-Feb-2022	31-Jul-2022	date	1	\N	ctr_id	\N
+16	32	hr_contracts	259	ctr_termindt	\N	04-Feb-2022	date	1	\N	ctr_id	\N
+17	34	hr_contracts	364	ctr_startdt	01-May-2022	01-Jul-2022	date	1	\N	ctr_id	\N
+18	34	hr_contracts	364	ctr_enddt	30-Jun-2022	30-Jun-2023	date	1	\N	ctr_id	\N
+19	34	hr_contracts	364	ctr_date	01-May-2022	01-Jul-2022	date	1	\N	ctr_id	\N
+20	34	hr_contracts	364	ctr_salary	50000	65000	numeric	1	\N	ctr_id	\N
+21	35	hr_contracts	221	ctr_termindt	30-Apr-2022	\N	date	1	\N	ctr_id	\N
+22	36	hr_contracts	194	ctr_enddt	31-Mar-2022	18-May-2022	date	1	\N	ctr_id	\N
+23	36	hr_contracts	194	ctr_termindt	\N	31-Mar-2022	date	1	\N	ctr_id	\N
+24	37	hr_contracts	210	ctr_enddt	31-Mar-2022	30-May-2022	date	1	\N	ctr_id	\N
+25	37	hr_contracts	210	ctr_termindt	\N	31-Mar-2022	date	1	\N	ctr_id	\N
+26	38	hr_contracts	227	ctr_enddt	31-Mar-2022	11-Aug-2022	date	1	\N	ctr_id	\N
+27	38	hr_contracts	227	ctr_termindt	\N	31-Mar-2022	date	1	\N	ctr_id	\N
+28	39	hr_contracts	285	ctr_enddt	31-Mar-2022	07-Nov-2022	date	1	\N	ctr_id	\N
+29	39	hr_contracts	285	ctr_termindt	\N	31-Mar-2022	date	1	\N	ctr_id	\N
+30	47	hr_contracts	241	ctr_termindt	24-Jun-2022	07-Jul-2022	date	1	\N	ctr_id	\N
+69	71	hr_contracts	407	ctr_hed_id	350018	350015	int4	1	\N	ctr_id	\N
+70	71	hr_emps	14-22-08-9227	emp_hed_id	350018	350015	int4	3	\N	emp_id	\N
+73	72	pur_purcases	742	pcs_midtax	152015	158431.5	numeric	1	\N	pcs_id	\N
+74	72	pur_purcases	742	pcs_price	1083965	1090381.5	numeric	1	\N	pcs_id	\N
+97	85	pur_purcases	464	pcs_midtax	17040	282948	numeric	1	\N	pcs_id	\N
+98	85	pur_purcases	464	pcs_price	1647430	1913338	numeric	1	\N	pcs_id	\N
+99	86	pur_purcases	745	pcs_midtax	778778	731168.3	numeric	1	\N	pcs_id	\N
+100	86	pur_purcases	745	pcs_price	5555868	5508258.3	numeric	1	\N	pcs_id	\N
+101	87	hr_contracts	428	ctr_startdt	27-Sep-2022	01-Sep-2022	date	1	\N	ctr_id	\N
+102	87	hr_contracts	428	ctr_enddt	26-Sep-2023	31-Aug-2023	date	1	\N	ctr_id	\N
+103	87	hr_contracts	428	ctr_date	27-Sep-2022	01-Sep-2022	date	1	\N	ctr_id	\N
+104	88	hr_contracts	429	ctr_startdt	27-Sep-2022	01-Sep-2022	date	1	\N	ctr_id	\N
+105	88	hr_contracts	429	ctr_enddt	26-Sep-2023	31-Aug-2023	date	1	\N	ctr_id	\N
+106	88	hr_contracts	429	ctr_date	27-Sep-2022	01-Sep-2022	date	1	\N	ctr_id	\N
+107	89	hr_contracts	429	ctr_startdt	27-Sep-22	01-Sep-22	date	1	\N	ctr_id	\N
+108	89	hr_contracts	429	ctr_enddt	26-Sep-23	31-Aug-23	date	1	\N	ctr_id	\N
+109	89	hr_contracts	429	ctr_date	27-Sep-22	01-Sep-22	date	1	\N	ctr_id	\N
+110	90	hr_emps	14-22-09-6968	emp_joindt	27-Sep-22	01-Sep-22	date	1	\N	emp_id	\N
+111	91	hr_emps	14-22-09-4823	emp_joindt	27-Sep-22	01-Sep-22	date	1	\N	emp_id	\N
+112	92	hr_emps	14-22-09-4823	emp_joindt	27-Sep-22	01-Sep-22	date	1	\N	emp_id	\N
+113	93	hr_contracts	431	ctr_enddt	31-Aug-22	31-Mar-23	date	1	\N	ctr_id	\N
+114	94	pur_purcases	1012	pcs_remarks	60% Advance (Phase-1)\r\n10% On start of work (Phase-2)\r\n15% Work completion (Phase-3)\r\n15% Completion/ Finishing of Project (Phase-4)	70% Advance \r\n15% Work completion \r\n15% Completion/ Finishing of Project	text	1	\N	pcs_id	\N
+115	95	pur_purcases	986	pcs_remarks	60% Advance (Phase-1)\r\n10% On start of work (Phase-2)\r\n15% Work completion (Phase-3)\r\n15% Completion/ Finishing of Project (Phase-4)	70% Advance \r\n15% Work completion \r\n15% Completion/ Finishing of Project	text	1	\N	pcs_id	\N
+116	98	pur_purcases	105	pcs_remarks	\N	Missing Items	text	1	\N	pcs_id	\N
+117	106	hr_contracts	383	ctr_hed_id	RAV-I	\N	varchar_int4	1	i	ctr_id	\N
+118	106	hr_emps	17-22-07-7289	emp_hed_id	RAV-I	\N	varchar_int4	3	i	emp_id	\N
+119	107	hr_contracts	375	ctr_hed_id	ELINT-II	\N	varchar_int4	1	i	ctr_id	\N
+120	107	hr_emps	21-20-02-4593	emp_hed_id	ELINT-II	\N	varchar_int4	3	i	emp_id	\N
+121	109	pur_purcases	1102	pcs_midtax	73169.7	77473.8	numeric	1	\N	pcs_id	\N
+122	109	pur_purcases	1102	pcs_price	503579.7	507883.8	numeric	1	\N	pcs_id	\N
+123	110	pur_purcases	1103	pcs_remarks	100%  advance payment	100%  payment after delivery	text	1	\N	pcs_id	\N
+124	111	pur_purcases	1101	pcs_midtax	101823	107812.8	numeric	1	\N	pcs_id	\N
+125	111	pur_purcases	1101	pcs_price	700783	706772.8	numeric	1	\N	pcs_id	\N
+126	113	pur_purcases	1106	pcs_midtax	67490	71460	numeric	1	\N	pcs_id	\N
+127	113	pur_purcases	1106	pcs_price	464490	468460	numeric	1	\N	pcs_id	\N
+186	145	hr_contracts	376	ctr_hed_id	ROV-II	\N	int4	1	i	ctr_id	\N
+187	145	hr_emps	18-21-06-0871	emp_hed_id	ROV-II	\N	varchar	3	i	emp_id	\N
+188	146	hr_contracts	375	ctr_hed_id	ELINT-II	\N	int4	1	i	ctr_id	\N
+189	146	hr_emps	21-20-02-4593	emp_hed_id	ELINT-II	\N	varchar	3	i	emp_id	\N
+190	165	pur_purcases	1150	pcs_remarks	50% Advance and 50% after delivery	100% after delivery	int4	1	\N	pcs_id	\N
+191	169	fin_transfers	73	trf_amount_x1	5755782	5772180	int4	1	\N	trf_id	\N
+192	169	fin_transfers	74	trf_amount_x2	1555782	1572180	int4	1	\N	trf_id	\N
+193	169	fin_commitments	3330	cmt_amount_x2	1555782	1572180	int4	3	n	cmt_id	\N
+194	169	fin_commitments	3329	cmt_amount_x1	5755782	5772180	int4	3	\N	cmt_id	\N
+195	170	fin_transactions	4205	trn_amount1_x2	2772692	2715305	int4	1	n	trn_id	\N
+196	171	fin_transactions	4205	trn_amount1_x2	2772692	2715305	int4	1	n	trn_id	\N
+197	172	fin_transactions	4205	trn_amount1_x2	2772692	2715305	int4	1	n	trn_id	\N
+198	173	fin_transactions	4205	trn_amount1_x2	2772692	4772692	int4	1	n	trn_id	\N
+199	174	fin_transactions	4205	trn_amount1_x2	2772692	2715305	int4	1	n	trn_id	\N
+200	174	(none)	(none)	rdw_share	7217465	7274852	numeric	1	\N	(none)	\N
+201	174	fin_sharesinstall	118	shi_c1	6071576	6119852	int4	1	\N	shi_id	\N
+202	174	fin_sharesinstall	118	shi_c2	997072	1005000	int4	1	\N	shi_id	\N
+203	174	fin_sharesinstall	118	shi_c3	148817	150000	int4	1	\N	shi_id	\N
+204	174	fin_transactions	4205	trn_amount2_x2	2772692	2715305	int4	3	n	trn_id	\N
+205	175	fin_transactions	4207	trn_amount1_x2	1112526	1083492	int4	1	n	trn_id	\N
+206	175	(none)	(none)	rdw_share	2895966	2925000	numeric	1	\N	(none)	\N
+207	175	fin_sharesinstall	119	shi_c1	1732629	1750000	int4	1	\N	shi_id	\N
+208	175	fin_sharesinstall	119	shi_c2	1163337	1175000	int4	1	\N	shi_id	\N
+209	175	fin_transactions	4207	trn_amount2_x2	1112526	1083492	int4	3	n	trn_id	\N
+210	176	fin_transactions	4209	trn_amount1_x2	824601	803080	int4	1	n	trn_id	\N
+211	176	(none)	(none)	rdw_share	2146479	2168000	numeric	1	\N	(none)	\N
+212	176	fin_sharesinstall	120	shi_c1	1386103	1400000	int4	1	\N	shi_id	\N
+213	176	fin_sharesinstall	120	shi_c2	760376	768000	int4	1	\N	shi_id	\N
+214	176	fin_transactions	4209	trn_amount2_x2	824601	803080	int4	3	n	trn_id	\N
+215	178	fin_sharesalloc	43	sha_cf	67331	783853	int4	1	\N	sha_id	\N
+216	179	hr_emps	14-22-09-4823	emp_id	14-22-09-4823	13-22-09-4823	varchar	1	\N	emp_id	\N
+217	180	fin_sharesalloc	17	sha_c1	9196382	9202407	int4	1	\N	sha_id	\N
+218	180	fin_sharesalloc	17	sha_c2	6025	0	int4	1	\N	sha_id	\N
+219	182	hr_contracts	383	ctr_termindt	04-Nov-2023	03-Nov-2023	int4	1	\N	ctr_id	\N
+220	183	fin_sharesalloc	45	sha_c2	6755896	6583396	int4	1	\N	sha_id	\N
+221	183	fin_sharesalloc	45	sha_cf	388498	560998	int4	1	\N	sha_id	\N
+222	183	fin_sharesalloc	45	sha_pcc	27207972	27035472	int4	1	\N	sha_id	\N
+223	183	fin_sharesalloc	45	sha_prj	27207972	27035472	int4	1	\N	sha_id	\N
+224	184	fin_sharesalloc	22	sha_c1	101212395	101211767	int4	3	\N	sha_id	\N
+225	184	fin_sharesalloc	22	sha_c2	12383321	12383244	int4	3	\N	sha_id	\N
+226	184	fin_sharesalloc	22	sha_cf	90000	854094	int4	1	\N	sha_id	\N
+227	184	fin_sharesalloc	22	sha_pcc	113660000	112895906	int4	1	\N	sha_id	\N
+228	184	fin_sharesalloc	22	sha_prj	113660000	113659295	int4	3	\N	sha_id	\N
+229	185	fin_sharesalloc	21	sha_c1	55254528	55205352	int4	3	\N	sha_id	\N
+230	185	fin_sharesalloc	21	sha_c2	14625472	14612456	int4	3	\N	sha_id	\N
+231	185	fin_sharesalloc	21	sha_cf	120000	1618200	int4	1	\N	sha_id	\N
+232	185	fin_sharesalloc	21	sha_pcc	69880000	68381800	int4	1	\N	sha_id	\N
+233	185	fin_sharesalloc	21	sha_prj	69880000	69817808	int4	3	\N	sha_id	\N
+234	186	fin_sharesalloc	24	sha_c1	64133136	62964318	int4	1	\N	sha_id	\N
+235	186	fin_sharesalloc	24	sha_c3	4750000	1960081	int4	1	\N	sha_id	\N
+236	186	fin_sharesalloc	24	sha_cf	1422500	5381237	int4	1	\N	sha_id	\N
+237	186	fin_sharesalloc	24	sha_pcc	97087115	93128378	int4	1	\N	sha_id	\N
+238	186	fin_sharesalloc	24	sha_prj	97087115	93128378	int4	1	\N	sha_id	\N
+239	187	fin_sharesalloc	45	sha_c2	6755896	1598396	int4	1	\N	sha_id	\N
+240	187	fin_sharesalloc	45	sha_cf	388498	5545998	int4	1	\N	sha_id	\N
+241	187	fin_sharesalloc	45	sha_pcc	27207972	22050472	int4	1	\N	sha_id	\N
+242	187	fin_sharesalloc	45	sha_prj	27207972	22050472	int4	1	\N	sha_id	\N
+243	188	fin_sharesalloc	24	sha_c1	64133136	59751899	int4	1	\N	sha_id	\N
+244	188	fin_sharesalloc	24	sha_c2	28203979	28453979	int4	1	\N	sha_id	\N
+245	188	fin_sharesalloc	24	sha_cf	1422500	5553737	int4	1	\N	sha_id	\N
+246	188	fin_sharesalloc	24	sha_pcc	97087115	92955878	int4	1	\N	sha_id	\N
+247	188	fin_sharesalloc	24	sha_prj	97087115	92955878	int4	1	\N	sha_id	\N
+248	189	fin_sharesalloc	8	sha_c1	154112000	152265870	int4	1	\N	sha_id	\N
+249	189	fin_sharesalloc	8	sha_c2	19529000	19295059	int4	1	\N	sha_id	\N
+250	189	fin_sharesalloc	8	sha_c3	4162000	4112143	int4	1	\N	sha_id	\N
+251	189	fin_sharesalloc	8	sha_cf	197000	2326928	int4	1	\N	sha_id	\N
+252	189	fin_sharesalloc	8	sha_pcc	177803000	175673072	int4	1	\N	sha_id	\N
+253	189	fin_sharesalloc	8	sha_prj	177803000	175673072	int4	1	\N	sha_id	\N
+254	190	fin_sharesalloc	8	sha_c1	154112000	151982072	int4	1	\N	sha_id	\N
+255	190	fin_sharesalloc	8	sha_cf	197000	2326928	int4	1	\N	sha_id	\N
+256	190	fin_sharesalloc	8	sha_pcc	177803000	175673072	int4	1	\N	sha_id	\N
+257	190	fin_sharesalloc	8	sha_prj	177803000	175673072	int4	1	\N	sha_id	\N
+258	191	fin_transfers	45	trf_amount_x1	64000000	64027350	int4	1	\N	trf_id	\N
+259	191	fin_transfers	46	trf_amount_x2	17299145	17326495	int4	1	\N	trf_id	\N
+260	191	fin_commitments	1541	cmt_amount_x2	17299145	17326495	int4	3	n	cmt_id	\N
+261	191	fin_commitments	1540	cmt_amount_x1	64000000	64027350	int4	3	\N	cmt_id	\N
+262	192	fin_transfers	69	trf_amount_x1	224920000	225258000	int4	1	\N	trf_id	\N
+263	192	fin_transfers	70	trf_amount_x2	60932726	61270726	int4	1	\N	trf_id	\N
+264	192	fin_commitments	3098	cmt_amount_x2	60932726	61270726	int4	3	n	cmt_id	\N
+265	192	fin_commitments	3097	cmt_amount_x1	224920000	225258000	int4	3	\N	cmt_id	\N
+266	193	fin_sharesalloc	45	sha_c2	6755896	6238396	int4	1	\N	sha_id	\N
+267	193	fin_sharesalloc	45	sha_cf	388498	905998	int4	1	\N	sha_id	\N
+268	193	fin_sharesalloc	45	sha_pcc	27207972	26690472	int4	1	\N	sha_id	\N
+269	193	fin_sharesalloc	45	sha_prj	27207972	26690472	int4	1	\N	sha_id	\N
+270	194	fin_transfers	69	trf_amount_x1	224920000	234920000	int4	1	\N	trf_id	\N
+271	194	fin_transfers	70	trf_amount_x2	60932726	70932726	int4	1	\N	trf_id	\N
+272	194	fin_commitments	3098	cmt_amount_x2	60932726	70932726	int4	3	n	cmt_id	\N
+273	194	fin_commitments	3097	cmt_amount_x1	224920000	234920000	int4	3	\N	cmt_id	\N
+274	200	fin_sharesalloc	32	sha_c2	3648000	3298000	int4	1	\N	sha_id	\N
+275	200	fin_sharesalloc	32	sha_cf	192000	542000	int4	1	\N	sha_id	\N
+276	200	fin_sharesalloc	32	sha_pcc	10648000	10298000	int4	1	\N	sha_id	\N
+277	200	fin_sharesalloc	32	sha_prj	10648000	10298000	int4	1	\N	sha_id	\N
+278	204	fin_transactions	4551	trn_amount1_x2	2636575	2646575	int4	1	n	trn_id	\N
+279	204	(none)	(none)	rdw_share	6899175	6889175	numeric	1	\N	(none)	\N
+280	204	fin_sharesinstall	139	shi_pcc	5993177	5983177	int4	1	\N	shi_id	\N
+281	204	fin_transactions	4551	trn_amount2_x2	2636575	2646575	int4	3	n	trn_id	\N
+282	213	hr_emps	11-23-12-9214	emp_id	11-23-12-9214	13-23-12-9214	varchar	1	\N	emp_id	\N
+283	214	hr_emps	11-23-12-9214	emp_id	11-23-12-9214	13-23-12-9214	varchar	1	\N	emp_id	\N
+284	219	fin_transfers	55	trf_amount_x1	135000000	135058000	int4	1	\N	trf_id	\N
+285	219	fin_transfers	56	trf_amount_x2	36490385	36548385	int4	1	\N	trf_id	\N
+286	219	fin_commitments	1928	cmt_amount_x2	36490385	36548385	int4	3	n	cmt_id	\N
+287	219	fin_commitments	1927	cmt_amount_x1	135000000	135058000	int4	3	\N	cmt_id	\N
+288	220	fin_subheads	68	sbh_alloc_x3_z(Misc Share)	109766	110072	int4	2	\N	sbh_id	\N
+289	223	pur_purcases	1369	pcs_remarks	50% advance 50% after receipt of goods	100% payment after delivery	int4	1	\N	pcs_id	\N
+290	224	fin_transfers	49	trf_amount_x1	16000000	16034188	int4	1	\N	trf_id	\N
+291	224	fin_transfers	50	trf_amount_x2	4324786	4358974	int4	1	\N	trf_id	\N
+292	224	fin_commitments	1922	cmt_amount_x2	4324786	4358974	int4	3	n	cmt_id	\N
+293	224	fin_commitments	1921	cmt_amount_x1	16000000	16034188	int4	3	\N	cmt_id	\N
+294	225	pur_purcases	1369	pcs_remarks	50% advance 50% after receipt of goods	100% payment after delivery	int4	1	\N	pcs_id	\N
+295	226	pur_purcases	1369	pcs_remarks	50% advance 50% after receipt of goods	100% payment after delivery	int4	1	\N	pcs_id	\N
+296	227	fin_transactions	4944	trn_amount1_x1	13453000	13455000	int4	1	\N	trn_id	\N
+297	227	fin_transactions	4945	trn_amount1_x2	8555364	3659728	int4	1	n	trn_id	\N
+298	227	(none)	(none)	rdw_share	4897636	9795272	numeric	1	\N	(none)	\N
+299	227	fin_sharesinstall	162	shi_pcc	4897636	9795272	int4	1	\N	shi_id	\N
+300	227	fin_transactions	4945	trn_amount2_x2	8555364	3659728	int4	3	n	trn_id	\N
+301	227	fin_transactions	4944	trn_amount2_x1	13453000	13455000	int4	3	\N	trn_id	\N
+302	228	fin_transactions	4944	trn_amount1_x1	13453000	13455000	int4	1	\N	trn_id	\N
+303	228	fin_transactions	4945	trn_amount1_x2	8555364	3659728	int4	1	n	trn_id	\N
+304	228	(none)	(none)	rdw_share	4897636	9795272	numeric	1	\N	(none)	\N
+305	228	fin_sharesinstall	162	shi_pcc	4897636	9795272	int4	1	\N	shi_id	\N
+306	228	fin_transactions	4945	trn_amount2_x2	8555364	3659728	int4	3	n	trn_id	\N
+307	228	fin_transactions	4944	trn_amount2_x1	13453000	13455000	int4	3	\N	trn_id	\N
+308	230	fin_transfers	91	trf_amount_x1	11030119	12709636	int4	1	\N	trf_id	\N
+309	230	fin_transfers	92	trf_amount_x2	3061325	3527463	int4	1	\N	trf_id	\N
+310	230	(none)	(none)	rdw_share	7968794	9182173	numeric	1	\N	(none)	\N
+311	230	fin_commitments	3983	cmt_amount_x2	3061325	3527463	int4	3	n	cmt_id	\N
+312	230	fin_commitments	3982	cmt_amount_x1	11030119	12709636	int4	3	\N	cmt_id	\N
+313	230	fin_sharesalloc	36	sha_pcc	7879104	9092483	int4	1	\N	sha_id	\N
+314	230	fin_sharesalloc	36	sha_prj	7879104	9092483	int4	3	\N	sha_id	\N
+315	230	fin_subheads	52	sbh_alloc_x1_z(Equipment Share)	6175000	7388379	int4	2	\N	sbh_id	\N
+316	231	fin_transactions	4952	trn_amount1_x1	225872	226292	int4	1	\N	trn_id	\N
+317	231	fin_transactions	4953	trn_amount1_x2	106718	106835	int4	1	n	trn_id	\N
+318	231	(none)	(none)	rdw_share	119154	119457	numeric	1	\N	(none)	\N
+319	231	fin_sharesinstall	166	shi_pcc	119154	119457	int4	1	\N	shi_id	\N
+320	231	fin_transactions	4953	trn_amount2_x2	106718	106835	int4	3	n	trn_id	\N
+321	231	fin_transactions	4952	trn_amount2_x1	225872	226292	int4	3	\N	trn_id	\N
+322	232	fin_transfers	116	trf_amount_x2	12244750	27187496	int4	1	\N	trf_id	\N
+323	232	(none)	(none)	rdw_share	85713250	70770504	numeric	1	\N	(none)	\N
+324	232	fin_commitments	4472	cmt_amount_x2	12244750	27187496	int4	3	n	cmt_id	\N
+325	232	fin_sharesalloc	48	sha_pcc	84733670	69790924	int4	1	\N	sha_id	\N
+326	232	fin_sharesalloc	48	sha_prj	84733670	69790924	int4	3	\N	sha_id	\N
+327	232	fin_subheads	128	sbh_alloc_x1_z(Equipment Share)	80233670	59090924	int4	2	\N	sbh_id	\N
+328	232	fin_subheads	67	sbh_alloc_x2_z(HR Share)	4500000	4200000	int4	2	\N	sbh_id	\N
+329	232	fin_subheads	107	sbh_alloc_x3_z(Misc Share)	0	6500000	int4	2	\N	sbh_id	\N
+330	233	fin_subheads	63	sbh_alloc_x1_z(Equipment Share)	99770304	93770304	int4	2	\N	sbh_id	\N
+331	233	fin_subheads	62	sbh_alloc_x2_z(HR Share)	7204800	13204800	int4	2	\N	sbh_id	\N
+332	234	fin_sharesalloc	15	sha_cf	119250	225500	int4	1	\N	sha_id	\N
+333	234	fin_sharesalloc	15	sha_pcc	9366861	9260611	int4	1	\N	sha_id	\N
+334	234	fin_sharesalloc	15	sha_prj	9260611	9154361	int4	3	\N	sha_id	\N
+335	234	fin_subheads	89	sbh_alloc_x3_z(Misc Share)	259500	153250	int4	2	\N	sbh_id	\N
+336	235	hr_contracts	648	ctr_salary	150000	200000	int4	1	\N	ctr_id	\N
+337	236	fin_transfers	120	trf_amount_x2	8450000	8451165	int4	1	\N	trf_id	\N
+338	236	(none)	(none)	rdw_share	22000000	21998835	numeric	1	\N	(none)	\N
+339	236	fin_commitments	4652	cmt_amount_x2	8450000	8451165	int4	3	n	cmt_id	\N
+340	236	fin_sharesalloc	50	sha_pcc	21695500	21694335	int4	1	\N	sha_id	\N
+341	236	fin_sharesalloc	50	sha_prj	21695500	21694335	int4	3	\N	sha_id	\N
+342	236	fin_subheads	145	sbh_alloc_x2_z(HR Share)	4931387	4930222	int4	2	\N	sbh_id	\N
+343	237	fin_sharesalloc	5	sha_cf	50000	0	int4	1	\N	sha_id	\N
+344	237	fin_sharesalloc	5	sha_pcc	7465919	7515919	int4	1	\N	sha_id	\N
+345	237	fin_sharesalloc	5	sha_prj	7465919	7515919	int4	3	\N	sha_id	\N
+346	237	fin_subheads	126	sbh_alloc_x1_z(Equipment Share)	5457406	5507406	int4	2	\N	sbh_id	\N
+347	238	fin_sharesalloc	39	sha_cf	1100000	1150000	int4	1	\N	sha_id	\N
+348	238	fin_sharesalloc	39	sha_pcc	206967797	206917797	int4	1	\N	sha_id	\N
+349	238	fin_sharesalloc	39	sha_prj	206967797	206917797	int4	3	\N	sha_id	\N
+350	238	fin_subheads	117	sbh_alloc_x1_z(Equipment Share)	187967797	187917797	int4	2	\N	sbh_id	\N
+351	239	pur_purcases	1394	pcs_remarks	Payment on Dilivery	Firm name instead of Electromech is Crown Systems	int4	1	\N	pcs_id	\N
+352	239	pur_purcases	1394	pcs_midtax	91890	0	int4	1	\N	pcs_id	\N
+353	239	pur_purcases	1394	pcs_price	602390	510500	int4	1	\N	pcs_id	\N
+354	240	pur_purcases	1394	pcs_remarks	Payment on Dilivery	Name of the selected firm should be Crown System instead of Electromech	int4	1	\N	pcs_id	\N
+355	246	fin_sharesinstall	77	shi_pcc	1828980	1878980	int4	1	\N	shi_id	\N
+356	246	fin_sharesinstall	77	shi_cf	50000	0	int4	1	\N	shi_id	\N
+357	247	fin_transactions	4666	trn_amount1_x2	2715305	2772692	int4	1	n	trn_id	\N
+358	247	(none)	(none)	rdw_share	7274852	7217465	numeric	1	\N	(none)	\N
+359	247	fin_sharesinstall	150	shi_pcc	7274852	7217465	int4	1	\N	shi_id	\N
+360	247	fin_transactions	4666	trn_amount2_x2	2715305	2772692	int4	3	n	trn_id	\N
+361	248	fin_subheads	140	sbh_alloc_x1_z(Equipment Share)	5418843	5490877	int4	2	\N	sbh_id	\N
+362	248	fin_subheads	139	sbh_alloc_x2_z(HR Share)	1134225	1062191	int4	2	\N	sbh_id	\N
+\.
+
+

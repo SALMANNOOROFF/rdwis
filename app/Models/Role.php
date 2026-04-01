@@ -13,6 +13,13 @@ class Role extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'rol_desig', 'rol_desigshort', 'rol_level', 'rol_xunt_id'
+        'rol_unt_id',
+        'rol_level',
+        'rol_desig',
+        'rol_desigshort',
+        'rol_desigtype',
+        'rol_reportlevel',
+        'rol_access',
+        'rol_auth',
     ];
 }

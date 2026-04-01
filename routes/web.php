@@ -304,6 +304,7 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::get('/', [SystemAdminAccountController::class, 'dashboard'])->name('dashboard');
             Route::get('/reversals', [SystemAdminAccountController::class, 'reversalsIndex'])->name('reversals.index');
+            Route::get('/crypto-test', [SystemAdminAccountController::class, 'cryptoTest'])->name('crypto.test');
         });
 
     Route::prefix('admin/accounts')

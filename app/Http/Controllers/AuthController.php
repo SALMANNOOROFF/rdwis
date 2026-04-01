@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\CenAccount;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -94,7 +94,7 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
-        $user->acc_pass = Hash::make($request->input('password'));
+        $user->acc_pass = CenAccount::hashPassword((string) ($user?->acc_username ?? ''), $request->input('password'));
         $user->save();
 
         $intended = $request->session()->pull('password_change.intended');
@@ -102,7 +102,7 @@ class AuthController extends Controller
             return redirect($intended);
         }
 
-        return redirect()->route('home');
+        return redirect()->to($this->redirectBasedOnArea());
     }
 
     private function redirectBasedOnArea(): string

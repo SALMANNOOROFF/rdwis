@@ -1,0 +1,219 @@
+1	Purchase Case	2022-04-28 11:53:29	2022-04-01 00:00:00	687	Category of purchase case item#2 to be changed from 'Misc' to 'Equipment'.	Fulfilled	200000	2022-04-28	1	200000	\N
+2	Salary Order	2022-04-28 12:09:00	2022-04-25 00:00:00	1832	Salary Head in the requisition is incorrect and needs to be changed from ROV to ROV-II	Fulfilled	350000	2022-04-28	1	800000	\N
+3	Salary Order	2022-04-28 12:13:20	2022-04-08 00:00:00	1764	Incorrect project was entered in contractand same was repeated in the requisition. The contract is to be changed from NIU to NIU-HS	Fulfilled	200000	2022-04-28	1	200000	\N
+4	Salary Order	2022-04-21 12:14:08	2022-04-08 00:00:00	1765	Incorrect project was entered in contractand same was repeated in the requisition. The contract is to be changed from NIU to NIU-HS	Fulfilled	200000	2022-04-28	1	200000	\N
+5	Purchase Case	2022-04-28 14:18:49	2022-04-27 00:00:00	776	Quoted item prices need to be corrected	Fulfilled	300000	2022-04-28	1	300000	\N
+6	Salary Order	2022-05-09 08:42:40	2022-05-09 00:00:00	1905	To change head from MC to VFD	Fulfilled	350000	2022-05-09	1	800000	\N
+7	Purchase Case	2022-05-11 20:08:44	2022-05-13 00:00:00	733	To change head from HSTD to MC	Fulfilled	350000	2022-05-11	1	350000	\N
+8	Purchase Case	2022-05-11 20:10:18	2022-05-13 00:00:00	734	To change head from HSTD to MC	Fulfilled	350000	2022-05-11	1	350000	\N
+9	Purchase Case	2022-05-24 17:16:51	2022-05-24 17:25:30	700	The items were included in purchase case 699 and this purchase case was not sent to MTSS. It needs to be cancelled.	Fulfilled	200000	2022-05-24	1	200000	\N
+10	Contract	2022-06-01 16:12:06.501	2022-05-27 16:28:45	205	Incorrect contract renewal.	Fulfilled	350000	2022-05-27	2	820000	\N
+22	Purchase Case	2022-06-08 15:30:43	2022-06-08 15:50:31	593	In HSTD available balance is insufficient to process complete payment of purchase case 593	Fulfilled	350000	2022-06-08	1	350000	\N
+23	Purchase Case	2022-06-06 08:37:54	2022-06-07 11:08:01	813	There is a typo in the terms and condition section: dates should be 19, 20, 23, 24, 25 and 26 May	Fulfilled	200000	2022-06-06	1	200000	\N
+17	Contract	2022-06-01 16:12:21.833	2022-06-21 16:00:14	374	Typographical error.	Cancelled	350000	2022-06-01	2	820000	\N
+16	Contract	2022-06-01 16:12:20.369	2022-06-21 16:00:22	364	Incorrect contract renewal.	Cancelled	350000	2022-06-01	2	820000	\N
+37	Contract	2022-06-16 14:02:41	2022-06-21 16:12:09	210	Contract updated via end date instead of closure date field	Fulfilled	350000	2022-06-16	2	820000	\N
+13	Contract	2022-06-01 16:12:12.428	2022-06-21 16:00:56	227	Incorrect contract renewal.	Cancelled	350000	2022-06-01	2	820000	\N
+12	Contract	2022-06-01 16:12:10.233	2022-06-21 16:01:07	210	Incorrect contract renewal.	Cancelled	350000	2022-06-01	2	820000	\N
+38	Contract	2022-06-16 14:06:09	2022-06-21 16:14:23	227	Contract updated via end date instead of closure date field	Fulfilled	350000	2022-06-16	2	820000	\N
+39	Contract	2022-06-16 14:13:39	2022-06-21 16:15:23	285	Contract updated via end date instead of closure date field	Fulfilled	350000	2022-06-16	2	820000	\N
+14	Contract	2022-06-01 16:12:15.085	2022-06-21 16:16:17	259	Contract updated via end date instead of closure date field	Fulfilled	300000	2022-06-01	2	820000	\N
+40	Salary Order	2022-06-22 10:23:59	2022-06-23 12:00:46.252	1969	Incorrect salary is entered in contract. Salary needs to be regenerated after correction in record.	Fulfilled	350000	2022-06-22	1	800000	\N
+47	Contract	2022-07-27 12:48:40	2022-07-27 14:22:06	241	Div requested to make the change afte revising attendance record	Fulfilled	350000	2022-07-27	2	820000	\N
+11	Contract	2022-06-01 16:12:03	2022-06-21 15:58:44	194	Incorrect contract renewal.	Cancelled	350000	2022-06-01	2	820000	\N
+15	Contract	2022-06-01 16:12:18.274	2022-06-21 16:03:58	285	Incorrect contract renewal.	Cancelled	350000	2022-06-01	2	820000	\N
+32	Contract	2022-06-16 12:10:49	2022-06-21 16:04:06	259	Previously contract updated via end date instead of closure date entry	Cancelled	300000	2022-06-16	2	820000	\N
+34	Contract	2022-06-16 13:44:00	2022-06-21 16:08:17	364	For settlement of approved contract	Fulfilled	350000	2022-06-16	2	820000	\N
+35	Contract	2022-06-16 13:48:59	2022-06-21 16:09:12	221	For settlement of approved contracts	Fulfilled	350000	2022-06-16	2	820000	\N
+36	Contract	2022-06-16 13:54:33	2022-06-21 16:10:23	194	Contract updated via end date field instead of closure date field	Fulfilled	350000	2022-06-16	2	820000	\N
+44	Purchase Case	2022-07-26 13:28:42	2022-06-27 17:01:12	843	Company Name update in Quotation	Fulfilled	300000	2022-07-26	1	300000	\N
+54	Salary Order	2022-08-04 11:51:27	2022-08-05 11:33:40.06	2065	Resignation on 6th July 22	Fulfilled	350000	2022-08-04	1	350000	\N
+53	Salary Order	2022-08-04 11:50:09	2022-08-05 11:33:18.221	2058	Resignation on 6th July 2022	Fulfilled	350000	2022-08-04	1	350000	\N
+57	Funding	2022-08-17 14:47:14	2022-08-22 14:59:43	83	Project milestone payment has been corrected to reconcile with the data shared by M/s MTSS.	Fulfilled	200000	2022-08-17	2	800000	NIU-HZ
+51	Salary Order	2022-08-04 11:43:44	2022-08-15 14:40:18	838	Resignation 6th July 2022	Cancelled	350000	2022-08-04	1	350000	\N
+50	Salary Order	2022-08-04 11:34:04	2022-08-15 14:40:28	838	resignation on 6th July 2022	Cancelled	350000	2022-08-04	1	350000	\N
+49	Salary Order	2022-08-04 11:44:06	2022-08-15 14:40:36	1040	Resigned on 6th July 2022	Cancelled	350000	2022-08-04	1	350000	\N
+58	Allocation	2022-08-18 14:30:02	2022-08-22 15:00:10	23	Total allocation of the project is amended to reconcile with the data shared by MTSS.	Fulfilled	200000	2022-08-18	2	800000	MET
+59	Allocation	2022-08-18 14:38:09	2022-08-22 15:00:36	4	Total allocation/ NRDI committed amount is amended to reconcile with MTSS data.	Fulfilled	200000	2022-08-18	2	800000	CDS
+60	Allocation	2022-08-19 10:32:20	2022-08-22 15:01:02	11	Total allocated amount/ NRDI committed amount has been amended to reconcile with MTSS data.	Fulfilled	200000	2022-08-19	2	800000	NIU-HS
+25	Payment	2022-06-15 09:29:07	2022-06-16 15:37:35	2660	GST was not included in calculation	Fulfilled	350000	2022-06-15	3	800000	\N
+63	Allocation	2022-08-19 10:48:28	2022-09-26 09:29:20	16	Total allocated amount has been amended to reconcile with MTSS data.	Cancelled	350000	2022-08-19	2	800000	RUL
+55	Purchase Case	2022-08-15 14:45:58	2022-08-22 11:16:35	674	GST calculated by the system on total amount is incorrect. Correct 13% SRB on total amount is Rs. 29,372/-	Fulfilled	350000	2022-08-15	1	350000	\N
+61	Allocation	2022-08-19 10:34:49	2022-08-22 15:01:24	5	Total allocated amount/ NRDI committed amount has been amended to reconcile with MTSS data.	Fulfilled	200000	2022-08-19	2	800000	NIU-HZ
+65	Allocation	2022-08-22 09:21:30	2022-08-25 11:24:20	16	total allocated amount has been amended to reconcile with MTSS data.	Fulfilled	350000	2022-08-22	2	800000	RUL
+69	Purchase Case	2022-08-23 12:55:32	2022-08-25 11:26:12	863	GST calculated by the system is not correct.	Fulfilled	350000	2022-08-23	1	350000	\N
+67	Funding	2022-08-22 10:15:22	2022-08-25 11:26:42	4	NRDI committed amount has been amended to reconcile with MTSS data.	Fulfilled	200000	2022-08-22	2	800000	DVBS
+68	Funding	2022-08-22 10:16:52	2022-08-25 11:26:57	6	NRDI committed amount has been amended to reconcile with MTSS data.	Fulfilled	200000	2022-08-22	2	800000	DVBS
+66	Funding	2022-08-22 10:13:51	2022-08-25 11:27:08	2	NRDI committed amount has been amended to reconcile with MTSS data.	Fulfilled	200000	2022-08-22	2	800000	DVBS
+70	Purchase Case	2022-08-26 14:11:34	2022-08-30 09:35:31	706	GST Amount calculated by the system is wrong.	Fulfilled	350000	2022-08-26	1	350000	\N
+33	Contract	2022-06-16 12:49:05	2022-06-21 16:04:57	374	Removal was necessary for the proper working of other contracts	Fulfilled	350000	2022-06-16	3	820000	\N
+27	Payment	2022-06-15 10:29:25	2022-06-16 15:38:03	2661	GST was not included in final payment	Fulfilled	350000	2022-06-15	3	800000	\N
+28	Payment	2022-06-15 10:30:54	2022-06-16 15:38:39	2662	GST was not included in final payment	Fulfilled	350000	2022-06-15	3	800000	\N
+29	Payment	2022-06-15 10:31:54	2022-06-16 15:38:59	2663	GST was not included in final payment	Fulfilled	350000	2022-06-15	3	800000	\N
+31	Payment	2022-06-15 14:15:32	2022-06-16 15:39:12	2665	out of two invoices, payment against one invoice was not entered.	Fulfilled	200000	2022-06-15	3	800000	\N
+64	Payment	2022-08-19 10:53:42	2022-08-22 11:17:29	2587	Expenditure against Purchase Case 706 is to be amended as PKR 326,391, in order to reconcile with data shared by MTSS.	Fulfilled	350000	2022-08-19	3	800000	\N
+62	Payment	2022-08-19 10:39:53	2022-08-22 15:01:51	2419	Amount is to be amended as PKR 47,212 instead of PKR 47,121 in order to reconcile with MTSS expenditure.	Fulfilled	200000	2022-08-19	3	800000	\N
+71	Contract	2022-09-02 12:34:02	2022-09-02 03:48:28	407	As project head was inappropriately selected	Fulfilled	350000	2022-09-02	2	820000	\N
+72	Purchase Case	2022-09-07 12:56:23	2022-09-09 09:48:06	742	GST is incorrect	Fulfilled	350000	2022-09-07	2	350000	\N
+74	Purchase Case	2022-09-12 11:42:53	2022-09-15 10:01:49	693	Terms were different in the quotation	Fulfilled	200000	2022-09-12	2	200000	\N
+73	Contract	2022-09-09 14:34:44	2022-09-20 11:33:53	408	Reviewed value entry in RDWIS	Fulfilled	350000	2022-09-09	2	820000	\N
+75	Purchase Case	2022-09-15 12:44:34	2022-09-20 11:34:44	837	Amount adjustment	Fulfilled	350000	2022-09-15	1	350000	\N
+85	Purchase Case	2022-09-23 10:14:45	2022-09-23 15:37:10	464	GST correction	Cancelled	350000	2022-09-23	2	350000	\N
+84	Purchase Case	2022-09-23 09:32:31	2022-09-23 15:37:17	458	GST correction	Cancelled	350000	2022-09-23	2	350000	\N
+80	Purchase Case	2022-09-22 11:36:56	2022-09-22 13:57:52	574	GST correction	Fulfilled	350000	2022-09-22	2	350000	\N
+79	Purchase Case	2022-09-22 11:34:10	2022-09-22 13:59:07	666	13% sindh sales tax added instead of GST	Fulfilled	350000	2022-09-22	2	350000	\N
+78	Purchase Case	2022-09-22 11:30:53	2022-09-22 13:59:37	602	GST correction	Fulfilled	350000	2022-09-22	2	350000	\N
+77	Funding	2022-09-21 13:48:41	2022-09-22 14:00:29	90	Reconciliation with MTSS	Fulfilled	350000	2022-09-21	2	350000	RAV-I
+83	Purchase Case	2022-09-23 09:31:44	2022-09-23 15:37:23	465	GST correcion	Cancelled	350000	2022-09-23	2	350000	\N
+82	Purchase Case	2022-09-23 09:30:28	2022-09-23 15:37:27	428	GST correction	Cancelled	350000	2022-09-23	2	350000	\N
+81	Purchase Case	2022-09-23 09:29:13	2022-09-23 15:37:31	333	GST correction	Cancelled	350000	2022-09-23	2	350000	\N
+86	Purchase Case	2022-10-17 09:34:16	2022-10-20 12:35:07	745	GST calculated by the system is incorrect	Fulfilled	350000	2022-10-17	2	350000	\N
+88	Contract	2022-10-26 09:58:40	2022-10-26 14:06:04	429	Changes are requested after considering the date of joining	Fulfilled	300000	2022-10-26	2	300000	\N
+87	Contract	2022-10-26 09:56:52	2022-10-26 14:06:32	428	Changes are requested after considering the date of joining	Fulfilled	300000	2022-10-26	2	300000	\N
+90	Employee	2022-10-28 09:19:31	2022-10-28 15:27:02	14-22-09-6968	After reviewing the date of joining	Fulfilled	300000	2022-10-28	2	300000	\N
+92	Employee	2022-10-28 09:26:13	2022-10-28 15:27:25	14-22-09-4823	After reviewing the date of joining	Fulfilled	300000	2022-10-28	2	300000	\N
+96	Salary Order	2022-12-01 14:21:39	2022-12-05 09:28:25	2443	As informed by M/s MTSS, funds are not available in DVBS project for provision of salary.	Fulfilled	840000	2022-12-01	1	800000	\N
+95	Purchase Case	2022-11-24 12:40:26	2022-11-25 09:01:18	986	60% and 10% phases combined because Contractor transported material and work is in progress at SVDC construction site.	Fulfilled	300000	2022-11-24	2	300000	\N
+94	Purchase Case	2022-11-24 12:38:18	2022-11-25 09:01:36	1012	60% and 10% phases combined because Contractor transported material and work is in progress at SVDC construction site.	Fulfilled	300000	2022-11-24	2	300000	\N
+97	Purchase Case	2022-12-07 10:16:07	2022-12-08 12:06:03	1036	Actual air fare (Rs. 35,180/- per person) was less than the approximate approved amount (Rs. 37,980/-). Copy of air tickets are attached.	Fulfilled	350000	2022-12-07	1	350000	\N
+108	Purchase Case	2023-02-24 09:56:54.975	2023-02-24 12:28:18.635	1100	The purchase order will be cancelled and salary will be paid through salary order.	Fulfilled	840000	2023-02-24	1	840000	\N
+106	Contract	2022-12-30 10:12:40	2023-04-14 13:14:59.556	383	Selection of Project Head by Finance Department for Personnel providing Central Services	Fulfilled	800000	2022-12-30	2	820000	\N
+111	Purchase Case	2023-03-07 13:27:37.137	2023-03-09 14:38:15.203	1101	Government has increased GST from 17% to 18%	Fulfilled	350000	2023-03-07	2	350000	\N
+109	Purchase Case	2023-03-02 12:56:49.758	2023-03-07 10:39:47.696	1102	Government has increased gst from 17% to 18%	Fulfilled	350000	2023-03-02	2	350000	\N
+110	Purchase Case	2023-03-06 10:33:18.869	2023-03-09 14:37:46.41	1103	Changes in terms and conditions	Fulfilled	300000	2023-03-06	2	300000	\N
+135	Salary Order	2023-03-24 08:48:45.414	2023-03-27 10:46:18.708	2759	Salary of individual is currently being deducted from project HR instead of CSRF HR.Salary is being reverted to make necessary amendments for deduction from CSRF HR.	Fulfilled	840000	2023-03-24	1	800000	\N
+113	Purchase Case	2023-03-14 11:13:54.068	2023-03-15 09:04:43.867	1106	Increase in GST	Fulfilled	300000	2023-03-14	2	300000	\N
+93	Contract	\N	2023-05-29 10:36:32.504	431	The contract end date is correct	Cancelled	840000	2023-04-14	2	820000	\N
+114	Purchase Case	2023-03-16 09:59:13.058	2023-03-27 13:03:55.616	1047	GST has been increased to 18%	Fulfilled	350000	2023-03-16	2	350000	\N
+136	Purchase Case	2023-03-28 08:54:49.483	2023-03-29 13:10:10.638	1083	GST increased from 17% to 18%	Fulfilled	350000	2023-03-28	2	350000	\N
+112	Payment	2023-03-13 12:04:22.3	2023-03-20 14:48:03.129	3745	The case is being reverted to exclude GST information of expenditure against case ID 1093 which is automatically calculated by software. Memo has been forwarded to Manager IS dated 10 Feb 23 for calculation of project expenses without GST.	Fulfilled	200000	2023-03-13	1	800000	\N
+117	Salary Order	2023-03-20 14:50:18.271	2023-03-21 13:04:51.026	2699	Salary of individual is currently being deducted from project HR instead of CSRF HR.Salary is being reverted to make necessary amendments for deduction from CSRF HR.	Fulfilled	840000	2023-03-20	1	800000	\N
+118	Salary Order	2023-03-20 14:54:25.752	2023-03-21 13:05:05.532	2759	Salary of individual is currently being deducted from project HR instead of CSRF HR.Salary is being reverted to make necessary amendments for deduction from CSRF HR.	Fulfilled	840000	2023-03-20	1	800000	\N
+119	Account	2023-03-20 14:58:16.314	2023-03-21 13:05:19.103	200012	As informed by MTSS, the project expenditures will be made without GST. Therefore reversal is being processed in RDWIS to change status from with GST to without GST.	Fulfilled	200000	2023-03-20	2	800000	DADSS
+139	Payment	2023-04-06 11:13:52.485	2023-04-07 12:30:54.721	3370	Payment to be made from Misc head. Currently showing in Equipment head.	Fulfilled	350000	2023-04-06	1	800000	\N
+133	Allocation	2023-03-22 10:27:09.671	2023-03-27 10:46:02.671	27	METLP Order No. 100 is being merged with METLP Order No. 79 as desired by PI.	Fulfilled	200000	2023-03-22	2	800000	METLP
+134	Salary Order	2023-03-24 08:47:35.198	2023-03-27 10:46:12.274	2699	Salary of individual is currently being deducted from project HR instead of CSRF HR.Salary is being reverted to make necessary amendments for deduction from CSRF HR.	Fulfilled	840000	2023-03-24	1	800000	\N
+180	Allocation	2023-08-28 10:46:59.956	2023-09-08 21:46:06.12	17	To make the account subheads zero	Cancelled	200000	2023-08-28	2	200000	ELINT-II
+140	Allocation	2023-04-26 11:25:01.788	2023-04-27 09:24:31.218	26	Additional approved amount of PKR 18,920,000/- to be added in existing project fund, as confirmed by PI.	Fulfilled	350000	2023-04-26	2	800000	RAV-I
+141	Payment	2023-05-09 09:45:09.908	2023-05-11 08:52:00.119	3765	GST of case has been included in expenditure as SRB by MTSS, hence GST to be included in total amount.	Fulfilled	350000	2023-05-09	1	800000	\N
+144	Payment	2023-05-12 09:10:09.466	2023-05-16 13:22:54.06	3974	Case needs to be financially opened in software since final payment is pending.	Fulfilled	300000	2023-05-12	1	800000	\N
+156	Funding	\N	2023-05-29 10:39:40.964	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+155	Funding	\N	2023-05-29 10:39:41.87	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+145	Contract	2023-05-19 09:03:15.653	2023-05-23 12:38:18.249	376	Due to the revised data entry policy in RDWIS for CSRF employees	Fulfilled	840000	2023-05-19	2	820000	\N
+146	Contract	2023-05-19 09:04:42.717	2023-05-23 12:38:32.009	375	Due to the revised data entry policy in RDWIS for CSRF employees	Fulfilled	880000	2023-05-19	2	820000	\N
+154	Funding	\N	2023-05-29 10:39:42.776	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+153	Funding	\N	2023-05-29 10:39:43.698	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+161	Funding	2023-05-23 14:59:14.533	2023-05-25 12:38:14.064	112	Funds against M4 have been added twice in software. Data removal case is being generated for removal of redundant entry.	Fulfilled	350000	2023-05-23	3	800000	SUR
+163	Payment	2023-05-24 14:25:57.326	2023-05-29 10:01:41.82	3965	Expenditure does not reconcile with fund status recived from MTSS.Case is being reverted to adjust the amount iaw MTSS data.	Fulfilled	200000	2023-05-24	1	800000	\N
+152	Funding	\N	2023-05-29 10:39:44.557	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+24	Payment	\N	2023-05-29 10:33:43.407	2660	\N	Cancelled	350000	2023-05-29	3	800000	\N
+162	Payment	\N	2023-05-29 10:39:35.684	3965	\N	Cancelled	200000	2023-05-24	1	800000	\N
+160	Funding	\N	2023-05-29 10:39:36.965	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+159	Funding	\N	2023-05-29 10:39:37.887	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+158	Funding	\N	2023-05-29 10:39:39.09	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+157	Funding	\N	2023-05-29 10:39:40.011	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+151	Funding	\N	2023-05-29 10:39:45.416	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+150	Funding	\N	2023-05-29 10:39:46.278	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+149	Funding	\N	2023-05-29 10:39:47.184	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+148	Funding	\N	2023-05-29 10:39:49.106	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+147	Funding	\N	2023-05-29 10:39:50.043	112	\N	Cancelled	350000	2023-05-23	3	800000	SUR
+143	Payment	\N	2023-05-29 10:36:20.053	3974	\N	Cancelled	300000	2023-05-11	1	800000	\N
+142	Commitment	\N	2023-05-29 10:36:26.911	3311	\N	Cancelled	300000	2023-05-11	1	800000	\N
+138	Commitment	\N	2023-05-29 10:36:30.785	3230	\N	Cancelled	350000	2023-05-11	1	800000	\N
+137	Payment	\N	2023-05-29 10:36:33.629	3370	\N	Cancelled	350000	2023-04-07	1	800000	\N
+116	Account	2023-03-20 14:30:27.528	2023-05-29 10:36:34.831	200012	its informed by MTSS,The project expenditures will be made without GST.Therefore reversed is being processed in RDWIS to charge status from 'with GST' to 'without GST'.	Cancelled	200000	2023-03-20	2	800000	DADSS
+105	Purchase Case	\N	2023-05-29 10:36:36.019	1016	\N	Cancelled	350000	2023-03-20	1	350000	\N
+115	Purchase Case	2023-03-16 10:04:04.375	2023-05-29 10:36:36.956	1048	GST has been increased to 18%	Cancelled	350000	2023-03-16	2	350000	\N
+99	Purchase Case	\N	2023-05-29 10:36:37.955	105	Missing items	Cancelled	300000	2023-03-15	1	300000	\N
+107	Contract	2022-12-30 10:15:00	2023-05-29 10:36:38.924	375	Selection of Project Head by Finance Department for Personnel providing Central Services	Cancelled	880000	2022-12-30	2	820000	\N
+98	Purchase Case	\N	2023-05-29 10:36:40.033	105	Missing	Cancelled	300000	2022-12-09	2	300000	\N
+46	Purchase Case	\N	2023-05-29 10:36:41.22	843	\N	Cancelled	300000	2022-12-09	1	300000	\N
+104	Purchase Case	2022-12-07 09:06:24	2023-05-29 10:36:42.548	130	Missing items	Cancelled	300000	2022-12-07	1	300000	\N
+45	Purchase Case	\N	2023-05-29 10:36:43.626	843	\N	Cancelled	300000	2022-12-07	1	300000	\N
+103	Purchase Case	2022-12-06 15:52:23	2023-05-29 10:36:44.86	357	Missing items	Cancelled	300000	2022-12-06	1	300000	\N
+102	Purchase Case	2022-12-06 15:51:07	2023-05-29 10:36:46.376	356	Missing items	Cancelled	300000	2022-12-06	1	300000	\N
+101	Purchase Case	2022-12-06 15:40:21	2023-05-29 10:36:47.656	286	Missing items	Cancelled	300000	2022-12-06	1	300000	\N
+100	Purchase Case	2022-12-06 15:34:50	2023-05-29 10:36:48.953	105	Missing items	Cancelled	300000	2022-12-06	1	300000	\N
+89	Contract	\N	2023-05-29 10:36:50.25	429	\N	Cancelled	300000	2022-11-28	2	300000	\N
+30	Payment	\N	2023-05-29 10:36:51.531	2665	due to one invoice missing uploded it now	Cancelled	200000	2022-11-28	3	800000	\N
+26	Payment	\N	2023-05-29 10:36:52.64	2661	\N	Cancelled	350000	2022-11-28	3	800000	\N
+91	Employee	2022-10-28 09:21:00	2023-05-29 10:36:53.858	14-22-09-4823	After reviewing the date of joining	Cancelled	300000	2022-10-28	2	300000	\N
+56	Purchase Case	\N	2023-05-29 10:36:55.061	674	\N	Cancelled	350000	2022-09-27	1	350000	\N
+52	Salary Order	\N	2023-05-29 10:36:57.232	838	\N	Cancelled	350000	2022-09-27	1	350000	\N
+48	Salary Order	\N	2023-05-29 10:36:58.341	1040	\N	Cancelled	350000	2022-09-27	1	350000	\N
+76	Funding	2022-09-19 14:55:06	2023-05-29 10:36:59.701	90	NRDI share of the project is amended to reconcile with data shared by M/s MTSS.	Cancelled	350000	2022-09-19	2	800000	RAV-I
+177	Salary Order	2023-08-11 11:30:27.771	2023-08-22 10:20:56.85	3015	DADSS project has been cancelled and no payments were processed from DADSS since May 23. Therefore, salary order is being reversed to adjust salary payment in software for the month of May 23 from ELINT project. (Note: Actual salary was already paid)	Fulfilled	200000	2023-08-11	1	800000	\N
+178	Allocation	2023-08-11 12:22:47.189	2023-08-22 13:33:34.24	43	Loan on the project is Rs. 1,433,044. 50% of loan amount i.e. Rs. 716,522 is being added in CSRF fund of project as per MD R&D instructions and subsequent DG NRDI approval.	Fulfilled	450000	2023-08-11	2	800000	25GUN
+165	Purchase Case	2023-06-15 11:53:29.632	2023-06-19 09:18:06.68	1150	Vendor has delivered the item thus 100% payment needs to be done	Fulfilled	350000	2023-06-15	2	350000	\N
+164	Salary Order	2023-06-06 10:09:47.037	2023-07-18 11:28:40.234	2951	As per MTSS email dated 31 May 23,individual will not be paid from DADSS project.Therefore, salary case is being reversed to generate salary from ELINT project.	Fulfilled	200000	2023-06-06	1	800000	\N
+168	Salary Order	2023-07-17 09:04:31.758	2023-07-18 15:30:53.186	2894	Salary reversal is being generated since software is showing it as Loan. Need to be shifted to CSRF.	Fulfilled	880000	2023-07-17	1	800000	\N
+167	Salary Order	2023-07-17 09:02:56.868	2023-07-18 15:30:57.864	2960	Salary reversal is being generated since software is showing it as Loan. Need to be shifted to CSRF.	Fulfilled	880000	2023-07-17	1	800000	\N
+169	Allocation	2023-07-25 10:14:24.949	2023-08-29 14:27:42.862	27	Project allocation is being reconciled as received from MTSS.	Fulfilled	200000	2023-07-25	2	800000	METLP
+176	Funding	2023-07-27 09:11:10.514	2023-09-08 21:47:55.968	120	Milestone payment as received from MTSS is being reversed to amend MS payment as per Sensors memo Dir Sensor/Memo/713 dated 24 Jul 23. However, reconciliation of MS data between NRDI and MTSS will be required in future.	Cancelled	350000	2023-07-27	2	800000	LDL
+175	Funding	2023-07-27 09:08:59.886	2023-09-08 21:48:24.486	119	Milestone payment as received from MTSS is being reversed to amend MS payment as per Sensors memo Dir Sensor/Memo/713 dated 24 Jul 23. However, reconciliation of MS data between NRDI and MTSS will be required in future.	Cancelled	350000	2023-07-27	2	800000	LRFA
+174	Funding	2023-07-27 09:05:48.459	2023-09-08 21:48:33.742	118	Milestone payment as received from MTSS is being reversed to amend MS payment as per Sensors memo Dir Sensor/Memo/713 dated 24 Jul 23. However, reconciliation of MS data between NRDI and MTSS will be required in future.	Cancelled	350000	2023-07-27	2	800000	L-Pro
+179	Employee	2023-08-21 13:09:28.687	2023-09-08 21:49:37.759	14-22-09-4823	 Code Correction for NWS Employee	Cancelled	300000	2023-08-21	2	820000	\N
+181	Salary Order	2023-09-07 11:18:27.316	2023-09-25 15:51:09.764	3025	Salary for the month of Jul 23 is being reversed as individual was promoted to RO from internee in the month of Aug 23 but with effective date as 07 Jul 23. Therefore, arrears are to be provided to individual as slaray of internee was given for Jul 23.	Fulfilled	200000	2023-09-07	1	800000	\N
+182	Contract	2023-10-12 12:08:27.151	2023-10-12 15:15:10.588	383	Entry of correct date as per MD instruction	Fulfilled	800000	2023-10-12	2	820000	\N
+185	Allocation	2023-10-17 09:51:20.189	2023-10-31 11:52:03.373	21	Remaing project fund is being shifted to CSRF apropos RAVEN-1 loan Min 20 of purchase case 1179	Fulfilled	350000	2023-10-17	2	800000	MC
+184	Allocation	2023-10-17 09:49:05.333	2023-10-31 11:52:32.446	22	Remaining project fund is being shifted to CSRF apropos RAVEN-1 loan Min 20 of purchase case 1179	Fulfilled	350000	2023-10-17	2	800000	UCAV
+199	Purchase Case	2023-10-26 16:58:14.725	2023-10-26 17:18:01.109	1193	PI didn’t sign the case	Fulfilled	840000	2023-10-26	1	840000	\N
+198	Purchase Case	2023-10-26 16:57:58.133	2023-10-26 17:18:07.034	1192	PI didn’t sign the case	Fulfilled	840000	2023-10-26	1	840000	\N
+197	Purchase Case	2023-10-26 16:57:41.55	2023-10-26 17:18:12.771	1188	PI didn’t sign the case	Fulfilled	840000	2023-10-26	1	840000	\N
+196	Purchase Case	2023-10-26 16:57:11.791	2023-10-26 17:18:19.145	1187	PI didn’t sign the case	Fulfilled	840000	2023-10-26	1	840000	\N
+210	Purchase Case	2023-12-05 11:21:22.479	2023-12-06 11:57:31.687	322	The expenditure was done for EH project. The purchase case has to be corrected accordingly.	Fulfilled	350000	2023-12-05	1	350000	\N
+195	Purchase Case	2023-10-26 16:56:08.702	2023-10-26 17:18:24.649	1186	PI didn’t sign the case	Fulfilled	840000	2023-10-26	1	840000	\N
+206	Purchase Case	2023-11-29 12:41:23.248	2023-11-29 13:51:44.79	1322	Firm name not entered in the case	Fulfilled	200000	2023-11-29	1	200000	\N
+193	Allocation	2023-10-19 10:56:48.722	2023-10-23 10:37:49.906	45	Manager IS salaries are being shifted to CSRF as RAVEN-I loan return vide Min-20 (Purchase case 1179)	Fulfilled	350000	2023-10-19	2	800000	HH1
+188	Allocation	2023-10-17 12:08:28.165	2023-10-23 11:16:24.173	24	Funds are being shifted to CSRF as RAVEN-I loan return vide Min-20 (Purchase case 1179)	Fulfilled	350000	2023-10-17	2	800000	RAV-II
+190	Allocation	2023-10-18 10:42:16.097	2023-10-23 11:16:37.697	8	Balance funds of the project are being shifted to CSRF as part of RAVEN-I loan settlement plan apropos Min 20 (Purchase case 1179)	Fulfilled	350000	2023-10-18	2	800000	EH
+191	Allocation	2023-10-18 12:04:28.865	2023-10-23 11:16:48.328	20	Contract value is being amended after receipt of additional GST PKR 27,350/- as received vide MTSS letter No. 177 dated 11 Oct 23 (Encl-VFD)	Fulfilled	350000	2023-10-18	2	800000	VFD
+192	Allocation	2023-10-18 12:17:54.292	2023-10-23 11:16:59.04	26	Contract value is being amended after receipt of additional GST PKR 338,000/- as received vide MTSS letter No. 177 dated 11 Oct 23 (Encl-RAV-I)	Fulfilled	350000	2023-10-18	2	800000	RAV-I
+204	Funding	2023-11-17 10:10:45.479	2023-11-27 14:34:59.614	139	MS-1 payment received in Oct 23 was erroneously entered as PKR 6,899,175 instead of PKR 6,889,175.	Fulfilled	350000	2023-11-17	2	800000	HH1
+203	Payment	2023-11-15 11:12:53.424	2023-11-27 14:35:43.895	4504	Duplicate entry done in system as the system was not showing payment history.	Fulfilled	350000	2023-11-15	1	800000	\N
+205	Commitment	2023-11-29 10:05:15.156	2023-11-29 12:11:01.751	4475	Name of firm is to be mentioned in purchase case	Fulfilled	200000	2023-11-29	1	800000	\N
+187	Allocation	2023-10-17 12:00:03.738	2023-10-31 11:02:20.748	45	Manager IS salaries are being shifted to CSRF as RAVEN-I loan return vide Min-20 (Purchase case 1179)	Cancelled	350000	2023-10-17	2	800000	HH1
+186	Allocation	2023-10-17 10:07:40.125	2023-10-31 11:02:29.04	24	Amount of PKR 4,381,237/- is being shifted to CSRF apropos RAVEN-1 loan Min 20 of purchase case 1179	Cancelled	350000	2023-10-17	2	800000	RAV-II
+183	Allocation	2023-10-17 09:44:17.875	2023-10-31 11:02:34.225	45	Salary of Manager IS is being shifted to CSRF apropos RAVEN-1 loan Min 20 of purchase case 1179	Cancelled	350000	2023-10-17	2	800000	HH1
+200	Allocation	2023-10-27 09:56:23.442	2023-10-31 11:51:47.88	32	Funds amounting Rs. 350,000 for Dir Fin salary are being shifted to CSRF apropos RAVEN-1 loan Min 20 of purchase case 1179	Fulfilled	350000	2023-10-27	2	800000	LDL
+207	Purchase Case	2023-12-05 10:49:30.894	2023-12-06 11:56:53.038	317	The expenditure was done for EH project. The purchase case has to be corrected accordingly.	Fulfilled	350000	2023-12-05	1	350000	\N
+208	Purchase Case	2023-12-05 11:16:42.642	2023-12-06 11:57:08.071	320	The expenditure was done for EH project. The purchase case has to be corrected accordingly.	Fulfilled	350000	2023-12-05	1	350000	\N
+209	Purchase Case	2023-12-05 11:19:57.871	2023-12-06 11:57:19.622	321	The expenditure was done for EH project. The purchase case has to be corrected accordingly.	Fulfilled	350000	2023-12-05	1	350000	\N
+211	Purchase Case	2023-12-05 11:23:45.509	2023-12-06 11:57:42.043	403	The expenditure was done for EH project. The purchase case has to be corrected accordingly.	Fulfilled	350000	2023-12-05	1	350000	\N
+212	Purchase Case	2023-12-05 11:24:47.814	2023-12-06 11:57:53.516	323	The expenditure was done for EH project. The purchase case has to be corrected accordingly.	Fulfilled	350000	2023-12-05	1	350000	\N
+213	Employee	2024-01-09 10:55:13.391	2024-01-16 11:23:48.792	11-23-12-9214	13 is the correct ID for NWS	Cancelled	200000	2024-01-09	2	820000	\N
+217	Purchase Case	2024-01-24 12:01:07.774	2024-02-01 09:48:22.044	1170	Change of Head from Sensor Division to CSRF as this amount is approved as EH loan return to RGA	Fulfilled	350000	2024-01-24	1	350000	\N
+214	Employee	2024-01-09 11:29:20.626	2024-01-16 11:23:58.352	11-23-12-9214	13 is the correct ID for NWS	Fulfilled	300000	2024-01-09	2	820000	\N
+220	Allocation	2024-01-29 10:31:22.69	2024-01-31 14:28:41.13	29	Misc amount is being amended to correct project financials, i.a.w. information received from/ verified by Sensors Division dated 26 Jan 24.	Fulfilled	350000	2024-01-29	2	800000	BSE-D
+215	Purchase Case	\N	\N	1170	\N	Draft	350000	2024-02-27	1	350000	\N
+218	Purchase Case	\N	\N	1170	\N	Draft	350000	2024-04-01	1	350000	\N
+202	Payment	2023-11-15 08:55:52.038	2024-01-31 14:30:35.927	4315	50% balance payment of case 1170 has been returned to project account,since vender did not complete the job.	Cancelled	350000	2023-11-15	1	800000	\N
+219	Allocation	2024-01-26 09:02:27.556	2024-01-31 14:27:57.902	24	Additional GST has been added in contract amount/ MTSS share	Fulfilled	350000	2024-01-26	2	800000	RAV-II
+216	Purchase Case	\N	\N	1170	\N	Draft	350000	2024-02-27	1	350000	\N
+222	Commitment	2024-02-12 13:53:29.204	2024-02-13 14:11:39.187	4726	Terms and condtions of purchase case needs to be amended as "100% payment after delivery" as per recent discussion of MTSS with vendor.	Fulfilled	350000	2024-02-12	1	800000	\N
+240	Purchase Case	2024-04-04 10:42:15.186	2024-04-08 10:32:39.466	1394	Name of Electromech entered by mistake	Fulfilled	200000	2024-04-04	2	200000	\N
+237	Allocation	2024-04-02 09:58:58.551	2024-04-08 10:33:25.859	5	Rs. 50,000/- have been shifted to Equipment head from CSRF head as per approval received vide Para 12 of NIU-HZ Min-23.	Fulfilled	200000	2024-04-02	2	800000	NIU-HZ
+226	Purchase Case	2024-02-16 10:01:28.564	2024-02-19 14:44:24.922	1369	As request generated by M/s MTSS	Fulfilled	350000	2024-02-16	2	350000	\N
+238	Allocation	2024-04-02 10:04:04.687	2024-04-08 10:33:58.098	39	Rs. 50,000/- have been shifted from Project share to CSRF head as delineated vide Para 9 and approved vide Para 12 of NIU-HZ Min-23.	Fulfilled	200000	2024-04-02	2	800000	IGS
+228	Funding	2024-02-21 08:42:09.554	2024-02-26 14:36:56.899	162	Funds received in Jan 24 to be corrected in RDWIS.	Fulfilled	350000	2024-02-21	2	800000	RAV-I
+229	Salary Order	2024-02-26 11:12:22.679	2024-02-26 14:42:38.285	2772	As per loan return plan of Sensors Division, the paid salary of Manager IS for Mar 23 is to be shifted to CSRF head.	Fulfilled	880000	2024-02-26	1	800000	\N
+244	Purchase Case	2024-04-24 11:05:29.045	\N	1394	Firm name entered incorrectly. Same needs to be fixed.	In Process	200000	2024-04-24	1	200000	\N
+227	Funding	2024-02-16 10:25:14.886	2024-04-25 13:51:45.981	162	MS-13 Payment to be amended in RDWIS.	Cancelled	350000	2024-02-16	2	800000	RAV-I
+230	Allocation	2024-02-28 08:50:03.842	2024-03-21 12:20:49.746	36	Project funds to be updated i.a.w. revised Work Order.	Fulfilled	350000	2024-02-28	2	800000	DNF
+224	Allocation	2024-02-16 09:40:59.708	2024-03-21 12:21:00.951	11	Additional GST has been received in Jan 24, which is being adjusted in MTSS share.	Fulfilled	200000	2024-02-16	2	800000	NIU-HS
+232	Allocation	2024-03-15 09:38:04.671	2024-03-21 12:21:07.296	48	Project breakdown is being ammended as requested by Division vide NWS Memo NWS/Memo/7 dated 14 Mar 24	Fulfilled	300000	2024-03-15	2	800000	PAP104
+231	Funding	2024-03-14 10:02:17.869	2024-03-21 12:21:17.437	166	Funds against MS-7 have been amended to reconcile with accounts adjustment carried out by MTSS in Feb 24	Fulfilled	350000	2024-03-14	2	800000	BSE-D
+233	Allocation	2024-03-15 10:13:52.06	2024-03-21 12:21:25.641	46	Rs. 6,000,000/- to be shifted from Eq head to HR head after receipt of DG NRDI approval against Min-37.	Fulfilled	350000	2024-03-15	2	800000	VFD2
+234	Allocation	2024-03-18 09:53:49.678	2024-03-21 12:21:38.304	15	Rs.106,250/ are being shifted from Misc head to CSRF as requested by Div vide Dir Sensors/Memo dated 13 Mar 24.  However, complete loan of Rs.212,500/ as per loan plan is not being shifted to CSRF, which may require case reversal by Division.	Fulfilled	350000	2024-03-18	2	800000	SUR
+245	Purchase Case	2024-04-24 11:20:43.879	2024-04-26 11:03:27.364	1394	Firm entered incorrectly, needs to be corrected.	Fulfilled	200000	2024-04-24	1	200000	\N
+235	Contract	2024-03-29 09:21:11.805	2024-03-29 12:13:28.591	648	Grant of Salary Increment	Fulfilled	350000	2024-03-29	2	820000	\N
+236	Allocation	2024-03-29 10:49:22.286	2024-04-04 10:38:50.837	50	RDW share and MTSS share have been reconciled as received from MTSS	Fulfilled	200000	2024-03-29	2	800000	NDB
+246	Funding	2024-04-30 09:46:49.14	2024-05-08 09:54:56.198	77	Received CSRF amount is being shifted to received Project share since project CSRF has been shifted to IGS project (i.a.w. Para 9 of Min-23 of NIU-HZ)	Fulfilled	200000	2024-04-30	2	800000	NIU-HZ
+247	Funding	2024-06-04 10:09:59.477	\N	150	MS-3 funds have been amended to reconcile with funds data received from MTSS.	In Process	350000	2024-06-04	2	800000	L-PRO
+248	Allocation	2024-06-05 09:20:15.507	2024-06-10 10:25:11.435	43	Rs. 72,034/- are being shifted from HR to Equip head of project as per DG NRDI approval vide Para 12, Min-23 of 25mm Gun project case file.	Fulfilled	450000	2024-06-05	2	800000	25MMGUN
+225	Purchase Case	2024-02-16 09:52:27.374	\N	1369	As per the request generated by M/s MTSS	Under Revision	350000	2024-02-16	2	350000	\N
+223	Purchase Case	2024-02-15 11:11:00.017	\N	1369	As per request generated by M/s MTSS	Under Revision	350000	2024-02-15	2	350000	\N
+249	Allocation	\N	\N	5	\N	Draft	200000	2024-07-01	2	800000	NIU-HZ
+\.
+
+

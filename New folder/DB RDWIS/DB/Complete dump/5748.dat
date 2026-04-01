@@ -1,0 +1,502 @@
+7	Degree	70	MBA - HRM	IBT	4	Years	2016-12-30	19-20-08-8451	3.3	\N	\N
+8	Course	0	Diploma in MS Office	PIM	6	Months	2010-02-15	19-20-08-8451	A	N/A	\N
+18	Course	0	SEMC (WE) (UK)	HMS COLLINGWOOD	10	Months	1998-06-30	15-20-07-3967	75%	\N	Weapon Engineering
+19	Course	0	WEAC	PNS JAUHAR	12	Months	1996-03-30	15-20-07-3967	76%	\N	weapon Engineering
+22	Degree	70	MS Electrical	NUST-PNEC	2	Years	2022-01-31	11-20-04-7131	3.5	\N	Controls
+23	Degree	60	BE Electrical	NUST-PNEC	4	Years	2016-06-06	11-20-04-7131	3.1	\N	Electronics
+24	Degree	35	A Level	Bahria College Karachi	2	Years	2012-08-13	11-20-04-7131	2As	\N	Pre Engineering
+27	Degree	30	O Level	Bahria College Karachi	3	Years	2010-08-12	11-20-04-7131	7As	\N	Science
+28	Course	0	Industrial Automation & Control	The Automators Pvt Limited	1	Months	2018-08-13	11-20-04-7131	A	Nil	PLcs DCS Systems with HMI
+29	Course	0	Electricity Technical Training	POWERCHINA Gansu energy Investment Co. Ltd.	6	Months	2017-04-05	11-20-04-7131	A	Nil	Power Generation
+163	Degree	35	FSc	Bahria College Karsaz	2	Years	2013-06-01	11-19-08-8746	A-1	\N	Pre-Engineering
+169	Degree	30	SSC	St John's School	2	Years	2011-05-01	11-19-08-8746	A-1	\N	Science
+41	Degree	30	O Levels IGCSE	Al Waha Inernational School	2	Years	2009-07-30	11-20-07-4329	85	\N	Science
+42	Degree	35	A Levels CIE	Paksitan International School Jeddah English Section	2	Years	2011-07-30	11-20-07-4329	79	\N	Pre-Engineering
+44	Degree	60	BSC Mechatronics Engineering	University of Wah, Wah Cantt	4	Years	2015-09-30	11-20-07-4329	2.94	\N	Embedded Systems
+47	Course	0	PRO-E 2014	Univerity of Wah ASME	1	Months	2014-08-08	11-20-07-4329	\N	\N	CAD DESIGN
+53	Course	0	SIEMENS PLC	AVACON TECH	2	Months	2018-06-18	11-20-07-4329	\N	\N	PLC
+56	Course	0	SIEMENS SCADA	AVACON TECH	2	Months	2018-06-18	11-20-07-4329	\N	\N	SCADA
+57	Course	0	SIEMENS HMI	AVACON TECH	2	Months	2018-06-18	11-20-07-4329	\N	\N	HMI
+184	Course	0	LabVIEW	NUST-PNEC	1	Months	2017-11-01	11-19-08-8746	Pass	None	None
+140	Course	0	Deep Learning by deeplearning.ai	coursera	5	Months	2018-05-28	11-20-02-2509	Pass	NA	Deep Learning
+145	Course	0	Build a Modern Computer from First Principles: From Nand to Tetris	coursera	2	Months	2020-05-05	11-20-02-2509	Pass	NA	Computer Engineering
+198	Degree	60	Bachelors in Business Administration	Bahria University Karachi	4	Years	2020-07-10	14-20-08-4304	3.6	\N	HRM
+248	Course	0	Huawei Electrical Works	Huawei KSA	2	Days	2018-06-05	16-20-09-3657	Pass	\N	Huawei
+222	Degree	70	MS	PNEC Nust	2	Years	2020-12-31	13-20-05-9453	4/A/1st	\N	Control
+237	Course	0	Control of Mobile Robot	MST	1	Months	2020-08-03	13-20-05-9453	A+	nil	Control
+239	Course	0	Intellegent Machining	UOS	1	Months	2020-09-03	13-20-05-9453	A+	nil	Control
+240	Course	0	Machine Learning	Mathwork	1	Months	2020-10-03	13-20-05-9453	A+	nil	AI
+242	Course	0	Deep Learning	Mathwork	1	Months	2020-10-03	13-20-05-9453	A+	nil	AI
+244	Course	0	Cisco Certified Network Associate CCNA-CyberOps	Cisco	6	Months	2019-01-01	16-20-09-3657	Pass	\N	Cyber Security
+249	Course	0	Huawei Working and Rescuing at Heights	Huawei KSA	2	Days	2018-06-08	16-20-09-3657	Pass	\N	Huawei
+245	Course	0	Advance leadership for Engineers	DTCC KSA	2	Days	2018-01-01	16-20-09-3657	Pass	\N	project management
+246	Course	0	RF Awareness, Material handling and Electrostatic Discharge	DTCC KSA	2	Days	2018-01-05	16-20-09-3657	pass	\N	RF Engineering
+247	Course	0	HSE Introduction	DTCC KSA	2	Days	2018-01-08	16-20-09-3657	Pass	\N	HSE
+250	Course	0	Huawei Project Delivery Awareness	Huawei KSA	2	Days	2018-06-10	16-20-09-3657	Pass	\N	Project management
+251	Course	0	Huawei Risk Assessment	Huawei KSA	2	Days	2018-06-12	16-20-09-3657	Pass	\N	Risk Assessment
+252	Course	0	Microwave Communications	SDC Karachi	3	Months	2012-01-01	16-20-09-3657	Pass	\N	RF & Microwave communications
+253	Course	0	Optical Communications	SDC Karachi	3	Months	2012-03-01	16-20-09-3657	Pass	\N	Fiber Optics Communications
+254	Course	0	Cisco Certified Network Associate CCNA R&S	Cisco	3	Months	2009-09-01	16-20-09-3657	Pass	\N	Computer Networks
+265	Course	0	CCNA	Cisco Academy	3	Months	2017-05-30	16-20-09-6179	PASS	\N	Network Routing
+266	Course	0	Ielts	Sir Faisal	3	Months	2015-09-18	16-20-09-6179	6.5	\N	\N
+262	Degree	70	MS Electrical (Control) Engineering	NUST-PNEC	2	Years	2021-05-05	16-20-09-6179	3.67	\N	\N
+99	Degree	60	BE Electrical Engineer	NUST-PNEC	4	Years	2017-06-02	11-20-02-2509	2.72	\N	Electronics
+219	Degree	60	BE Electronics	Hamdard University	4	Years	2017-07-03	13-20-05-9453	3.76/A+/1st	\N	Electronics
+243	Degree	60	BE Telecommunications Engineering	Iqra University Karachi	4	Years	2010-12-31	16-20-09-3657	2.65	\N	\N
+264	Degree	60	BE Electronics Engineering	SSUET	4	Years	2018-03-31	16-20-09-6179	3.54	\N	\N
+6	Degree	60	BCom	Karachi University	2	Years	2017-09-20	19-20-08-8451	2nd Division	\N	\N
+58	Degree	60	BE Electrical Engineering	Pakistan Navy Engineering College	4	Years	2017-06-01	11-19-09-2301	3.35	\N	Electronics
+162	Degree	60	BE Electrical Engineering	NUST-PNEC	4	Years	2018-06-10	11-19-08-8746	3.93	\N	Electrical
+17	Degree	60	BE	NED	4	Years	1994-04-01	15-20-07-3967	81%	\N	Electrical Engg
+195	Degree	60	BE Mechanical Engineering	NUST-PNEC	4	Years	2019-06-15	13-20-05-2229	3.6	\N	\N
+77	Degree	50	Diploma	Karsaz	4	Years	2015-01-01	11-19-08-9773	1st	\N	\N
+194	Degree	50	Diploma Mechanical	Karsaz	4	Years	2010-01-01	11-19-09-1097	80	\N	mechanical
+60	Degree	35	A Level	St. Patricks High School	2	Years	2013-06-01	11-19-09-2301	78	\N	Pre-Engineering
+91	Degree	35	A Levels	The Lyceum School	2	Years	2013-06-01	11-20-02-2509	82.25	\N	Science
+208	Degree	60	BS Telecommunication Engineering	Sir_Syed_university_of_Engineering_ and_Technology	4	Years	2018-12-31	14-20-08-6716	3.73	\N	telecom
+61	Degree	30	O Level	River Oaks Academy	2	Years	2011-06-01	11-19-09-2301	81	\N	Pre-Engineering
+80	Degree	30	O Level	Beaconhouse School System, Jublie Campus	11	Years	2011-06-01	11-20-02-2509	87.25	\N	Science
+267	Course	0	Industrial Automation	Siemens	1	Months	2020-04-19	16-20-09-6179	Pass	\N	PLC
+270	Course	0	General Electrician	Karachi Shipyard & Enginering Works Ltd	6	Months	2007-01-09	16-20-09-8425	Pass	\N	General Electrical Wiring In ship
+271	Course	0	Optical Fiber	Telecom Foundation Islamabad	3	Months	2009-01-08	16-20-09-8425	Pass	\N	Cable Jointing In ptcl
+274	Degree	70	MS Computer Science	SZABIST, Karachi	2	Years	2009-07-10	21-20-02-4593	3.68	\N	Database Systems
+273	Degree	60	BE Mechanical	PNEC, NUST, Karachi	4	Years	1998-06-06	21-20-02-4593	72.1 %	\N	Mechanical Engineering
+275	Course	0	MESMC	PNS Jauhar	10	Months	2001-06-08	21-20-02-4593	70.4%	\N	\N
+280	Course	0	SAP PM certification	Siemens / abacus Consulting, Karachi	4	Months	2010-09-30	21-20-02-4593	\N	\N	\N
+279	Course	0	Project Management	PIMS, Karachi	0.5	Months	2011-03-28	21-20-02-4593	\N	\N	\N
+290	Course	0	Web designing	PNWA	2	Months	2014-07-01	16-20-09-3410	A	na	na
+304	Degree	30	SSC	Falconhouse Grammar School BSEK	2	Years	2012-06-01	13-20-05-1643	A-ONE	\N	Science
+306	Degree	35	HSC	Adamjee Govt Science College BIEK	2	Years	2014-06-01	13-20-05-1643	A-ONE	\N	Pre-Engineering
+309	Degree	30	\N	B.I.S.E HYD	2	Years	2007-08-30	13-20-05-1661	1	\N	Computer Science
+318	Degree	30	SSC	ARMY PUBLIC SCHOOL COD	2	Years	2007-05-10	13-20-05-0991	B+	\N	Science
+320	Degree	35	HSSC	ST PATRICKS COLLEGE	2	Years	2009-09-12	13-20-05-0991	A	\N	Pre-Engineering
+324	Degree	70	MS	NUST	3	Years	2020-12-30	13-20-05-0991	3.53	\N	Electrical/Control
+333	Degree	60	BA	University of karachi	2	Years	1996-11-04	13-20-08-3103	45%	\N	education,Islamic history
+336	Course	0	Ordnance engineering	PNS karsaz	4	Years	1989-08-17	13-20-08-3103	B	\N	Missile system Maintenance
+337	Course	0	C-802 Missile Maintenance Course	China	5	Months	2003-07-14	13-20-08-3103	A	\N	Missile Weapon System Maintenance
+342	Degree	30	SSC	Karachi Public School Korangi Campus (Safavi)	2	Years	2014-04-30	11-20-10-8913	86	\N	Science
+344	Degree	35	HSC	New Fazaia Intermediate College Shahrah-e-Faisal	2	Years	2016-04-30	11-20-10-8913	83.36	\N	Pre-engineering
+369	Degree	35	Higher Secondary School Certificate	Board of Intermediate Education Karachi	2	Years	2014-04-01	12-20-08-3519	A	\N	Pre-Engineering
+364	Degree	30	SSC Part I	Board of Secondary Education Karachi	2	Years	2012-04-01	12-20-08-3519	A-One	\N	Science
+409	Degree	30	Matric (Federal Board)	Bahria College Karachi	2	Years	2008-07-31	14-20-08-3763	85%	\N	Science
+380	Degree	35	Commerce	Islamia College	2	Years	2012-04-01	12-20-08-9305	B Grade	\N	Commerce
+396	Degree	35	Pre Engg	PN JCC	2	Years	1994-06-15	12-20-08-5743	A	\N	Maths, Physics, Chemistry
+397	Degree	60	Electrical Engg	PNEC NUST	4	Years	1998-12-15	12-20-08-5743	B	\N	Electrical, Electronics
+399	Course	0	PN STAFF COURSE	PN WAR Collage	11	Months	2012-07-15	12-20-08-5743	3.37	\N	War studies
+400	Course	0	OQA	DPQ/SQ	2	Months	2006-10-15	12-20-08-5743	Q	\N	ISO-9001/2000
+401	Course	0	Project Management Course	PDC NUST	2	Months	2010-12-10	12-20-08-5743	Q	\N	\N
+403	Course	0	JOSDC	PN JCC	2	Months	1999-02-10	12-20-08-5743	Q	\N	Staff Duties
+405	Degree	70	Masters in Business Administration	Bahria University Karachi	2	Years	2017-03-14	14-20-08-3763	3.83	\N	Marketing
+407	Degree	35	Intermediate (Federal Board)	Bahria College Islamabad	2	Years	2010-07-31	14-20-08-3763	85%	\N	Pre-Engineering
+420	Degree	35	Diploma	Azzizabad Commercial College	3	Years	2002-07-02	12-20-08-6687	B	\N	D.Com
+421	Degree	30	SSC	Private	2	Years	1998-09-26	12-20-08-6687	D	\N	Arts
+422	Course	0	Network Administration	NUST PDC	1	Months	2016-08-16	12-20-08-6687	\N	\N	Network
+423	Course	0	A+ Certification	NUST PDC	3	Months	2010-03-24	12-20-08-6687	\N	\N	Hardware Networking
+424	Course	0	Survillance Security System	HIKVISION	7	Days	2018-02-27	12-20-08-6687	\N	\N	CCTV
+383	Course	0	Hikvision Camera	Hikvision	7	Days	2019-02-27	12-20-08-9305	\N	\N	CCTV Camera
+425	Degree	30	SSC	Eden Pubblic High School	2	Years	2012-04-01	14-20-08-8545	A-one	\N	Science
+428	Degree	35	HSC	Govt Degree College Malir Cantt	2	Years	2014-01-04	14-20-08-8545	B	\N	Pre-Engineering
+429	Degree	60	Bachelors of Engineering	SZABIST	4	Years	2018-07-20	14-20-08-8545	2.92	\N	Engineering
+432	Degree	80	PhD Electrical Engineering	PNEC NUST	8	Years	2021-02-12	14-20-08-7389	3.75	\N	Electrical Engineering
+436	Course	0	Introduction to Programming with MATLAB	Vanderbilt University	2	Months	2020-06-29	14-20-07-1601	100	6LQWPWRQVVM9	\N
+316	Degree	70	MS	NUST PNEC	3	Years	2020-12-30	13-20-05-1661	3.88	\N	CONTROL
+286	Degree	60	BE Electrical Engineering	NUST-PNEC	4	Years	2020-07-10	16-20-09-3410	3.54	\N	Electrical Engineering
+345	Degree	60	BE Electrical	NUST-PNEC	4	Years	2020-07-10	11-20-10-8913	3.91	\N	Electrical Engineering
+406	Degree	60	BE Electrical Engineering	National University of Sciences & Technology Karachi	4	Years	2014-06-30	14-20-08-3763	3.46	\N	Electrical
+431	Degree	60	BE Electronics	NEDUET	4	Years	2019-08-23	14-21-01-3943	3.05	\N	Electronic Engineering
+381	Degree	60	BCom	Shah Abdul Latif Bhittai University Khairpur	2	Years	2015-01-01	12-20-08-9305	B	\N	Commerce
+321	Degree	60	BE Electronics	PAFKIET	4	Years	2014-05-10	13-20-05-0991	3.69	\N	Electronics/Avionics
+307	Degree	60	BE Electrical Engineering	NUST PNEC	4	Years	2019-06-01	13-20-05-1643	3.35	\N	Electrical
+314	Degree	60	BE Electronics	IIEE NED UET	4	Years	2014-04-04	13-20-05-1661	3.7	\N	INDUSTRIAL ELECTRONICS
+356	Degree	30	SSC Science	PN Model School  Majeed SRE Karachi	2	Years	2008-05-12	12-20-08-9305	B Grade	\N	Science
+268	Degree	50	Electrical	Jinnah Polytecnic Institute Nazimabad Karachi	3	Years	2007-10-30	16-20-09-8425	1st Div	\N	\N
+388	Degree	30	SSC Science	FG Boys Secondary School Nai Chawni Rawalpindi	2	Years	1991-10-06	12-20-08-5743	A1	\N	Maths, Physics, Chemistry, Biology
+313	Degree	35	HSSC	B.I.S.E HYD	2	Years	2009-09-30	13-20-05-1661	1	\N	Pre-Engineering
+398	Degree	75	Comm Engineering	PNEC NUST	2	Years	2018-06-15	12-20-08-5743	3.3	\N	Stochastics, Computer Vision
+437	Course	0	Data Science Math Skills	Duke University	1	Months	2020-05-17	14-20-07-1601	100	6AACFUXB5SHB	\N
+438	Course	0	AWS Machine Learning	Amazon Web Services	1	Months	2020-05-16	14-20-07-1601	100	5BLCPLSATK9V	\N
+439	Course	0	Computer Vision Basics	University of Buffalo	1	Months	2020-04-28	14-20-07-1601	100	S4KWJV7XXB98	\N
+443	Degree	75	Electrical Engineering	NUST, Islamabad	2	Years	2019-12-17	14-21-01-3089	3.20/4	\N	RF and Microwave
+452	Course	0	Design Electrical small antenna	IEEE	3	Days	2020-07-28	14-21-01-3089	\N	Certificate	RF and Microwave
+448	Course	0	Design Ultra wideband antenna	IEEE	3	Days	2020-07-25	14-21-01-3089	\N	Certificate	RF and Microwave
+453	Course	0	EMC/EMI workshop	RIMMS,NUST	3	Days	2019-06-16	14-21-01-3089	\N	Certificate	RF and Microwave
+466	Degree	30	GCE Ordinary Level	Chapter & Verse	3	Years	2012-08-13	14-21-01-8590	A-1	\N	General Science
+463	Degree	35	GCE Advanced Level	Beaconhouse School System	2	Years	2014-08-13	14-21-01-8590	A-1	\N	Pre-engineering
+468	Course	0	Successful Career Development	University System of Georgia	4	Months	2019-07-07	14-21-01-8590	A-1	\N	\N
+471	Degree	35	Intermediate	Liquat College, Karachi	2	Years	2014-06-30	14-20-08-7529	C	\N	Commerce
+474	Degree	35	HSSC	DA SKBZ College	2	Years	2014-06-01	14-20-08-8409	A	\N	Pre-Engineering
+476	Degree	30	SSC	DA SKBZ College	2	Years	2012-05-01	14-20-08-8409	A	\N	Computer Science
+481	Degree	30	HSC	Govt High School Wapda Colony Mianwali	2	Years	2009-10-01	11-21-04-5275	B	\N	Science
+482	Degree	30	O Level	IBCC	2	Years	2012-07-30	14-20-08-1035	A	\N	\N
+483	Degree	35	A Level	IBCC	2	Years	2014-07-31	14-20-08-1035	A	\N	\N
+488	Degree	70	MS(EE)	Xian Jiaotong University	2	Years	2018-05-30	14-20-12-7912	3.55	\N	Power Electronics
+493	Course	0	POWER SYSTEM ANALYSIS	XJTU	2	Months	2017-02-05	14-20-12-7912	A	-	Power Systems
+494	Degree	30	SSC	BISE-Faisalabad	2	Years	2010-04-05	14-20-08-4355	898/1050	\N	General science
+496	Degree	35	HSSC	BISE-Faisalabad	2	Years	2012-05-05	14-20-08-4355	935/1100	\N	Pre-engg
+497	Degree	60	BE Electrical	NUST-PNEC	4	Years	2016-03-06	14-20-08-4355	3.60/4.0	\N	Electrical
+507	Degree	35	FSc	PECHS Education Foundation Government Science College	2	Years	2015-05-15	14-21-05-8099	B	\N	Pre-Engineering
+508	Degree	30	Matriculation	Korangi Public Secondary School	2	Years	2013-05-15	14-21-05-8099	A	\N	Comp-Science
+519	Degree	35	HSSC	P.EC.H.S Govt College for Women	2	Years	2015-01-06	14-21-05-5448	82.9	\N	Pre-Engineering
+523	Degree	35	HSSC	BISE Bannu	2	Years	2011-07-15	14-20-08-6681	B	\N	Pre-Engineering
+524	Degree	30	SSC	Metropolis Academy	2	Years	2013-06-01	14-21-05-5448	89.6	\N	Science
+525	Course	0	Professesional PLC Course	N.E.D Academy	15	Days	2019-07-01	14-21-05-5448	none	none	Electrical
+518	Degree	30	SSC	BISE Bannu	2	Years	2008-12-20	14-20-08-6681	A1	\N	Science
+530	Degree	30	Matriculation	Crescent Model Higher Secondary School Lahore	2	Years	2010-09-01	14-20-08-0303	1st	\N	Science
+531	Degree	35	Intermediate	Punjab College of Science, Lahore	2	Years	2012-09-01	14-20-08-0303	1st	\N	Pre Engineering
+532	Degree	60	BE Electrical	National University of Sciences and Technology	4	Years	2016-06-04	14-20-08-0303	1st	\N	Electrical & Electronics Engineering
+535	Degree	70	MS Electrical Engineering	National University of Sciences and Technology (NUST)	2	Years	2021-09-01	14-20-08-0303	1st	\N	Control Engineering
+547	Degree	35	Pre-Engineering	St.Lawrance Govt Girls Degree College	2	Years	2016-12-01	14-20-08-0440	82.09%	\N	\N
+548	Degree	30	Biology	Metropolitan Academy	12	Years	2014-12-01	14-20-08-0440	87%	\N	\N
+565	Degree	60	BE Mechatronics	SZABIST Karachi	4	Years	2018-07-31	14-20-08-2265	3.54	\N	Mechatronics
+566	Degree	35	GCE A Level	Lyceum School Karachi	2	Years	2009-08-01	14-20-08-2265	5 As	\N	Engineering
+445	Degree	70	MS Electrical Telecom Engineering	UET Peshawar	4	Years	2017-03-17	14-21-01-3089	3.38/4	\N	Telecommunication
+564	Degree	70	MSc (Applied Physics)	Karachi University	2003	Years	2003-12-01	14-20-10-6921	First	\N	Electronics
+543	Degree	70	MS Electrical Engineering	NUST PNEC	2	Years	2016-03-15	14-20-08-3623	3.9	\N	Communications
+469	Degree	60	BE Electronics	NEDUET	4	Years	2019-08-30	14-21-02-0970	3.755	\N	Electronics
+546	Degree	60	BE Electronics	NED University of engineering and technology	4	Years	2018-10-01	14-20-08-0440	3.83	\N	Electronics
+544	Degree	60	BE Telecom Engineering	Iqra University	4	Years	2012-12-31	14-20-08-3623	3.68	\N	Communications
+526	Degree	60	BE Electrical Engineering	NUCES	4	Years	2015-06-30	14-20-08-6681	3.14/4	\N	Electronics
+502	Degree	60	BE Mechatronics	Paf-Karachi Institute of Economics and Technology	4	Years	2019-12-18	14-21-05-8099	3.89	\N	Mechatronics
+491	Degree	60	BS EE	NUST-PNEC	4	Years	2016-06-02	14-20-12-7912	3.48	\N	Power
+487	Degree	60	BE Mechanical Engineering	NUST	2	Years	2018-06-30	14-20-08-1035	3.178/4	\N	\N
+473	Degree	60	BE Mechatronics	SZABIST	4	Years	2018-07-01	14-20-08-8409	3.22	\N	Mechatronics
+516	Degree	60	BE Electrical	N.E.D University of Engineering and Technology	4	Years	2019-08-23	14-21-05-5448	3.512	\N	Electrical
+461	Degree	60	BE Electrical	NEDUET	4	Years	2018-09-28	14-21-01-8590	3.79	\N	Electrical
+554	Degree	50	DAE (Eletronics)	Govt.College Of Technology	3	Years	2006-06-06	14-21-05-5521	First Division	\N	Electonics
+567	Degree	30	O Level	Beaconhouse School	3	Years	2007-08-01	14-20-08-2265	7As 1B	\N	Pre-Engineering
+509	Degree	30	SSC Science group	GOVT. M.C. Model High School Burewala(Vehari)	2	Years	2012-05-31	14-21-05-1233	1st Division	\N	MATH, PHY, Chemistry, Biology
+512	Degree	35	FSc (Pre-Engineering)	GOVT. Post Graduate College Burewala	2	Years	2014-08-20	14-21-05-1233	1st Division	\N	MATH, Physics, Chemistry
+446	Degree	35	FSc	Cadet College Swat	2	Years	2013-08-05	14-21-01-3089	908/1100	\N	\N
+586	Degree	35	Higher Secondary	DJ Sindh Govt. Science College	2	Years	2016-04-30	14-21-04-0903	65%	\N	Pre-Engineering
+587	Degree	30	Secondary	Metropolitan School	10	Years	2014-04-30	14-21-04-0903	83%	\N	Computer Science
+588	Course	0	WTR-II	PNSL	1989	06 Month	1989-05-08	17-19-09-6165	65%	\N	Typing & Pay Cash Duty
+589	Course	0	L/WTR	PNSL	1994	14 Week	1994-06-11	17-19-09-6165	70%	\N	Typing & Pay cash Duty
+590	Course	0	PO/WTR	PNSL	2003	22 Week	2003-06-11	17-19-09-6165	75%	\N	Auditing & Secretarate
+591	Course	0	FCPO/WTR	PNSL	2007	22 Week	2007-06-11	17-19-09-6165	83%	\N	Incharge
+592	Course	0	NBCD-III	NBCD Sch	2003	2 Week	2003-06-11	17-19-09-6165	80%	\N	\N
+478	Course	0	Introduction to Programming with MATLAB	Vanderbilt University	2	Months	2020-06-29	14-20-08-8409	100%	N/A	N/A
+593	Course	0	SST	HIMALAYA	1988	Months	1988-12-01	17-19-09-6165	Pass	\N	\N
+594	Course	0	OOD DUTIES	RAHNUMA	2003	Months	2003-06-11	17-19-09-6165	Pass	\N	\N
+596	Course	0	SEA SURVIVIAL	HIMALAYA	2003	Months	2003-06-11	17-19-09-6165	Pass	\N	\N
+597	Course	0	IT (NST TECH)	RAHNUMA	2004	Months	2004-06-11	17-19-09-6165	Pass	\N	\N
+598	Course	0	FRENCH LANGUAGE	NUML	2010	Months	2010-06-11	17-19-09-6165	Pass	\N	\N
+599	Course	0	Basic Intelligence Course	ISI HQ HAMZA	2011	Months	2011-06-11	17-19-09-6165	Pass	\N	\N
+600	Course	0	JLC	RAHNUMA	2015	Months	2015-06-11	17-19-09-6165	73%	\N	\N
+613	Degree	50	DAE	Pakistan Navy ME School	3	Years	1989-08-24	14-20-12-4053	1st	\N	Mechanical
+627	Course	0	'Computational Fluid Dynamics (CFD), Finite Element Analysis (FEA), Machine Design, Materail Science, Manufacturing Processes, Heat & Mass Transfer, Project Management	PNEC NUST	48	Months	2020-06-02	14-20-08-3007	3.93	Mechanical Engineering	Mechanical Engineering
+628	Degree	50	DAE	Government College of Technology Abottabad	3	Years	2020-07-15	14-20-12-2581	B	\N	Mechanical
+629	Course	0	AutoCAD	Government College of Technology Abottabad	3	Months	2020-07-15	14-20-12-2581	B	NA	AutoCAD designing
+630	Degree	30	Middle	AWAZ PUR FAISLABAD	2	Years	1972-01-01	14-21-05-0503	A	\N	Middle
+638	Degree	50	Higher Education Test	PN	2	Years	2008-06-16	18-21-06-0871	B	\N	Geography, General Science
+639	Course	0	MTO course	PN	1	Months	2016-03-31	18-21-06-0871	Pass	\N	MTO
+640	Course	0	Unit Security Officer	PN NI School	1	Months	2014-04-30	18-21-06-0871	Qualified	\N	USO
+15	Degree	70	MS Electrical	NUST	2	Years	2010-03-15	11-20-07-8177	4.00	\N	Signal Processing
+435	Degree	70	MS Control System	McGill University	1.5	Years	2022-05-31	14-20-07-1601	3.85	\N	Control Systems and Robotics
+46	Degree	70	MSc Mechatronics Engineering	College of Electrical and Mechanical Engineering, NUST EME	4	Years	2019-09-30	11-20-07-4329	3.19	\N	Robotics and Industrial Automation
+370	Degree	70	BE Electrical Engineering (Electronics)	Bahria University, Karachi Campus	4	Years	2018-07-03	12-20-08-3519	3.4/4	\N	Electrical (Electronics)
+615	Degree	60	BE Mechanical Engineering	NED University	4	Years	2019-08-28	14-20-07-6565	3.88	\N	Mechanical
+606	Degree	60	BE Electronics Engineering	Sir Syed University of Sciences & Technology	4	Years	2012-12-31	14-21-06-3669	1st	\N	Electronics & Telecom
+601	Degree	60	BE Mechanical Engineering	NUST	4	Years	2019-06-05	14-20-08-6261	3.18	\N	MECHANICAL
+624	Degree	60	Mechanical Engineering	PNEC NUST	4	Years	2020-07-10	14-20-08-3007	3.93	\N	Mechanical Engineering
+614	Degree	60	BE Mechanical Engineering	NUST PNEC	4	Years	2020-01-16	14-20-08-7029	3.24	\N	Mechanical
+513	Degree	60	BE Mechanical Engineering	PNEC-NUST	4	Years	2020-01-17	14-21-05-1233	3.41/4.00	\N	Renewable Energy, CFD, Power Plant Engineering, Petroleum Engineering
+585	Degree	60	BE Electronics	PAF-KIET	4	Years	2020-12-22	14-21-04-0903	3.37	\N	Avionics
+637	Degree	60	BA	KU	2	Years	1997-05-06	18-21-06-0871	B	\N	Political Science, Islamic History, Islamic studies,
+626	Degree	50	DAE & BTech	GCT Bannu	3	Years	2018-12-15	14-20-11-0041	A	\N	Electrical
+633	Degree	30	Matric	NA	2	Years	2016-01-01	14-20-06-9965	1ST	\N	XX
+653	Degree	60	Engineering	NUST-PNEC	4	Years	2020-07-10	14-21-09-7688	3.79	\N	IME
+658	Degree	60	BE-ME	NUST PNEC	4	Years	2023-07-01	14-20-09-9481	3.94	\N	ME
+659	Course	0	Models of business in society	N/A	1	Months	2020-04-30	14-20-09-9481	N/A	N/A	N/A
+661	Course	0	Solid works surface modelling	N/A	1	Months	2020-04-30	14-20-09-9481	N/A	N/A	N/A
+662	Course	0	Ansys	N/A	1	Months	1930-02-20	14-20-09-9481	N/A	N/A	N/A
+663	Degree	60	BE-ME	NUST PNEC	4	Years	2021-07-30	14-20-09-9553	3.88	\N	ME
+664	Course	0	Wind energy	Techincal university of Denmark	1	Months	2021-11-05	14-21-01-8345	N/A	N/A	N/A
+666	Course	0	Energy transition innovation towards a low carbon future	IFP School	1	Months	2021-11-05	14-21-01-8345	N/A	N/A	N/A
+667	Course	0	Computational Fluid Dynamics	NED Academy	1	Months	2021-11-05	14-21-01-8345	N/A	N/A	N/A
+668	Course	0	Circuit Desining Competition	N/A	1	Days	2017-08-30	14-20-08-0440	1	N/A	N/A
+669	Course	0	Open Mic Speak Fest	HM	1	Days	2017-01-30	14-20-08-0440	N/A	N/A	N/A
+670	Course	0	Spec Robo Maze	N/A	1	Days	2017-12-30	14-20-08-0440	1	N/A	N/A
+671	Degree	50	B.Tech Electronics	Preston Institute	3	Years	2007-07-30	14-20-08-6977	N/A	\N	Electronics
+673	Course	0	Training on Alternate Energy	Systek Pvt Ltd	1	Months	2010-12-30	14-21-05-5521	N/A	N/A	N/A
+558	Course	0	Star Series Certified Specialist	AEC Italy	1	Days	2006-06-09	14-21-05-5521	N/A	N/A	N/A
+675	Course	0	Data Science and Machine Learning	Harvard University Online	7	Days	2019-12-30	14-20-08-0303	N/A	N/A	N/A
+676	Course	0	Machine Learning	Stanford Univeristy Online	7	Days	2018-12-30	14-20-08-0303	N/A	N/A	N/A
+677	Course	0	Object Oriented Programming	Virtual University	7	Days	2013-12-30	14-20-08-0303	N/A	N/A	N/A
+678	Degree	60	ME	NED UET	4	Years	2020-09-30	14-21-07-1905	3.89	\N	ME
+679	Course	0	Wind energy	Technical Univeristy of Denmark	7	Days	2021-11-05	14-21-07-1905	N/A	N/A	N/A
+568	Degree	25	SSC Science	GOVT HSS	2	Years	2010-02-02	14-21-05-0575	1ST	\N	Science
+680	Degree	35	Commerce	BIEK	2	Years	2021-11-05	14-21-08-3525	N/A	\N	Commerce
+681	Degree	60	ME	NUST PNEC	4	Years	2023-08-30	14-21-05-1391	3.71	\N	ME
+621	Degree	60	BE Mechanical Engineering	NED University	4	Years	2020-10-25	14-21-01-8345	3.82	\N	Mechanical
+610	Degree	60	Bachelor of Arts	Karachi University	2	Years	1997-08-01	14-20-12-4053	1st	\N	Management
+634	Degree	30	SSC	Ibrahim Ali Bhai Secondary School	2	Years	1999-06-07	14-20-06-9295	B	\N	Arts
+623	Degree	50	DAE	Govt Polytechnic Institute of Asu Goth	3	Years	2019-10-04	14-21-05-7969	A	\N	Mechanical
+647	Degree	30	Matriculation	Technical High School	4	Years	2005-05-12	14-20-12-6095	c	\N	science
+683	Course	0	Abdul Kalam Design Challenge	N/A	1	Days	2021-11-05	14-21-05-1391	N/A	N/A	N/A
+672	Degree	50	Electrical	Jinnah Polytechnic Institute	3	Years	2014-07-30	14-20-08-6239	A	\N	Electrical
+684	Course	0	Speak out for Engineering	N/A	1	Days	2021-11-05	14-21-05-1391	N/A	N/A	N/A
+604	Course	0	N/A	NA	2	Months	2021-06-17	14-20-08-6261	1	NA	NA
+686	Course	0	Project Management Principles and Practices Specialization Coursera	N/A	7	Days	2021-11-05	14-21-05-1391	N/A	N/A	N/A
+687	Course	0	Presidential Initiative for Artificial Intelligence & Computing (PIAIC)	N/A	7	Days	2021-11-05	14-21-01-3943	N/A	N/A	N/A
+688	Course	0	Specialized Course on Control Technology	Swiss Pakistan Training Centre	1.5	Months	2021-11-05	14-21-01-3943	N/A	N/A	N/A
+689	Degree	80	Business Management	College of Business Management at IOBM	5	Years	2020-12-30	14-21-08-7587	N/A	\N	Business Management
+690	Course	0	Balanced Scorecard Professional	George Washington University USA	1	Months	2019-12-30	14-21-08-7587	N/A	N/A	N/A
+691	Course	0	PGD In Logistic and Port Management	Bahria University Karachi	1	Years	2014-12-30	14-21-08-7587	N/A	N/A	N/A
+692	Degree	60	ME	NUST PNEC	4	Years	2021-06-30	14-21-09-8139	3.91	\N	ME
+651	Degree	60	BE Mechanical Engieering	nust	4	Years	2021-06-30	14-21-05-3061	3.76	\N	mechanical
+701	Degree	60	Bachelors of Engineering Avionics	PAK-KIET	4	Years	2020-12-16	14-21-09-9933	3.81	\N	Avionics
+708	Course	0	Chief Marines Engineering Artificer	Pak Navy	16	weeks	2000-10-23	14-20-12-4053	N/A	N/A	N/A
+710	Course	0	Divisional & Leadership Course	Pak Navy	8	weeks	1995-03-22	14-20-12-4053	N/A	N/A	N/A
+711	Course	0	Safety Awareness for Supervisor	Pak Navy	1	weeks	2001-02-01	14-20-12-4053	N/A	N/A	N/A
+712	Course	0	Instruction Technique	Pak Navy	4	weeks	2001-06-11	14-20-12-4053	N/A	N/A	N/A
+718	Degree	60	BS CS	Habib University	4	Years	2021-08-01	14-21-02-2626	3.87	\N	CS
+721	Degree	70	MS Computer Vision	Queen Mary University of London, UK	1	Years	2018-09-30	14-21-07-6778	Distinction	\N	Computer Vision
+724	Degree	70	Islamic Studies	Karachi University	2	Years	2001-12-31	14-20-06-2173	N/A	\N	Islamic Studies
+728	Degree	50	ElectroMech	PAF Korangi Creek Karachi	3	Years	1992-12-31	14-20-06-2173	N/A	\N	ElectroMech
+759	Degree	30	N/A	Ibrahim Ali Bhai	2	Years	2015-04-01	14-21-11-7359	C	\N	Science
+762	Course	0	Electrician	Memon Foundation	4	Months	2016-03-31	14-21-11-7359	N/A	N/A	N/A
+773	Degree	35	na	Govt Delhi College F.B Area	3	Years	2019-03-11	14-21-11-1231	A+	\N	Engineering
+774	Course	0	Na	Na	0	Months	2021-11-23	14-21-11-1231	0	Na	Na
+775	Degree	70	Manufacturing Engineering & Management	National University of Sciences & Technology	2	Years	2018-08-10	14-21-11-6746	3.95	\N	Manufacturing & Management
+776	Degree	60	Electrical Engineering	NED University of Sciences & Technology	4	Years	2014-12-30	14-21-11-6746	3.892	\N	Electrical Machines,Communication Systems,Digital signal processing
+778	Degree	35	Pre-Engineering	Aga Khan Higher Secondary School	2	Years	2010-07-30	14-21-11-6746	85.9	\N	Maths,physics,chemistry
+779	Course	0	na	na	0	Months	2021-12-07	14-21-11-6746	na	na	na
+784	Degree	35	Pre Engineering	ACR-CET	2	Years	2016-03-01	14-21-12-7103	A	\N	Engineering
+780	Degree	60	B.E Mechatronics	SZABIST	4	Years	2021-07-27	14-21-12-7103	3.15	\N	Mechatronics
+792	Degree	60	Mechanical Engineering	National University of Science and Technology	4	Years	2021-06-01	14-21-12-7909	3.94	\N	Mechanical
+782	Course	0	Digital Control System	N/A	1	Months	2020-12-01	14-21-12-7103	N/A	N/A	N/A
+795	Degree	60	B.Sc	University of Engineering & Technology	4	Years	2019-08-01	14-22-01-4214	3.44/4	\N	Electrical Engineering
+806	Degree	60	BE Mechatronics	Szabist	4	Years	2021-03-01	14-22-01-4526	3.49	\N	\N
+807	Degree	60	B.E Electronic Engineering	Pakistan Air Force KIET	4	Years	2019-12-30	14-22-01-3217	3.23	\N	Electronics
+698	Degree	25	Middle	Nazimabad Government High School	1	Years	2010-11-08	14-20-10-3639	B	\N	Science
+810	Degree	60	BE Electronics	Dawood University of  Engineering	4	Years	2014-12-31	14-22-01-5685	3.60/4.0	\N	Electronics
+818	Degree	60	BE Mechatronics	PAK KIET	4	Years	2022-01-22	14-22-02-9906	3.95/4.00	\N	Mechatronics
+824	Degree	35	Inter	Country Girls College	2	Years	2018-03-01	14-22-02-2332	82%	\N	N/A
+829	Degree	60	 Electrical Engineering	Karachi Institute of Economics and Technology (KIET)	4	Years	2020-03-31	14-22-03-1439	3.55/4.0	\N	Electronics
+840	Degree	60	Bachelor of Engineering	Karachi Institute of Economics & Technology	4	Years	2019-12-31	14-22-04-1163	3.33	\N	Avionics
+859	Degree	60	Electrical Engineering	NUST-PNEC	4	Years	2021-06-16	11-22-04-8353	2.7	\N	Electrical
+863	Degree	70	MBA (HR MANAGEMENT)	PRESETON UNIVERSITY	2	Years	2001-01-05	17-22-07-7289	\N	\N	\N
+864	Degree	60	Bachelors of Engineering	NED University of Engineering & Technology	4	Years	2021-03-31	14-22-07-2827	3.793	\N	Mechanical
+867	Degree	70	Electrical (Control) Engineering	NUST PNEC	2	Years	2021-07-31	14-20-08-6681	3.75	\N	Electrical (Control)
+868	Degree	70	Master of Engineering (Networking & Security)	NED University	2.5	Years	2022-03-11	14-22-01-5685	3.89	\N	\N
+832	Degree	60	Bechelors of Engineering	PAF Karachi institute of Economics and Technology	4	Years	2022-01-31	14-22-04-5964	3.91	\N	Electronics
+843	Degree	60	Bachelor of Engineering	PAF Karachi Institute of Economics and Technology	4	Years	2022-01-31	14-22-04-0600	3.75	\N	Avionics
+616	Degree	60	BE Mechanical Engineering	NED UET	4	Years	2020-10-11	14-20-11-8023	3.8	\N	Mechanical Design
+785	Degree	60	BE Mechanical Engineering	NED University of Engineering and Technology	4	Years	2021-11-27	14-21-12-8653	3.583	\N	Mechanical
+871	Degree	60	BE Electrical Engineering	Pakistan Navy Engineering College	4	Years	2022-06-24	14-22-08-3219	3.65	\N	Electrical
+873	Course	0	SQL	Udemy	1	Months	2022-05-31	14-22-08-3219	Nil	Nil	Data Analytics
+874	Course	0	The Data Science Course	Udemy	2	Months	2022-04-01	14-22-08-3219	Nil	Nil	Data Science
+875	Course	0	Algorithim	Udemy	5	Months	2020-09-30	14-22-08-3219	Nil	Nil	Algorithim for battery management systems specialization
+877	Course	0	Nil	Nil	0	Months	2022-09-05	14-22-08-9227	Nil	Nil	Nil
+880	Course	0	Nil	Nil	0	Months	2022-09-06	14-22-08-1397	Nil	Nil	Nil
+882	Course	0	NA	NA	0	Months	2022-09-07	14-22-07-3445	NA	NA	NA
+886	Course	0	NA	NA	0	Months	2022-09-23	14-22-09-4105	NA	NA	NA
+890	Course	0	Nil	Nil	0	Months	2022-09-28	14-22-09-6559	Nil	Nil	Nil
+895	Degree	70	MS Electronics Engineering	KIET	2	Years	2022-01-01	14-22-10-8599	3.44	\N	Electronics
+896	Degree	60	BE Avionics Engineering	KIET	4	Years	2018-05-01	14-22-10-8599	3.3/4	\N	Avionics
+897	Course	0	NA	NA	0	Months	2022-10-04	14-22-10-8599	NA	NA	NA
+900	Course	0	NA	NA	0	Months	2022-10-04	14-22-09-3063	NA	NA	NA
+902	Degree	60	DAE Elactrical	PNS KARSAZ	3	Years	1992-05-05	13-22-09-6267	A	\N	Electronics
+903	Course	0	SONAR	France	1	Months	1996-11-27	13-22-09-6267	1st	NIL	SONAR
+904	Course	0	Auto Pilot	France	14	Days	1996-12-14	13-22-09-6267	1st	NIL	Auto Pilot
+905	Degree	60	Electrical Engineering	NUST	4	Years	2021-06-01	14-22-09-6968	3.41	\N	Electronics
+906	Degree	60	Mechanical Engineering	NUST	4	Years	2024-08-01	14-22-09-4823	3.04	\N	Mechanical
+907	Degree	50	Mechanical	Jinnah Polytechnic	3	Years	2020-10-26	11-22-10-2645	B	\N	Mechanical
+908	Degree	30	Science	Karachi Borad	1	Years	2017-08-06	11-22-10-2645	B	\N	Computer Science
+545	Degree	80	PhD Electrical Engineering	NUST PNEC	5	Years	2021-07-31	14-20-08-3623	3.89	\N	Reliability Engineering
+870	Degree	70	Ms Electronics	PAF KIET	2	Years	2022-01-16	14-22-04-1163	3.19	\N	Electronics
+851	Degree	60	Bachelore of Engineering	NEDUET	4	Years	2020-10-26	14-22-04-3081	3.81	\N	Mechanical
+854	Degree	50	B Tech	Newport Institute of Commerce & Technical	3	Years	2013-07-09	14-22-04-8881	Pass	\N	B.Tech
+914	Degree	70	MS Electrical	NUST	3.5	Years	2017-07-01	14-23-01-2587	3.95	\N	Communications
+917	Degree	60	BE Electrical	NED	4	Years	1997-07-01	14-23-01-2587	1st	\N	Electrical
+922	Course	0	Weapon Engineering System Management	PNEC/NUST	12	Months	2000-08-31	14-23-01-2587	A	\N	Weapon Engineering
+920	Course	0	Supply Chain Management	Pakistan Institute of Management (PIM)	4	Months	2017-12-31	14-23-01-2587	A	\N	Supply Chain
+921	Course	0	Reliability Engineering	PNEC	6	Months	2016-07-31	14-23-01-2587	A	\N	Reliability Engineering
+919	Degree	30	SSC	Petaro/Hyderabad	2	Years	1990-08-01	14-23-01-2587	A+	\N	Science
+916	Degree	35	HSC	Karachi	2	Years	1993-12-01	14-23-01-2587	1st	\N	Science
+933	Degree	60	BE	NED UET	4	Years	2022-10-01	14-23-01-4589	3.53	\N	Automotive
+936	Degree	30	SSC	BSEK	2	Years	2016-03-01	14-23-01-4589	85%	\N	Computer Science
+889	Degree	50	B-Tech	Newport Institute Karachi	2	Years	2013-04-01	14-22-09-6559	A	\N	\N
+876	Degree	50	Diploma of Associate Engineer	Aligarh Institute of Technology, Karachi	3	Years	2016-11-17	14-22-08-9227	B	\N	\N
+887	Degree	50	Diploma of Associate Engineer	Technical Board Of Karachi	3	Years	2010-03-01	14-22-09-6559	A	\N	\N
+879	Degree	50	DAE Diploma	Avid Institute Management & Technology	1	Years	2014-12-31	14-22-08-1397	A	\N	Mechanical
+885	Degree	30	Matric	Karachi Board	2	Years	2015-03-01	14-22-09-4105	Pass	\N	\N
+898	Degree	60	BS Tech	Preston University	4	Years	2021-09-01	14-22-09-3063	3.2	\N	\N
+899	Degree	50	DAE	Sindh Board of Technical Education	3	Years	2017-03-01	14-22-09-3063	Pass	\N	\N
+935	Degree	35	HSC	BIEK	2	Years	2018-04-01	14-23-01-4589	79%	\N	Pre-Engineering
+938	Course	0	Python for data science	Coursera	1	Months	2021-12-31	14-23-01-4589	A	\N	Programing
+940	Course	0	Autocad	Digiskills.PK	2	Months	2021-05-01	14-23-01-4589	A	\N	CAD
+946	Degree	60	BE	NUST PNEC	4	Years	2015-06-01	14-23-02-1055	2.97	\N	Electronics
+947	Degree	35	A-Level	Nixor College	2	Years	2011-06-01	14-23-02-1055	80%	\N	Pre-Engineering
+948	Degree	30	O-Level	Beaconhouse	2	Years	2009-06-01	14-23-02-1055	80%	\N	Science
+955	Course	0	Foundation of Project Management	Online by Google	3	Months	2022-07-31	14-23-02-8047	A	NA	Project Management
+951	Degree	35	FSC	FG Boys Inter College	2	Years	2018-05-01	14-23-02-8047	76.73%	\N	Pre-Engineering
+957	Degree	70	Master	Kyung HEE University	2	Years	2022-02-25	14-23-02-7783	4.21	\N	Electronic Engineering
+959	Degree	60	BE Electrical	NUST EME	4	Years	2018-06-01	14-23-02-7783	3.51	\N	Electrical
+618	Course	0	N/A	NA	1	Months	2021-06-17	14-20-11-8023	1	1	1
+960	Degree	35	FSC	A/O Level	2	Years	2014-03-01	14-23-02-7783	87%	\N	ICS
+954	Degree	30	SSC	Secred Heart School	2	Years	2016-05-01	14-23-02-8047	64.35%	\N	Science
+956	Course	0	Intro to IOT & Embedded System	Online by University of California	2	Months	2021-07-31	14-23-02-8047	A	NA	IOT
+937	Course	0	Dier & mould  LV-III	KTDMC	2	Months	2021-12-01	14-23-01-4589	A	\N	Manufacturing
+942	Course	0	Freelancing	Digiskills.pk	2	Months	2021-05-31	14-23-01-4589	A	\N	CAD
+943	Degree	70	Msc	University Paderborn	5	Years	2022-11-01	14-23-02-1055	NA	\N	Electronics System Engineering
+965	Degree	60	Electrical	NUST_PNEC	4	Years	2022-06-06	11-22-12-2062	3.82	\N	Power
+950	Degree	60	BE Electrical	KIET	4	Years	2023-01-01	14-23-02-8047	3.92	\N	Electronics
+967	Degree	30	Matriculation	Bahria Model School 1 Majeed SRE	2	Years	2018-07-01	14-22-07-3445	89.54	\N	Computer Science
+884	Degree	35	Intermediate	Army Public College Saddar, Karachi	2	Years	2020-07-01	14-22-07-3445	88.72%	\N	Pre Engineering
+969	Degree	60	BE Mechanical	NUST-PNEC	4	Years	2023-06-05	11-23-05-5305	3.7	\N	Mechanical
+970	Degree	60	Electrical	NUST-PNEC	4	Years	2023-06-05	11-23-05-5744	3.8	\N	Electronics
+972	Degree	60	BE Electrical	NUST-PNEC	4	Years	2023-06-05	11-23-05-9824	3.82	\N	Electronics
+981	Degree	60	Computer Engineering	Habib Univeristy	4	Years	2023-06-27	14-23-07-6706	3.26	\N	\N
+982	Degree	35	Pre-Engineering	Habib Higer Secondary School	2	Years	2019-06-15	14-23-07-6706	86.4%	\N	\N
+983	Degree	30	Science (Biology)	Habib Girls School	2	Years	2017-06-15	14-23-07-6706	90.6%	\N	\N
+989	Degree	60	Mechanical Engineering	NUST	4	Years	2017-03-10	14-23-07-9947	3.8	\N	\N
+990	Degree	35	Pre-Engineering	Karachi Board	2	Years	2019-08-05	14-23-07-9947	85.7%	\N	\N
+991	Degree	30	Science	FBISE	2	Years	2023-06-02	14-23-07-9947	91.4%	\N	\N
+992	Degree	60	Electronics	Bahria University	4	Years	2021-07-31	14-23-07-7278	3.62	\N	\N
+993	Degree	35	Pre-Engineering	Private	1	Years	2016-05-01	14-23-07-7278	78%	\N	\N
+994	Degree	35	Pre-Medical	NCR-CET	2	Years	2015-07-01	14-23-07-7278	78%	\N	\N
+995	Degree	30	Science	Trinity Methodist	2	Years	2014-07-01	14-23-07-7278	78%	\N	\N
+997	Degree	30	General Certificate of Education	ARMY PUBLIC SCHOOL AND COLLEGE MALIR CANTT	3	Years	2015-01-01	12-23-07-6529	A	\N	\N
+999	Degree	35	FBISE HSSC	ARMY PUBLIC SCHOOL AND COLLEGE MALIR CANTt	2	Years	2017-01-01	12-23-07-6529	A	\N	\N
+1000	Degree	60	BSSE	University of Karachi	4	Years	2022-01-01	12-23-07-6529	3.1	\N	\N
+1001	Degree	30	Equivalence Certificate	LaSalle Higher Secondary School	2	Years	2012-08-08	12-23-07-1111	A	\N	\N
+1005	Degree	35	 Equivalence Certificate	LaSalle Higher Scondary School	2	Years	2014-08-08	12-23-07-1111	A	\N	\N
+1006	Degree	60	BEE	NUST PNEC	4	Years	2019-06-14	12-23-07-1111	A	\N	\N
+1007	Degree	30	Matric	DA SKBZ High School DHA Karachi	2	Years	2012-07-23	12-23-07-1659	A+	\N	Science
+1012	Degree	35	Intermediate	DA SKBZ College	2	Years	2014-08-21	12-23-07-1659	A	\N	Pre-Eng
+1013	Degree	60	BSCS	Bahria University Karachi	4	Years	2019-01-29	12-23-07-1659	2.76	\N	CS
+1014	Degree	70	MSCS	Bahria University Karachi	2	Years	2023-05-22	12-23-07-1659	3.79	\N	CS
+1015	Course	0	AI	PIAIC	18	Months	2023-01-30	12-23-07-1659	A	\N	AI
+1016	Course	0	3D Interaction Design in Virtual Reality	University of London	1	Months	2023-05-22	12-23-07-1659	A	\N	VR
+1017	Degree	30	Matric	FAUJI FOUNDATION MODEL School	2	Years	2014-04-25	12-23-07-4543	A	\N	Science
+1018	Degree	35	Intermiadiate	GOVT. DEGREE SCIENCE/COMMERCE COLLEGE MALIR CANTT	2	Years	2016-06-11	12-23-07-4543	B	\N	Pre-Eng
+1019	Degree	60	BEE	Bahria University Karachi	4	Years	2020-08-07	12-23-07-4543	3.08	\N	BEE
+1020	Course	0	Fundamental App. Development of Data Science And Artificial Intelligence	SSUET	8	Months	2019-09-19	12-23-07-4543	Pass	\N	AI
+1021	Course	0	Programming for Everybody	University of MICHIGAN	6	Months	2019-07-30	12-23-07-4543	Pass	\N	AI
+1022	Course	0	3D Interaction Design in Virtual Reality	University of London	6	Months	2023-05-21	12-23-07-4543	Pass	\N	VR
+1023	Degree	30	Matric	PN MODEL SCHOOL	2	Years	2010-07-20	12-23-07-9305	C	\N	SCIENCE
+1024	Degree	35	Intermediate	18. Govt Islamia College, Sukkur	2	Years	2012-05-16	12-23-07-9305	B	\N	Pre-Eng
+1025	Degree	60	B.com	Shah Abdul Latif University, KHAIRPUR	2	Years	2015-10-28	12-23-07-9305	B	\N	B.com
+1026	Course	0	HCSA	HIVISION	1	Months	2021-03-02	12-23-07-9305	Pass	\N	HCSA
+1027	Course	0	Introduction to Virtual Reality	University of London	3	Months	2023-06-06	12-23-07-9305	Pass	\N	VR
+1028	Degree	30	Matric	Kids University	2	Years	2012-07-07	12-23-07-3519	A+	\N	Science
+1029	Degree	35	Intermiadiate	Bahria College Karsaz	2	Years	2014-11-02	12-23-07-3519	A	\N	Pre-eng
+1032	Degree	60	BEE	Bahria University Karachi	4	Years	2018-10-18	12-23-07-3519	3.40	\N	Bee
+1034	Degree	70	Cyber Security	NUST	2	Years	2022-06-10	12-23-07-3519	3.15	\N	Cyber Security
+1037	Degree	30	Matric	Bahria Model School Sabir SRE	2	Years	2016-04-01	12-23-07-8573	B	\N	Science
+1038	Degree	35	Intermediate	FG Boys Inter College	2	Years	2008-09-28	12-23-07-8573	D	\N	Science
+1039	Course	0	3D Models for Virtual Reality	University of London	3	Months	2023-05-16	12-23-07-8573	Pass	\N	VR
+1042	Degree	30	Matric	Bahria Foundation College Naushahro Feroze	2	Years	2013-08-08	12-23-07-6049	A	\N	Science
+1043	Degree	35	Intermediate	Bahria Foundation College Naushahro Feroze	2	Years	2015-08-18	12-23-07-6049	A	\N	Pre-Med
+1047	Degree	60	B.A	Shah Abdul Latif University KHAIRPUR	2	Years	2016-12-01	12-23-07-6049	B	\N	Arts
+1048	Course	0	CIT	SBB Institute of Computer Science	6	Months	2016-06-01	12-23-07-6049	B	\N	MS
+1049	Course	0	Fundamentals of Network Communication	University of Colorado	1	Months	2022-01-01	12-23-07-6049	A	\N	Network
+1050	Course	0	Introduction to Virtual Reality	University of London	1	Months	2023-05-01	12-23-07-6049	A	\N	VR
+1052	Degree	60	BS CS	IBA Karachi	4	Years	2024-05-30	11-23-06-9067	2.9	\N	CS
+1053	Degree	60	Electronics	NED	4	Years	2023-10-31	11-23-07-8094	3.66	\N	Embedded
+1055	Degree	60	Computer Science	Bahria University	4	Years	2023-07-20	11-23-06-9026	3.22	\N	Software Engg
+1056	Course	0	Full Stack Development Course	Jawan Pakistan	4	Months	2022-09-30	11-23-06-9026	Pass	\N	MERN
+1058	Degree	60	Avionics Engineering	KIET	4	Years	2023-02-06	14-23-08-1287	3.81	\N	Avionics Engineering
+1059	Degree	35	Pre-Engineering	Hyderabad Baord	2	Years	2018-04-30	14-23-08-1287	74.18%	\N	Pre-Engineering
+1060	Degree	30	Science(Biology)	Hyderabad Board	2	Years	2016-03-30	14-23-08-1287	77.76%	\N	Biology
+1061	Degree	70	Electrical (Comm) Engineering	NUST-PNEC	2	Years	2022-01-30	11-19-08-8746	3.9	\N	Communication
+1081	Degree	60	Elecrical Engineering	IST	4	Years	2018-09-12	11-23-09-3299	3.39	\N	Embedded System
+1075	Degree	30	Electrical Welding	Sindh Board of Technical Education(S,B,T,E)	2	Years	2009-05-15	14-23-09-4373	61%	\N	Electric Welding
+1063	Degree	50	DAE Electrical	Sindh Board of Technical Education (S,B,T,E)	3	Years	2016-08-25	14-23-09-4373	63%	\N	Elcetrical
+1082	Course	0	Coursera Deep Learning	DeepLearning.AI	1	Months	2023-06-11	11-23-09-3299	NA	\N	NA
+1076	Course	0	Tech Certifcate of Electrical and Electronics Engineering	Aman Tech Foundation	1	Years	2012-06-30	14-23-09-4373	Distinction	\N	Electrical and Electronics
+1078	Course	0	Optical Fiber Transmission and Cable jointing	Telecom foundation Manpowers Training Islamabad	3	Months	2010-03-20	14-23-09-4373	A	\N	Transmission and cable jointing
+1085	Degree	60	Electrical	Habib	4	Years	2023-05-27	11-23-09-4520	3.85	\N	Power Electronics
+1087	Degree	60	B.E Electrical	NEDUET	4	Years	2023-08-15	14-23-09-6202	3.801	\N	Electrical
+1088	Degree	35	Pre-Engineering	BISE	2	Years	2019-03-20	14-23-09-6202	85.5	\N	Engineering
+1089	Degree	30	Pre-Medical	FBISE	2	Years	2017-03-20	14-23-09-6202	82%	\N	Medical
+1091	Course	0	PLC	JMAK	1	Months	2021-08-01	14-23-09-6202	-	\N	Electrical
+1093	Degree	35	Pre Engineering	Karachi Board	2	Years	2015-08-21	14-23-10-4087	65.82%	\N	Engineering
+1094	Degree	30	Science	Karachi	2	Years	2013-08-01	14-23-10-4087	72.12%	\N	Science
+1092	Degree	60	B.E(Electronics)	Hamdard	4	Years	2020-07-07	14-23-10-4087	3.61	\N	Electronics
+1095	Course	0	Design Fundamental	Upverter Altium	1	Months	2021-10-01	14-23-10-4087	N/A	\N	Designing
+1096	Course	0	Circuits & Schematic	upverter Altium	1	Months	2021-10-10	14-23-10-4087	N/A	\N	Designing
+1097	Degree	60	BE Mechanical	NED University	4	Years	2023-09-01	14-23-10-8457	3.495	\N	Mechanical
+1099	Degree	30	Science	Oxford Grammer Secondary School	2	Years	2017-04-01	14-23-10-8457	90.12%	\N	Science
+1098	Degree	35	Pre Engineering	Bahria College	2	Years	2019-05-01	14-23-10-8457	85%	\N	Engineering
+1102	Course	0	Computational Fluid Dyanmics	Fluent Ansys	2	Months	2022-12-31	14-23-10-8457	Excelent	\N	Fluent Ansys
+1103	Course	0	Solidworks Course	Slidworks	2	Months	2022-10-31	14-23-10-8457	Excelent	\N	Stuty Aid Project, NED
+1106	Degree	60	Mechanical Engineering	NED University	4	Years	2023-09-30	14-23-10-9271	3.58	\N	Mechanical Engineeing
+1108	Degree	35	Pre-Engineering	Government Dehli College	2	Years	2019-05-25	14-23-10-9271	85%	\N	Engineering
+1110	Course	0	AUTOCAD	DIGISKILLS	1	Years	2019-09-30	14-23-10-9271	A	\N	CAD
+1111	Course	0	CIT	AIPECT	1	Years	2017-10-15	14-23-10-9271	A	\N	MS Office
+1113	Degree	60	Material Engineering	GIKI	4	Years	2023-06-21	14-23-10-4401	3.15	\N	Material Engineering
+1114	Degree	35	Pre Engineering	Mirpur Khas Board	2	Years	2019-08-01	14-23-10-4401	75.1%	\N	Pre Engineering
+1115	Degree	30	Science	Mirpur khas Board	2	Years	2017-08-01	14-23-10-4401	76.47%	\N	Science
+1109	Degree	30	Science	AL Hamd Grammer School	2	Years	2017-03-20	14-23-10-9271	85.7%	\N	Science
+1116	Degree	60	Electronics	Sukkur IBA	4	Years	2022-12-30	14-23-11-7005	3.24	\N	Electronics
+1117	Degree	35	Pre-Engineering	AKU-EB	2	Years	2017-09-01	14-23-11-7005	72%	\N	Pre-Engineering
+1118	Degree	30	Science	FBISE	2	Years	2015-07-04	14-23-11-7005	80%	\N	Science
+1121	Degree	70	RF & Microwave	NUST	3.5	Years	2021-03-04	14-23-11-7532	3.4	\N	RF & Microwave
+1122	Degree	60	Electrical Engineering	IST Islamabad	4	Years	2017-08-08	14-23-11-7532	2.95	\N	Electrical Engineering
+1123	Degree	35	Pre Engineering	Bahria College	2	Years	2011-07-20	14-23-11-7532	83.7%	\N	Pre Engineering
+1124	Degree	30	Science	Bahria College	2	Years	2009-06-25	14-23-11-7532	89.9%	\N	Science
+1126	Course	0	Radar System & Antennas	NUST	14	Days	2023-10-06	14-23-11-7532	-	\N	Radar System & Antennas
+1128	Degree	60	B.E Electrical	NED	4	Years	2012-12-30	14-23-11-8162	84%	\N	Electrical
+1129	Degree	35	Pre-Engineering	Karachi Board	2	Years	2008-08-30	14-23-11-8162	84%	\N	Engineering
+1130	Degree	30	Science	Karachi Board	2	Years	2006-04-30	14-23-11-8162	88%	\N	Science
+1137	Degree	60	BSC (Hons)	KU	4	Years	1994-12-31	19-23-11-8727	B	\N	Naval Sciences
+1136	Degree	60	BSC	BU	1	Years	2007-12-31	19-23-11-8727	B	\N	War Studies
+1147	Course	0	Diploma	PIMIS	6	Months	2016-12-31	19-23-11-8727	\N	\N	Supply Chain
+1144	Course	0	CSCP	APICS (USA)	6	Months	2016-12-31	19-23-11-8727	-	-	Supply Chain
+1133	Degree	70	MBA	BU	2	Years	2018-08-31	19-23-11-8727	3.5	\N	Supply Chain
+1179	Degree	60	Bs Mechanical	Dadabhoy Institute	4	Years	2026-06-10	13-23-12-3265	\N	\N	Mechanical
+1180	Degree	50	Mechanical Technology	Jinnah Polytechnic Institute	3	Years	2016-11-18	13-23-12-3265	B Grade	\N	MT
+1182	Degree	30	SSC	Ideal Public School	2	Years	2009-05-10	13-23-12-3265	B Grade	\N	Computer Science
+1170	Degree	60	BA	Karachi University	2	Years	2009-06-07	13-23-12-4410	2 Division	\N	Arts
+1171	Degree	35	HSC	APWA Govt College	2	Years	2006-05-01	13-23-12-4410	C Grade	\N	Humanities
+1172	Degree	30	SSC	Progressive National Ideal School	10	Years	2000-03-01	13-23-12-4410	B Grade	\N	Computer Science
+1173	Course	0	H.R Internship	Pakistan State Oil	1.5	Months	2013-07-31	13-23-12-4410	\N	\N	Training and Development
+1174	Course	0	Experience Certificate	Pakistan Maritime Museum	6	Years	2021-08-31	13-23-12-4410	\N	\N	\N
+1183	Course	0	VB.net	HMCA	6	Months	2012-11-10	13-23-12-3265	\N	\N	Software Development
+1169	Degree	70	MBA	Iqra University	4	Years	2017-08-31	13-23-12-4410	2.52 CGPA	\N	Human Resource Mangement\\
+1175	Degree	60	Telecommunication Engineering	MUET	4	Years	2023-11-27	14-24-01-9796	3.50	\N	Telecommunication
+1176	Degree	35	Pre-Engineering	PSH	2	Years	2018-11-27	14-24-01-9796	80.81%	\N	Engineering
+1177	Degree	30	Science	Latif Niazi	2	Years	2016-06-05	14-24-01-9796	84.47%	\N	Science
+1149	Degree	60	BE Electronics	NED University	4	Years	2023-08-23	13-23-12-9214	3.79	\N	Electronics
+1153	Course	0	Maintenance of various departments	Artistic milliners	14	Days	2022-04-30	13-23-12-9214	NIL	NIL	Electronics
+1154	Degree	35	Intermediate	Govt Degree Science Commerce College Block 7 Gulshan-e-Iqbal	2	Years	2019-05-09	13-23-12-9214	A1	\N	Pre-Engineering
+1156	Degree	30	Matric	Shah Wilayat Public School	10	Years	2017-07-20	13-23-12-9214	A1	\N	Computer Science
+1157	Course	0	Python for Everyone	E-Hunarmand Kamyab Jawan Program	3	Months	2023-06-05	13-23-12-9214	NIL	NIL	Python
+1158	Course	0	Raspberry-pi & Computer vision course	Things Roam Accademy	2	Months	2022-11-19	13-23-12-9214	NIL	626FA04	Raspberry-pi & CV
+1161	Course	0	Arduino & IOT	Things Roam Accademy	1	Months	2022-06-06	13-23-12-9214	NIL	NIL	Arduino & IOT
+1184	Course	0	Pro-Engineering	3D Educators	3	Months	2015-01-08	13-23-12-3265	\N	\N	Mechanical Designing
+1192	Degree	35	Pre Engineering	PECHS Education Foundation Govt. Degree Science College	2	Years	2018-09-25	16-23-10-6161	71	\N	\N
+1194	Degree	30	Computer Science	Al Muhammad School System	2	Years	2016-08-05	16-23-10-6161	77	\N	\N
+1189	Degree	30	Science	Abu Turab Govt. School	2	Years	2020-07-16	16-24-01-4871	D	\N	\N
+1187	Degree	60	Electrical Engineering	NEDUET	4	Years	2022-09-26	16-23-10-6161	3.34	\N	\N
+1188	Course	0	IOT	PIAIC	1	Years	2020-12-01	16-23-10-6161	B	\N	IT
+1196	Course	0	CIT	Computer Collegiate	4	Months	2017-06-01	16-23-10-6161	B	\N	IT
+1197	Degree	60	Electronics Engineering	NED-UET	4	Years	2023-08-09	14-24-02-9289	3.174	\N	Electronics
+1198	Degree	35	Pre Engineering	BIEK	2	Years	2018-12-26	14-24-02-9289	63.27%	\N	Engineering
+1199	Degree	30	Computer Science	BSEK	2	Years	2017-03-10	14-24-02-9289	81%	\N	Computer Science
+1200	Course	0	INTRO. TOCOMP, VISION	 GLA (Online)	2	Months	2023-08-31	14-24-02-9289	-	\N	Comuter Vision
+1201	Course	0	Python for data Science	Sololearn (online)	2	Months	2022-04-30	14-24-02-9289	-	\N	Data Science
+1202	Course	0	Java	Sololearn(online)	1.5	Months	2021-10-29	14-24-02-9289	-	\N	Java programming
+1203	Course	0	Java Programming	GLA(Online)	1	Months	2021-05-30	14-24-02-9289	-	\N	Java Programming
+1204	Course	0	C++ for beginners	GLA(Online)	1	Months	2021-01-30	14-24-02-9289	-	\N	C++ Programming
+1205	Degree	60	Engineering	Mehran University	4	Years	2023-12-04	14-24-03-0179	3.85	\N	Machatronics Engineering
+1206	Degree	35	Pre Engineering	Public School Hyderabad	2	Years	2019-05-31	14-24-03-0179	74.45%	\N	Pre Engineering
+1207	Degree	30	Science (Biology)	Meritorious	2	Years	2017-04-28	14-24-03-0179	78%	\N	Science (Biology)
+1212	Course	0	Professional Industrial Automation	Auto con	5	Months	2023-09-10	14-24-03-0179	\N	\N	Industrial Automation
+1213	Degree	60	Mechanical Engineering	Mehran	4	Years	2023-11-15	14-24-03-5397	3.58	\N	Mechanical Engineering
+1214	Degree	35	Pre Engineering	BISEH	2	Years	2019-03-01	14-24-03-5397	76.27%	\N	Pre Engineering
+1215	Degree	30	Science	BISEH	2	Years	2017-03-01	14-24-03-5397	75.76%	\N	Science
+1216	Course	0	Machine Design	Coursera(online)	14	Days	2023-03-15	14-24-03-5397	Pass	\N	Machine Desgining
+1217	Course	0	Interal Combustion Engines Basic	Alison (online)	14	Days	2023-03-24	14-24-03-5397	Pass	\N	Engines Basic
+1220	Course	0	Engineering Drawing for Manufacturing	Linken In (Online)	14	Days	2021-12-24	14-24-03-5397	Pass	\N	Engineering Drawing
+1218	Course	0	Rapid prototyping	Linken In (online)	14	Days	2021-12-30	14-24-03-5397	Pass	\N	Rapid prototyping
+1221	Degree	60	Electronics Engineering	NED	4	Years	2021-11-18	14-24-04-2337	3.269	\N	Electronics
+1222	Degree	35	Pre Engineering	BIE Karachi	2	Years	2017-04-12	14-24-04-2337	68.4%	\N	Engineering
+1223	Degree	30	Science	BSE Karachi	2	Years	2015-01-01	14-24-04-2337	68.7%	\N	Science
+1224	Degree	60	CS	FAST	4	Years	2023-06-30	11-24-04-9106	2.45	\N	Software Development
+1225	Degree	60	Engineering	NED	4	Years	2022-09-24	11-24-04-8763	3.361	\N	Electronics
+\.
+
+

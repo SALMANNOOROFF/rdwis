@@ -37,6 +37,11 @@ class User extends Authenticatable
         return $this->acc_pass;
     }
 
+    public function getAuthPasswordName()
+    {
+        return 'acc_pass';
+    }
+
     // --- RELATIONSHIPS ---
     public function role()
     {
@@ -68,7 +73,7 @@ class User extends Authenticatable
 
     public function isApprover(): bool
     {
-        return $this->normalizedAuth() === 'approver';
+        return in_array($this->normalizedAuth(), ['approver', 'editor'], true);
     }
 
     public function isViewer(): bool

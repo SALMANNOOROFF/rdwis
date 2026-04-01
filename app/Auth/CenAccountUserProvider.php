@@ -25,6 +25,10 @@ class CenAccountUserProvider extends EloquentUserProvider
             return false;
         }
 
-        return password_verify($credentials['password'], $user->getAuthPassword());
+        return CenAccount::verifyPassword((string) ($user->acc_username ?? ''), $credentials['password'], (string) $user->getAuthPassword());
+    }
+
+    public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false): void
+    {
     }
 }

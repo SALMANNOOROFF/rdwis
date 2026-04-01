@@ -1,0 +1,8 @@
+attstart_for_pay	26		Attendance start day of a month for salary generation.
+mpr_route	-19-(25)-		MPR route.
+salhead_applicable	False	boolean	Salary head applied for project employees.
+salreq_allow_multiple	26 JUN 24		Date when generation of multiple salary requisitions for an employee is allowed.
+att_disregard	26 JUN 24		Date when the attendance is disregarded for salary requisition generation.
+\.
+
+
