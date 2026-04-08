@@ -67,9 +67,12 @@ Route::middleware('auth')->group(function () {
 
             return match ($area) {
                 'hr' => redirect()->route('divhr.employelist'),
-                'fin' => redirect()->route('fin.dashboard'),
+                'fin' => redirect()->route('nrdi.dashboard'), // High-level Fin lands on HQ Dashboard
                 'it' => redirect()->route('admin.dashboard'),
                 'nrdi' => redirect()->route('nrdi.dashboard'),
+                'rdw' => redirect()->route('nrdi.dashboard'), // MD lands on HQ Dashboard
+                'hqs' => redirect()->route('nrdi.dashboard'), // DDG lands on HQ Dashboard
+                'proc' => redirect()->route('nrdi.dashboard'), // DProc lands on HQ Dashboard
                 default => redirect()->route('dashboard'),
             };
         });
@@ -82,13 +85,28 @@ Route::middleware('auth')->group(function () {
             ->name('sord.dashboard')
             ->middleware('area:rdwprj,rdw');
 
-        Route::prefix('nrdi')->middleware('area:nrdi')->name('nrdi.')->group(function () {
+        Route::prefix('nrdi')->middleware('area:nrdi,rdw,hqs,proc,fin')->name('nrdi.')->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboard'])->name('dashboard');
             Route::get('/dashboard-data', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboardData'])->name('dashboard.data');
             Route::get('/contract-cases', [\App\Http\Controllers\DashboardController::class, 'contractCases'])->name('contract_cases.index');
-            Route::get('/purchase-cases', [PurchaseController::class, 'nrdiIndex'])->name('purchase_cases.index');
-            Route::get('/purchase-cases/{id}', [PurchaseController::class, 'nrdiShow'])->name('purchase_cases.show');
-            Route::post('/purchase-cases/{id}/action', [PurchaseController::class, 'nrdiAction'])->name('purchase_cases.action');
+            
+            // Standard HQ Approval Routes (Generic)
+            Route::get('/purchase-cases', [\App\Http\Controllers\PurchaseApprovalController::class, 'dashboard'])->name('purchase_cases.index');
+            Route::get('/purchase-cases/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'show'])->name('purchase_cases.show');
+            Route::post('/purchase-cases/{id}/action', [\App\Http\Controllers\PurchaseApprovalController::class, 'action'])->name('purchase_cases.action');
+
+            // Director Procurement Specialized Routes
+            Route::prefix('procurement')->name('procurement.')->group(function () {
+                Route::get('/dashboard', [\App\Http\Controllers\ProcurementDashboardController::class, 'index'])->name('purchase_cases.index');
+                Route::get('/case/{id}', [\App\Http\Controllers\ProcurementDashboardController::class, 'show'])->name('purchase_cases.show');
+            });
+
+            // Director Finance Specialized Routes
+            Route::prefix('finance')->name('finance.')->group(function () {
+                Route::get('/dashboard', [\App\Http\Controllers\FinanceDashboardController::class, 'index'])->name('purchase_cases.index');
+                Route::get('/case/{id}', [\App\Http\Controllers\FinanceDashboardController::class, 'show'])->name('purchase_cases.show');
+            });
+
             Route::get('/projects', [ProjectController::class, 'nrdiIndex'])->name('projects.index');
             Route::get('/projects/{id}', [ProjectController::class, 'nrdiShow'])->name('projects.show');
         });
@@ -154,6 +172,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/gantchartpr', function () { return view('projects.gantchartpr'); })->name('gantchartpr');
 
         // --- PURCHASE & REPORTS (Project area) ---
+        Route::get('/pc-initiation', [\App\Http\Controllers\PurchaseInitiationController::class, 'index'])->name('purchase.initiation.index');
+        Route::get('/pc-initiation/case/{id}', [\App\Http\Controllers\PurchaseInitiationController::class, 'show'])->name('purchase.initiation.show');
+        Route::get('/pc-initiation/statuses', [\App\Http\Controllers\PurchaseInitiationController::class, 'getStatuses'])->name('purchase.initiation.statuses');
+        
         Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
         Route::get('/purchase/select', [PurchaseController::class, 'select'])
             ->name('purchase.select')
@@ -167,6 +189,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase/details/{id}', [PurchaseController::class, 'show'])->name('purchasecasedetails');
         Route::post('/purchase/release/{id}', [PurchaseController::class, 'releaseCase'])
             ->name('purchase.release')
+            ->middleware('approver');
+        Route::post('/purchase/hold/{id}', [PurchaseController::class, 'holdCase'])
+            ->name('purchase.hold')
+            ->middleware('approver');
+        Route::post('/purchase/update-core/{id}', [PurchaseController::class, 'updateCore'])
+            ->name('purchase.update_core')
             ->middleware('approver');
         Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
         Route::get('/training/create', [TrainingController::class, 'create'])->name('training.create');
@@ -343,6 +371,17 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'finDashboard'])->name('dashboard');
         });
+
+    // Unified Group for High-Level Approvals (DProc, DFin, MD, DDG, DG)
+    Route::middleware(['area:proc,fin,rdw,hqs,nrdi'])->group(function () {
+        Route::get('/approvals/dashboard', [\App\Http\Controllers\PurchaseApprovalController::class, 'dashboard'])->name('approvals.dashboard');
+        Route::get('/approvals/show/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'show'])->name('approvals.show');
+        Route::post('/approvals/action/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'action'])->name('approvals.action');
+    });
+
+    // Procurement Notifications
+    Route::get('/notifications/unread', [\App\Http\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
 
     }); // End force password change
 }); // End Auth

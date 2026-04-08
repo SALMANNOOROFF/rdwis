@@ -1,6 +1,6 @@
-  @extends('welcome')
+@extends('welcome')
 @section('content')
-
+<div class="content-wrapper">
 <div class="purchase-wrapper">
 
 <style>
@@ -482,5 +482,6 @@
   });
 </script>
 
+</div>
 </div>
 @endsection

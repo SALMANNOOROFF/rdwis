@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         /* Global Responsiveness & Sidebar Toggle Fix */
@@ -123,20 +125,21 @@
           </div>
         </li>
 
-        <li class="nav-item dropdown">
-          <a class="nav-link" data-toggle="dropdown" href="#">
+        {{-- Dynamic Purchase Notifications --}}
+        <li class="nav-item dropdown" id="notif-bell-container">
+          <a class="nav-link" data-toggle="dropdown" href="#" id="pnt-bell">
             <i class="far fa-bell"></i>
-            <span class="badge badge-warning navbar-badge">15</span>
+            <span class="badge badge-warning navbar-badge d-none" id="pnt-count">0</span>
           </a>
-          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-            <span class="dropdown-item dropdown-header">15 Notifications</span>
+          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="pnt-dropdown">
+            <span class="dropdown-item dropdown-header" id="pnt-header">Notifications</span>
             <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item">
-              <i class="fas fa-envelope mr-2"></i> 4 new messages
-              <span class="float-right text-muted text-sm">3 mins</span>
-            </a>
+            <div id="pnt-list">
+              <!-- Dynamically populated -->
+              <div class="dropdown-item text-center text-muted">No new notifications</div>
+            </div>
             <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+            <a href="javascript:void(0)" class="dropdown-item dropdown-footer" id="pnt-mark-all">Mark all as read</a>
           </div>
         </li>
         
@@ -259,9 +262,9 @@
           --}}
 
           <li class="nav-item">
-              <a href="{{ route('purchase.select') }}" class="nav-link {{ Request::routeIs('purchase.select') ? 'active' : '' }}">
-                  <i class="fas fa-cart-plus nav-icon"></i>
-                  <p>PURCHASE CASE</p>
+              <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
+                  <i class="fas fa-rocket nav-icon"></i>
+                  <p>PC INITIATION HUB</p>
               </a>
           </li>
 
@@ -327,8 +330,7 @@
               </ul>
           </li>
 
-      @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'nrdi')
-
+      @elseif(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['nrdi', 'proc', 'fin', 'rdw', 'hqs']))
           <li class="nav-header">COMMAND VIEW</li>
 
           <li class="nav-item">
@@ -352,7 +354,13 @@
               </a>
               <ul class="nav nav-treeview">
                   <li class="nav-item">
-                      <a href="{{ route('nrdi.purchase_cases.index') }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases.*') ? 'active' : '' }}">
+                      @php
+                          $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
+                          $route = 'nrdi.purchase_cases.index';
+                          if($area === 'proc') $route = 'nrdi.procurement.purchase_cases.index';
+                          if($area === 'fin') $route = 'nrdi.finance.purchase_cases.index';
+                      @endphp
+                      <a href="{{ route($route) }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases.*') || Request::routeIs('nrdi.procurement.*') || Request::routeIs('nrdi.finance.*') ? 'active' : '' }}">
                           <i class="fas fa-shopping-cart nav-icon"></i><p>Purchase Cases</p>
                       </a>
                   </li>
@@ -361,7 +369,7 @@
                           <i class="fas fa-file-signature nav-icon"></i><p>Contract Cases</p>
                       </a>
                   </li>
-              </ul>
+          </ul>
           </li>
 
       @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
@@ -388,7 +396,6 @@
               </a>
           </li>
 
-          
           {{-- ========================================================= --}}
           {{-- CASE 3: UNKNOWN / NO ACCESS --}}
           {{-- ========================================================= --}}
@@ -438,19 +445,11 @@
   <script src="{{ asset('dist/js/demo.js') }}"></script>
   <script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
 
-  @stack('scripts')
-  @yield('scripts')
+    @stack('scripts')
+    @yield('scripts')
 
-  
-  @if(isset($global_varModeStr))
-  <script>
-      console.log("%c--- RDWIS ACTIVE DYNAMIC VARIABLES ---", "color: red; font-size: 16px; font-weight: bold;");
-      console.log(`%c[Role & Auth] -> User is: %c{{ strtoupper($global_userAuth ?? 'viewer') }}`, "color: blue; font-weight: bold;", "color: green; font-weight: bold;");
-      console.log(`%c[Access Mode] -> varMode: %c{{ $global_varModeStr }}`, "color: blue; font-weight: bold;", "color: magenta; font-weight: bold;");
-      console.log(`%c[Data Horizon] -> Boundary: varLower = {{ $global_lower ?? 0 }} | varUpper = {{ $global_upper ?? 0 }}`, "color: darkorange; font-weight: bold;");
-      console.log("%c----------------------------------------", "color: red; font-weight: bold;");
-  </script>
-  @endif
-
+    @auth
+        <script src="{{ asset('js/rdwis-notifications.js') }}"></script>
+    @endauth
   </body>
-  </html>
+</html>

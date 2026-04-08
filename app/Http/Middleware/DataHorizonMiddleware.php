@@ -17,17 +17,26 @@ class DataHorizonMiddleware
         if (Auth::check()) {
             $user = Auth::user();
 
-            // Intercept URL mode parameter or default to 'm'
-            // Keep in session to persist across pages if needed, or just per request.
-            $mode = $request->query('mode', session('global_horizon_mode', 'm'));
+            // Default to 's' (Organization Mode/Global) for Oversight Roles, 'm' (Module Mode/Unit) for others
+            $hqRoles = ['fin', 'proc', 'rdw', 'hqs', 'nrdi'];
+            $defaultMode = in_array(strtolower(trim($user->acc_untarea)), $hqRoles) ? 's' : 'm';
+
+            // Intercept URL mode parameter or default
+            $mode = $request->query('mode', session('global_horizon_mode', $defaultMode));
             
             // Save to session so it persists across modules without constant URL parameters
             session(['global_horizon_mode' => $mode]);
 
             // Calculate active limits mathematically based on MS Access rules
             if ($mode === 's') {
-                $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
-                $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+                // HQ Roles need GLOBAL range in Organization Mode
+                if (in_array(strtolower(trim($user->acc_untarea)), $hqRoles)) {
+                    $lower = 0;
+                    $upper = 999999;
+                } else {
+                    $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+                    $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+                }
                 $varModeStr = 'approver-s';
             } else {
                 $lower = $user->acc_lowerm;

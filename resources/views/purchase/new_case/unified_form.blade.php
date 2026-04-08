@@ -56,17 +56,24 @@
         /* Color Themes depending on Type */
         <?php 
           $theme = match($type) {
-              'consultancy', 'services', 'civil' => ['bg' => 'var(--rd-accent-soft)', 'color' => 'var(--rd-accent)', 'icon' => 'fa-layer-group'],
-              'training', 'tada' => ['bg' => 'var(--rd-warning-soft)', 'color' => 'var(--rd-warning)', 'icon' => 'fa-plane-departure'],
-              'transport', 'books', 'license', 'internet', 'publishing', 'stationery' => ['bg' => 'var(--rd-success-soft)', 'color' => 'var(--rd-success)', 'icon' => 'fa-box-open'],
+              'consultancy', 'cons', 'services', 'serv', 'civil', 'civ' => ['bg' => 'var(--rd-accent-soft)', 'color' => 'var(--rd-accent)', 'icon' => 'fa-layer-group'],
+              'training', 'trn', 'tada' => ['bg' => 'var(--rd-warning-soft)', 'color' => 'var(--rd-warning)', 'icon' => 'fa-plane-departure'],
+              'transport', 'tran', 'books', 'book', 'license', 'lic', 'internet', 'net', 'publishing', 'pub', 'stationery', 'stat' => ['bg' => 'var(--rd-success-soft)', 'color' => 'var(--rd-success)', 'icon' => 'fa-box-open'],
               default => ['bg' => 'var(--rd-accent-soft)', 'color' => 'var(--rd-accent)', 'icon' => 'fa-file-invoice']
           };
           
           $titles = [
-              'consultancy' => 'Consultancy Case', 'services' => 'Outsourced Services', 'civil' => 'Civil Works / Upfit',
-              'training' => 'Training Program', 'tada' => 'TA / DA Entry',
-              'transport' => 'Transport Expense', 'books' => 'Books & Magazines', 'license' => 'License Fees',
-              'internet' => 'Communication & Internet', 'publishing' => 'Publishing / Reg. Fees', 'stationery' => 'Stationery'
+              'consultancy' => 'Consultancy Case', 'cons' => 'Consultancy Case',
+              'services' => 'Outsourced Services', 'serv' => 'Outsourced Services',
+              'civil' => 'Civil Works / Upfit', 'civ' => 'Civil Works / Upfit',
+              'training' => 'Training Program', 'trn' => 'Training Program',
+              'tada' => 'TA / DA Entry',
+              'transport' => 'Transport Expense', 'tran' => 'Transport Expense',
+              'books' => 'Books & Magazines', 'book' => 'Books & Magazines',
+              'license' => 'License Fees', 'lic' => 'License Fees',
+              'internet' => 'Communication & Internet', 'net' => 'Communication & Internet',
+              'publishing' => 'Publishing / Reg. Fees', 'pub' => 'Publishing / Reg. Fees',
+              'stationery' => 'Stationery', 'stat' => 'Stationery'
           ];
           $pageTitle = $titles[$type] ?? 'New Purchase Case';
         ?>
@@ -107,15 +114,44 @@
       <!-- Topbar -->
       <div class="sinc-topbar">
         <div>
-          <div class="sinc-page-title">
-            <span class="title-icon theme-icon"><i class="fas <?= $theme['icon'] ?>"></i></span>
-            <?= $pageTitle ?>
+          <div class="sinc-page-title d-flex align-items-center">
+            <span class="title-icon theme-icon mr-3"><i class="fas <?= $theme['icon'] ?>"></i></span>
+            <div class="d-flex flex-column">
+                <span class="small text-muted font-weight-bold rajdhani" style="letter-spacing: 1px; font-size: 10px;">PROCUREMENT CATEGORY</span>
+                <select id="typeSwitcher" class="form-control form-control-sm rajdhani font-weight-bold" 
+                        style="background:transparent; border:none; color:var(--rd-text1); font-size:1.2rem; padding:0; height:auto; cursor:pointer;"
+                        onchange="if(this.value) window.location.href='/purchase/new/'+this.value">
+                    @foreach([
+                        'material' => 'Material / Equipment Purchase',
+                        'consultancy' => 'Consultancy Services',
+                        'services' => 'Outsourced Services',
+                        'civil' => 'Civil Works / Upfit',
+                        'training' => 'Training Program',
+                        'tada' => 'TA / DA Entry',
+                        'transport' => 'Transport Expense',
+                        'books' => 'Books & Magazines',
+                        'license' => 'License & Software',
+                        'internet' => 'Communication & Internet',
+                        'publishing' => 'Publishing / Registration',
+                        'stationery' => 'Stationery / Consumables'
+                    ] as $val => $lbl)
+                        <option value="{{ $val }}" {{ $type == $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                    @endforeach
+                </select>
+            </div>
           </div>
-          <div style="font-size:0.75rem;color:#64748b;font-weight:500;margin-top:2px">Unified form processor for specialized procurement cases. Fill the required fields below.</div>
         </div>
-        <a href="{{ route('purchase.select') }}" class="btn-cancel" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--rd-border2);border-radius:10px;background:var(--rd-surface);color:var(--rd-text2);font-size:0.85rem;font-weight:700;text-decoration:none;box-shadow:0 2px 4px rgba(0,0,0,0.1)"> 
-          <i class="fas fa-arrow-left" style="font-size:0.75rem"></i> Back to Selection
-        </a>
+        
+        <div class="d-flex gap-2 align-items-center">
+            <a href="{{ route('purchase.initiation.index') }}" class="btn-cancel px-3 py-2 mr-2" style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--rd-border2);border-radius:10px;background:var(--rd-surface);color:var(--rd-text2);font-size:0.85rem;font-weight:700;text-decoration:none;"> 
+              <i class="fas fa-arrow-left"></i> BACK TO HUB
+            </a>
+            
+            <div class="glass-card px-3 py-2 d-flex align-items-center" style="background: rgba(0,123,255,0.05); border: 1px solid rgba(0,123,255,0.1); border-radius: 12px;">
+                <i class="fas fa-shield-alt text-primary mr-2" style="font-size: 12px;"></i>
+                <span class="rajdhani text-white font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">SECURE INITIATION MODE</span>
+            </div>
+        </div>
       </div>
 
       <div class="sinc-card">
@@ -126,7 +162,7 @@
         
         <form class="soft-form" id="unifiedPurchaseForm" action="{{ route('purchase.store') }}" method="POST" onsubmit="return handleFormSubmit(event)">
           @csrf
-          <input type="hidden" name="pcs_type" value="pt"> <!-- Legacy fallback -->
+          <input type="hidden" name="pcs_type" value="{{ $type }}">
           
           <!-- BASE FIELDS REQUIRED FOR ALL -->
           <div class="soft-row-3">
@@ -522,11 +558,55 @@
             </div>
           @endif
           
-          <div class="soft-group mt-5 text-right" style="text-align:right">
-            <button type="submit" class="btn-submit" id="mainSubmitBtn"><i class="fas fa-check-circle"></i> Save & Initialize Case</button>
+          <!-- FORM ACTIONS -->
+          <div class="mt-5 p-4 d-flex justify-content-between align-items-center" style="background:var(--rd-surface3); border-radius: 20px; border: 1px solid var(--rd-border);">
+            <div class="text-left">
+                <p class="mb-0 text-muted small"><i class="fas fa-info-circle mr-1"></i> You can save this case as a <strong>Draft</strong> to add quotations later,</p>
+                <p class="mb-0 text-muted small">or <strong>Release Immediately</strong> if you have already attached all required documents.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <input type="hidden" name="release_directly" id="release_directly_flag" value="0">
+                <input type="hidden" name="initiation_remarks" id="initiation_remarks_payload" value="">
+
+                <button type="submit" id="draftSubmitBtn" class="btn btn-dark px-4 py-3 shadow-sm" style="font-weight:700; border-radius: 14px; background: #1e293b; color:#fff; border: 1px solid #334155; height: 55px;">
+                   <i class="fas fa-save mr-2"></i> SAVE AS DRAFT
+                </button>
+
+                <button type="button" id="releaseSubmitBtn" class="btn btn-primary px-5 py-3 rajdhani font-weight-bold shadow-lg ml-2" 
+                        onclick="confirmAndRelease()"
+                        style="background: linear-gradient(135deg, #0284c7, #0369a1); border-radius: 14px; font-size: 1.1rem; letter-spacing: 1px; border: none; height: 55px;">
+                   <i class="fas fa-paper-plane mr-2 text-white"></i> SAVE & FORWARD
+                </button>
+            </div>
           </div>
         </form>
       </div>
+
+    {{-- Confirmation Modal for Direct Release --}}
+    <div class="sinc-popup-overlay" id="releaseDirectModal">
+        <div class="sinc-popup-box" style="max-width: 450px;">
+            <div class="sinc-popup-icon" style="background: rgba(0, 123, 255, 0.1); color: #007bff;"><i class="fas fa-paper-plane"></i></div>
+            <div class="sinc-popup-title" style="font-size: 1.2rem;">Forward to Director Procurement</div>
+            <div class="sinc-popup-text text-left mb-0">
+                You are forwarding this case to **Director Procurement** (Technical Scrutiny Unit) for formal review.
+                <br><br>
+                <div class="d-flex align-items-center mb-2">
+                    <label class="small font-weight-bold text-muted text-uppercase mb-0">Initiation Remarks (Optional)</label>
+                    <span class="badge badge-dark ml-2" style="font-size: 8px; opacity: 0.5;">OPTIONAL</span>
+                </div>
+                <textarea id="directRemarksInput" class="soft-input w-100 mb-3 p-3" rows="3" placeholder="Enter context or specific justification (optional)..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--rd-border); border-radius:12px; color:white; font-size: 0.9rem;"></textarea>
+                
+                <div class="alert alert-info border-0 p-3 mb-4" style="background: rgba(0, 123, 255, 0.05); border-radius: 12px; border: 1px solid rgba(0,123,255,0.1) !important;">
+                    <i class="fas fa-shield-alt mr-2 text-primary"></i>
+                    <span class="small text-muted">Authority: <strong>Director Procurement</strong> will review items and specifications.</span>
+                </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-center">
+                <button class="btn btn-dark px-4 py-2 mr-2" onclick="document.getElementById('releaseDirectModal').classList.remove('show')" style="border-radius:12px; border: 1px solid var(--rd-border);">CANCEL</button>
+                <button class="sinc-popup-btn px-4 py-2" id="finalReleaseBtn" onclick="executeDirectRelease()" style="border-radius:12px; width: auto !important; background: var(--rd-accent);">PROCEED & FORWARD</button>
+            </div>
+        </div>
+    </div>
 
     </div>
   </div>
@@ -620,14 +700,38 @@
   });
   <?php endif; ?>
 
+  // ----- Direct Release Logic -----
+  function confirmAndRelease() {
+      document.getElementById('releaseDirectModal').classList.add('show');
+  }
+
+  function executeDirectRelease() {
+      const remarks = document.getElementById('directRemarksInput').value;
+      
+      document.getElementById('release_directly_flag').value = '1';
+      document.getElementById('initiation_remarks_payload').value = (remarks && remarks.trim().length > 0) ? remarks : "No Comments";
+      
+      const btn = document.getElementById('finalReleaseBtn');
+      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+      btn.disabled = true;
+
+      document.getElementById('unifiedPurchaseForm').submit();
+  }
+
   // ----- Form Submission Handling -----
   function handleFormSubmit(e) {
-      // Just showing notification and submitting normally
-      fireToast('Saving case... Please wait', 'success');
-      const btn = document.getElementById('mainSubmitBtn');
-      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
-      btn.style.pointerEvents = 'none';
-      btn.style.opacity = '0.8';
+      fireToast('Synchronizing with ledger... Please wait', 'success');
+      
+      // If direct release wasn't triggered, it's a draft
+      const isDraft = document.getElementById('release_directly_flag').value === '0';
+      const btnId = isDraft ? 'draftSubmitBtn' : 'finalReleaseBtn';
+      const btn = document.getElementById(btnId);
+      
+      if (btn) {
+          btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+          btn.style.pointerEvents = 'none';
+          btn.style.opacity = '0.8';
+      }
       return true; 
   }
 

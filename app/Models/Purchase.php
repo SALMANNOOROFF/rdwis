@@ -76,6 +76,28 @@ class Purchase extends Model
         return $this->hasMany(PurAttachment::class, 'pat_objid', 'pcs_id');
     }
 
+    /**
+     * Approval trail decisions
+     */
+    public function decisions()
+    {
+        return $this->hasMany(PurDecision::class, 'pdec_pcs_id', 'pcs_id')->orderBy('pdec_id', 'desc');
+    }
 
+    /**
+     * The single most recent decision for quick status context
+    */
+    public function latestDecision()
+    {
+        return $this->hasOne(PurDecision::class, 'pdec_pcs_id', 'pcs_id')->latestOfMany('pdec_id');
+    }
+
+    /**
+     * Purchase notifications
+     */
+    public function notifications()
+    {
+        return $this->hasMany(PurNotification::class, 'pnt_pcs_id', 'pcs_id');
+    }
 }
 

@@ -6,6 +6,10 @@
 
 /* ===== SCOPED to .dg-page ===== */
 .dg-page { font-family:'Inter',sans-serif; }
+.text-gold { color: #f39c12 !important; }
+.bg-navy { background-color: #001f3f !important; }
+.border-gold { border-top: 3px solid #f39c12 !important; }
+.border-left-gold { border-left: 5px solid #f39c12 !important; }
 
 /* ---- Page Header ---- */
 .dg-hdr { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
@@ -314,14 +318,16 @@
                 $sortedQ      = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->values() : collect([]);
 
                 $caseValue      = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
-                $totalBudget    = 5000000;
-                $utilizedBudget = 3200000;
-                $balanceAfter   = ($totalBudget - $utilizedBudget) - $caseValue;
+                
+                // Live Financials from $head (Project)
+                $totalBudget    = (float)($head->prj_aprvcost ?? 5000000); 
+                $utilizedBudget = $totalBudget - (float)($head->hed_balance ?? $totalBudget);
+                $balanceAfter   = (float)($head->hed_balance ?? 0) - $caseValue;
 
-                $pctUtilized  = ($utilizedBudget / $totalBudget) * 100;
-                $pctCase      = ($caseValue / $totalBudget) * 100;
+                $pctUtilized  = $totalBudget > 0 ? ($utilizedBudget / $totalBudget) * 100 : 0;
+                $pctCase      = $totalBudget > 0 ? ($caseValue / $totalBudget) * 100 : 0;
                 $pctRemaining = max(0, ($balanceAfter / $totalBudget) * 100);
-                $returnCount  = collect($approvalTrail ?? [])->where('action', 'Returned')->count();
+                $returnCount  = $purchase->decisions->where('pdec_action', 'return')->count();
             @endphp
 
             {{-- Page Header --}}
@@ -329,9 +335,9 @@
                 {{-- Top Row: Title + Back Button --}}
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <div style="font-family:'Rajdhani',sans-serif; font-size:24px; font-weight:700; color:#fff; letter-spacing:1px; text-transform:uppercase;">
-                        <i class="fas fa-shopping-cart mr-2" style="color:var(--rd-accent); font-size:18px;"></i> Purchase Case
+                        <i class="fas fa-shopping-cart mr-2" style="color:var(--rd-accent); font-size:18px;"></i> {{ $pageTitle ?? 'Purchase Case' }}
                     </div>
-                    <a href="{{ route('nrdi.purchase_cases.index') }}" class="dg-back-btn">
+                    <a href="{{ route('approvals.dashboard') }}" class="dg-back-btn">
                         <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
                     </a>
                 </div>
@@ -506,94 +512,11 @@
                     </div>
                     @endif
 
-                    {{-- DG Decision --}}
-                    <div class="dg-panel-r">
-                        <div class="dg-panel-r-hdr">
-                            <i class="fas fa-gavel" style="color:var(--rd-accent);font-size:11px;"></i>
-                            <span class="dg-panel-r-title">Command Decision</span>
-                        </div>
-                        <form action="{{ route('nrdi.purchase_cases.action', $purchase->pcs_id) }}" method="POST" id="dgActionForm">
-                            @csrf
-                            <input type="hidden" name="action" id="dgActionMethod" value="">
-                            <div style="padding:14px;">
-                                <label style="font-size:10px;font-weight:600;color:var(--rd-text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:4px;">
-                                    Remarks / Directives <span id="dgRemarksReq" style="color:var(--rd-danger);display:none;">*</span>
-                                </label>
-                                <textarea name="remarks" class="dg-remarks-textarea" id="dgRemarksField" rows="3" placeholder="Enter remarks before returning or rejecting..."></textarea>
-                                <div class="dg-remarks-error" id="dgRemarksError">
-                                    <i class="fas fa-exclamation-circle"></i> Remarks required.
-                                </div>
-                                <div style="margin-top:11px;">
-                                    <button type="button" class="dg-btn-approve" id="dgBtnApprove">
-                                        <i class="fas fa-check-circle mr-1"></i> Approve Case
-                                    </button>
-                                    <div class="dg-btn-row">
-                                        <button type="button" class="dg-btn-return" id="dgBtnReturn">
-                                            <i class="fas fa-undo mr-1"></i> Return
-                                        </button>
-                                        <button type="button" class="dg-btn-reject" id="dgBtnReject">
-                                            <i class="fas fa-times-circle mr-1"></i> Not Approved
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                    {{-- Command Decision Panel --}}
+                    @include('approvals._action_box')
 
                     {{-- Approval Trail --}}
-                    <div class="dg-panel-r">
-                        <div class="dg-panel-r-hdr">
-                            <i class="fas fa-random" style="color:var(--rd-accent);font-size:11px;"></i>
-                            <span class="dg-panel-r-title">Approval Trail</span>
-                        </div>
-                        <div class="dg-trail-body" style="max-height:320px;overflow-y:auto;">
-                            {{-- Awaiting Decision — always at top --}}
-                            <div class="dg-pending" style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--rd-border);">
-                                <div class="dg-pulse-ring">
-                                    <i class="fas fa-hourglass-half" style="font-size:9px;color:var(--rd-info);"></i>
-                                </div>
-                                <div>
-                                    <div style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--rd-info);">Director General (NRDI)</div>
-                                    <span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(23,162,184,0.12);color:var(--rd-info);letter-spacing:.5px;margin-top:3px;">AWAITING DECISION</span>
-                                </div>
-                            </div>
-
-                            {{-- Trail items: recent first (data comes recent-first from controller) --}}
-                            @foreach($approvalTrail ?? [] as $idx => $trail)
-                                @php
-                                    $isReturn  = ($trail->action == 'Returned');
-                                    $isInit    = ($trail->action == 'Initiated');
-                                    $isForward = ($trail->action == 'Forwarded');
-
-                                    $nc='#6b7a94'; $cc='rgba(107,122,148,0.2)'; $bb='rgba(107,122,148,0.12)'; $bc='#9ba8bf'; $ico='fas fa-circle';
-                                    if($isInit)        { $nc='#9ba8bf'; $bb='rgba(155,168,191,0.12)'; $bc='#9ba8bf'; $ico='fas fa-play'; }
-                                    elseif($isReturn)  { $nc='var(--rd-danger)'; $cc='rgba(220,53,69,0.15)'; $bb='rgba(220,53,69,0.1)'; $bc='#f87171'; $ico='fas fa-undo'; }
-                                    elseif($isForward) { $nc='var(--rd-info)'; $cc='rgba(23,162,184,0.15)'; $bb='rgba(23,162,184,0.1)'; $bc='#60c4d6'; $ico='fas fa-arrow-down'; }
-                                    else               { $nc='var(--rd-success)'; $cc='rgba(40,167,69,0.15)'; $bb='rgba(40,167,69,0.1)'; $bc='#4ade80'; $ico='fas fa-check'; }
-                                @endphp
-                                <div class="dg-tl-item" style="animation-delay:{{ $idx*100+100 }}ms;">
-                                    <div class="dg-tl-line">
-                                        <div class="dg-tl-node" style="background:{{$nc}};color:#fff;">
-                                            <i class="{{ $ico }}" style="font-size:8px;"></i>
-                                        </div>
-                                        @if(!$loop->last)
-                                        <div class="dg-tl-connector" style="background:{{$cc}};{{ $isReturn ? 'border-left:1px dashed rgba(220,53,69,0.3);background:transparent;width:0;margin-left:12px;' : '' }}"></div>
-                                        @endif
-                                    </div>
-                                    <div class="dg-tl-content">
-                                        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px;">
-                                            <div class="dg-tl-actor">{{ $trail->actor }}</div>
-                                            <div class="dg-tl-time">{{ \Carbon\Carbon::parse($trail->date)->format('d M, H:i') }}</div>
-                                        </div>
-                                        <span class="dg-tl-badge" style="background:{{$bb}};color:{{$bc}};border:1px solid {{$bb}};">{{ $trail->action }}</span>
-                                        @if($trail->comment)
-                                        <div class="dg-tl-comment" style="border-color:{{$nc}};">"{{ $trail->comment }}"</div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
+                    @include('approvals._decision_trail')
 
                 </div>
             </div>

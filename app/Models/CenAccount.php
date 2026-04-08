@@ -517,7 +517,7 @@ class CenAccount extends Authenticatable
     {
         $area = $this->normalizedArea();
 
-        return in_array($area, ['rdwprj', 'prjrdw', 'rdw'], true);
+        return in_array($area, ['rdwprj', 'prjrdw'], true);
     }
 
     public function isDivision()

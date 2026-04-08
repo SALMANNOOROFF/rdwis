@@ -19,12 +19,29 @@ class CheckArea
         $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
         $userAreas = [$userArea];
 
-        if (in_array($userArea, ['rdwprj', 'prjrdw'], true)) {
+        // RDW / SORD Mapping
+        if (in_array($userArea, ['rdw', 'rdwprj', 'prjrdw'], true)) {
             $userAreas = ['rdw', 'prj', 'rdwprj', 'prjrdw'];
         }
 
+        // DG / NRDI Mapping (Full Access)
         if ($userArea === 'nrdi') {
-            $userAreas = ['nrdi', 'prj', 'hr', 'fin', 'rdw', 'rdwprj', 'prjrdw'];
+            $userAreas = ['nrdi', 'prj', 'hr', 'fin', 'rdw', 'rdwprj', 'prjrdw', 'proc', 'hqs'];
+        }
+
+        // Procurement Department Mapping
+        if ($userArea === 'proc') {
+            $userAreas = ['proc', 'prj'];
+        }
+
+        // Finance Department Mapping
+        if ($userArea === 'fin') {
+            $userAreas = ['fin', 'prj'];
+        }
+
+        // HQs / DDG Mapping
+        if ($userArea === 'hqs') {
+            $userAreas = ['hqs', 'prj', 'rdw'];
         }
 
         foreach ($areas as $area) {

@@ -244,53 +244,48 @@
 
         {{-- ================= STATUS FLOW LOGIC ================= --}}
         @php
-            $subTotal = 0;
-            foreach($purchase->items as $item) {
-                $subTotal += ($item->pci_qty * $item->pci_price);
-            }
-
-            $commonStart = ['Draft', 'Under Scrutiny', 'Forward to MD'];
-            $commonEnd   = [
-                'Approved',
-                'Email to MTSS',
-                'PO Issued by MTSS',
-                'Docs Submitted to Fin',
-                'Docs Forward to MTSS',
-                'Cheque Ready',
-                'Cheque Collected'
+            $workflowSteps = [
+                'Draft', 
+                'Under Scrutiny', 
+                'With DFinance', 
+                'With MD', 
+                'With DDG', 
+                'With DG', 
+                'Approved'
             ];
 
-            if ($subTotal < 400000) {
-                $workflowSteps = array_merge($commonStart, $commonEnd);
-            } elseif ($subTotal < 1000000) {
-                $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DDG'], $commonEnd);
-            } else {
-                $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DG'], $commonEnd);
-            }
-
             $activeIndex = array_search($currentStatus, $workflowSteps);
-            if ($activeIndex === false) $activeIndex = 0;
+            if ($activeIndex === false) {
+                // Handle non-standard statuses (like Returned, Rejected)
+                $activeIndex = 0; 
+            }
 
             $currentLabel = $workflowSteps[$activeIndex];
             $nextLabel = $workflowSteps[$activeIndex + 1] ?? 'Process Completed';
         @endphp
 
         {{-- ================= STATUS DISPLAY ================= --}}
-        @if($currentStatus === 'Draft')
-            <!-- ONLY DRAFT (NO NEXT) -->
-            <div class="status-flow-container mt-3">
-                <div class="stage-box current-box w-100 text-left">
-                    <span class="stage-label">Current Stage</span>
-                    <span class="stage-value">
-                        <i class="fas fa-dot-circle mr-1"></i> Draft
-                    </span>
+        @if($currentStatus === 'Draft' || $currentStatus === 'Returned')
+            <!-- PROCESS BANNER: ACTION REQUIRED -->
+            <div class="alert alert-warning border-0 shadow-sm rounded-lg d-flex align-items-center justify-content-between p-3 mt-3" style="background: linear-gradient(to right, #fffdf0, #fff); border-left: 6px solid #ffc107 !important;">
+                <div>
+                    <h5 class="mb-1 font-weight-bold text-dark"><i class="fas fa-exclamation-triangle mr-2"></i> ACTION REQUIRED: CASE NOT YET RELEASED</h5>
+                    <p class="mb-0 text-muted">This case is currently in <strong>{{ $currentStatus }}</strong> mode. Changes are allowed, but headquarters will NOT see this case until you release it.</p>
+                </div>
+                <div class="text-right">
+                    <form action="{{ route('purchase.release', $purchase->pcs_id) }}" method="POST" id="topReleaseForm">
+                        @csrf
+                        <button type="button" class="btn btn-warning btn-lg rounded-pill px-4 font-weight-bold shadow-sm unlock" onclick="if(confirm('Release to HQ Scrutiny?')) document.getElementById('topReleaseForm').submit();">
+                            <i class="fas fa-paper-plane mr-2"></i> RELEASE TO HEADQUARTERS
+                        </button>
+                    </form>
                 </div>
             </div>
         @else
             <!-- NORMAL FLOW -->
             <div class="status-flow-container mt-3 overflow-auto">
                 <div class="stage-box current-box" style="min-width: fit-content;">
-                    <span class="stage-label">Previous Stage</span>
+                    <span class="stage-label">Current Status</span>
                     <span class="stage-value text-nowrap">
                         <i class="fas fa-dot-circle mr-1"></i> {{ $currentLabel }}
                     </span>
@@ -301,7 +296,7 @@
                 </div>
 
                 <div class="stage-box next-box" style="min-width: fit-content;">
-                    <span class="stage-label">Current Stage</span>
+                    <span class="stage-label">Pending With</span>
                     <span class="stage-value text-nowrap">
                         <i class="fas fa-arrow-circle-right mr-1"></i> {{ $nextLabel }}
                     </span>
@@ -320,77 +315,10 @@
 @endphp
 
 @if($currentStatus !== 'Draft')
-    <!-- COLUMN 1: TIMELINE -->
-    <div class="timeline-container">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-0 pb-0 pt-4">
-                <h6 class="text-uppercase text-secondary font-weight-bold"
-                    style="letter-spacing: 1px; font-size: 12px;">
-                    <i class="fas fa-stream mr-2"></i> Case Workflow
-                </h6>
-            </div>
-
-            <div class="card-body">
-                @php
-                    $subTotal = 0;
-                    foreach($purchase->items as $item) {
-                        $subTotal += ($item->pci_qty * $item->pci_price);
-                    }
-
-                    $commonStart = ['Draft', 'Under Scrutiny', 'Forward to MD'];
-                    $commonEnd   = ['Approved', 'Email to MTSS', 'PO Issued by MTSS', 'Docs Submitted to Fin', 'Docs Forward to MTSS', 'Cheque Ready', 'Cheque Collected'];
-
-                    if ($subTotal < 400000)
-                        $workflowSteps = array_merge($commonStart, $commonEnd);
-                    elseif ($subTotal < 1000000)
-                        $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DDG'], $commonEnd);
-                    else
-                        $workflowSteps = array_merge($commonStart, ['Recommended & Forward to DG'], $commonEnd);
-
-                    $activeIndex = array_search($currentStatus, $workflowSteps) ?: 0;
-                    $purchaseHistory = $purchase->history ?? collect([]);
-                @endphp
-
-                <div class="timeline-vertical-container">
-                    @foreach($workflowSteps as $index => $stepLabel)
-                        @php
-                            $historyDate = null;
-                            $hEntry = $purchaseHistory
-                                ->filter(fn($h) => stripos($h->status ?? '', $stepLabel) !== false)
-                                ->sortByDesc('created_at')
-                                ->first();
-
-                            if($hEntry)
-                                $historyDate = \Carbon\Carbon::parse($hEntry->created_at)->format('d M Y');
-
-                            $stateClass = 'pending';
-                            $statusText = '-';
-                            $icon = '<i class="fas fa-circle" style="font-size: 8px;"></i>';
-
-                            if ($index <= $activeIndex) {
-                                $stateClass = 'completed';
-                                $statusText = $historyDate ?: 'Completed';
-                                $icon = '<i class="fas fa-check"></i>';
-                            } elseif ($index == $activeIndex + 1) {
-                                $stateClass = 'active';
-                                $statusText = 'Processing';
-                                $icon = '<i class="fas fa-spinner fa-spin"></i>';
-                            }
-                        @endphp
-
-                        <div class="stepper-item {{ $stateClass }}">
-                            <div class="stepper-icon">{!! $icon !!}</div>
-                            <div class="stepper-content">
-                                <div class="stepper-label">{{ $stepLabel }}</div>
-                                <div class="stepper-date">{{ $statusText }}</div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-            </div>
+        <!-- COLUMN 1: TIMELINE -->
+        <div class="timeline-container">
+            @include('approvals._decision_trail')
         </div>
-    </div>
 @endif
 
 
@@ -496,12 +424,12 @@
     <!-- Back Button (always visible) -->
     <button onclick="history.back()" class="btn btn-outline-secondary mr-2 unlock">Back</button>
 
-    <!-- Release Case Form (only if Draft) -->
-    @if(trim($purchase->pcs_status) === 'Draft')
+    <!-- Release Case Form (only if Draft or Returned) -->
+    @if(in_array(trim($purchase->pcs_status), ['Draft', 'Returned']))
         <form action="{{ route('purchase.release', $purchase->pcs_id) }}" method="POST" id="releaseCaseForm" style="display: inline-block;">
             @csrf
             <button type="button" class="btn btn-primary px-4 shadow-sm unlock" onclick="confirmRelease()">
-                <i class="fas fa-paper-plane mr-1"></i> Release Case
+                <i class="fas fa-paper-plane mr-1 text-white"></i> Release Case
             </button>
         </form>
     @endif

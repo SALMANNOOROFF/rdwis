@@ -1,6 +1,9 @@
 @php
-    $divPending = $cases->whereIn('pcs_status', ['Pending', 'Under Scrutiny', 'Forwarded', 'Draft', 'Submitted']);
-    $divProcessed = $cases->whereIn('pcs_status', ['Approved', 'Returned', 'Rejected']);
+    $activeStatuses = ['Pending', 'Under Scrutiny', 'Forwarded', 'Draft', 'Submitted', 'With DFinance', 'With MD', 'With DDG', 'With DG'];
+    $processedStatuses = ['Approved', 'Returned', 'Rejected'];
+    
+    $divPending = $cases->whereIn('pcs_status', $activeStatuses);
+    $divProcessed = $cases->whereIn('pcs_status', $processedStatuses);
 @endphp
 
 <div class="card shadow-sm border-0 rounded-lg">

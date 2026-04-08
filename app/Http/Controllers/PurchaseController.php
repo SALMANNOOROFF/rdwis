@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
+use App\Services\PurchaseApprovalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseController extends Controller
 {
+    protected $approvalService;
+
+    public function __construct(PurchaseApprovalService $approvalService)
+    {
+        $this->approvalService = $approvalService;
+    }
     /**
      * Show list of purchases for logged-in user's unit
      */
@@ -139,8 +146,11 @@ class PurchaseController extends Controller
     /**
      * unified dynamic creation view
      */
-    public function unifiedCreate(Request $request, $type)
+    public function unifiedCreate(Request $request, $type = 'material')
     {
+        // If type is empty or generic, default to material
+        if (!$type || $type == 'all') $type = 'material';
+
         $maxId = DB::table('pur.purcases')->max('pcs_id');
         $nextId = $maxId ? ($maxId + 1) : 1;
 
@@ -150,6 +160,7 @@ class PurchaseController extends Controller
                     ->get();
         
         // Use the refined split-view form for consultancy and services (Outsourcing)
+        // Note: For total unification, we might eventually merge consultancy_form into unified_form
         if (in_array($type, ['consultancy', 'services'])) {
             return view('purchase.new_case.consultancy_form', compact('nextId', 'heads', 'type'));
         }
@@ -168,50 +179,80 @@ class PurchaseController extends Controller
             'pcs_hed_id' => 'required',
             'pcs_date' => 'required',
             'pcs_minute' => 'required',
+            'pcs_type' => 'required|string',
         ]);
 
-        // 2. Get Login User Unit ID
-        $userUnitId = Auth::user()->acc_unt_id;
+        return DB::transaction(function () use ($request) {
+            $userUnitId = Auth::user()->acc_unt_id;
 
-        $pcs = new Purchase();
-        $pcs->pcs_date = $request->pcs_date;
-        $pcs->pcs_title = $request->pcs_title;
-        $pcs->pcs_minute = $request->pcs_minute;
-        
-        // Handle remarks_JSON to pcs_remarks
-        if ($request->has('remarks_JSON')) {
-            $pcs->pcs_remarks = json_encode($request->remarks_JSON);
-        }
+            $pcs = new Purchase();
+            $pcs->pcs_date = $request->pcs_date;
+            $pcs->pcs_title = $request->pcs_title;
+            $pcs->pcs_minute = $request->pcs_minute;
+            
+            // Map long types to 5-char codes for DB varchar(5) limit
+            $typeMap = [
+                'material'    => 'mat',
+                'consultancy' => 'cons',
+                'services'    => 'serv',
+                'civil'       => 'civ',
+                'training'    => 'trn',
+                'tada'        => 'tada',
+                'transport'   => 'tran',
+                'books'       => 'book',
+                'license'     => 'lic',
+                'internet'    => 'net',
+                'publishing'  => 'pub',
+                'stationery'  => 'stat',
+            ];
+            $pcs->pcs_type = $typeMap[$request->pcs_type] ?? substr($request->pcs_type, 0, 5);
+            
+            if ($request->has('remarks_JSON')) {
+                $pcs->pcs_remarks = json_encode($request->remarks_JSON);
+            }
 
-        $pcs->pcs_status = 'Draft';
-
-        // SETTING UNIT ID FROM LOGIN USER
-        // Ab yeh case hamesha usi bande ke account mein show hoga jo login hai
-        $pcs->pcs_unt_id = $userUnitId; 
-        $pcs->pcs_effunt_id = $userUnitId; 
-        $pcs->pcs_intunt_id = $userUnitId;
-
-        // Baki Mandatory fields
-        $pcs->pcs_hed_id = $request->pcs_hed_id;
-        $pcs->pcs_effhed_id = $request->pcs_hed_id;
-
-        // Default Numeric values for NOT NULL constraints
-        $pcs->pcs_price = 0;
-        $pcs->pcs_midprice = 0;
-        $pcs->pcs_inttax = 0;
-        $pcs->pcs_midtax = 0;
-
-        // Other required fields from diagram
-        $pcs->pcs_transtype = 1;
-        $pcs->pcs_noloan = false;
-        $pcs->pcs_type = 'pt';
-
-        try {
+            $pcs->pcs_status = 'Draft';
+            $pcs->pcs_unt_id = $userUnitId; 
+            $pcs->pcs_effunt_id = $userUnitId; 
+            $pcs->pcs_intunt_id = $userUnitId;
+            $pcs->pcs_hed_id = $request->pcs_hed_id;
+            $pcs->pcs_effhed_id = $request->pcs_hed_id;
+            $pcs->pcs_price = 0;
+            $pcs->pcs_midprice = 0;
+            $pcs->pcs_inttax = 0;
+            $pcs->pcs_midtax = 0;
+            $pcs->pcs_transtype = 1;
+            $pcs->pcs_noloan = false;
+            // Calculate Total Price from Items in remarks_JSON
+            $totalPrice = 0;
+            if ($request->has('remarks_JSON.items')) {
+                foreach ($request->input('remarks_JSON.items') as $item) {
+                    $qty = (float)($item['qty'] ?? ($item['amount'] ?? 0)); // handle different form keys
+                    $rate = (float)($item['rate'] ?? 1); // if it's simple amount, rate is 1
+                    $totalPrice += ($qty * $rate);
+                }
+            } elseif ($request->has('remarks_JSON.milestones')) {
+                 foreach ($request->input('remarks_JSON.milestones') as $m) {
+                    $totalPrice += (float)($m['amount'] ?? 0);
+                }
+            }
+            
+            $pcs->pcs_price = $totalPrice;
             $pcs->save();
-            return redirect()->route('viewpurchasecase')->with('success', 'Case Created Successfully in your Unit!');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Database Error: ' . $e->getMessage());
-        }
+
+            // Handle Direct Release logic
+            if ($request->has('release_directly') && $request->release_directly == '1') {
+                $approvalService = app(\App\Services\PurchaseApprovalService::class);
+                $initiationRemarks = $request->initiation_remarks ?: "No Comments";
+                $approvalService->processDecision($pcs, 'forward', $initiationRemarks);
+                
+                return redirect()->route('purchase.initiation.index')
+                    ->with('success', 'Case #'.$pcs->pcs_id.' Created and Released to HQ successfully!');
+            }
+
+            return redirect()->route('purchase.initiation.index')
+                ->with('success', 'Case #'. $pcs->pcs_id .' Created as Draft in your Unit!');
+        });
     }
 
     /**
@@ -229,18 +270,78 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function releaseCase($id)
-{
-    // 1. Find the case by ID
-    $pcs = Purchase::findOrFail($id);
+    public function updateCore(Request $request, $id)
+    {
+        $request->validate([
+            'pcs_title' => 'required|string|max:500',
+        ]);
 
-    // 2. Update status
-    $pcs->pcs_status = 'Under Scrutiny';
-    
-    // 3. Save to database
-    $pcs->save();
+        $purchase = Purchase::findOrFail($id);
+        
+        if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
+            return back()->with('error', 'Unauthorized access.');
+        }
 
-    // 4. Redirect with success message
-    return redirect()->route('viewpurchasecase')->with('success', 'Case has been released and is now Under Scrutiny.');
-}
+        if (!in_array($purchase->pcs_status, ['Draft', 'Returned'])) {
+            return back()->with('error', 'Case cannot be edited in current status.');
+        }
+
+        $purchase->pcs_title = $request->pcs_title;
+        $purchase->save();
+
+        return back()->with('success', 'Case details updated successfully.');
+    }
+
+    public function releaseCase(Request $request, $id)
+    {
+        $pcs = Purchase::findOrFail($id);
+        $remarks = $request->input('remarks', 'Case released by Division.');
+
+        try {
+            // Use the service to handle the transition logic, decision log, and notification
+            $this->approvalService->processDecision($pcs, 'forward', $remarks);
+            
+            return redirect()->route('purchase.initiation.index')->with('success', 'Case has been released and is now with Director Procurement for scrutiny.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error releasing case: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Revert case status to Draft from Under Scrutiny (Hold Feature)
+     */
+    public function holdCase($id)
+    {
+        $purchase = Purchase::findOrFail($id);
+        
+        // Authorization: Only initiator can hold their own case
+        if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
+            return back()->with('error', 'Unauthorized access.');
+        }
+
+        // Only allow holding if it's currently with DProc (Initiator -> DProc flow)
+        if ($purchase->pcs_status != 'Under Scrutiny') {
+            return back()->with('error', 'Case cannot be held as it has already been processed by HQ.');
+        }
+
+        return DB::transaction(function () use ($purchase) {
+            $purchase->pcs_status = 'Draft';
+            $purchase->save();
+
+            // Record the "Hold" action in the trail
+            DB::table('pur.purdecisions')->insert([
+                'pdec_pcs_id' => $purchase->pcs_id,
+                'pdec_role' => 'Initiator',
+                'pdec_acc_id' => Auth::id(),
+                'pdec_action' => 'hold',
+                'pdec_remarks' => 'Case held by Division for internal review/corrections.',
+                'pdec_from_status' => 'Under Scrutiny',
+                'pdec_to_status' => 'Draft',
+                'created_at' => now()
+            ]);
+
+            return redirect()->route('purchase.initiation.show', $purchase->pcs_id)
+                ->with('success', 'Case #'.$purchase->pcs_id.' is now back in HOLD (Draft) mode.');
+        });
+    }
 }
