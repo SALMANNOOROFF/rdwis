@@ -35,7 +35,7 @@ class MprController extends Controller
     // 2. Review Page (UPDATED: Locking Logic)
     public function reviewMpr($doc_id)
     {
-        $document = Document::with(['project', 'versions'])->findOrFail($doc_id);
+        $document = Document::with(['project', 'versions', 'history.fromUser', 'history.toUser', 'creator', 'creator.unit'])->findOrFail($doc_id);
         
         // Fetch absolute latest version to show current state
         $latestVersion = $document->versions()->orderBy('ver_id', 'desc')->first();
@@ -80,9 +80,11 @@ class MprController extends Controller
             // We must merge with previous data to avoid overwriting with nulls.
             $existingContent = $lastVer ? $lastVer->content_data : [];
 
-            $contentData = [
-                'mpr_content' => $request->has('mpr_content') ? $request->mpr_content : ($existingContent['mpr_content'] ?? null),
-            ];
+            // Preserve all existing content (like mpr_month) and update mpr_content if provided
+            $contentData = $existingContent;
+            if ($request->has('mpr_content')) {
+                $contentData['mpr_content'] = $request->mpr_content;
+            }
 
             // Filter out nulls so we don't save {"mpr_content": null} if it's empty
             $contentData = array_filter($contentData, function($v) { return !is_null($v) && $v !== ''; });

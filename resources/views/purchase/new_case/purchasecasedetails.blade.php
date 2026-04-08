@@ -206,14 +206,14 @@
     <div class="card-header bg-white py-3">
 
         <!-- TITLE + ACTION BUTTONS -->
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <label class="text-primary mb-0 font-weight-bold" style="font-size:16px !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 10px;">
+            <div class="flex-grow-1">
+                <label class="text-primary mb-0 font-weight-bold" style="font-size:16px !important; letter-spacing: 0.5px; font-family: 'Rajdhani', sans-serif !important;">
                     <i class="fas fa-tag mr-1"></i> {{ $purchase->pcs_title }}
                 </label>
             </div>
 
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center flex-wrap" style="gap: 5px;">
                 @php
                     $currentStatus = trim($purchase->pcs_status);
                 @endphp
@@ -288,10 +288,10 @@
             </div>
         @else
             <!-- NORMAL FLOW -->
-            <div class="status-flow-container mt-3">
-                <div class="stage-box current-box">
+            <div class="status-flow-container mt-3 overflow-auto">
+                <div class="stage-box current-box" style="min-width: fit-content;">
                     <span class="stage-label">Previous Stage</span>
-                    <span class="stage-value">
+                    <span class="stage-value text-nowrap">
                         <i class="fas fa-dot-circle mr-1"></i> {{ $currentLabel }}
                     </span>
                 </div>
@@ -300,9 +300,9 @@
                     <i class="fas fa-long-arrow-alt-right"></i>
                 </div>
 
-                <div class="stage-box next-box">
+                <div class="stage-box next-box" style="min-width: fit-content;">
                     <span class="stage-label">Current Stage</span>
-                    <span class="stage-value">
+                    <span class="stage-value text-nowrap">
                         <i class="fas fa-arrow-circle-right mr-1"></i> {{ $nextLabel }}
                     </span>
                 </div>
@@ -498,14 +498,22 @@
 
     <!-- Release Case Form (only if Draft) -->
     @if(trim($purchase->pcs_status) === 'Draft')
-        <form action="{{ route('purchase.release', $purchase->pcs_id) }}" method="POST" style="display: inline-block;">
+        <form action="{{ route('purchase.release', $purchase->pcs_id) }}" method="POST" id="releaseCaseForm" style="display: inline-block;">
             @csrf
-            <button type="submit" class="btn btn-primary px-4 shadow" onclick="return confirm('Are you sure you want to release this case for scrutiny?')">
+            <button type="button" class="btn btn-primary px-4 shadow-sm unlock" onclick="confirmRelease()">
                 <i class="fas fa-paper-plane mr-1"></i> Release Case
             </button>
         </form>
     @endif
 </div>
+
+<script>
+    function confirmRelease() {
+        if (confirm('Are you sure you want to release this case for scrutiny?')) {
+            document.getElementById('releaseCaseForm').submit();
+        }
+    }
+</script>
 
                 </div>
             </div>

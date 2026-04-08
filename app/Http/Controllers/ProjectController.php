@@ -22,7 +22,10 @@ class ProjectController extends Controller
     if (!$user) return redirect()->route('login');
     
     // --- FIX: 'with(\'document\')' add kiya hai taake status dashboard par dikhe ---
-    $query = Project::with('document')->where('prj_unt_id', $user->acc_unt_id);
+    $query = Project::where('prj_unt_id', $user->acc_unt_id);
+    if (\Illuminate\Support\Facades\Schema::hasTable('doc.documents')) {
+        $query->with('document');
+    }
 
     // Filter Logic
     if ($request->has('status') && $request->status != 'All') {
@@ -32,6 +35,114 @@ class ProjectController extends Controller
     $projects = $query->orderBy('prj_id', 'desc')->get();
     
     return view('projects.viewprojects', compact('projects'));
+}
+
+   public function nrdiIndex(Request $request)
+{
+    $user = Auth::user();
+    if (! $user) {
+        return redirect()->route('login');
+    }
+
+    [$lower, $upper] = $user->acc_lowers == 0
+        ? [$user->acc_lowerm, $user->acc_upperm]
+        : [$user->acc_lowers, $user->acc_uppers];
+
+    $closedStatuses = ['Closed', 'Completed'];
+
+    $query = Project::with('unit')
+        ->whereBetween('prj_unt_id', [$lower, $upper]);
+
+    $status = (string) $request->query('status', 'open');
+    if ($status === 'closed') {
+        $query->whereIn('prj_status', $closedStatuses);
+    } elseif ($status === 'all') {
+        $status = 'all';
+    } else {
+        $status = 'open';
+        $query->whereNotIn('prj_status', $closedStatuses);
+    }
+
+    $divisionId = $request->query('division');
+    if (is_numeric($divisionId) && (int) $divisionId > 0) {
+        $query->where('prj_unt_id', (int) $divisionId);
+    }
+
+    $term = trim((string) $request->query('term', ''));
+    if ($term !== '') {
+        $query->where(function ($q) use ($term) {
+            $q->where('prj_code', 'ILIKE', '%' . $term . '%')
+              ->orWhere('prj_title', 'ILIKE', '%' . $term . '%');
+        });
+    }
+
+    $projects = $query->orderByDesc('prj_id')->paginate(50);
+    $projects->appends([
+        'status' => $status,
+        'division' => $divisionId,
+        'term' => $term,
+    ]);
+
+    $divisions = Unit::where('unt_type', 'Division')
+        ->whereBetween('unt_id', [$lower, $upper])
+        ->orderBy('unt_name', 'asc')
+        ->get();
+
+    return view('nrdi.projects.index', compact('projects', 'divisions', 'status', 'divisionId', 'term'));
+}
+
+   public function nrdiShow($id)
+{
+    $user = Auth::user();
+    if (! $user) {
+        return redirect()->route('login');
+    }
+
+    [$lower, $upper] = $user->acc_lowers == 0
+        ? [$user->acc_lowerm, $user->acc_upperm]
+        : [$user->acc_lowers, $user->acc_uppers];
+
+    $project = Project::with('milestones', 'attachments', 'unit')
+        ->where('prj_id', $id)
+        ->whereBetween('prj_unt_id', [$lower, $upper])
+        ->firstOrFail();
+
+    $totalSpent = DB::table('fin.transactions')
+        ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
+        ->where('fin.commitments.cmt_docid', $id)
+        ->sum('fin.transactions.trn_amount1');
+
+    $balance = ($project->prj_propcost ?? 0) - $totalSpent;
+    $spentPercentage = ($project->prj_propcost ?? 0) > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+
+    $finData = [
+        'equip' => $totalSpent * 0.45,
+        'hr'    => $totalSpent * 0.35,
+        'misc'  => $totalSpent * 0.20,
+    ];
+
+    $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
+
+    $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : \Carbon\Carbon::now();
+    $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : \Carbon\Carbon::now();
+
+    $totalMonths = $startDate->diffInMonths($endDate);
+    if ($totalMonths < 1) $totalMonths = 1;
+    $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
+
+    $readOnly = true;
+
+    return view('projects.openprojectdetails', compact(
+        'project',
+        'totalSpent',
+        'balance',
+        'spentPercentage',
+        'finData',
+        'mprsSubmitted',
+        'mprsLeft',
+        'totalMonths',
+        'readOnly'
+    ));
 }
 
    public function show($id)
@@ -480,11 +591,15 @@ public function markMilestoneComplete(Request $request)
     }
 
     // Warna purana Global Audit Log dikhao
-    $activities = DB::table('project_activities')
-        ->join('prj.projects', 'project_activities.pja_prj_id', '=', 'prj.projects.prj_id')
-        ->select('project_activities.*', 'prj.projects.prj_title', 'prj.projects.prj_code')
-        ->orderBy('created_at', 'desc')
-        ->get();
+    if (\Illuminate\Support\Facades\Schema::hasTable('project_activities')) {
+        $activities = DB::table('project_activities')
+            ->join('prj.projects', 'project_activities.pja_prj_id', '=', 'prj.projects.prj_id')
+            ->select('project_activities.*', 'prj.projects.prj_title', 'prj.projects.prj_code')
+            ->orderBy('created_at', 'desc')
+            ->get();
+    } else {
+        $activities = collect([]);
+    }
 
     $viewType = 'global_log';
 
@@ -493,15 +608,17 @@ public function markMilestoneComplete(Request $request)
     // --- HELPER: LOG ACTIVITY ---
     private function logActivity($projectId, $action, $details)
     {
-        // Ensure table 'project_activities' exists
-        DB::table('project_activities')->insert([
-            'pja_prj_id' => $projectId,
-            'pja_action' => $action,
-            'pja_details' => $details,
-            'pja_user' => Auth::check() ? Auth::user()->acc_username : 'System',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Ensure table 'project_activities' exists before inserting
+        if (\Illuminate\Support\Facades\Schema::hasTable('project_activities')) {
+            DB::table('project_activities')->insert([
+                'pja_prj_id' => $projectId,
+                'pja_action' => $action,
+                'pja_details' => $details,
+                'pja_user' => Auth::check() ? Auth::user()->acc_username : 'System',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 
 

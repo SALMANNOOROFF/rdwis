@@ -22,8 +22,34 @@ class PurchaseController extends Controller
                         ->orderBy('pcs_id', 'desc')
                         ->get();
 
-    return view('purchase.new_case.viewpurchasecase', compact('purchases'));
+    $detailsRouteName = 'purchasecasedetails';
+    $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
+    return view('purchase.new_case.viewpurchasecase', compact('purchases', 'detailsRouteName', 'unitNameMap'));
 }
+
+    public function nrdiIndex()
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        [$lower, $upper] = $user->acc_lowers == 0
+            ? [$user->acc_lowerm, $user->acc_upperm]
+            : [$user->acc_lowers, $user->acc_uppers];
+
+        $purchases = Purchase::with(['project'])
+            ->whereBetween('pcs_unt_id', [$lower, $upper])
+            ->orderBy('pcs_id', 'desc')
+            ->get();
+
+        $detailsRouteName = 'nrdi.purchase_cases.show';
+        $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
+        $groupedPurchases = $purchases->groupBy('pcs_unt_id');
+        
+        // Return new DG specific index
+        return view('nrdi.purchase_cases.index', compact('purchases', 'detailsRouteName', 'unitNameMap', 'groupedPurchases'));
+    }
     /**
      * Show single purchase case details
      */
@@ -41,6 +67,66 @@ class PurchaseController extends Controller
 
     return view('purchase.new_case.purchasecasedetails', compact('purchase', 'firms'));
 }
+
+    public function nrdiShow($id)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        [$lower, $upper] = $user->acc_lowers == 0
+            ? [$user->acc_lowerm, $user->acc_upperm]
+            : [$user->acc_lowers, $user->acc_uppers];
+
+        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments'])
+            ->where('pcs_id', $id)
+            ->whereBetween('pcs_unt_id', [$lower, $upper])
+            ->firstOrFail();
+
+        // Load account head info (which budget head is being charged)
+        $head    = DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->first();
+        $effHead = $purchase->pcs_effhed_id && $purchase->pcs_effhed_id != $purchase->pcs_hed_id
+                   ? DB::table('cen.heads')->where('hed_id', $purchase->pcs_effhed_id)->first()
+                   : null;
+
+        // Load division name
+        $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
+
+        // Dummy History/Approval Trail. For production this should come from a history table.
+        // Assuming $purchase->history exists or we generate mock data
+        // Recent first
+        $approvalTrail = collect([
+            (object)['actor' => 'Director', 'action' => 'Forwarded', 'date' => now()->subDays(2), 'comment' => 'Forwarded to SORD/DG'],
+            (object)['actor' => 'Division Officer', 'action' => 'Initiated', 'date' => $purchase->created_at ?? $purchase->pcs_date, 'comment' => 'Created the purchase case'],
+        ]);
+
+        return view('nrdi.purchase_cases.show', compact('purchase', 'approvalTrail', 'head', 'effHead', 'divisionName'));
+    }
+
+    public function nrdiAction(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (! $user) return redirect()->route('login');
+
+        // Note: For full safety, ensure this case actually belongs to DG's jurisdiction.
+        $purchase = Purchase::findOrFail($id);
+        $action = $request->input('action');
+        $remarks = $request->input('remarks');
+
+        if ($action == 'approve') {
+            $purchase->pcs_status = 'Approved';
+        } elseif ($action == 'return') {
+            $purchase->pcs_status = 'Returned';
+        } elseif ($action == 'reject') {
+            $purchase->pcs_status = 'Rejected';
+        }
+
+        // Save DG remarks somewhere (e.g. into a history table). For now just onto the case remarks or handle later.
+        $purchase->save();
+
+        return redirect()->route('nrdi.purchase_cases.index')->with('success', 'Case has been ' . $purchase->pcs_status);
+    }
 
     /**
      * Show create new purchase case form

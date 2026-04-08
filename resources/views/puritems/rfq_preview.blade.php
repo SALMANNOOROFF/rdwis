@@ -328,7 +328,7 @@
   </form>
 
   <!-- Table -->
-  <div class="rfq-table-wrap">
+  <div class="rd-table-responsive">
     <table class="rfq-table">
       <thead>
         <tr>

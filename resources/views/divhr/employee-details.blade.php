@@ -93,19 +93,19 @@
 <body
   class="dark bg-background-light dark:bg-background-dark text-white dark:text-white min-h-screen transition-colors duration-200">
 
-  <div class="max-w-[1600px] mx-auto p-6">
-    <header class="flex justify-between items-center mb-6">
+  <div class="max-w-[1600px] mx-auto p-3 sm:p-6 pb-20 sm:pb-6">
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <div class="flex items-center gap-2">
-        <span class="text-white dark:text-white font-medium">Employees /</span>
-        <h1 class="text-xl font-bold text-white dark:text-white tracking-tight">Jonathan Pierce</h1>
+        <span class="text-white/60 dark:text-white/60 font-medium text-sm">Employees /</span>
+        <h1 class="text-xl font-bold text-white dark:text-white tracking-tight" style="font-family: 'Rajdhani', sans-serif;">{{ $emp->emp_name ?? 'Jonathan Pierce' }}</h1>
       </div>
-      <div class="flex gap-3">
-        <button
-          class="px-4 py-2 text-sm font-semibold text-white bg-white border border-slate-200 rounded-lg shadow-refined hover:bg-slate-50 transition-all dark:bg-[var(--rd-surface)] dark:border-slate-700 dark:text-white">
+      <div class="flex gap-2 w-full sm:w-auto">
+        <button onclick="history.back()"
+          class="flex-1 sm:flex-initial px-4 py-2 text-xs font-semibold text-white bg-slate-800 border border-slate-700 rounded-lg shadow-refined hover:bg-slate-700 transition-all">
           <span class="material-icons-outlined text-base align-middle mr-1">arrow_back</span> Back
         </button>
         <button
-          class="px-5 py-2 text-sm font-semibold text-white bg-primary rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all">
+          class="flex-1 sm:flex-initial px-5 py-2 text-xs font-semibold text-white bg-primary rounded-lg shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all">
           Edit Profile
         </button>
       </div>
@@ -206,23 +206,23 @@
           class="bg-white dark:bg-[var(--rd-surface)]/50 border-slate-700 p-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="material-icons-outlined text-primary text-lg">assessment</span>
-            <h3 class="font-bold text-white dark:text-white">Leave Utilization</h3>
+            <h3 class="font-bold text-white dark:text-white text-sm">Leave Utilization</h3>
           </div>
           <div class="flex flex-col items-center">
-            <div style="width:90px;height:90px;border-radius:50%;background:conic-gradient(var(--rd-accent) 0 50%,#3b82f6 50% 57.5%,#60a5fa 57.5% 62.5%,var(--rd-surface3) 62.5% 100%);position:relative;" class="relative mb-3">
-              <span class="absolute inset-0 flex items-center justify-center text-xs font-bold dark:text-white">25/40d</span>
+            <div style="width:70px;height:70px;border-radius:50%;background:conic-gradient(var(--rd-accent) 0 50%,#3b82f6 50% 57.5%,#60a5fa 57.5% 62.5%,var(--rd-surface3) 62.5% 100%);position:relative;" class="relative mb-3">
+              <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold dark:text-white">25/40d</span>
             </div>
-            <div class="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px]">
+            <div class="flex flex-wrap justify-center gap-x-2 gap-y-1 text-[9px]">
               <div class="flex items-center gap-1">
-                <span class="w-2.5 h-2.5 bg-primary rounded-full"></span>
+                <span class="w-2 h-2 bg-primary rounded-full"></span>
                 <span>Annual 20/25d</span>
               </div>
               <div class="flex items-center gap-1">
-                <span class="w-2.5 h-2.5 bg-blue-400 rounded-full"></span>
+                <span class="w-2 h-2 bg-blue-400 rounded-full"></span>
                 <span>Sick 3/10d</span>
               </div>
               <div class="flex items-center gap-1">
-                <span class="w-2.5 h-2.5 bg-blue-300 rounded-full"></span>
+                <span class="w-2 h-2 bg-blue-300 rounded-full"></span>
                 <span>Casual 2/5d</span>
               </div>
             </div>
@@ -240,18 +240,18 @@
             </div>
             <div
               class="bg-transparent p-3 rounded-xl border border-slate-700/50 mb-3">
-              <div class="grid grid-cols-3 gap-3 mb-4">
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                 <div>
-                  <p class="text-[10px] text-white uppercase tracking-widest mb-1 font-bold">Department</p>
-                  <p class="font-semibold text-white dark:text-white text-sm">{{ $authUnit->unt_name ?? ($base->eff_unit_name ?? ($emp->unt_name ?? '—')) }}</p>
+                  <p class="text-[9px] text-white/50 uppercase tracking-widest mb-1 font-bold">Department</p>
+                  <p class="font-semibold text-white dark:text-white text-xs truncate">{{ $authUnit->unt_name ?? ($base->eff_unit_name ?? ($emp->unt_name ?? '—')) }}</p>
                 </div>
                 <div>
-                  <p class="text-[10px] text-white uppercase tracking-widest mb-1 font-bold">Designation</p>
-                  <p class="font-semibold text-white dark:text-white text-sm">{{ $currentContract->ctr_jobtitle ?? ($emp->emp_title ?? '—') }}</p>
+                  <p class="text-[9px] text-white/50 uppercase tracking-widest mb-1 font-bold">Designation</p>
+                  <p class="font-semibold text-white dark:text-white text-xs truncate">{{ $currentContract->ctr_jobtitle ?? ($emp->emp_title ?? '—') }}</p>
                 </div>
-                <div>
-                  <p class="text-[10px] text-white uppercase tracking-widest mb-1 font-bold">Next Review</p>
-                  <p class="font-semibold text-white dark:text-white text-sm">
+                <div class="col-span-2 md:col-span-1 border-t md:border-t-0 pt-2 md:pt-0 border-slate-700/50">
+                  <p class="text-[9px] text-white/50 uppercase tracking-widest mb-1 font-bold">Next Review</p>
+                  <p class="font-semibold text-white dark:text-white text-xs">
                     {{ !empty($currentContract->ctr_enddt) ? \Carbon\Carbon::parse($currentContract->ctr_enddt)->format('d-M-Y') : '—' }}
                   </p>
                 </div>
@@ -443,57 +443,60 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 space-y-6">
             <!-- combined education + certification card container -->
-            <div class="bg-white dark:bg-[var(--rd-surface)]/50 border-slate-700 p-6">
-              <div class="flex justify-center items-start gap-6 relative w-full">
-                <div class="w-1/2">
+            <!-- combined education + certification card container -->
+            <div class="bg-white dark:bg-[var(--rd-surface)]/50 border-slate-700 p-4 sm:p-6">
+              <div class="flex flex-col md:flex-row justify-center items-start gap-8 relative w-full">
+                <div class="w-full md:w-1/2">
                   <!-- education card content -->
                   <div>
-                    <div class="flex items-center gap-2 mb-0">
+                    <div class="flex items-center gap-2 mb-4">
                       <span class="material-icons-outlined text-primary text-xl">school</span>
-                      <h3 class="font-bold text-white dark:text-white">Education Details</h3>
+                      <h3 class="font-bold text-white dark:text-white text-sm">Education Details</h3>
                     </div>
                     <div class="space-y-4">
                       @php
                         $deg = ($degrees ?? collect())->first();
                       @endphp
-                      <div>
-                        <p class="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Degree</p>
-                        <p class="text-xs font-bold text-white dark:text-white">{{ $deg->qlf_name ?? '—' }}</p>
-                      </div>
-                      <div>
-                        <p class="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Institution</p>
-                        <p class="text-xs font-bold text-white dark:text-white">{{ $deg->qlf_inst ?? '—' }}</p>
-                      </div>
-                      <div class="flex justify-between items-end">
+                      <div class="grid grid-cols-2 lg:grid-cols-1 gap-2">
                         <div>
-                          <p class="text-[10px] text-white font-bold uppercase tracking-widest mb-1">Duration</p>
+                          <p class="text-[9px] text-white/60 font-bold uppercase tracking-widest mb-1">Degree</p>
+                          <p class="text-xs font-bold text-white dark:text-white">{{ $deg->qlf_name ?? '—' }}</p>
+                        </div>
+                        <div>
+                          <p class="text-[9px] text-white/60 font-bold uppercase tracking-widest mb-1">Institution</p>
+                          <p class="text-xs font-bold text-white dark:text-white">{{ $deg->qlf_inst ?? '—' }}</p>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center pt-2 border-t border-slate-700/50 lg:border-t-0 lg:pt-0">
+                        <div>
+                          <p class="text-[9px] text-white/60 font-bold uppercase tracking-widest mb-1">Duration</p>
                           <p class="text-xs font-bold text-white dark:text-white">
                             {{ !empty($deg?->qlf_duration) ? ($deg->qlf_duration.' '.($deg->qlf_unit ?? '')) : (!empty($deg?->qlf_enddt) ? \Carbon\Carbon::parse($deg->qlf_enddt)->format('Y') : '—') }}
                           </p>
                         </div>
-                        <span class="material-icons-outlined text-white dark:text-white text-2xl">verified</span>
+                        <span class="material-icons-outlined text-emerald-400 text-2xl">verified</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="absolute inset-y-0 left-1/2 w-px bg-slate-200 dark:bg-[var(--rd-surface2)]"></div>
-                <div class="w-1/2">
+                <div class="hidden md:block absolute inset-y-0 left-1/2 w-px bg-slate-700/50"></div>
+                <div class="w-full md:w-1/2 pt-6 md:pt-0 border-t md:border-t-0 border-slate-700/50">
                   <!-- certifications content -->
                   <div>
                     <div class="flex items-center gap-2 mb-4">
                       <span class="material-icons-outlined text-primary text-xl">military_tech</span>
-                      <h3 class="font-bold text-white dark:text-white">Certifications</h3>
+                      <h3 class="font-bold text-white dark:text-white text-sm">Certifications</h3>
                     </div>
                     <ul class="space-y-4">
                       @forelse(($certs ?? collect())->take(5) as $ct)
                         <li class="flex justify-between items-center">
-                          <span class="text-xs font-bold text-white dark:text-white">{{ $ct->qlf_name ?? '—' }}</span>
-                          <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-md text-[8px] font-black uppercase">
+                          <span class="text-xs font-bold text-white dark:text-white truncate pr-2">{{ $ct->qlf_name ?? '—' }}</span>
+                          <span class="px-2 py-0.5 bg-blue-900/20 text-blue-400 rounded-md text-[8px] font-black uppercase shrink-0">
                             {{ !empty($ct->qlf_enddt) ? \Carbon\Carbon::parse($ct->qlf_enddt)->format('Y') : ($ct->qlf_level ?? '—') }}
                           </span>
                         </li>
                       @empty
-                        <li class="text-xs text-white">No certifications</li>
+                        <li class="text-xs text-white/50">No certifications</li>
                       @endforelse
                     </ul>
                   </div>

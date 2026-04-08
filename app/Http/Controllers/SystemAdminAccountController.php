@@ -60,7 +60,7 @@ class SystemAdminAccountController extends Controller
             ->orderBy('acc_status', 'desc')
             ->orderBy('acc_unt_id')
             ->orderBy('acc_username')
-            ->paginate(25);
+            ->paginate(50);
 
         $accounts->appends(['status' => $status]);
 
@@ -74,7 +74,17 @@ class SystemAdminAccountController extends Controller
     {
         $units = Unit::orderBy('unt_name')->get();
 
-        return view('admin.accounts.create', compact('units'));
+        $unitsJson = $units->map(function ($u) {
+            return [
+                'id' => (int) $u->unt_id,
+                'type' => (string) $u->unt_type,
+                'name' => (string) $u->unt_name,
+                'namesh' => (string) $u->unt_namesh,
+                'area' => (string) ($u->unt_area ?? ''),
+            ];
+        })->values();
+
+        return view('admin.accounts.create', compact('units', 'unitsJson'));
     }
 
     public function fetchRoles(Request $request)
@@ -94,22 +104,36 @@ class SystemAdminAccountController extends Controller
     {
         $request->validate([
             'unit_id'       => 'required|integer|exists:pgsql.cen.units,unt_id',
-            'role_level'    => 'required|integer',
+            'role_desig'    => 'required|string|max:255',
+            'auth_level'    => 'required|string|in:viewer,editor,approver',
             'username'      => 'required|string|max:50|unique:pgsql.cen.accounts,acc_username',
             'name'          => 'required|string|max:150',
             'rank'          => 'nullable|string|max:100',
             'title'         => 'nullable|string|max:20',
+        ], [
+            'username.unique' => 'Username already exists. Please close/reopen the existing account instead of creating again.',
         ]);
 
         $unit = Unit::findOrFail($request->unit_id);
 
         $role = Role::where('rol_unt_id', $unit->unt_id)
-            ->where('rol_level', $request->role_level)
+            ->where('rol_desig', $request->role_desig)
             ->first();
 
         if (!$role) {
             return back()->withErrors([
-                'role_level' => 'Selected unit + level combination has no role template.',
+                'role_desig' => 'Selected unit + role has no role template.',
+            ])->withInput();
+        }
+
+        $existingRoleOwner = CenAccount::where('acc_unt_id', $unit->unt_id)
+            ->where('acc_desig', $role->rol_desig)
+            ->where('acc_status', 'Active')
+            ->first();
+
+        if ($existingRoleOwner) {
+            return back()->withErrors([
+                'role_desig' => 'This role is already assigned to ' . $existingRoleOwner->acc_username . '. Please close that account first.',
             ])->withInput();
         }
 
@@ -130,7 +154,7 @@ class SystemAdminAccountController extends Controller
 
         $account = new CenAccount();
         $account->acc_unt_id      = $unit->unt_id;
-        $account->acc_level       = $request->role_level;
+        $account->acc_level       = $role->rol_level;
         $account->acc_type        = 'Standard';
         $account->acc_reportlevel = $role->rol_reportlevel ?? null;
         $account->acc_username    = $request->username;
@@ -151,7 +175,7 @@ class SystemAdminAccountController extends Controller
         $account->acc_untname     = $unit->unt_name;
         $account->acc_untnamesh   = $unit->unt_namesh;
         $account->acc_unttype     = $unit->unt_type;
-        $account->acc_auth        = strtolower(trim((string) ($role->rol_auth ?? 'viewer')));
+        $account->acc_auth        = strtolower(trim((string) $request->auth_level));
         $account->acc_untarea     = strtolower(trim((string) $area));
         $account->save();
 

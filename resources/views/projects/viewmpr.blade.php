@@ -78,18 +78,30 @@
                 </div>
             </div>
 
-            {{-- STATUS LINE (Simple Text) --}}
+            {{-- VISUAL STATUS ALERT (SIGNS) --}}
             <div class="mb-3">
-                @if(isset($isReturned) && $isReturned)
-                    <h5 class="text-danger font-weight-bold">
-                        <i class="fas fa-exclamation-circle mr-1"></i> Returned by {{ $document->latestVersion->actor->role->rol_desig ?? 'Reviewer' }}: 
-                        <span class="bg-warning px-2 rounded text-white" style="font-size: 0.9em;">"{{ $document->latestVersion->remarks }}"</span>
-                    </h5>
-                @elseif(!$isEditable && $document)
-                    <h5 class="text-info font-weight-bold">
-                        <i class="fas fa-lock mr-1"></i> Status: {{ $document->status }} (Currently with {{ $document->currentOwner->role->rol_desig ?? ($document->currentOwner->acc_name ?? 'SORD') }})
-                    </h5>
-                @endif
+                @php
+                    $dStatus = $document->status ?? 'New';
+                    $alertClass = 'alert-secondary';
+                    $icon = 'fa-file';
+                    
+                    if($dStatus == 'Returned') { $alertClass = 'alert-danger'; $icon = 'fa-undo'; }
+                    elseif($dStatus == 'Pending Review' || $dStatus == 'Under Review by SORD') { $alertClass = 'alert-info'; $icon = 'fa-paper-plane'; }
+                    elseif($dStatus == 'Finalized' || $dStatus == 'Forwarded to MD') { $alertClass = 'alert-success'; $icon = 'fa-check-double'; }
+                    elseif($dStatus == 'Draft') { $alertClass = 'alert-warning'; $icon = 'fa-pencil-alt'; }
+                @endphp
+
+                <div class="alert {{ $alertClass }} shadow-sm border-0 d-flex align-items-center">
+                    <i class="fas {{ $icon }} fa-2x mr-3 opacity-75"></i>
+                    <div>
+                        <h5 class="mb-0 font-weight-bold">Status: {{ $dStatus }}</h5>
+                        @if($dStatus == 'Returned' && isset($document->latestVersion->remarks))
+                            <small class="d-block mt-1"><strong>Reason/Remarks:</strong> "{{ $document->latestVersion->remarks }}"</small>
+                        @elseif($dStatus != 'New' && $dStatus != 'Draft' && $document)
+                            <small class="d-block mt-1">Currently with: <strong>{{ $document->currentOwner->role->rol_desig ?? ($document->currentOwner->acc_username ?? 'System') }}</strong></small>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <div class="mpr-wrapper">
@@ -125,9 +137,22 @@
                                     }
                                 @endphp
 
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Report Month <span class="text-danger">*</span></label>
+                                        <input type="month" name="mpr_month" class="form-control shadow-sm" required
+                                               value="{{ $latestData['mpr_month'] ?? date('Y-m') }}" 
+                                               {{ !$isEditable ? 'disabled' : '' }}>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Last Updated</label>
+                                        <input type="text" class="form-control shadow-sm" disabled value="{{ $latestVer ? \Carbon\Carbon::parse($latestVer->updated_at)->format('d-M-Y') : 'N/A' }}">
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
-                                    <label>MPR Main Report <span class="text-danger">*</span></label>
-                                    <textarea name="mpr_content" class="form-control font-weight-bold" rows="12" 
+                                    <label>MPR Main Report Content <span class="text-danger">*</span></label>
+                                    <textarea name="mpr_content" class="form-control font-weight-bold shadow-sm" rows="12" 
                                               placeholder="Enter the detailed Monthly Progress Report here..." required
                                               {{ !$isEditable ? 'disabled' : '' }}>{{ $latestData['mpr_content'] ?? '' }}</textarea>
                                 </div>
@@ -239,17 +264,17 @@
                             <span class="font-weight-bold text-white" style="font-size: 0.9rem;">
                                 <i class="fas {{ $icon }} mr-1 text-secondary"></i>
                                 {{-- FROM: Sender Role --}}
-                                {{ $log->sender->role->rol_desig ?? ($log->sender->acc_name ?? 'System') }}
+                                {{ $log->fromUser->role->rol_desig ?? ($log->fromUser->acc_username ?? 'System') }}
                             </span>
                             
                             <i class="fas fa-arrow-right mx-1 text-muted text-xs"></i>
                             
                             <span class="font-weight-bold text-white" style="font-size: 0.9rem;">
                                 {{-- TO: Receiver Role --}}
-                                @if($log->to_user_id == 0)
+                                @if($log->to_user_id == 0 || $log->action_type == 'Finalized')
                                     MD / Final
                                 @else
-                                    {{ $log->receiver->role->rol_desig ?? 'User' }}
+                                    {{ $log->toUser->role->rol_desig ?? ($log->toUser->acc_username ?? 'User') }}
                                 @endif
                             </span>
                         </div>

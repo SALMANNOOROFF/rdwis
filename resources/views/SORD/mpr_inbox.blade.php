@@ -5,19 +5,22 @@
     <div class="container-fluid">
         <div class="card card-primary card-outline">
             {{-- HEADER UPDATE START --}}
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">Incoming MPRs (Approval Queue)</h3>
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+                <h3 class="card-title font-weight-bold" style="font-family: 'Rajdhani', sans-serif;">
+                    <i class="fas fa-inbox mr-2"></i> Incoming MPRs (Approval Queue)
+                </h3>
                 
                 {{-- COMPILE BUTTON --}}
                 <div class="card-tools">
-                     <a href="{{ route('sord.compile_report') }}" class="btn btn-success btn-sm shadow-sm">
-                        <i class="fas fa-file-word mr-1"></i> Compile Report (.docx)
+                     <a href="{{ route('sord.compile_report') }}" class="btn btn-success btn-sm shadow-sm rounded-pill px-3">
+                        <i class="fas fa-file-word mr-1"></i> Compile Report
                     </a>
                 </div>
             </div>
             {{-- HEADER UPDATE END --}}
             <div class="card-body p-0">
-                <table class="table table-hover table-striped">
+                <div class="rd-table-responsive">
+                    <table class="table table-hover table-striped mb-0 text-nowrap">
                     <thead>
                         <tr>
                             <th>Ref No</th>
@@ -76,6 +79,7 @@
                         @endforelse
                     </tbody>
                 </table>
+               </div>
             </div>
         </div>
     </div>

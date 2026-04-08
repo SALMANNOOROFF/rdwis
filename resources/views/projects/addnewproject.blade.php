@@ -18,6 +18,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .form-title {
@@ -31,7 +33,9 @@
         .stepper-box {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .step-pill {
@@ -359,24 +363,26 @@
 
 
                     <h6 class="text-primary font-weight-bold mt-4 mb-3"><i class="fas fa-list-ol mr-1"></i> Define Initial Milestones</h6>
-                    <table class="table table-bordered table-custom" id="msTable">
-                        <thead>
-                            <tr>
-                                <th width="50" class="text-center">#</th>
-                                <th>Milestone Description</th>
-                                <th width="200">Target Date</th>
-                                <th width="50"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-center font-weight-bold text-muted sn-cell">1</td>
-                                <td><input type="text" name="milestones[0][desc]" class="form-control form-control-sm border-0 bg-light" placeholder="e.g. Requirement Analysis" required></td>
-                                <td><input type="date" name="milestones[0][date]" class="form-control form-control-sm border-0 bg-light" required></td>
-                                <td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger disabled"><i class="fas fa-trash"></i></button></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="rd-table-responsive">
+                        <table class="table table-bordered table-custom" id="msTable">
+                            <thead>
+                                <tr>
+                                    <th width="50" class="text-center">#</th>
+                                    <th>Milestone Description</th>
+                                    <th width="200">Target Date</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center font-weight-bold text-muted sn-cell">1</td>
+                                    <td><input type="text" name="milestones[0][desc]" class="form-control form-control-sm border-0 bg-light" placeholder="e.g. Requirement Analysis" required style="min-width: 250px;"></td>
+                                    <td><input type="date" name="milestones[0][date]" class="form-control form-control-sm border-0 bg-light" required style="min-width: 150px;"></td>
+                                    <td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger disabled"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <button type="button" class="btn btn-sm btn-secondary shadow-sm" onclick="addRow()">
                         <i class="fas fa-plus mr-1"></i> Add Another Row
                     </button>

@@ -4,12 +4,12 @@
 <div class="content-wrapper pt-2"> {{-- Reduced pt-3 to pt-2 --}}
 
     {{-- HEADER --}}
-    <div class="content-header pb-1"> {{-- Added pb-1 to reduce bottom padding --}}
+    <div class="content-header pb-1">
         <div class="container-fluid">
-            <div class="row mb-2"> {{-- Reduced mb-3 to mb-2 --}}
-                <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem;">
-                        <i class="fas fa-folder-open mr-1"></i> All Projects
+            <div class="row mb-2">
+                <div class="col-12 d-flex flex-wrap justify-content-between align-items-center" style="gap: 10px;">
+                    <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem; font-family:'Rajdhani',sans-serif; letter-spacing:1px;">
+                        <i class="fas fa-folder-open mr-1"></i> ALL PROJECTS
                     </h1>
                     <a href="{{ route('addnewproject') }}" class="btn btn-primary btn-sm shadow-sm px-4 rounded-pill">
                         <i class="fas fa-plus-circle mr-1"></i> New Project
@@ -18,27 +18,26 @@
             </div>
 
             {{-- FILTER CARD --}}
-            <div class="card card-outline card-primary shadow-sm mb-2"> {{-- Reduced mb-4 to mb-2 --}}
-                <div class="card-body py-2"> {{-- Reduced py-3 to py-2 --}}
+            <div class="card card-outline card-primary shadow-sm mb-2">
+                <div class="card-body py-2">
                     <div class="row align-items-end">
-                        <div class="col-md-3 mb-1"> {{-- Reduced mb-2 to mb-1 --}}
+                        <div class="col-md-3 col-sm-6 mb-2">
                              <label class="small text-muted mb-0">Search</label>
                              <input type="text" id="codeSearch" class="form-control form-control-sm" placeholder="Code or Title..." onkeyup="applyFilters()">
                         </div>
-                         <div class="col-md-2 mb-1">
-                            <label class="small text-muted mb-0">From Date</label>
+                         <div class="col-md-2 col-sm-3 col-6 mb-2">
+                            <label class="small text-muted mb-0">From</label>
                             <input type="date" id="dateFrom" class="form-control form-control-sm" onchange="applyFilters()">
                         </div>
-                        <div class="col-md-2 mb-1">
-                            <label class="small text-muted mb-0">To Date</label>
+                        <div class="col-md-2 col-sm-3 col-6 mb-2">
+                            <label class="small text-muted mb-0">To</label>
                             <input type="date" id="dateTo" class="form-control form-control-sm" onchange="applyFilters()">
                         </div>
-                        <div class="col-md-5 mb-1">
-                             <label class="small text-muted mb-0">Status</label>
+                        <div class="col-md-5 col-12 mb-2">
+                             <label class="small text-muted mb-0">Status Filter</label>
                              <div class="btn-group btn-block shadow-sm">
                                 <button class="btn btn-sm btn-outline-primary active filter-btn-main" onclick="setMainFilter('all', this)">All</button>
                                 <button class="btn btn-sm btn-outline-primary filter-btn-main" onclick="setMainFilter('open', this)">Open</button>
-                                {{-- REMOVED RETURNED FILTER AS REQUESTED --}}
                                 <button class="btn btn-sm btn-outline-success filter-btn-main" onclick="setMainFilter('closed', this)">Closed</button>
                             </div>
                         </div>
@@ -53,17 +52,15 @@
         <div class="container-fluid">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-0">
-                    {{-- ADDED FIXED HEIGHT AND OVERFLOW FOR STICKY HEADER SCROLLING --}}
-                    {{-- TABLE CONTENT --}}
-                    <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
+                    <div class="rd-table-responsive" style="max-height: 75vh; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="projectsTable">
                             <thead class="bg-light text-muted sticky-top shadow-sm" style="z-index: 1;">
                                 <tr>
-                                    <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th> {{-- Action --}}
-                                    <th style="width: 35%;" class="p-2">Project</th>
-                                    <th style="width: 20%;" class="p-2">Timeline</th>
-                                    <th style="width: 20%;" class="p-2">Financials</th>
-                                    <th style="width: 20%;" class="text-right p-2">MPR Status</th>
+                                    <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th>
+                                    <th style="min-width: 250px;" class="p-2">Project Details</th>
+                                    <th style="min-width: 150px;" class="p-2">Timeline</th>
+                                    <th style="min-width: 150px;" class="p-2">Financial Standing</th>
+                                    <th style="min-width: 150px;" class="text-right p-2">MPR Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -72,8 +69,14 @@
                                     $status = Str::lower($project->prj_status);
                                     
                                     // --- DOCUMENT STATUS CHECK ---
-                                    $doc = $project->document; 
-                                    $docStatus = $doc ? $doc->status : 'Not Started';
+                                    try {
+                                        $hasDoc = \Illuminate\Support\Facades\Schema::hasTable('doc.documents');
+                                        $doc = $hasDoc ? $project->document : null; 
+                                        $docStatus = $doc ? $doc->status : 'Not Started';
+                                    } catch (\Exception $e) {
+                                        $docStatus = 'Not Started';
+                                        $doc = null;
+                                    }
                                     
                                     // --- Change 'Not Started' to 'Action Awaited' ---
                                     if($docStatus == 'Not Started' || $docStatus == 'Draft') $docStatus = 'Action Awaited';

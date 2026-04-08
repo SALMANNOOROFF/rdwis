@@ -89,7 +89,7 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'accessdev'),
+            'database' => env('DB_DATABASE', 'acessdev'),
             'username' => env('DB_USERNAME', 'postgres'),
             'password' => env('DB_PASSWORD', '12345'),
             'charset' => env('DB_CHARSET', 'utf8'),
@@ -122,7 +122,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This table keeps track of all the migrations that have already run for
-    | your application. Using this information, we can determine which of
+    | your application. Using this information, we can determine which of   
     | the migrations on disk haven't actually been run on the database.
     |
     */

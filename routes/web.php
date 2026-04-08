@@ -67,8 +67,9 @@ Route::middleware('auth')->group(function () {
 
             return match ($area) {
                 'hr' => redirect()->route('divhr.employelist'),
-                'fin' => redirect()->route('viewpurchasecase'),
+                'fin' => redirect()->route('fin.dashboard'),
                 'it' => redirect()->route('admin.dashboard'),
+                'nrdi' => redirect()->route('nrdi.dashboard'),
                 default => redirect()->route('dashboard'),
             };
         });
@@ -80,6 +81,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/sord/dashboard', [\App\Http\Controllers\DashboardController::class, 'sord'])
             ->name('sord.dashboard')
             ->middleware('area:rdwprj,rdw');
+
+        Route::prefix('nrdi')->middleware('area:nrdi')->name('nrdi.')->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboard'])->name('dashboard');
+            Route::get('/dashboard-data', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboardData'])->name('dashboard.data');
+            Route::get('/contract-cases', [\App\Http\Controllers\DashboardController::class, 'contractCases'])->name('contract_cases.index');
+            Route::get('/purchase-cases', [PurchaseController::class, 'nrdiIndex'])->name('purchase_cases.index');
+            Route::get('/purchase-cases/{id}', [PurchaseController::class, 'nrdiShow'])->name('purchase_cases.show');
+            Route::post('/purchase-cases/{id}/action', [PurchaseController::class, 'nrdiAction'])->name('purchase_cases.action');
+            Route::get('/projects', [ProjectController::class, 'nrdiIndex'])->name('projects.index');
+            Route::get('/projects/{id}', [ProjectController::class, 'nrdiShow'])->name('projects.show');
+        });
 
         Route::group([
             'middleware' => [
@@ -143,7 +155,9 @@ Route::middleware('auth')->group(function () {
 
         // --- PURCHASE & REPORTS (Project area) ---
         Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
-        Route::get('/purchase/select', [PurchaseController::class, 'select'])->name('purchase.select');
+        Route::get('/purchase/select', [PurchaseController::class, 'select'])
+            ->name('purchase.select')
+            ->middleware('approver');
         Route::get('/purchase/new/{type}', [PurchaseController::class, 'unifiedCreate'])
             ->name('purchase.unified.create')
             ->middleware('approver');
@@ -319,5 +333,16 @@ Route::middleware('auth')->group(function () {
             Route::post('/{account}/reset-password', [SystemAdminAccountController::class, 'resetPassword'])->name('reset_password');
             Route::get('/roles', [SystemAdminAccountController::class, 'fetchRoles'])->name('roles');
         });
+
+    // ====================================================
+    // FINANCE AREA ROUTES
+    // ====================================================
+    Route::prefix('fin')
+        ->name('fin.')
+        ->middleware(['area:fin'])
+        ->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'finDashboard'])->name('dashboard');
+        });
+
     }); // End force password change
 }); // End Auth

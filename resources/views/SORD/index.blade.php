@@ -11,17 +11,17 @@
     <div class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0">Dashboard</h1>
-          </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
+          <div class="col-12 d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+            <h1 class="m-0 font-weight-bold text-primary" style="font-family: 'Rajdhani', sans-serif;">
+                <i class="fas fa-chart-line mr-2"></i>SORD Dashboard
+            </h1>
+            <ol class="breadcrumb bg-transparent p-0 m-0" style="font-size: 0.8rem;">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Dashboard v1</li>
+              <li class="breadcrumb-item active">Overview</li>
             </ol>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
+          </div>
+        </div>
+      </div>
     </div>
     <!-- /.content-header -->
 
@@ -95,7 +95,7 @@
         <!-- Main row -->
         <div class="row">
           <!-- Left col -->
-          <section class="col-lg-7 connectedSortable">
+          <div class="col-12 col-xl-8 connectedSortable mb-4">
             <!-- Custom tabs (Charts with tabs)-->
             <div class="card">
               <div class="card-header">
@@ -464,7 +464,7 @@
           </section>
           <!-- /.Left col -->
           <!-- right col (We are only adding the ID to make the widgets sortable)-->
-          <section class="col-lg-5 connectedSortable">
+          <div class="col-12 col-xl-4 connectedSortable">
 
             <!-- Map card -->
             <div class="card bg-gradient-primary">

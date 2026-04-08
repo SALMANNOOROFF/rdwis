@@ -6,17 +6,36 @@
     <div class="content-header pb-1">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem;">
+                <div class="col-12 d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+                    <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem; font-family: 'Rajdhani', sans-serif;">
                         <i class="fas fa-users mr-1"></i> Division Employees
+                        @if($mode === 's')
+                            <span class="badge badge-info ml-2" style="font-size: 0.7rem; vertical-align: middle;">Dept Only</span>
+                        @else
+                            <span class="badge badge-danger ml-2" style="font-size: 0.7rem; vertical-align: middle;">All Data</span>
+                        @endif
                     </h1>
-                    <form method="get" action="{{ route('divhr.employelist') }}" class="ml-auto">
-                        @php $st = request('status','Current'); @endphp
-                        <div class="btn-group shadow-sm">
-                            <a href="{{ route('divhr.employelist',['status'=>'Current','term'=>request('term')]) }}" class="btn btn-sm btn-primary {{ $st=='Current'?'active':'secondary' }}" style="{{ $st=='Current' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Current</a>
-                            <a href="{{ route('divhr.employelist',['status'=>'Previous','term'=>request('term')]) }}" class="btn btn-sm btn-success {{ $st=='Previous'?'active':'secondary' }}" style="{{ $st=='Previous' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Previous</a>
+                    <div class="ml-sm-auto d-flex align-items-center flex-wrap" style="gap: 10px;">
+                        <div class="btn-group btn-group-sm shadow-sm" role="group">
+                            <a href="{{ route('divhr.employelist', ['mode' => 'm', 'status'=>request('status','Current')]) }}" 
+                               class="btn {{ $mode === 'm' ? 'btn-danger font-weight-bold' : 'btn-outline-danger' }}" style="{{ $mode === 'm' ? '' : 'background: var(--rd-surface2);' }}">
+                                <i class="fas fa-globe mr-1"></i> Global
+                            </a>
+                            <a href="{{ route('divhr.employelist', ['mode' => 's', 'status'=>request('status','Current')]) }}" 
+                               class="btn {{ $mode === 's' ? 'btn-info font-weight-bold' : 'btn-outline-info' }}"
+                               style="{{ $mode === 's' ? 'background-color: #17a2b8; border-color: #17a2b8; color: white;' : 'background: var(--rd-surface2); border-color: #17a2b8;' }}">
+                                <i class="fas fa-sitemap mr-1"></i> My Dept
+                            </a>
                         </div>
-                    </form>
+                        <form method="get" action="{{ route('divhr.employelist') }}" class="m-0">
+                            <input type="hidden" name="mode" value="{{ $mode }}">
+                            @php $st = request('status','Current'); @endphp
+                            <div class="btn-group btn-group-sm shadow-sm">
+                                <a href="{{ route('divhr.employelist',['status'=>'Current','mode'=>$mode,'term'=>request('term')]) }}" class="btn btn-primary {{ $st=='Current'?'active':'secondary' }}" style="{{ $st=='Current' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Current</a>
+                                <a href="{{ route('divhr.employelist',['status'=>'Previous','mode'=>$mode,'term'=>request('term')]) }}" class="btn btn-success {{ $st=='Previous'?'active':'secondary' }}" style="{{ $st=='Previous' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Previous</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="card card-outline card-primary shadow-sm mb-2">
@@ -41,7 +60,7 @@
         <div class="container-fluid">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
+                    <div class="rd-table-responsive" style="max-height: 75vh; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="employeesTable">
                             @php $st = request('status','Current'); @endphp
                             <thead class="bg-dark text-muted sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2) !important; border-bottom: 2px solid var(--rd-border);">

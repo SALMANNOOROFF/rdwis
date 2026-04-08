@@ -2,12 +2,15 @@
 
 @section('content')
 @php
+    $hasDocumentTable = \Illuminate\Support\Facades\Schema::hasTable('doc.documents');
     $actionRequiredCount = 0;
     foreach($projects as $p) {
-         $d = $p->document;
-         if($d && ($d->status == 'Pending Review' || $d->status == 'Under Review by SORD')) {
-             $actionRequiredCount++;
-         }
+         try {
+             $d = $hasDocumentTable ? $p->document : null;
+             if($d && ($d->status == 'Pending Review' || $d->status == 'Under Review by SORD')) {
+                 $actionRequiredCount++;
+             }
+         } catch (\Exception $e) { $d = null; }
     }
 @endphp
 
@@ -29,16 +32,16 @@
             @endif
 
             <div class="row mb-2">
-                <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h1 id="page-heading" class="m-0 font-weight-bold" style="font-size: 1.5rem; color: var(--rd-accent);">
-                        <i class="fas fa-layer-group mr-1"></i> All Divisions Projects <span class="text-sm ml-2" style="color: var(--rd-text3);">({{ $projects->count() }})</span>
+                <div class="col-12 d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+                    <h1 id="page-heading" class="m-0 font-weight-bold" style="font-size: 1.5rem; color: var(--rd-accent); font-family: 'Rajdhani', sans-serif;">
+                        <i class="fas fa-layer-group mr-1"></i> All Projects <span class="text-xs ml-2" style="color: var(--rd-text3);">({{ $projects->count() }})</span>
                     </h1>
-                    <div>
-                        <a href="{{ route('sord.compile_report') }}" class="btn btn-info btn-sm shadow-sm px-4 rounded-pill mr-2">
-                            <i class="fas fa-file-word mr-1"></i> Generate Report
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('sord.compile_report') }}" class="btn btn-info btn-sm shadow-sm px-3 rounded-pill">
+                            <i class="fas fa-file-word mr-1"></i> Report
                         </a>
-                        <a href="{{ route('sord.mpr_log') }}" class="btn btn-primary btn-sm shadow-sm px-4 rounded-pill">
-                            <i class="fas fa-list-alt mr-1"></i> Global MPR Log
+                        <a href="{{ route('sord.mpr_log') }}" class="btn btn-primary btn-sm shadow-sm px-3 rounded-pill">
+                            <i class="fas fa-list-alt mr-1"></i> Global Log
                         </a>
                     </div>
                 </div>
@@ -95,7 +98,7 @@
         <div class="container-fluid">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="rd-table-responsive" style="max-height: 70vh; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="projectsTable">
                             <thead class="sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2); color: var(--rd-text3);">
                                 <tr>
@@ -118,8 +121,10 @@
                                 $greenCount = 0; // Completed
 
                                 foreach($divProjects as $p) {
-                                    $d = $p->document;
-                                    $st = $d ? $d->status : 'Not Started';
+                                    try {
+                                        $d = (isset($hasDocumentTable) && $hasDocumentTable) ? $p->document : null;
+                                        $st = $d ? $d->status : 'Not Started';
+                                    } catch (\Exception $e) { $st = 'Not Started'; }
 
                                     if(in_array($st, ['Pending Review', 'Under Review by SORD', 'Returned to Division', 'Returned'])) {
                                         $redCount++;
@@ -135,19 +140,19 @@
                             <tbody class="division-group" data-division-id="{{ $divProjects->first()->unit->unt_id ?? '' }}">
                                 <tr class="bg-light division-header collapsed" role="button" data-toggle="collapse" data-target="#{{ $divId }}" aria-expanded="false" aria-controls="{{ $divId }}" style="cursor: pointer;">
                                     <td colspan="5" class="font-weight-bold py-2 px-3" style="background-color: var(--rd-surface2); color: var(--rd-text1);">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+                                            <span class="d-flex align-items-center flex-wrap" style="gap: 5px;">
                                                 <i class="fas fa-building text-secondary mr-2"></i> {{ $divisionName ?? 'Unknown Division' }}
-                                                <span class="badge badge-pill badge-secondary ml-2" title="Total Projects">{{ $divCount }} Total</span>
+                                                <span class="badge badge-pill badge-secondary" title="Total Projects">{{ $divCount }} Total</span>
                                                 
                                                 @if($redCount > 0)
-                                                <span class="badge badge-pill badge-danger ml-1" title="Action Required / Returned">{{ $redCount }}</span>
+                                                <span class="badge badge-pill badge-danger" title="Action Required / Returned">{{ $redCount }}</span>
                                                 @endif
                                                 @if($blueCount > 0)
-                                                <span class="badge badge-pill badge-info ml-1" title="Awaited">{{ $blueCount }}</span>
+                                                <span class="badge badge-pill badge-info" title="Awaited">{{ $blueCount }}</span>
                                                 @endif
                                                 @if($greenCount > 0)
-                                                <span class="badge badge-pill badge-success ml-1" title="Completed">{{ $greenCount }}</span>
+                                                <span class="badge badge-pill badge-success" title="Completed">{{ $greenCount }}</span>
                                                 @endif
                                             </span>
                                             <i class="fas fa-chevron-down text-muted small"></i>
@@ -163,8 +168,10 @@
                                     $status = Str::lower($project->prj_status);
                                     
                                     // --- DOCUMENT STATUS CHECK ---
-                                    $doc = $project->document; 
-                                    $docStatus = $doc ? $doc->status : 'Not Started';
+                                    try {
+                                        $doc = (isset($hasDocumentTable) && $hasDocumentTable) ? $project->document : null; 
+                                        $docStatus = $doc ? $doc->status : 'Not Started';
+                                    } catch (\Exception $e) { $docStatus = 'Not Started'; $doc = null; }
                                     
                                     // --- SORD MAPPING LOGIC ---
                                     if($docStatus == 'Pending Review' || $docStatus == 'Under Review by SORD') $docStatus = 'Action Required';

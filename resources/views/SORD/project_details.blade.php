@@ -10,11 +10,12 @@
         .header-controls { display: flex; align-items: center; gap: 8px; }
         .milestone-box-compact {
             background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 30px;
-            padding: 8px 20px; display: inline-flex; align-items: center; justify-content: space-between;
-            min-width: 380px; height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            padding: 8px 15px; display: inline-flex; align-items: center; justify-content: space-between;
+            min-width: 280px; width: 100%; max-width: 400px; height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         /* --- INFO PANEL --- */
-        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; overflow: visible; }
+        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; flex-direction: row; overflow: visible; }
+        @media (max-width: 991px) { .info-panel { flex-direction: column; } .info-right-team { width: 100% !important; border-left: none !important; border-top: 1px solid var(--rd-border); padding: 20px 15px !important; } }
         .info-left-content { flex: 1; padding: 15px; display: flex; align-items: center; }
         .info-right-team { width: 350px; background: var(--rd-surface); border-left: 1px solid var(--rd-border); padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; }
         .info-label { font-size: 0.7rem; text-transform: uppercase; color: var(--rd-text3); font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
@@ -113,7 +114,7 @@
         .table-custom tbody td { padding: 10px 15px; vertical-align: middle; color: var(--rd-text2); font-size: 0.85rem; border-bottom: 1px solid var(--rd-border); }
 
         /* --- FINANCE KNobs --- */
-        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center; }
         .finance-box {
             width: 120px; height: 140px; background: var(--rd-surface); border-radius: 14px; padding: 12px;
             box-shadow: 0 6px 18px rgba(0,0,0,0.2); display: flex; flex-direction: column;
@@ -593,7 +594,7 @@
         </div>
 
         <div class="milestone-container shadow-sm">
-            <div class="milestone-scroll-box">
+            <div class="rd-table-responsive milestone-scroll-box">
                 <table class="table table-custom w-100 m-0">
                     <thead>
                         <tr>

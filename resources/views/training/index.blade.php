@@ -4,15 +4,15 @@
 <div class="content-wrapper">
     <div class="content-header pb-2">
         <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap" style="gap: 15px;">
                 <div>
-                    <h1 class="m-0 font-weight-bold" style="color:var(--rd-text1); letter-spacing: -0.5px;">
+                    <h1 class="m-0 font-weight-bold" style="color:var(--rd-text1); letter-spacing: -0.5px; font-family: 'Rajdhani', sans-serif;">
                         <i class="fas fa-chalkboard-teacher mr-2 text-info"></i> Training Queue
                     </h1>
                 </div>
                 <div>
                     <a href="{{ route('training.create') }}" class="btn btn-info btn-sm px-3 shadow-sm font-weight-bold" style="border-radius:6px;">
-                        <i class="fas fa-plus-circle mr-2"></i> New Training Case
+                        <i class="fas fa-plus-circle mr-2"></i> New Case
                     </a>
                 </div>
             </div>

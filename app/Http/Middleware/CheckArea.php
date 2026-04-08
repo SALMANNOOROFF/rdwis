@@ -23,6 +23,10 @@ class CheckArea
             $userAreas = ['rdw', 'prj', 'rdwprj', 'prjrdw'];
         }
 
+        if ($userArea === 'nrdi') {
+            $userAreas = ['nrdi', 'prj', 'hr', 'fin', 'rdw', 'rdwprj', 'prjrdw'];
+        }
+
         foreach ($areas as $area) {
             $areaNorm = strtolower(trim($area));
             if (in_array($areaNorm, $userAreas, true)) {

@@ -118,6 +118,7 @@ class AuthController extends Controller
         return match ($area) {
             'hr'     => route('divhr.employelist'),
             'fin'    => route('viewpurchasecase'),
+            'nrdi'   => route('nrdi.dashboard'),
             'prj'    => route('dashboard'),
             'rdwprj', 'prjrdw' => route('sord.dashboard'),
             'it'     => route('admin.dashboard'),

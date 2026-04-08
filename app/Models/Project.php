@@ -8,11 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HorizonScoped;
 
     protected $table = 'prj.projects'; // Schema ke sath
     protected $primaryKey = 'prj_id';
     public $timestamps = false; 
+
+    public function getHorizonColumn()
+    {
+        return 'prj_unt_id';
+    } 
 
     protected $fillable = [
         'prj_title',

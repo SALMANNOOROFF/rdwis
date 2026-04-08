@@ -1,5 +1,14 @@
 @extends('welcome')
 @section('content')
+@php
+    $detailsRouteName = $detailsRouteName ?? 'purchasecasedetails';
+    $u = Auth::user();
+    $area = strtolower(trim((string) ($u?->acc_untarea ?? '')));
+    $auth = strtolower(trim((string) ($u?->acc_auth ?? '')));
+    $desigShort = strtoupper(trim((string) ($u?->acc_desigshort ?? '')));
+    $isCommandView = $area === 'nrdi' && in_array($desigShort, ['DG', 'MD'], true);
+    $canCreate = in_array($auth, ['approver', 'editor'], true) && ! $isCommandView;
+@endphp
 <div class="content-wrapper bg-transparent">
     <style>
         /* ... (Purana CSS same rahega) ... */
@@ -27,7 +36,9 @@
         <div class="container-fluid">
             <div class="page-header">
                 <div class="page-title"><i class="fas fa-folder-open"></i> All Purchase Cases</div>
-                <a href="{{ route('purchase.select') }}" class="btn btn-new-project"><i class="fas fa-plus-circle mr-1"></i> New Case</a>
+                @if($canCreate)
+                    <a href="{{ route('purchase.select') }}" class="btn btn-new-project"><i class="fas fa-plus-circle mr-1"></i> New Case</a>
+                @endif
             </div>
 
             <!-- FILTER BAR SECTION -->
@@ -73,6 +84,9 @@
                         <tr>
                             <th style="width: 8%">Code</th>
                             <th style="width: 12%">Head / For</th>
+                            @if(isset($unitNameMap))
+                                <th style="width: 10%">Unit</th>
+                            @endif
                             <th style="width: 20%">Title / Description</th>
                             <!-- ✅ NAYA COLUMN -->
                             <th style="width: 12%">Case Date</th>
@@ -97,6 +111,12 @@
                                 <td>
                                     <span class="font-weight-bold text-light">{{ $pcs->project->prj_code ?? $pcs->pcs_hed_id }}</span>
                                 </td>
+
+                                @if(isset($unitNameMap))
+                                    <td>
+                                        <span class="text-muted font-weight-bold">{{ $unitNameMap[$pcs->pcs_unt_id] ?? '' }}</span>
+                                    </td>
+                                @endif
 
                                 <td>
                                     <div class="text-truncate" style="max-width: 250px;" title="{{ $pcs->pcs_title }}">
@@ -134,7 +154,7 @@
                                 </td>
 
                                 <td class="text-center">
-                                    <a href="{{ route('purchasecasedetails', $pcs->pcs_id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                    <a href="{{ route($detailsRouteName, $pcs->pcs_id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
                                         View
                                     </a>
                                 </td>
@@ -142,7 +162,7 @@
                         @empty
                             <tr id="noDataRow">
                                 <!-- ✅ COLSPAN 8 KIYA -->
-                                <td colspan="8" class="text-center py-5 text-muted">
+                                <td colspan="{{ isset($unitNameMap) ? 9 : 8 }}" class="text-center py-5 text-muted">
                                     <i class="fas fa-folder-open fa-3x mb-3"></i><br>
                                     No purchase cases found.
                                 </td>

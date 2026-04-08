@@ -6,11 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
+    use \App\Traits\HorizonScoped;
+
     protected $table = 'hr.emps';
     protected $primaryKey = 'emp_id';
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
+
+    public function getHorizonColumn()
+    {
+        return 'emp_unt_id';
+    }
 
     protected $fillable = [
         'emp_id',

@@ -5,15 +5,15 @@
     <div class="content-header pb-1">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0 font-weight-bold" style="color: var(--rd-accent);">
+                <div class="col-12 d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+                    <h1 class="m-0 font-weight-bold" style="color: var(--rd-accent); font-family: 'Rajdhani', sans-serif;">
                         <i class="fas fa-history mr-2"></i> MPR Activity Log
                     </h1>
-                </div>
-                <div class="col-sm-6 text-right">
-                    <a href="{{ route('sord.all_projects') }}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
-                        <i class="fas fa-arrow-left mr-1"></i> Back to Projects
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('sord.all_projects') }}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold rounded-pill px-3">
+                            <i class="fas fa-arrow-left mr-1"></i> Back
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -22,8 +22,9 @@
     <div class="content">
         <div class="container-fluid">
             <div class="card card-outline card-primary shadow-sm">
-                <div class="card-body p-0 table-responsive">
-                    <table class="table table-hover table-striped text-nowrap mb-0">
+                <div class="card-body p-0">
+                    <div class="rd-table-responsive">
+                        <table class="table table-hover table-striped text-nowrap mb-0">
                         <thead style="background-color: var(--rd-surface2); color: var(--rd-text3);">
                             <tr>
                                 <th>Date & Time</th>
@@ -84,6 +85,7 @@
                         </tbody>
                     </table>
                 </div>
+               </div>
                 <div class="card-footer clearfix">
                     {{ $logs->links('pagination::bootstrap-4') }}
                 </div>

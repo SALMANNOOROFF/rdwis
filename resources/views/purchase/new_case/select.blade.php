@@ -15,26 +15,26 @@
     min-height: 100vh;
     background: var(--rd-bg);
     font-family: 'Outfit', sans-serif;
-    padding: 32px 0 48px;
+    padding: 20px 10px 48px;
   }
 
   /* ─── TYPOGRAPHY & HEADER ─── */
   .page-heading {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 32px;
     position: relative;
     z-index: 2;
   }
 
   .page-heading h1 {
     font-weight: 900;
-    font-size: 2.3rem;
+    font-size: calc(1.5rem + 1.5vw);
     color: var(--rd-text1);
     letter-spacing: -0.5px;
     margin-bottom: 8px;
   }
   .page-heading p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--rd-text3);
     font-weight: 500;
   }
@@ -43,7 +43,7 @@
   .glass-card {
     background: var(--rd-surface);
     border-radius: 24px;
-    padding: 32px 28px;
+    padding: 24px 20px;
     border: 1px solid var(--rd-border2);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(12px);
@@ -54,6 +54,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-height: 220px;
   }
 
   .glass-card::before {

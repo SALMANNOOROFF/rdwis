@@ -7,10 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Purchase extends Model
 {
+    use \App\Traits\HorizonScoped;
+
     // Table and primary key
     protected $table = 'pur.purcases';
     protected $primaryKey = 'pcs_id';
     public $timestamps = false;
+
+    public function getHorizonColumn()
+    {
+        return 'pcs_unt_id';
+    }
 
     // Fillable fields for mass assignment
  protected $fillable = [

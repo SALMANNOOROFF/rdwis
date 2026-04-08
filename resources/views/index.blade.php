@@ -1,12 +1,19 @@
 @extends('welcome')
 
 @section('content')
+@php
+    $u = Auth::user();
+    $area = strtolower(trim((string) ($u?->acc_untarea ?? '')));
+    $title = $area === 'nrdi'
+        ? 'NRDI Command Dashboard'
+        : ((method_exists($u, 'isSORD') && $u->isSORD()) ? 'SORD Dashboard' : 'Division Dashboard');
+@endphp
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0 font-weight-bold text-dark">Division Dashboard <span class="text-muted" style="font-size: 0.6em;">v2.0</span></h1>
+                    <h1 class="m-0 font-weight-bold text-dark">{{ $title }} <span class="text-muted" style="font-size: 0.6em;">v2.0</span></h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -156,20 +163,20 @@
                             </h3>
                         </div>
                         <div class="card-body p-0">
-                            <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                                <table class="table table-valign-middle m-0">
+                            <div class="rd-table-responsive" style="max-height: 250px; overflow-y: auto; margin-bottom:0; border-radius:0 0 12px 12px;">
+                                <table class="table table-valign-middle m-0" style="font-size:13px;">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th>Project Code</th>
-                                            <th class="text-center">Staff Count</th>
+                                            <th style="padding:12px 15px;">Project Code</th>
+                                            <th class="text-center" style="padding:12px 15px;">Staff Count</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($employeeStats as $stat)
                                         <tr>
-                                            <td>{{ $stat->hed_code }}</td>
-                                            <td class="text-center">
-                                                <span class="badge badge-info px-3 py-2" style="font-size: 1rem;">{{ $stat->emp_count }}</span>
+                                            <td style="padding:10px 15px; font-weight:600; color:var(--rd-text2);">{{ $stat->hed_code }}</td>
+                                            <td class="text-center" style="padding:10px 15px;">
+                                                <span class="badge badge-info px-3 py-1" style="font-size: 0.9rem; border-radius:6px;">{{ $stat->emp_count }}</span>
                                             </td>
                                         </tr>
                                         @endforeach

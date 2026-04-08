@@ -19,7 +19,47 @@
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
 
     <style>
-        /* Custom Sidebar Override for Cleaner Look */
+        /* Global Responsiveness & Sidebar Toggle Fix */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        .wrapper {
+            overflow-x: hidden;
+        }
+
+        .content-wrapper {
+            overflow-x: hidden;
+            transition: margin-left .3s ease-in-out, width .3s ease-in-out;
+        }
+
+        @media (max-width: 991.98px) {
+            .main-sidebar {
+                box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
+            }
+        }
+
+        /* Standardized Responsive Table Container */
+        .rd-table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .rd-table-responsive::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .rd-table-responsive::-webkit-scrollbar-thumb {
+            background: var(--rd-border);
+            border-radius: 10px;
+        }
+
+        /* ---- Original Sidebar Overrides ---- */
         .nav-header {
             color: var(--rd-text3) !important;
         }
@@ -287,6 +327,43 @@
               </ul>
           </li>
 
+      @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'nrdi')
+
+          <li class="nav-header">COMMAND VIEW</li>
+
+          <li class="nav-item">
+              <a href="{{ route('nrdi.dashboard') }}" class="nav-link {{ Request::routeIs('nrdi.dashboard') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <p>Dashboard</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('nrdi.projects.index') }}" class="nav-link {{ Request::routeIs('nrdi.projects.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-folder-open"></i>
+                  <p>Projects</p>
+              </a>
+          </li>
+
+          <li class="nav-item {{ Request::routeIs('nrdi.purchase_cases.*') || Request::routeIs('nrdi.contract_cases.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('nrdi.purchase_cases.*') || Request::routeIs('nrdi.contract_cases.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-briefcase"></i>
+                  <p>VIEW CASES <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('nrdi.purchase_cases.index') }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases.*') ? 'active' : '' }}">
+                          <i class="fas fa-shopping-cart nav-icon"></i><p>Purchase Cases</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('nrdi.contract_cases.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases.*') ? 'active' : '' }}">
+                          <i class="fas fa-file-signature nav-icon"></i><p>Contract Cases</p>
+                      </a>
+                  </li>
+              </ul>
+          </li>
+
       @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
           <li class="nav-header">SYSTEM ADMIN</li>
 
@@ -363,6 +440,17 @@
 
   @stack('scripts')
   @yield('scripts')
+
+  
+  @if(isset($global_varModeStr))
+  <script>
+      console.log("%c--- RDWIS ACTIVE DYNAMIC VARIABLES ---", "color: red; font-size: 16px; font-weight: bold;");
+      console.log(`%c[Role & Auth] -> User is: %c{{ strtoupper($global_userAuth ?? 'viewer') }}`, "color: blue; font-weight: bold;", "color: green; font-weight: bold;");
+      console.log(`%c[Access Mode] -> varMode: %c{{ $global_varModeStr }}`, "color: blue; font-weight: bold;", "color: magenta; font-weight: bold;");
+      console.log(`%c[Data Horizon] -> Boundary: varLower = {{ $global_lower ?? 0 }} | varUpper = {{ $global_upper ?? 0 }}`, "color: darkorange; font-weight: bold;");
+      console.log("%c----------------------------------------", "color: red; font-weight: bold;");
+  </script>
+  @endif
 
   </body>
   </html>

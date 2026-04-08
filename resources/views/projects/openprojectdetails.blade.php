@@ -1,6 +1,6 @@
 @extends('welcome')
 @section('content')
-<div class="content-wrapper pt-3">
+<div class="content-wrapper pt-3 {{ ($readOnly ?? false) ? 'command-view' : '' }}">
     <style>
         /* --- GLOBAL & UTILS --- */
         .card-primary.card-outline { border-top: 3px solid var(--rd-accent); }
@@ -10,13 +10,19 @@
         .header-controls { display: flex; align-items: center; gap: 8px; }
         .milestone-box-compact {
             background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 30px;
-            padding: 8px 20px; display: inline-flex; align-items: center; justify-content: space-between;
-            min-width: 380px; height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            padding: 8px 15px; display: inline-flex; align-items: center; justify-content: space-between;
+            min-width: 250px; max-width: 100%; height: auto; min-height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin: 5px 0;
         }
         /* --- INFO PANEL --- */
-        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; overflow: visible; }
-        .info-left-content { flex: 1; padding: 15px; display: flex; align-items: center; }
+        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; flex-wrap: wrap; overflow: visible; }
+        .info-left-content { flex: 1; padding: 15px; display: flex; align-items: center; min-width: 300px; }
         .info-right-team { width: 350px; background: var(--rd-surface); border-left: 1px solid var(--rd-border); padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; }
+        @media (max-width: 991.98px) {
+            .info-panel { flex-direction: column; }
+            .info-right-team { width: 100%; border-left: none; border-top: 1px solid var(--rd-border); padding: 20px 15px; }
+            .info-left-content { border-right: none !important; }
+        }
         .info-label { font-size: 0.7rem; text-transform: uppercase; color: var(--rd-text3); font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
         .info-value { font-size: 0.9rem; color: var(--rd-text1); font-weight: 600; line-height: 1.4; }
         .cost-tag { background: var(--rd-success-soft); color: var(--rd-success); padding: 4px 10px; border-radius: 4px; font-weight: 700; border: 1px solid var(--rd-success); display: inline-block; }
@@ -48,7 +54,18 @@
         /* --- OVERALL STEPS WIZARD --- */
         .steps-container {
             position: relative; display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 35px; margin-top: 35px; padding: 0 10px;
+            margin-bottom: 35px; margin-top: 35px; padding: 0 44px;
+            min-width: 800px;
+        }
+        .steps-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 40px;
+            margin-bottom: -20px;
+        }
+        @media (max-width: 991.98px) {
+            .steps-wrapper::-webkit-scrollbar { height: 4px; }
+            .steps-wrapper::-webkit-scrollbar-thumb { background: var(--rd-border); border-radius: 10px; }
         }
         .steps-track {
             position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: var(--rd-border);
@@ -108,7 +125,7 @@
 
         /* --- MILESTONE TABLE --- */
         .milestone-container { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; overflow: hidden; }
-        .milestone-scroll-box { max-height: 450px; overflow-y: auto; }
+        .milestone-scroll-box { max-height: 450px; overflow-y: auto; overflow-x: auto; }
         .table-custom thead th { background: var(--rd-surface2); color: var(--rd-text3); text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid var(--rd-border); padding: 12px 15px; position: sticky; top: 0; z-index: 5; }
         .table-custom tbody td { padding: 10px 15px; vertical-align: middle; color: var(--rd-text2); font-size: 0.85rem; border-bottom: 1px solid var(--rd-border); }
 
@@ -121,6 +138,11 @@
         }
         .finance-box canvas { width: 90px; height: 90px; }
         .finance-title { margin-top: 10px; font-size: 11px; font-weight: 800; color: var(--rd-text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .command-view a[href*="attachment/delete"] { display: none !important; }
+        .command-view form[action*="upload-single"],
+        .command-view form[action*="upload-other"],
+        .command-view form[action*="mark-complete"] { display: none !important; }
 
       
         /* --- MODAL --- */
@@ -191,19 +213,19 @@
         <div class="card card-primary card-outline shadow-sm border-0">
             <div class="card-header p-3 bg-white border-bottom">
                 <div class="row align-items-center">
-                    <div class="col-md-4">
-                        <div class="d-flex align-items-center mb-1">
-                            <span class="badge badge-light border mr-2">CODE: {{ $project->prj_code }}</span>
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="d-flex align-items-center mb-1 flex-wrap" style="gap:5px;">
+                            <span class="badge badge-light border">CODE: {{ $project->prj_code }}</span>
                             <span class="font-weight-bolder {{ $edcClass }} small">
                                 <i class="fas fa-flag-checkered mr-1"></i> EDC: {{ $edc ? $edc->format('d M, Y') : 'TBD' }}
                             </span>
                         </div>
-                        <h4 class="text-dark font-weight-bold m-0 text-truncate" title="{{ $project->prj_title }}">
+                        <h4 class="text-dark font-weight-bold m-0 text-truncate" title="{{ $project->prj_title }}" style="font-family:'Rajdhani',sans-serif; letter-spacing:0.5px;">
                             {{ $project->prj_title }}
                         </h4>
                     </div>
 
-                    <div class="col-md-4 text-center">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
                         @if($nextMilestone)
                             <div class="milestone-box-compact">
                                 <div class="d-flex align-items-center pr-3 border-right mr-3">
@@ -226,19 +248,21 @@
                         @endif
                     </div>
 
-                    <div class="col-md-4 text-right">
-                        <div class="header-controls justify-content-end">
+                    <div class="col-md-4 text-center text-md-right">
+                        <div class="header-controls justify-content-center justify-content-md-end flex-wrap">
                             {{-- LOG HISTORY BUTTON (NEW) --}}
                             <a href="{{ route('projecthistory', ['project_id' => $project->prj_id]) }}" class="btn btn-outline-info btn-sm shadow-sm font-weight-bold">
-                                <i class="fas fa-history mr-1"></i> Log History
+                                <i class="fas fa-history mr-1"></i> History
                             </a>
 
                             <a href="{{ route('projecthistory', $project->prj_id) }}" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold">
-                                <i class="fas fa-list-alt mr-1"></i> View MPRs
+                                <i class="fas fa-list-alt mr-1"></i> MPRs
                             </a>
-                            <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm font-weight-bold px-3">
-                                <i class="fas fa-plus-circle mr-1"></i> Create MPR
-                            </a>
+                            @if(!($readOnly ?? false))
+                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm font-weight-bold px-3">
+                                    <i class="fas fa-plus-circle mr-1"></i> MPR
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -457,7 +481,8 @@
             </span>
         </div>
 
-        <div class="steps-container mb-4">
+        <div class="steps-wrapper">
+            <div class="steps-container mb-4">
 
     <div class="steps-track">
         <div class="steps-fill" style="width: {{ $overallPercent }}%;"></div>

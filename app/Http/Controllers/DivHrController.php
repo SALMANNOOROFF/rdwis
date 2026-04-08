@@ -14,13 +14,32 @@ class DivHrController extends Controller
     public function employeelist(Request $request)
     {
         $user = Auth::user();
-        $unitId = $user ? $user->acc_unt_id : null;
+        if (!$user) return redirect()->route('login');
+
+        // Determine Mode
+        $mode = $request->query('mode', 's'); // 'm' for Module, 's' for Section
+
+        if ($mode === 's') {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $varModeStr = 'approver-s';
+        } else {
+            $lower = $user->acc_lowerm;
+            $upper = $user->acc_upperm;
+            $varModeStr = 'approver-m';
+        }
+        $userAuth = (string) ($user->acc_auth ?? 'viewer');
 
         $q = Employee::query()
             ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'hr.emps.emp_unt_id')
             ->select('hr.emps.*', 'h.hed_code');
-        if ($unitId) {
-            $q->where('emp_unt_id', $unitId);
+        
+        $q->whereBetween('emp_unt_id', [$lower, $upper]);
+
+        // If Mode S (My Dept), filter out divisions explicitly
+        if ($mode === 's') {
+            $q->where('u.unt_type', '!=', 'Division');
         }
 
         if ($request->filled('status')) {
@@ -42,7 +61,8 @@ class DivHrController extends Controller
             return in_array(strtolower($e->emp_status), ['active','current']);
         })->count();
         $previousCount = $employees->count() - $activeCount;
-        return view('divhr.employelist', compact('employees','activeCount','previousCount'));
+        
+        return view('divhr.employelist', compact('employees','activeCount','previousCount', 'mode', 'lower', 'upper', 'varModeStr', 'userAuth'));
     }
 
     // Employee detail page (ID from URL)

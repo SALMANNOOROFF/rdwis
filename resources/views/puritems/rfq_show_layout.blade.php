@@ -20,6 +20,8 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 15px;
   }
 
   .sinc-page-title {
@@ -324,7 +326,7 @@
     </span>
   </div>
 
-  <div style="overflow-x:auto">
+  <div class="rd-table-responsive">
     <table class="rfq-table">
       <thead>
         <tr>

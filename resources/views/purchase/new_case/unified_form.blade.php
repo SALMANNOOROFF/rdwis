@@ -13,6 +13,11 @@
         .soft-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
         .soft-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
         .soft-group { margin-bottom:14px; }
+
+        @media (max-width: 991.98px) {
+          .soft-row, .soft-row-3 { grid-template-columns: 1fr; gap: 8px; }
+          .sinc-wrapper { padding: 15px 12px 32px !important; }
+        }
         
         .soft-label { font-size:0.72rem; font-weight:700; color:var(--rd-text3); margin-bottom:4px; display:block; text-transform:uppercase; letter-spacing:0.3px; }
         
@@ -26,11 +31,11 @@
         
         .section-title { font-size:0.85rem; font-weight:800; color:var(--rd-text1); margin:6px 0 12px; display:flex; align-items:center; gap:8px; padding-bottom:6px; border-bottom:1px dashed var(--rd-border2); }
         
-        .sinc-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+        .sinc-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap: wrap; gap: 15px; }
         .sinc-page-title { font-size:1.15rem; font-weight:800; color:var(--rd-text1); display:flex; align-items:center; gap:10px; }
         .title-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
         
-        .btn-submit { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 24px; border-radius:10px; background:linear-gradient(135deg, var(--rd-accent), var(--rd-accent-dark)); color:#fff; font-size:0.85rem; font-weight:700; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:all 0.2s ease; }
+        .btn-submit { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 24px; border-radius:10px; background:linear-gradient(135deg, var(--rd-accent), var(--rd-accent-dark)); color:#fff; font-size:0.85rem; font-weight:700; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:all 0.2s ease; width: 100%; max-width: fit-content; }
         .btn-submit:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.4); }
         
         .badge-draft { background-color:#fffbeb; color:#d97706; padding:4px 12px; border-radius:50px; font-size:0.7rem; font-weight:800; border:1px solid #fcd34d; letter-spacing:0.3px; }
@@ -38,6 +43,10 @@
         /* Interactive dynamic lists */
         .dyn-list { display:flex; flex-direction:column; gap:10px; }
         .dyn-row { display:grid; grid-template-columns:1fr 1fr 38px; gap:12px; align-items:end; padding:12px; border:1.5px solid var(--rd-border); border-radius:12px; background:var(--rd-surface); transition:all 0.2s; }
+        @media (max-width: 575.98px) {
+          .dyn-row { grid-template-columns: 1fr !important; position: relative; padding-bottom: 50px; }
+          .btn-rm-row { position: absolute; bottom: 12px; right: 12px; width: calc(100% - 24px) !important; }
+        }
         .dyn-row:focus-within { border-color:var(--rd-accent); box-shadow:0 2px 8px rgba(0,0,0,0.1); }
         .btn-add-row { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; background:var(--rd-accent-soft); color:var(--rd-accent); font-weight:700; font-size:0.75rem; border:none; cursor:pointer; transition:background 0.2s; margin-top:6px; }
         .btn-add-row:hover { background:var(--rd-accent-soft); opacity: 0.8; }

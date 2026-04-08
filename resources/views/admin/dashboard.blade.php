@@ -3,14 +3,16 @@
 @section('content')
 <div class="content-wrapper">
     <div class="content-header">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            <h1 class="m-0 font-weight-bold text-dark">System Admin — Dashboard</h1>
-            <div class="d-flex align-items-center" style="gap: 8px;">
-                <a href="{{ route('admin.accounts.index') }}" class="btn btn-outline-primary btn-sm">
+        <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+            <h1 class="m-0 font-weight-bold text-dark" style="font-family: 'Rajdhani', sans-serif;">
+                <i class="fas fa-shield-alt mr-2 text-primary"></i>Admin Dashboard
+            </h1>
+            <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+                <a href="{{ route('admin.accounts.index') }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
                     <i class="fas fa-users-cog mr-1"></i> Accounts
                 </a>
-                <a href="{{ route('admin.reversals.index') }}" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-undo-alt mr-1"></i> Data Reversals
+                <a href="{{ route('admin.reversals.index') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    <i class="fas fa-undo-alt mr-1"></i> Reversals
                 </a>
             </div>
         </div>
@@ -83,14 +85,15 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="card-title mb-0">Latest Reversal Requests</h3>
-                            <a href="{{ route('admin.reversals.index') }}" class="btn btn-sm btn-outline-primary">
+                        <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
+                            <h3 class="card-title mb-0 font-weight-bold">Latest Reversal Requests</h3>
+                            <a href="{{ route('admin.reversals.index') }}" class="btn btn-xs btn-outline-primary rounded-pill px-3">
                                 View All
                             </a>
                         </div>
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover table-striped table-sm mb-0">
+                        <div class="card-body p-0">
+                            <div class="rd-table-responsive">
+                                <table class="table table-hover table-striped table-sm mb-0 text-nowrap">
                                 <thead class="thead-dark">
                                 <tr>
                                     <th>ID</th>
@@ -126,6 +129,7 @@
                                 @endforelse
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>

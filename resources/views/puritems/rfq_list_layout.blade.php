@@ -48,9 +48,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     padding-bottom: 16px;
     border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 15px;
   }
   .sinc-page-title {
     font-size: 1.25rem;
@@ -104,12 +106,15 @@
   .search-wrap {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
   }
   .search-box {
     position: relative;
-    width: 260px;
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
   }
   .search-box i {
     position: absolute;
@@ -690,7 +695,7 @@
 
 <!-- Table -->
 <div class="table-card">
-  <div class="table-responsive">
+  <div class="rd-table-responsive">
     <table class="rfq-table" id="demandTable">
       <thead>
         <tr>

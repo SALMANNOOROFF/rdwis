@@ -18,11 +18,14 @@ class DocMprController extends Controller
         $user = Auth::user();
         $project = Project::findOrFail($projectId);
         
-        $document = Document::where('prj_id', $projectId)
-                            ->with(['versions' => function($q){
-                                $q->orderBy('ver_id', 'desc');
-                            }, 'versions.actor.role', 'currentOwner.role', 'creator.role', 'history.fromUser.role'])
-                            ->first();
+        $document = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('doc.documents')) {
+            $document = Document::where('prj_id', $projectId)
+                                ->with(['versions' => function($q){
+                                    $q->orderBy('ver_id', 'desc');
+                                }, 'versions.actor.role', 'currentOwner.role', 'creator.role', 'history.fromUser.role', 'history.toUser.role'])
+                                ->first();
+        }
 
         // Permissions
         $isEditable = true;
@@ -57,12 +60,15 @@ class DocMprController extends Controller
         $user = Auth::user();
         $project = Project::findOrFail($projectId);
 
-        $document = Document::where('prj_id', $projectId)
-                            ->with('creator.role', 'versions.actor.role', 'currentOwner')
-                            ->first();
+        $document = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('doc.documents')) {
+            $document = Document::where('prj_id', $projectId)
+                                ->with('creator.role', 'versions.actor.role', 'currentOwner')
+                                ->first();
+        }
 
         if (!$document) {
-             return redirect()->route('sord.inbox')->with('error', 'Document not found.');
+             return redirect()->route('sord.all_projects')->with('error', 'Document System Offline or Document not found.');
         }
 
         // EDITABLE CHECK: Sirf tab edit hoga jab file mere paas ho
@@ -187,11 +193,14 @@ class DocMprController extends Controller
 
     public function sordInbox() {
         $user = Auth::user();
-        $documents = Document::where('current_owner_id', $user->acc_id)
-                             ->where('status', '!=', 'Approved') 
-                             ->with(['project', 'creator.role', 'creator.unit']) 
-                             ->orderBy('updated_at', 'desc')
-                             ->get();
+        $documents = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('doc.documents')) {
+            $documents = Document::where('current_owner_id', $user->acc_id)
+                                 ->where('status', '!=', 'Approved') 
+                                 ->with(['project', 'creator.role', 'creator.unit']) 
+                                 ->orderBy('updated_at', 'desc')
+                                 ->get();
+        }
         return view('sord.mpr_inbox', compact('documents'));
     }
 }
