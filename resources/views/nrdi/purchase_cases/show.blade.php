@@ -20,9 +20,9 @@
 .dg-case-date { font-size:11px; color:var(--rd-text3); margin-top:4px; text-align:right; }
 
 /* ---- 2-col grid ---- */
-.dg-grid { display:grid; grid-template-columns:1fr 390px; gap:18px; align-items:start; }
-@media(max-width:1300px){ .dg-grid { grid-template-columns:1fr 350px; } }
-@media(max-width:1024px){ .dg-grid { grid-template-columns:1fr 320px; } }
+.dg-grid { display:grid; grid-template-columns:1fr 300px; gap:18px; align-items:start; }
+@media(max-width:1300px){ .dg-grid { grid-template-columns:1fr 280px; } }
+@media(max-width:1024px){ .dg-grid { grid-template-columns:1fr 260px; } }
 @media(max-width:860px)  { .dg-grid { grid-template-columns:1fr; } }
 
 /* ---- Section labels (no box) ---- */
@@ -37,37 +37,37 @@
 .dg-divider { height:1px; background:var(--rd-border); margin:14px 0; }
 
 /* ---- Financial row (50/50 equal height with border) ---- */
-.dg-fin-row { display:grid; grid-template-columns:35% 1fr; gap:14px; align-items:stretch; }
-.dg-fin-col { background:var(--rd-surface); border:1px solid var(--rd-border); border-radius:10px; padding:14px; display:flex; flex-direction:column; }
+.dg-fin-row { display:grid; grid-template-columns:30% 1fr; gap:14px; align-items:stretch; }
+.dg-fin-col { background:var(--rd-surface); border:1px solid var(--rd-border); border-radius:10px; padding:12px; display:flex; flex-direction:column; }
 @media(max-width:860px) { .dg-fin-row { grid-template-columns:1fr; } }
 @media(max-width:600px) { .dg-fin-row { grid-template-columns:1fr; } }
 
 /* ---- Financial numbers ---- */
-.dg-fin-nums { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
-.dg-fin-card { background:var(--rd-surface2); border:1px solid var(--rd-border); border-radius:7px; padding:9px 10px; text-align:center; }
-.dg-fin-label { font-size:9px; letter-spacing:.8px; text-transform:uppercase; color:var(--rd-text3); margin-bottom:3px; font-weight:600; }
-.dg-fin-value { font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; }
+.dg-fin-nums { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px; }
+.dg-fin-card { background:var(--rd-surface2); border:1px solid var(--rd-border); border-radius:7px; padding:6px 8px; text-align:center; }
+.dg-fin-label { font-size:8px; letter-spacing:.6px; text-transform:uppercase; color:var(--rd-text3); margin-bottom:2px; font-weight:600; }
+.dg-fin-value { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; }
 
-.dg-prog-wrap { position:relative; height:16px; background:rgba(255,255,255,0.04); border-radius:20px; overflow:hidden; margin-bottom:6px; border:1px solid var(--rd-border); }
+.dg-prog-wrap { position:relative; height:12px; background:rgba(255,255,255,0.04); border-radius:20px; overflow:hidden; margin-bottom:4px; border:1px solid var(--rd-border); }
 .dg-prog-utilized { position:absolute; left:0; top:0; height:100%; background:var(--rd-text3); border-radius:20px 0 0 20px; width:0; transition:width 1s cubic-bezier(.4,0,.2,1) .2s; }
 .dg-prog-utilized.anim { width:var(--pw); }
 .dg-prog-case {
     position:absolute; top:0; height:100%;
-    background: repeating-linear-gradient(-45deg, var(--rd-info) 0px, var(--rd-info) 8px, rgba(255,255,255,0.18) 8px, rgba(255,255,255,0.18) 16px);
-    background-size:22px 100%;
+    background: repeating-linear-gradient(-45deg, var(--rd-info) 0px, var(--rd-info) 6px, rgba(255,255,255,0.18) 6px, rgba(255,255,255,0.18) 12px);
+    background-size:18px 100%;
     animation:dgStripeFlow .7s linear infinite, dgCaseGrow .9s cubic-bezier(.4,0,.2,1) .7s both;
     width:0; left:var(--lu);
 }
-@keyframes dgStripeFlow { 0%{background-position:0 0} 100%{background-position:22px 0} }
+@keyframes dgStripeFlow { 0%{background-position:0 0} 100%{background-position:18px 0} }
 @keyframes dgCaseGrow   { from{width:0} to{width:var(--pw)} }
 .dg-prog-remain { position:absolute; right:0; top:0; height:100%; border-radius:0 20px 20px 0; width:0; transition:width .9s cubic-bezier(.4,0,.2,1) 1s; }
 .dg-prog-remain.anim { width:var(--pw); }
-.dg-prog-legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; justify-content:center; }
-.dg-leg-item { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--rd-text2); }
-.dg-leg-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.dg-prog-legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; justify-content:center; }
+.dg-leg-item { display:flex; align-items:center; gap:4px; font-size:9px; color:var(--rd-text2); }
+.dg-leg-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 
-.dg-chart-wrap { position:relative; width:100%; height:130px; }
-.dg-chart-sm   { position:relative; width:100%; height:110px; }
+.dg-chart-wrap { position:relative; width:100%; height:110px; }
+.dg-chart-sm   { position:relative; width:100%; height:90px; }
 
 /* ---- Account head card ---- */
 .dg-head-card { background:rgba(23,162,184,0.05); border:1px solid rgba(23,162,184,0.18); border-left:3px solid var(--rd-info); border-radius:7px; padding:9px 12px; margin-bottom:12px; }
@@ -78,38 +78,38 @@
 
 /* ---- Items box ---- */
 .dg-box { background:var(--rd-surface); border:1px solid var(--rd-border); border-radius:10px; overflow:hidden; }
-.dg-box-hdr { background:var(--rd-surface2); padding:10px 14px; border-bottom:1px solid var(--rd-border); display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
-.dg-box-hdr-left { display:flex; flex-direction:column; gap:2px; }
-.dg-box-hdr-firm { font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; color:var(--rd-text1); }
-.dg-box-hdr-cost { font-size:11px; color:var(--rd-success); font-weight:600; }
-.dg-box-hdr-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.dg-box-hdr { background:var(--rd-surface2); padding:8px 12px; border-bottom:1px solid var(--rd-border); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+.dg-box-hdr-left { display:flex; flex-direction:column; gap:1px; }
+.dg-box-hdr-firm { font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; color:var(--rd-text1); }
+.dg-box-hdr-cost { font-size:10px; color:var(--rd-success); font-weight:600; }
+.dg-box-hdr-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
 
-.dg-cs-btn { background:rgba(23,162,184,0.1); border:1px solid rgba(23,162,184,0.3); color:var(--rd-info); font-size:11px; font-weight:600; padding:6px 12px; border-radius:7px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+.dg-cs-btn { background:rgba(23,162,184,0.1); border:1px solid rgba(23,162,184,0.3); color:var(--rd-info); font-size:10px; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer; transition:all .2s; white-space:nowrap; }
 .dg-cs-btn:hover { background:rgba(23,162,184,0.22); color:#fff; border-color:var(--rd-info); }
 
-.dg-items-wrap { max-height:220px; overflow-y:auto; }
+.dg-items-wrap { max-height:180px; overflow-y:auto; }
 .dg-items-wrap::-webkit-scrollbar { width:3px; }
 .dg-items-wrap::-webkit-scrollbar-thumb { background:var(--rd-border); border-radius:4px; }
-.dg-items-table { width:100%; font-size:12px; border-collapse:collapse; }
-.dg-items-table th { padding:7px 11px; color:var(--rd-text3); font-weight:600; font-size:10px; letter-spacing:.8px; text-align:left; text-transform:uppercase; background:var(--rd-surface2); }
-.dg-items-table td { padding:7px 11px; border-top:1px solid var(--rd-border); color:var(--rd-text1); font-size:12px; }
+.dg-items-table { width:100%; font-size:11px; border-collapse:collapse; }
+.dg-items-table th { padding:6px 10px; color:var(--rd-text3); font-weight:600; font-size:9px; letter-spacing:.6px; text-align:left; text-transform:uppercase; background:var(--rd-surface2); }
+.dg-items-table td { padding:6px 10px; border-top:1px solid var(--rd-border); color:var(--rd-text1); font-size:11px; }
 .dg-items-table tr:hover td { background:rgba(255,255,255,0.015); }
 .dg-price-col { color:var(--rd-success) !important; font-weight:600; text-align:right !important; }
 .dg-qty-col { text-align:center !important; color:var(--rd-warning) !important; font-weight:600; }
 
-.dg-terms-row { padding:8px 14px; border-top:1px solid var(--rd-border); background:rgba(255,255,255,0.015); line-height:1.4; }
-.dg-terms-label { font-size:11px; font-weight:700; color:var(--rd-text1); display:inline; }
-.dg-terms-text { font-size:11px; color:var(--rd-text2); display:inline; margin-left:4px; }
+.dg-terms-row { padding:6px 12px; border-top:1px solid var(--rd-border); background:rgba(255,255,255,0.015); line-height:1.3; }
+.dg-terms-label { font-size:10px; font-weight:700; color:var(--rd-text1); display:inline; }
+.dg-terms-text { font-size:10px; color:var(--rd-text2); display:inline; margin-left:4px; }
 
 /* ---- Spending breakdown box ---- */
 .dg-spend-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 @media(max-width:600px){ .dg-spend-grid { grid-template-columns:1fr; } }
 
 /* ---- Right panel ---- */
-.dg-right { display:flex; flex-direction:column; gap:14px; }
+.dg-right { display:flex; flex-direction:column; gap:12px; }
 .dg-panel-r { background:var(--rd-surface); border:1px solid var(--rd-border); border-radius:10px; overflow:hidden; }
-.dg-panel-r-hdr { background:var(--rd-surface2); padding:11px 15px; border-bottom:1px solid var(--rd-border); display:flex; align-items:center; gap:8px; }
-.dg-panel-r-title { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; color:var(--rd-accent); letter-spacing:1px; text-transform:uppercase; }
+.dg-panel-r-hdr { background:var(--rd-surface2); padding:8px 12px; border-bottom:1px solid var(--rd-border); display:flex; align-items:center; gap:6px; }
+.dg-panel-r-title { font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:700; color:var(--rd-accent); letter-spacing:0.8px; text-transform:uppercase; }
 
 .dg-trail-body { padding:14px; max-height:360px; overflow-y:auto; }
 .dg-trail-body::-webkit-scrollbar { width:3px; }
@@ -331,28 +331,28 @@
             @endphp
 
             {{-- Page Header --}}
-            <div style="margin-bottom:16px;">
-                {{-- Top Row: Title + Back Button --}}
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div style="font-family:'Rajdhani',sans-serif; font-size:24px; font-weight:700; color:#fff; letter-spacing:1px; text-transform:uppercase;">
-                        <i class="fas fa-shopping-cart mr-2" style="color:var(--rd-accent); font-size:18px;"></i> {{ $pageTitle ?? 'Purchase Case' }}
+            <div style="margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                {{-- Top Row: Meta info + ID + Date --}}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <span class="dg-case-badge" style="background:var(--rd-accent); color:var(--rd-bg); padding:2px 10px; border-radius:4px; font-weight:700; font-family:'Rajdhani',sans-serif;">ID: #{{ $purchase->pcs_id }}</span>
+                        <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
+                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-calendar-alt mr-1" style="color:var(--rd-accent);"></i> {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span>
+                        <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
+                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-project-diagram mr-1" style="color:var(--rd-accent);"></i> Project: <span class="text-white font-weight-bold">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></span>
+                        <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
+                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-building mr-1" style="color:var(--rd-accent);"></i> Initiator: <span class="text-white font-weight-bold">{{ $divisionName ?? $purchase->pcs_unt_id }}</span></span>
+                        <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
+                        <span style="color:var(--rd-text2); font-size:15px;"><i class="fas fa-money-bill-wave mr-1" style="color:var(--rd-accent);"></i> Amount: <span style="color:var(--rd-info); font-weight:800; font-family:'Rajdhani',sans-serif; font-size:17px;">PKR {{ number_format($caseValue) }}</span></span>
+                        <span class="dg-status-badge ml-2">{{ $purchase->pcs_status }}</span>
                     </div>
                     <a href="{{ route('approvals.dashboard') }}" class="dg-back-btn">
                         <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
                     </a>
                 </div>
 
-                {{-- Second Row: Meta line + Case ID + Date --}}
                 <div class="dg-meta-header" style="display:flex; flex-wrap:wrap; align-items:center; gap:4px 0;">
-                    <span style="font-size:15px; color:#fff; font-weight:700;">Purchase Case Title:</span>&nbsp;<span style="font-size:15px; color:#fff;">{{ $purchase->pcs_title }}</span>
-                    <span class="dg-pipe" style="color:var(--rd-text3); margin:0 10px; font-size:15px;">|</span>
-                    <span style="font-size:15px; color:#fff; font-weight:700;">Division Initiator:</span>&nbsp;<span style="font-size:15px; color:#fff;">{{ $divisionName ?? $purchase->pcs_unt_id }}</span>
-                    <span class="dg-pipe" style="color:var(--rd-text3); margin:0 10px; font-size:15px;">|</span>
-                    <span style="font-size:15px; color:#fff; font-weight:700;">Project Head:</span>&nbsp;<span style="font-size:15px; color:#fff;">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span>
-                    <span class="dg-status-badge" style="margin-left:12px; vertical-align:middle;">{{ $purchase->pcs_status }}</span>
-                    <span class="dg-pipe" style="color:var(--rd-text3); margin:0 10px; font-size:15px;">|</span>
-                    <span class="dg-case-badge" style="vertical-align:middle;">{{ $purchase->pcs_type }}-{{ $purchase->pcs_id }}</span>
-                    <span style="font-size:12px; color:var(--rd-text3); margin-left:10px;"><i class="fas fa-calendar-alt mr-1"></i>{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span>
+                    <span style="font-size:14px; color:#fff; font-weight:700;">Purchase Case Title:</span>&nbsp;<span style="font-size:14px; color:#fff;">{{ $purchase->pcs_title }}</span>
                 </div>
             </div>
 

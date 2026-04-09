@@ -69,23 +69,23 @@
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card p-4">
-                        <div class="metric-label">HQ Scrutiny</div>
-                        <div class="metric-value" style="color: var(--rd-text-primary);">{{ $atHqCount }} <span style="font-size: 14px; opacity: 0.5;">Active</span></div>
-                        <div class="mt-1 small text-muted font-weight-bold"><i class="fas fa-university mr-1"></i> Under evaluation at HQ</div>
+                        <div class="metric-label">Case Initiated</div>
+                        <div class="metric-value" style="color: var(--rd-text-primary);">{{ $initiatedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Active</span></div>
+                        <div class="mt-1 small text-muted font-weight-bold"><i class="fas fa-university mr-1"></i> Moving through HQ</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card p-4">
                         <div class="metric-label">Action Required</div>
-                        <div class="metric-value" style="color: var(--rd-text-warning);">{{ $pendingCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Pending</span></div>
+                        <div class="metric-value" style="color: var(--rd-text-warning);">{{ $actionReqCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Pending</span></div>
                         <div class="mt-1 small text-warning font-weight-bold"><i class="fas fa-undo-alt mr-1"></i> Drafts / Returns</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card p-4">
-                        <div class="metric-label">Approved Value</div>
-                        <div class="metric-value" style="color: var(--rd-text-success);">Rs. {{ number_format($purchases->where('pcs_status', 'Approved')->sum('pcs_price')/1000, 1) }}K</div>
-                        <div class="mt-1 small text-success font-weight-bold"><i class="fas fa-check-double mr-1"></i> Successful procurement cycle</div>
+                        <div class="metric-label">Completed</div>
+                        <div class="metric-value" style="color: var(--rd-text-success);">{{ $completedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Finalized</span></div>
+                        <div class="mt-1 small text-success font-weight-bold"><i class="fas fa-check-double mr-1"></i> Success / Rejected</div>
                     </div>
                 </div>
             </div>
@@ -96,12 +96,17 @@
                     <ul class="nav nav-pills" id="hubTabs" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link hub-tab-btn active" data-toggle="tab" href="#action-req">
-                                <i class="fas fa-folder-open mr-2"></i> PENDING CASES ({{ $pendingCases->count() }})
+                                <i class="fas fa-folder-open mr-2"></i> ACTION REQUIRED ({{ $actionReqCases->count() }})
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link hub-tab-btn" data-toggle="tab" href="#tracking">
-                                <i class="fas fa-stream mr-2"></i> TRACKING & HISTORY ({{ $releasedCases->count() }})
+                            <a class="nav-link hub-tab-btn" data-toggle="tab" href="#initiated">
+                                <i class="fas fa-stream mr-2"></i> CASE INITIATED ({{ $initiatedCases->count() }})
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link hub-tab-btn" data-toggle="tab" href="#completed">
+                                <i class="fas fa-history mr-2"></i> COMPLETED ({{ $completedCases->count() }})
                             </a>
                         </li>
                     </ul>
@@ -112,7 +117,7 @@
                         {{-- TAB 1: ACTION REQUIRED --}}
                         <div class="tab-pane fade show active" id="action-req">
                             <div class="metric-card overflow-hidden">
-                                @if($pendingCases->count() > 0)
+                                @if($actionReqCases->count() > 0)
                                     <div class="table-responsive">
                                         <table class="table dg-case-table mb-0">
                                             <thead>
@@ -125,7 +130,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($pendingCases as $p)
+                                                @foreach($actionReqCases as $p)
                                                 @php 
                                                     $isOld = \Carbon\Carbon::parse($p->pcs_date)->diffInDays() > 2;
                                                 @endphp
@@ -160,16 +165,16 @@
                                     <div class="text-center py-5" style="background: rgba(255,255,255,0.01);">
                                         <div class="display-4 text-muted mb-3" style="opacity: 0.2;"><i class="fas fa-clipboard-check"></i></div>
                                         <h6 class="text-muted font-weight-bold">Queue Empty</h6>
-                                        <p class="text-muted small">All your initiated cases have been released to HQ.</p>
+                                        <p class="text-muted small">No cases currently require your action.</p>
                                     </div>
                                 @endif
                             </div>
                         </div>
 
-                        {{-- TAB 2: TRACKING --}}
-                        <div class="tab-pane fade" id="tracking">
+                        {{-- TAB 2: INITIATED --}}
+                        <div class="tab-pane fade" id="initiated">
                             <div class="metric-card overflow-hidden">
-                                @if($releasedCases->count() > 0)
+                                @if($initiatedCases->count() > 0)
                                     <div class="table-responsive">
                                         <table class="table dg-case-table mb-0">
                                             <thead>
@@ -182,12 +187,10 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($releasedCases as $p)
+                                                @foreach($initiatedCases as $p)
                                                 @php
                                                     $s = $p->pcs_status;
                                                     $b = 'info'; $i = 'hourglass-half';
-                                                    if($s == 'Approved') { $b = 'success'; $i = 'check-double'; }
-                                                    if($s == 'Rejected') { $b = 'danger'; $i = 'times-circle'; }
                                                     $latest = $p->latestDecision;
                                                 @endphp
                                                 <tr data-id="{{ $p->pcs_id }}">
@@ -219,7 +222,58 @@
                                     </div>
                                 @else
                                     <div class="text-center py-5">
-                                        <h6 class="text-muted">No cases in tracking queue.</h6>
+                                        <h6 class="text-muted">No active cases moving through HQ.</h6>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- TAB 3: COMPLETED --}}
+                        <div class="tab-pane fade" id="completed">
+                            <div class="metric-card overflow-hidden">
+                                @if($completedCases->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table dg-case-table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="pl-4">Reference</th>
+                                                    <th>Title / Context</th>
+                                                    <th class="text-right">Final Value</th>
+                                                    <th class="text-center">Outcome</th>
+                                                    <th class="text-right pr-4">Archive</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($completedCases as $p)
+                                                @php
+                                                    $s = $p->pcs_status;
+                                                    $b = ($s == 'Approved') ? 'success' : 'danger';
+                                                    $i = ($s == 'Approved') ? 'check-double' : 'times-circle';
+                                                @endphp
+                                                <tr data-id="{{ $p->pcs_id }}">
+                                                    <td class="pl-4"><span class="badge badge-dark text-muted px-2 py-1" style="font-size: 9px; border: 1px solid var(--rd-border);">PC-{{ $p->pcs_id }}</span></td>
+                                                    <td>
+                                                        <div class="case-title text-muted">{{ Str::limit($p->pcs_title, 50) }}</div>
+                                                    </td>
+                                                    <td class="text-right"><span class="case-value text-muted">PKR {{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
+                                                    <td class="text-center">
+                                                        <span class="badge status-badge" style="background: rgba(var(--rd-{{$b}}-rgb), 0.1); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.2);">
+                                                            <i class="fas fa-{{$i}} mr-1"></i> {{ strtoupper($s) }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-right pr-4">
+                                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-link text-muted rajdhani" style="font-size: 11px;">
+                                                            VIEW LOG
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="text-center py-5">
+                                        <h6 class="text-muted">No completed cases in archive.</h6>
                                     </div>
                                 @endif
                             </div>

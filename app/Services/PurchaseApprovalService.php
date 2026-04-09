@@ -25,16 +25,83 @@ class PurchaseApprovalService
         'Hqs'   => 'nrdi',  // DDG -> DG (if amt > 6L)
     ];
 
-    /**
-     * Define the linear hierarchy for stepping back (returns)
-     */
-    protected $statusHierarchy = [
-        'Under Scrutiny' => 'Returned',          // Back to Division
-        'With DFinance'  => 'Under Scrutiny',    // Back to DProc
-        'With MD'        => 'With DFinance',     // Back to DFin
-        'With DDG'       => 'With MD',           // Back to MD
-        'With DG'        => 'With DDG'           // Back to DDG
+    protected $displayNames = [
+        'Under Scrutiny' => 'Director Procurement',
+        'With DFinance'  => 'Director Finance',
+        'With MD'        => 'MD Office',
+        'With DDG'       => 'DDG Office',
+        'With DG'        => 'Director General',
+        'Returned'       => 'Division (Initiator)'
     ];
+
+    protected $returnChain = [
+        'Under Scrutiny' => 'Returned',
+        'With DFinance'  => 'Under Scrutiny',
+        'With MD'        => 'With DFinance',
+        'With DDG'       => 'With MD',
+        'With DG'        => 'With DDG'
+    ];
+
+    protected $statusToArea = [
+        'Under Scrutiny' => 'Proc',
+        'With DFinance'  => 'fin',
+        'With MD'        => 'rdw',
+        'With DDG'       => 'Hqs',
+        'With DG'        => 'nrdi',
+    ];
+
+    /**
+     * Get the name of the next authority based on current area and case value
+     */
+    public function getNextAuthorityName(Purchase $case, string $currentArea): ?string
+    {
+        $mapping = $this->resolveForwarding($case, $currentArea);
+        $nextArea = strtolower(trim($mapping['area'] ?? ''));
+        
+        if ($mapping['status'] === 'Approved') return 'Final Approval (Success)';
+
+        return match($nextArea) {
+            'proc' => 'Director Procurement',
+            'fin'  => 'Director Finance',
+            'rdw'  => 'MD Office',
+            'hqs'  => 'DDG Office',
+            'nrdi' => 'Director General',
+            default => null
+        };
+    }
+
+    /**
+     * Get the display name of a status
+     */
+    public function getStatusDisplayName(string $status): string
+    {
+        return $this->displayNames[$status] ?? $status;
+    }
+
+    /**
+     * Get all possible return targets based on the case's journey
+     */
+    public function getReturnTargets(Purchase $case): array
+    {
+        $trailStatuses = $case->decisions()
+            ->orderBy('pdec_id', 'asc')
+            ->pluck('pdec_from_status')
+            ->unique()
+            ->toArray();
+
+        $targets = [];
+        
+        // Always allow returning to Division
+        $targets['Returned'] = $this->displayNames['Returned'];
+
+        foreach ($trailStatuses as $status) {
+            if ($status !== $case->pcs_status && isset($this->displayNames[$status])) {
+                $targets[$status] = $this->displayNames[$status];
+            }
+        }
+
+        return $targets;
+    }
 
     /**
      * Process a decision and move the case to the next stage
@@ -54,7 +121,7 @@ class PurchaseApprovalService
                 // Determine the recipient for the return notification
                 $this->notifyReturn($case, $user, $remarks, $toStatus);
             } elseif ($action === 'not_approved') { // Changed from 'reject'
-                $toStatus = $this->statusHierarchy[$fromStatus] ?? 'Returned';
+                $toStatus = $this->returnChain[$fromStatus] ?? 'Returned';
                 $this->notifyReturn($case, $user, $remarks, $toStatus);
             } elseif ($action === 'approve') {
                 // Verification: Can this user approve this amount?
@@ -211,7 +278,7 @@ class PurchaseApprovalService
                 $recipientIds[] = $initiator->acc_id;
             }
         } else { // Back to an HQ authority
-            $targetArea = array_search($toStatus, array_column($this->statusHierarchy, null, 'value'));
+            $targetArea = $this->statusToArea[$toStatus] ?? null;
             if ($targetArea) {
                 $recipients = CenAccount::where('acc_untarea', 'ILIKE', $targetArea)
                                         ->where('acc_status', 'Active')

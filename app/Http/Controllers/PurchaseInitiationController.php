@@ -23,29 +23,25 @@ class PurchaseInitiationController extends Controller
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        $releasedCases = $purchases->filter(function($p) {
-            return !in_array(strtolower(trim($p->pcs_status)), ['draft', 'returned']);
+        $initiatedCases = $purchases->filter(function($p) {
+            $status = strtolower(trim($p->pcs_status));
+            return !in_array($status, ['draft', 'returned', 'approved', 'rejected']);
         });
         
-        $pendingCases = $purchases->filter(function($p) {
+        $actionReqCases = $purchases->filter(function($p) {
             return in_array(strtolower(trim($p->pcs_status)), ['draft', 'returned']);
         });
 
-        // Explicit counts for status clarity (Active cases at HQ)
-        $atHqCount = $purchases->filter(function($p) {
-            $status = strtolower(trim($p->pcs_status));
-            return !in_array($status, ['draft', 'returned', 'approved', 'rejected']);
-        })->count();
-
-        $releasedTotal = $releasedCases->sum('pcs_price');
-        $pendingTotal = $pendingCases->sum('pcs_price');
+        $completedCases = $purchases->filter(function($p) {
+            return in_array(strtolower(trim($p->pcs_status)), ['approved', 'rejected']);
+        });
 
         $pageTitle = "PC Initiation Hub";
         $detailsRouteName = 'purchase.initiation.show'; // New dedicated route
 
         return view('purchase.initiation.index', compact(
             'purchases', 'pageTitle', 'detailsRouteName', 'unitId',
-            'releasedTotal', 'pendingTotal', 'releasedCases', 'pendingCases', 'atHqCount'
+            'initiatedCases', 'actionReqCases', 'completedCases'
         ));
     }
 
@@ -61,10 +57,14 @@ class PurchaseInitiationController extends Controller
             ->where('pcs_unt_id', $unitId)
             ->findOrFail($id);
 
+        $service = app(\App\Services\PurchaseApprovalService::class);
+        $currentAuthority = $service->getStatusDisplayName($purchase->pcs_status);
+        $nextAuthority = $service->getNextAuthorityName($purchase, 'prj'); // prj is Division
+
         // Budget Head Balance Calculation (similar to HQ logic)
         $head = null;
         if($purchase->project) {
-            $totalBudget = (float) $purchase->project->prj_cost;
+            $totalBudget = (float) $purchase->project->prj_aprvcost;
             
             // Total of all APPROVED purchase cases for this project
             $approvedSpent = Purchase::where('pcs_hed_id', $purchase->pcs_hed_id)
@@ -72,15 +72,40 @@ class PurchaseInitiationController extends Controller
                 ->sum('pcs_price');
 
             $head = (object) [
+                'prj_aprvcost' => $totalBudget,
                 'hed_balance' => $totalBudget - $approvedSpent
             ];
         }
 
         $firms = \App\Models\Firm::orderBy('frm_name')->get();
-        $canEdit = in_array($purchase->pcs_status, ['Draft', 'Returned']);
+        $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
         $pageTitle = "Initiation Details: " . $purchase->pcs_title;
+        $area = 'prj';
 
-        return view('purchase.initiation.show', compact('purchase', 'head', 'firms', 'pageTitle', 'canEdit'));
+        return view('purchase.initiation.show', compact('purchase', 'head', 'firms', 'pageTitle', 'canEdit', 'currentAuthority', 'nextAuthority', 'area'));
+    }
+
+    /**
+     * Pull back a case from HQ to Division (Hold/Revert)
+     */
+    public function holdCase($id)
+    {
+        $purchase = Purchase::findOrFail($id);
+        
+        // Security check
+        if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
+            return back()->with('error', 'Unauthorized access.');
+        }
+
+        // Only allow if not yet approved/rejected
+        if (in_array(strtolower($purchase->pcs_status), ['approved', 'rejected'])) {
+             return back()->with('error', 'Approved/Rejected cases cannot be held.');
+        }
+
+        $purchase->pcs_status = 'Draft';
+        $purchase->save();
+
+        return back()->with('success', 'Case has been pulled back to Draft and is now editable.');
     }
 
     /**
