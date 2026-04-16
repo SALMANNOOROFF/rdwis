@@ -654,28 +654,28 @@
             </h6>
 
             <div class="row gx-2">
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_rcptdt ? 'done' : '' }}">
                         <span class="d-title">Received</span>
                         <span class="d-value">{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('d M y') : '—' }}</span>
                     </div>
                 </div>
 
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_assigndt ? 'done' : '' }}">
                         <span class="d-title">Assigned</span>
                         <span class="d-value">{{ $project->prj_assigndt ? \Carbon\Carbon::parse($project->prj_assigndt)->format('d M y') : '—' }}</span>
                     </div>
                 </div>
 
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_propdt ? 'done' : '' }}">
                         <span class="d-title">Proposal</span>
                         <span class="d-value">{{ $project->prj_propdt ? \Carbon\Carbon::parse($project->prj_propdt)->format('d M y') : '—' }}</span>
                     </div>
                 </div>
 
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_aprvdt ? 'done' : '' }}">
                         <span class="d-title">Approved</span>
                         <span class="d-value">{{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M y') : '—' }}</span>
@@ -732,6 +732,7 @@
                 </div>
                 <div class="modal-body">
                     <h6 class="font-weight-bold text-white">Existing Files</h6>
+                    <div class="table-responsive">
                     <table class="table table-bordered table-sm mt-2 bg-white">
                         <thead class="bg-light"><tr><th>#</th><th>Document Name</th><th>Action</th></tr></thead>
                         <tbody>
@@ -746,6 +747,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

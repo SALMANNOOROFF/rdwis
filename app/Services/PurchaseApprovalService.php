@@ -120,7 +120,7 @@ class PurchaseApprovalService
                 $toStatus = $targetStatus; // Use the explicitly provided targetStatus
                 // Determine the recipient for the return notification
                 $this->notifyReturn($case, $user, $remarks, $toStatus);
-            } elseif ($action === 'not_approved') { // Changed from 'reject'
+            } elseif ($action === 'not_approved' || $action === 'reject') { 
                 $toStatus = $this->returnChain[$fromStatus] ?? 'Returned';
                 $this->notifyReturn($case, $user, $remarks, $toStatus);
             } elseif ($action === 'approve') {
@@ -170,13 +170,14 @@ class PurchaseApprovalService
             'forward' => 'Forwarded',
             'return'  => 'Returned',
             'approve' => 'Approved',
-            'not_approved' => 'Not Approved',
-            'reject'  => 'Rejected',
+            'not_approved' => 'Not Recommended',
+            'reject'  => 'Not Recommended',
+            'hold'    => 'Reverted',
             default   => $action
         };
 
         $message = "Case #{$case->pcs_id} has been {$actionPast} by {$actor->acc_name}. Status: {$case->pcs_status}.";
-        if ($action == 'return' || $action == 'not_approved') $message .= " Reason: {$remarks}";
+        if ($action == 'return' || $action == 'not_approved' || $action == 'reject' || $action == 'hold') $message .= " Reason: {$remarks}";
 
         // 2. Identify Recipients
         // a. All previous actors from the decision trail

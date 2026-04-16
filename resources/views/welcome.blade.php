@@ -2,7 +2,7 @@
   <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>RDWIS</title>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -79,7 +80,7 @@
     </style>
   </head>
 
-  <body class="hold-transition sidebar-mini layout-fixed">
+  <body class="hold-transition sidebar-mini layout-fixed {{ str_replace(['.', '/'], '-', Route::currentRouteName() ?? 'home') }}">
   <div class="wrapper">
 
     <div class="preloader flex-column justify-content-center align-items-center">
@@ -347,6 +348,26 @@
               </a>
           </li>
 
+          <li class="nav-item">
+              @php
+                  $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
+                  $purchaseRoute = 'nrdi.purchase_cases_new.index';
+                  if($area === 'proc') $purchaseRoute = 'nrdi.purchase_cases_new.procurement.index';
+                  if($area === 'fin') $purchaseRoute = 'nrdi.purchase_cases_new.finance.index';
+              @endphp
+              <a href="{{ route($purchaseRoute) }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases_new.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-shopping-cart"></i>
+                  <p>Purchase Case</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('nrdi.contract_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases_new.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-file-signature"></i>
+                  <p>Contract Case</p>
+              </a>
+          </li>
+
           <li class="nav-item {{ Request::routeIs('nrdi.purchase_cases.*') || Request::routeIs('nrdi.contract_cases.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ Request::routeIs('nrdi.purchase_cases.*') || Request::routeIs('nrdi.contract_cases.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-briefcase"></i>
@@ -445,11 +466,30 @@
   <script src="{{ asset('dist/js/demo.js') }}"></script>
   <script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
 
+
+
     @stack('scripts')
     @yield('scripts')
 
     @auth
         <script src="{{ asset('js/rdwis-notifications.js') }}"></script>
     @endauth
+    {{-- Firefox zoom fallback --}}
+    <script>
+    (function() {
+        var isFirefox = typeof InstallTrigger !== 'undefined';
+        if (!isFirefox) return;
+        var w = window.innerWidth;
+        var scale = 1;
+        if (w <= 1100) scale = 0.70;
+        else if (w <= 1280) scale = 0.75;
+        else if (w <= 1400) scale = 0.85;
+        if (scale < 1) {
+            document.body.style.transform = 'scale(' + scale + ')';
+            document.body.style.transformOrigin = '0 0';
+            document.body.style.width = (100 / scale) + '%';
+        }
+    })();
+    </script>
   </body>
 </html>

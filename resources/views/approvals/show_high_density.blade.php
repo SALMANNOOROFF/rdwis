@@ -34,11 +34,11 @@
                             <hr class="border-secondary">
 
                             <div class="row mb-3">
-                                <div class="col-6">
+                                <div class="col-12 col-md-6">
                                     <small class="text-muted d-block">Originating Division</small>
                                     <span class="font-weight-bold">{{ $purchase->pcs_unt_id }}</span>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-12 col-md-6">
                                     <small class="text-muted d-block">Budget Head</small>
                                     <span class="badge badge-warning">{{ $purchase->pcs_hed_id }}</span>
                                 </div>
@@ -50,6 +50,7 @@
                     <div class="card bg-secondary border-0 mt-4">
                         <div class="card-header bg-navy text-xs py-2">ITEMIZED COMPONENTS</div>
                         <div class="card-body p-0">
+                            <div class="table-responsive">
                             <table class="table table-sm table-hover text-white mb-0">
                                 <thead>
                                     <tr class="text-muted border-bottom border-dark">
@@ -68,6 +69,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
 
@@ -121,12 +123,12 @@
                                     @endif
 
                                     <div class="row mt-3">
-                                        <div class="col-6">
+                                        <div class="col-12 col-md-6">
                                             <button type="submit" name="action" value="return" class="btn btn-outline-warning btn-block btn-sm">
                                                 <i class="fas fa-undo mr-1"></i> RETURN
                                             </button>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-12 col-md-6">
                                             @if($area == 'nrdi')
                                             <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-block btn-sm">
                                                 <i class="fas fa-times-circle mr-1"></i> REJECT

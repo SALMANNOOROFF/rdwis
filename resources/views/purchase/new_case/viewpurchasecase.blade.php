@@ -79,6 +79,7 @@
             </div>
 
             <div class="table-container">
+                <div class="table-responsive">
                 <table class="table custom-table" id="casesTable">
                     <thead>
                         <tr>
@@ -170,6 +171,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div> 
         </div>
     </div>

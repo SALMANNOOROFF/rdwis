@@ -107,6 +107,27 @@ Route::middleware('auth')->group(function () {
                 Route::get('/case/{id}', [\App\Http\Controllers\FinanceDashboardController::class, 'show'])->name('purchase_cases.show');
             });
 
+            // --- NEW DUPLICATED ROUTES FOR PURCHASE AND CONTRACT CASES ---
+            Route::prefix('purchase-cases-new')->name('purchase_cases_new.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\PurchaseCaseController::class, 'index'])->name('index');
+
+                Route::prefix('procurement')->name('procurement.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\PurchaseProcurementController::class, 'index'])->name('index');
+                    Route::get('/{id}', [\App\Http\Controllers\PurchaseProcurementController::class, 'show'])->name('show');
+                });
+
+                Route::prefix('finance')->name('finance.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\PurchaseFinanceController::class, 'index'])->name('index');
+                    Route::get('/{id}', [\App\Http\Controllers\PurchaseFinanceController::class, 'show'])->name('show');
+                });
+
+                // Wildcard routes must come last
+                Route::get('/{id}', [\App\Http\Controllers\PurchaseCaseController::class, 'show'])->name('show');
+                Route::post('/{id}/action', [\App\Http\Controllers\PurchaseCaseController::class, 'action'])->name('action');
+            });
+
+            Route::get('/contract-cases-new', [\App\Http\Controllers\ContractCaseController::class, 'index'])->name('contract_cases_new.index');
+
             Route::get('/projects', [ProjectController::class, 'nrdiIndex'])->name('projects.index');
             Route::get('/projects/{id}', [ProjectController::class, 'nrdiShow'])->name('projects.show');
         });
@@ -219,6 +240,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/get-last-minute/{headId}', [PurchaseController::class, 'getLastMinute'])->name('get.last.minute');
         Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
         Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
+        Route::get('/purchase/case/{id}/minute-view', [PurchaseController::class, 'minuteView'])->name('purchase.minute_view');
         Route::get('/print-minute', function () { return view('purchase.new_case.print_minute'); })->name('purchase.new_case.print_minute');
         Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])
             ->name('quotes.store')

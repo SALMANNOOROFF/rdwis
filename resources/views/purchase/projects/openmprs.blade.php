@@ -13,6 +13,7 @@
                 </div>
 
                 <div class="card-body p-0">
+                    <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="bg-light">
                             <tr>
@@ -42,6 +43,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
 

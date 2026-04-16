@@ -269,6 +269,7 @@ body::before {
     .glass-card { max-width: 100%; }
 }
 </style>
+<link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
 </head>
 
 <body>
@@ -356,6 +357,23 @@ body::before {
             opacity += 0.1;
         }, 30);
     }
+</script>
+
+<script>
+(function() {
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    if (!isFirefox) return;
+    var w = window.innerWidth;
+    var scale = 1;
+    if (w <= 1100) scale = 0.70;
+    else if (w <= 1280) scale = 0.75;
+    else if (w <= 1400) scale = 0.85;
+    if (scale < 1) {
+        document.body.style.transform = 'scale(' + scale + ')';
+        document.body.style.transformOrigin = '0 0';
+        document.body.style.width = (100 / scale) + '%';
+    }
+})();
 </script>
 
 </body>

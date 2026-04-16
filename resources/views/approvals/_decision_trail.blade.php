@@ -19,35 +19,73 @@
     </div>
     <div class="p-2">
         <div class="trail-scroll-container p-2">
+            @php $service = app(\App\Services\PurchaseApprovalService::class); @endphp
             @forelse($purchase->decisions->sortByDesc('created_at') as $index => $decision)
                 @php
                     $act = $decision->pdec_action;
                     $color = 'primary';
-                    if($act == 'approve') { $color = 'success'; }
-                    if($act == 'return') { $color = 'warning'; }
-                    if($act == 'reject' || $act == 'not_approved') { $color = 'danger'; $act = 'Not Approved'; }
+                    $icon = 'fa-share-square';
+                    $actionText = 'Recommended';
+                    
+                    if($act == 'approve') { 
+                        $color = 'success'; 
+                        $icon = 'fa-check-circle'; 
+                        $actionText = 'Approved';
+                    }
+                    elseif($act == 'return') { 
+                        $color = 'warning'; 
+                        $icon = 'fa-undo'; 
+                        $actionText = 'Returned';
+                    }
+                    elseif($act == 'reject' || $act == 'not_approved') { 
+                        $color = 'danger'; 
+                        $icon = 'fa-times-circle'; 
+                        $actionText = 'Not Recommended'; 
+                    }
+                    elseif($act == 'hold') { 
+                        $color = 'warning'; 
+                        $icon = 'fa-hand-paper'; 
+                        $actionText = 'Case Reverted for Corrections'; 
+                    }
+                    
+                    // Get Display Names for statuses
+                    $fromStatus = $service->getStatusDisplayName($decision->pdec_from_status);
+                    $toStatus = $service->getStatusDisplayName($decision->pdec_to_status);
+
+                    // Override text for Revert/Hold action by Initiator (Legacy support for 'return' action used as hold)
+                    if ($act == 'return' && in_array(strtolower($decision->pdec_role), ['prj', 'rdwprj', 'division', 'initiator']) && $decision->pdec_to_status == 'Draft') {
+                        $actionText = 'Case Reverted for Corrections';
+                        $color = 'warning';
+                        $icon = 'fa-hand-paper';
+                    }
                 @endphp
                 <div class="trail-item">
-                    <div class="trail-dot bg-{{$color}} shadow-sm"></div>
+                    <div class="trail-dot shadow-sm" style="background: var(--rd-{{$color}}); display: flex; align-items: center; justify-content: center; left: -10px; width: 20px; height: 20px; border: 3px solid #080b0f;">
+                        <i class="fas {{$icon}}" style="font-size: 8px; color: #fff;"></i>
+                    </div>
                     <div class="d-flex justify-content-between align-items-start">
                         <div style="flex: 1;">
-                            <span class="trail-role">{{ strtoupper($decision->pdec_role) }} • {{ $decision->account->acc_name }}</span>
+                            <span class="trail-role" style="color: var(--rd-{{$color}}); font-size: 11px;">
+                                {{ $decision->account->acc_name }} ({{ strtoupper($decision->pdec_role) }})
+                            </span>
                             <div class="d-flex align-items-center">
-                                <span class="trail-action">
-                                    {{ $act == 'Not Approved' ? 'Not Approved' : ucfirst($act).'ed' }} to 
-                                    <span class="text-{{$color}}">{{ $decision->pdec_to_status }}</span>
+                                <span class="trail-action" style="font-size: 11px; color: var(--rd-text2);">
+                                    <span style="font-weight: 800; color: #fff;">{{ $actionText }}</span> 
+                                    @if($actionText !== 'Case Reverted for Corrections')
+                                        to <span style="font-weight: 700; color: var(--rd-{{$color}});">{{ $toStatus }}</span>
+                                    @endif
                                 </span>
                                 @if($decision->pdec_remarks)
-                                    <button class="btn btn-link btn-xs p-0 ml-2 text-muted" onclick="$(this).closest('.trail-item').find('.comment-box').slideToggle(150)" title="View Remarks">
-                                        <i class="fas fa-comment-alt"></i>
+                                    <button class="btn btn-link btn-xs p-0 ml-2" onclick="$(this).closest('.trail-item').find('.comment-box').slideToggle(150)" style="color: {{ $act == 'hold' ? '#f39c12' : ($act == 'not_approved' || $act == 'reject' ? '#e74c3c' : ($act == 'return' ? '#f1c40f' : 'var(--rd-'.$color.')')) }}; opacity: 0.9;">
+                                        <i class="fas fa-comment-dots" style="font-size: 14px;"></i>
                                     </button>
                                 @endif
                             </div>
                         </div>
-                        <div class="text-right" style="min-width: 70px;">
-                            <div style="font-size: 9px; color: rgba(255,255,255,0.4);">{{ \Carbon\Carbon::parse($decision->created_at)->format('d M, H:i') }}</div>
-                        </div>
-                    </div>
+        <div class="text-right" style="min-width: 70px;">
+            <div style="font-size: 9px; color: rgba(255,255,255,0.4); font-weight: 600;">{{ \Carbon\Carbon::parse($decision->created_at)->format('d M, H:i') }}</div>
+        </div>
+    </div>
                     
                     @if($decision->pdec_remarks)
                     <div class="comment-box shadow-sm" style="display: none;">

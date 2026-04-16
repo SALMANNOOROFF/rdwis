@@ -60,7 +60,7 @@
 
             {{-- HEADER: BACK BUTTON LOGIC --}}
             <div class="row mb-3">
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     @if(Auth::user()->isSORD())
                         <a href="{{ route('sord.inbox') }}" class="btn btn-sm btn-secondary shadow-sm">
                             <i class="fas fa-arrow-left mr-1"></i> Back to Inbox
@@ -71,7 +71,7 @@
                         </a>
                     @endif
                 </div>
-                <div class="col-6 text-right">
+                <div class="col-12 col-md-6 text-right">
                     @if($document)
                         <span class="badge badge-info p-2">Ref: {{ $document->doc_ref_no ?? $document->doc_id }}</span>
                     @endif

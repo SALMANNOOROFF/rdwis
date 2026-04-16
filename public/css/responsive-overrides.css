@@ -1,0 +1,614 @@
+/* ============================================================
+   RESPONSIVE OVERRIDES — AdminLTE 3.x Laravel (RDWIS)
+   Targets: 1920px (base) / 1366px / 1080px
+   Include AFTER adminlte.min.css and rdwis-dark.css
+   ============================================================ */
+
+/* ── GLOBAL OVERFLOW PREVENTION ─────────────── */
+html,
+body,
+.wrapper {
+  max-width: 100vw;
+}
+
+/* ── SIDEBAR ─────────────────────────────────── */
+
+/* 1400px and below: auto-collapsed sidebar gets tighter */
+@media (max-width: 1400px) {
+  .sidebar-collapse .main-sidebar {
+    width: 4.6rem !important;
+  }
+  .sidebar-collapse .main-sidebar .brand-text,
+  .sidebar-collapse .main-sidebar .user-panel .info,
+  .sidebar-collapse .main-sidebar .nav-sidebar .nav-link p,
+  .sidebar-collapse .main-sidebar .nav-header {
+    display: none !important;
+  }
+  .sidebar-collapse .main-sidebar:hover {
+    width: 250px !important;
+  }
+  .sidebar-collapse .main-sidebar:hover .brand-text,
+  .sidebar-collapse .main-sidebar:hover .user-panel .info,
+  .sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link p,
+  .sidebar-collapse .main-sidebar:hover .nav-header {
+    display: inline-block !important;
+  }
+  /* Push content properly when sidebar is collapsed */
+  .sidebar-collapse .content-wrapper,
+  .sidebar-collapse .main-footer,
+  .sidebar-collapse .main-header {
+    margin-left: 4.6rem !important;
+  }
+}
+
+/* 992px and below: sidebar goes overlay (AdminLTE default mobile behavior) */
+@media (max-width: 991.98px) {
+  .main-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    z-index: 1038 !important;
+    transform: translateX(-250px);
+    transition: transform 0.3s ease-in-out;
+  }
+  .sidebar-open .main-sidebar {
+    transform: translateX(0);
+  }
+  .content-wrapper,
+  .main-footer,
+  .main-header {
+    margin-left: 0 !important;
+  }
+}
+
+
+/* ── CONTENT WRAPPER ─────────────────────────── */
+
+@media (max-width: 1400px) {
+  .content-wrapper {
+    padding: 12px 14px !important;
+  }
+  .content-wrapper > .content-header {
+    padding: 8px 0 !important;
+  }
+  .content > .container-fluid {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .content-wrapper {
+    padding: 10px 12px !important;
+  }
+  .content-wrapper > .content-header {
+    padding: 6px 0 !important;
+  }
+}
+
+
+/* ── TYPOGRAPHY ──────────────────────────────── */
+
+/* Base (1920px) — already set by rdwis-dark.css, just ensure fallbacks */
+body {
+  font-size: 14px;
+}
+
+@media (max-width: 1400px) {
+  body {
+    font-size: 13px !important;
+  }
+  h1, .h1 {
+    font-size: 1.6rem !important;
+  }
+  h2, .h2 {
+    font-size: 1.35rem !important;
+  }
+  h3, .h3 {
+    font-size: 1.15rem !important;
+  }
+  .card-title {
+    font-size: 0.9rem !important;
+  }
+  .content-header h1 {
+    font-size: 1.4rem !important;
+  }
+  .breadcrumb-item,
+  .breadcrumb-item a {
+    font-size: 0.82rem !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  body {
+    font-size: 13px !important;
+  }
+  h1, .h1 {
+    font-size: 1.45rem !important;
+  }
+  h2, .h2 {
+    font-size: 1.25rem !important;
+  }
+  h3, .h3 {
+    font-size: 1.1rem !important;
+  }
+  .card-title {
+    font-size: 0.85rem !important;
+  }
+  .content-header h1 {
+    font-size: 1.3rem !important;
+  }
+}
+
+
+/* ── CARDS ────────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .card-header {
+    padding: 10px 14px !important;
+  }
+  .card-body {
+    padding: 12px 14px !important;
+  }
+  .card-footer {
+    padding: 8px 14px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .card-header {
+    padding: 8px 12px !important;
+  }
+  .card-body {
+    padding: 10px 12px !important;
+  }
+  .card-footer {
+    padding: 6px 12px !important;
+  }
+}
+
+/* Small-box cards (dashboard metric widgets) */
+@media (max-width: 1400px) {
+  .small-box .inner h3 {
+    font-size: 1.6rem !important;
+  }
+  .small-box .inner p {
+    font-size: 0.85rem !important;
+  }
+  .small-box .icon i {
+    font-size: 50px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .small-box .inner h3 {
+    font-size: 1.4rem !important;
+  }
+  .small-box .inner p {
+    font-size: 0.8rem !important;
+  }
+  .small-box .icon i {
+    font-size: 42px !important;
+  }
+}
+
+/* Force max cards per row on smaller screens */
+@media (max-width: 1400px) {
+  .row > [class*="col-lg-3"].col-6 {
+    flex: 0 0 33.333% !important;
+    max-width: 33.333% !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .row > [class*="col-lg-3"].col-6 {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+  }
+}
+
+
+/* ── TABLES ──────────────────────────────────── */
+
+/* Ensure all table containers scroll horizontally */
+.table-responsive,
+.rd-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1400px) {
+  .table td,
+  .table th {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+  .table thead th {
+    font-size: 10.5px !important;
+    padding: 8px 8px !important;
+  }
+  /* Override fixed widths on th at smaller screens */
+  .table th[style*="width:"],
+  .table td[style*="width:"] {
+    width: auto !important;
+    min-width: 60px;
+  }
+  /* DataTables controls */
+  .dataTables_wrapper .dataTables_filter input {
+    width: 160px !important;
+  }
+  .dataTables_wrapper .dataTables_length select {
+    width: 60px !important;
+  }
+  .dataTables_info {
+    font-size: 11px !important;
+  }
+  /* Custom tables (rfq-table, dg-case-table) */
+  .rfq-table td,
+  .rfq-table th,
+  .dg-case-table td,
+  .dg-case-table th,
+  .readable-table td,
+  .readable-table th,
+  .dg-items-table td,
+  .dg-items-table th {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .table td,
+  .table th {
+    font-size: 11.5px !important;
+    padding: 5px 7px !important;
+  }
+  .table thead th {
+    font-size: 10px !important;
+    padding: 7px 7px !important;
+  }
+}
+
+/* Action buttons in tables — icon-only on tight screens */
+@media (max-width: 1400px) {
+  .table .btn-sm,
+  .dg-case-table .btn-sm {
+    font-size: 11px !important;
+    padding: 3px 8px !important;
+  }
+  .table .btn-xs {
+    font-size: 10px !important;
+    padding: 2px 7px !important;
+  }
+}
+
+
+/* ── FORMS ────────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .form-control,
+  .custom-select {
+    font-size: 12.5px !important;
+    padding: 6px 10px !important;
+  }
+  label,
+  .col-form-label {
+    font-size: 12px !important;
+  }
+  /* Side-by-side form fields go full width */
+  .form-row > [class*="col-md-6"],
+  .row > [class*="col-md-6"]:not(.dg-metric) {
+    /* Only apply to form context — don't break dashboard layouts */
+  }
+}
+
+@media (max-width: 992px) {
+  .form-row > [class*="col-md-"],
+  .form-group .row > [class*="col-md-"] {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+
+/* ── MODALS ──────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .modal-dialog:not(.modal-fullscreen):not(.modal-sm) {
+    max-width: 700px !important;
+  }
+  .modal-dialog.modal-xl {
+    max-width: 85vw !important;
+  }
+  .modal-dialog.modal-lg {
+    max-width: 680px !important;
+  }
+  .modal-body {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .modal-dialog:not(.modal-fullscreen):not(.modal-sm) {
+    max-width: 620px !important;
+  }
+  .modal-dialog.modal-xl {
+    max-width: 90vw !important;
+  }
+  .modal-dialog.modal-lg {
+    max-width: 600px !important;
+  }
+  .modal-body {
+    padding: 14px !important;
+  }
+  .modal-header {
+    padding: 12px 16px !important;
+  }
+  .modal-footer {
+    padding: 10px 16px !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .modal-dialog:not(.modal-sm) {
+    max-width: 95vw !important;
+    margin: 10px auto !important;
+  }
+  .modal-dialog.modal-xl,
+  .modal-dialog.modal-lg {
+    max-width: 95vw !important;
+  }
+}
+
+
+/* ── NAVBAR ──────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .main-header .nav-link {
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+  }
+  .main-header .navbar-badge {
+    font-size: 9px !important;
+  }
+}
+
+
+/* ── BADGES ──────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .badge {
+    font-size: 10px !important;
+    padding: 2px 7px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .badge {
+    font-size: 9.5px !important;
+    padding: 2px 6px !important;
+  }
+}
+
+
+/* ── PAGINATION ──────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .pagination .page-link {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+  }
+}
+
+
+/* ── DESCRIPTION BLOCKS (Dashboard footers) ── */
+
+@media (max-width: 1400px) {
+  .description-block .description-header {
+    font-size: 1rem !important;
+  }
+  .description-block .description-text {
+    font-size: 0.75rem !important;
+  }
+}
+
+
+/* ── ALERTS ──────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .alert {
+    font-size: 12.5px !important;
+    padding: 10px 14px !important;
+  }
+}
+
+
+/* ── TABS ────────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  .nav-tabs .nav-link,
+  .nav-pills .nav-link {
+    font-size: 12.5px !important;
+    padding: 8px 12px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .nav-tabs .nav-link,
+  .nav-pills .nav-link {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+
+/* ── DROPDOWN MENUS ──────────────────────────── */
+
+@media (max-width: 1400px) {
+  .dropdown-item {
+    font-size: 12.5px !important;
+    padding: 6px 10px !important;
+  }
+  .dropdown-menu-lg {
+    max-width: 280px !important;
+  }
+}
+
+
+/* ── NOTIFICATION DROPDOWN ───────────────────── */
+
+@media (max-width: 1400px) {
+  #pnt-dropdown.dropdown-menu-lg {
+    min-width: 260px !important;
+    max-width: 300px !important;
+  }
+}
+
+
+/* ── BUTTON GROUPS ───────────────────────────── */
+
+@media (max-width: 1400px) {
+  .btn-group .btn {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+  }
+  .btn-group-sm .btn {
+    font-size: 11px !important;
+    padding: 3px 8px !important;
+  }
+}
+
+
+/* ── CONTENT HEADER FLEX FIX ─────────────────── */
+
+@media (max-width: 1280px) {
+  .content-header .container-fluid {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .content-header .d-flex {
+    flex-wrap: wrap !important;
+  }
+}
+
+
+/* ── PAGE-SPECIFIC OVERRIDES ─────────────────── */
+
+/* Admin Accounts — dense table */
+body[class*="admin-accounts"] .table th[style*="width:"],
+body[class*="admin-accounts"] .table td[style*="width:"] {
+  width: auto !important;
+}
+
+/* Purchase Case Details — multi-modal page */
+@media (max-width: 1400px) {
+  body[class*="purchasecasedetails"] .card-body {
+    padding: 10px !important;
+  }
+}
+
+/* SORD Dashboard — XL columns */
+@media (max-width: 1400px) {
+  body[class*="sord-dashboard"] .col-xl-8 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+  body[class*="sord-dashboard"] .col-xl-4 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* View Purchase Cases — wide table */
+@media (max-width: 1400px) {
+  body[class*="viewpurchasecase"] .custom-table th,
+  body[class*="viewpurchasecase"] .custom-table td {
+    white-space: nowrap;
+  }
+}
+
+/* RFQ / Puritems tables */
+@media (max-width: 1400px) {
+  .rfq-table th[style*="width:"],
+  .rfq-table td[style*="width:"] {
+    width: auto !important;
+    min-width: 50px;
+  }
+}
+
+/* Minute Sheet */
+@media (max-width: 1280px) {
+  body[class*="minutesheet"] .table-minute td,
+  body[class*="minutesheet"] .table-minute th {
+    font-size: 11px !important;
+    padding: 5px 6px !important;
+  }
+  body[class*="minutesheet"] .financial-table td,
+  body[class*="minutesheet"] .financial-table th {
+    font-size: 11px !important;
+  }
+}
+
+/* Training tables (dark themed) */
+@media (max-width: 1400px) {
+  .training-index .table td,
+  .training-index .table th,
+  body[class*="training"] .table td,
+  body[class*="training"] .table th {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+/* Approval dashboards */
+@media (max-width: 1400px) {
+  body[class*="approvals"] .card {
+    margin-bottom: 12px !important;
+  }
+}
+
+/* Charts — ensure responsive containers */
+canvas {
+  max-width: 100% !important;
+}
+
+
+/* ── UTILITY HELPERS ─────────────────────────── */
+
+/* Force text truncation on tight cells */
+@media (max-width: 1400px) {
+  .text-truncate-responsive {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+}
+
+@media (max-width: 1280px) {
+  .text-truncate-responsive {
+    max-width: 140px;
+  }
+}
+
+/* Fix flex-wrap for header action groups */
+@media (max-width: 1280px) {
+  .content-header .d-flex[style*="gap"] {
+    gap: 6px !important;
+  }
+}
+
+/* Ensure footer doesn't get pushed */
+.main-footer {
+  font-size: 12px;
+}
+
+@media (max-width: 1400px) {
+  .main-footer {
+    font-size: 11px !important;
+    padding: 8px 14px !important;
+  }
+}

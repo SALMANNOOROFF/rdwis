@@ -20,9 +20,9 @@
 .dg-case-date { font-size:11px; color:var(--rd-text3); margin-top:4px; text-align:right; }
 
 /* ---- 2-col grid ---- */
-.dg-grid { display:grid; grid-template-columns:1fr 300px; gap:18px; align-items:start; }
-@media(max-width:1300px){ .dg-grid { grid-template-columns:1fr 280px; } }
-@media(max-width:1024px){ .dg-grid { grid-template-columns:1fr 260px; } }
+.dg-grid { display:grid; grid-template-columns:40% 1fr; gap:18px; align-items:start; }
+@media(max-width:1300px){ .dg-grid { grid-template-columns:40% 1fr; } }
+@media(max-width:1024px){ .dg-grid { grid-template-columns:40% 1fr; } }
 @media(max-width:860px)  { .dg-grid { grid-template-columns:1fr; } }
 
 /* ---- Section labels (no box) ---- */
@@ -139,6 +139,14 @@
                 $pctCase      = $totalBudget > 0 ? ($caseValue / $totalBudget) * 100 : 0;
                 $pctRemaining = max(0, ($balanceAfter / $totalBudget) * 100);
                 $returnCount  = $purchase->decisions->where('pdec_action', 'return')->count();
+
+                $service = app(\App\Services\PurchaseApprovalService::class);
+                $currentStatusDisplay = $service->getStatusDisplayName($purchase->pcs_status);
+
+                // Variable overrides for cross-role compatibility
+                $isInitiator = in_array(strtolower(trim((string)Auth::user()->acc_untarea)), ['prj', 'rdwprj', 'division']);
+                $canEdit = $isInitiator && in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
+                $backRoute = $isInitiator ? route('purchase.initiation.index') : route('nrdi.purchase_cases.index');
             @endphp
 
             {{-- Page Header --}}
@@ -154,9 +162,11 @@
                         <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-building mr-1" style="color:var(--rd-accent);"></i> <span class="text-white font-weight-bold">{{ $purchase->unit?->unt_name ?? $purchase->pcs_unt_id }}</span></span>
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
                         <span style="color:var(--rd-text2); font-size:15px;"><i class="fas fa-money-bill-wave mr-1" style="color:var(--rd-accent);"></i> <span style="color:var(--rd-info); font-weight:900; font-family:'Rajdhani',sans-serif; font-size:20px;">PKR {{ number_format($caseValue) }}</span></span>
-                        <span class="dg-status-badge ml-2">{{ $purchase->pcs_status }}</span>
+                        <span class="dg-status-badge ml-2" style="background: {{ $purchase->pcs_status == 'Approved' ? 'rgba(40,167,69,0.2)' : ($purchase->pcs_status == 'Returned' ? 'rgba(255,193,7,0.2)' : 'rgba(0,123,255,0.2)') }}; color: {{ $purchase->pcs_status == 'Approved' ? '#28a745' : ($purchase->pcs_status == 'Returned' ? '#ffc107' : '#007bff') }}; border-color: transparent;">
+                            {{ $currentStatusDisplay }}
+                        </span>
                     </div>
-                    <a href="{{ route('purchase.initiation.index') }}" class="dg-back-btn">
+                    <a href="{{ $backRoute }}" class="dg-back-btn">
                         <i class="fas fa-arrow-left mr-1"></i> Back to Hub
                     </a>
                 </div>
@@ -193,23 +203,113 @@
             <div class="dg-grid">
 
                 {{-- ============ LEFT PANE ============ --}}
+                <div class="dg-right">
+                    
+                    {{-- Decision Panel (Includes Release/Hold logic) --}}
+                    @include('approvals._action_box')
+
+                    {{-- CONVERSATIONAL VIEW (NEW) --}}
+                    <div class="dg-panel-r mt-3">
+                        <div class="dg-panel-r-hdr py-2 px-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-comments text-accent" style="font-size: 12px;"></i>
+                                <span class="dg-panel-r-title" style="font-size: 11px;">Conversational View</span>
+                                <div class="dropdown ml-2">
+                                    <button class="btn btn-xs btn-outline-light dropdown-toggle py-0 px-2" style="font-size:10px; border-radius:10px; color: var(--rd-accent); border-color: var(--rd-accent);" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-history"></i> History
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-left bg-dark border-secondary shadow" style="max-height: 300px; width: 280px; overflow-y:auto; font-size:11px; padding: 0;">
+                                        <div class="bg-navy py-2 px-3 border-bottom border-secondary">
+                                            <span class="rajdhani font-weight-bold text-accent" style="font-size: 12px; letter-spacing: 0.5px;">DECISION TRAIL</span>
+                                        </div>
+                                        @foreach($purchase->decisions->sortByDesc('created_at') as $decision)
+                                            @php
+                                                $act = $decision->pdec_action;
+                                                $color = 'primary';
+                                                $actionVerb = 'Recommended';
+                                                if($act == 'approve') { $color = 'success'; $actionVerb = 'Approved'; }
+                                                elseif($act == 'return') { $color = 'warning'; $actionVerb = 'Returned'; }
+                                                elseif($act == 'hold') { $color = 'warning'; $actionVerb = 'Reverted'; }
+                                                elseif($act == 'reject' || $act == 'not_approved') { $color = 'danger'; $actionVerb = 'Not Recommended'; }
+                                                
+                                                $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
+                                            @endphp
+                                            <a class="dropdown-item text-white border-bottom border-secondary py-2" href="#" onclick="scrollToUserComment('user-comment-{{$decision->pdec_id}}'); return false;" style="white-space: normal;">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="font-weight-bold" style="color: var(--rd-{{$color}}); font-size: 11px;">{{ $decision->account->acc_name }}</span>
+                                                    <span class="text-muted" style="font-size: 9px;">{{ \Carbon\Carbon::parse($decision->created_at)->format('d M, H:i') }}</span>
+                                                </div>
+                                                <div class="small text-muted" style="line-height: 1.3;">
+                                                    <span class="text-white font-weight-bold">{{ $actionVerb }}</span> 
+                                                    @if($act !== 'hold' && $act !== 'approve')
+                                                        to <span class="text-accent">{{ $toStatusDisplay }}</span>
+                                                    @endif
+                                                </div>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold" style="padding:1px 6px; font-size:10px; border-radius: 4px;">
+                                <i class="fas fa-file-alt mr-1"></i> MINUTE VIEW
+                            </a>
+                        </div>
+                        <div class="p-3" id="conversational-comments-box" style="max-height: 400px; overflow-y: auto;">
+                            @forelse($purchase->decisions->sortByDesc('created_at') as $decision)
+                                @php
+                                    $act = $decision->pdec_action;
+                                    $color = 'primary';
+                                    $actionVerb = 'Recommended';
+                                    if($act == 'approve') { $color = 'success'; $actionVerb = 'Approved'; }
+                                    elseif($act == 'return') { $color = 'warning'; $actionVerb = 'Returned'; }
+                                    elseif($act == 'hold') { $color = 'warning'; $actionVerb = 'Reverted'; }
+                                    elseif($act == 'reject' || $act == 'not_approved') { $color = 'danger'; $actionVerb = 'Not Recommended'; }
+                                    
+                                    $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
+                                    $hasRemarks = !empty(trim(strip_tags($decision->pdec_remarks)));
+                                @endphp
+                                <div class="mb-4" id="user-comment-{{$decision->pdec_id}}">
+                                    <div class="d-flex align-items-center justify-content-between mb-1 border-bottom border-secondary pb-1" style="border-bottom-style: dashed !important;">
+                                        <div class="font-weight-bold rajdhani text-white" style="font-size: 14px;">
+                                            <i class="fas fa-user-circle text-accent mr-1"></i> {{ $decision->account->acc_name }} 
+                                            <span class="text-muted small ml-1" style="font-weight: 500;">({{ strtoupper($decision->pdec_role) }})</span>
+                                            <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 10px; color: var(--rd-{{$color}}); letter-spacing: 0.5px;">
+                                                <i class="fas fa-caret-right mr-1"></i>{{ strtoupper($actionVerb) }}
+                                            </span>
+                                        </div>
+                                        <span class="text-muted" style="font-size:9px; font-weight: 600;">
+                                            {{ \Carbon\Carbon::parse($decision->created_at)->format('d M, h:i A') }}
+                                        </span>
+                                    </div>
+                                    <div class="mt-2" style="line-height: 1.5; font-size:12px; color: var(--rd-text1); padding-left: 5px;">
+                                        @if($hasRemarks)
+                                            {!! $decision->pdec_remarks !!}
+                                        @else
+                                            <div class="font-italic text-muted" style="font-size: 11px; opacity: 0.7;">
+                                                <i class="fas fa-info-circle mr-1"></i> Case {{ strtolower($actionVerb) }} to <strong>{{ $toStatusDisplay }}</strong> without additional remarks.
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center text-muted small py-3">No remarks yet.</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ============ RIGHT PANE ============ --}}
                 <div style="display:flex;flex-direction:column;gap:18px;">
 
                     {{-- Financial Row --}}
                     <div class="dg-fin-row">
-                        <div class="dg-fin-col">
-                            <div class="dg-sec-label"><i class="fas fa-chart-bar fa-xs"></i> Spending Breakdown</div>
-                            <div style="margin-bottom:12px;"><div class="dg-chart-sm"><canvas id="dgDonutChart"></canvas></div></div>
-                            <div><div class="dg-chart-sm"><canvas id="dgLineChart"></canvas></div></div>
-                        </div>
-
-                        <div class="dg-fin-col">
+                        <div class="dg-fin-col" style="grid-column: 1 / -1;">
                             <div class="dg-sec-label"><i class="fas fa-chart-pie fa-xs"></i> Financial Picture</div>
-                            <div class="dg-fin-nums">
-                                <div class="dg-fin-card"><div class="dg-fin-label">Total Budget</div><div class="dg-fin-value">{{ number_format($totalBudget) }}</div></div>
-                                <div class="dg-fin-card"><div class="dg-fin-label">Utilized</div><div class="dg-fin-value">{{ number_format($utilizedBudget) }}</div></div>
-                                <div class="dg-fin-card"><div class="dg-fin-label">This Case</div><div class="dg-fin-value" style="color:var(--rd-info);">{{ number_format($caseValue) }}</div></div>
-                                <div class="dg-fin-card"><div class="dg-fin-label">Bal. After</div><div class="dg-fin-value" style="color:{{ $balanceAfter < 0 ? 'var(--rd-danger)' : 'var(--rd-success)' }};">{{ number_format($balanceAfter) }}</div></div>
+                            <div class="dg-fin-nums" style="grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                                <div class="text-center"><div class="dg-fin-label">Total Budget</div><div class="dg-fin-value">{{ number_format($totalBudget) }}</div></div>
+                                <div class="text-center"><div class="dg-fin-label">Utilized</div><div class="dg-fin-value">{{ number_format($utilizedBudget) }}</div></div>
+                                <div class="text-center"><div class="dg-fin-label">This Case</div><div class="dg-fin-value" style="color:var(--rd-info);">{{ number_format($caseValue) }}</div></div>
+                                <div class="text-center"><div class="dg-fin-label">Bal. After</div><div class="dg-fin-value" style="color:{{ $balanceAfter < 0 ? 'var(--rd-danger)' : 'var(--rd-success)' }};">{{ number_format($balanceAfter) }}</div></div>
                             </div>
                             <div class="dg-prog-wrap">
                                 <div class="dg-prog-utilized" id="dgProgU" style="--pw:{{ $pctUtilized }}%;"></div>
@@ -221,7 +321,7 @@
                                 <div class="dg-leg-item"><div class="dg-leg-dot" style="background:var(--rd-info);"></div>This Case ({{ round($pctCase,1) }}%)</div>
                                 <div class="dg-leg-item"><div class="dg-leg-dot" style="background:{{ $balanceAfter < 0 ? 'var(--rd-danger)' : 'var(--rd-success)' }};"></div>Remaining ({{ round($pctRemaining,1) }}%)</div>
                             </div>
-                            <div style="margin-top:12px;flex:1;"><div class="dg-chart-wrap"><canvas id="dgBudgetChart"></canvas></div></div>
+                            <div style="margin-top:12px; height: 160px;"><canvas id="dgBudgetChart"></canvas></div>
                         </div>
                     </div>
 
@@ -292,22 +392,13 @@
                         </div>
                     </div>
 
-                </div>
-
-                {{-- ============ RIGHT PANE ============ --}}
-                <div class="dg-right">
-                    
-                    {{-- Decision Panel (Includes Release/Hold logic) --}}
-                    @include('approvals._action_box')
-
-                    {{-- Decision Trail --}}
-                    @include('approvals._decision_trail')
-
                     {{-- Attachments --}}
-                    <div class="dg-panel-r">
-                        <div class="dg-panel-r-hdr">
-                            <i class="fas fa-paperclip text-accent"></i>
-                            <span class="dg-panel-r-title">Related Files</span>
+                    <div class="dg-box">
+                        <div class="dg-box-hdr">
+                            <div class="dg-sec-label" style="margin-bottom:0;"><i class="fas fa-paperclip fa-xs"></i> Related Files</div>
+                            @if($canEdit)
+                                <button class="btn btn-outline-light btn-xs rajdhani" data-toggle="modal" data-target="#caseAttachmentModal"><i class="fas fa-plus"></i></button>
+                            @endif
                         </div>
                         <div class="p-3">
                             @forelse($purchase->attachments as $file)
@@ -322,12 +413,6 @@
                             @empty
                                 <div class="text-center py-3 text-muted small">No documents attached.</div>
                             @endforelse
-
-                            @if($canEdit)
-                                <button class="btn btn-outline-primary btn-block btn-sm rajdhani mt-2" data-toggle="modal" data-target="#caseAttachmentModal">
-                                    <i class="fas fa-plus mr-1"></i> ATTACH DOCUMENTS
-                                </button>
-                            @endif
                         </div>
                     </div>
 
@@ -337,10 +422,26 @@
     </section>
 </div>
 
-@include('purchase.initiation.partials.modals')
+@if($isInitiator)
+    @include('purchase.initiation.partials.modals')
+@endif
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+function scrollToUserComment(elementId) {
+    let container = document.getElementById('conversational-comments-box');
+    let element = document.getElementById(elementId);
+    if (element && container) {
+        container.scrollTop = element.offsetTop - container.offsetTop;
+        // Highlight effect
+        element.style.transition = "all 0.5s";
+        element.style.backgroundColor = "rgba(23, 162, 184, 0.2)";
+        setTimeout(() => {
+            element.style.backgroundColor = "transparent";
+        }, 1500);
+    }
+}
+
 (function(){
     const dsU={{ $utilizedBudget }}, dsC={{ $caseValue }}, dsR={{ max(0,$balanceAfter) }};
     setTimeout(() => {
@@ -356,30 +457,39 @@
             labels:['Utilized','This Case','Remaining'],
             datasets:[{
                 data:[dsU,dsC,dsR],
-                backgroundColor:['rgba(108,117,125,0.6)','rgba(23,162,184,0.6)','rgba(40,167,69,0.6)'],
+                backgroundColor:['#6c757d','#17a2b8','#28a745'],
                 borderColor:['#6c757d','#17a2b8','#28a745'],
-                borderWidth:1, borderRadius:5
+                borderWidth:1, 
+                borderRadius:4,
+                barThickness: 40, 
             }]
         },
-        options:co
-    });
-
-    new Chart(document.getElementById('dgDonutChart'),{
-        type:'doughnut',
-        data:{
-            labels:['Equipment','Tools','Other'],
-            datasets:[{data:[68,22,10],backgroundColor:['rgba(23,162,184,0.8)','rgba(201,162,39,0.8)','rgba(40,167,69,0.8)'],borderColor:'#0d1f3c',borderWidth:2}]
-        },
-        options:{...co, cutout:'65%'}
-    });
-
-    new Chart(document.getElementById('dgLineChart'),{
-        type:'line',
-        data:{
-            labels:['Oct','Nov','Dec','Jan','Feb','Mar'],
-            datasets:[{ label:'Expenditure', data:[420000,680000,510000,890000,1100000,1245800], borderColor:'#c9a227', tension:0.4, fill:true }]
-        },
-        options:co
+        options:{
+            ...co,
+            scales: {
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#8a96a3', font: { size: 11 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#fff', font: { size: 12, weight: '600' } }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0d1f3c',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
     });
 })();
 </script>

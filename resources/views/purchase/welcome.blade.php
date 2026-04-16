@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
 
   {{-- NOTE: Maine yahan se scripts hata diye hain, wo ab file ke end mein load honge --}}
+  <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -303,6 +304,24 @@
 
 {{-- Custom Scripts Section for individual pages (Modal logic yahan inject hoga) --}}
 @yield('scripts')
+
+{{-- Firefox zoom fallback --}}
+<script>
+(function() {
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    if (!isFirefox) return;
+    var w = window.innerWidth;
+    var scale = 1;
+    if (w <= 1100) scale = 0.70;
+    else if (w <= 1280) scale = 0.75;
+    else if (w <= 1400) scale = 0.85;
+    if (scale < 1) {
+        document.body.style.transform = 'scale(' + scale + ')';
+        document.body.style.transformOrigin = '0 0';
+        document.body.style.width = (100 / scale) + '%';
+    }
+})();
+</script>
 
 </body>
 </html>

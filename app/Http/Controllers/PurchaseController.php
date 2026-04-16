@@ -270,6 +270,13 @@ class PurchaseController extends Controller
         ]);
     }
 
+    public function minuteView($id)
+    {
+        $purchase = Purchase::with(['decisions.account'])->findOrFail($id);
+        
+        return view('purchase.initiation.minute_view', compact('purchase'));
+    }
+
     public function updateCore(Request $request, $id)
     {
         $request->validate([

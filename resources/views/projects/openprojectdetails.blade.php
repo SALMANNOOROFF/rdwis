@@ -635,6 +635,7 @@ $achievedPercent = max(0, min(100, $achievedPercent));
 
         <div class="milestone-container shadow-sm">
             <div class="milestone-scroll-box">
+                <div class="table-responsive">
                 <table class="table table-custom w-100 m-0">
                     <thead>
                         <tr>
@@ -689,6 +690,7 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 
@@ -704,28 +706,28 @@ $achievedPercent = max(0, min(100, $achievedPercent));
             </h6>
 
             <div class="row gx-2">
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_rcptdt ? 'done' : '' }}">
                         <span class="d-title">Received</span>
                         <span class="d-value">{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('d M y') : '—' }}</span>
                     </div>
                 </div>
 
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_assigndt ? 'done' : '' }}">
                         <span class="d-title">Assigned</span>
                         <span class="d-value">{{ $project->prj_assigndt ? \Carbon\Carbon::parse($project->prj_assigndt)->format('d M y') : '—' }}</span>
                     </div>
                 </div>
 
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_propdt ? 'done' : '' }}">
                         <span class="d-title">Proposal</span>
                         <span class="d-value">{{ $project->prj_propdt ? \Carbon\Carbon::parse($project->prj_propdt)->format('d M y') : '—' }}</span>
                     </div>
                 </div>
 
-                <div class="col-6">
+                <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_aprvdt ? 'done' : '' }}">
                         <span class="d-title">Approved</span>
                         <span class="d-value">{{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M y') : '—' }}</span>
@@ -826,6 +828,7 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                         </form>
                     </div>
                     <h6 class="font-weight-bold text-dark">Existing Files</h6>
+                    <div class="table-responsive">
                     <table class="table table-bordered table-sm mt-2 bg-white">
                         <thead class="bg-light"><tr><th>#</th><th>Document Name</th><th>Action</th></tr></thead>
                         <tbody>
@@ -843,6 +846,7 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -874,6 +878,7 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                     <button class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body p-0">
+                    <div class="table-responsive">
                     <table class="table table-striped m-0">
                         <thead class="bg-primary text-white"><tr><th>Image</th><th>Name</th><th>Role</th><th>Contact</th></tr></thead>
                         <tbody>
@@ -887,6 +892,7 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
