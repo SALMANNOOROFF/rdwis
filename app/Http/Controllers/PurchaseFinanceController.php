@@ -26,13 +26,13 @@ class PurchaseFinanceController extends Controller
         $targetStatus = 'With DFinance';
         $pageTitle = 'Director Finance | Budget Hub';
 
-        $purchases = Purchase::with(['project', 'latestDecision.account'])
+        $purchases = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->where('pcs_status', $targetStatus)
             ->orderBy('pcs_id', 'desc')
             ->get();
 
         // 2. Action Taken (Cases already processed by this user)
-        $processed = Purchase::with(['project', 'latestDecision.account'])
+        $processed = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
@@ -59,7 +59,7 @@ class PurchaseFinanceController extends Controller
      */
     public function show($id)
     {
-        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
             ->findOrFail($id);
 
         // Fetch Live Financials

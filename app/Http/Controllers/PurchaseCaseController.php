@@ -47,13 +47,13 @@ class PurchaseCaseController extends Controller
         $pageTitle = $titleMap[$area] ?? 'Purchase Scrutiny Hub';
 
         // 1. Pending Queue (Cases currently at this user's level)
-        $purchases = Purchase::with(['project', 'latestDecision.account'])
+        $purchases = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->whereIn('pcs_status', $targetStatuses)
             ->orderBy('pcs_id', 'desc')
             ->get();
 
         // 2. Action Taken (Cases already processed by this user)
-        $processed = Purchase::with(['project', 'latestDecision.account'])
+        $processed = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
@@ -85,7 +85,7 @@ class PurchaseCaseController extends Controller
         $user = Auth::user();
         $area = strtolower(trim($user->acc_untarea));
         
-        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
             ->findOrFail($id);
 
         // Fetch Live Financials from cen.heads
@@ -123,7 +123,7 @@ class PurchaseCaseController extends Controller
     public function action(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:forward,return,approve,reject',
+            'action' => 'required|in:forward,forward_negative,return,approve,reject',
             'remarks' => 'nullable|string',
             'target_status' => 'nullable|string',
         ]);

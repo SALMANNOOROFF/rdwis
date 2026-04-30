@@ -375,7 +375,7 @@
 </div>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+    @import url('/css/fonts.css');
 
     :root {
         --uc-bg:      #080a12;

@@ -93,6 +93,14 @@ class Purchase extends Model
     }
 
     /**
+     * Purchase belongs to a Unit (Division)
+     */
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'pcs_unt_id', 'unt_id');
+    }
+
+    /**
      * Purchase notifications
      */
     public function notifications()

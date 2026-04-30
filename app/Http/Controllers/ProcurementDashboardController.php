@@ -23,36 +23,58 @@ class ProcurementDashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $pageTitle = 'Procurement Dashboard';
         
-        // DProc only sees cases with 'Under Scrutiny' status
-        $targetStatus = 'Under Scrutiny';
-        $pageTitle = 'Director Procurement | Scrutiny Hub';
-
-        $purchases = Purchase::with(['project', 'latestDecision.account'])
-            ->where('pcs_status', $targetStatus)
+        // DProc sees cases based on their current status lifecycle
+        
+        // 1. Pending Action: Under Scrutiny OR Returned
+        $pending = Purchase::with(['project', 'latestDecision.account'])
+            ->whereIn('pcs_status', ['Under Scrutiny', 'Returned'])
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        $processed = Purchase::with(['project', 'latestDecision.account'])
-            ->whereHas('decisions', function($q) use ($user) {
-                $q->where('pdec_acc_id', $user->acc_id);
-            })
-            ->where('pcs_status', '!=', $targetStatus) 
+        // 2. Open: Active cases with others (DFinance, MD, DDG, DG)
+        $open = Purchase::with(['project', 'latestDecision.account'])
+            ->whereIn('pcs_status', ['With DFinance', 'With MD', 'With DDG', 'With DG'])
             ->orderBy('pcs_id', 'desc')
-            ->limit(10)
             ->get();
 
-        // Metrics
-        $totalVolume = $purchases->sum('pcs_price');
-        $caseCount = $purchases->count();
-        $processedCount = $processed->count();
+        // 3. Close: Cases that are already Approved
+        $closed = Purchase::with(['project', 'latestDecision.account'])
+            ->where('pcs_status', 'Approved')
+            ->orderBy('pcs_id', 'desc')
+            ->get();
 
+        // Metrics for compatibility if needed
+        $caseCount = $pending->count();
+        $processedCount = $open->count() + $closed->count();
+        $totalVolume = $pending->sum('pcs_price') + $open->sum('pcs_price') + $closed->sum('pcs_price');
+
+        // Division filters with Pending counts
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
+        $unitPendingMap = $pending->groupBy('pcs_unt_id')->map->count();
+
         $detailsRouteName = 'nrdi.procurement.purchase_cases.show';
 
         return view('nrdi.purchase_cases.index', compact(
-            'purchases', 'processed', 'pageTitle', 'totalVolume', 'caseCount', 'processedCount', 'unitNameMap', 'detailsRouteName'
+            'pending', 'open', 'closed', 'pageTitle', 'totalVolume', 'caseCount', 'processedCount', 'unitNameMap', 'unitPendingMap', 'detailsRouteName'
         ));
+    }
+
+    /**
+     * Directly close/approve a case from the dashboard
+     */
+    public function closeCase($id)
+    {
+        try {
+            $purchase = Purchase::findOrFail($id);
+            $purchase->pcs_status = 'Approved';
+            $purchase->save();
+            
+            return redirect()->back()->with('success', 'Case marked as Closed (Approved) successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error closing case: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -78,8 +100,15 @@ class ProcurementDashboardController extends Controller
         $pageTitle = 'DProc Scrutiny: ' . $purchase->pcs_title;
         $area = 'proc';
 
+        // Recent 8 approved cases for sidebar
+        $recentApproved = Purchase::where('pcs_status', 'Approved')
+            ->withCount('items')
+            ->orderByDesc('pcs_date')
+            ->limit(8)
+            ->get(['pcs_id', 'pcs_title', 'pcs_price', 'pcs_date', 'pcs_type']);
+
         return view('nrdi.purchase_cases.show', compact(
-            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName'
+            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'recentApproved'
         ));
     }
 }

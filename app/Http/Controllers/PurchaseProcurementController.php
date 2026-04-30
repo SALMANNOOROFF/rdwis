@@ -28,30 +28,39 @@ class PurchaseProcurementController extends Controller
         $targetStatus = 'Under Scrutiny';
         $pageTitle = 'Director Procurement | Scrutiny Hub';
 
-        $purchases = Purchase::with(['project', 'latestDecision.account'])
-            ->where('pcs_status', $targetStatus)
+        $pending = Purchase::with(['unit', 'project', 'latestDecision.account'])
+            ->where('pcs_status', 'Under Scrutiny')
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        $processed = Purchase::with(['project', 'latestDecision.account'])
+        $open = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
-            ->where('pcs_status', '!=', $targetStatus) 
+            ->whereNotIn('pcs_status', ['Under Scrutiny', 'Approved', 'Rejected']) 
             ->orderBy('pcs_id', 'desc')
-            ->limit(10)
+            ->get();
+
+        $closed = Purchase::with(['unit', 'project', 'latestDecision.account'])
+            ->whereHas('decisions', function($q) use ($user) {
+                $q->where('pdec_acc_id', $user->acc_id);
+            })
+            ->whereIn('pcs_status', ['Approved', 'Rejected'])
+            ->orderBy('pcs_id', 'desc')
+            ->limit(20)
             ->get();
 
         // Metrics
-        $totalVolume = $purchases->sum('pcs_price');
-        $caseCount = $purchases->count();
-        $processedCount = $processed->count();
+        $totalVolume = $pending->sum('pcs_price');
+        $caseCount = $pending->count();
+        $openCount = $open->count();
+        $closedCount = $closed->count();
 
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
         $detailsRouteName = 'nrdi.purchase_cases_new.procurement.show';
 
         return view('nrdi.purchase_cases_new.index', compact(
-            'purchases', 'processed', 'pageTitle', 'totalVolume', 'caseCount', 'processedCount', 'unitNameMap', 'detailsRouteName'
+            'pending', 'open', 'closed', 'pageTitle', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'unitNameMap', 'detailsRouteName'
         ));
     }
 
@@ -60,7 +69,7 @@ class PurchaseProcurementController extends Controller
      */
     public function show($id)
     {
-        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
             ->findOrFail($id);
 
         // Fetch Live Financials

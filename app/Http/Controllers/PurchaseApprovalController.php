@@ -71,9 +71,15 @@ class PurchaseApprovalController extends Controller
         $caseCount = $purchases->count();
         $processedCount = $processed->count();
 
+        $pending = $purchases;
+        $open = collect([]); // Empty for approval hub
+        $closed = $processed;
+        $unitPendingMap = $pending->groupBy('pcs_unt_id')->map->count();
+
         return view('nrdi.purchase_cases.index', compact(
             'purchases', 'processed', 'unitNameMap', 'area', 'pageTitle', 
-            'groupedPurchases', 'detailsRouteName', 'totalVolume', 'caseCount', 'processedCount'
+            'groupedPurchases', 'detailsRouteName', 'totalVolume', 'caseCount', 'processedCount',
+            'pending', 'open', 'closed', 'unitPendingMap'
         ));
     }
 
@@ -123,7 +129,7 @@ class PurchaseApprovalController extends Controller
     public function action(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:forward,return,approve,reject',
+            'action' => 'required|in:forward,forward_negative,return,approve,reject',
             'remarks' => 'nullable|string',
             'target_status' => 'nullable|string',
         ]);
@@ -138,6 +144,20 @@ class PurchaseApprovalController extends Controller
                 $remarks = $remarks, 
                 $targetStatus = $request->target_status
             );
+
+            $user = Auth::user();
+            $area = strtolower(trim($user?->acc_untarea ?? ''));
+
+            // Intelligent Redirection:
+            // If the user processed a case in the "New" system or belongs to those roles, 
+            // keep them in the New system dashboard.
+            if ($area === 'proc') {
+                return redirect()->route('nrdi.purchase_cases_new.procurement.index')->with('success', 'Case processed successfully!');
+            } elseif ($area === 'fin') {
+                return redirect()->route('nrdi.purchase_cases_new.finance.index')->with('success', 'Budget review completed!');
+            }
+
+            // Fallback for others (MD, DDG, DG)
             return redirect()->route('nrdi.purchase_cases.index')->with('success', 'Action completed successfully!');
         } catch (\Exception $e) {
             return back()->with('error', 'Error: ' . $e->getMessage());

@@ -38,8 +38,8 @@
 
 .text-amount { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 600; color: #fff; }
 .text-ref { font-size: 10px; color: #4b5563; font-weight: 500; }
-.view-btn { background: #0d1218; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 6px 20px; border-radius: 6px; font-size: 11px; font-weight: 600; transition: all 0.2s; }
-.view-btn:hover { background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.3); }
+.nav-arrow { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #3b82f6; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); transition: all 0.2s; text-decoration: none !important; }
+.nav-arrow:hover { background: #3b82f6; color: #fff; transform: scale(1.1); }
 
 /* Animation */
 .fade-up { animation: fadeUp 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
@@ -54,7 +54,7 @@
                 <i class="fas fa-th-large"></i> All Divisions
             </div>
             @foreach($unitNameMap as $id => $name)
-                @php $pendingInDiv = $purchases->where('pcs_unt_id', $id); @endphp
+                @php $pendingInDiv = $pending->where('pcs_unt_id', $id); @endphp
                 @if($pendingInDiv->count() > 0)
                 <div class="div-pill" data-div="{{ $id }}">
                     <i class="fas fa-building"></i> {{ $name }}
@@ -74,8 +74,13 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="hub-tab-link" id="action-tab" data-toggle="tab" href="#actionTaken" role="tab">
-                    <i class="fas fa-history"></i> Action Taken ({{ $processedCount }})
+                <a class="hub-tab-link" id="open-tab" data-toggle="tab" href="#open" role="tab">
+                    <i class="fas fa-folder-open"></i> Open ({{ $openCount }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="hub-tab-link" id="closed-tab" data-toggle="tab" href="#closed" role="tab">
+                    <i class="fas fa-check-circle"></i> Close ({{ $closedCount }})
                 </a>
             </li>
         </ul>
@@ -87,16 +92,16 @@
                     <table class="hub-table">
                         <thead>
                             <tr>
+                                <th style="width: 50px;"></th>
                                 <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
                                 <th style="width: 180px; text-align: right;">Est. Amount</th>
                                 <th style="width: 160px; text-align: center;">Status</th>
-                                <th style="width: 100px; text-align: right;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($purchases as $idx => $p)
+                            @forelse($pending as $idx => $p)
                             @php 
                                 $isOld = \Carbon\Carbon::parse($p->pcs_date)->diffInDays() > 2;
                                 $statusIcon = match(strtolower($p->pcs_status)) {
@@ -108,6 +113,11 @@
                                 };
                             @endphp
                             <tr class="hub-row fade-up div-row-{{ $p->pcs_unt_id }}" style="animation-delay: {{ $idx * 0.05 }}s">
+                                <td class="text-center">
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </td>
                                 <td>
                                     <div class="type-badge type-ps shadow-sm">{{ strtoupper(substr($p->pcs_type ?? 'PS', 0, 2)) }}</div>
                                 </td>
@@ -131,9 +141,6 @@
                                         <i class="fas {{ $statusIcon }}"></i> {{ strtoupper($p->pcs_status) }}
                                     </span>
                                 </td>
-                                <td class="text-right">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="view-btn rajdhani">VIEW</a>
-                                </td>
                             </tr>
                             @empty
                             <tr>
@@ -150,48 +157,110 @@
                 </div>
             </div>
 
-            {{-- Action Taken Content --}}
-            <div class="tab-pane fade" id="actionTaken" role="tabpanel">
+            {{-- Open Content --}}
+            <div class="tab-pane fade" id="open" role="tabpanel">
                 <div class="table-responsive">
                     <table class="hub-table">
                         <thead>
                             <tr>
+                                <th style="width: 50px;"></th>
                                 <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
-                                <th style="width: 180px; text-align: right;">Action Result</th>
-                                <th style="width: 160px; text-align: center;">Trail Log</th>
-                                <th style="width: 100px; text-align: right;">Action</th>
+                                <th style="width: 180px; text-align: right;">Current Authority</th>
+                                <th style="width: 160px; text-align: center;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($processed as $idx => $p)
+                            @forelse($open as $idx => $p)
                             <tr class="hub-row fade-up div-row-{{ $p->pcs_unt_id }}" style="animation-delay: {{ $idx * 0.05 }}s">
-                                <td>
-                                    <div class="type-badge type-pt" style="opacity: 0.6;">{{ strtoupper(substr($p->pcs_type ?? 'PT', 0, 2)) }}</div>
+                                <td class="text-center">
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
                                 </td>
                                 <td>
-                                    <div class="text-muted font-weight-bold" style="font-size: 14px;">{{ $p->pcs_title }}</div>
+                                    <div class="type-badge type-pt shadow-sm">{{ strtoupper(substr($p->pcs_type ?? 'PT', 0, 2)) }}</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-white font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->pcs_title }}</div>
+                                    </div>
                                     <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
                                 </td>
-                                <td class="text-muted small font-weight-bold rajdhani" style="font-size: 11px;">
+                                <td class="text-muted small font-weight-bold rajdhani" style="font-size: 12px;">
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
                                 </td>
                                 <td class="text-right">
-                                    <div class="text-amount text-muted rajdhani" style="font-size: 14px;">Rs. {{ number_format($p->pcs_price) }}</div>
-                                </td>
-                                <td class="text-center">
-                                    <span class="status-pill" style="opacity: 0.5; border-color: rgba(255,255,255,0.05);">
-                                        <i class="fas fa-history"></i> {{ $p->pcs_status }}
+                                    <span class="badge badge-dark px-2 py-1 rajdhani" style="font-size: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                                        {{ strtoupper(str_replace('With ', '', $p->pcs_status)) }}
                                     </span>
                                 </td>
-                                <td class="text-right">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="view-btn rajdhani">LOG</a>
+                                <td class="text-center">
+                                    <span class="status-pill rajdhani">
+                                        <i class="fas fa-hourglass-half"></i> {{ $p->pcs_status }}
+                                    </span>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted rajdhani small italic opacity-50">Nothing here yet.</td>
+                                <td colspan="6" class="text-center py-5 text-muted rajdhani small italic opacity-50">No open cases.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Closed Content --}}
+            <div class="tab-pane fade" id="closed" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="hub-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;"></th>
+                                <th style="width: 60px;">Type</th>
+                                <th>Title / Description</th>
+                                <th style="width: 150px;">Date</th>
+                                <th style="width: 180px; text-align: right;">Amount</th>
+                                <th style="width: 160px; text-align: center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($closed as $idx => $p)
+                            <tr class="hub-row fade-up div-row-{{ $p->pcs_unt_id }}" style="animation-delay: {{ $idx * 0.05 }}s">
+                                <td class="text-center">
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    @php $isSuccess = strpos(strtolower($p->pcs_status), 'approved') !== false; @endphp
+                                    <div class="type-badge type-ps shadow-sm" style="background: {{ $isSuccess ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}; color: {{ $isSuccess ? '#10b981' : '#ef4444' }}; border: 1px solid {{ $isSuccess ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)' }};">
+                                        {{ strtoupper(substr($p->pcs_type ?? 'PS', 0, 2)) }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-white font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->pcs_title }}</div>
+                                    </div>
+                                    <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
+                                </td>
+                                <td class="text-muted small font-weight-bold rajdhani" style="font-size: 12px;">
+                                    {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
+                                </td>
+                                <td class="text-right">
+                                    <div class="text-amount text-white rajdhani">Rs. {{ number_format($p->pcs_price) }}</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="status-pill rajdhani" style="color: {{ $isSuccess ? '#10b981' : '#ef4444' }}; border-color: {{ $isSuccess ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)' }}; background: transparent;">
+                                        <i class="fas {{ $isSuccess ? 'fa-check' : 'fa-times' }}"></i> {{ strtoupper($p->pcs_status) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted rajdhani small italic opacity-50">No closed cases.</td>
                             </tr>
                             @endforelse
                         </tbody>

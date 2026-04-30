@@ -1,0 +1,9 @@
+caddy reverse-proxy --from https://172.16.4.92 --to http://172.16.4.92:8000
+
+
+php artisan serve --host=172.16.4.92 --port=8000
+
+
+
+
+ E:\RDWIS ENHANCED>

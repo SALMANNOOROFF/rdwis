@@ -158,14 +158,15 @@ class PurchaseController extends Controller
                     ->select('hed_id', 'hed_name', 'hed_code')
                     ->orderBy('hed_name', 'asc')
                     ->get();
+
+        $firms = DB::table('frm.firmz')->select('frm_id', 'frm_name')->orderBy('frm_name')->get();
         
         // Use the refined split-view form for consultancy and services (Outsourcing)
-        // Note: For total unification, we might eventually merge consultancy_form into unified_form
         if (in_array($type, ['consultancy', 'services'])) {
-            return view('purchase.new_case.consultancy_form', compact('nextId', 'heads', 'type'));
+            return view('purchase.new_case.consultancy_form', compact('nextId', 'heads', 'type', 'firms'));
         }
                     
-        return view('purchase.new_case.unified_form', compact('nextId', 'heads', 'type'));
+        return view('purchase.new_case.unified_form', compact('nextId', 'heads', 'type', 'firms'));
     }
 
     /**
@@ -223,16 +224,35 @@ class PurchaseController extends Controller
             $pcs->pcs_midtax = 0;
             $pcs->pcs_transtype = 1;
             $pcs->pcs_noloan = false;
-            // Calculate Total Price from Items in remarks_JSON
+            
+            // Build item index map for quotation price lookup
+            $itemsInput = $request->input('items', []);
+            $quotationsInput = $request->input('quotations', []); // [firm_id => [item_idx => price]]
+            
+            // Calculate total price from quotations (lowest firm wins) or from legacy remarks_JSON
             $totalPrice = 0;
-            if ($request->has('remarks_JSON.items')) {
+            $firmTotals = [];
+            
+            if (!empty($quotationsInput)) {
+                foreach ($quotationsInput as $firmId => $itemPrices) {
+                    $firmTotal = 0;
+                    foreach ($itemPrices as $idx => $price) {
+                        $firmTotal += (float)($price ?? 0);
+                    }
+                    $firmTotals[$firmId] = $firmTotal;
+                }
+                // Lowest firm total = case price
+                if (!empty($firmTotals)) {
+                    $totalPrice = min($firmTotals);
+                }
+            } elseif ($request->has('remarks_JSON.items')) {
                 foreach ($request->input('remarks_JSON.items') as $item) {
-                    $qty = (float)($item['qty'] ?? ($item['amount'] ?? 0)); // handle different form keys
-                    $rate = (float)($item['rate'] ?? 1); // if it's simple amount, rate is 1
+                    $qty = (float)($item['qty'] ?? ($item['amount'] ?? 0));
+                    $rate = (float)($item['rate'] ?? 1);
                     $totalPrice += ($qty * $rate);
                 }
             } elseif ($request->has('remarks_JSON.milestones')) {
-                 foreach ($request->input('remarks_JSON.milestones') as $m) {
+                foreach ($request->input('remarks_JSON.milestones') as $m) {
                     $totalPrice += (float)($m['amount'] ?? 0);
                 }
             }
@@ -240,10 +260,83 @@ class PurchaseController extends Controller
             $pcs->pcs_price = $totalPrice;
             $pcs->save();
 
+            $itemIds = [];
+            if (!empty($itemsInput)) {
+                $itemsInput = array_values($itemsInput); // standardize to 0-index
+                $serial = 1;
+                foreach ($itemsInput as $idx => $item) {
+                    $desc = $item['desc'] ?? '';
+                    if (empty(trim($desc))) continue;
+                    
+                    $qty = (float)($item['qty'] ?? 1);
+                    $unit = $item['unit'] ?? 'num';
+                    
+                    // Item price = winning firm's price for this item (if quotations exist)
+                    $itemPrice = 0;
+                    if (!empty($firmTotals)) {
+                        $winningFirmId = array_keys($firmTotals, min($firmTotals))[0];
+                        $itemPrice = (float)($quotationsInput[$winningFirmId][$idx] ?? 0);
+                    }
+                    
+                    $pci_id = DB::table('pur.purcaseitems')->insertGetId([
+                        'pci_pcs_id' => $pcs->pcs_id,
+                        'pci_serial' => $serial++,
+                        'pci_desc' => $desc,
+                        'pci_qty' => $qty,
+                        'pci_qtyunit' => $unit,
+                        'pci_price' => $itemPrice,
+                        'pci_type' => 1,
+                        'pci_subtype' => 1,
+                    ], 'pci_id');
+                    
+                    $itemIds[] = $pci_id;
+                }
+            }
+
+            // --- Save Quotations to quotes ---
+            if (!empty($quotationsInput)) {
+                $quoteNum = 1;
+                foreach ($quotationsInput as $firmId => $itemPrices) {
+                    $firmTotal = (float)($firmTotals[$firmId] ?? 0);
+                    if ($firmTotal <= 0) continue;
+                    
+                    $firmName = DB::table('frm.firmz')->where('frm_id', $firmId)->value('frm_name') ?? 'Unknown';
+                    
+                    $qte_id = DB::table('pur.quotes')->insertGetId([
+                        'qte_pcs_id' => $pcs->pcs_id,
+                        'qte_frm_id' => $firmId,
+                        'qte_firmname' => $firmName,
+                        'qte_price' => $firmTotal,
+                        'qte_num' => $quoteNum++,
+                        'qte_date' => $request->pcs_date,
+                        'qte_techaccept' => true,
+                    ], 'qte_id');
+                    
+                    // Save individual prices to quoteitems for Comparative Statement
+                    if (is_array($itemPrices)) {
+                        $itemPrices = array_values($itemPrices); // standardize
+                        foreach ($itemPrices as $idx => $price) {
+                            if (isset($itemIds[$idx])) {
+                                DB::table('pur.quoteitems')->insert([
+                                    'qti_qte_id' => $qte_id,
+                                    'qti_pci_id' => $itemIds[$idx],
+                                    'qti_price' => (float)$price,
+                                    'qti_qty' => (float)($itemsInput[$idx]['qty'] ?? 1),
+                                    'qti_serial' => $idx + 1,
+                                    'qti_desc' => $itemsInput[$idx]['desc'] ?? 'Item',
+                                    'qti_qtyunit' => $itemsInput[$idx]['unit'] ?? 'num',
+                                    'qti_pcsdesc' => $itemsInput[$idx]['desc'] ?? 'Item'
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+
             // Handle Direct Release logic
             if ($request->has('release_directly') && $request->release_directly == '1') {
                 $approvalService = app(\App\Services\PurchaseApprovalService::class);
-                $initiationRemarks = $request->initiation_remarks ?: "No Comments";
+                $initiationRemarks = $request->initiation_remarks ?: '<ol start="1"><li>Case Initiated and forwarded.</li></ol>';
                 $approvalService->processDecision($pcs, 'forward', $initiationRemarks);
                 
                 return redirect()->route('purchase.initiation.index')
@@ -272,9 +365,50 @@ class PurchaseController extends Controller
 
     public function minuteView($id)
     {
-        $purchase = Purchase::with(['decisions.account'])->findOrFail($id);
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'project', 'attachments', 'decisions.account'])->findOrFail($id);
         
-        return view('purchase.initiation.minute_view', compact('purchase'));
+        // Live Financials
+        $project = $purchase->project;
+        if ($project) {
+            $totalSpent = Purchase::where('pcs_hed_id', $project->prj_id)
+                ->where('pcs_status', 'Approved')
+                ->where('pcs_id', '<>', $purchase->pcs_id)
+                ->sum('pcs_price');
+            $project->hed_balance = ($project->prj_aprvcost ?? 0) - $totalSpent;
+        }
+        $head = $project;
+        
+        return view('purchase.initiation.minute_view', compact('purchase', 'head'));
+    }
+
+    public function caseDetail($id)
+    {
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'project', 'attachments', 'decisions.account'])->findOrFail($id);
+        
+        // Live Financials
+        $project = $purchase->project;
+        if ($project) {
+            $totalSpent = Purchase::where('pcs_hed_id', $project->prj_id)
+                ->where('pcs_status', 'Approved')
+                ->where('pcs_id', '<>', $purchase->pcs_id)
+                ->sum('pcs_price');
+            $project->hed_balance = ($project->prj_aprvcost ?? 0) - $totalSpent;
+        }
+        $head = $project;
+        
+        return view('purchase.initiation.case_detail', compact('purchase', 'head'));
+    }
+
+    public function marketResearch($id)
+    {
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes.firm', 'project', 'decisions.account'])->findOrFail($id);
+        return view('purchase.initiation.market_research', compact('purchase'));
+    }
+
+    public function csFormal($id)
+    {
+        $purchase = Purchase::with(['unit', 'quotes.firm', 'project'])->findOrFail($id);
+        return view('purchase.initiation.cs_formal', compact('purchase'));
     }
 
     public function updateCore(Request $request, $id)
@@ -350,5 +484,28 @@ class PurchaseController extends Controller
             return redirect()->route('purchase.initiation.show', $purchase->pcs_id)
                 ->with('success', 'Case #'.$purchase->pcs_id.' is now back in HOLD (Draft) mode.');
         });
+    }
+
+    /**
+     * AJAX: Select a different winning firm for a case
+     */
+    public function selectFirm(Request $request, $id)
+    {
+        $purchase = Purchase::with('quotes')->findOrFail($id);
+        $quoteId = $request->input('quote_id');
+        
+        $selectedQuote = $purchase->quotes->firstWhere('qte_id', $quoteId);
+        if (!$selectedQuote) {
+            return response()->json(['error' => 'Quote not found'], 404);
+        }
+
+        $purchase->pcs_price = $selectedQuote->qte_price;
+        $purchase->save();
+
+        return response()->json([
+            'success' => true,
+            'new_price' => $selectedQuote->qte_price,
+            'firm_name' => $selectedQuote->firm?->frm_name ?? $selectedQuote->qte_firmname,
+        ]);
     }
 }

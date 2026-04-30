@@ -256,22 +256,67 @@
               @if(!in_array($type, ['tada', 'transport']))
                 <div class="soft-group mt-2">
                   <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="soft-label mb-0">Line Items / Expenditure Breakdown</label>
-                    <button type="button" class="btn-add-row" onclick="addDynRow('dyn-list-misc', ['Description', 'Est. Amount'], ['desc', 'amount'], 'number')">
+                    <label class="soft-label mb-0">Line Items</label>
+                    <button type="button" class="btn-add-row" onclick="addItemRow()">
                         <i class="fas fa-plus"></i> ADD ITEM
                     </button>
                   </div>
-                  <div id="dyn-list-misc" class="dyn-list">
-                    <div class="dyn-row" data-idx="0">
+                  <div id="items-list" class="dyn-list">
+                    <div class="dyn-row" data-idx="0" style="grid-template-columns: 40px 1fr 80px 80px 32px;">
+                      <div class="text-center" style="display:flex;align-items:center;justify-content:center;color:var(--rd-text3);font-size:11px;font-weight:700;">1</div>
                       <div>
-                        <input type="text" name="remarks_JSON[items][0][desc]" class="soft-input" placeholder="Item description / milestone name">
+                        <input type="text" name="items[0][desc]" class="soft-input item-desc" placeholder="Item description" required>
                       </div>
                       <div>
-                        <input type="number" name="remarks_JSON[items][0][amount]" class="soft-input amount-input" placeholder="0" oninput="calculateTotal()">
+                        <input type="number" name="items[0][qty]" class="soft-input item-qty" placeholder="Qty" value="1" min="1" required>
+                      </div>
+                      <div>
+                        <input type="text" name="items[0][unit]" class="soft-input" placeholder="Unit" value="num">
                       </div>
                       <button type="button" class="btn-rm-row" tabindex="-1" style="visibility:hidden"><i class="fas fa-times"></i></button>
                     </div>
                   </div>
+                </div>
+
+                {{-- Quotation Grid --}}
+                <div class="soft-group mt-3">
+                  <div class="section-title"><i class="fas fa-balance-scale"></i> Firm Quotations</div>
+                  <div class="d-flex align-items-end gap-2 mb-2">
+                    <div style="flex:1;">
+                      <label class="soft-label">Select Firm to Add</label>
+                      <select id="firmSelector" class="soft-select">
+                        <option value="" disabled selected>-- Choose a Firm --</option>
+                        @foreach($firms ?? [] as $f)
+                          <option value="{{ $f->frm_id }}" data-name="{{ $f->frm_name }}">{{ $f->frm_name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <button type="button" class="btn-add-row" onclick="addFirmColumn()" style="height:32px;">
+                      <i class="fas fa-plus"></i> ADD FIRM
+                    </button>
+                  </div>
+                  <div style="overflow-x:auto; border:1px solid var(--rd-border); border-radius:8px;">
+                    <table id="quotationTable" style="width:100%; border-collapse:collapse; font-size:12px;">
+                      <thead>
+                        <tr style="background:var(--rd-surface2); border-bottom:1px solid var(--rd-border);">
+                          <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; min-width:40px;">S.No</th>
+                          <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; min-width:180px;">Item</th>
+                          <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; text-align:center; min-width:60px;">Qty</th>
+                          {{-- Firm columns will be dynamically added here --}}
+                        </tr>
+                      </thead>
+                      <tbody id="quotationBody">
+                        {{-- Rows populated by JS --}}
+                      </tbody>
+                      <tfoot>
+                        <tr style="border-top:2px solid var(--rd-border); background:rgba(255,255,255,0.02);">
+                          <td colspan="3" style="padding:8px 10px; font-weight:800; color:var(--rd-text1); text-align:right; font-family:'Rajdhani',sans-serif; font-size:13px;">TOTAL →</td>
+                          {{-- Firm total cells added dynamically --}}
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                  <p class="text-muted mt-1 mb-0" style="font-size:10px;"><i class="fas fa-info-circle mr-1"></i> The lowest-priced firm will be auto-selected as the winning quote.</p>
                 </div>
               @endif
             </div>
@@ -385,216 +430,254 @@
       document.getElementById('transport_mode').value = mode;
       const btnNon = document.getElementById('btn-transport-nonrecurrent');
       const btnRec = document.getElementById('btn-transport-recurrent');
-      
       const themeColor = '<?= $theme['color'] ?? '#10b981' ?>';
-
       if(mode === 'nonrecurrent') {
-          $('#transport-recurrent').hide();
-          $('#transport-nonrecurrent').fadeIn(200);
+          $('#transport-recurrent').hide(); $('#transport-nonrecurrent').fadeIn(200);
           btnNon.style.background = '#fff'; btnNon.style.color = themeColor; btnNon.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)'; btnNon.style.fontWeight = '700';
           btnRec.style.background = 'transparent'; btnRec.style.color = '#64748b'; btnRec.style.boxShadow = 'none'; btnRec.style.fontWeight = '600';
       } else {
-          $('#transport-nonrecurrent').hide();
-          $('#transport-recurrent').fadeIn(200);
+          $('#transport-nonrecurrent').hide(); $('#transport-recurrent').fadeIn(200);
           btnRec.style.background = '#fff'; btnRec.style.color = themeColor; btnRec.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)'; btnRec.style.fontWeight = '700';
           btnNon.style.background = 'transparent'; btnNon.style.color = '#64748b'; btnNon.style.boxShadow = 'none'; btnNon.style.fontWeight = '600';
       }
   }
 
-  // ----- Training Type Switcher Logic -----
+  // ----- Training Type Switcher -----
   function switchTrnMode(mode) {
       document.getElementById('training_type_sel').value = mode;
-      
       const themeColor = '<?= $theme['color'] ?? '#10b981' ?>';
-      const btns = {
-          'external': document.getElementById('btn-trn-external'),
-          'online': document.getElementById('btn-trn-online'),
-          'inhouse': document.getElementById('btn-trn-inhouse')
-      };
-
-      // Reset all buttons
-      Object.keys(btns).forEach(key => {
-          if(!btns[key]) return;
-          btns[key].style.background = 'transparent'; 
-          btns[key].style.color = '#64748b'; 
-          btns[key].style.boxShadow = 'none'; 
-          btns[key].style.fontWeight = '600';
-      });
-
-      // Highlight active button
-      if(btns[mode]) {
-          btns[mode].style.background = '#fff'; 
-          btns[mode].style.color = themeColor; 
-          btns[mode].style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)'; 
-          btns[mode].style.fontWeight = '700';
-      }
-
-      // Hide all dynamic areas and remove required attribute
-      $('#trn_external, #trn_online, #trn_inhouse').hide();
-      $('.trn_ext_req, .trn_onl_req, .trn_inh_req').prop('required', false);
-      
-      // Target area
-      if(mode === 'external') {
-          $('#trn_external').fadeIn(200);
-          $('.trn_ext_req').prop('required', true);
-      } else if(mode === 'online') {
-          $('#trn_online').fadeIn(200);
-          $('.trn_onl_req').prop('required', true);
-      } else if(mode === 'inhouse') {
-          $('#trn_inhouse').fadeIn(200);
-          $('.trn_inh_req').prop('required', true);
-      }
+      const btns = { 'external': document.getElementById('btn-trn-external'), 'online': document.getElementById('btn-trn-online'), 'inhouse': document.getElementById('btn-trn-inhouse') };
+      Object.keys(btns).forEach(key => { if(!btns[key]) return; btns[key].style.background='transparent'; btns[key].style.color='#64748b'; btns[key].style.boxShadow='none'; btns[key].style.fontWeight='600'; });
+      if(btns[mode]) { btns[mode].style.background='#fff'; btns[mode].style.color=themeColor; btns[mode].style.boxShadow='0 2px 6px rgba(0,0,0,0.05)'; btns[mode].style.fontWeight='700'; }
+      $('#trn_external, #trn_online, #trn_inhouse').hide(); $('.trn_ext_req, .trn_onl_req, .trn_inh_req').prop('required', false);
+      if(mode==='external') { $('#trn_external').fadeIn(200); $('.trn_ext_req').prop('required',true); }
+      else if(mode==='online') { $('#trn_online').fadeIn(200); $('.trn_onl_req').prop('required',true); }
+      else if(mode==='inhouse') { $('#trn_inhouse').fadeIn(200); $('.trn_inh_req').prop('required',true); }
   }
-
-  // Initialize correct training layout on load if category is Training
   <?php if($type == 'training'): ?>
-  $(document).ready(function() {
-      switchTrnMode('external'); // Starts at external by default
-  });
+  $(document).ready(function() { switchTrnMode('external'); });
   <?php endif; ?>
 
   // ----- Direct Release Logic -----
-  function confirmAndRelease() {
-      document.getElementById('releaseDirectModal').classList.add('show');
-  }
-
+  function confirmAndRelease() { document.getElementById('releaseDirectModal').classList.add('show'); }
   function executeDirectRelease() {
       const remarks = document.getElementById('directRemarksInput').value;
-      
       document.getElementById('release_directly_flag').value = '1';
       document.getElementById('initiation_remarks_payload').value = (remarks && remarks.trim().length > 0) ? remarks : "No Comments";
-      
       const btn = document.getElementById('finalReleaseBtn');
-      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
-      btn.disabled = true;
-
+      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`; btn.disabled = true;
       document.getElementById('unifiedPurchaseForm').submit();
   }
 
-  // ----- Form Submission Handling -----
   function handleFormSubmit(e) {
       fireToast('Synchronizing with ledger... Please wait', 'success');
-      
-      // If direct release wasn't triggered, it's a draft
       const isDraft = document.getElementById('release_directly_flag').value === '0';
       const btnId = isDraft ? 'draftSubmitBtn' : 'finalReleaseBtn';
       const btn = document.getElementById(btnId);
-      
-      if (btn) {
-          btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
-          btn.style.pointerEvents = 'none';
-          btn.style.opacity = '0.8';
-      }
-      return true; 
+      if (btn) { btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`; btn.style.pointerEvents = 'none'; btn.style.opacity = '0.8'; }
+      return true;
   }
 
   // ----- Dynamic Minute Number AJAX -----
   $('#pcs_hed_id').on('change', function() {
-      const headId = $(this).val();
-      const $input = $('#pcs_minute');
-      const $hint = $('#minute-hint');
+      const headId = $(this).val(); const $input = $('#pcs_minute'); const $hint = $('#minute-hint');
       if(headId) {
           $hint.html('<i class="fas fa-spinner fa-spin"></i> Fetching next available minute...');
-          $.ajax({
-              url: '/get-next-minute/' + headId,
-              type: "GET",
-              success: function(data) {
-                  $input.val(data.next_minute);
-                  $hint.html(`Last minute: <strong style="color:var(--rd-text1)">${data.last_minute}</strong> &nbsp;|&nbsp; Suggested: <strong style="color:var(--rd-success)">${data.next_minute}</strong>`);
-                  fireToast(`Auto-filled minute: ${data.next_minute}`, 'success');
-              },
-              error: function() { $hint.html('<span style="color:#ef4444">Could not auto-fetch minute number. Please enter manually.</span>'); }
+          $.ajax({ url: '/get-next-minute/' + headId, type: "GET",
+              success: function(data) { $input.val(data.next_minute); $hint.html(`Last minute: <strong style="color:var(--rd-text1)">${data.last_minute}</strong> &nbsp;|&nbsp; Suggested: <strong style="color:var(--rd-success)">${data.next_minute}</strong>`); fireToast(`Auto-filled minute: ${data.next_minute}`, 'success'); },
+              error: function() { $hint.html('<span style="color:#ef4444">Could not auto-fetch minute number.</span>'); }
           });
       }
   });
 
-  // ----- Hardware Shift Logic -----
+  // ----- Hardware Shift -----
   $('#add_hardware_chk').on('change', function() {
-      if(this.checked) {
-          // Show custom elegant popup instead of standard alert
-          document.getElementById('sincCustomAlert').classList.add('show');
-          
-          $('#hardware_sub_options').slideDown(200);
-          
-          // Visually modify the title layout to show it's now Services
-          $('.sinc-page-title').html('<span class="title-icon theme-icon"><i class="fas fa-layer-group"></i></span> Outsourced Services');
-          
-          // Submit as Service if possible, backend type injection via hidden field
-          if($('#actual_type_override').length === 0) {
-              $('#unifiedPurchaseForm').append('<input type="hidden" name="remarks_JSON[actual_type]" id="actual_type_override" value="services">');
-          } else {
-              $('#actual_type_override').val('services');
-          }
-      } else {
-          $('#hardware_sub_options').slideUp(200);
-          $('.sinc-page-title').html('<span class="title-icon theme-icon"><i class="fas fa-layer-group"></i></span> Consultancy Case');
-          $('#actual_type_override').val('consultancy');
-      }
+      if(this.checked) { document.getElementById('sincCustomAlert').classList.add('show'); $('#hardware_sub_options').slideDown(200); if($('#actual_type_override').length===0) { $('#unifiedPurchaseForm').append('<input type="hidden" name="remarks_JSON[actual_type]" id="actual_type_override" value="services">'); } else { $('#actual_type_override').val('services'); } }
+      else { $('#hardware_sub_options').slideUp(200); $('#actual_type_override').val('consultancy'); }
   });
 
-  // ----- Financial Calculation -----
-  function calculateTotal() {
-      let total = 0;
-      $('.amount-input').each(function() {
-          let val = parseFloat($(this).val()) || 0;
-          total += val;
+  // =====================================================
+  //  ITEMS + QUOTATION GRID MANAGEMENT
+  // =====================================================
+  let itemCounter = 1; // already have index 0
+  let firms = []; // { id, name }
+
+  function getItems() {
+      const rows = document.querySelectorAll('#items-list .dyn-row');
+      const items = [];
+      rows.forEach((r, i) => {
+          const desc = r.querySelector('.item-desc')?.value || '';
+          const qty = r.querySelector('.item-qty')?.value || '1';
+          items.push({ idx: r.getAttribute('data-idx'), desc, qty, serial: i+1 });
       });
-      $('#live-total-display').text('PKR ' + total.toLocaleString());
+      return items;
   }
 
-  // ----- Dynamic List Row Management -----
-  function updateRmButtons(listId) {
-      const list = document.getElementById(listId);
-      if(!list) return;
+  function addItemRow() {
+      const list = document.getElementById('items-list');
       const rows = list.querySelectorAll('.dyn-row');
-      rows.forEach((r, idx) => {
-          const btn = r.querySelector('.btn-rm-row');
-          if(rows.length === 1) {
-              btn.style.visibility = 'hidden';
-          } else {
-              btn.style.visibility = 'visible';
-              btn.onclick = function() {
-                  r.style.opacity = '0';
-                  setTimeout(() => { 
-                    r.remove(); 
-                    updateRmButtons(listId); 
-                    calculateTotal(); // Update total after removal
-                  }, 200);
-              };
-          }
-      });
-  }
+      const newIdx = itemCounter++;
+      const serial = rows.length + 1;
 
-  function addDynRow(listId, labels, keys, typeOverride='text') {
-      const list = document.getElementById(listId);
-      if(!list) return;
-      const rows = Array.from(list.querySelectorAll('.dyn-row'));
-      const newIdx = rows.length > 0 ? Math.max(...rows.map(r => parseInt(r.getAttribute('data-idx')))) + 1 : 0;
-      
       const row = document.createElement('div');
       row.className = 'dyn-row';
       row.setAttribute('data-idx', newIdx);
-      
+      row.style.gridTemplateColumns = '40px 1fr 80px 80px 32px';
+
       row.innerHTML = `
-          <div>
-            <input type="text" name="remarks_JSON[items][${newIdx}][${keys[0]}]" class="soft-input" placeholder="Description">
-          </div>
-          <div>
-            <input type="${typeOverride}" name="remarks_JSON[items][${newIdx}][${keys[1]}]" class="soft-input amount-input" placeholder="0" oninput="calculateTotal()">
-          </div>
-          <button type="button" class="btn-rm-row"><i class="fas fa-times"></i></button>
+          <div class="text-center" style="display:flex;align-items:center;justify-content:center;color:var(--rd-text3);font-size:11px;font-weight:700;">${serial}</div>
+          <div><input type="text" name="items[${newIdx}][desc]" class="soft-input item-desc" placeholder="Item description" required></div>
+          <div><input type="number" name="items[${newIdx}][qty]" class="soft-input item-qty" placeholder="Qty" value="1" min="1" required></div>
+          <div><input type="text" name="items[${newIdx}][unit]" class="soft-input" placeholder="Unit" value="num"></div>
+          <button type="button" class="btn-rm-row" onclick="removeItemRow(this)"><i class="fas fa-times"></i></button>
       `;
       list.appendChild(row);
-      updateRmButtons(listId);
-      
-      // Auto focus first input
-      row.querySelector('input').focus();
+      row.querySelector('.item-desc').focus();
+      updateItemSerials();
+      rebuildQuotationBody();
   }
-  
+
+  function removeItemRow(btn) {
+      const row = btn.closest('.dyn-row');
+      const list = document.getElementById('items-list');
+      if (list.querySelectorAll('.dyn-row').length <= 1) return;
+      row.style.opacity = '0';
+      setTimeout(() => { row.remove(); updateItemSerials(); rebuildQuotationBody(); }, 200);
+  }
+
+  function updateItemSerials() {
+      const rows = document.querySelectorAll('#items-list .dyn-row');
+      rows.forEach((r, i) => {
+          const numCell = r.querySelector('div:first-child');
+          if (numCell) numCell.textContent = i + 1;
+          // Update remove button visibility
+          const btn = r.querySelector('.btn-rm-row');
+          if (btn) btn.style.visibility = rows.length <= 1 ? 'hidden' : 'visible';
+      });
+  }
+
+  // ---- Firm / Quotation Grid ----
+  function addFirmColumn() {
+      const sel = document.getElementById('firmSelector');
+      const firmId = sel.value;
+      const firmName = sel.options[sel.selectedIndex]?.getAttribute('data-name');
+      if (!firmId || !firmName) { fireToast('Please select a firm first', 'error'); return; }
+      if (firms.find(f => f.id == firmId)) { fireToast('This firm is already added', 'error'); return; }
+      firms.push({ id: firmId, name: firmName });
+      sel.value = '';
+      rebuildQuotationGrid();
+      fireToast(`${firmName} added`, 'success');
+  }
+
+  function removeFirm(firmId) {
+      firms = firms.filter(f => f.id != firmId);
+      rebuildQuotationGrid();
+  }
+
+  function rebuildQuotationGrid() {
+      // Rebuild header
+      const headerRow = document.querySelector('#quotationTable thead tr');
+      // Remove old firm columns (keep first 3: S.No, Item, Qty)
+      while (headerRow.children.length > 3) headerRow.removeChild(headerRow.lastChild);
+      firms.forEach(f => {
+          const th = document.createElement('th');
+          th.style.cssText = 'padding:6px 8px; color:var(--rd-accent); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; text-align:center; min-width:120px; white-space:nowrap;';
+          th.innerHTML = `${f.name} <button type="button" onclick="removeFirm('${f.id}')" style="background:none;border:none;color:var(--rd-danger);font-size:10px;cursor:pointer;margin-left:4px;"><i class="fas fa-times-circle"></i></button>`;
+          headerRow.appendChild(th);
+      });
+      // Rebuild body
+      rebuildQuotationBody();
+      // Rebuild footer
+      const footerRow = document.querySelector('#quotationTable tfoot tr');
+      while (footerRow.children.length > 1) footerRow.removeChild(footerRow.lastChild);
+      firms.forEach(f => {
+          const td = document.createElement('td');
+          td.style.cssText = 'padding:8px 10px; text-align:center; font-family:"Rajdhani",sans-serif; font-size:14px; font-weight:800; color:var(--rd-info);';
+          td.id = `firm-total-${f.id}`;
+          td.textContent = '0';
+          footerRow.appendChild(td);
+      });
+      calculateQuotationTotals();
+  }
+
+  function rebuildQuotationBody() {
+      const body = document.getElementById('quotationBody');
+      body.innerHTML = '';
+      const items = getItems();
+      items.forEach((item, i) => {
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid var(--rd-border)';
+          let html = `<td style="padding:6px 10px; color:var(--rd-text3); font-size:11px; text-align:center;">${i+1}</td>`;
+          html += `<td style="padding:6px 10px; color:var(--rd-text1); font-size:11px;">${item.desc || '<span class="text-muted">—</span>'}</td>`;
+          html += `<td style="padding:6px 10px; color:var(--rd-warning); font-size:11px; text-align:center; font-weight:600;">${item.qty}</td>`;
+          firms.forEach(f => {
+              html += `<td style="padding:4px 6px; text-align:center;">
+                  <input type="number" name="quotations[${f.id}][${item.idx}]" class="soft-input firm-price-input" data-firm="${f.id}" 
+                         style="width:100%; text-align:center; font-size:11px; padding:3px 6px; height:28px;" placeholder="0" min="0" oninput="calculateQuotationTotals()">
+              </td>`;
+          });
+          tr.innerHTML = html;
+          body.appendChild(tr);
+      });
+      calculateQuotationTotals();
+  }
+
+  function calculateQuotationTotals() {
+      let lowestTotal = Infinity;
+      firms.forEach(f => {
+          let total = 0;
+          document.querySelectorAll(`input[data-firm="${f.id}"]`).forEach(inp => {
+              total += parseFloat(inp.value) || 0;
+          });
+          const el = document.getElementById(`firm-total-${f.id}`);
+          if (el) el.textContent = total.toLocaleString();
+          if (total > 0 && total < lowestTotal) lowestTotal = total;
+      });
+      // Update the financial summary
+      const displayTotal = lowestTotal === Infinity ? 0 : lowestTotal;
+      const liveDisplay = document.getElementById('live-total-display');
+      if (liveDisplay) liveDisplay.textContent = 'PKR ' + displayTotal.toLocaleString();
+  }
+
+  // Sync quotation grid when item desc/qty changes
+  document.addEventListener('input', function(e) {
+      if (e.target.classList.contains('item-desc') || e.target.classList.contains('item-qty')) {
+          rebuildQuotationBody();
+      }
+  });
+
+  // ----- Financial Calculation (fallback for non-quotation) -----
+  function calculateTotal() {
+      let total = 0;
+      $('.amount-input').each(function() { total += parseFloat($(this).val()) || 0; });
+      $('#live-total-display').text('PKR ' + total.toLocaleString());
+  }
+
+  // ----- Legacy Dynamic List (for milestone-based forms) -----
+  function updateRmButtons(listId) {
+      const list = document.getElementById(listId); if(!list) return;
+      const rows = list.querySelectorAll('.dyn-row');
+      rows.forEach((r, idx) => { const btn = r.querySelector('.btn-rm-row');
+          if(rows.length === 1) { btn.style.visibility = 'hidden'; }
+          else { btn.style.visibility = 'visible'; btn.onclick = function() { r.style.opacity='0'; setTimeout(()=>{ r.remove(); updateRmButtons(listId); calculateTotal(); }, 200); }; }
+      });
+  }
+  function addDynRow(listId, labels, keys, typeOverride='text') {
+      const list = document.getElementById(listId); if(!list) return;
+      const rows = Array.from(list.querySelectorAll('.dyn-row'));
+      const newIdx = rows.length > 0 ? Math.max(...rows.map(r => parseInt(r.getAttribute('data-idx')))) + 1 : 0;
+      const row = document.createElement('div'); row.className = 'dyn-row'; row.setAttribute('data-idx', newIdx);
+      row.innerHTML = `<div><input type="text" name="remarks_JSON[items][${newIdx}][${keys[0]}]" class="soft-input" placeholder="Description"></div>
+          <div><input type="${typeOverride}" name="remarks_JSON[items][${newIdx}][${keys[1]}]" class="soft-input amount-input" placeholder="0" oninput="calculateTotal()"></div>
+          <button type="button" class="btn-rm-row"><i class="fas fa-times"></i></button>`;
+      list.appendChild(row); updateRmButtons(listId); row.querySelector('input').focus();
+  }
+
   // Init
   document.addEventListener('DOMContentLoaded', () => {
-    updateRmButtons('dyn-list-milestone');
-    updateRmButtons('dyn-list-misc');
+      updateRmButtons('dyn-list-milestone');
+      updateRmButtons('dyn-list-misc');
+      updateItemSerials();
   });
 </script>
 

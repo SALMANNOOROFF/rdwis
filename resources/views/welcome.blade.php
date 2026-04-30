@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>RDWIS</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- PWA Setup -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#4f8cff">
+    <link rel="apple-touch-icon" href="{{ asset('images/icons/icon-192.png') }}">
+
+    <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
     
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="{{ asset('plugins/ionicons/ionicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/jqvmap/jqvmap.min.css') }}">
@@ -19,7 +24,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('plugins/sweetalert2/sweetalert2.all.min.js') }}"></script>
 
     <style>
         /* Global Responsiveness & Sidebar Toggle Fix */
@@ -91,6 +96,17 @@
       <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+        {{-- Custom Back & Forward Buttons for PWA Navigation --}}
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0)" onclick="window.history.back();" title="Go Back">
+            <i class="fas fa-chevron-left" style="font-size: 16px;"></i>
+          </a>
+        </li>
+        <li class="nav-item mr-2">
+          <a class="nav-link" href="javascript:void(0)" onclick="window.history.forward();" title="Go Forward">
+            <i class="fas fa-chevron-right" style="font-size: 16px;"></i>
+          </a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
           @if(Auth::check() && Auth::user()->isSORD())
@@ -346,7 +362,7 @@
                   <i class="nav-icon fas fa-folder-open"></i>
                   <p>Projects</p>
               </a>
-          </li>
+          </li> 
 
           <li class="nav-item">
               @php
@@ -491,5 +507,17 @@
         }
     })();
     </script>
+    
+    <!-- PWA Service Worker & Install Banner -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').catch(function(error) {
+                    // console.error("Service worker registration failed.");
+                });
+            });
+        }
+    </script>
+    @include('pwa.install-banner')
   </body>
 </html>

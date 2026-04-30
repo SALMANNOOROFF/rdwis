@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
             Route::prefix('procurement')->name('procurement.')->group(function () {
                 Route::get('/dashboard', [\App\Http\Controllers\ProcurementDashboardController::class, 'index'])->name('purchase_cases.index');
                 Route::get('/case/{id}', [\App\Http\Controllers\ProcurementDashboardController::class, 'show'])->name('purchase_cases.show');
+                Route::post('/case/{id}/close', [\App\Http\Controllers\ProcurementDashboardController::class, 'closeCase'])->name('purchase_cases.close');
             });
 
             // Director Finance Specialized Routes
@@ -217,6 +218,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/purchase/update-core/{id}', [PurchaseController::class, 'updateCore'])
             ->name('purchase.update_core')
             ->middleware('approver');
+        Route::post('/purchase/select-firm/{id}', [PurchaseController::class, 'selectFirm'])
+            ->name('purchase.select_firm');
         Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
         Route::get('/training/create', [TrainingController::class, 'create'])->name('training.create');
         Route::get('/training/books', [TrainingController::class, 'indexBook'])->name('training.books.index');
@@ -241,6 +244,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
         Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
         Route::get('/purchase/case/{id}/minute-view', [PurchaseController::class, 'minuteView'])->name('purchase.minute_view');
+        Route::get('/purchase/case/{id}/case-detail', [PurchaseController::class, 'caseDetail'])->name('purchase.case_detail');
+        Route::get('/purchase/case/{id}/market-research', [PurchaseController::class, 'marketResearch'])->name('purchase.market_research');
+        Route::get('/purchase/case/{id}/cs-formal', [PurchaseController::class, 'csFormal'])->name('purchase.cs_formal');
         Route::get('/print-minute', function () { return view('purchase.new_case.print_minute'); })->name('purchase.new_case.print_minute');
         Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])
             ->name('quotes.store')

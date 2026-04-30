@@ -4,10 +4,8 @@
 <div class="content-wrapper pt-2">
 
   <title>Employee Profile - Jonathan Pierce</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=Material+Icons+Outlined&amp;display=swap"
-    rel="stylesheet" />
+  <script src="{{ asset('plugins/tailwind/tailwind-cdn.js') }}"></script>
+  <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -119,7 +117,7 @@
           <div class="relative mb-4 inline-block">
             <img alt="{{ $emp->emp_name ?? 'Employee' }}"
               class="w-20 h-20 rounded-full border-4 border-slate-50 dark:border-slate-900 shadow-md object-cover"
-              src="{{ $emp->emp_photodest ? asset($emp->emp_photodest) : 'https://ui-avatars.com/api/?name='.urlencode($emp->emp_name ?? 'Employee').'&background=2563eb&color=ffffff' }}" />
+              src="{{ $emp->emp_photodest ? asset($emp->emp_photodest) : asset('dist/img/avatar.png') }}" />
           </div>
           <h2 class="text-lg font-bold text-white dark:text-white leading-tight">{{ $emp->emp_name ?? $id }}</h2>
           <p class="text-sm text-white dark:text-white mt-1">{{ $emp->emp_title ?? ($emp->emp_rank ?? '') }}</p>

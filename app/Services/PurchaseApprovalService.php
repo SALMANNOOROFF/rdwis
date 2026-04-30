@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class PurchaseApprovalService
 {
-    const THRESHOLD_MD  = 200000;   // 2 Lakh
-    const THRESHOLD_DDG = 600000;   // 6 Lakh
+    const THRESHOLD_MD  = 399999;   // 4 Lakh
+    const THRESHOLD_DDG = 999999;   // 10 Lakh
 
     /**
      * Define the strict serial order of areas
@@ -21,8 +21,8 @@ class PurchaseApprovalService
         'prj'   => 'Proc',  // Division -> DProc
         'Proc'  => 'fin',   // DProc -> DFinance
         'fin'   => 'rdw',   // DFinance -> MD
-        'rdw'   => 'Hqs',   // MD -> DDG (if amt > 2L)
-        'Hqs'   => 'nrdi',  // DDG -> DG (if amt > 6L)
+        'rdw'   => 'Hqs',   // MD -> DDG (if amt >= 4L)
+        'Hqs'   => 'nrdi',  // DDG -> DG (if amt >= 10L)
     ];
 
     protected $displayNames = [
@@ -130,7 +130,7 @@ class PurchaseApprovalService
                 } else {
                     throw new \Exception("Unauthorized: This role cannot approve this amount.");
                 }
-            } elseif ($action === 'forward') {
+            } elseif ($action === 'forward' || $action === 'forward_negative') {
                 $statusMapping = $this->resolveForwarding($case, $userArea);
                 $toStatus = $statusMapping['status'];
                 $nextArea = $statusMapping['area'];
@@ -167,11 +167,12 @@ class PurchaseApprovalService
     {
         // 1. Get the message based on action
         $actionPast = match($action) {
-            'forward' => 'Forwarded',
+            'forward' => 'Recommended & Forwarded',
+            'forward_negative' => 'Not Recommended but Forwarded',
             'return'  => 'Returned',
             'approve' => 'Approved',
             'not_approved' => 'Not Recommended',
-            'reject'  => 'Not Recommended',
+            'reject'  => 'Rejected & Closed',
             'hold'    => 'Reverted',
             default   => $action
         };
@@ -214,8 +215,8 @@ class PurchaseApprovalService
     {
         $area = strtolower($area);
         if ($area === 'nrdi') return true; // DG can always approve
-        if ($area === 'hqs' && $amount <= self::THRESHOLD_DDG) return true; // DDG <= 6L
-        if ($area === 'rdw' && $amount <= self::THRESHOLD_MD) return true; // MD <= 2L
+        if ($area === 'hqs' && $amount <= self::THRESHOLD_DDG) return true; // DDG < 10L
+        if ($area === 'rdw' && $amount <= self::THRESHOLD_MD) return true; // MD < 4L
         
         return false;
     }
@@ -227,21 +228,30 @@ class PurchaseApprovalService
     {
         $currentArea = strtolower(trim($currentArea));
         
-        // Initiator Level (Division / Projects)
-        if ($currentArea === 'prj' || $currentArea === 'rdwprj' || $currentArea === 'division') {
-            return ['status' => 'Under Scrutiny', 'area' => 'Proc'];
+        // Initiator Level (Division / Projects / Initiation)
+        if (in_array($currentArea, ['prj', 'rdwprj', 'division', 'initiation'])) {
+            return ['status' => 'Under Scrutiny', 'area' => 'proc'];
         }
 
-        if ($currentArea === 'proc') return ['status' => 'With DFinance', 'area' => 'fin'];
-        if ($currentArea === 'fin') return ['status' => 'With MD', 'area' => 'rdw'];
+        // Forward from Procurement to Finance
+        if (str_contains($currentArea, 'proc')) {
+            return ['status' => 'With DFinance', 'area' => 'fin'];
+        }
+
+        // Forward from Finance to MD
+        if (str_contains($currentArea, 'fin')) {
+            return ['status' => 'With MD', 'area' => 'rdw'];
+        }
         
+        // Forward from MD to DDG (if >= 4L) or Approve
         if ($currentArea === 'rdw') {
             if ($case->pcs_price <= self::THRESHOLD_MD) {
-                 return ['status' => 'Approved', 'area' => null]; // Auto-transition? No, button usually hidden.
+                 return ['status' => 'Approved', 'area' => null];
             }
-            return ['status' => 'With DDG', 'area' => 'Hqs'];
+            return ['status' => 'With DDG', 'area' => 'hqs'];
         }
 
+        // Forward from DDG to DG (if >= 10L) or Approve
         if ($currentArea === 'hqs') {
             if ($case->pcs_price <= self::THRESHOLD_DDG) {
                  return ['status' => 'Approved', 'area' => null];

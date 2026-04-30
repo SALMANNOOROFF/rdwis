@@ -137,7 +137,7 @@
 
                 $pctUtilized  = $totalBudget > 0 ? ($utilizedBudget / $totalBudget) * 100 : 0;
                 $pctCase      = $totalBudget > 0 ? ($caseValue / $totalBudget) * 100 : 0;
-                $pctRemaining = max(0, ($balanceAfter / $totalBudget) * 100);
+                $pctRemaining = $totalBudget > 0 ? max(0, ($balanceAfter / $totalBudget) * 100) : 0;
                 $returnCount  = $purchase->decisions->where('pdec_action', 'return')->count();
 
                 $service = app(\App\Services\PurchaseApprovalService::class);
@@ -230,7 +230,7 @@
                                                 if($act == 'approve') { $color = 'success'; $actionVerb = 'Approved'; }
                                                 elseif($act == 'return') { $color = 'warning'; $actionVerb = 'Returned'; }
                                                 elseif($act == 'hold') { $color = 'warning'; $actionVerb = 'Reverted'; }
-                                                elseif($act == 'reject' || $act == 'not_approved') { $color = 'danger'; $actionVerb = 'Not Recommended'; }
+                                                elseif($act == 'forward_negative' || $act == 'reject' || $act == 'not_approved') { $color = 'warning'; $actionVerb = 'Not Recommended'; }
                                                 
                                                 $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
                                             @endphp
@@ -263,7 +263,7 @@
                                     if($act == 'approve') { $color = 'success'; $actionVerb = 'Approved'; }
                                     elseif($act == 'return') { $color = 'warning'; $actionVerb = 'Returned'; }
                                     elseif($act == 'hold') { $color = 'warning'; $actionVerb = 'Reverted'; }
-                                    elseif($act == 'reject' || $act == 'not_approved') { $color = 'danger'; $actionVerb = 'Not Recommended'; }
+                                    elseif($act == 'forward_negative' || $act == 'reject' || $act == 'not_approved') { $color = 'warning'; $actionVerb = 'Not Recommended'; }
                                     
                                     $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
                                     $hasRemarks = !empty(trim(strip_tags($decision->pdec_remarks)));
@@ -341,6 +341,7 @@
                                 <thead>
                                     <tr>
                                         <th class="pl-4">Firm Name</th>
+                                        <th class="text-center">Date</th>
                                         <th class="text-right">Price (PKR)</th>
                                         <th class="text-center">L-Ranking</th>
                                         <th class="text-right pr-4">Status</th>
@@ -350,12 +351,13 @@
                                     @forelse($purchase->quotes->sortBy('qte_price') as $q)
                                     <tr>
                                         <td class="pl-4 font-weight-bold text-white">{{ $q->firm->frm_name ?? $q->qte_firmname }}</td>
+                                        <td class="text-center text-muted" style="font-size: 10px;">{{ \Carbon\Carbon::parse($q->qte_date ?? $purchase->pcs_date)->format('d M y') }}</td>
                                         <td class="text-right font-weight-bold text-primary">Rs. {{ number_format($q->qte_price) }}</td>
                                         <td class="text-center"><span class="badge {{ $loop->first ? 'badge-success' : 'badge-secondary' }} px-3">L{{ $loop->iteration }}</span></td>
                                         <td class="text-right pr-4">@if($loop->first)<span class="text-success rajdhani small font-weight-bold">WINNER (L1)</span>@else - @endif</td>
                                     </tr>
                                     @empty
-                                    <tr><td colspan="4" class="text-center py-4 text-muted small">No quotations added yet.</td></tr>
+                                    <tr><td colspan="5" class="text-center py-4 text-muted small">No quotations added yet.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -375,16 +377,14 @@
                                 <thead>
                                     <tr>
                                         <th class="pl-4">Description</th>
-                                        <th class="text-center">Qty</th>
-                                        <th class="text-right pr-4">Sub Total</th>
+                                        <th class="text-center pr-4">Qty</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($purchase->items as $item)
                                     <tr>
                                         <td class="pl-4">{{ $item->pci_desc }}</td>
-                                        <td class="text-center font-weight-bold">{{ $item->pci_qty }} {{ $item->pci_qtyunit }}</td>
-                                        <td class="text-right pr-4 font-weight-bold text-white">{{ number_format($item->pci_qty * $item->pci_price) }}</td>
+                                        <td class="text-center pr-4 font-weight-bold">{{ $item->pci_qty }} {{ $item->pci_qtyunit }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>

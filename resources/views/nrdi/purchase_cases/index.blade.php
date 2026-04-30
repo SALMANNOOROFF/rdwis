@@ -7,243 +7,250 @@
 .scrutiny-hub { font-family: 'Inter', sans-serif; background: #080b0f; min-height: 100vh; color: #cbd5e0; }
 .rajdhani { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
 
-/* Dashboard Header & Navigation */
-.hub-header { background: #0f161e; padding: 20px 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.div-pill { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 16px; color: #8a96a3; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-.div-pill.active { background: #111a24; border-color: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15); }
+/* Compact Header */
+.hub-header { background: #0f161e; padding: 12px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.hub-title { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+
+/* Filter Bar */
+.filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.div-pill { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 6px 14px; color: #8a96a3; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; position: relative; }
+.div-pill.active { background: #111a24; border-color: #3b82f6; color: #fff; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
 .div-pill:hover:not(.active) { background: rgba(255,255,255,0.06); }
-.div-badge { background: #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+.red-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; position: absolute; top: -3px; right: -3px; box-shadow: 0 0 8px rgba(239, 68, 68, 0.9); }
 
-/* Tabs Logic */
-.hub-tabs { border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
-.hub-tab-link { padding: 12px 24px; color: #64748b; font-weight: 600; font-size: 13px; text-decoration: none !important; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; background: transparent; border-top: none; border-left: none; border-right: none; }
-.hub-tab-link:hover { color: #fff; }
-.hub-tab-link.active { color: #3b82f6; border-bottom-color: #3b82f6; }
+/* Master Table Styling */
+.hub-master-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; table-layout: fixed; }
 
-/* Table Styling */
-.hub-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; }
-.hub-table th { font-family: 'Rajdhani', sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #4b5563; padding: 12px 16px; font-weight: 700; border: none !important; }
-.hub-row { background: #0d1218; transition: transform 0.2s, background 0.2s; }
-.hub-row:hover { background: #111a24; transform: scale(1.002); }
-.hub-row td { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.02) !important; border-bottom: 1px solid rgba(255,255,255,0.02) !important; vertical-align: middle; }
-.hub-row td:first-child { border-left: 1px solid rgba(255,255,255,0.02) !important; border-radius: 8px 0 0 8px; }
-.hub-row td:last-child { border-right: 1px solid rgba(255,255,255,0.02) !important; border-radius: 0 8px 8px 0; }
+/* Sticky Header */
+.sticky-header th { 
+    position: sticky; 
+    top: 0; 
+    z-index: 100; 
+    background: #0f161e; /* Match hub-header background */
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 11px; 
+    text-transform: uppercase; 
+    letter-spacing: 1.2px; 
+    color: #4b5563; 
+    padding: 12px 16px; 
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
 
-/* Type & Status Badges */
-.type-badge { width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: #fff; text-transform: uppercase; }
-.type-ps { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
-.type-pt { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
-.status-pill { background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid rgba(245, 158, 11, 0.2); display: inline-flex; align-items: center; gap: 4px; }
-.status-pill i { font-size: 10px; }
+/* Section Group Headings */
+.section-group-row { cursor: pointer; transition: background 0.2s; }
+.section-group-row:hover { background: rgba(255,255,255,0.02); }
+.section-group-cell { padding: 18px 16px 8px 16px !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
 
-.text-amount { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 600; color: #fff; }
-.text-ref { font-size: 10px; color: #4b5563; font-weight: 500; }
-.view-btn { background: #0d1218; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 6px 20px; border-radius: 6px; font-size: 11px; font-weight: 600; transition: all 0.2s; }
-.view-btn:hover { background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.3); }
+.section-title-wrap { display: flex; align-items: center; gap: 12px; }
+.section-title { 
+    font-family: 'Rajdhani', sans-serif; 
+    font-size: 16px; 
+    font-weight: 700; 
+    color: #fff; 
+    text-transform: uppercase; 
+    letter-spacing: 1px;
+}
+.section-count {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+.toggle-icon { font-size: 14px; color: #64748b; transition: transform 0.3s; }
+.collapsed .toggle-icon { transform: rotate(-90deg); }
 
-/* Animation */
-.fade-up { animation: fadeUp 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
-@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+/* Row Styling */
+.hub-row { background: #0d1218; transition: background 0.2s; }
+.hub-row:hover { background: #111a24; }
+.hub-row td { padding: 10px 16px; border: none !important; vertical-align: middle; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hub-row td:first-child { border-radius: 6px 0 0 6px; width: 50px; text-align: center; }
+.hub-row td:last-child { border-radius: 0 6px 6px 0; text-align: right; width: 120px; }
+
+/* Navigation Arrow Button */
+.nav-arrow { 
+    width: 32px; 
+    height: 32px; 
+    border-radius: 6px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: #3b82f6; 
+    background: rgba(59, 130, 246, 0.08); 
+    border: 1px solid rgba(59, 130, 246, 0.2); 
+    transition: all 0.2s;
+    text-decoration: none !important;
+}
+.nav-arrow:hover { background: #3b82f6; color: #fff; transform: scale(1.1); }
+
+.type-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; text-transform: uppercase; }
+.type-ps { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+.type-pt { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); }
+
+.status-pill { background: rgba(245, 158, 11, 0.08); color: #f59e0b; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid rgba(245, 158, 11, 0.15); display: inline-flex; align-items: center; gap: 4px; }
+
+.text-amount { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: #fff; }
+.text-ref { font-size: 11px; color: #4b5563; font-weight: 500; }
 </style>
 
 <div class="content-wrapper scrutiny-hub">
     {{-- Header Area with Division Filter --}}
     <div class="hub-header">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
+        <h1 class="hub-title">Procurement Cases</h1>
+        
+        <div class="filter-bar">
             <div class="div-pill active" data-div="all">
-                <i class="fas fa-th-large"></i> All Divisions
+                Show All
             </div>
             @foreach($unitNameMap as $id => $name)
-                @php $pendingInDiv = $purchases->where('pcs_unt_id', $id); @endphp
-                @if($pendingInDiv->count() > 0)
+                @php $pendingCount = $unitPendingMap[$id] ?? 0; @endphp
+                @if($pendingCount > 0)
                 <div class="div-pill" data-div="{{ $id }}">
-                    <i class="fas fa-building"></i> {{ $name }}
-                    <span class="div-badge">{{ $pendingInDiv->count() }}</span>
+                    {{ $name }}
+                    <span class="red-dot"></span>
                 </div>
                 @endif
             @endforeach
         </div>
     </div>
 
-    <div class="p-4 pt-1">
-        {{-- Main Hub Tabs --}}
-        <ul class="nav nav-tabs hub-tabs" role="tablist">
-            <li class="nav-item">
-                <a class="hub-tab-link active" id="pending-tab" data-toggle="tab" href="#pending" role="tab">
-                    <i class="fas fa-clock"></i> Pending Action ({{ $caseCount }})
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="hub-tab-link" id="action-tab" data-toggle="tab" href="#actionTaken" role="tab">
-                    <i class="fas fa-history"></i> Action Taken ({{ $processedCount }})
-                </a>
-            </li>
-        </ul>
+    <div class="px-4 pb-5 mt-2">
+        <table class="hub-master-table">
+            <thead class="sticky-header">
+                <tr>
+                    <th style="width: 50px;"></th>
+                    <th>Title / Description</th>
+                    <th style="width: 120px;">Date</th>
+                    <th style="width: 160px; text-align: right;">Amount</th>
+                    <th style="width: 160px; text-align: center;">Status</th>
+                    <th style="width: 100px; text-align: right;">Type</th>
+                </tr>
+            </thead>
 
-        <div class="tab-content">
-            {{-- Pending Cases Content --}}
-            <div class="tab-pane fade show active" id="pending" role="tabpanel">
-                <div class="table-responsive">
-                    <table class="hub-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">Type</th>
-                                <th>Title / Description</th>
-                                <th style="width: 150px;">Date</th>
-                                <th style="width: 180px; text-align: right;">Est. Amount</th>
-                                <th style="width: 160px; text-align: center;">Status</th>
-                                <th style="width: 100px; text-align: right;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($purchases as $idx => $p)
-                            @php 
-                                $isOld = \Carbon\Carbon::parse($p->pcs_date)->diffInDays() > 2;
-                                $statusIcon = match(strtolower($p->pcs_status)) {
-                                    'under scrutiny' => 'fa-binoculars',
-                                    'with md' => 'fa-user-tie',
-                                    'with dg' => 'fa-user-shield',
-                                    'with dfinance' => 'fa-file-invoice-dollar',
-                                    default => 'fa-hourglass-half'
-                                };
-                            @endphp
-                            <tr class="hub-row fade-up div-row-{{ $p->pcs_unt_id }}" style="animation-delay: {{ $idx * 0.05 }}s">
-                                <td>
-                                    <div class="type-badge type-ps shadow-sm">{{ strtoupper(substr($p->pcs_type ?? 'PS', 0, 2)) }}</div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        @if($isOld)
-                                            <span class="mr-2 pulse-red" title="Pending for > 48 hours"></span>
-                                        @endif
-                                        <div class="text-white font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->pcs_title }}</div>
-                                    </div>
-                                    <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
-                                </td>
-                                <td class="text-muted small font-weight-bold rajdhani" style="font-size: 12px;">
-                                    {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
-                                </td>
-                                <td class="text-right">
-                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->pcs_price) }}</div>
-                                </td>
-                                <td class="text-center">
-                                    <span class="status-pill rajdhani">
-                                        <i class="fas {{ $statusIcon }}"></i> {{ strtoupper($p->pcs_status) }}
-                                    </span>
-                                </td>
-                                <td class="text-right">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="view-btn rajdhani">VIEW</a>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5">
-                                    <div class="text-muted rajdhani" style="opacity: 0.3;">
-                                        <i class="fas fa-check-double fa-3x mb-3 d-block"></i>
-                                        NO PENDING CASES IN YOUR QUEUE
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{-- 1. PENDING ACTION SECTION --}}
+            <tbody id="group-pending">
+                <tr class="section-group-row" onclick="toggleGroup('pending')">
+                    <td colspan="6" class="section-group-cell">
+                        <div class="section-title-wrap">
+                            <i class="fas fa-chevron-down toggle-icon" id="toggle-pending"></i>
+                            <span class="section-title">Pending Action</span>
+                            <span class="section-count" id="count-pending">{{ $pending->count() }}</span>
+                        </div>
+                    </td>
+                </tr>
+                @include('nrdi.purchase_cases.partial_list', ['cases' => $pending, 'type' => 'pending'])
+            </tbody>
 
-            {{-- Action Taken Content --}}
-            <div class="tab-pane fade" id="actionTaken" role="tabpanel">
-                <div class="table-responsive">
-                    <table class="hub-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">Type</th>
-                                <th>Title / Description</th>
-                                <th style="width: 150px;">Date</th>
-                                <th style="width: 180px; text-align: right;">Action Result</th>
-                                <th style="width: 160px; text-align: center;">Trail Log</th>
-                                <th style="width: 100px; text-align: right;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($processed as $p)
-                            <tr class="hub-row fade-up div-row-{{ $p->pcs_unt_id }}">
-                                <td>
-                                    <div class="type-badge type-pt" style="opacity: 0.6;">{{ strtoupper(substr($p->pcs_type ?? 'PT', 0, 2)) }}</div>
-                                </td>
-                                <td>
-                                    <div class="text-muted font-weight-bold" style="font-size: 14px;">{{ $p->pcs_title }}</div>
-                                    <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
-                                </td>
-                                <td class="text-muted small font-weight-bold rajdhani" style="font-size: 11px;">
-                                    {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
-                                </td>
-                                <td class="text-right">
-                                    <div class="text-amount text-muted rajdhani" style="font-size: 14px;">Rs. {{ number_format($p->pcs_price) }}</div>
-                                </td>
-                                <td class="text-center">
-                                    <span class="status-pill" style="opacity: 0.5; border-color: rgba(255,255,255,0.05);">
-                                        <i class="fas fa-history"></i> {{ $p->pcs_status }}
-                                    </span>
-                                </td>
-                                <td class="text-right">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="view-btn rajdhani">LOG</a>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted rajdhani small italic opacity-50">Nothing here yet.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+            {{-- 2. OPEN SECTION --}}
+            <tbody id="group-open">
+                <tr class="section-group-row" onclick="toggleGroup('open')">
+                    <td colspan="6" class="section-group-cell">
+                        <div class="section-title-wrap">
+                            <i class="fas fa-chevron-down toggle-icon" id="toggle-open"></i>
+                            <span class="section-title">Open</span>
+                            <span class="section-count" id="count-open">{{ $open->count() }}</span>
+                        </div>
+                    </td>
+                </tr>
+                @include('nrdi.purchase_cases.partial_list', ['cases' => $open, 'type' => 'open'])
+            </tbody>
+
+            {{-- 3. CLOSE SECTION --}}
+            <tbody id="group-closed">
+                <tr class="section-group-row" onclick="toggleGroup('closed')">
+                    <td colspan="6" class="section-group-cell">
+                        <div class="section-title-wrap">
+                            <i class="fas fa-chevron-down toggle-icon" id="toggle-closed"></i>
+                            <span class="section-title">Close</span>
+                            <span class="section-count" id="count-closed">{{ $closed->count() }}</span>
+                        </div>
+                    </td>
+                </tr>
+                @include('nrdi.purchase_cases.partial_list', ['cases' => $closed, 'type' => 'closed'])
+            </tbody>
+        </table>
     </div>
 </div>
 
-<style>
-.pulse-red {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: #ef4444;
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-    animation: pulse-red 1.5s infinite;
-}
-@keyframes pulse-red {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-</style>
-
 <script>
+function toggleGroup(type) {
+    const group = document.getElementById('group-' + type);
+    const rows = group.querySelectorAll('.hub-row, .empty-row');
+    const toggle = document.getElementById('toggle-' + type);
+    
+    group.classList.toggle('collapsed');
+    
+    rows.forEach(row => {
+        if (group.classList.contains('collapsed')) {
+            row.style.setProperty('display', 'none', 'important');
+        } else {
+            // Respect the division filter if active
+            const activePill = document.querySelector('.div-pill.active');
+            const selectedDiv = activePill.getAttribute('data-div');
+            
+            if (selectedDiv === 'all' || row.classList.contains('div-row-' + selectedDiv) || row.classList.contains('empty-row')) {
+                row.style.display = '';
+            }
+        }
+    });
+}
+
+function updateDynamicCounts() {
+    const groups = ['pending', 'open', 'closed'];
+    groups.forEach(type => {
+        const group = document.getElementById('group-' + type);
+        const countSpan = document.getElementById('count-' + type);
+        if (group && countSpan) {
+            // Count rows belonging to this group that are NOT explicitly hidden by div filter
+            // but we need to check if they are hidden by the group collapse too.
+            // Actually, dynamic count should reflect what WOULD be visible if group were expanded.
+            const totalVisibleInDiv = Array.from(group.querySelectorAll('.hub-row')).filter(r => {
+                const activePill = document.querySelector('.div-pill.active');
+                const selectedDiv = activePill.getAttribute('data-div');
+                return selectedDiv === 'all' || r.classList.contains('div-row-' + selectedDiv);
+            }).length;
+            
+            countSpan.textContent = totalVisibleInDiv;
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const pills = document.querySelectorAll('.div-pill');
     const rows = document.querySelectorAll('.hub-row');
 
     pills.forEach(pill => {
         pill.addEventListener('click', function() {
-            // Update UI
             pills.forEach(p => p.classList.remove('active'));
             this.classList.add('active');
-
             const selectedDiv = this.getAttribute('data-div');
+            
+            // Iterate all groups
+            ['pending', 'open', 'closed'].forEach(type => {
+                const group = document.getElementById('group-' + type);
+                const groupRows = group.querySelectorAll('.hub-row, .empty-row');
+                const isCollapsed = group.classList.contains('collapsed');
 
-            // Filter Rows
-            rows.forEach(row => {
-                if (selectedDiv === 'all') {
-                    row.style.display = '';
-                } else {
-                    if (row.classList.contains('div-row-' + selectedDiv)) {
-                        row.style.display = '';
+                groupRows.forEach(row => {
+                    if (selectedDiv === 'all') {
+                        if (!isCollapsed) row.style.display = '';
+                        else row.style.display = 'none';
                     } else {
-                        row.style.display = 'none';
+                        if (!isCollapsed && (row.classList.contains('div-row-' + selectedDiv) || row.classList.contains('empty-row'))) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
                     }
-                }
+                });
             });
+
+            // Update Counts Dynamically
+            updateDynamicCounts();
         });
     });
 });

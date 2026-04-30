@@ -26,7 +26,7 @@ class FinanceDashboardController extends Controller
         $targetStatus = 'With DFinance';
         $pageTitle = 'Director Finance | Budget Hub';
 
-        $purchases = Purchase::with(['project', 'latestDecision.account'])
+        $pending = Purchase::with(['project', 'latestDecision.account'])
             ->where('pcs_status', $targetStatus)
             ->orderBy('pcs_id', 'desc')
             ->get();
@@ -41,16 +41,19 @@ class FinanceDashboardController extends Controller
             ->limit(15)
             ->get();
 
+        $open = collect(); // Finance mostly deals with pending vs processed
+        $closed = collect();
+
         // Metrics for Finance
-        $totalVolume = $purchases->sum('pcs_price');
-        $caseCount = $purchases->count();
+        $totalVolume = $pending->sum('pcs_price');
+        $caseCount = $pending->count();
         $processedCount = $processed->count();
         
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
         $detailsRouteName = 'nrdi.finance.purchase_cases.show';
 
         return view('nrdi.purchase_cases.index', compact(
-            'purchases', 'processed', 'pageTitle', 'totalVolume', 'caseCount', 'processedCount', 'unitNameMap', 'detailsRouteName'
+            'pending', 'open', 'processed', 'closed', 'pageTitle', 'totalVolume', 'caseCount', 'processedCount', 'unitNameMap', 'detailsRouteName'
         ));
     }
 
