@@ -238,10 +238,10 @@
                                             @php
                                                 $act = $decision->pdec_action;
                                                 $color = '#ffffff'; // Recommended (White)
-                                                $actionVerb = 'Recommended';
-                                                if($act == 'approve') { $color = '#28a745'; $actionVerb = 'Approved'; } // Green
-                                                elseif($act == 'return') { $color = '#dc3545'; $actionVerb = 'Returned'; } // Red
-                                                elseif($act == 'hold') { $color = '#dc3545'; $actionVerb = 'Reverted'; } // Red
+                                                $actionVerb = 'Forwarded';
+                                                if($act == 'approve') { $color = '#28a745'; $actionVerb = 'Approved'; }
+                                                elseif($act == 'return') { $color = '#dc3545'; $actionVerb = 'Returned'; }
+                                                elseif($act == 'hold') { $color = '#dc3545'; $actionVerb = 'Reverted'; }
                                                 elseif($act == 'forward_negative' || $act == 'reject' || $act == 'not_approved') { $color = '#ffc107'; $actionVerb = 'Not Recommended'; } // Yellow
                                                 
                                                 $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
@@ -271,10 +271,10 @@
                                 @php
                                     $act = $decision->pdec_action;
                                     $color = '#ffffff'; // Recommended (White)
-                                    $actionVerb = 'Recommended';
-                                    if($act == 'approve') { $color = '#28a745'; $actionVerb = 'Approved'; } // Green
-                                    elseif($act == 'return') { $color = '#dc3545'; $actionVerb = 'Returned'; } // Red
-                                    elseif($act == 'hold') { $color = '#dc3545'; $actionVerb = 'Reverted'; } // Red
+                                    $actionVerb = 'Forwarded';
+                                    if($act == 'approve') { $color = '#28a745'; $actionVerb = 'Approved'; }
+                                    elseif($act == 'return') { $color = '#dc3545'; $actionVerb = 'Returned'; }
+                                    elseif($act == 'hold') { $color = '#dc3545'; $actionVerb = 'Reverted'; }
                                     elseif($act == 'forward_negative' || $act == 'reject' || $act == 'not_approved') { $color = '#ffc107'; $actionVerb = 'Not Recommended'; } // Yellow
                                     
                                     $senderName  = $decision->account->acc_name ?? 'Unknown';

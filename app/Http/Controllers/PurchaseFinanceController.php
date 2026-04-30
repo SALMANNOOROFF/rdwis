@@ -26,7 +26,7 @@ class PurchaseFinanceController extends Controller
         $targetStatus = 'With DFinance';
         $pageTitle = 'Director Finance | Budget Hub';
 
-        $purchases = Purchase::with(['unit', 'project', 'latestDecision.account'])
+        $pending = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->where('pcs_status', $targetStatus)
             ->orderBy('pcs_id', 'desc')
             ->get();
@@ -38,19 +38,23 @@ class PurchaseFinanceController extends Controller
             })
             ->where('pcs_status', '!=', $targetStatus) 
             ->orderBy('pcs_id', 'desc')
-            ->limit(15)
             ->get();
 
+        // Split processed into Open and Closed
+        $open = $processed->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+        $closed = $processed->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+
         // Metrics for Finance
-        $totalVolume = $purchases->sum('pcs_price');
-        $caseCount = $purchases->count();
-        $processedCount = $processed->count();
+        $totalVolume = $pending->sum('pcs_price');
+        $caseCount = $pending->count();
+        $openCount = $open->count();
+        $closedCount = $closed->count();
         
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
         $detailsRouteName = 'nrdi.purchase_cases_new.finance.show';
 
         return view('nrdi.purchase_cases_new.index', compact(
-            'purchases', 'processed', 'pageTitle', 'totalVolume', 'caseCount', 'processedCount', 'unitNameMap', 'detailsRouteName'
+            'pending', 'open', 'closed', 'pageTitle', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'unitNameMap', 'detailsRouteName'
         ));
     }
 

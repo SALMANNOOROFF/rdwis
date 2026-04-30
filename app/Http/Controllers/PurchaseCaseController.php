@@ -47,7 +47,7 @@ class PurchaseCaseController extends Controller
         $pageTitle = $titleMap[$area] ?? 'Purchase Scrutiny Hub';
 
         // 1. Pending Queue (Cases currently at this user's level)
-        $purchases = Purchase::with(['unit', 'project', 'latestDecision.account'])
+        $pending = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->whereIn('pcs_status', $targetStatuses)
             ->orderBy('pcs_id', 'desc')
             ->get();
@@ -59,21 +59,24 @@ class PurchaseCaseController extends Controller
             })
             ->whereNotIn('pcs_status', $targetStatuses) 
             ->orderBy('pcs_id', 'desc')
-            ->limit(15)
             ->get();
 
+        // Split processed into Open and Closed
+        $open = $processed->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+        $closed = $processed->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
-        $groupedPurchases = $purchases->groupBy('pcs_unt_id');
         $detailsRouteName = 'nrdi.purchase_cases_new.show';
 
         // Metrics
-        $totalVolume = $purchases->sum('pcs_price');
-        $caseCount = $purchases->count();
-        $processedCount = $processed->count();
+        $totalVolume = $pending->sum('pcs_price');
+        $caseCount = $pending->count();
+        $openCount = $open->count();
+        $closedCount = $closed->count();
 
         return view('nrdi.purchase_cases_new.index', compact(
-            'purchases', 'processed', 'unitNameMap', 'area', 'pageTitle', 
-            'groupedPurchases', 'detailsRouteName', 'totalVolume', 'caseCount', 'processedCount'
+            'pending', 'open', 'closed', 'unitNameMap', 'area', 'pageTitle', 
+            'detailsRouteName', 'totalVolume', 'caseCount', 'openCount', 'closedCount'
         ));
     }
 

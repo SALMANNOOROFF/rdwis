@@ -350,7 +350,7 @@
                                     @php
                                         $act = $decision->pdec_action;
                                         $color = 'primary';
-                                        $actionVerb = 'Recommended';
+                                        $actionVerb = 'Forwarded';
                                         if($act == 'approve') { $color = 'success'; $actionVerb = 'Approved'; }
                                         elseif($act == 'return') { $color = 'warning'; $actionVerb = 'Returned'; }
                                         elseif($act == 'hold') { $color = 'warning'; $actionVerb = 'Reverted'; }

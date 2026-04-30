@@ -52,15 +52,6 @@
         <input type="hidden" name="target_status" id="formTargetStatusInput" value="">
         <input type="hidden" name="remarks" id="remarksHiddenInput">
 
-        <div id="returnTargetWrapper" style="display:none;" class="mb-2">
-            <label class="text-warning small font-weight-bold mb-1 rajdhani">SELECT RETURN TARGET:</label>
-            <select id="targetStatusSelect" class="form-control form-control-sm bg-navy text-white border-secondary" style="font-size: 11px;">
-                @foreach($returnTargets as $status => $name)
-                    <option value="{{ $status }}">{{ $name }}</option>
-                @endforeach
-            </select>
-        </div>
-
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="text-muted small rajdhani"><i class="fas fa-pen-nib mr-1"></i> Remarks Box</span>
@@ -68,40 +59,53 @@
             <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks here..." style="background: transparent; color: #fff; font-family: 'Arial', sans-serif; font-size: 12pt; min-height: 80px; border: none; border-bottom: 2px solid rgba(255,255,255,0.2); border-radius: 0; padding: 5px 0; outline: none; box-shadow: none; resize: vertical;"></textarea>
         </div>
 
-        <div class="d-flex gap-2" style="width: 100%;">
+        <div class="d-flex" style="gap: 10px; width: 100%;">
             @if($canApprove)
                 {{-- FINAL AUTHORITY (MD < 2L, DDG < 6L, DG) --}}
-                <button type="button" onclick="handleAction('approve')" class="dg-btn-action dg-btn-success flex-grow-1" style="flex: 1;">
+                <button type="button" onclick="handleAction('approve')" class="dg-btn-action dg-btn-success flex-grow-1">
                     <i class="fas fa-check-double mr-1"></i> APPROVE CASE
                 </button>
-                <button type="button" onclick="handleAction('reject')" class="dg-btn-action dg-btn-danger flex-grow-1" style="flex: 1;">
-                    <i class="fas fa-ban mr-1"></i> REJECT (KILL)
-                </button>
-                <button type="button" onclick="handleAction('return')" class="dg-btn-action dg-btn-return flex-grow-1" id="btnReturn" disabled style="flex: 1;">
-                    <i class="fas fa-undo mr-1"></i> RETURN
-                </button>
+                <div class="btn-group flex-grow-1">
+                    <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-undo mr-1"></i> RETURN
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right bg-dark border-secondary shadow-lg mt-2" style="min-width: 200px; border-radius: 10px; padding: 8px 0;">
+                        <h6 class="dropdown-header text-warning rajdhani mb-1" style="font-size: 10px; letter-spacing: 1px;">SELECT RETURN TARGET:</h6>
+                        @foreach($returnTargets as $status => $name)
+                            <a class="dropdown-item text-white py-2 d-flex align-items-center" href="javascript:void(0)" onclick="confirmReturn('{{ $status }}', '{{ $name }}')">
+                                <i class="fas fa-chevron-left mr-2 text-muted" style="font-size: 10px;"></i>
+                                <span class="rajdhani" style="font-size: 13px; font-weight: 600;">{{ $name }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
             @else
                 {{-- INTERMEDIATE OR INITIATOR --}}
                 @if($isInitiator)
-                    <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success flex-grow-1" style="flex: 1;">
+                    <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success w-100">
                         <i class="fas fa-paper-plane mr-1"></i> RELEASE TO HQ
                     </button>
                 @else
-                    <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success flex-grow-1" style="flex: 1;">
+                    <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success flex-grow-1">
                         <div class="d-flex flex-column align-items-center">
-                            <span><i class="fas fa-thumbs-up mr-1"></i> RECOMMEND</span>
-                            @if($nextAuthName)<span style="font-size: 7px; opacity: 0.8; margin-top: -2px;">TO: {{ strtoupper($nextAuthName) }}</span>@endif
+                            <span><i class="fas fa-paper-plane mr-1"></i> FORWARD</span>
+                            @if($nextAuthName)<span style="font-size: 8px; opacity: 0.8; margin-top: 2px;">TO: {{ strtoupper($nextAuthName) }}</span>@endif
                         </div>
                     </button>
-                    <button type="button" onclick="handleAction('forward_negative')" class="dg-btn-action dg-btn-info flex-grow-1" style="flex: 1;">
-                        <div class="d-flex flex-column align-items-center">
-                            <span><i class="fas fa-times-circle mr-1"></i> NOT RECOMMEND</span>
-                            @if($nextAuthName)<span style="font-size: 7px; opacity: 0.8; margin-top: -2px;">FORWARD TO: {{ strtoupper($nextAuthName) }}</span>@endif
+                    <div class="btn-group flex-grow-1">
+                        <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-undo mr-1"></i> RETURN
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right bg-dark border-secondary shadow-lg mt-2" style="min-width: 200px; border-radius: 10px; padding: 8px 0;">
+                            <h6 class="dropdown-header text-warning rajdhani mb-1" style="font-size: 10px; letter-spacing: 1px;">SELECT RETURN TARGET:</h6>
+                            @foreach($returnTargets as $status => $name)
+                                <a class="dropdown-item text-white py-2 d-flex align-items-center" href="javascript:void(0)" onclick="confirmReturn('{{ $status }}', '{{ $name }}')">
+                                    <i class="fas fa-chevron-left mr-2 text-muted" style="font-size: 10px;"></i>
+                                    <span class="rajdhani" style="font-size: 13px; font-weight: 600;">{{ $name }}</span>
+                                </a>
+                            @endforeach
                         </div>
-                    </button>
-                    <button type="button" onclick="handleAction('return')" class="dg-btn-action dg-btn-return flex-grow-1" id="btnReturn" disabled style="flex: 1;">
-                        <i class="fas fa-undo mr-1"></i> RETURN
-                    </button>
+                    </div>
                 @endif
             @endif
         </div>
@@ -214,7 +218,32 @@
         }
     });
 
-    function handleAction(action) {
+    function confirmReturn(targetStatus, targetName) {
+        let remarks = inlineRemarks.value.trim();
+        let lines = remarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let cleanedLines = lines.map(line => line.replace(/^\d+\.\s*/, '').trim()).filter(l => l.length > 0);
+
+        if (cleanedLines.length === 0) {
+            Swal.fire({ title: 'Remarks Required!', text: 'Remarks are compulsory for returning a case.', icon: 'warning', background: '#001226', color: '#fff' });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Confirm Return?',
+            text: `Return this case to ${targetName}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Return',
+            background: '#001226',
+            color: '#fff'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                handleAction('return', targetStatus);
+            }
+        });
+    }
+
+    function handleAction(action, targetStatus = null) {
         let remarks = inlineRemarks.value.trim();
         
         // Split by newlines
@@ -233,13 +262,8 @@
         }
 
         if (cleanedLines.length === 0) {
-            if (action === 'approve' || action === 'forward') {
-                cleanedLines = ['Recommended and forwarded'];
-            } else if (action === 'forward_negative') {
-                cleanedLines = ['Not recommended but forward for further review'];
-            } else if (action === 'reject') {
-                cleanedLines = ['Case rejected/not recommended'];
-            }
+            if (action === 'approve') cleanedLines = ['Case approved'];
+            else if (action === 'forward') cleanedLines = ['Forwarded for review'];
         }
 
         let liItems = cleanedLines.map(line => `<li>${line}</li>`).join('');
@@ -249,31 +273,27 @@
         document.getElementById('formActionInput').value = action;
         
         if (action === 'return') {
-            document.getElementById('returnTargetWrapper').style.display = 'block';
-            if (!document.getElementById('formTargetStatusInput').value) {
-                Swal.fire({ title: 'Select Target', text: 'Please select where to return this case.', icon: 'info', background: '#001226', color: '#fff' });
-                return;
-            }
-            document.getElementById('formTargetStatusInput').value = document.getElementById('targetStatusSelect').value;
+            if (!targetStatus) return; // Should not happen with new flow
+            document.getElementById('formTargetStatusInput').value = targetStatus;
         }
 
-        Swal.fire({
-            title: 'Confirm Action?',
-            text: `You are about to submit your decision.`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Confirm',
-            background: '#001226',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('authorityActionForm').submit();
-            }
-        });
+        if (action === 'return') {
+            document.getElementById('authorityActionForm').submit();
+        } else {
+            Swal.fire({
+                title: 'Confirm Action?',
+                text: `You are about to submit your decision.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Confirm',
+                background: '#001226',
+                color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('authorityActionForm').submit();
+                }
+            });
+        }
     }
-
-    document.getElementById('targetStatusSelect')?.addEventListener('change', function() {
-        document.getElementById('formTargetStatusInput').value = this.value;
-    });
 </script>
 @endif
