@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\DocMprController; // <--- YE IMPORT ZAROORI HAI
+use App\Http\Controllers\DocMprController; 
 use App\Http\Controllers\MprController;
 use App\Http\Controllers\DivHrController;
 use App\Http\Controllers\PurItemsController;
@@ -196,6 +196,7 @@ Route::middleware('auth')->group(function () {
         // --- PURCHASE & REPORTS (Project area) ---
         Route::get('/pc-initiation', [\App\Http\Controllers\PurchaseInitiationController::class, 'index'])->name('purchase.initiation.index');
         Route::get('/pc-initiation/case/{id}', [\App\Http\Controllers\PurchaseInitiationController::class, 'show'])->name('purchase.initiation.show');
+        Route::post('/pc-initiation/case/{id}/save', [\App\Http\Controllers\PurchaseInitiationController::class, 'save'])->name('purchase.initiation.save');
         Route::get('/pc-initiation/statuses', [\App\Http\Controllers\PurchaseInitiationController::class, 'getStatuses'])->name('purchase.initiation.statuses');
         
         Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');

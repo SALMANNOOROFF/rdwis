@@ -83,7 +83,7 @@
                 {{-- INTERMEDIATE OR INITIATOR --}}
                 @if($isInitiator)
                     <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success w-100">
-                        <i class="fas fa-paper-plane mr-1"></i> RELEASE TO HQ
+                        <i class="fas fa-paper-plane mr-1"></i> RELEASE
                     </button>
                 @else
                     <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success flex-grow-1">

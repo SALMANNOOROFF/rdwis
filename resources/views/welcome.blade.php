@@ -278,11 +278,19 @@
           </li>
           --}}
 
-          <li class="nav-item">
-              <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
-                  <i class="fas fa-rocket nav-icon"></i>
-                  <p>PC INITIATION HUB</p>
+          <li class="nav-item {{ Request::routeIs('purchase.initiation.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-shopping-cart"></i>
+                  <p>PURCHASE CASES <i class="right fas fa-angle-left"></i></p>
               </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
+                          <i class="fas fa-list nav-icon"></i>
+                          <p>VIEW ALL</p>
+                      </a>
+                  </li>
+              </ul>
           </li>
 
           <li class="nav-item">

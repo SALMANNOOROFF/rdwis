@@ -69,7 +69,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card p-4">
-                        <div class="metric-label">Case Initiated</div>
+                        <div class="metric-label">Open</div>
                         <div class="metric-value" style="color: var(--rd-text-primary);">{{ $initiatedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Active</span></div>
                         <div class="mt-1 small text-muted font-weight-bold"><i class="fas fa-university mr-1"></i> Moving through HQ</div>
                     </div>
@@ -83,7 +83,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card p-4">
-                        <div class="metric-label">Completed</div>
+                        <div class="metric-label">Close</div>
                         <div class="metric-value" style="color: var(--rd-text-success);">{{ $completedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Finalized</span></div>
                         <div class="mt-1 small text-success font-weight-bold"><i class="fas fa-check-double mr-1"></i> Success / Rejected</div>
                     </div>
@@ -101,12 +101,12 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link hub-tab-btn" data-toggle="tab" href="#initiated">
-                                <i class="fas fa-stream mr-2"></i> CASE INITIATED ({{ $initiatedCases->count() }})
+                                <i class="fas fa-stream mr-2"></i> OPEN ({{ $initiatedCases->count() }})
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link hub-tab-btn" data-toggle="tab" href="#completed">
-                                <i class="fas fa-history mr-2"></i> COMPLETED ({{ $completedCases->count() }})
+                                <i class="fas fa-history mr-2"></i> CLOSE ({{ $completedCases->count() }})
                             </a>
                         </li>
                     </ul>
@@ -171,7 +171,7 @@
                             </div>
                         </div>
 
-                        {{-- TAB 2: INITIATED --}}
+                        {{-- TAB 2: OPEN --}}
                         <div class="tab-pane fade" id="initiated">
                             <div class="metric-card overflow-hidden">
                                 @if($initiatedCases->count() > 0)
@@ -228,7 +228,7 @@
                             </div>
                         </div>
 
-                        {{-- TAB 3: COMPLETED --}}
+                        {{-- TAB 3: CLOSE --}}
                         <div class="tab-pane fade" id="completed">
                             <div class="metric-card overflow-hidden">
                                 @if($completedCases->count() > 0)
