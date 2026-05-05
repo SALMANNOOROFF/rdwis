@@ -52,11 +52,22 @@ class PurchaseInitiationController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $unitId = $user->acc_unt_id;
+        $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc');
+        
+        $query = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account']);
+        
+        if ($isDProc) {
+            $lower = $user->acc_lowerm;
+            $upper = $user->acc_upperm;
+            $query->whereBetween('pcs_unt_id', [$lower, $upper]);
+        } else {
 
-        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
-            ->where('pcs_unt_id', $unitId)
-            ->findOrFail($id);
+            $query->where('pcs_unt_id', $user->acc_unt_id);
+        }
+
+
+        $purchase = $query->findOrFail($id);
+
 
         $service = app(\App\Services\PurchaseApprovalService::class);
         $currentAuthority = $service->getStatusDisplayName($purchase->pcs_status);
@@ -139,9 +150,20 @@ class PurchaseInitiationController extends Controller
         $request->validate($rules);
 
         $user = Auth::user();
-        $unitId = $user->acc_unt_id;
+        $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc');
 
-        $purchase = Purchase::where('pcs_unt_id', $unitId)->findOrFail($id);
+        
+        $query = Purchase::query();
+        if ($isDProc) {
+            $lower = $user->acc_lowerm;
+            $upper = $user->acc_upperm;
+            $query->whereBetween('pcs_unt_id', [$lower, $upper]);
+        } else {
+            $query->where('pcs_unt_id', $user->acc_unt_id);
+        }
+
+        $purchase = $query->findOrFail($id);
+
         $status = strtolower(trim((string) $purchase->pcs_status));
         if (!in_array($status, ['draft', 'returned'])) {
             return $this->respond($request, (int) $purchase->pcs_id, false, 'Case cannot be edited in current status.');
@@ -227,30 +249,42 @@ class PurchaseInitiationController extends Controller
             }
 
             if ($op === 'add_quote') {
+                $qteId = $request->input('qte_id');
                 $firmName = trim((string) $request->input('firm_name'));
                 $itemPrices = (array) $request->input('item_prices', []);
                 $items = DB::table('pur.purcaseitems')->where('pci_pcs_id', $purchase->pcs_id)->orderBy('pci_serial')->get(['pci_id', 'pci_serial', 'pci_desc', 'pci_qty', 'pci_qtyunit']);
-
-                $maxNum = (int) (DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->max('qte_num') ?? 0);
-                $nextNum = $maxNum + 1;
 
                 $total = 0.0;
                 foreach ($items as $it) {
                     $total += (float) ($itemPrices[$it->pci_id] ?? 0);
                 }
 
-                $firm = DB::table('cen.firms')->where('frm_name', $firmName)->first();
+                $firm = DB::table('frm.firmz')->where('frm_name', $firmName)->first();
                 $firmId = $firm ? $firm->frm_id : null;
 
-                $qteId = DB::table('pur.quotes')->insertGetId([
-                    'qte_pcs_id' => $purchase->pcs_id,
-                    'qte_frm_id' => $firmId,
-                    'qte_firmname' => $firmName,
-                    'qte_price' => $total,
-                    'qte_num' => $nextNum,
-                    'qte_date' => $purchase->pcs_date,
-                    'qte_techaccept' => true,
-                ], 'qte_id');
+                if ($qteId) {
+                    // Update existing quote
+                    DB::table('pur.quotes')->where('qte_id', $qteId)->where('qte_pcs_id', $purchase->pcs_id)->update([
+                        'qte_frm_id' => $firmId,
+                        'qte_firmname' => $firmName,
+                        'qte_price' => $total,
+                    ]);
+                    DB::table('pur.quoteitems')->where('qti_qte_id', $qteId)->delete();
+                } else {
+                    // Insert new quote
+                    $maxNum = (int) (DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->max('qte_num') ?? 0);
+                    $nextNum = $maxNum + 1;
+
+                    $qteId = DB::table('pur.quotes')->insertGetId([
+                        'qte_pcs_id' => $purchase->pcs_id,
+                        'qte_frm_id' => $firmId,
+                        'qte_firmname' => $firmName,
+                        'qte_price' => $total,
+                        'qte_num' => $nextNum,
+                        'qte_date' => $purchase->pcs_date,
+                        'qte_techaccept' => true,
+                    ], 'qte_id');
+                }
 
                 foreach ($items as $it) {
                     DB::table('pur.quoteitems')->insert([
@@ -266,7 +300,24 @@ class PurchaseInitiationController extends Controller
                 }
 
                 $this->recalcCasePricing($purchase->pcs_id);
+
+                // If DProc is adding the quote, record it in decisions to notify Division
+                if (str_contains(strtolower(trim(Auth::user()->acc_untarea)), 'proc')) {
+                    DB::table('pur.purdecisions')->updateOrInsert(
+                        ['pdec_pcs_id' => $purchase->pcs_id, 'pdec_action' => 'dproc_save'],
+                        [
+                            'pdec_acc_id' => Auth::id(),
+                            'pdec_role' => 'Director Procurement',
+                            'pdec_remarks' => 'DProc added/updated quotations in Draft stage.',
+                            'pdec_from_status' => $purchase->pcs_status,
+                            'pdec_to_status' => $purchase->pcs_status,
+                            'created_at' => now()
+                        ]
+                    );
+                }
+
                 return ['ok' => true, 'message' => 'Quotation saved.', 'pcsId' => (int) $purchase->pcs_id];
+
             }
 
             if ($op === 'delete_quote') {

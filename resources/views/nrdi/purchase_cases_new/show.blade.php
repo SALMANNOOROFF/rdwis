@@ -1,6 +1,45 @@
 @extends('welcome')
 
 @section('content')
+@php
+    $winnerQuote  = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->first() : null;
+    $sortedQ      = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->values() : collect([]);
+
+    $caseValue      = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
+    
+    // Image terminologies implementation
+    $finReceived    = (float)($head->prj_aprvcost ?? 0);
+    $finBalance     = (float)($head->hed_balance ?? $finReceived);
+    $finExpenditure = $finReceived - $finBalance;
+    $finCommitments = 0; // Commitments not directly available
+    $finInProcess   = $caseValue;
+    $finAvailable   = $finBalance - $finCommitments - $finInProcess;
+    
+    // For progress bar if still needed somewhere else
+    $totalBudget    = $finReceived;
+    $utilizedBudget = $finExpenditure;
+    $balanceAfter   = $finAvailable;
+    $pctUtilized  = $totalBudget > 0 ? ($utilizedBudget / $totalBudget) * 100 : 0;
+    $pctCase      = $totalBudget > 0 ? ($caseValue / $totalBudget) * 100 : 0;
+    $pctRemaining = $totalBudget > 0 ? max(0, ($balanceAfter / $totalBudget) * 100) : 0;
+    
+    $service = app(\App\Services\PurchaseApprovalService::class);
+    $currentStatusDisplay = $service->getStatusDisplayName($purchase->pcs_status);
+    
+    // Variable overrides for cross-role compatibility
+    $userArea = strtolower(trim((string)Auth::user()->acc_untarea));
+    $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division']);
+    $isDProc     = str_contains($userArea, 'proc');
+    $isDraft     = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
+
+    // DProc can also edit quotations in Draft stage
+    $canEdit        = $isInitiator && $isDraft;
+    $canAddQuotes   = ($isInitiator || $isDProc) && $isDraft;
+    $dprocSaved     = $purchase->decisions->where('pdec_action', 'dproc_save')->isNotEmpty();
+
+    $backRoute = $isInitiator ? route('purchase.initiation.index') : route('nrdi.purchase_cases.index');
+@endphp
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
@@ -132,51 +171,39 @@
 .pc-plus-btn:hover { background: rgba(255,255,255,0.06); color: #fff; border-color: var(--rd-accent); }
 .pc-edit-card { border: 1px dashed rgba(255,255,255,0.18); border-radius: 8px; padding: 10px; background: rgba(255,255,255,0.02); }
 
-/* Multi-column quote table styles */
-#pcMultiQuoteTable th, #pcMultiQuoteTable td { border: 1px solid #dee2e6 !important; font-size: 11px; vertical-align: middle; }
-#pcMultiQuoteTable thead th { border-bottom: 2px solid #dee2e6 !important; }
-#pcMultiQuoteBody tr:hover td { background-color: rgba(0,123,255,0.02); }
-.pc-price-input:focus { border-color: #007bff !important; box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.1) !important; background: #fff !important; }
-.pc-vendor-name-input:focus { border-color: #007bff !important; box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.1) !important; }
-#pcMultiQuoteFoot td { border-top: 2px solid #dee2e6 !important; background: #fdfdfd; }
+/* Multi-column quote table styles - DARK THEME */
+#pcMultiQuoteTable { border: 1px solid rgba(255,255,255,0.1) !important; background: #000c1a; table-layout: fixed; border-collapse: separate; border-spacing: 0; width: auto; }
+#pcMultiQuoteTable th, #pcMultiQuoteTable td { border: 1px solid rgba(255,255,255,0.08) !important; font-size: 12px; vertical-align: middle; padding: 6px 10px; color: #fff; overflow: hidden; text-overflow: ellipsis; }
+#pcMultiQuoteTable thead th { border-bottom: 2px solid var(--rd-accent) !important; background: #001226; color: #888; font-weight: 700; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 20; }
+#pcMultiQuoteBody tr:hover td { background-color: rgba(255,255,255,0.02); }
+.pc-price-input { border: 1px solid rgba(255,255,255,0.15) !important; height: 30px !important; font-size: 13px !important; font-weight: 700 !important; color: var(--rd-accent) !important; padding: 2px 8px !important; width: 100% !important; border-radius: 4px !important; text-align: center; background: rgba(0,0,0,0.2); transition: all 0.2s; }
+.pc-price-input:focus { border-color: var(--rd-accent) !important; box-shadow: 0 0 0 2px rgba(243,156,18,0.1) !important; background: rgba(0,0,0,0.4) !important; outline: none; }
+.pc-price-input:disabled { opacity: 0.3; cursor: not-allowed; background: rgba(0,0,0,0.1) !important; border-color: rgba(255,255,255,0.05) !important; }
+.pc-vendor-name-input { font-size: 12px !important; font-weight: 700 !important; height: 28px !important; border-color: rgba(255,255,255,0.15) !important; border-radius: 4px !important; background: rgba(0,0,0,0.2) !important; color: #fff !important; width: 100% !important; }
+.pc-col-winner { background: rgba(40, 167, 69, 0.15) !important; }
+#pcMultiQuoteTable tfoot td { position: sticky; bottom: 0; z-index: 20; background: #000c1a !important; border-top: 2px solid var(--rd-accent) !important; color: #fff !important; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
+.pc-item-sticky { position: sticky; left: 0; z-index: 25; background: #001226 !important; box-shadow: 3px 0 8px rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.12) !important; width: 350px !important; min-width: 350px !important; }
+#pcMultiQuoteTable tfoot .pc-item-sticky { background: #000c1a !important; color: var(--rd-accent) !important; border-right: 1px solid rgba(255,255,255,0.12) !important; text-align: right; }
+
+
+
+
+
+
+
+
 
 </style>
 
 <div class="content-wrapper dg-page zoom-out pc-edit-wrap" id="pcEditWrap" data-can-edit="{{ $canEdit ? 1 : 0 }}">
 
+
+
+
     <div class="p-3 pt-4">
         <div class="container-fluid">
             
-            @php
-                $winnerQuote  = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->first() : null;
-                $sortedQ      = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->values() : collect([]);
 
-                $caseValue      = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
-                
-                // Image terminologies implementation
-                $finReceived    = (float)($head->prj_aprvcost ?? 0);
-                $finBalance     = (float)($head->hed_balance ?? $finReceived);
-                $finExpenditure = $finReceived - $finBalance;
-                $finCommitments = 0; // Commitments not directly available
-                $finInProcess   = $caseValue;
-                $finAvailable   = $finBalance - $finCommitments - $finInProcess;
-                
-                // For progress bar if still needed somewhere else
-                $totalBudget    = $finReceived;
-                $utilizedBudget = $finExpenditure;
-                $balanceAfter   = $finAvailable;
-                $pctUtilized  = $totalBudget > 0 ? ($utilizedBudget / $totalBudget) * 100 : 0;
-                $pctCase      = $totalBudget > 0 ? ($caseValue / $totalBudget) * 100 : 0;
-                $pctRemaining = $totalBudget > 0 ? max(0, ($balanceAfter / $totalBudget) * 100) : 0;
-                
-                $service = app(\App\Services\PurchaseApprovalService::class);
-                $currentStatusDisplay = $service->getStatusDisplayName($purchase->pcs_status);
-                
-                // Variable overrides for cross-role compatibility
-                $isInitiator = in_array(strtolower(trim((string)Auth::user()->acc_untarea)), ['prj', 'rdwprj', 'division']);
-                $canEdit = $isInitiator && in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
-                $backRoute = $isInitiator ? route('purchase.initiation.index') : route('nrdi.purchase_cases_new.index');
-            @endphp
 
             <div class="dg-grid">
 
@@ -206,7 +233,14 @@
                     </div>
                     
                     <div class="p-3" style="flex:1; overflow-y:auto;">
-                        {{-- 0. Case Header Metadata (Moved inside) --}}
+                        @if($isInitiator && $dprocSaved && $isDraft)
+                            <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center" style="background: rgba(23,162,184,0.1); border: 1px solid rgba(23,162,184,0.2); border-radius: 8px;">
+                                <i class="fas fa-info-circle mr-2 text-info"></i>
+                                <div class="small font-weight-bold text-white">Director Procurement has added/updated quotations for this case.</div>
+                            </div>
+                        @endif
+
+                        {{-- Case Header Metadata --}}
                         <div class="mb-4 d-flex align-items-start gap-4">
                             <div style="flex: 1;">
                                 <div class="d-flex align-items-start mb-2" style="font-size: 13px;">
@@ -229,7 +263,7 @@
                                 </div>
                             </div>
                             
-                            {{-- Financial Overview (Image terminologies logic) --}}
+                            {{-- Financial Overview --}}
                             <div class="text-right d-flex flex-column align-items-end" style="border-left: 1px solid rgba(255,255,255,0.05); padding-left: 20px; font-size: 12px; color: var(--rd-text2);">
                                 <button class="btn btn-sm btn-info rajdhani font-weight-bold px-3 mb-3 shadow-sm" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 10px; border-radius: 6px; letter-spacing: 0.5px;">
                                     <i class="fas fa-chart-line mr-1"></i> VIEW FINANCIAL DETAILS
@@ -298,9 +332,10 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="dg-sec-label mb-0"><i class="fas fa-list-ol fa-xs"></i> Quotations</div>
                                 <div class="d-flex align-items-center" style="gap:8px;">
-                                    @if($canEdit)
-                                        <button type="button" class="pc-plus-btn edit-only" data-toggle="modal" data-target="#pcAddQuoteModal" title="Add Quotation"><i class="fas fa-plus"></i></button>
-                                    @endif
+                                @if($canAddQuotes)
+                                    <button type="button" class="pc-plus-btn" data-toggle="modal" data-target="#pcAddQuoteModal" title="Add Quotation"><i class="fas fa-plus"></i></button>
+                                @endif
+
                                     <button class="dg-cs-btn" data-toggle="modal" data-target="#detailedCSModal"><i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT</button>
                                 </div>
                             </div>
@@ -311,7 +346,8 @@
                                             <th class="pl-3" style="width: 50px;">S.No</th>
                                             <th>Firm Name</th>
                                             <th class="text-right pr-3">Price (PKR)</th>
-                                            <th class="text-right pr-3 edit-only" style="width: 100px;">Action</th>
+                                            <th class="text-right pr-3" style="width: 100px;">Action</th>
+
                                         </tr>
                                     </thead>
                                     <tbody id="pcQuotesBody">
@@ -387,7 +423,18 @@
                         <div class="p-3" id="conversational-comments-box" style="max-height: 600px; overflow-y: auto;">
                             
                             {{-- Decision Panel (Integrated as a Minute Entry) --}}
-                            @include('approvals_new._action_box')
+                            @if($isDProc && $isDraft)
+                                <div class="mb-4 p-4 text-center rounded border border-warning" style="background: rgba(255,193,7,0.05);">
+                                    <div class="mb-2"><i class="fas fa-users-cog fa-2x text-warning opacity-75"></i></div>
+                                    <h6 class="rajdhani font-weight-bold text-white mb-2">COLLABORATION MODE</h6>
+                                    <p class="small text-muted mb-3" style="line-height: 1.4;">You are collaborating on this <strong>Draft</strong> case. Use the quotation modal to add or update prices. The Division will release it once finalized.</p>
+                                    <button type="button" class="btn btn-outline-warning btn-sm font-weight-bold px-4" data-toggle="modal" data-target="#pcAddQuoteModal">
+                                        <i class="fas fa-plus-circle mr-1"></i> MANAGE QUOTATIONS
+                                    </button>
+                                </div>
+                            @else
+                                @include('approvals_new._action_box')
+                            @endif
 
                             <div>
                                 @forelse($purchase->decisions->sortByDesc('created_at') as $decision)
@@ -399,6 +446,8 @@
                                         elseif($act == 'return') { $color = 'warning'; $actionVerb = 'Returned'; }
                                         elseif($act == 'hold') { $color = 'warning'; $actionVerb = 'Reverted'; }
                                         elseif($act == 'reject' || $act == 'not_approved') { $color = 'danger'; $actionVerb = 'Not Recommended'; }
+                                        elseif($act == 'dproc_save') { $color = 'info'; $actionVerb = 'Updated Quotations'; }
+
                                         
                                         $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
                                         $hasRemarks = !empty(trim(strip_tags($decision->pdec_remarks)));
@@ -417,7 +466,11 @@
                                             </span>
                                         </div>
                                         <div class="mt-2" style="line-height: 1.5; font-size:12px; color: var(--rd-text1); padding-left: 5px;">
-                                            @if($hasRemarks)
+                                            @if($decision->pdec_action == 'dproc_save')
+                                                <div class="text-info font-weight-bold" style="font-size: 11px;">
+                                                    <i class="fas fa-check-circle mr-1"></i> DProc updated quotations for this case.
+                                                </div>
+                                            @elseif($hasRemarks)
                                                 {!! $decision->pdec_remarks !!}
                                             @else
                                                 <div class="font-italic text-muted" style="font-size: 11px; opacity: 0.7;">
@@ -425,6 +478,7 @@
                                                 </div>
                                             @endif
                                         </div>
+
                                     </div>
                                 @empty
                                     <div class="text-center text-muted small py-3">No remarks yet.</div>
@@ -440,73 +494,82 @@
         </div>
     </div>
 
-@if($canEdit)
+@if($canAddQuotes)
+
 <div class="modal fade" id="pcAddQuoteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 98%;">
-        <div class="modal-content" style="background: #ffffff; border: none; border-radius: 8px; overflow: hidden; color: #333;">
-            <div class="modal-header py-2 px-3 align-items-center" style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+        <div class="modal-content" style="background: #000c1a; border: 1px solid var(--rd-accent); border-radius: 8px; overflow: hidden; color: #fff; display: flex; flex-direction: column; height: 85vh;">
+            
+            {{-- HEADER --}}
+            <div class="modal-header py-2 px-3 align-items-center flex-shrink-0" style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <div class="d-flex align-items-center flex-grow-1">
-                    <i class="fas fa-file-invoice-dollar mr-2 text-primary" style="font-size: 18px;"></i>
+                    <i class="fas fa-file-invoice-dollar mr-2 text-accent" style="font-size: 18px;"></i>
                     <div>
-                        <h6 class="modal-title font-weight-bold mb-0" style="color: #444; font-size: 14px;">Add Quotations</h6>
+                        <h6 class="modal-title font-weight-bold mb-0 rajdhani" style="color: #fff; font-size: 14px; letter-spacing: 1px;">Add Quotations</h6>
                         <div class="small text-muted" style="font-size: 10px;">Group: <span class="text-info">{{ $purchase->pcs_title }}</span> | ID: <span class="text-info">PC-{{ $purchase->pcs_id }}</span></div>
                     </div>
                 </div>
-                
                 <div class="d-flex align-items-center gap-3 mr-4">
                     <div class="d-flex align-items-center">
-                        <label class="mb-0 mr-2 small font-weight-bold">TAX TYPE:</label>
-                        <select id="pcGlobalTaxType" class="form-control form-control-sm" style="width: 80px; height: 26px; font-size: 11px;">
+                        <label class="mb-0 mr-2 small font-weight-bold text-muted">TAX TYPE:</label>
+                        <select id="pcGlobalTaxType" class="form-control form-control-sm" style="width: 80px; height: 26px; font-size: 11px; background: rgba(0,0,0,0.3); color: #fff; border-color: rgba(255,255,255,0.1);">
                             <option value="GST">GST</option>
-                            <option value="VAT">VAT</option>
-                            <option value="NONE">NONE</option>
+                            <option value="SST">SST</option>
                         </select>
                     </div>
                     <div class="d-flex align-items-center">
-                        <label class="mb-0 mr-2 small font-weight-bold">TAX %:</label>
-                        <input type="number" id="pcGlobalTaxPercent" class="form-control form-control-sm" value="18" style="width: 60px; height: 26px; font-size: 11px;">
+                        <label class="mb-0 mr-2 small font-weight-bold text-muted">TAX %:</label>
+                        <input type="number" id="pcGlobalTaxPercent" class="form-control form-control-sm" value="18" style="width: 60px; height: 26px; font-size: 11px; background: rgba(0,0,0,0.3); color: #fff; border-color: rgba(255,255,255,0.1);">
                     </div>
                 </div>
-
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-success btn-sm font-weight-bold px-3" id="pcSaveAllQuotesBtn" style="height: 30px; font-size: 12px;"><i class="fas fa-shopping-cart mr-1"></i> Place Order</button>
                     <button type="button" class="btn btn-primary btn-sm font-weight-bold px-3" id="pcAddVendorColBtn" style="height: 30px; font-size: 12px;"><i class="fas fa-user-plus mr-1"></i> Add Vendor</button>
-                    <button type="button" class="close ml-2" data-dismiss="modal">&times;</button>
+                    <button type="button" class="close ml-2 text-white" data-dismiss="modal">&times;</button>
                 </div>
+
             </div>
-            
-            <div class="modal-body p-0" style="background: #fff; height: 70vh; overflow-y: auto;">
-                <table class="table table-bordered mb-0" id="pcMultiQuoteTable" style="border-collapse: collapse;">
-                    <thead style="position: sticky; top: 0; background: #f8f9fa; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+
+            {{-- BODY: scrollable table area --}}
+            <div class="flex-grow-1" style="overflow: auto; min-height: 0;">
+                <table id="pcMultiQuoteTable">
+                    <thead id="pcMultiQuoteHead">
                         <tr>
-                            <th style="width: 280px; min-width: 280px;" class="bg-light">ITEM DESCRIPTION</th>
-                            <!-- Vendor Columns will be injected here -->
+                            <th style="width: 20%;" class="pc-item-sticky">ITEM DESCRIPTION</th>
+                            {{-- Vendor columns injected by JS --}}
                         </tr>
                     </thead>
                     <tbody id="pcMultiQuoteBody">
-                        <!-- Item rows will be injected here -->
+                        {{-- Item rows injected by JS --}}
                     </tbody>
-                    <tfoot id="pcMultiQuoteFoot" style="position: sticky; bottom: 0; background: #f8f9fa; z-index: 10; border-top: 2px solid #dee2e6;">
-                        <!-- Footer totals will be injected here -->
+                    <tfoot id="pcMultiQuoteFoot">
+                        {{-- Totals injected by JS --}}
                     </tfoot>
                 </table>
             </div>
 
-            <div class="modal-footer py-1 px-3 d-flex justify-content-between align-items-center" style="background: #f8f9fa; border-top: 1px solid #dee2e6;">
-                <div class="small text-muted" style="font-size: 10px;">
-                    <i class="fas fa-info-circle mr-1"></i> Data is saved as you click 'Place Order'.
+            {{-- FOOTER --}}
+            <div class="py-2 px-3 d-flex justify-content-between align-items-center flex-shrink-0" style="background: rgba(255,255,255,0.03); border-top: 1px solid rgba(255,255,255,0.1);">
+                <div class="small text-muted" style="font-size: 11px;"><i class="fas fa-info-circle mr-1"></i> Ensure all vendor names are entered before saving.</div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-light btn-sm font-weight-bold px-4" data-dismiss="modal" style="height: 32px; font-size: 12px; letter-spacing: 0.5px;">CLOSE</button>
+                    <button type="button" class="btn btn-success btn-sm font-weight-bold px-4" id="pcSaveAllQuotesBtn" style="height: 32px; font-size: 12px; letter-spacing: 0.5px;"><i class="fas fa-save mr-1"></i> SAVE QUOTATIONS</button>
                 </div>
-                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" style="height: 26px; font-size: 11px;">Close</button>
             </div>
+
         </div>
     </div>
 </div>
+@endif
+
 
 <datalist id="dbFirmsList">
     @foreach($firms as $f)
         <option value="{{ $f->frm_name }}"></option>
     @endforeach
 </datalist>
+
+@if($canEdit)
+
 
 <div class="modal fade" id="pcEditRemarksModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -854,6 +917,9 @@ document.addEventListener('DOMContentLoaded', function() {
     @endphp
 
     let state = @json($snapshot);
+    const isInitiator = @json($isInitiator);
+    const isDProc     = @json($isDProc);
+
 
     function setEditing(isEditing) {
         const toggleBtn = document.getElementById('pcEditToggleBtn');
@@ -917,9 +983,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td class="pl-3 ${td1}">${idx + 1}</td>
                     <td class="font-weight-bold ${td2}">${(q.firm_name ?? '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</td>
                     <td class="text-right pr-3 font-weight-bold ${td3}">Rs. ${fmt(q.qte_price)}</td>
-                    <td class="text-right pr-3 edit-only">
-                        <button type="button" class="btn btn-outline-danger btn-xs pc-quote-del-btn" data-qte-id="${q.qte_id}" title="Delete" style="padding: 2px 6px;"><i class="fas fa-trash-alt"></i></button>
+                    <td class="text-right pr-3">
+                        @if($canAddQuotes)
+                            <button type="button" class="btn btn-outline-danger btn-xs pc-quote-del-btn" data-qte-id="${q.qte_id}" title="Delete" style="padding: 2px 6px;"><i class="fas fa-trash-alt"></i></button>
+                        @endif
                     </td>
+
                 </tr>
             `;
         }).join('');
@@ -960,86 +1029,119 @@ document.addEventListener('DOMContentLoaded', function() {
     let modalVendors = [];
 
     function renderMultiQuoteModal() {
-        const table = document.getElementById('pcMultiQuoteTable');
-        const headRow = table.querySelector('thead tr');
-        const body = document.getElementById('pcMultiQuoteBody');
-        const foot = document.getElementById('pcMultiQuoteFoot');
-        if (!body || !headRow || !foot) return;
 
-        const items = [...(state.items || [])].sort((a, b) => (a.pci_serial ?? 0) - (b.pci_serial ?? 0));
-        const qi = state.quote_items || {};
+    const headRow = document.querySelector('#pcMultiQuoteHead tr');
+    const body = document.getElementById('pcMultiQuoteBody');
+    const foot = document.getElementById('pcMultiQuoteFoot');
+    if (!body || !headRow || !foot) return;
 
-        // Initialize modalVendors from state.quotes if empty
-        if (modalVendors.length === 0 && (state.quotes || []).length > 0) {
-            modalVendors = (state.quotes || []).map(q => ({
-                id: q.qte_id,
-                firm_name: q.firm_name,
-                prices: qi[String(q.qte_id)] || {}
-            }));
-        }
-        if (modalVendors.length === 0) {
-            modalVendors.push({ id: null, firm_name: '', prices: {} });
-        }
+    const items = [...(state.items || [])].sort((a, b) => (a.pci_serial ?? 0) - (b.pci_serial ?? 0));
+    const qi = state.quote_items || {};
 
-        // Render Head
-        headRow.innerHTML = `<th style="width: 280px; min-width: 280px;" class="bg-light">ITEM DESCRIPTION</th>` + 
-            modalVendors.map((v, idx) => `
-                <th class="text-center" style="min-width: 200px; position: relative;">
-                    <div class="d-flex align-items-center mb-2">
-                        <input type="text" list="dbFirmsList" class="form-control form-control-sm pc-vendor-name-input" 
-                               value="${v.firm_name}" placeholder="Select Vendor" data-idx="${idx}"
-                               style="font-size: 11px; font-weight: bold; border-color: #ced4da;">
-                        <button type="button" class="btn btn-link text-danger p-0 ml-2 pc-remove-vendor-btn" data-idx="${idx}">
-                            <i class="fas fa-trash-alt" style="font-size: 12px;"></i>
-                        </button>
-                    </div>
-                </th>
-            `).join('');
+    // Initialize modalVendors from state.quotes if empty
+    if (modalVendors.length === 0 && (state.quotes || []).length > 0) {
+        modalVendors = (state.quotes || []).map(q => ({
+            id: q.qte_id,
+            firm_name: q.firm_name,
+            prices: qi[String(q.qte_id)] || {}
+        }));
+    }
+    if (modalVendors.length === 0) {
+        modalVendors.push({ id: null, firm_name: '', prices: {} });
+    }
 
-        // Render Body
-        body.innerHTML = items.map((it) => `
-            <tr>
-                <td class="bg-light">
-                    <div class="font-weight-bold" style="font-size: 12px; color: #333;">${(it.pci_desc ?? '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</div>
-                    <div class="small text-muted">${fmt(it.pci_qty)} ${it.pci_qtyunit ?? ''}</div>
-                </td>
-                ${modalVendors.map((v, idx) => `
-                    <td class="p-1">
-                        <input type="number" class="form-control form-control-sm text-center pc-price-input" 
-                               value="${v.prices[it.pci_id] || ''}" placeholder="Enter Price"
-                               data-v-idx="${idx}" data-i-id="${it.pci_id}"
-                               style="border: 1px solid #dee2e6; height: 32px; font-size: 13px; font-weight: 600;">
-                    </td>
-                `).join('')}
-            </tr>
+    const V_COL_WIDTH_PCT = 80 / Math.max(1, modalVendors.length);
+
+    // ---- THEAD ----
+    headRow.innerHTML = `<th class="pc-item-sticky">ITEM DESCRIPTION</th>` +
+        modalVendors.map((v, idx) => `
+            <th style="width: 250px; min-width: 250px; text-align:center; padding:8px;">
+                <div class="d-flex align-items-center justify-content-center" style="gap:6px;">
+                    <input type="text" list="dbFirmsList"
+                           class="pc-vendor-name-input"
+                           value="${v.firm_name}"
+                           placeholder="Vendor Name"
+                           data-idx="${idx}">
+                    <button type="button" class="pc-remove-vendor-btn btn btn-link p-0" data-idx="${idx}" style="color:#dc3545; font-size:12px;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </th>
         `).join('');
 
-        // Render Foot
-        const taxPercent = parseFloat(document.getElementById('pcGlobalTaxPercent')?.value || 0);
-        
-        foot.innerHTML = `
-            <tr>
-                <td class="text-right pr-3 font-weight-bold bg-light" style="font-size: 12px; color: #666;">
-                    <div class="mb-1">Sub Total</div>
-                    <div class="mb-1">Tax Amount</div>
-                    <div style="font-size: 14px; color: #333;">TOTAL</div>
+
+
+
+    // ---- TBODY ----
+    body.innerHTML = items.map((it) => `
+        <tr>
+            <td class="pc-item-sticky">
+                <div style="font-size:12px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${(it.pci_desc ?? '').replaceAll('<','&lt;').replaceAll('>','&gt;')}</div>
+                <div style="font-size:11px; color:#888;">Quantity: ${fmt(it.pci_qty)}</div>
+            </td>
+            ${modalVendors.map((v, idx) => `
+                <td style="width: 250px; min-width: 250px; text-align:center; padding:6px;">
+                    <input type="number"
+                           class="pc-price-input"
+                           value="${v.prices[it.pci_id] || ''}"
+                           placeholder="0.00"
+                           data-v-idx="${idx}"
+                           data-i-id="${it.pci_id}"
+                           ${!v.firm_name.trim() ? 'disabled title="Enter vendor name first"' : ''}>
                 </td>
-                ${modalVendors.map((v, idx) => {
-                    let sub = 0;
-                    items.forEach(it => { sub += parseFloat(v.prices[it.pci_id] || 0); });
-                    let tax = sub * (taxPercent / 100);
-                    let total = sub + tax;
-                    return `
-                        <td class="text-center p-2" style="background: rgba(0,0,0,0.01);">
-                            <div class="small text-muted mb-1">Sub: ${fmt(sub)}</div>
-                            <div class="small text-muted mb-1">+${taxPercent}% tax included</div>
-                            <div class="font-weight-bold text-dark" style="font-size: 15px;">${fmt(total)}</div>
-                        </td>
-                    `;
-                }).join('')}
-            </tr>
-        `;
+            `).join('')}
+        </tr>
+    `).join('');
+
+
+
+    renderMultiQuoteTotals();
+}
+
+function renderMultiQuoteTotals() {
+    const foot = document.getElementById('pcMultiQuoteFoot');
+    if (!foot) return;
+
+    const items = state.items || [];
+    const taxPercent = parseFloat(document.getElementById('pcGlobalTaxPercent')?.value || 0);
+
+    const columnTotals = modalVendors.map((v) => {
+        let sub = 0;
+        items.forEach(it => { sub += parseFloat(v.prices[it.pci_id] || 0); });
+        return sub;
+    });
+    const minTotal = Math.min(...columnTotals.filter(t => t > 0));
+
+    foot.innerHTML = `
+        <tr>
+            <td class="pc-item-sticky" style="text-align:right;">
+                <div style="font-size:10px; color:rgba(255,255,255,0.5);">SUB TOTAL</div>
+                <div style="font-size:10px; color:rgba(255,255,255,0.5);">TAX (${taxPercent}%)</div>
+                <div style="font-size:13px; color:var(--rd-accent); font-weight:800;">TOTAL (PKR)</div>
+            </td>
+            ${modalVendors.map((v, idx) => {
+                const sub = columnTotals[idx];
+                const tax = sub * (taxPercent / 100);
+                const total = sub + tax;
+                const isWinner = sub > 0 && sub === minTotal;
+                return `
+                    <td style="width: 250px; min-width: 250px; text-align:center; padding:8px; ${isWinner ? 'background:rgba(40,167,69,0.15) !important;' : ''}">
+                        <div style="font-size:11px; color:rgba(255,255,255,0.7);">${fmt(sub)}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.5);">${fmt(tax)}</div>
+                        <div style="font-size:15px; font-weight:800; color:${isWinner ? '#28a745' : '#fff'};">
+                            ${fmt(total)}${isWinner ? ' <i class="fas fa-trophy ml-1" style="font-size:11px;"></i>' : ''}
+                        </div>
+                    </td>
+                `;
+            }).join('')}
+        </tr>
+    `;
+
+
+
     }
+
+
 
     function renderTitle() {
         const view = document.getElementById('pcTitleView');
@@ -1162,9 +1264,12 @@ document.addEventListener('DOMContentLoaded', function() {
         renderQuotes();
         renderRemarks();
         renderFiles();
-        renderQuoteModalItems();
-        renderExistingQuotesModal();
+        // Updated to use the new multi-quote rendering function if needed
+        if (typeof renderMultiQuoteModal === 'function') {
+            renderMultiQuoteModal();
+        }
     }
+
 
     async function postForm(formData) {
         const res = await fetch(saveUrl, {
@@ -1201,16 +1306,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function ensureEditing() {
+        if (isDProc) return true; // DProc is always in collaborative edit mode for quotes
         return wrap.classList.contains('is-editing');
     }
 
+
     const toggleBtn = document.getElementById('pcEditToggleBtn');
-    if (canEdit) {
+    if (toggleBtn) {
+        // Initial state
         setEditing(false);
-        toggleBtn?.addEventListener('click', function() {
-            setEditing(!wrap.classList.contains('is-editing'));
+        
+        toggleBtn.addEventListener('click', function() {
+            const isEditing = !wrap.classList.contains('is-editing');
+            setEditing(isEditing);
+            console.log("Editing mode toggled:", isEditing);
         });
+    } else {
+        console.warn("Edit toggle button not found. canEdit is:", canEdit);
     }
+
 
     const inlineBtn = document.getElementById('pcAddItemInlineBtn');
     const inlineEditor = document.getElementById('pcInlineItemEditor');
@@ -1342,35 +1456,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    $(document).on('click', '#pcAddVendorColBtn', function() {
-        modalVendors.push({ id: null, firm_name: '', prices: {} });
-        renderMultiQuoteModal();
-    });
+  $(document).on('click', '#pcAddVendorColBtn', function() {
+    modalVendors.unshift({ id: null, firm_name: '', prices: {} });
+    renderMultiQuoteModal();
+});
 
-    $(document).on('click', '.pc-remove-vendor-btn', function() {
+    $(document).on('click', '.pc-remove-vendor-btn', async function() {
         const idx = parseInt(this.getAttribute('data-idx'));
+        const vendor = modalVendors[idx];
+        
+        if (vendor && vendor.id) {
+            if (!confirm("Are you sure you want to permanently delete this quotation?")) return;
+            
+            const fd = new FormData();
+            fd.append('op', 'delete_quote');
+            fd.append('qte_id', vendor.id);
+            fd.append('_token', @json(csrf_token()));
+            
+            try {
+                const json = await postForm(fd);
+                state = json.data;
+                renderAll();
+                toast(json.message || 'Deleted from database');
+            } catch (err) {
+                toast(err.message || 'Error deleting quote');
+                return;
+            }
+        }
+
         if (modalVendors.length > 1) {
             modalVendors.splice(idx, 1);
             renderMultiQuoteModal();
         } else {
-            toast("At least one vendor is required.");
+            modalVendors = [{ id: null, firm_name: '', prices: {} }];
+            renderMultiQuoteModal();
         }
     });
+
 
     $(document).on('input', '.pc-vendor-name-input', function() {
         const idx = parseInt(this.getAttribute('data-idx'));
         modalVendors[idx].firm_name = this.value;
+        // If they start typing a name, enable the inputs for that column
+        renderMultiQuoteModal(); 
     });
 
     $(document).on('input', '.pc-price-input', function() {
         const vIdx = parseInt(this.getAttribute('data-v-idx'));
         const iId = this.getAttribute('data-i-id');
         modalVendors[vIdx].prices[iId] = this.value;
-        renderMultiQuoteModal(); // Re-render to update totals
+        renderMultiQuoteTotals(); // Only update totals, don't re-render inputs
     });
 
     $(document).on('input', '#pcGlobalTaxPercent', function() {
-        renderMultiQuoteModal();
+        renderMultiQuoteTotals();
     });
 
     $(document).on('click', '#pcSaveAllQuotesBtn', async function() {
@@ -1387,12 +1526,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const fd = new FormData();
                 fd.append('op', 'add_quote');
+                if (v.id) fd.append('qte_id', v.id);
                 fd.append('firm_name', v.firm_name);
                 fd.append('_token', @json(csrf_token()));
                 
                 for (const [itemId, price] of Object.entries(v.prices)) {
                     fd.append(`item_prices[${itemId}]`, price || 0);
                 }
+
 
                 const json = await postForm(fd);
                 state = json.data;
@@ -1405,8 +1546,9 @@ document.addEventListener('DOMContentLoaded', function() {
             toast(err.message || 'Error saving quotations');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-shopping-cart mr-1"></i> Place Order';
+            btn.innerHTML = '<i class="fas fa-save mr-1"></i> SAVE QUOTATIONS';
         }
+
     });
 
     $(document).on('shown.bs.modal', '#pcAddQuoteModal', function () {

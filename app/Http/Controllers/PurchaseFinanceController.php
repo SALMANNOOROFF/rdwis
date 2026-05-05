@@ -81,8 +81,12 @@ class PurchaseFinanceController extends Controller
         $pageTitle = 'DFin Review: ' . $purchase->pcs_title;
         $area = 'fin';
 
+        $firms = \App\Models\Firm::orderBy('frm_name')->get();
+        $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
+
         return view('nrdi.purchase_cases_new.show', compact(
-            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName'
+            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'firms', 'canEdit'
         ));
     }
+
 }

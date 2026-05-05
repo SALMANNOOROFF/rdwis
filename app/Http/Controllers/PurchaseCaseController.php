@@ -27,7 +27,8 @@ class PurchaseCaseController extends Controller
         
         // Define which statuses to show on each dashboard
         $statusMap = [
-            'proc' => ['Under Scrutiny'],
+            'proc' => ['Under Scrutiny', 'Draft', 'Returned'],
+
             'fin'  => ['With DFinance'],
             'rdw'  => ['With MD'],
             'hqs'  => ['With DDG'],
@@ -47,10 +48,19 @@ class PurchaseCaseController extends Controller
         $pageTitle = $titleMap[$area] ?? 'Purchase Scrutiny Hub';
 
         // 1. Pending Queue (Cases currently at this user's level)
-        $pending = Purchase::with(['unit', 'project', 'latestDecision.account'])
-            ->whereIn('pcs_status', $targetStatuses)
-            ->orderBy('pcs_id', 'desc')
-            ->get();
+        $pendingQuery = Purchase::with(['unit', 'project', 'latestDecision.account'])
+            ->whereIn('pcs_status', $targetStatuses);
+
+        // For DProc, also filter by their jurisdiction (Master Unit Range)
+        if ($area === 'proc') {
+            $lower = $user->acc_lowerm;
+            $upper = $user->acc_upperm;
+            $pendingQuery->whereBetween('pcs_unt_id', [$lower, $upper]);
+        }
+
+
+        $pending = $pendingQuery->orderBy('pcs_id', 'desc')->get();
+
 
         // 2. Action Taken (Cases already processed by this user)
         $processed = Purchase::with(['unit', 'project', 'latestDecision.account'])
@@ -62,8 +72,23 @@ class PurchaseCaseController extends Controller
             ->get();
 
         // Split processed into Open and Closed
-        $open = $processed->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
-        $closed = $processed->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+        if ($area === 'proc') {
+            // For DProc, Open means participated but not yet final
+            $open = Purchase::with(['unit', 'project', 'latestDecision.account'])
+                ->whereBetween('pcs_unt_id', [$user->acc_lowerm, $user->acc_upperm])
+                ->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled', 'Draft', 'Returned', 'Under Scrutiny'])
+                ->whereHas('decisions', function($q) { $q->where('pdec_action', 'dproc_save'); })
+                ->orderBy('pcs_id', 'desc')->get();
+            
+            $closed = Purchase::with(['unit', 'project', 'latestDecision.account'])
+                ->whereHas('decisions', function($q) use ($user) { $q->where('pdec_acc_id', $user->acc_id); })
+                ->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled'])
+                ->orderBy('pcs_id', 'desc')->get();
+        } else {
+            $open = $processed->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+            $closed = $processed->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+        }
+
 
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
         $detailsRouteName = 'nrdi.purchase_cases_new.show';
@@ -106,6 +131,8 @@ class PurchaseCaseController extends Controller
 
         // Check if user is authorized to approve
         $canApprove = $this->approvalService->canApprove($area, $purchase->pcs_price);
+        $firms = \App\Models\Firm::orderBy('frm_name')->get();
+
 
         // Titles for show view
         $titleMap = [
@@ -117,8 +144,12 @@ class PurchaseCaseController extends Controller
         ];
         $pageTitle = $titleMap[$area] ?? 'Purchase Case Details';
 
-        return view('nrdi.purchase_cases_new.show', compact('purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName'));
+        $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
+
+        return view('nrdi.purchase_cases_new.show', compact('purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'canEdit', 'firms'));
     }
+
+
 
     /**
      * Process decision (Forward, Return, Approve, Reject)

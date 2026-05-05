@@ -95,10 +95,12 @@ class PurchaseApprovalService
         $targets['Returned'] = $this->displayNames['Returned'];
 
         foreach ($trailStatuses as $status) {
-            if ($status !== $case->pcs_status && isset($this->displayNames[$status])) {
+            // Exclude current status and Under Scrutiny (Procurement) as a return target
+            if ($status !== $case->pcs_status && $status !== 'Under Scrutiny' && isset($this->displayNames[$status])) {
                 $targets[$status] = $this->displayNames[$status];
             }
         }
+
 
         return $targets;
     }
@@ -228,10 +230,11 @@ class PurchaseApprovalService
     {
         $currentArea = strtolower(trim($currentArea));
         
-        // Initiator Level (Division / Projects / Initiation)
+        // NEW FLOW: Division forwards directly to Finance
         if (in_array($currentArea, ['prj', 'rdwprj', 'division', 'initiation'])) {
-            return ['status' => 'Under Scrutiny', 'area' => 'proc'];
+            return ['status' => 'With DFinance', 'area' => 'fin'];
         }
+
 
         // Forward from Procurement to Finance
         if (str_contains($currentArea, 'proc')) {
