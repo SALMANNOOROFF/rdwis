@@ -66,16 +66,12 @@ class PurchaseFinanceController extends Controller
         $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
             ->findOrFail($id);
 
-        // Fetch Live Financials
-        $project = $purchase->project;
-        if ($project) {
-            $totalSpent = Purchase::where('pcs_hed_id', $project->prj_id)
-                ->where('pcs_status', 'Approved')
-                ->sum('pcs_price');
-            $project->hed_balance = ($project->prj_aprvcost ?? 0) - $totalSpent;
-        }
-        $head = $project;
-
+        // Financial Intelligence (Legacy Logic)
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $fin = $finService->getHeadStatus($purchase->pcs_hed_id);
+        $subheads = $finService->getSubheadBreakdown($purchase->pcs_hed_id);
+        $head = $fin;
+        
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
         $canApprove = $this->approvalService->canApprove('fin', $purchase->pcs_price);
         $pageTitle = 'DFin Review: ' . $purchase->pcs_title;
@@ -85,8 +81,9 @@ class PurchaseFinanceController extends Controller
         $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
 
         return view('nrdi.purchase_cases_new.show', compact(
-            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'firms', 'canEdit'
+            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'firms', 'canEdit', 'subheads'
         ));
+
     }
 
 }

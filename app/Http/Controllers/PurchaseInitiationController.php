@@ -40,9 +40,25 @@ class PurchaseInitiationController extends Controller
         $pageTitle = "PC Initiation Hub";
         $detailsRouteName = 'purchase.initiation.show'; // New dedicated route
 
+        // Financial Intelligence Summary
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $head = DB::table('cen.heads')->where('hed_unt_id', $unitId)->first();
+        $finSummary = null;
+        if ($head) {
+            $s = $finService->getHeadStatus($head->hed_id);
+            $finSummary = [
+                'received' => $s->received,
+                'expenditure' => $s->expenditure,
+                'commitments' => $s->commitments,
+                'in_process' => $s->in_process,
+                'balance' => $s->balance,
+                'available' => $s->available
+            ];
+        }
+
         return view('purchase.initiation.index', compact(
             'purchases', 'pageTitle', 'detailsRouteName', 'unitId',
-            'initiatedCases', 'actionReqCases', 'completedCases'
+            'initiatedCases', 'actionReqCases', 'completedCases', 'finSummary'
         ));
     }
 
@@ -73,28 +89,21 @@ class PurchaseInitiationController extends Controller
         $currentAuthority = $service->getStatusDisplayName($purchase->pcs_status);
         $nextAuthority = $service->getNextAuthorityName($purchase, 'prj'); // prj is Division
 
-        // Budget Head Balance Calculation (similar to HQ logic)
-        $head = null;
-        if($purchase->project) {
-            $totalBudget = (float) $purchase->project->prj_aprvcost;
-            
-            // Total of all APPROVED purchase cases for this project
-            $approvedSpent = Purchase::where('pcs_hed_id', $purchase->pcs_hed_id)
-                ->where('pcs_status', 'Approved')
-                ->sum('pcs_price');
+        // Financial Intelligence (Legacy Logic)
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $fin = $finService->getHeadStatus($purchase->pcs_hed_id);
+        $subheads = $finService->getSubheadBreakdown($purchase->pcs_hed_id);
+        $head = $fin;
 
-            $head = (object) [
-                'prj_aprvcost' => $totalBudget,
-                'hed_balance' => $totalBudget - $approvedSpent
-            ];
-        }
 
         $firms = \App\Models\Firm::orderBy('frm_name')->get();
+
         $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
         $pageTitle = "Initiation Details: " . $purchase->pcs_title;
         $area = 'prj';
 
-        return view('nrdi.purchase_cases_new.show', compact('purchase', 'head', 'firms', 'pageTitle', 'canEdit', 'currentAuthority', 'nextAuthority', 'area'));
+        return view('nrdi.purchase_cases_new.show', compact('purchase', 'head', 'firms', 'pageTitle', 'canEdit', 'currentAuthority', 'nextAuthority', 'area', 'subheads'));
+
     }
 
     /**

@@ -282,9 +282,14 @@
                 </div>
                 <div>
                     <h6 class="text-dark font-weight-bold mb-1" style="font-size:0.95rem;">Scope of Work</h6>
-                    <p class="text-muted m-0" style="font-size:0.85rem; line-height:1.45;">
+                    <p class="text-muted m-0 mb-2" style="font-size:0.85rem; line-height:1.45;">
                         {{ Str::limit($project->prj_scope ?? 'No scope defined.', 110) }}
                     </p>
+                    @if($head)
+                        <button type="button" class="btn btn-xs btn-outline-info rajdhani font-weight-bold" data-toggle="modal" data-target="#financialIntelligenceModal">
+                            <i class="fas fa-chart-line mr-1"></i> DETAILED FINANCIAL VIEW
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -898,10 +903,235 @@ $achievedPercent = max(0, min(100, $achievedPercent));
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script>
+</div>
+</div>
+</div>
+</div>
 
-        function openMilestoneDetail(title, target, achieved, status){
+{{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
+@if($head)
+<div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background: #000c1a; border: 2px solid var(--rd-accent); border-radius: 12px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+            <div class="modal-header border-bottom border-dark py-2 px-4 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.03);">
+                <div class="d-flex align-items-center">
+                    <div class="mr-3" style="font-size: 24px; color: var(--rd-accent);"><i class="fas fa-chart-network"></i></div>
+                    <div>
+                        <h5 class="modal-title rajdhani font-weight-bold text-white mb-0" style="letter-spacing: 2px;">FINANCIAL INTELLIGENCE REPORT</h5>
+                        <div class="small text-muted rajdhani">{{ $head->head_name }} | DATED {{ date('d M y') }}</div>
+                    </div>
+                </div>
+                <button type="button" class="close text-white opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
+            </div>
+            
+            <div class="modal-body p-0" style="background: #000c1a;">
+                {{-- Top Summary bar --}}
+                <div class="row no-gutters border-bottom border-dark" style="background: rgba(0,0,0,0.4);">
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">ALLOCATION</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->allocation) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">MTSS SHARE</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->mtss_share) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">RDW SHARE</div>
+                        <div class="h5 mb-0 text-info font-weight-bold rajdhani">{{ number_format($head->rdw_share) }}</div>
+                    </div>
+                    <div class="col-md-3 p-3">
+                        <div class="small text-muted rajdhani">CSRF SHARE</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->csrf_share) }}</div>
+                    </div>
+                </div>
+
+                <div class="row no-gutters">
+                    {{-- Left Pane: Detailed Metrics Table --}}
+                    <div class="col-xl-4 border-right border-dark p-4" style="background: rgba(0,0,0,0.2);">
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <h6 class="rajdhani text-info font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
+                            <div class="small text-muted rajdhani">FIGURES IN PKR</div>
+                        </div>
+
+                        <div class="fin-table-modern rounded border border-dark overflow-hidden">
+                            <table class="table table-sm table-dark mb-0 rajdhani" style="font-size: 13px;">
+                                <thead style="background: rgba(255,255,255,0.03);">
+                                    <tr class="text-muted">
+                                        <th class="pl-3 border-0">METRIC</th>
+                                        <th class="text-right border-0" style="color: #4da3ff;">PROJECT</th>
+                                        <th class="text-right pr-3 border-0" style="color: #4dff88;">ACTUAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Received</td>
+                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->received) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->received) }}</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Expenditure</td>
+                                         <td class="text-right text-danger">{{ number_format($head->expenditure) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->expenditure) }}</td>
+                                     </tr>
+                                     <tr style="background: rgba(255,255,255,0.01);">
+                                         <td class="pl-3 text-info font-weight-bold">Balance</td>
+                                         <td class="text-right text-info font-weight-bold">{{ number_format($head->balance) }}</td>
+                                         <td class="text-right pr-3 text-muted">--</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Commitments</td>
+                                         <td class="text-right text-warning">{{ number_format($head->commitments) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->commitments) }}</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">In Process</td>
+                                         <td class="text-right text-muted">{{ number_format($head->in_process) }}</td>
+                                         <td class="text-right pr-3 text-muted">0</td>
+                                     </tr>
+                                     <tr style="background: rgba(0,255,100,0.05);">
+                                         <td class="pl-3 font-weight-bold text-success">Available</td>
+                                         <td class="text-right font-weight-bold text-success">{{ number_format($head->available) }}</td>
+                                         <td class="text-right pr-3 text-muted">--</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Yet to be Rcvd.</td>
+                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->yet_to_be_received) }}</td>
+                                         <td class="text-right pr-3 text-muted">--</td>
+                                     </tr>
+                                     <tr style="background: rgba(255,255,255,0.03);">
+                                         <td class="pl-3 text-white font-weight-bold">Remaining</td>
+                                         <td class="text-right text-white font-weight-bold">{{ number_format($head->remaining) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->remaining) }}</td>
+                                     </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Receivables section --}}
+                        <div class="mt-4 pt-4 border-top border-dark">
+                            <h6 class="rajdhani text-muted mb-3" style="font-size: 12px; letter-spacing: 2px;">RECEIVABLES</h6>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Comp. Milestones</span>
+                                <span class="text-white rajdhani font-weight-bold">{{ number_format($head->receivable_completed) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Current Milestone</span>
+                                <span class="text-white rajdhani font-weight-bold">{{ number_format($head->receivable_current) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mt-3 p-2 rounded" style="background: rgba(23,162,184,0.1); border: 1px solid rgba(23,162,184,0.2);">
+                                <span class="text-info small rajdhani font-weight-bold">Available after Rcv.</span>
+                                <span class="text-info rajdhani font-weight-bold">{{ number_format($head->available_after_receivables) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Right Pane: Visual Analytics & Subheads --}}
+                    <div class="col-xl-8 p-4">
+                        <div class="row">
+                            {{-- Mini Category Charts --}}
+                            @foreach(array_slice($subheads, 0, 3) as $idx => $sh)
+                            <div class="col-md-4 mb-4">
+                                <div class="subhead-mini-card p-3 rounded border border-dark text-center h-100" style="background: rgba(255,255,255,0.01);">
+                                    <div class="d-flex justify-content-center mb-2" style="height: 80px;">
+                                        <canvas id="chartShMini{{ $idx }}"></canvas>
+                                    </div>
+                                    <h6 class="rajdhani font-weight-bold text-info mb-1">{{ $sh['name'] }}</h6>
+                                    <div class="text-white rajdhani" style="font-size: 14px;">{{ number_format($sh['allocation']) }}</div>
+                                    <div class="mt-2 small text-muted rajdhani">UTILIZED: {{ number_format($sh['expenditure']) }}</div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Subhead Detailed Breakdown --}}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="dg-sec-label mb-3 text-info"><i class="fas fa-th-list fa-xs"></i> Category Metrics Breakdown</div>
+                                <div class="table-responsive rounded border border-dark">
+                                    <table class="table table-sm table-dark table-hover mb-0 rajdhani" style="font-size: 12px;">
+                                        <thead style="background: rgba(0,0,0,0.4);">
+                                            <tr class="text-muted small">
+                                                <th class="pl-3">SUBHEAD</th>
+                                                <th class="text-right">EXPENDITURE</th>
+                                                <th class="text-right">COMMITMENTS</th>
+                                                <th class="text-right pr-3">REMAINING</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($subheads as $sh)
+                                            <tr>
+                                                <td class="pl-3 font-weight-bold text-info">{{ $sh['name'] }}</td>
+                                                <td class="text-right">{{ number_format($sh['expenditure']) }}</td>
+                                                <td class="text-right">{{ number_format($sh['commitments']) }}</td>
+                                                <td class="text-right pr-3 font-weight-bold {{ $sh['remaining'] < 0 ? 'text-danger' : 'text-success' }}">
+                                                    {{ number_format($sh['remaining']) }}
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Large Comparison Chart --}}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="p-4 rounded border border-dark" style="background: rgba(0,0,0,0.3); height: 280px;">
+                                    <canvas id="finDetailedChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+@endsection
+
+@section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js"></script>
+<script src="{{ asset('plugins/chartjs4/chart.umd.js') }}"></script>
+<script>
+$(function () {
+    $('.knob').knob({
+        draw: function () {
+            if (this.$.data('skin') == 'tron') {
+                var a = this.angle(this.cv),
+                    sa = this.startAngle,
+                    sat = this.startAngle,
+                    ea = sa + a,
+                    eat = sat + a,
+                    r = true;
+                this.g.lineWidth = this.lineWidth;
+                this.o.cursor && (sat = eat - 0.3) && (eat = eat + 0.3);
+                if (this.o.displayPrevious) {
+                    ea = this.startAngle + this.angle(this.value);
+                    this.o.cursor && (sa = ea - 0.3) && (ea = ea + 0.3);
+                    this.g.beginPath();
+                    this.g.strokeStyle = this.previousColor;
+                    this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false);
+                    this.g.stroke();
+                }
+                this.g.beginPath();
+                this.g.strokeStyle = r ? this.o.fgColor : this.fgColor;
+                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
+                this.g.stroke();
+                this.g.lineWidth = 2;
+                this.g.beginPath();
+                this.g.strokeStyle = this.o.fgColor;
+                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+                this.g.stroke();
+                return false;
+            }
+        }
+    });
+});
+
+function openMilestoneDetail(title, target, achieved, status) {
     document.getElementById('msTitle').innerText = title;
     document.getElementById('msTarget').innerText = target;
     document.getElementById('msAchieved').innerText = achieved;
@@ -909,59 +1139,76 @@ $achievedPercent = max(0, min(100, $achievedPercent));
     $('#milestoneDetailModal').modal('show');
 }
 
-        function openOtherDocsModal() { $('#otherDocsModal').modal('show'); }
-        function openEmployeeModal(name, role, img, email, phone) {
-            document.getElementById('empModalName').innerText = name;
-            document.getElementById('empModalRole').innerText = role;
-            document.getElementById('empModalImg').src = img;
-            document.getElementById('empModalEmail').innerText = email;
-            document.getElementById('empModalPhone').innerText = phone;
-            $('#employeeDetailModal').modal('show');
-        }
-        function openAllStaffModal() { $('#allStaffModal').modal('show'); }
+function openOtherDocsModal() { $('#otherDocsModal').modal('show'); }
+function openEmployeeModal(name, role, img, email, phone) {
+    document.getElementById('empModalName').innerText = name;
+    document.getElementById('empModalRole').innerText = role;
+    document.getElementById('empModalImg').src = img;
+    document.getElementById('empModalEmail').innerText = email;
+    document.getElementById('empModalPhone').innerText = phone;
+    $('#employeeDetailModal').modal('show');
+}
+function openAllStaffModal() { $('#allStaffModal').modal('show'); }
+function openAchieveModal(msnId) {
+    document.getElementById('modal_msn_id').value = msnId;
+    $('#achieveDateModal').modal('show');
+}
 
-        function openAchieveModal(msnId) {
-            document.getElementById('modal_msn_id').value = msnId;
-            $('#achieveDateModal').modal('show');
-        }
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js"></script>
-    <script>
-    $(function () {
-        $('.knob').knob({
-            draw: function () {
-                if (this.$.data('skin') == 'tron') {
-                    var a = this.angle(this.cv),
-                        sa = this.startAngle,
-                        sat = this.startAngle,
-                        ea = sa + a,
-                        eat = sat + a,
-                        r = true;
-                    this.g.lineWidth = this.lineWidth;
-                    this.o.cursor && (sat = eat - 0.3) && (eat = eat + 0.3);
-                    if (this.o.displayPrevious) {
-                        ea = this.startAngle + this.angle(this.value);
-                        this.o.cursor && (sa = ea - 0.3) && (ea = ea + 0.3);
-                        this.g.beginPath();
-                        this.g.strokeStyle = this.previousColor;
-                        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false);
-                        this.g.stroke();
-                    }
-                    this.g.beginPath();
-                    this.g.strokeStyle = r ? this.o.fgColor : this.fgColor;
-                    this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
-                    this.g.stroke();
-                    this.g.lineWidth = 2;
-                    this.g.beginPath();
-                    this.g.strokeStyle = this.o.fgColor;
-                    this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
-                    this.g.stroke();
-                    return false;
+function initFinancialIntelligenceCharts() {
+    @if($head)
+    const head = @json($head);
+    const subheads = @json($subheads);
+    
+    const canvas = document.getElementById('finDetailedChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (window.finMainChart) window.finMainChart.destroy();
+        window.finMainChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Received', 'Expenditure', 'Commitments', 'Remaining'],
+                datasets: [{
+                    label: 'PKR Value',
+                    data: [head.received, head.expenditure, head.commitments, head.remaining],
+                    backgroundColor: ['rgba(77, 163, 255, 0.2)', 'rgba(255, 50, 50, 0.2)', 'rgba(243, 156, 18, 0.2)', 'rgba(77, 255, 136, 0.2)'],
+                    borderColor: ['#4da3ff', '#ff3232', '#f39c12', '#4dff88'],
+                    borderWidth: 2, borderRadius: 4, barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                    x: { grid: { display: false }, ticks: { color: '#aaa', font: { weight: 'bold' } } }
                 }
             }
         });
+    }
+
+    subheads.slice(0, 3).forEach((sh, idx) => {
+        const shCanvas = document.getElementById(`chartShMini${idx}`);
+        if (shCanvas) {
+            const shCtx = shCanvas.getContext('2d');
+            if (window[`finShChart${idx}`]) window[`finShChart${idx}`].destroy();
+            window[`finShChart${idx}`] = new Chart(shCtx, {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [sh.expenditure + sh.commitments, sh.remaining > 0 ? sh.remaining : 0],
+                        backgroundColor: ['rgba(77, 255, 136, 0.8)', 'rgba(255, 255, 255, 0.05)'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+            });
+        }
     });
-    </script>
-</div>
+    @endif
+}
+
+$(document).on('shown.bs.modal', '#financialIntelligenceModal', function () {
+    setTimeout(initFinancialIntelligenceCharts, 300);
+});
+</script>
 @endsection

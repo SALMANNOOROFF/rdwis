@@ -7,13 +7,16 @@
 
     $caseValue      = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
     
-    // Image terminologies implementation
-    $finReceived    = (float)($head->prj_aprvcost ?? 0);
-    $finBalance     = (float)($head->hed_balance ?? $finReceived);
-    $finExpenditure = $finReceived - $finBalance;
-    $finCommitments = 0; // Commitments not directly available
-    $finInProcess   = $caseValue;
-    $finAvailable   = $finBalance - $finCommitments - $finInProcess;
+    // Image terminologies implementation (Legacy Logic)
+    $finReceived    = (float)($head->received ?? 0);
+    $finBalance     = (float)($head->balance ?? 0);
+    $finExpenditure = (float)($head->expenditure ?? 0);
+    $finCommitments = (float)($head->commitments ?? 0);
+    $finInProcess   = (float)($head->in_process ?? 0);
+    $finAvailable   = (float)($head->available ?? 0);
+    $finCanBeSpent  = (float)($head->can_be_spent ?? 0);
+    $finAllocation  = (float)($head->allocation ?? 0);
+
     
     // For progress bar if still needed somewhere else
     $totalBudget    = $finReceived;
@@ -263,19 +266,36 @@
                                 </div>
                             </div>
                             
-                            {{-- Financial Overview --}}
-                            <div class="text-right d-flex flex-column align-items-end" style="border-left: 1px solid rgba(255,255,255,0.05); padding-left: 20px; font-size: 12px; color: var(--rd-text2);">
-                                <button class="btn btn-sm btn-info rajdhani font-weight-bold px-3 mb-3 shadow-sm" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 10px; border-radius: 6px; letter-spacing: 0.5px;">
-                                    <i class="fas fa-chart-line mr-1"></i> VIEW FINANCIAL DETAILS
-                                </button>
+                            {{-- Financial Overview (High Density Text Summary) --}}
+                            <div class="text-right d-flex flex-column align-items-end" style="border-left: 1px solid rgba(255,255,255,0.05); padding-left: 20px; font-size: 12px; min-width: 250px;">
+                                <div class="d-flex justify-content-between align-items-center w-100 mb-3">
+                                    <h6 class="rajdhani text-info font-weight-bold mb-0" style="font-size: 10px; letter-spacing: 1px;">FINANCIAL PULSE</h6>
+                                    <button class="btn btn-xs btn-outline-info rajdhani font-weight-bold py-0" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 8px; border-radius: 4px;">
+                                        <i class="fas fa-expand-arrows-alt mr-1"></i> FULL REPORT
+                                    </button>
+                                </div>
                                 
-                                <div style="display: grid; grid-template-columns: auto auto; gap: 4px 16px; text-align: right;">
-                                    <div>Received</div>                     <div class="text-white">{{ number_format($finReceived) }}</div>
-                                    <div>Expenditure</div>                  <div class="text-white">{{ number_format($finExpenditure) }}</div>
-                                    <div class="font-weight-bold text-white">Balance</div>   <div class="font-weight-bold text-white">{{ number_format($finBalance) }}</div>
-                                    <div>Commitments</div>                  <div class="text-white">{{ number_format($finCommitments) }}</div>
-                                    <div>In Process</div>                   <div class="text-white">{{ number_format($finInProcess) }}</div>
-                                    <div class="font-weight-bold text-success">Available</div> <div class="font-weight-bold text-success" style="font-size: 14px;">{{ number_format($finAvailable) }}</div>
+                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 4px 20px; text-align: left;">
+                                    <div class="text-muted small">RECEIVED</div>
+                                    <div class="text-white font-weight-bold text-right">{{ number_format($finReceived) }}</div>
+                                    
+                                    <div class="text-muted small">EXPENDITURE</div>
+                                    <div class="text-danger font-weight-bold text-right">{{ number_format($finExpenditure) }}</div>
+                                    
+                                    <div class="text-white font-weight-bold small">BALANCE</div>
+                                    <div class="text-white font-weight-bold text-right">{{ number_format($finBalance) }}</div>
+                                    
+                                    <div class="text-muted small">COMMITMENTS</div>
+                                    <div class="text-warning font-weight-bold text-right">{{ number_format($finCommitments) }}</div>
+                                    
+                                    <div class="text-muted small">IN PROCESS</div>
+                                    <div class="text-muted text-right">{{ number_format($finInProcess) }}</div>
+                                    
+                                    <div class="text-success font-weight-bold small border-top border-dark pt-1">AVAILABLE</div>
+                                    <div class="text-success font-weight-bold text-right border-top border-dark pt-1">{{ number_format($finAvailable) }}</div>
+                                    
+                                    <div class="text-warning font-weight-bold small" style="font-size: 11px;">CAN BE SPENT</div>
+                                    <div class="text-warning font-weight-bold text-right" style="font-size: 13px;">{{ number_format($finCanBeSpent) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -618,74 +638,234 @@
 @endif
 
 {{-- ============ FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
-    <div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content" style="background: #000c1a; border: 1px solid var(--rd-accent); border-radius: 15px; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.8);">
-                <div class="modal-header border-bottom border-dark py-2 px-3" style="background: rgba(23,162,184,0.05);">
-                    <h5 class="modal-title rajdhani font-weight-bold text-accent" style="letter-spacing: 1px;">
-                        <i class="fas fa-microchip mr-2"></i> FINANCIAL INTELLIGENCE DASHBOARD
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body p-4">
-                    {{-- Charts Grid --}}
-                    <div class="row">
-                        {{-- 1. Budget Pulse --}}
-                        <div class="col-md-4 mb-4">
-                            <div class="chart-container-box p-3 rounded border border-dark h-100">
-                                <div class="small text-muted rajdhani font-weight-bold mb-3"><i class="fas fa-percentage mr-1"></i> BUDGET PULSE</div>
-                                <div style="height: 220px; position: relative;" class="d-flex align-items-center justify-content-center">
-                                    <canvas id="chartBudgetPulse"></canvas>
-                                    <div id="fallbackPulse" class="text-muted small d-none"><i class="fas fa-exclamation-triangle mr-1"></i> Data missing</div>
-                                </div>
-                            </div>
-                        </div>
-                        {{-- 2. Bid Comparison --}}
-                        <div class="col-md-8 mb-4">
-                            <div class="chart-container-box p-3 rounded border border-dark h-100">
-                                <div class="small text-muted rajdhani font-weight-bold mb-3"><i class="fas fa-balance-scale mr-1"></i> BID COMPARISON</div>
-                                <div style="height: 220px; position: relative;" class="d-flex align-items-center justify-content-center">
-                                    <canvas id="chartBidComparison"></canvas>
-                                    <div id="fallbackComparison" class="text-muted small d-none">No quotations to compare</div>
-                                </div>
-                            </div>
-                        </div>
-                        {{-- 3. Item Impact --}}
-                        <div class="col-md-6 mb-4">
-                            <div class="chart-container-box p-3 rounded border border-dark h-100">
-                                <div class="small text-muted rajdhani font-weight-bold mb-3"><i class="fas fa-cubes mr-1"></i> ITEM IMPACT</div>
-                                <div style="height: 220px; position: relative;" class="d-flex align-items-center justify-content-center">
-                                    <canvas id="chartItemImpact"></canvas>
-                                    <div id="fallbackImpact" class="text-muted small d-none">No items listed</div>
-                                </div>
-                            </div>
-                        </div>
-                        {{-- 4. Forecast Projection --}}
-                        <div class="col-md-6 mb-4">
-                            <div class="chart-container-box p-3 rounded border border-dark h-100">
-                                <div class="small text-muted rajdhani font-weight-bold mb-3"><i class="fas fa-forward mr-1"></i> FORECAST</div>
-                                <div style="height: 220px; position: relative;" class="d-flex align-items-center justify-content-center">
-                                    <canvas id="chartForecastTrend"></canvas>
-                                    <div id="fallbackForecast" class="text-muted small d-none">Unable to generate forecast</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-top border-dark py-2 px-3 d-flex justify-content-between" style="background: rgba(0,0,0,0.2);">
-                    <div id="dashboardStatusLine" class="small text-muted font-italic">
-                        <i class="fas fa-sync fa-spin mr-1"></i> Waiting for initialization...
-                    </div>
+{{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
+<div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background: #000c1a; border: 2px solid var(--rd-accent); border-radius: 12px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+            <div class="modal-header border-bottom border-dark py-2 px-4 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.03);">
+                <div class="d-flex align-items-center">
+                    <div class="mr-3" style="font-size: 24px; color: var(--rd-accent);"><i class="fas fa-chart-network"></i></div>
                     <div>
-                        <button type="button" class="btn btn-outline-info btn-xs px-3 rajdhani font-weight-bold mr-2" onclick="renderFinancialDashboard()">
-                            <i class="fas fa-sync mr-1"></i> FORCE REFRESH
-                        </button>
-                        <button type="button" class="btn btn-outline-light btn-xs px-3 rajdhani font-weight-bold" data-dismiss="modal">CLOSE DASHBOARD</button>
+                        <h5 class="modal-title rajdhani font-weight-bold text-white mb-0" style="letter-spacing: 2px;">FINANCIAL INTELLIGENCE REPORT</h5>
+                        <div class="small text-muted rajdhani">{{ $head->head_name }} | DATED {{ date('d M y') }} <span class="ml-2 text-info opacity-50">{{ $head->trans_type == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
+                    </div>
+                </div>
+                <button type="button" class="close text-white opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
+            </div>
+            
+            <div class="modal-body p-0" style="background: #000c1a;">
+                {{-- Top Summary bar --}}
+                <div class="row no-gutters border-bottom border-dark" style="background: rgba(0,0,0,0.4);">
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">ALLOCATION</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->allocation) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">MTSS SHARE</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->mtss_share) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">RDW SHARE</div>
+                        <div class="h5 mb-0 text-info font-weight-bold rajdhani">{{ number_format($head->rdw_share) }}</div>
+                    </div>
+                    <div class="col-md-3 p-3">
+                        <div class="small text-muted rajdhani">CSRF SHARE</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->csrf_share) }}</div>
+                    </div>
+                </div>
+
+                <div class="row no-gutters">
+                    {{-- Left Pane: Detailed Metrics Table --}}
+                    <div class="col-xl-4 border-right border-dark p-4" style="background: rgba(0,0,0,0.2);">
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <h6 class="rajdhani text-info font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
+                            <div class="small text-muted rajdhani">FIGURES IN PKR</div>
+                        </div>
+
+                        <div class="fin-table-modern rounded border border-dark overflow-hidden">
+                            <table class="table table-sm table-dark mb-0 rajdhani" style="font-size: 13px;">
+                                <thead style="background: rgba(255,255,255,0.03);">
+                                    <tr class="text-muted">
+                                        <th class="pl-3 border-0">METRIC</th>
+                                        <th class="text-right border-0" style="color: #4da3ff;">PROJECT</th>
+                                        <th class="text-right pr-3 border-0" style="color: #4dff88;">ACTUAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="pl-3 text-muted">Received</td>
+                                        <td class="text-right" style="color: #4da3ff;">{{ number_format($head->received) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->received) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pl-3 text-muted">Expenditure</td>
+                                        <td class="text-right text-danger">{{ number_format($head->expenditure) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->expenditure) }}</td>
+                                    </tr>
+                                    <tr style="background: rgba(255,255,255,0.01);">
+                                        <td class="pl-3 text-info font-weight-bold">Balance</td>
+                                        <td class="text-right text-info font-weight-bold">{{ number_format($head->balance) }}</td>
+                                        <td class="text-right pr-3 text-muted">--</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pl-3 text-muted">Commitments</td>
+                                        <td class="text-right text-warning">{{ number_format($head->commitments) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->commitments) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pl-3 text-muted">In Process</td>
+                                        <td class="text-right text-muted">{{ number_format($head->in_process) }}</td>
+                                        <td class="text-right pr-3 text-muted">0</td>
+                                    </tr>
+                                    <tr style="background: rgba(0,255,100,0.05);">
+                                        <td class="pl-3 font-weight-bold">Available</td>
+                                        <td class="text-right font-weight-bold">{{ number_format($head->available) }}</td>
+                                        <td class="text-right pr-3 text-muted">--</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="pl-3 text-muted">Yet to be Rec</td>
+                                        <td class="text-right text-muted">{{ number_format($head->yet_to_be_received) }}</td>
+                                        <td class="text-right pr-3 text-muted">--</td>
+                                    </tr>
+                                    <tr style="background: rgba(255,50,50,0.05);">
+                                        <td class="pl-3 text-danger font-weight-bold">Remaining</td>
+                                        <td class="text-right text-danger font-weight-bold">{{ number_format($head->remaining) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->remaining) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Receivables section --}}
+                        <div class="mt-4 pt-4 border-top border-dark">
+                            <h6 class="rajdhani text-muted mb-3" style="font-size: 12px; letter-spacing: 2px;">RECEIVABLES</h6>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Comp. Milestones</span>
+                                <span class="text-white rajdhani font-weight-bold">{{ number_format($head->receivable_completed) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Current Milestone</span>
+                                <span class="text-white rajdhani font-weight-bold">{{ number_format($head->receivable_current) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mt-3 p-2 rounded" style="background: rgba(23,162,184,0.1); border: 1px solid rgba(23,162,184,0.2);">
+                                <span class="text-info small rajdhani font-weight-bold">Available after Rcv.</span>
+                                <span class="text-info rajdhani font-weight-bold">{{ number_format($head->available_after_receivables) }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Exp Sources --}}
+                        <div class="mt-4 pt-4 border-top border-dark">
+                            <h6 class="rajdhani text-muted mb-3" style="font-size: 12px; letter-spacing: 2px;">EXP. SOURCES</h6>
+                            <div class="small d-flex justify-content-between mb-1">
+                                <span class="text-muted rajdhani">From this account</span>
+                                <span class="text-white rajdhani">{{ number_format($head->exp_this_account) }}</span>
+                            </div>
+                            <div class="small d-flex justify-content-between mb-1">
+                                <span class="text-muted rajdhani">From other accounts</span>
+                                <span class="text-white rajdhani">{{ number_format($head->exp_other_accounts) }}</span>
+                            </div>
+                            <div class="small d-flex justify-content-between">
+                                <span class="text-muted rajdhani">Other's exp. this acc.</span>
+                                <span class="text-white rajdhani">{{ number_format($head->others_exp_this_account) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Right Pane: Visual Analytics & Subheads --}}
+                    <div class="col-xl-8 p-4">
+                        <div class="row">
+                            {{-- Mini Category Charts --}}
+                            @foreach(array_slice($subheads, 0, 3) as $idx => $sh)
+                            <div class="col-md-4 mb-4">
+                                <div class="subhead-mini-card p-3 rounded border border-dark text-center h-100" style="background: rgba(255,255,255,0.01);">
+                                    <div class="d-flex justify-content-center mb-2" style="height: 80px;">
+                                        <canvas id="chartShMini{{ $idx }}"></canvas>
+                                    </div>
+                                    <h6 class="rajdhani font-weight-bold text-info mb-1">{{ $sh['name'] }}</h6>
+                                    <div class="text-white rajdhani" style="font-size: 14px;">{{ number_format($sh['allocation']) }}</div>
+                                    <div class="mt-2 small text-muted rajdhani">UTILIZED: {{ number_format($sh['expenditure']) }}</div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Subhead Detailed Breakdown --}}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="dg-sec-label mb-3"><i class="fas fa-th-list fa-xs"></i> Category Metrics Breakdown</div>
+                                <div class="table-responsive rounded border border-dark">
+                                    <table class="table table-sm table-dark table-hover mb-0 rajdhani" style="font-size: 12px;">
+                                        <thead style="background: rgba(0,0,0,0.4);">
+                                            <tr class="text-muted small">
+                                                <th class="pl-3">SUBHEAD</th>
+                                                <th class="text-right">EXPENDITURE</th>
+                                                <th class="text-right">COMMITMENTS</th>
+                                                <th class="text-right">IN PROCESS</th>
+                                                <th class="text-right pr-3">REMAINING</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($subheads as $sh)
+                                            <tr>
+                                                <td class="pl-3 font-weight-bold text-info">{{ $sh['name'] }}</td>
+                                                <td class="text-right">{{ number_format($sh['expenditure']) }}</td>
+                                                <td class="text-right">{{ number_format($sh['commitments']) }}</td>
+                                                <td class="text-right">{{ number_format($sh['in_process']) }}</td>
+                                                <td class="text-right pr-3 font-weight-bold {{ $sh['remaining'] < 0 ? 'text-danger' : 'text-success' }}">
+                                                    {{ number_format($sh['remaining']) }}
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Large Comparison Chart --}}
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="p-4 rounded border border-dark" style="background: rgba(0,0,0,0.3); height: 300px;">
+                                    <canvas id="finDetailedChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="d-grid gap-2 h-100" style="display: grid; grid-template-rows: repeat(4, 1fr); gap: 10px;">
+                                    <button class="btn btn-outline-info btn-sm rajdhani font-weight-bold"><i class="fas fa-chart-pie mr-2"></i> SPENDING BREAKDOWN</button>
+                                    <button class="btn btn-outline-secondary btn-sm rajdhani font-weight-bold"><i class="fas fa-history mr-2"></i> SPENDING TIMELINE</button>
+                                    <button class="btn btn-outline-secondary btn-sm rajdhani font-weight-bold"><i class="fas fa-calculator mr-2"></i> SALARY FORECAST</button>
+                                    <button class="btn btn-outline-secondary btn-sm rajdhani font-weight-bold"><i class="fas fa-file-contract mr-2"></i> CONTRACTS TIMELINE</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <div class="modal-footer border-top border-dark py-2 px-4 d-flex justify-content-between" style="background: rgba(0,0,0,0.3);">
+                <div class="small text-muted rajdhani"><i class="fas fa-shield-check text-success mr-1"></i> RDWIS FINANCIAL AUDIT ENGINE ACTIVE</div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-info btn-xs rajdhani font-weight-bold px-4" onclick="initFinancialIntelligenceCharts()">
+                        <i class="fas fa-sync-alt mr-1"></i> RE-CALCULATE
+                    </button>
+                    <button type="button" class="btn btn-outline-light btn-xs rajdhani font-weight-bold px-4" data-dismiss="modal">CLOSE REPORT</button>
+                </div>
+            </div>
+        </div>
+
         </div>
     </div>
+</div>
+
+<style>
+    .fin-card-glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
+    .fin-card-glass:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+    .border-accent { border-color: rgba(243,156,18,0.3) !important; }
+    .bg-navy-darker { background: #000c1a !important; }
+    .subhead-list-wrap::-webkit-scrollbar { width: 4px; }
+    .subhead-list-wrap::-webkit-scrollbar-thumb { background: var(--rd-accent); border-radius: 10px; }
+</style>
+
 </div>
 
 <style>
@@ -712,143 +892,77 @@ function updateDashboardStatus(msg, isError = false) {
     }
 }
 
-function renderFinancialDashboard() {
-    console.log("RDWIS Dashboard: Command Received.");
-    updateDashboardStatus("Processing Intelligence Data...");
-
-    if (typeof Chart === 'undefined') {
-        updateDashboardStatus("ERROR: Chart.js not loaded. Check Network.", true);
-        return;
-    }
-
-    try {
-        // 1. CLEANUP
-        if (pulseChart) try { pulseChart.destroy(); } catch(e){}
-        if (comparisonChart) try { comparisonChart.destroy(); } catch(e){}
-        if (impactChart) try { impactChart.destroy(); } catch(e){}
-        if (trendChart) try { trendChart.destroy(); } catch(e){}
-
-        // 2. BUDGET PULSE
-        const ctx1 = document.getElementById('chartBudgetPulse').getContext('2d');
-        const spentVal = {{ (float)$utilizedBudget }};
-        const caseVal = {{ (float)$caseValue }};
-        const remainVal = {{ (float)max(0, $balanceAfter) }};
-        
-        pulseChart = new Chart(ctx1, {
-            type: 'doughnut',
-            data: {
-                labels: ['Utilized', 'This Case', 'Available'],
-                datasets: [{
-                    data: (spentVal + caseVal + remainVal === 0) ? [33, 33, 34] : [spentVal, caseVal, remainVal],
-                    backgroundColor: ['#6c757d', '#17a2b8', '#28a745'],
-                    borderWidth: 0
-                }]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false, cutout: '70%',
-                plugins: { legend: { position: 'bottom', labels: { color: '#aaa', font: { size: 10, family: 'Rajdhani' } } } }
-            }
-        });
-
-        // 3. BID COMPARISON
-        @php
-            $qts = $purchase->quotes->sortBy('qte_price')->values();
-            $hasQuotes = $qts->count() > 0;
-            $qNames = $hasQuotes ? $qts->map(fn($q) => $q->firm?->frm_name ?? $q->qte_firmname) : collect(['Sample Firm A','Sample Firm B','Sample Firm C']);
-            $qVals = $hasQuotes ? $qts->pluck('qte_price') : collect([150000, 220000, 185000]);
-            $isDemoQuotes = !$hasQuotes;
-        @endphp
-        const ctx2 = document.getElementById('chartBidComparison').getContext('2d');
-        comparisonChart = new Chart(ctx2, {
+function initFinancialIntelligenceCharts() {
+    const head = @json($head);
+    const subheads = @json($subheads);
+    
+    console.log("RDWIS Financial Intelligence: Initializing high-fidelity charts...", head);
+    
+    // 1. Main Project Liquidity Bar Chart
+    const canvas = document.getElementById('finDetailedChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (window.finMainChart) window.finMainChart.destroy();
+        window.finMainChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {!! $qNames->toJson() !!},
+                labels: ['Received', 'Expenditure', 'Commitments', 'In Process', 'Remaining'],
                 datasets: [{
-                    label: 'Quote Price',
-                    data: {!! $qVals->toJson() !!},
-                    backgroundColor: {!! $qVals->map(fn($v, $k) => ($k === 0 && !$isDemoQuotes) ? '#28a745' : '#17a2b8')->toJson() !!},
-                    borderRadius: 5
+                    label: 'PKR Value',
+                    data: [head.received, head.expenditure, head.commitments, head.in_process, head.remaining],
+                    backgroundColor: [
+                        'rgba(77, 163, 255, 0.2)', 
+                        'rgba(255, 50, 50, 0.2)', 
+                        'rgba(243, 156, 18, 0.2)', 
+                        'rgba(23, 162, 184, 0.2)', 
+                        'rgba(77, 255, 136, 0.2)'
+                    ],
+                    borderColor: ['#4da3ff', '#ff3232', '#f39c12', '#17a2b8', '#4dff88'],
+                    borderWidth: 2, borderRadius: 4, barThickness: 40
                 }]
             },
-            options: { 
-                responsive: true, maintainAspectRatio: false, 
-                plugins: {
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { 
                     legend: { display: false },
-                    title: { display: {{ $isDemoQuotes ? 'true' : 'false' }}, text: 'NO QUOTES FOUND - SHOWING DEMO', color: '#f39c12', font: { size: 10 } }
+                    tooltip: { backgroundColor: '#001226', titleFont: { family: 'Rajdhani', size: 14 }, bodyFont: { family: 'Inter', size: 12 }, padding: 12 } 
                 },
                 scales: {
-                    y: { grid: { color: '#222' }, ticks: { color: '#555', font: { size: 9 } } },
-                    x: { grid: { display: false }, ticks: { color: '#aaa', font: { size: 10, family: 'Rajdhani' } } }
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { family: 'Rajdhani' } } },
+                    x: { grid: { display: false }, ticks: { color: '#aaa', font: { family: 'Rajdhani', weight: 'bold' } } }
                 }
             }
         });
-
-        // 4. ITEM IMPACT
-        @php
-            $itms = $purchase->items;
-            $hasItems = $itms->count() > 0;
-            $itNames = $hasItems ? $itms->pluck('pci_desc') : collect(['Sample Item 1', 'Sample Item 2']);
-            $itVals = $hasItems ? $itms->map(fn($i) => (float)$i->pci_price * (float)$i->pci_qty) : collect([50000, 35000]);
-            $isDemoItems = !$hasItems;
-        @endphp
-        const ctx3 = document.getElementById('chartItemImpact').getContext('2d');
-        impactChart = new Chart(ctx3, {
-            type: 'horizontalBar',
-            data: {
-                labels: {!! $itNames->toJson() !!},
-                datasets: [{ data: {!! $itVals->toJson() !!}, backgroundColor: '#f39c12' }]
-            },
-            options: { 
-                indexAxis: 'y',
-                responsive: true, maintainAspectRatio: false, 
-                plugins: {
-                    legend: { display: false },
-                    title: { display: {{ $isDemoItems ? 'true' : 'false' }}, text: 'NO ITEMS FOUND - SHOWING DEMO', color: '#f39c12', font: { size: 10 } }
-                },
-                scales: {
-                    x: { grid: { color: '#222' }, ticks: { display: false } },
-                    y: { grid: { display: false }, ticks: { color: '#aaa', font: { size: 9, family: 'Rajdhani' } } }
-                }
-            }
-        });
-
-        // 5. FORECAST
-        const ctx4 = document.getElementById('chartForecastTrend').getContext('2d');
-        const totalBud = {{ (float)$totalBudget }};
-        const utiBud = {{ (float)$utilizedBudget }};
-        const caseValFore = {{ (float)$caseValue }};
-        trendChart = new Chart(ctx4, {
-            type: 'line',
-            data: {
-                labels: ['Start', 'Current', 'After Case', 'Future'],
-                datasets: [{
-                    label: 'Trend',
-                    data: [0, utiBud, utiBud + caseValFore, utiBud + (caseValFore * 1.2)],
-                    borderColor: '#17a2b8', backgroundColor: 'rgba(23,162,184,0.1)', fill: true, lineTension: 0.3
-                }, {
-                    label: 'Total Budget',
-                    data: [totalBud, totalBud, totalBud, totalBud],
-                    borderColor: '#dc3545', borderDash:[5,5], fill:false, pointRadius:0
-                }]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false, 
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { grid: { color: '#222' }, ticks: { color: '#555', font: { size: 9 } } },
-                    x: { grid: { display: false }, ticks: { color: '#aaa', font: { size: 10, family: 'Rajdhani' } } }
-                }
-            }
-        });
-
-        updateDashboardStatus("Intelligence Engine: Active & Verified");
-        console.log("RDWIS Dashboard: Rendering Complete.");
-
-    } catch (err) {
-        console.error("Dashboard Render Failed:", err);
-        updateDashboardStatus("CRITICAL ERROR: " + err.message, true);
     }
+
+    // 2. Mini Subhead Utilization Charts (Pie)
+    subheads.slice(0, 3).forEach((sh, idx) => {
+        const shCanvas = document.getElementById(`chartShMini${idx}`);
+        if (shCanvas) {
+            const shCtx = shCanvas.getContext('2d');
+            if (window[`finShChart${idx}`]) window[`finShChart${idx}`].destroy();
+            
+            window[`finShChart${idx}`] = new Chart(shCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Used', 'Remaining'],
+                    datasets: [{
+                        data: [sh.expenditure + sh.commitments + sh.in_process, sh.remaining > 0 ? sh.remaining : 0],
+                        backgroundColor: ['rgba(77, 255, 136, 0.8)', 'rgba(255, 255, 255, 0.05)'],
+                        borderColor: 'transparent',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    cutout: '70%'
+                }
+            });
+        }
+    });
 }
+
 
 $(function() {
     // Main page progress bar animation
@@ -859,9 +973,9 @@ $(function() {
 
     // Modal trigger logic
     $(document).on('shown.bs.modal', '#financialIntelligenceModal', function () {
-        // Small delay ensures canvas has finished transition and has dimensions
-        setTimeout(renderFinancialDashboard, 200);
+        setTimeout(initFinancialIntelligenceCharts, 250);
     });
+
 });
 </script>
 <script>

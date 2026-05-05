@@ -70,8 +70,25 @@ class PurchaseProcurementController extends Controller
         $detailsRouteName = 'nrdi.purchase_cases_new.procurement.show';
         $area = 'proc';
 
+        // Financial Intelligence for DProc Summary
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $heads = DB::table('cen.heads')
+            ->whereBetween('hed_unt_id', [$lower, $upper])
+            ->get();
+        
+        $finSummary = ['received' => 0, 'expenditure' => 0, 'commitments' => 0, 'in_process' => 0, 'balance' => 0, 'available' => 0];
+        foreach($heads as $h) {
+            $s = $finService->getHeadStatus($h->hed_id);
+            $finSummary['received'] += $s->received;
+            $finSummary['expenditure'] += $s->expenditure;
+            $finSummary['commitments'] += $s->commitments;
+            $finSummary['in_process'] += $s->in_process;
+            $finSummary['balance'] += $s->balance;
+            $finSummary['available'] += $s->available;
+        }
+
         return view('nrdi.purchase_cases_new.index', compact(
-            'pending', 'open', 'closed', 'pageTitle', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'unitNameMap', 'detailsRouteName', 'area'
+            'pending', 'open', 'closed', 'pageTitle', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'unitNameMap', 'detailsRouteName', 'area', 'finSummary'
         ));
     }
 
@@ -90,16 +107,12 @@ class PurchaseProcurementController extends Controller
             ->whereBetween('pcs_unt_id', [$lower, $upper])
             ->findOrFail($id);
 
-        // Fetch Live Financials
-        $project = $purchase->project;
-        if ($project) {
-            $totalSpent = Purchase::where('pcs_hed_id', $project->prj_id)
-                ->where('pcs_status', 'Approved')
-                ->sum('pcs_price');
-            $project->hed_balance = ($project->prj_aprvcost ?? 0) - $totalSpent;
-        }
-        $head = $project;
-
+        // Financial Intelligence (Legacy Logic)
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $fin = $finService->getHeadStatus($purchase->pcs_hed_id);
+        $subheads = $finService->getSubheadBreakdown($purchase->pcs_hed_id);
+        $head = $fin;
+        
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
         $canApprove = $this->approvalService->canApprove('proc', $purchase->pcs_price);
         $firms = \App\Models\Firm::orderBy('frm_name')->get();
@@ -111,8 +124,9 @@ class PurchaseProcurementController extends Controller
         $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
 
         return view('nrdi.purchase_cases_new.show', compact(
-            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'canEdit', 'firms'
+            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'canEdit', 'firms', 'subheads'
         ));
+
     }
 
 

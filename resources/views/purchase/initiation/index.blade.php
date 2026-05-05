@@ -58,7 +58,21 @@
     <section class="content">
         <div class="container-fluid">
             
-            {{-- Metrics Row --}}
+            {{-- Financial Pulse Summary (Simplified Text View) --}}
+            @if($finSummary)
+            <div class="mb-4 p-3 rounded d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                <div class="d-flex align-items-center gap-4 rajdhani">
+                    <div class="mr-4"><i class="fas fa-wallet text-info mr-2"></i> <span class="text-muted small">RECEIVED:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['received']) }}</span></div>
+                    <div class="mr-4"><i class="fas fa-money-bill-wave text-danger mr-2"></i> <span class="text-muted small">EXPENDITURE:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['expenditure']) }}</span></div>
+                    <div class="mr-4"><i class="fas fa-balance-scale text-white mr-2"></i> <span class="text-muted small">BALANCE:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['balance']) }}</span></div>
+                    <div class="mr-4"><i class="fas fa-handshake text-warning mr-2"></i> <span class="text-muted small">COMMITMENTS:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['commitments']) }}</span></div>
+                </div>
+                <div class="rajdhani px-4 py-1 rounded" style="background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.2);">
+                    <span class="text-success small font-weight-bold">AVAILABLE:</span> 
+                    <span class="text-success font-weight-bold ml-2" style="font-size: 16px;">Rs. {{ number_format($finSummary['available']) }}</span>
+                </div>
+            </div>
+            @endif
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="metric-card p-4">

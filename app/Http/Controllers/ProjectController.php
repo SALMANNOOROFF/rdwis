@@ -91,101 +91,110 @@ class ProjectController extends Controller
     return view('nrdi.projects.index', compact('projects', 'divisions', 'status', 'divisionId', 'term'));
 }
 
-   public function nrdiShow($id)
-{
-    $user = Auth::user();
-    if (! $user) {
-        return redirect()->route('login');
+    public function nrdiShow($id)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        [$lower, $upper] = $user->acc_lowers == 0
+            ? [$user->acc_lowerm, $user->acc_upperm]
+            : [$user->acc_lowers, $user->acc_uppers];
+
+        $project = Project::with('milestones', 'attachments', 'unit')
+            ->where('prj_id', $id)
+            ->whereBetween('prj_unt_id', [$lower, $upper])
+            ->firstOrFail();
+
+        // Financial Intelligence (Legacy Logic Integration)
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $id)->first();
+        
+        $head = null;
+        $subheads = [];
+        if ($headRecord) {
+            $head = $finService->getHeadStatus($headRecord->hed_id);
+            $subheads = $finService->getSubheadBreakdown($headRecord->hed_id);
+        }
+
+        $totalSpent = $head->expenditure ?? 0;
+        $balance = $head->balance ?? (($project->prj_propcost ?? 0) - $totalSpent);
+        $spentPercentage = ($project->prj_propcost ?? 0) > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+
+        $finData = [
+            'equip' => $totalSpent * 0.45,
+            'hr'    => $totalSpent * 0.35,
+            'misc'  => $totalSpent * 0.20,
+        ];
+
+        $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
+
+        $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : \Carbon\Carbon::now();
+        $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : \Carbon\Carbon::now();
+
+        $totalMonths = $startDate->diffInMonths($endDate);
+        if ($totalMonths < 1) $totalMonths = 1;
+        $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
+
+        $readOnly = true;
+
+        return view('projects.openprojectdetails', compact(
+            'project',
+            'totalSpent',
+            'balance',
+            'spentPercentage',
+            'finData',
+            'mprsSubmitted',
+            'mprsLeft',
+            'totalMonths',
+            'readOnly',
+            'head',
+            'subheads'
+        ));
     }
 
-    [$lower, $upper] = $user->acc_lowers == 0
-        ? [$user->acc_lowerm, $user->acc_upperm]
-        : [$user->acc_lowers, $user->acc_uppers];
 
-    $project = Project::with('milestones', 'attachments', 'unit')
-        ->where('prj_id', $id)
-        ->whereBetween('prj_unt_id', [$lower, $upper])
-        ->firstOrFail();
+    public function show($id)
+    {
+        $project = Project::with('milestones', 'attachments')->where('prj_id', $id)->firstOrFail();
 
-    $totalSpent = DB::table('fin.transactions')
-        ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
-        ->where('fin.commitments.cmt_docid', $id)
-        ->sum('fin.transactions.trn_amount1');
+        // Financial Intelligence (Legacy Logic Integration)
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $id)->first();
+        
+        $head = null;
+        $subheads = [];
+        if ($headRecord) {
+            $head = $finService->getHeadStatus($headRecord->hed_id);
+            $subheads = $finService->getSubheadBreakdown($headRecord->hed_id);
+        }
 
-    $balance = ($project->prj_propcost ?? 0) - $totalSpent;
-    $spentPercentage = ($project->prj_propcost ?? 0) > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+        $totalSpent = $head->expenditure ?? 0;
+        $balance = $head->balance ?? ($project->prj_propcost - $totalSpent);
+        $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
 
-    $finData = [
-        'equip' => $totalSpent * 0.45,
-        'hr'    => $totalSpent * 0.35,
-        'misc'  => $totalSpent * 0.20,
-    ];
+        $finData = [
+            'equip' => $totalSpent * 0.45,
+            'hr'    => $totalSpent * 0.35,
+            'misc'  => $totalSpent * 0.20
+        ];
 
-    $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
+        $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
 
-    $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : \Carbon\Carbon::now();
-    $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : \Carbon\Carbon::now();
+        $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : \Carbon\Carbon::now();
+        $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : \Carbon\Carbon::now();
+        
+        $totalMonths = $startDate->diffInMonths($endDate);
+        if($totalMonths < 1) $totalMonths = 1;
 
-    $totalMonths = $startDate->diffInMonths($endDate);
-    if ($totalMonths < 1) $totalMonths = 1;
-    $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
+        $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
 
-    $readOnly = true;
-
-    return view('projects.openprojectdetails', compact(
-        'project',
-        'totalSpent',
-        'balance',
-        'spentPercentage',
-        'finData',
-        'mprsSubmitted',
-        'mprsLeft',
-        'totalMonths',
-        'readOnly'
-    ));
-}
-
-   public function show($id)
-{
-    $project = Project::with('milestones', 'attachments')->where('prj_id', $id)->firstOrFail();
-    
-    // 1. Calculate Total Spent
-    $totalSpent = DB::table('fin.transactions')
-        ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
-        ->where('fin.commitments.cmt_docid', $id)
-        ->sum('fin.transactions.trn_amount1');
-
-    // 2. Balance
-    $balance = $project->prj_propcost - $totalSpent;
-    $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
-
-    // 3. Category Data
-    $finData = [
-        'equip' => $totalSpent * 0.45,
-        'hr'    => $totalSpent * 0.35,
-        'misc'  => $totalSpent * 0.20
-    ];
-
-    // --- NEW: MPR STATISTICS LOGIC ---
-    // Count Submitted
-    $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
-
-    // Calculate Expected/Left based on Duration (Months)
-    $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : \Carbon\Carbon::now();
-    $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : \Carbon\Carbon::now();
-    
-    // Total duration in months
-    $totalMonths = $startDate->diffInMonths($endDate);
-    if($totalMonths < 1) $totalMonths = 1; // Minimum 1 month
-
-    // Left = Total Duration - Submitted
-    $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
-
-    return view('projects.openprojectdetails', compact(
-        'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
-        'mprsSubmitted', 'mprsLeft', 'totalMonths' // <-- Ye variables pass kiye hain
-    ));
-}
+        return view('projects.openprojectdetails', compact(
+            'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
+            'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head', 'subheads'
+        ));
+    }
 
     // --- 2. CREATE PROJECT PAGE (Smart Logic) ---
     public function create(Request $request)
