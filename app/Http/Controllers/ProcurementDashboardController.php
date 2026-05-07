@@ -85,13 +85,17 @@ class ProcurementDashboardController extends Controller
         $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
             ->findOrFail($id);
 
-        // Fetch Live Financials
+        // Fetch Live Financials using FinancialIntelligenceService
         $project = $purchase->project;
         if ($project) {
-            $totalSpent = Purchase::where('pcs_hed_id', $project->prj_id)
-                ->where('pcs_status', 'Approved')
-                ->sum('pcs_price');
-            $project->hed_balance = ($project->prj_aprvcost ?? 0) - $totalSpent;
+            $finService = app(\App\Services\FinancialIntelligenceService::class);
+            $headRecord = DB::table('cen.heads')->where('hed_prj_id', $project->prj_id)->first();
+            if ($headRecord) {
+                $headStatus = $finService->getHeadStatus($headRecord->hed_id);
+                $project->hed_balance = $headStatus->available ?? 0;
+            } else {
+                $project->hed_balance = ($project->prj_aprvcost ?? 0) - 0;
+            }
         }
         $head = $project;
 

@@ -649,22 +649,28 @@ public function markMilestoneComplete(Request $request)
    {
        $project = Project::with('milestones', 'attachments')->where('prj_id', $id)->firstOrFail();
        
-       // 1. Calculate Total Spent
-       $totalSpent = DB::table('fin.transactions')
-           ->join('fin.commitments', 'fin.transactions.trn_cmt_id', '=', 'fin.commitments.cmt_id')
-           ->where('fin.commitments.cmt_docid', $id)
-           ->sum('fin.transactions.trn_amount1');
-
-       // 2. Balance
-       $balance = $project->prj_propcost - $totalSpent;
-       $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
-
-       // 3. Category Data
-       $finData = [
-           'equip' => $totalSpent * 0.45,
-           'hr'    => $totalSpent * 0.35,
-           'misc'  => $totalSpent * 0.20
-       ];
+       // 1. Get Financial Intelligence using proper service
+       $finService = app(\App\Services\FinancialIntelligenceService::class);
+       $headRecord = DB::table('cen.heads')->where('hed_prj_id', $id)->first();
+       
+       $totalSpent = 0;
+       $balance = $project->prj_propcost;
+       $spentPercentage = 0;
+       $finData = ['equip' => 0, 'hr' => 0, 'misc' => 0];
+       
+       if ($headRecord) {
+           $head = $finService->getHeadStatus($headRecord->hed_id);
+           $totalSpent = $head->expenditure ?? 0;
+           $balance = $head->balance ?? ($project->prj_propcost - $totalSpent);
+           $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+           
+           // 3. Category Data
+           $finData = [
+               'equip' => $totalSpent * 0.45,
+               'hr'    => $totalSpent * 0.35,
+               'misc'  => $totalSpent * 0.20
+           ];
+       }
 
        // --- MPR STATISTICS --
        $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();

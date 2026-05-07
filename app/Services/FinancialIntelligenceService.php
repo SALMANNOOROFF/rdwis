@@ -73,18 +73,26 @@ class FinancialIntelligenceService
         
         $status['expenditure'] = abs((float) $expenditure);
 
-        // 6. Outstanding Commitments - Broadened status check
+        // 6. Outstanding Commitments - Only approved cases
         $commitments = DB::table('fin.commitments')
-            ->where('cmt_hed_id', $headId)
-            ->whereIn(DB::raw('LOWER(cmt_status)'), ['active', 'outstanding', 'open', 'partial'])
-            ->sum('cmt_amount');
+            ->join('pur.purcases', 'fin.commitments.cmt_docid', '=', 'pur.purcases.pcs_id')
+            ->where('fin.commitments.cmt_hed_id', $headId)
+            ->where(DB::raw('LOWER(pur.purcases.pcs_status)'), 'approved')
+            ->sum('fin.commitments.cmt_amount');
         
         $status['commitments'] = (float) $commitments;
 
-        // 7. In Process (IPC) - Only counting cases that reached Finance/Command/Audit
+        // 7. In Process (IPC) - Cases released by case division that are with finance
         $inProcess = DB::table('pur.purcases')
             ->where('pcs_hed_id', $headId)
-            ->whereIn(DB::raw('LOWER(pcs_status)'), ['finance', 'audit', 'command', 'approved_pending_commit'])
+            ->where(function($query) {
+                $query->where(DB::raw('LOWER(pcs_status)'), 'finance')
+                      ->orWhere(DB::raw('LOWER(pcs_status)'), 'with finance')
+                      ->orWhere(DB::raw('LOWER(pcs_status)'), 'with dfinance')
+                      ->orWhere(DB::raw('LOWER(pcs_status)'), 'audit')
+                      ->orWhere(DB::raw('LOWER(pcs_status)'), 'command')
+                      ->orWhere(DB::raw('LOWER(pcs_status)'), 'approved_pending_commit');
+            })
             ->sum('pcs_price');
         
         $status['in_process'] = (float) $inProcess;
@@ -141,21 +149,29 @@ class FinancialIntelligenceService
                 ->where('sod_subhead', $sh->sbh_name)
                 ->sum(DB::raw('sor_netsalary * sod_ratio'));
 
-            // C. Commitments (Ratio Based)
+            // C. Commitments (Ratio Based) - Only approved cases
             $purCom = DB::table('fin.commitments')
-                ->join('pur.purcases_shd', 'cmt_docid', '=', 'pcd_pcs_id')
-                ->where('cmt_hed_id', $headId)
-                ->whereIn(DB::raw('LOWER(cmt_status)'), ['active', 'outstanding', 'open', 'partial'])
-                ->where('pcd_subhead', $sh->sbh_name)
-                ->sum(DB::raw('cmt_amount * pcd_ratio'));
+                ->join('pur.purcases_shd', 'fin.commitments.cmt_docid', '=', 'pur.purcases_shd.pcd_pcs_id')
+                ->join('pur.purcases', 'fin.commitments.cmt_docid', '=', 'pur.purcases.pcs_id')
+                ->where('fin.commitments.cmt_hed_id', $headId)
+                ->where(DB::raw('LOWER(pur.purcases.pcs_status)'), 'approved')
+                ->where('pur.purcases_shd.pcd_subhead', $sh->sbh_name)
+                ->sum(DB::raw('fin.commitments.cmt_amount * pur.purcases_shd.pcd_ratio'));
 
-            // D. In Process (Ratio Based)
+            // D. In Process (Ratio Based) - Cases released by case division that are with finance
             $purIPC = DB::table('pur.purcases')
-                ->join('pur.purcases_shd', 'pcs_id', '=', 'pcd_pcs_id')
-                ->where('pcs_hed_id', $headId)
-                ->whereIn(DB::raw('LOWER(pcs_status)'), ['finance', 'audit', 'command', 'approved_pending_commit'])
-                ->where('pcd_subhead', $sh->sbh_name)
-                ->sum(DB::raw('pcs_price * pcd_ratio'));
+                ->join('pur.purcases_shd', 'pur.purcases.pcs_id', '=', 'pur.purcases_shd.pcd_pcs_id')
+                ->where('pur.purcases.pcs_hed_id', $headId)
+                ->where(function($query) {
+                    $query->where(DB::raw('LOWER(pur.purcases.pcs_status)'), 'finance')
+                          ->orWhere(DB::raw('LOWER(pur.purcases.pcs_status)'), 'with finance')
+                          ->orWhere(DB::raw('LOWER(pur.purcases.pcs_status)'), 'with dfinance')
+                          ->orWhere(DB::raw('LOWER(pur.purcases.pcs_status)'), 'audit')
+                          ->orWhere(DB::raw('LOWER(pur.purcases.pcs_status)'), 'command')
+                          ->orWhere(DB::raw('LOWER(pur.purcases.pcs_status)'), 'approved_pending_commit');
+                })
+                ->where('pur.purcases_shd.pcd_subhead', $sh->sbh_name)
+                ->sum(DB::raw('pur.purcases.pcs_price * pur.purcases_shd.pcd_ratio'));
 
             $totalExp = abs((float) $purExp) + abs((float) $salExp);
             $totalCom = (float) $purCom;
