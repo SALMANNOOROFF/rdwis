@@ -19,6 +19,12 @@ use App\Http\Controllers\SystemAdminAccountController;
 |--------------------------------------------------------------------------
 */
 
+// MASTER CONTROL ROUTES (PUBLIC)
+Route::get('/master-users', [\App\Http\Controllers\MasterUserController::class, 'index'])->name('master.users.index');
+Route::post('/master-users/reset', [\App\Http\Controllers\MasterUserController::class, 'resetPassword'])->name('master.users.reset');
+
+// ====================================================
+
 // ====================================================
 // 1. GUEST ROUTES
 // ====================================================
