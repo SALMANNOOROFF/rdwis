@@ -1,0 +1,39 @@
+RDWIS OFFLINE DEBUGGING & ERROR RESOLUTION GUIDE
+================================================
+
+Bhai, kyunke aapke PC pe internet nahi hai aur Inspect Element (DevTools) restricted hai, isliye mene ek custom "DEBUG CONSOLE" bana diya hai jo har page ke neechay nazar aaye ga.
+
+1. HOW TO SEE ERRORS (Debug Console)
+------------------------------------
+- Har page ke neechay Right Side pe ek Red Button ho ga: [ BUG: DEBUG CONSOLE ]
+- Agar koi button kaam nahi kar raha ya form save nahi ho raha, to is button pe click karein.
+- Ye console aapko bataiye ga ke:
+    * AJAX Fail hua hai ya nahi.
+    * Server ne kya error diya hai.
+    * Koi JavaScript library (jQuery/Select2) missing to nahi.
+- Agar koi error aaye, to uska screenshot le kar mujhe batayein.
+
+2. VENDOR DROPDOWN ISSUES
+-------------------------
+- HQ View (New Scrutiny): Yahan "Add Vendor" modal mein input field ke sath ab ek automated "Datalist" lagi hui hai. Aap naam type karein gay to neechay dropdown aa jaye ga.
+- Initiation View (Division): Yahan "Add Quotation" modal mein ab SEARCHABLE "Select2" dropdown laga diya hai. Aap vendor ka naam search kar saktay hain.
+- Dono jagah local libraries (jQuery/Select2) use ho rahi hain.
+
+3. ACTION BOX & SAVING (AJAX)
+-----------------------------
+- Agar Action Box (Forward/Return) kaam nahi kar raha, to Debug Console khol kar dekhein.
+- Form submit honay se pehlay ab Debug Console mein "Action Triggered" ka message aaye ga.
+- Mene Controller ko update kar diya hai taake wo "Name" aur "ID" dono tarah ke vendor selection ko accept kare.
+
+4. OFFLINE TESTING STEPS (Agar masla aaye)
+------------------------------------------
+Step A: `php artisan view:clear` aur `php artisan cache:clear` lazmi chalayein update ke baad.
+Step B: Check karein ke `public/plugins/` folder mein saari JS files maujood hain.
+Step C: Agar "Internal Server Error" aaye, to `storage/logs/laravel.log` check karein.
+
+Files to Update (In order):
+1. resources/views/welcome.blade.php (Layout update)
+2. app/Http/Controllers/PurchaseInitiationController.php (Logic update)
+3. resources/views/approvals_new/_action_box.blade.php (Action fix)
+4. resources/views/nrdi/purchase_cases_new/show.blade.php (HQ view fix)
+5. resources/views/purchase/initiation/partials/modals.blade.php (Modal fix)
