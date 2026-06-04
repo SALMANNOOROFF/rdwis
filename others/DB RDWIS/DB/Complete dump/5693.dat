@@ -1,0 +1,27 @@
+100000	49	Director General	DG	specific	49	multiple	editor
+200000	19	Director Communication	DCom	specific	39	single	editor
+250000	19	Director Enabling Technology	DEnab	specific	39	single	editor
+300000	19	Director Naval Weapon Systems	DNWS	specific	39	single	editor
+350000	19	Director Sensors	DSensor	specific	39	single	editor
+400000	19	Director System of Systems	DSOS	specific	39	single	editor
+450000	19	Director Systems	DSys	specific	39	single	editor
+800000	25	Director Finance	DFin	specific	39	single	editor
+820000	25	Manager HR	MHR	specific	39	multiple	editor
+840000	25	Admin Officer	AO	specific	39	single	editor
+880000	25	Manager IS	MIS	specific	39	single	editor
+180000	25	Director R&D	DR&D	specific	39	multiple	editor
+800000	24	Accounts Officer	AccOfficer	specific	29	multiple	editor
+820000	25	Staff Officer HR	SO HR	specific	39	multiple	editor
+800000	24	Staff Officer Finance	SO Finance	specific	29	multiple	editor
+180000	25	Staff Officer R&D	SO R&D	specific	39	multiple	editor
+860000	25	Staff Officer IT&CYS	SO IT&CYS	specific	39	single	editor
+100000	11	System Admin	Sys Admin	specific	0	multiple	viewer
+10000	59	Director NRD	DNRD	specific	69	single	viewer
+450000	19	PI Systems	DSys	specific	39	single	editor
+160000	25	Subject Matter Expert	SME	specific	49	multiple	viewer
+160000	39	Managing Director	MD	specific	49	multiple	editor
+100000	35	Director Planning And Coordination	DP&C	specific	49	multiple	viewer
+990000	49	MTSS Representative	MTSS Rep	specific	49	multiple	viewer
+\.
+
+

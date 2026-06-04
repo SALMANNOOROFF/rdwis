@@ -1,0 +1,269 @@
+Attribute VB_Name = "Contract"
+Option Compare Database
+Option Explicit
+
+Public Sub GeneratePlan(Mode As String, ContractStart As Date, ContractEnd As Date, Optional RecId As Long)
+Dim dbsGen As Database
+Dim rstGen As Recordset
+Dim strTableName As String
+Dim strField As String, strField1 As String, strField2 As String, strField3 As String
+Dim dtMonthStart As Date
+Dim dtMonthEnd As Date
+
+Select Case Mode
+    Case "Test"
+        strTableName = "hr_contractplan_temp"
+        strField = "cpn_ctr_id"
+        strField1 = "cpn_startdt"
+        strField2 = "cpn_enddt"
+    Case "Contract"
+        strTableName = "hr_contractplans"
+        strField = "cpn_ctr_id"
+        strField1 = "cpn_startdt"
+        strField2 = "cpn_enddt"
+    Case "CtrCase"
+        strTableName = "hr_ctrcaseplans"
+        strField = "ccp_ctc_id"
+        strField1 = "ccp_startdt"
+        strField2 = "ccp_enddt"
+    End Select
+
+Set dbsGen = CurrentDb()
+If Mode = "Test" Then dbsGen.Execute "Delete From " & strTableName
+Set rstGen = dbsGen.OpenRecordset(strTableName)
+dtMonthStart = ContractStart
+Do While dtMonthStart <= ContractEnd
+    dtMonthEnd = LastDateThisMonth(dtMonthStart)
+    If ContractEnd < dtMonthEnd Then dtMonthEnd = ContractEnd
+    rstGen.AddNew
+    rstGen.Fields(strField) = RecId
+    rstGen.Fields(strField1) = dtMonthStart
+    rstGen.Fields(strField2) = dtMonthEnd
+    rstGen.Update
+    dtMonthStart = FirstDateThisMonth(DateAdd("m", 1, dtMonthStart))
+    Loop
+
+End Sub
+
+'Adjusts plan as Permission parent dates. If no plan exixts, a new plan is created.
+'Head is provided or omitted or "Auto"
+Public Sub AdjustPlan(Mode As String, RecId As Long, Optional head As Variant)
+Dim dbsPlan As Database
+Dim rstPlan As Recordset
+Dim strTableName As String
+Dim strField As String, strField1 As String, strField2 As String, strField3 As String
+Dim dtCtrStart As Date
+Dim dtCtrEnd As Date
+Dim dtPlanStart As Date
+Dim dtPlanEnd As Date
+Dim dtNewStart As Date
+Dim dtNewEnd As Date
+
+'Note contract start and end dates
+Select Case Mode
+    Case "Contract"
+        strTableName = "hr_contracts"
+        strField = "ctr_id"
+        strField1 = "ctr_startdt"
+        strField2 = "ctr_enddt"
+    Case "CtrCase"
+        strTableName = "hr_ctrcases"
+        strField = "ctc_id"
+        strField1 = "ctc_newstartdt"
+        strField2 = "ctc_newenddt"
+    End Select
+
+Set dbsPlan = CurrentDb()
+Set rstPlan = dbsPlan.OpenRecordset("Select * From " & strTableName & " Where " & strField & " = " & RecId, dbOpenSnapshot)
+dtCtrStart = rstPlan.Fields(strField1)
+dtCtrEnd = rstPlan.Fields(strField2)
+If Mode = "Contract" Then
+    If Not IsNull(rstPlan!ctr_termindt) Then dtCtrEnd = rstPlan!ctr_termindt
+    End If
+rstPlan.Close
+
+'Adjust plan start
+Select Case Mode
+    Case "Contract"
+        strTableName = "hr_contractplans"
+        strField = "cpn_ctr_id"
+        strField1 = "cpn_startdt"
+        strField2 = "cpn_enddt"
+        strField3 = "cpn_hed_id"
+    Case "CtrCase"
+        strTableName = "hr_ctrcaseplans"
+        strField = "ccp_ctc_id"
+        strField1 = "ccp_startdt"
+        strField2 = "ccp_enddt"
+        strField3 = "ccp_hed_id"
+    End Select
+
+Set rstPlan = dbsPlan.OpenRecordset("Select * From " & strTableName & " Where " & strField & " = " & RecId & " Order by " & strField1, dbOpenDynaset, dbSeeChanges)
+If Not rstPlan.EOF Then
+    rstPlan.MoveFirst
+    dtPlanStart = rstPlan.Fields(strField1)
+    Else
+    dtPlanStart = dtCtrEnd
+    End If
+
+Select Case True
+    Case dtCtrStart < dtPlanStart
+        dtNewStart = DateAdd("m", -1, FirstDateThisMonth(dtPlanStart))
+        dtNewEnd = LastDateThisMonth(dtNewStart)
+        If Not rstPlan.EOF Then
+            'If Head = "Auto" And Not IsNull(rstPlan.Fields(strField3)) Then Head = rstPlan.Fields(strField3)
+            rstPlan.Edit
+            rstPlan.Fields(strField1) = IIf(dtCtrStart > dtNewEnd, dtCtrStart, DateAdd("d", 1, dtNewEnd))
+            rstPlan.Update
+            End If
+        Do Until dtNewEnd < dtCtrStart
+            With rstPlan
+                .AddNew
+                .Fields(strField) = RecId
+                .Fields(strField1) = IIf(dtNewStart > dtCtrStart, dtNewStart, dtCtrStart)
+                .Fields(strField2) = dtNewEnd
+                If Not IsMissing(head) Then .Fields(strField3) = head
+                .Update
+                End With
+            dtNewEnd = DateAdd("d", -1, dtNewStart)
+            dtNewStart = FirstDateThisMonth(dtNewEnd)
+            Loop
+
+    Case dtCtrStart > dtPlanStart
+        Do While rstPlan.Fields(strField2) < dtCtrStart
+            rstPlan.Delete
+            rstPlan.MoveNext
+            Loop
+            rstPlan.Edit
+            rstPlan.Fields(strField1) = dtCtrStart
+            rstPlan.Update
+    End Select
+
+'Adjust plan end
+rstPlan.Requery
+rstPlan.MoveLast
+dtPlanEnd = rstPlan.Fields(strField2)
+Select Case True
+    Case dtCtrEnd > dtPlanEnd
+        dtNewStart = DateAdd("m", 1, FirstDateThisMonth(dtPlanEnd))
+        dtNewEnd = LastDateThisMonth(dtNewStart)
+        'If Head = "Auto" And Not IsNull(rstPlan.Fields(strField3)) Then Head = rstPlan.Fields(strField3)
+        rstPlan.Edit
+        rstPlan.Fields(strField2) = IIf(dtCtrEnd < dtNewStart, dtCtrEnd, DateAdd("d", -1, dtNewStart))
+        rstPlan.Update
+        Do Until dtNewStart > dtCtrEnd
+            With rstPlan
+                .AddNew
+                .Fields(strField) = RecId
+                .Fields(strField1) = dtNewStart
+                .Fields(strField2) = IIf(dtNewEnd < dtCtrEnd, dtNewEnd, dtCtrEnd)
+                If Not IsMissing(head) Then .Fields(strField3) = head
+                .Update
+                End With
+            dtNewStart = DateAdd("d", 1, dtNewEnd)
+            dtNewEnd = LastDateThisMonth(dtNewStart)
+            Loop
+    
+    Case dtCtrEnd < dtPlanEnd
+        Do While rstPlan.Fields(strField1) > dtCtrEnd
+            rstPlan.Delete
+            rstPlan.MovePrevious
+            Loop
+            rstPlan.Edit
+            rstPlan.Fields(strField2) = dtCtrEnd
+            rstPlan.Update
+    End Select
+
+End Sub
+
+Public Sub GetContractPlanUnassigned(ContractId As Long)
+Dim dbsGen As Database
+Dim rstGen As Recordset
+Dim rstCpn As Recordset
+
+Set dbsGen = CurrentDb()
+dbsGen.Execute "Delete From hr_contractplan_temp"
+Set rstGen = dbsGen.OpenRecordset("hr_contractplan_temp")
+Set rstCpn = dbsGen.OpenRecordset("Select * From hr_contractplans Where cpn_ctr_id = " & ContractId & " And IsNull(cpn_hed_id) Order By cpn_startdt", dbOpenSnapshot)
+
+Do While Not rstCpn.EOF
+    rstGen.AddNew
+    rstGen!cpn_id = rstCpn!cpn_id
+    rstGen!cpn_ctr_id = rstCpn!cpn_ctr_id
+    rstGen!cpn_startdt = rstCpn!cpn_startdt
+    rstGen!cpn_enddt = rstCpn!cpn_enddt
+    rstGen.Update
+    rstCpn.MoveNext
+    Loop
+
+End Sub
+
+Public Function AddCtrApprovalDoc(CtrIds As String, minute As Integer) As Long
+Dim dbsAddApp As Database
+Dim rstAddApp As Recordset
+Dim lngCcmId As Long
+
+'Add record in Approval docs list
+Set dbsAddApp = CurrentDb()
+Set rstAddApp = dbsAddApp.OpenRecordset("hr_ctrcaseminutes", dbOpenDynaset, dbSeeChanges)
+With rstAddApp
+    .AddNew
+    !ccm_ctrcases = CtrIds
+    !ccm_minute = minute
+    .Update
+    .Bookmark = .LastModified
+    End With
+lngCcmId = rstAddApp!ccm_id
+rstAddApp.Close
+Set rstAddApp = Nothing
+
+AddCtrApprovalDoc = lngCcmId
+End Function
+Function MakeMonthString(CtrCaseID As Long, HeadId As Variant) As String
+Dim dbsMaker As Database
+Dim rstMaker As Recordset
+Dim strMonths As String
+Dim intContinuity As Integer
+
+If IsEmpty(HeadId) Then HeadId = Null
+Set dbsMaker = CurrentDb()
+Set rstMaker = dbsMaker.OpenRecordset("Select * From hr_ctrcaseplans Where ccp_ctc_id = " & CtrCaseID & " Order By ccp_startdt", dbOpenSnapshot)
+
+Do While Not rstMaker.EOF
+    If Nz(rstMaker!ccp_hed_id, 0) = Nz(HeadId, 0) Then
+        If intContinuity = 0 Then
+            strMonths = strMonths & ",  " & Format(rstMaker!ccp_startdt, "mmm yy")
+            Else
+            If intContinuity > 1 Then strMonths = Left(strMonths, Len(strMonths) - 6)
+            strMonths = strMonths & " - " & Format(rstMaker!ccp_startdt, "mmm yy")
+            End If
+        intContinuity = intContinuity + 1
+        Else
+        intContinuity = 0
+        End If
+    rstMaker.MoveNext
+    Loop
+strMonths = Right(strMonths, Len(strMonths) - 3)
+
+Do While Not InStr(strMonths, " -  - ") = 0
+    strMonths = Replace(strMonths, " -  - ", " - ")
+    Loop
+
+MakeMonthString = strMonths
+End Function
+Sub dooo()
+Dim h
+Debug.Print MakeMonthString(17, h)
+'AdjustPlan "CtrCase", 13
+'GenerateContractPlan #1/13/2024#, #2/1/2024#
+'Dim dbs As Database
+'Dim rst As Recordset
+'Set dbs = CurrentDb()
+'Set rst = dbs.OpenRecordset("hr_contracts", dbOpenSnapshot)
+'Do While Not rst.EOF
+'    AdjustContractPlan (rst!ctr_id)
+'    rst.MoveNext
+'    Loop
+End Sub
+
+

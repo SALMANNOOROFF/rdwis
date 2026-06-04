@@ -1,0 +1,318 @@
+Attribute VB_Name = "Attachment"
+Option Compare Database
+Option Explicit
+
+Public Sub FileResponse(ObjectType As String, ObjectId As Variant, FileType As String, SlotId As Variant, FilePath As String, FormName As String, FormTitle As String)
+Dim strObjAuth As String
+Dim booAuth As Boolean
+On Error GoTo FileResponse_Err
+
+strObjAuth = ObjectType & "-" & getVar("varUnitArea")
+Select Case strObjAuth
+    Case "prj-prj", "emp-prj", "emp-hr", "ctc-prj", "ctc-hr", "pcs-prj", "pcs-fin", "ina - prj", "rev-it", "pgh-prj", "msn-prj", "ctr-hr"
+        booAuth = True
+    End Select
+
+If FilePath <> "" Then
+    If booAuth = True Then
+        DoCmd.OpenForm "choose_file_action", acNormal, , , acFormPropertySettings, acWindowNormal, FileBankDest() & FilePath
+        Else
+        DoCmd.OpenForm "wait"
+        DoCmd.Hourglass True
+        FollowHyperlink FileBankDest() & FilePath
+        DoCmd.Close acForm, "wait"
+        DoCmd.Hourglass False
+        End If
+    Else
+    If booAuth = True Then
+        DoCmd.OpenForm "attach", acNormal, "", "", , acNormal, ObjectType & "~" & ObjectId & "~" & FileType & "~" & SlotId & "~" & FormName & "~" & FormTitle
+        Else
+        If Nz(SlotId, "") = "" Then
+            MsgBox "Attachment not allowed.", vbCritical
+            Else
+            MsgBox "No file attached.", vbCritical
+            End If
+        End If
+    End If
+
+
+Exit Sub
+
+FileResponse_Err:
+MsgBox Error$, vbCritical
+If CurrentProject.AllForms("wait").IsLoaded Then
+    DoCmd.Close acForm, "wait"
+    DoCmd.Hourglass False
+    End If
+
+End Sub
+
+Public Function SelectFile(Optional FileType As String) As String
+On Error GoTo Error_Handler
+
+Dim fd As Office.FileDialog
+Dim strSourcePath As String
+Dim strFileExt As String
+Dim strFileType As String
+Dim fso
+
+'Get file source and extension
+Select Case FileType
+    Case "Photo"
+        strFileType = "Jpeg Image"
+        strFileExt = "*.jpg, *.jpeg"
+    Case Else
+        strFileType = "Pdf Document"
+        strFileExt = "*.pdf"
+    End Select
+Set fd = Application.FileDialog(msoFileDialogFilePicker)
+With fd
+    .AllowMultiSelect = False
+    .title = "Please select a file"
+    .Filters.Clear
+    .Filters.Add strFileType, strFileExt
+    If .Show = True Then
+        strSourcePath = .SelectedItems(1)
+        End If
+    End With
+Set fso = Nothing
+strFileExt = Right(strSourcePath, Len(strSourcePath) - InStr(strSourcePath, "."))
+SelectFile = strSourcePath
+Exit Function
+
+Error_Handler:
+    MsgBox "File not added. " & Err.Description, vbCritical
+    Exit Function
+
+End Function
+
+Public Sub AttachFile(ObjectType As String, ObjectId As Variant, FileType As String, SlotId As Variant, SourcePath As String)
+Dim strFileName As String
+Dim strDestFolder As String
+Dim strDestPath As String
+Dim strFileExt As String
+Dim strSql As String
+Dim strFieldName As String
+Dim rstAttach As Recordset
+Dim fso
+
+'xxx create transaction!!!!
+
+'Create slot if not present
+If SlotId = "" Then
+    SlotId = CreateAttachmentSlot(ObjectType, ObjectId, FileType)
+    End If
+
+'Create file name
+Select Case FileType
+    Case "Progress Detail":                 strFileName = "prg-"
+    Case "Approval in Principal":           strFileName = "aip-"
+    Case "Form":                            strFileName = "frm-"
+    Case "Minute":                          strFileName = "min-"
+    Case "Purchase Case":                   strFileName = "pcs-"
+    Case "Market Research Report":          strFileName = "mrr-"
+    Case "Financial Status":                strFileName = "fs-"
+    Case "Photo":                           strFileName = "pht-"
+    Case "Appointment Letter":              strFileName = "apl-"
+    Case "Notice":                          strFileName = "ntc-"
+    Case "Contract":                        strFileName = "ctr-"
+    Case "Project Proposal":                strFileName = "ppr-"
+    Case "PPF":                             strFileName = "ppf-"
+    Case "Work Order":                      strFileName = "wo-"
+    Case "Data Revision Case":              strFileName = "rev-"
+    Case "Milestone Completion Certificate": strFileName = "mcc-"
+    Case Else:                              strFileName = "mx-"
+    End Select
+strFileName = strFileName & ObjectType & "-" & ObjectId
+
+'Assign Destination Folder
+strDestFolder = FileBankDest()
+
+'Assign destination subfolder path and sql
+Select Case ObjectType
+    Case "prj"
+        strDestPath = "\prj\" & strFileName
+        strFieldName = "jat_path"
+        strSql = "Select jat_path From prj_prjattachments Where jat_id = " & SlotId
+    Case "msn"
+        strDestPath = "\prj\" & strFileName
+        strFieldName = "msn_cc_path"
+        strSql = "Select msn_cc_path From prj_milestones Where msn_idd = " & ObjectId
+    Case "pgh"
+        strDestPath = "\prj\" & strFileName
+        strFieldName = "pgh_path"
+        strSql = "Select pgh_path From prj_prghistory Where pgh_id = " & ObjectId
+    Case "pcs"
+        strDestPath = "\pur\" & strFileName
+        strFieldName = "pat_path"
+        strSql = "Select pat_path From pur_purattachments Where pat_id = " & SlotId
+    Case "emp"
+        Select Case FileType
+            Case "Photo"
+                strDestPath = "\hr\photos\" & strFileName
+                strFieldName = "emp_photodest"
+                strSql = "Select emp_photodest From hr_emps Where emp_id = '" & ObjectId & "'"
+            Case Else
+                strDestPath = "\hr\" & strFileName
+                strFieldName = "eat_path"
+                strSql = "Select eat_path From hr_empattachments Where eat_id = " & SlotId
+                End Select
+    Case "ctc"
+        strDestPath = "\hr\" & strFileName
+        strFieldName = "cat_path"
+        strSql = "Select cat_path From hr_ctrcaseattachments Where cat_id = " & SlotId
+    Case "ctr"
+        Select Case FileType
+            Case "Contract"
+                strDestPath = "\hr\" & strFileName
+                strFieldName = "ctr_path"
+                strSql = "Select ctr_path From hr_contracts Where ctr_id = " & ObjectId
+            Case "Approval"      'Valid only upto contract xxx
+                strDestPath = "\hr\" & strFileName
+                strFieldName = "ctr_path2"
+                strSql = "Select ctr_path2 From hr_contracts Where ctr_id = " & ObjectId
+            End Select
+    Case "rev"
+        strDestPath = "\aud\" & strFileName
+        strFieldName = "aat_path"
+        strSql = "Select aat_path From aud_audattachments Where aat_id = " & SlotId
+    End Select
+
+'Get extension
+strFileExt = Right(SourcePath, Len(SourcePath) - InStrRev(SourcePath, "."))
+
+'Change destination path to cater for duplication and add extension
+If Dir(strDestFolder & strDestPath & "." & strFileExt) <> "" Then strDestPath = ModifyFilePath(strDestPath, strDestFolder, strFileExt)
+
+'Add extension
+strDestPath = strDestPath & "." & strFileExt
+
+'Copy file to file bank
+Set fso = CreateObject("Scripting.FileSystemObject")
+fso.CopyFile (SourcePath), strDestFolder & strDestPath, True
+
+'Enter file path in database
+Set rstAttach = CurrentDb.OpenRecordset(strSql)
+rstAttach.Edit
+rstAttach.Fields(strFieldName) = strDestPath
+rstAttach.Update
+
+'Enter file path at a secondary location if required
+If ObjectType = "ctc" And FileType = "Approval" Then
+    Set rstAttach = CurrentDb.OpenRecordset("Select ctr_path2 From hr_contracts Where ctr_ctc_id = " & ObjectId)
+    Do While Not rstAttach.EOF
+        rstAttach.Edit
+        rstAttach!ctr_path2 = strDestPath
+        rstAttach.Update
+        rstAttach.MoveNext
+        Loop
+    End If
+
+Exit Sub
+
+Error_Handler:
+    MsgBox "File not added. " & Err.Description, vbCritical
+    Exit Sub
+
+End Sub
+
+Public Function CreateAttachmentSlot(ObjectType As String, ObjectId As Variant, FileType As String) As Long
+Dim dbsAttSlot As Database
+Dim rstAttSlot As Recordset
+Dim strTableName As String
+Dim strFieldName1 As String
+Dim strFieldName2 As String
+Dim strFieldName3 As String
+Dim strFieldName4 As String
+
+Select Case ObjectType
+    Case "prj"
+        strTableName = "prj_prjattachments"
+        strFieldName1 = "jat_objtype"
+        strFieldName2 = "jat_objid"
+        strFieldName3 = "jat_type"
+        strFieldName4 = "jat_id"
+    Case "emp"
+        strTableName = "hr_empattachments"
+        strFieldName1 = "eat_objtype"
+        strFieldName2 = "eat_objid"
+        strFieldName3 = "eat_type"
+        strFieldName4 = "eat_id"
+     Case "ctc"
+        strTableName = "hr_ctrcaseattachments"
+        strFieldName1 = "cat_objtype"
+        strFieldName2 = "cat_objid"
+        strFieldName3 = "cat_type"
+        strFieldName4 = "cat_id"
+    Case "pcs"
+        strTableName = "pur_purattachments"
+        strFieldName1 = "pat_objtype"
+        strFieldName2 = "pat_objid"
+        strFieldName3 = "pat_type"
+        strFieldName4 = "pat_id"
+    Case "rev"
+        strTableName = "aud_audattachments"
+        strFieldName1 = "aat_objtype"
+        strFieldName2 = "aat_objid"
+        strFieldName3 = "aat_type"
+        strFieldName4 = "aat_id"
+        End Select
+
+Set dbsAttSlot = CurrentDb()
+Set rstAttSlot = dbsAttSlot.OpenRecordset(strTableName, dbOpenDynaset, dbSeeChanges)
+With rstAttSlot
+    .AddNew
+    .Fields(strFieldName1) = ObjectType
+    .Fields(strFieldName2) = ObjectId
+    .Fields(strFieldName3) = FileType
+    .Update
+    .Bookmark = .LastModified
+    End With
+CreateAttachmentSlot = rstAttSlot.Fields(strFieldName4)
+rstAttSlot.Close
+Set rstAttSlot = Nothing
+
+End Function
+
+Public Function ModifyFilePath(FilePath As String, FileBankDest As String, FileExt As String) As String
+Dim n As Integer
+n = 2
+Do
+    n = n + 1
+    Loop While Dir(FileBankDest & FilePath & "-" & Format(n, "00") & "." & FileExt) <> ""
+ModifyFilePath = FilePath & "-" & Format(n, "00")
+End Function
+
+Public Function FileBankDest() As String
+Dim dbsFile As Database
+Dim tblFile As TableDef
+
+Set dbsFile = CurrentDb()
+Set tblFile = dbsFile.TableDefs("cen_version")
+If InStr(tblFile.Connect, "DATABASE=rdw;") > 0 Then FileBankDest = "\\10.120.29.100\filerepo$"
+If InStr(tblFile.Connect, "DATABASE=trn;") > 0 Then FileBankDest = "\\10.120.29.100\filerepo-trn$"
+If InStr(tblFile.Connect, "DATABASE=dev;") > 0 Then FileBankDest = "D:\filebank-dev$"
+
+End Function
+
+
+Sub zzz()
+Dim dbs As Database
+Dim rst As Recordset
+Dim strPath As String
+Dim fso
+On Error Resume Next
+
+Set fso = CreateObject("Scripting.FileSystemObject")
+'strPath = FileBankDest()
+'fso.CopyFile strPath & "\hr\photos\*.jpg", "D:\Users\NRDI-MIS\Documents\NRDI\RDWIS data\photos"
+
+Set dbs = CurrentDb()
+Set rst = dbs.OpenRecordset("Select * From hr_emps Where emp_status = 'Active'", dbOpenSnapshot)
+
+Do While Not rst.EOF
+    fso.CopyFile "D:\Users\NRDI-MIS\Documents\NRDI\RDWIS data\photos\photo-" & rst!emp_id & ".jpg", "D:\Users\NRDI-MIS\Documents\NRDI\RDWIS data\photos-2\" & rst!emp_name & ".jpg"
+    fso.CopyFile "D:\Users\NRDI-MIS\Documents\NRDI\RDWIS data\photos\pht-emp-" & rst!emp_id & ".jpg", "D:\Users\NRDI-MIS\Documents\NRDI\RDWIS data\photos-2\" & rst!emp_name & ".jpg"
+    rst.MoveNext
+    Loop
+End Sub

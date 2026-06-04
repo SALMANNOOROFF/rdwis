@@ -1,0 +1,81 @@
+100000	Navy Research and Development Institute	Institute	NRDI	2001-01-01	\N	\N	100000	\N
+160000	Research and Development Wing	Wing	RDW	2001-01-01	\N	\N	160000	\N
+180000	Projects Department	Department	PROJECTS	2001-01-01	\N	\N	180000	\N
+200000	Communication Division	Division	COMM	2001-01-01	\N	\N	200000	\N
+250000	Enabling Technology Division	Division	ENAB	2001-01-01	\N	\N	250000	\N
+300000	Naval Weapons System Division	Division	NWS	2001-01-01	\N	\N	300000	\N
+350000	Sensors Division	Division	SENSORS	2001-01-01	\N	\N	350000	\N
+400000	System of Systems Division	Division	SOS	2001-01-01	\N	\N	400000	\N
+450000	Systems Division	Division	SYS	2001-01-01	\N	\N	450000	\N
+800000	Finance Department	Department	FIN	2001-01-01	\N	\N	800000	\N
+820000	Human Resource Department	Department	HR	2001-01-01	\N	\N	820000	\N
+840000	Administration Department	Department	ADMIN	2001-01-01	\N	\N	840000	\N
+860000	Information Technology Department	Department	IT	2001-01-01	\N	\N	860000	\N
+880000	Information System Department	Department	IS	2001-01-01	\N	\N	880000	\N
+990000	External	External	EXT	2001-01-01	\N	\N	990000	\N
+990001	Project Funder	ExtHead	PFND	2001-01-01	\N	\N	990000	\N
+990009	Other Source	ExtHead	OSRC	2001-01-01	\N	\N	990000	\N
+990011	MTSS	ExtHead	MTSS	2001-01-01	\N	\N	990000	\N
+990019	Other Consumer	ExtHead	OCNM	2001-01-01	\N	\N	990000	\N
+200007	Development of NIU for PNS/M HAMZA	Project	NIU-HZ	2021-10-20	\N	1	200000	200007
+200001	Metgraph	Project	MET	2001-01-01	\N	1	200000	200001
+200003	Indigenous development of NIU for PNS/M HURMAT	Project	NIU	2019-06-20	\N	1	200000	200003
+200004	Overhaul of ELINT System of RDS Nathiagali	Project	ELINT	2019-10-01	\N	2	200000	200004
+200008	Functional Replacement of CRTs of CDS with LED Displays for PNS ALAMGIR	Project	CDS	2021-10-20	\N	1	200000	200008
+250001	Video Analytics	Project	VA	2016-07-15	\N	2	250000	250001
+250002	Establishment of Virtual Reality Center	Project	VRC	2020-08-27	\N	2	250000	250002
+300001	Indigenous Development of ROV for UW Operations onboard MCMVs	Project	ROV	2019-09-03	\N	2	300000	300001
+300002	Unmanned Underwater Vehicle	Project	UUV	2010-04-17	2020-04-05	2	300000	300002
+350002	Eagle Hunt - UAVs GPS jamming and spoofing	Project	EH	2018-02-01	\N	1	350000	350002
+350003	Directed Energy Weapons	Project	MC	2020-02-12	\N	2	350000	350003
+350004	Medium Altitude Long Endurance Unmanned Combat Aerial Vehicle (Male UCAV)	Project	UCAV	2020-02-12	\N	2	350000	350004
+350005	High Speed Target Drone	Project	HSTD	2020-02-12	\N	2	350000	350005
+350010	Indigenous Development of VFDs onboard Agosta 90B Submarine	Project	VFD	2021-01-01	\N	1	350000	350010
+350012	Remaining Useful life estimation of in-service systems onboard PN ships	Project	RUL	2021-07-01	\N	1	350000	350012
+400001	Supersonic metal spray for submarines	Project	SMSRS	2001-01-01	\N	2	400000	400001
+350014	RAVEN-2	Project	RAV-II	2001-01-01	\N	1	350000	350014
+200006	Development of NIU for PNS/M HASHMAT	Project	NIU-HS	2021-10-20	\N	1	200000	200006
+350006	High Speed Target Drone 2	Project	HSTD-II	2021-12-15	\N	1	350000	350006
+350015	Directed Energy Weapons 2	Project	MC-II	2021-12-15	\N	1	350000	350015
+300003	ROV-II	Project	ROV-II	2022-02-02	\N	1	300000	300003
+350018	xxx	Project	SUR	2022-04-12	\N	1	350000	350018
+200009	ELINT-II	Project	ELINT-II	2022-02-09	\N	1	200000	200009
+350009	Eagle Hunt-01	Project	EH1	2020-02-11	\N	1	350000	350009
+350013	RAVEN-1	Project	RAV-I	2001-01-01	\N	1	350000	350013
+200011	xxx	Project	METLP	2022-11-24	\N	1	200000	200011
+200012	xxx	Project	DADSS	2022-12-28	\N	1	200000	200012
+350022	xxx	Project	BSE-D	2023-03-27	\N	1	350000	350022
+350023	xxx	Project	BSE-F	2023-03-27	\N	1	350000	350023
+350021	xxx	Project	LDL	2023-03-27	\N	1	350000	350021
+350020	xxx	Project	LRFA	2023-03-27	\N	1	350000	350020
+350024	xxx	Project	RADOME	2023-04-04	\N	1	350000	350024
+350025	xxx	Project	TWT	2023-05-18	\N	1	350000	350025
+350026	xxx	Project	DNF	2023-06-08	\N	1	350000	350026
+300005	xxx	Project	ROV-III	2023-06-15	\N	1	300000	300005
+350028	xxx	Project	MC3	2023-07-03	\N	1	350000	350028
+200014	xxx	Project	IGS	2023-07-04	\N	1	200000	200014
+200013	xxx	Project	TLI	2023-07-04	\N	1	200000	200013
+350027	xxx	Project	GPI	2023-07-20	\N	1	350000	350027
+250003	xxx	Project	STLT	2023-07-25	\N	1	250000	250003
+350029	xxx	Project	VFD-AC	2023-08-03	\N	1	350000	350029
+350030	xxx	Project	HH1	2023-08-09	\N	1	350000	350030
+350031	xxx	Project	VFD2	2023-08-15	\N	1	350000	350031
+450002	25GUN	Project	25MMGUN	2021-11-05	\N	1	450000	450002
+160001	Research Grant Account	Account	RGA	2001-01-01	\N	2	160000	\N
+300006	xxx	Project	HYDROV	2023-10-05	\N	1	300000	300006
+350019	xxx	Project	L-PRO	2023-03-27	\N	1	350000	350019
+300007	xxx	Project	PAP104	2023-11-24	\N	1	300000	300007
+200017	xxx	Project	SSMLP	2024-01-29	\N	1	200000	200017
+200018	xxx	Project	NDB	2024-01-29	\N	1	200000	200018
+350011	Vertical Takeoff and Landing Aircraft	Project	VTOL	2001-01-01	2023-08-04	1	350000	350011
+450001	Underwater Sea Surveillance System Acoustic Sensor Network	Project	PKS	2001-01-01	2023-08-04	2	450000	450001
+200002	Interfacing of Link Y with DVBS	Project	DVBS	2018-11-15	2024-02-02	2	200000	200002
+400002	Data Bell Logger	Project	DBL	2001-01-01	2024-02-02	1	400000	400002
+350007	Video Telemetry System	Project	VTS	2001-01-01	2024-02-02	1	350000	350007
+300008	xxx	Project	ROV-PH2	2024-05-16	\N	1	300000	300008
+350033	xxx	Project	MDB-1	2024-05-16	\N	1	350000	350033
+350032	xxx	Project	HFT	2024-05-16	\N	1	350000	350032
+250007	xxx	Project	VR-HARBAH	2024-06-25	\N	1	250000	250007
+\.
+
+

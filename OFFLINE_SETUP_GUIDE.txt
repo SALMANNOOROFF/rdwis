@@ -1,0 +1,66 @@
+========================================================================
+RDWIS ENHANCED - OFFLINE DEPLOYMENT & TROUBLESHOOTING GUIDE
+========================================================================
+
+This document provides instructions for setting up the Laravel Procurement 
+system in an air-gapped (offline) environment and resolving common issues.
+
+1. OFFLINE SETUP STEPS
+------------------------------------------------------------------------
+A. Copy Files:
+   Copy all files from the 'offline_updates' folder to your target machine, 
+   preserving the directory structure.
+   
+   - Controllers: app/Http/Controllers/
+   - Views: resources/views/nrdi/
+   - Services: app/Services/
+
+B. Clear Laravel Cache:
+   After copying files, you MUST clear the view and route cache to see 
+   changes. Run these commands in the project root:
+   
+   php artisan view:clear
+   php artisan route:clear
+   php artisan config:clear
+
+C. Asset Check:
+   The system is configured to use local assets. Ensure the following 
+   directory exists and contains the library:
+   public/plugins/chartjs4/chart.umd.js
+
+2. TROUBLESHOOTING GRAPHS (CHART.JS)
+------------------------------------------------------------------------
+If graphs are not appearing (empty boxes):
+
+A. Check Chart.js Loading:
+   Press F12 in the browser and check the Console. If you see 
+   "Failed to load resource: net::ERR_FILE_NOT_FOUND", it means 
+   the chart.umd.js file is missing in the public/plugins/chartjs4/ folder.
+
+B. Cache Issues:
+   If you recently updated the view but the old graphs (or no graphs) 
+   show up, run 'php artisan view:clear'.
+
+C. Data Integrity:
+   If the charts show "No Data", verify that the project has:
+   - Approved cases (for historical trends)
+   - Allocation in the 'cen.heads' table
+   - Transactions in 'fin.transactions'
+
+3. DATABASE CONNECTION (POSTGRESQL)
+------------------------------------------------------------------------
+If you see "Connection Refused":
+- Ensure the PostgreSQL service is running on the offline PC.
+- Check your .env file for correct DB_HOST (usually 127.0.0.1), 
+  DB_PORT (5432), and DB_DATABASE.
+
+4. LOGGING ERRORS
+------------------------------------------------------------------------
+If a "500 Internal Server Error" occurs:
+- Check the log file at: storage/logs/laravel.log
+- Look for the most recent lines (at the bottom) to find the 
+  exact file and line number where the error occurred.
+
+========================================================================
+Updated: May 12, 2026
+========================================================================

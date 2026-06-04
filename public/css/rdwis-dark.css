@@ -1,0 +1,1285 @@
+/*
+ * ============================================================
+ *  RDWIS — Obsidian Navy Dark Theme
+ *  Override file for AdminLTE 3.x + Bootstrap 4
+ *
+ *  Usage: Include AFTER adminlte.min.css in welcome.blade.php
+ *  <link rel="stylesheet" href="{{ asset('css/rdwis-dark.css') }}">
+ *
+ *  Author: TheDevCouple (Salman + Wania)
+ *  Version: 1.0.0
+ * ============================================================
+ */
+
+/* ============================================================
+   1. DESIGN TOKENS (CSS Variables)
+   ============================================================ */
+:root {
+  /* --- Backgrounds --- */
+  --rd-bg:          #0d0f14;   /* Page background */
+  --rd-surface:     #13161e;   /* Sidebar, topbar, cards */
+  --rd-surface2:    #1a1e2a;   /* Hover states, inputs */
+  --rd-surface3:    #1f2435;   /* Active row, deeper surfaces */
+  --rd-surface4:    #252b3b;   /* Tooltip, dropdown bg */
+
+  /* --- Borders --- */
+  --rd-border:      #252a38;   /* Default border */
+  --rd-border2:     #2e3447;   /* Emphasis border */
+  --rd-border3:     #3a4260;   /* Focus, active borders */
+
+  /* --- Accent (Blue) --- */
+  --rd-accent:      #4f8cff;
+  --rd-accent-dark: #3b6ecc;
+  --rd-accent-soft: rgba(79, 140, 255, 0.12);
+  --rd-accent-glow: rgba(79, 140, 255, 0.08);
+
+  /* --- Semantic Status --- */
+  --rd-success:      #22c97a;
+  --rd-success-soft: rgba(34, 201, 122, 0.12);
+  --rd-warning:      #f5a623;
+  --rd-warning-soft: rgba(245, 166, 35, 0.12);
+  --rd-danger:       #e05252;
+  --rd-danger-soft:  rgba(224, 82, 82, 0.12);
+  --rd-info:         #38bdf8;
+  --rd-info-soft:    rgba(56, 189, 248, 0.12);
+  --rd-purple:       #a78bfa;
+  --rd-purple-soft:  rgba(167, 139, 250, 0.12);
+
+  /* --- Typography --- */
+  --rd-text1:  #e8ecf4;   /* Primary text */
+  --rd-text2:  #8b91a8;   /* Secondary / muted */
+  --rd-text3:  #555c74;   /* Hints, labels, placeholders */
+  --rd-text4:  #363d56;   /* Disabled */
+}
+
+
+/* ============================================================
+   2. BASE / BODY
+   ============================================================ */
+body,
+.wrapper {
+  background-color: var(--rd-bg) !important;
+  color: var(--rd-text1) !important;
+}
+
+a {
+  color: var(--rd-accent);
+}
+a:hover {
+  color: var(--rd-accent-dark);
+}
+
+hr {
+  border-color: var(--rd-border) !important;
+}
+
+::selection {
+  background: var(--rd-accent-soft);
+  color: var(--rd-text1);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--rd-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--rd-border2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rd-border3);
+}
+
+
+/* ============================================================
+   3. TOP NAVBAR
+   ============================================================ */
+.main-header.navbar,
+.navbar.navbar-expand {
+  background-color: var(--rd-surface) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  box-shadow: none !important;
+}
+
+.main-header .nav-link,
+.main-header .navbar-nav .nav-link {
+  color: var(--rd-text2) !important;
+  transition: color 0.15s;
+}
+.main-header .nav-link:hover {
+  color: var(--rd-text1) !important;
+}
+
+/* Brand / Logo in navbar */
+.main-header .brand-link,
+.main-header .navbar-brand {
+  background-color: var(--rd-surface) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.main-header .brand-link:hover {
+  color: var(--rd-accent) !important;
+}
+
+/* Pushmenu toggle icon */
+.main-header [data-widget="pushmenu"] {
+  color: var(--rd-text2) !important;
+}
+
+/* Navbar search */
+.main-header .form-control-navbar {
+  background-color: var(--rd-surface2) !important;
+  border: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  border-radius: 7px;
+}
+.main-header .form-control-navbar:focus {
+  border-color: var(--rd-accent) !important;
+}
+.main-header .form-control-navbar::placeholder {
+  color: var(--rd-text3) !important;
+}
+.main-header .btn-navbar {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text2) !important;
+  border: 1px solid var(--rd-border) !important;
+}
+
+/* Notification badge on nav */
+.main-header .badge {
+  font-size: 10px;
+}
+
+
+/* ============================================================
+   4. SIDEBAR
+   ============================================================ */
+.main-sidebar,
+.main-sidebar.sidebar-dark-primary {
+  background-color: var(--rd-surface) !important;
+  border-right: 1px solid var(--rd-border) !important;
+  box-shadow: none !important;
+}
+
+/* Sidebar brand */
+.sidebar .brand-link {
+  background-color: var(--rd-surface) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Sidebar user panel */
+.sidebar .user-panel {
+  border-bottom: 1px solid var(--rd-border) !important;
+}
+.sidebar .user-panel .info a {
+  color: var(--rd-text1) !important;
+  font-weight: 500;
+}
+.sidebar .user-panel .info a:hover {
+  color: var(--rd-accent) !important;
+}
+
+/* Nav section headers */
+.nav-sidebar .nav-header {
+  color: var(--rd-text3) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 12px 16px 4px !important;
+}
+
+/* Nav items */
+.nav-sidebar > .nav-item > .nav-link,
+.nav-sidebar .nav-treeview .nav-item .nav-link {
+  color: var(--rd-text2) !important;
+  border-radius: 7px !important;
+  margin: 1px 8px !important;
+  padding: 8px 10px !important;
+  transition: all 0.15s ease !important;
+  font-size: 13px !important;
+}
+
+.nav-sidebar > .nav-item > .nav-link:hover,
+.nav-sidebar .nav-treeview .nav-item .nav-link:hover {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Active nav item */
+.nav-sidebar > .nav-item > .nav-link.active,
+.nav-sidebar.nav-legacy > .nav-item > .nav-link.active {
+  background-color: var(--rd-accent-soft) !important;
+  color: var(--rd-accent) !important;
+  border: 1px solid rgba(79, 140, 255, 0.2) !important;
+  box-shadow: none !important;
+}
+
+/* Nav icon */
+.nav-sidebar .nav-icon {
+  color: var(--rd-text3) !important;
+  width: 1.4rem !important;
+  font-size: 14px !important;
+  transition: color 0.15s;
+}
+.nav-sidebar > .nav-item > .nav-link:hover .nav-icon,
+.nav-sidebar > .nav-item > .nav-link.active .nav-icon {
+  color: var(--rd-accent) !important;
+}
+
+/* Submenu (treeview) */
+.nav-sidebar .nav-treeview {
+  background: transparent !important;
+  padding-left: 8px !important;
+}
+.nav-sidebar .nav-treeview .nav-item .nav-link {
+  font-size: 12.5px !important;
+  padding: 7px 10px !important;
+}
+
+/* Treeview arrow */
+.nav-sidebar .nav-item.menu-open > .nav-link .right {
+  color: var(--rd-accent) !important;
+}
+
+/* Sidebar search */
+.sidebar-search-results,
+.sidebar .form-control {
+  background: var(--rd-surface2) !important;
+  border-color: var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+}
+
+
+/* ============================================================
+   5. CONTENT AREA
+   ============================================================ */
+.content-wrapper {
+  background-color: var(--rd-bg) !important;
+}
+
+/* Content header / breadcrumb */
+.content-header {
+  background: transparent;
+}
+.content-header h1,
+.content-header .breadcrumb-item,
+.content-header .breadcrumb-item a {
+  color: var(--rd-text1) !important;
+}
+.content-header .breadcrumb-item.active {
+  color: var(--rd-text2) !important;
+}
+.content-header .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--rd-text3) !important;
+}
+
+/* Section */
+.content {
+  background: transparent !important;
+}
+
+
+/* ============================================================
+   6. CARDS
+   ============================================================ */
+.card {
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  color: var(--rd-text1) !important;
+}
+
+.card-header {
+  background-color: var(--rd-surface) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  padding: 14px 16px !important;
+}
+
+.card-title {
+  color: var(--rd-text1) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+.card-body {
+  color: var(--rd-text2) !important;
+}
+
+.card-footer {
+  background-color: var(--rd-surface) !important;
+  border-top: 1px solid var(--rd-border) !important;
+  color: var(--rd-text2) !important;
+}
+
+/* Card tools (collapse, close buttons) */
+.card-tools .btn-tool {
+  color: var(--rd-text3) !important;
+}
+.card-tools .btn-tool:hover {
+  color: var(--rd-text1) !important;
+}
+
+/* Card outline variants — left accent border only */
+.card.card-primary   { border-left: 3px solid var(--rd-accent)   !important; }
+.card.card-success   { border-left: 3px solid var(--rd-success)  !important; }
+.card.card-warning   { border-left: 3px solid var(--rd-warning)  !important; }
+.card.card-danger    { border-left: 3px solid var(--rd-danger)   !important; }
+.card.card-info      { border-left: 3px solid var(--rd-info)     !important; }
+.card.card-secondary { border-left: 3px solid var(--rd-text3)    !important; }
+
+/* Card outline — header color */
+.card.card-outline.card-primary   .card-header { border-top: 2px solid var(--rd-accent)  !important; }
+.card.card-outline.card-success   .card-header { border-top: 2px solid var(--rd-success) !important; }
+.card.card-outline.card-warning   .card-header { border-top: 2px solid var(--rd-warning) !important; }
+.card.card-outline.card-danger    .card-header { border-top: 2px solid var(--rd-danger)  !important; }
+
+/* Loading overlay on card */
+.card .overlay,
+.card .loading-img {
+  background-color: rgba(13, 15, 20, 0.75) !important;
+  border-radius: 10px !important;
+}
+
+
+/* ============================================================
+   7. TABLES
+   ============================================================ */
+.table {
+  color: var(--rd-text2) !important;
+}
+
+.table thead th {
+  background-color: var(--rd-surface2) !important;
+  border-color: var(--rd-border) !important;
+  color: var(--rd-text3) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  padding: 10px 14px !important;
+}
+
+.table td,
+.table th {
+  border-color: var(--rd-border) !important;
+  padding: 10px 14px !important;
+  vertical-align: middle !important;
+}
+
+.table tbody tr:hover td {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+}
+
+.table-bordered {
+  border-color: var(--rd-border) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(26, 30, 42, 0.5) !important;
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--rd-surface2) !important;
+}
+
+/* DataTables integration */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  color: var(--rd-text2) !important;
+  border-radius: 6px !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--rd-surface2) !important;
+  border-color: var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--rd-accent-soft) !important;
+  border-color: transparent !important;
+  color: var(--rd-accent) !important;
+}
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  background: var(--rd-surface2) !important;
+  border: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+}
+.dataTables_wrapper .dataTables_info {
+  color: var(--rd-text3) !important;
+  font-size: 12px !important;
+}
+
+
+/* ============================================================
+   8. FORMS
+   ============================================================ */
+.form-control,
+.custom-select {
+  background-color: var(--rd-surface2) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: 7px !important;
+  color: var(--rd-text1) !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+  font-size: 13px !important;
+}
+
+.form-control:focus,
+.custom-select:focus {
+  background-color: var(--rd-surface2) !important;
+  border-color: var(--rd-accent) !important;
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15) !important;
+  color: var(--rd-text1) !important;
+}
+
+.form-control::placeholder {
+  color: var(--rd-text3) !important;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: var(--rd-surface) !important;
+  color: var(--rd-text4) !important;
+  cursor: not-allowed;
+}
+
+label,
+.col-form-label {
+  color: var(--rd-text2) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  margin-bottom: 4px !important;
+}
+
+.form-text,
+.text-muted {
+  color: var(--rd-text3) !important;
+}
+
+/* Input groups */
+.input-group-text {
+  background-color: var(--rd-surface3) !important;
+  border: 1px solid var(--rd-border) !important;
+  color: var(--rd-text2) !important;
+}
+
+/* Custom checkbox & radio */
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: var(--rd-accent) !important;
+  border-color: var(--rd-accent) !important;
+}
+.custom-control-label::before {
+  background-color: var(--rd-surface2) !important;
+  border-color: var(--rd-border2) !important;
+}
+
+/* Select2 */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+  background-color: var(--rd-surface2) !important;
+  border: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  border-radius: 7px !important;
+  min-height: 36px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: var(--rd-text1) !important;
+  line-height: 34px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+  border-color: var(--rd-text3) transparent transparent transparent !important;
+}
+.select2-dropdown {
+  background-color: var(--rd-surface4) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+.select2-container--default .select2-results__option {
+  color: var(--rd-text2) !important;
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+}
+.select2-container--default .select2-results__option--highlighted {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+}
+.select2-container--default .select2-results__option[aria-selected="true"] {
+  background-color: var(--rd-accent-soft) !important;
+  color: var(--rd-accent) !important;
+}
+.select2-search--dropdown .select2-search__field {
+  background-color: var(--rd-surface2) !important;
+  border: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  border-radius: 5px !important;
+}
+
+/* Bootstrap DatePicker */
+.datepicker table tr td,
+.datepicker table tr th {
+  color: var(--rd-text2) !important;
+}
+.datepicker table tr td.active,
+.datepicker table tr td.active:hover {
+  background-color: var(--rd-accent) !important;
+  color: #fff !important;
+}
+.datepicker .datepicker-switch:hover,
+.datepicker .prev:hover,
+.datepicker .next:hover {
+  background: var(--rd-surface2) !important;
+}
+.datepicker {
+  background: var(--rd-surface4) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: 8px !important;
+}
+
+
+/* ============================================================
+   9. BUTTONS
+   ============================================================ */
+
+/* Primary */
+.btn-primary {
+  background-color: var(--rd-accent) !important;
+  border-color: var(--rd-accent) !important;
+  color: #fff !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s !important;
+}
+.btn-primary:hover {
+  background-color: var(--rd-accent-dark) !important;
+  border-color: var(--rd-accent-dark) !important;
+}
+
+/* Secondary */
+.btn-secondary {
+  background-color: var(--rd-surface3) !important;
+  border-color: var(--rd-border2) !important;
+  color: var(--rd-text1) !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+}
+.btn-secondary:hover {
+  background-color: var(--rd-surface4) !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Success */
+.btn-success {
+  background-color: var(--rd-success) !important;
+  border-color: var(--rd-success) !important;
+  color: #0a1f14 !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Warning */
+.btn-warning {
+  background-color: var(--rd-warning) !important;
+  border-color: var(--rd-warning) !important;
+  color: #1a0f00 !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Danger */
+.btn-danger {
+  background-color: var(--rd-danger) !important;
+  border-color: var(--rd-danger) !important;
+  color: #fff !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+}
+
+/* Info */
+.btn-info {
+  background-color: var(--rd-info) !important;
+  border-color: var(--rd-info) !important;
+  color: #02111c !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Outline variants */
+.btn-outline-primary {
+  color: var(--rd-accent) !important;
+  border-color: var(--rd-accent) !important;
+  background: transparent !important;
+  border-radius: 7px !important;
+}
+.btn-outline-primary:hover {
+  background-color: var(--rd-accent-soft) !important;
+}
+
+/* Default / tool button */
+.btn-default,
+.btn-tool {
+  background: transparent !important;
+  color: var(--rd-text2) !important;
+  border-color: var(--rd-border) !important;
+}
+.btn-default:hover {
+  background: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Soft utility buttons (Procurement module) */
+.btn-primary-soft {
+  background-color: var(--rd-accent-soft) !important;
+  color: var(--rd-accent) !important;
+  border: 1px solid rgba(79, 140, 255, 0.25) !important;
+  border-radius: 7px !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+}
+.btn-primary-soft:hover {
+  background-color: rgba(79, 140, 255, 0.2) !important;
+}
+.btn-danger-soft {
+  background-color: var(--rd-danger-soft) !important;
+  color: var(--rd-danger) !important;
+  border: 1px solid rgba(224, 82, 82, 0.25) !important;
+  border-radius: 7px !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+}
+.btn-success-soft {
+  background-color: var(--rd-success-soft) !important;
+  color: var(--rd-success) !important;
+  border: 1px solid rgba(34, 201, 122, 0.25) !important;
+  border-radius: 7px !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+}
+
+
+/* ============================================================
+   10. BADGES
+   ============================================================ */
+.badge {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 3px 9px !important;
+  border-radius: 20px !important;
+  letter-spacing: 0.02em !important;
+}
+
+.badge-primary   { background-color: var(--rd-accent-soft)   !important; color: var(--rd-accent)   !important; }
+.badge-success   { background-color: var(--rd-success-soft)  !important; color: var(--rd-success)  !important; }
+.badge-warning   { background-color: var(--rd-warning-soft)  !important; color: var(--rd-warning)  !important; }
+.badge-danger    { background-color: var(--rd-danger-soft)   !important; color: var(--rd-danger)   !important; }
+.badge-info      { background-color: var(--rd-info-soft)     !important; color: var(--rd-info)     !important; }
+.badge-secondary { background-color: var(--rd-surface3)      !important; color: var(--rd-text2)    !important; }
+.badge-dark      { background-color: var(--rd-surface4)      !important; color: var(--rd-text1)    !important; }
+
+
+/* ============================================================
+   11. ALERTS
+   ============================================================ */
+.alert {
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  border-left: 3px solid transparent !important;
+}
+.alert-primary   { background: var(--rd-accent-soft)   !important; color: var(--rd-accent)   !important; border-left-color: var(--rd-accent)   !important; }
+.alert-success   { background: var(--rd-success-soft)  !important; color: var(--rd-success)  !important; border-left-color: var(--rd-success)  !important; }
+.alert-warning   { background: var(--rd-warning-soft)  !important; color: var(--rd-warning)  !important; border-left-color: var(--rd-warning)  !important; }
+.alert-danger    { background: var(--rd-danger-soft)   !important; color: var(--rd-danger)   !important; border-left-color: var(--rd-danger)   !important; }
+.alert-info      { background: var(--rd-info-soft)     !important; color: var(--rd-info)     !important; border-left-color: var(--rd-info)     !important; }
+
+.alert .close { color: inherit !important; opacity: 0.6 !important; }
+.alert .close:hover { opacity: 1 !important; }
+
+
+/* ============================================================
+   12. MODALS
+   ============================================================ */
+.modal-content {
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+  color: var(--rd-text1) !important;
+}
+
+.modal-header {
+  background-color: var(--rd-surface) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  padding: 16px 20px !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.modal-title {
+  color: var(--rd-text1) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.modal-header .close {
+  color: var(--rd-text2) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  font-size: 20px !important;
+}
+.modal-header .close:hover {
+  color: var(--rd-text1) !important;
+}
+
+.modal-body {
+  background-color: var(--rd-surface) !important;
+  color: var(--rd-text2) !important;
+  padding: 20px !important;
+}
+
+.modal-footer {
+  background-color: var(--rd-surface) !important;
+  border-top: 1px solid var(--rd-border) !important;
+  padding: 12px 20px !important;
+  border-radius: 0 0 12px 12px !important;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+
+/* ============================================================
+   13. DROPDOWNS
+   ============================================================ */
+.dropdown-menu {
+  background-color: var(--rd-surface4) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  padding: 4px !important;
+}
+
+.dropdown-item {
+  color: var(--rd-text2) !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  padding: 8px 12px !important;
+  transition: all 0.1s !important;
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+}
+.dropdown-item.active {
+  background-color: var(--rd-accent-soft) !important;
+  color: var(--rd-accent) !important;
+}
+
+.dropdown-divider {
+  border-color: var(--rd-border) !important;
+  margin: 4px 0 !important;
+}
+
+.dropdown-header {
+  color: var(--rd-text3) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+}
+
+/* Navbar notification dropdown */
+.navbar-nav .dropdown-menu {
+  min-width: 280px !important;
+}
+
+
+/* ============================================================
+   14. SMALL BOXES (Dashboard Stats)
+   ============================================================ */
+.small-box {
+  border-radius: 10px !important;
+  border: 1px solid var(--rd-border) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  background-color: var(--rd-surface) !important;
+}
+
+.small-box h3 {
+  color: var(--rd-text1) !important;
+  font-weight: 700 !important;
+}
+
+.small-box p {
+  color: var(--rd-text2) !important;
+}
+
+.small-box .icon {
+  color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.small-box-footer {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text3) !important;
+  font-size: 12px !important;
+  transition: all 0.15s !important;
+}
+.small-box-footer:hover {
+  background-color: var(--rd-surface3) !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Color variants — accent border top */
+.small-box.bg-primary   { border-top: 3px solid var(--rd-accent)   !important; background-color: var(--rd-surface) !important; }
+.small-box.bg-success   { border-top: 3px solid var(--rd-success)  !important; background-color: var(--rd-surface) !important; }
+.small-box.bg-warning   { border-top: 3px solid var(--rd-warning)  !important; background-color: var(--rd-surface) !important; }
+.small-box.bg-danger    { border-top: 3px solid var(--rd-danger)   !important; background-color: var(--rd-surface) !important; }
+.small-box.bg-info      { border-top: 3px solid var(--rd-info)     !important; background-color: var(--rd-surface) !important; }
+
+
+/* ============================================================
+   15. INFO BOXES
+   ============================================================ */
+.info-box {
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.info-box-icon {
+  border-radius: 10px 0 0 10px !important;
+}
+
+.info-box-content .info-box-text {
+  color: var(--rd-text2) !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.info-box-content .info-box-number {
+  color: var(--rd-text1) !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+}
+
+
+/* ============================================================
+   16. PAGINATION
+   ============================================================ */
+.pagination .page-link {
+  background-color: var(--rd-surface) !important;
+  border-color: var(--rd-border) !important;
+  color: var(--rd-text2) !important;
+  border-radius: 6px !important;
+  margin: 0 2px !important;
+  transition: all 0.15s !important;
+}
+.pagination .page-link:hover {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+  border-color: var(--rd-border2) !important;
+}
+.pagination .page-item.active .page-link {
+  background-color: var(--rd-accent) !important;
+  border-color: var(--rd-accent) !important;
+  color: #fff !important;
+}
+.pagination .page-item.disabled .page-link {
+  background-color: var(--rd-surface) !important;
+  color: var(--rd-text4) !important;
+  border-color: var(--rd-border) !important;
+}
+
+
+/* ============================================================
+   17. TABS & NAV-TABS
+   ============================================================ */
+.nav-tabs {
+  border-bottom: 1px solid var(--rd-border) !important;
+}
+.nav-tabs .nav-link {
+  color: var(--rd-text2) !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  padding: 10px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s !important;
+}
+.nav-tabs .nav-link:hover {
+  color: var(--rd-text1) !important;
+  border-bottom-color: var(--rd-border2) !important;
+  background: transparent !important;
+}
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  color: var(--rd-accent) !important;
+  border-bottom: 2px solid var(--rd-accent) !important;
+  background: transparent !important;
+}
+
+.tab-content {
+  color: var(--rd-text2) !important;
+}
+
+/* Nav pills */
+.nav-pills .nav-link {
+  color: var(--rd-text2) !important;
+  border-radius: 7px !important;
+}
+.nav-pills .nav-link:hover {
+  background: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+}
+.nav-pills .nav-link.active {
+  background-color: var(--rd-accent-soft) !important;
+  color: var(--rd-accent) !important;
+}
+
+
+/* ============================================================
+   18. BREADCRUMB
+   ============================================================ */
+.breadcrumb {
+  background: transparent !important;
+  padding: 4px 0 !important;
+}
+.breadcrumb-item a {
+  color: var(--rd-accent) !important;
+}
+.breadcrumb-item.active {
+  color: var(--rd-text2) !important;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--rd-text3) !important;
+}
+
+
+/* ============================================================
+   19. PROGRESS BARS
+   ============================================================ */
+.progress {
+  background-color: var(--rd-surface3) !important;
+  border-radius: 10px !important;
+  height: 6px !important;
+}
+.progress-bar {
+  background-color: var(--rd-accent) !important;
+  border-radius: 10px !important;
+}
+.progress-bar.bg-success { background-color: var(--rd-success) !important; }
+.progress-bar.bg-warning { background-color: var(--rd-warning) !important; }
+.progress-bar.bg-danger  { background-color: var(--rd-danger)  !important; }
+
+
+/* ============================================================
+   20. TOASTR NOTIFICATIONS
+   ============================================================ */
+#toast-container > div {
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  opacity: 1 !important;
+  font-size: 13px !important;
+}
+.toast-success {
+  background-color: #0d2b1e !important;
+  border: 1px solid rgba(34, 201, 122, 0.3) !important;
+  color: var(--rd-success) !important;
+}
+.toast-error {
+  background-color: #2b0f0f !important;
+  border: 1px solid rgba(224, 82, 82, 0.3) !important;
+  color: var(--rd-danger) !important;
+}
+.toast-warning {
+  background-color: #2b1f0a !important;
+  border: 1px solid rgba(245, 166, 35, 0.3) !important;
+  color: var(--rd-warning) !important;
+}
+.toast-info {
+  background-color: #051520 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  color: var(--rd-info) !important;
+}
+
+
+/* ============================================================
+   21. SWEETALERT2
+   ============================================================ */
+.swal2-popup {
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+}
+.swal2-title {
+  color: var(--rd-text1) !important;
+  font-size: 18px !important;
+}
+.swal2-html-container,
+.swal2-content {
+  color: var(--rd-text2) !important;
+  font-size: 14px !important;
+}
+.swal2-confirm {
+  background-color: var(--rd-accent) !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+.swal2-cancel {
+  background-color: var(--rd-surface3) !important;
+  color: var(--rd-text1) !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+}
+.swal2-icon.swal2-warning {
+  border-color: var(--rd-warning) !important;
+  color: var(--rd-warning) !important;
+}
+.swal2-icon.swal2-error {
+  border-color: var(--rd-danger) !important;
+  color: var(--rd-danger) !important;
+}
+.swal2-icon.swal2-success {
+  border-color: var(--rd-success) !important;
+  color: var(--rd-success) !important;
+}
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: var(--rd-success) !important;
+}
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(34, 201, 122, 0.3) !important;
+}
+
+
+/* ============================================================
+   22. FOOTER
+   ============================================================ */
+.main-footer {
+  background-color: var(--rd-surface) !important;
+  border-top: 1px solid var(--rd-border) !important;
+  color: var(--rd-text3) !important;
+  font-size: 12px !important;
+}
+.main-footer a {
+  color: var(--rd-accent) !important;
+}
+
+
+/* ============================================================
+   23. TYPOGRAPHY HELPERS
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--rd-text1) !important;
+}
+
+p {
+  color: var(--rd-text2);
+}
+
+.text-primary { color: var(--rd-accent)   !important; }
+.text-success { color: var(--rd-success)  !important; }
+.text-warning { color: var(--rd-warning)  !important; }
+.text-danger  { color: var(--rd-danger)   !important; }
+.text-info    { color: var(--rd-info)     !important; }
+.text-muted   { color: var(--rd-text3)    !important; }
+.text-white   { color: #fff               !important; }
+.text-dark    { color: var(--rd-text1)    !important; }
+
+.bg-primary { background-color: var(--rd-accent-soft)   !important; color: var(--rd-accent)   !important; }
+.bg-success { background-color: var(--rd-success-soft)  !important; color: var(--rd-success)  !important; }
+.bg-warning { background-color: var(--rd-warning-soft)  !important; color: var(--rd-warning)  !important; }
+.bg-danger  { background-color: var(--rd-danger-soft)   !important; color: var(--rd-danger)   !important; }
+.bg-info    { background-color: var(--rd-info-soft)     !important; color: var(--rd-info)     !important; }
+.bg-dark    { background-color: var(--rd-surface3)      !important; color: var(--rd-text1)    !important; }
+.bg-light   { background-color: var(--rd-surface2)      !important; color: var(--rd-text2)    !important; }
+.bg-white   { background-color: var(--rd-surface)       !important; }
+
+/* Border helpers */
+.border         { border-color: var(--rd-border)  !important; }
+.border-primary { border-color: var(--rd-accent)  !important; }
+.border-success { border-color: var(--rd-success) !important; }
+.border-warning { border-color: var(--rd-warning) !important; }
+.border-danger  { border-color: var(--rd-danger)  !important; }
+
+
+/* ============================================================
+   24. PROCUREMENT MODULE (RFQ / rfq_list_layout)
+   ============================================================ */
+
+/* Override procurement CSS variables to match dark theme */
+.procurement-module,
+[data-module="procurement"] {
+  --accent:         var(--rd-accent) !important;
+  --accent-hover:   var(--rd-accent-dark) !important;
+  --accent-soft:    var(--rd-accent-soft) !important;
+  --success:        var(--rd-success) !important;
+  --success-soft:   var(--rd-success-soft) !important;
+  --danger:         var(--rd-danger) !important;
+  --danger-soft:    var(--rd-danger-soft) !important;
+  --warning:        var(--rd-warning) !important;
+  --warning-soft:   var(--rd-warning-soft) !important;
+  --text-primary:   var(--rd-text1) !important;
+  --text-secondary: var(--rd-text2) !important;
+  --text-muted:     var(--rd-text3) !important;
+  --border:         var(--rd-border) !important;
+  --border-light:   var(--rd-border) !important;
+  --surface:        var(--rd-surface) !important;
+  --bg:             var(--rd-bg) !important;
+  --sidebar-bg:     var(--rd-surface2) !important;
+}
+
+
+/* ============================================================
+   25. PURCHASE CASE CARDS (Color-coded by type)
+   ============================================================ */
+
+/* Blue — Consultancy / Civil / Services */
+.pc-card-blue {
+  background-color: var(--rd-surface) !important;
+  border-left: 4px solid var(--rd-accent) !important;
+}
+.pc-card-blue .card-header {
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.12), rgba(79, 140, 255, 0.04)) !important;
+  border-bottom: 1px solid rgba(79, 140, 255, 0.15) !important;
+}
+
+/* Amber — Training / TA-DA */
+.pc-card-amber {
+  background-color: var(--rd-surface) !important;
+  border-left: 4px solid var(--rd-warning) !important;
+}
+.pc-card-amber .card-header {
+  background: linear-gradient(135deg, rgba(245, 166, 35, 0.12), rgba(245, 166, 35, 0.04)) !important;
+  border-bottom: 1px solid rgba(245, 166, 35, 0.15) !important;
+}
+
+/* Green — Transport / Books / IT / Misc */
+.pc-card-green {
+  background-color: var(--rd-surface) !important;
+  border-left: 4px solid var(--rd-success) !important;
+}
+.pc-card-green .card-header {
+  background: linear-gradient(135deg, rgba(34, 201, 122, 0.12), rgba(34, 201, 122, 0.04)) !important;
+  border-bottom: 1px solid rgba(34, 201, 122, 0.15) !important;
+}
+
+
+/* ============================================================
+   26. MISCELLANEOUS FIXES
+   ============================================================ */
+
+/* Timeline (AdminLTE) */
+.timeline::before {
+  background-color: var(--rd-border) !important;
+}
+.timeline > li > .timeline-item {
+  background: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: 8px !important;
+  color: var(--rd-text2) !important;
+}
+.timeline > li > .timeline-item > .time {
+  color: var(--rd-text3) !important;
+  font-size: 11px !important;
+}
+
+/* Callout boxes */
+.callout {
+  background-color: var(--rd-surface2) !important;
+  border-color: var(--rd-border) !important;
+  color: var(--rd-text2) !important;
+  border-radius: 8px !important;
+}
+.callout-primary { border-left-color: var(--rd-accent)   !important; }
+.callout-success { border-left-color: var(--rd-success)  !important; }
+.callout-warning { border-left-color: var(--rd-warning)  !important; }
+.callout-danger  { border-left-color: var(--rd-danger)   !important; }
+
+/* List groups */
+.list-group-item {
+  background-color: var(--rd-surface) !important;
+  border-color: var(--rd-border) !important;
+  color: var(--rd-text2) !important;
+}
+.list-group-item:hover {
+  background-color: var(--rd-surface2) !important;
+  color: var(--rd-text1) !important;
+}
+.list-group-item.active {
+  background-color: var(--rd-accent-soft) !important;
+  border-color: rgba(79, 140, 255, 0.2) !important;
+  color: var(--rd-accent) !important;
+}
+
+/* Code blocks */
+code {
+  background-color: var(--rd-surface3) !important;
+  color: var(--rd-accent) !important;
+  border-radius: 4px !important;
+  padding: 1px 5px !important;
+  font-size: 12px !important;
+}
+pre {
+  background-color: var(--rd-surface2) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: 8px !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Tooltips */
+.tooltip-inner {
+  background-color: var(--rd-surface4) !important;
+  color: var(--rd-text1) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+}
+
+/* Popovers */
+.popover {
+  background-color: var(--rd-surface4) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+.popover-header {
+  background-color: var(--rd-surface2) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  border-radius: 10px 10px 0 0 !important;
+}
+.popover-body {
+  color: var(--rd-text2) !important;
+  font-size: 13px !important;
+}
+
+/* Print — dark theme se print ko protect karein */
+@media print {
+  body, .wrapper, .content-wrapper {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  .main-sidebar, .main-header, .main-footer {
+    display: none !important;
+  }
+}

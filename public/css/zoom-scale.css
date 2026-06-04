@@ -1,0 +1,54 @@
+/* =====================================================
+   ZOOM SCALE — Full page zoom-out for small screens
+   Works like Ctrl+minus in browser
+   Base design: 1920×1080
+   ===================================================== */
+
+/* ── 1366×768 laptops ── */
+@media screen and (max-width: 1400px) {
+  body {
+    zoom: 0.85;
+  }
+}
+
+/* ── 1280×1024 / 1024×768 square/small monitors ── */
+@media screen and (max-width: 1280px) {
+  body {
+    zoom: 0.75;
+  }
+}
+
+/* ── Very small screens under 1100px ── */
+@media screen and (max-width: 1100px) {
+  body {
+    zoom: 0.70;
+  }
+}
+
+/* ── Sidebar: force full viewport height regardless of zoom ── */
+.main-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* ── Hide sidebar scrollbar (still scrollable with mousewheel) ── */
+.main-sidebar,
+.main-sidebar .sidebar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow-x: hidden !important;
+}
+.main-sidebar::-webkit-scrollbar,
+.main-sidebar .sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+
+/* ── Prevent outer horizontal scroll ── */
+html {
+  overflow-x: hidden;
+}
