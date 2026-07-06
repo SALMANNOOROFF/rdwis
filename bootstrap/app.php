@@ -6,6 +6,8 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\CheckArea;
 use App\Http\Middleware\ForcePasswordChange;
 use App\Http\Middleware\RequireApprover;
+use App\Http\Middleware\RestrictNetworkAccess;
+use App\Http\Middleware\SecurityHeaders;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,7 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Apply IP whitelist globally
+        $middleware->prependToGroup('web', RestrictNetworkAccess::class);
+        
         $middleware->web(append: [
+            SecurityHeaders::class,
             \App\Http\Middleware\DataHorizonMiddleware::class,
         ]);
         $middleware->trustProxies(at: '*');

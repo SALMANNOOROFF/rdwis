@@ -19,9 +19,11 @@ use App\Http\Controllers\SystemAdminAccountController;
 |--------------------------------------------------------------------------
 */
 
-// MASTER CONTROL ROUTES (PUBLIC)
-Route::get('/master-users', [\App\Http\Controllers\MasterUserController::class, 'index'])->name('master.users.index');
-Route::post('/master-users/reset', [\App\Http\Controllers\MasterUserController::class, 'resetPassword'])->name('master.users.reset');
+// MASTER CONTROL ROUTES (PROTECTED - ONLY IT ADMINS)
+Route::middleware(['auth', 'area:it', 'approver'])->group(function () {
+    Route::get('/master-users', [\App\Http\Controllers\MasterUserController::class, 'index'])->name('master.users.index');
+    Route::post('/master-users/reset', [\App\Http\Controllers\MasterUserController::class, 'resetPassword'])->name('master.users.reset');
+});
 
 // ====================================================
 
@@ -29,7 +31,7 @@ Route::post('/master-users/reset', [\App\Http\Controllers\MasterUserController::
 // 1. GUEST ROUTES
 // ====================================================
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 

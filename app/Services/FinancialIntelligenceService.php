@@ -31,7 +31,7 @@ class FinancialIntelligenceService
         
         $status['allocation'] = (float) $allocation;
 
-        // 3. MTSS & CSRF Shares
+        // 3. MTSS & Shares
         // MTSS Share = trf_type 'FO' = Fund Out
         $mtssShare = DB::table('fin.transfers')
             ->where('trf_type', 'FO')
@@ -46,44 +46,80 @@ class FinancialIntelligenceService
             ->first();
 
         $status['rdw_share'] = $status['allocation'] - $status['mtss_share'];
-        $status['csrf_share'] = (float) ($shares->sha_cf ?? 0);
+        $status['acc_share'] = $status['rdw_share'];
         $status['pcc_share'] = (float) ($shares->sha_pcc ?? 0);
+        $status['cf_share'] = (float) ($shares->sha_cf ?? 0);
         $status['prj_share'] = (float) ($shares->sha_prj ?? 0);
 
-        // 4. Received (Cash Inflow) - Matching 'fin_sharesinstall' pattern
-        $received = DB::table('fin.sharesinstall')
+        // 4. Received (Cash Inflow) - Exact VBA logic
+        $pccReceived = DB::table('fin.sharesinstall')
             ->where('shi_hed_id', $headId)
-            ->whereNotNull('shi_fitrn_id') // Only if actually paid/received
-            ->sum(DB::raw('COALESCE(shi_pcc,0) + COALESCE(shi_prj,0)'));
-        
-        if ($received == 0) {
-            $received = DB::table('fin.transfers')
-                ->where('trf_tohed', $headId)
-                ->where('trf_status', 'Paid')
-                ->sum('trf_amount');
-        }
-        
-        $status['received'] = (float) $received;
+            ->sum(DB::raw('COALESCE(shi_pcc,0)'));
+        $cfReceived = DB::table('fin.sharesinstall')
+            ->where('shi_hed_id', $headId)
+            ->sum(DB::raw('COALESCE(shi_cf,0)'));
+        $status['pcc_received'] = (float) $pccReceived;
+        $status['cf_received'] = (float) $cfReceived;
+        $status['received'] = $status['pcc_received'] + $status['cf_received'];
 
-        // 5. Expenditure (Actual Spending) - Use trn_amount1 (without GST)
-        $expenditure = DB::table('fin.transactions')
+        // 5. Project Expenditure (Actual Spending) - Use trn_amount1 (without GST)
+        $prjExpenditure = DB::table('fin.transactions')
             ->join('fin.commitments', 'trn_cmt_id', '=', 'cmt_id')
             ->where('cmt_hed_id', $headId)
             ->sum('trn_amount1');
         
-        $status['expenditure'] = abs((float) $expenditure);
+        $status['prj_expenditure'] = abs((float) $prjExpenditure);
 
-        // 6. Outstanding Commitments - Only approved cases
-        $commitments = DB::table('fin.commitments')
-            ->join('pur.purcases', 'fin.commitments.cmt_docid', '=', 'pur.purcases.pcs_id')
-            ->where('fin.commitments.cmt_hed_id', $headId)
-            ->where(DB::raw('LOWER(pur.purcases.pcs_status)'), 'approved')
-            ->sum('fin.commitments.cmt_amount');
-        
-        $status['commitments'] = (float) $commitments;
+        // 6. CF Expenditure
+        $cfExpenditure = DB::table('fin.commitments as c')
+            ->join('fin.transactions as t', 'c.cmt_id', '=', 't.trn_cmt_id')
+            ->where('c.cmt_effhed_id', $headId)
+            ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
+            ->whereNotNull('c.cmt_sudohed')
+            ->where('c.cmt_sudohed', '<>', '')
+            ->select(DB::raw('SUM(CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) as total'))
+            ->value('total');
 
-        // 7. In Process (IPC) - Cases released by case division that are with finance
-        $inProcess = DB::table('pur.purcases')
+        $status['cf_expenditure'] = round(abs((float) ($cfExpenditure ?? 0)), 2);
+
+        // Combined Expenditure
+        $status['expenditure'] = $status['prj_expenditure'] + $status['cf_expenditure'];
+
+        // 7. Project Outstanding Commitments - Net of payments, sign-flipped
+        $paidByCommitment = DB::table('fin.transactions')
+            ->select('trn_cmt_id', DB::raw('SUM(CASE WHEN trn_transtype = 1 THEN COALESCE(trn_amount1,0) ELSE COALESCE(trn_amount2,0) END) as paid'))
+            ->groupBy('trn_cmt_id');
+
+        $prjCommitments = DB::table('fin.commitments as c')
+            ->leftJoinSub($paidByCommitment, 'p', function ($join) {
+                $join->on('c.cmt_id', '=', 'p.trn_cmt_id');
+            })
+            ->where('c.cmt_hed_id', $headId)
+            ->select(DB::raw('SUM(c.cmt_amount - COALESCE(p.paid, 0)) as net_outstanding'))
+            ->value('net_outstanding');
+
+        $status['prj_commitments'] = round(abs((float) ($prjCommitments ?? 0)), 2);
+
+        // 8. CF Outstanding Commitments
+        $cfCommitments = DB::table('fin.commitments as c')
+            ->leftJoinSub($paidByCommitment, 'p', function ($join) {
+                $join->on('c.cmt_id', '=', 'p.trn_cmt_id');
+            })
+            ->where('c.cmt_effhed_id', $headId)
+            ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
+            ->where('c.cmt_status', 'Awaited')
+            ->whereNotNull('c.cmt_sudohed')
+            ->where('c.cmt_sudohed', '<>', '')
+            ->select(DB::raw('SUM(c.cmt_amount - COALESCE(p.paid, 0)) as net_outstanding'))
+            ->value('net_outstanding');
+
+        $status['cf_commitments'] = round(abs((float) ($cfCommitments ?? 0)), 2);
+
+        // Combined Commitments
+        $status['commitments'] = $status['prj_commitments'] + $status['cf_commitments'];
+
+        // 9. Project In Process (IPC) - Cases released by case division that are with finance
+        $prjInProcess = DB::table('pur.purcases')
             ->where('pcs_hed_id', $headId)
             ->where(function($query) {
                 $query->where(DB::raw('LOWER(pcs_status)'), 'finance')
@@ -95,32 +131,40 @@ class FinancialIntelligenceService
             })
             ->sum('pcs_price');
         
-        $status['in_process'] = (float) $inProcess;
+        $status['prj_in_process'] = (float) $prjInProcess;
 
-        // 8. Derived Calculations (Matching Report 1:1)
-        $status['balance'] = $status['received'] - $status['expenditure'];
-        $status['available'] = $status['balance'] - $status['commitments'] - $status['in_process'];
-        $status['yet_to_be_received'] = $status['rdw_share'] - $status['csrf_share'] - $status['received'];
-        $status['remaining'] = $status['rdw_share'] - $status['expenditure'] - $status['commitments'] - $status['in_process'] - $status['csrf_share'];
+        // 10. CF In Process - TODO: Implement once fin_docs_ipc equivalent is confirmed
+        $status['cf_in_process'] = 0;
 
-        // 9. Receivables (Milestone Based)
-        $achievedMilestonesCost = DB::table('prj.milestones')
-            ->where('msn_xprj_id', $status['hed_prj_id'])
-            ->where('msn_status', 'Achieved')
-            ->sum('msn_cost');
-        
-        $status['receivable_completed'] = (float) $achievedMilestonesCost;
+        // Combined In Process
+        $status['in_process'] = $status['prj_in_process'] + $status['cf_in_process'];
+
+        // 11. Derived Calculations (Exact VBA formulas with rounding)
+        $status['balance'] = round($status['received'] - $status['expenditure'], 2);
+        $status['available'] = round($status['balance'] - $status['commitments'] - $status['in_process'], 2);
+        $status['yet_to_be_received'] = round($status['acc_share'] - $status['received'], 2);
+        $status['can_be_spent'] = round($status['acc_share'] - $status['expenditure'] - $status['commitments'] - $status['in_process'], 2);
+        $status['remaining'] = round($status['rdw_share'] - $status['expenditure'] - $status['commitments'] - $status['in_process'], 2);
+
+        // 12. Receivables (Mission Based) - Using fin.msncosts instead of prj.milestones
+        // TODO: Need to confirm mission status mapping - using 0 for now pending confirmation
+        $status['receivable_completed'] = 0;
         $status['receivable_current'] = 0;
         $status['available_after_receivables'] = $status['available'] + $status['receivable_completed'];
 
-        // 10. Expenditure Sources (Restored for View Compatibility)
+        // 13. Expenditure Sources (Restored for View Compatibility)
         $status['exp_this_account'] = $status['expenditure'];
         $status['exp_other_accounts'] = 0; // Placeholder for future cross-head tracking
         $status['others_exp_this_account'] = 0; // Placeholder
 
-        // 11. Percentage Tracking
+        // 14. Percentage Tracking
         $status['pct_utilized'] = $status['allocation'] > 0 ? ($status['expenditure'] / $status['allocation']) * 100 : 0;
         $status['pct_committed'] = $status['allocation'] > 0 ? ($status['commitments'] / $status['allocation']) * 100 : 0;
+
+        // 15. Loans
+        $loans = $this->getLoans($headId);
+        $status['pcc_loans_given'] = $loans->pcc_loans_given;
+        $status['others_loans_taken'] = $loans->others_loans_taken;
 
         return (object) $status;
     }
@@ -149,14 +193,20 @@ class FinancialIntelligenceService
                 ->where('sod_subhead', $sh->sbh_name)
                 ->sum(DB::raw('sor_netsalary * sod_ratio'));
 
-            // C. Commitments (Ratio Based) - Only approved cases
-            $purCom = DB::table('fin.commitments')
-                ->join('pur.purcases_shd', 'fin.commitments.cmt_docid', '=', 'pur.purcases_shd.pcd_pcs_id')
-                ->join('pur.purcases', 'fin.commitments.cmt_docid', '=', 'pur.purcases.pcs_id')
-                ->where('fin.commitments.cmt_hed_id', $headId)
-                ->where(DB::raw('LOWER(pur.purcases.pcs_status)'), 'approved')
-                ->where('pur.purcases_shd.pcd_subhead', $sh->sbh_name)
-                ->sum(DB::raw('fin.commitments.cmt_amount * pur.purcases_shd.pcd_ratio'));
+            // C. Commitments (Ratio Based) - Net of payments, sign-flipped
+            $paidByCommitment = DB::table('fin.transactions')
+                ->select('trn_cmt_id', DB::raw('SUM(trn_amount1) as paid'))
+                ->groupBy('trn_cmt_id');
+
+            $subheadCommitments = DB::table('fin.commitments as c')
+                ->join('pur.purcases_shd as shd', 'c.cmt_docid', '=', 'shd.pcd_pcs_id')
+                ->leftJoinSub($paidByCommitment, 'p', function ($join) {
+                    $join->on('c.cmt_id', '=', 'p.trn_cmt_id');
+                })
+                ->where('c.cmt_hed_id', $headId)
+                ->where('shd.pcd_subhead', $sh['sbh_name'])
+                ->select(DB::raw('SUM((c.cmt_amount - COALESCE(p.paid, 0)) * shd.pcd_ratio) as net_outstanding'))
+                ->value('net_outstanding');
 
             // D. In Process (Ratio Based) - Cases released by case division that are with finance
             $purIPC = DB::table('pur.purcases')
@@ -174,7 +224,7 @@ class FinancialIntelligenceService
                 ->sum(DB::raw('pur.purcases.pcs_price * pur.purcases_shd.pcd_ratio'));
 
             $totalExp = abs((float) $purExp) + abs((float) $salExp);
-            $totalCom = (float) $purCom;
+            $totalCom = round(abs((float) ($subheadCommitments ?? 0)), 2);
             $totalIPC = (float) $purIPC;
 
             $result[] = [
@@ -183,11 +233,73 @@ class FinancialIntelligenceService
                 'expenditure' => $totalExp,
                 'commitments' => $totalCom,
                 'in_process' => $totalIPC,
-                'remaining' => (float) $sh->sbh_alloc - $totalExp - $totalCom - $totalIPC
+                'remaining' => round((float) $sh->sbh_alloc - $totalExp - $totalCom - $totalIPC, 2),
+                'can_be_spent' => round((float) $sh->sbh_alloc - $totalExp - $totalCom - $totalIPC, 2)
             ];
         }
 
         return $result;
     }
 
+    /**
+     * Calculate loans given and taken for a head
+     */
+    public function getLoans($headId)
+    {
+        $loans = [];
+        
+        // Pcc Loans Given (lad_from = HeadId)
+        $loansGiven = DB::table('fin.loanadjustments')
+            ->where('lad_from', $headId)
+            ->sum('lad_amount');
+        $loans['pcc_loans_given'] = abs((float) $loansGiven); // Sign flipped per VBA
+        
+        // Others Loans Taken (lad_to = HeadId)
+        $loansTaken = DB::table('fin.loanadjustments')
+            ->where('lad_to', $headId)
+            ->sum('lad_amount');
+        $loans['others_loans_taken'] = abs((float) $loansTaken); // Sign flipped per VBA
+        
+        return (object) $loans;
+    }
+
+    /**
+     * Calculate salary tax using fin.salary_tax table
+     */
+    public function calculateSalaryTax($ctrSalary, $baseSalary)
+    {
+        if ($ctrSalary <= 0) {
+            return 0;
+        }
+
+        $annualSalary = $ctrSalary * 12;
+        
+        // Find the correct tax slab
+        $taxSlab = DB::table('fin.salary_tax')
+            ->where('slt_from', '<=', $annualSalary)
+            ->where('slt_to', '>=', $annualSalary)
+            ->first();
+        
+        if (!$taxSlab) {
+            return 0;
+        }
+
+        // Exact VBA formula
+        $tax = ($taxSlab->slt_inttax + ($annualSalary - $taxSlab->slt_midamount) * $taxSlab->slt_midtax / 100) / 12 * ($baseSalary / $ctrSalary);
+        
+        return $tax;
+    }
+
+    /**
+     * Check if a contract is verified
+     */
+    public function isContractVerified($contractId)
+    {
+        $verification = DB::table('fin.contractsverif')
+            ->where('cvf_ctr_id', $contractId)
+            ->where('cvf_verif', true)
+            ->first();
+        
+        return $verification !== null;
+    }
 }
