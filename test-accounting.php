@@ -9,55 +9,62 @@ use App\Services\FinancialIntelligenceService;
 
 $service = new FinancialIntelligenceService();
 
-// Get some real HeadIds to test
-echo "Testing accounting calculations...\n\n";
-echo "Enter HeadIds to test (comma separated): ";
-$handle = fopen ("php://stdin","r");
-$line = fgets($handle);
-$headIds = array_map('trim', explode(',', $line));
-fclose($handle);
+// Test HeadId 200012
+$headId = 200002;
+$status = $service->getHeadStatus($headId);
 
-if (empty($headIds)) {
-    $headIds = [1, 2, 3, 4, 5]; // Default test IDs
+echo "=== ACCOUNTING VALIDATION FOR HEADID $headId ===" . PHP_EOL;
+echo str_repeat('=', 70) . PHP_EOL;
+
+echo PHP_EOL . "--- FINAL COMBINED METRICS ---" . PHP_EOL;
+echo "Total Expenditure: " . number_format($status->expenditure, 2) . PHP_EOL;
+echo "Total Commitments: " . number_format($status->commitments, 2) . PHP_EOL;
+echo "Total In Process:  " . number_format($status->in_process, 2) . PHP_EOL;
+echo "Total Balance:     " . number_format($status->balance, 2) . PHP_EOL;
+echo "Total Available:   " . number_format($status->available, 2) . PHP_EOL;
+
+echo PHP_EOL . "--- PROJECT SCOPE (PRJ) ---" . PHP_EOL;
+echo "Prj Received:      " . number_format($status->prj_received, 2) . PHP_EOL;
+echo "Prj Expenditure:   " . number_format($status->prj_expenditure, 2) . PHP_EOL;
+echo "Prj Commitments:   " . number_format($status->prj_commitments, 2) . PHP_EOL;
+echo "Prj In Process:    " . number_format($status->prj_in_process, 2) . PHP_EOL;
+echo "Prj Balance:       " . number_format($status->prj_balance, 2) . PHP_EOL;
+echo "Prj Available:     " . number_format($status->prj_available, 2) . PHP_EOL;
+
+echo PHP_EOL . "--- CSRF SCOPE (CF) ---" . PHP_EOL;
+echo "CF Received:       " . number_format($status->cf_received, 2) . PHP_EOL;
+echo "CF Expenditure:    " . number_format($status->cf_expenditure, 2) . PHP_EOL;
+echo "CF Commitments:    " . number_format($status->cf_commitments, 2) . PHP_EOL;
+echo "CF In Process:     " . number_format($status->cf_in_process, 2) . PHP_EOL;
+echo "CF Balance:        " . number_format($status->cf_balance, 2) . PHP_EOL;
+echo "CF Available:      " . number_format($status->cf_available, 2) . PHP_EOL;
+
+echo PHP_EOL . str_repeat('=', 70) . PHP_EOL;
+
+// Verify target values
+$targets = [
+    'prj_available' => -2828654.00,
+    'cf_available' => -300000.00,
+    'available' => -3128654.00,
+    'in_process' => 0.00,
+    'expenditure' => 2678654.00,
+    'commitments' => 450000.00,
+];
+
+$allMatched = true;
+echo PHP_EOL . "--- TARGET COMPARISON ---" . PHP_EOL;
+foreach ($targets as $key => $expected) {
+    $actual = $status->$key ?? null;
+    $match = abs($actual - $expected) < 0.01;
+    $allMatched &= $match;
+    echo str_pad($key, 20) . " | "
+        . str_pad(number_format($actual, 2), 15, ' ', STR_PAD_LEFT)
+        . " | "
+        . str_pad(number_format($expected, 2), 15, ' ', STR_PAD_LEFT)
+        . " | "
+        . ($match ? "✅ MATCH" : "❌ MISMATCH")
+        . PHP_EOL;
 }
 
-echo "\n---\n";
-echo "Testing HeadIds: " . implode(', ', $headIds) . "\n";
-echo "---\n\n";
-
-foreach ($headIds as $headId) {
-    echo "Head ID: $headId\n";
-    echo str_repeat("-", 50) . "\n";
-    
-    $status = $service->getHeadStatus($headId);
-    $subheads = $service->getSubheadBreakdown($headId);
-    $loans = $service->getLoans($headId);
-    
-    echo "  Allocation: " . $status->allocation . "\n";
-    echo "  MTSS Share: " . $status->mtss_share . "\n";
-    echo "  Acc Share: " . $status->acc_share . "\n";
-    echo "  Pcc Share: " . $status->pcc_share . "\n";
-    echo "  Cf Share: " . $status->cf_share . "\n";
-    echo "  Prj Share: " . $status->prj_share . "\n";
-    echo "  Received: " . $status->received . "\n";
-    echo "  Expenditure: " . $status->expenditure . "\n";
-    echo "  Commitments: " . $status->commitments . "\n";
-    echo "  In Process: " . $status->in_process . "\n";
-    echo "  Balance: " . $status->balance . "\n";
-    echo "  Available: " . $status->available . "\n";
-    echo "  Yet To Be Received: " . $status->yet_to_be_received . "\n";
-    echo "  Can Be Spent: " . $status->can_be_spent . "\n";
-    echo "  Pcc Loans Given: " . $loans->pcc_loans_given . "\n";
-    echo "  Others Loans Taken: " . $loans->others_loans_taken . "\n";
-    
-    echo "\n  Subheads:\n";
-    foreach ($subheads as $sh) {
-        echo "    {$sh['name']}: Allocation={$sh['allocation']}, Expenditure={$sh['expenditure']}, Commitments={$sh['commitments']}, InProcess={$sh['in_process']}, CanBeSpent={$sh['can_be_spent']}\n";
-    }
-    
-    echo "\n";
-}
-
-echo "\n---\n";
-echo "Test completed!\n";
-echo "---\n";
+echo PHP_EOL . "--- FINAL VERDICT ---" . PHP_EOL;
+echo $allMatched ? "✅ ALL TARGETS MATCHED!" : "❌ SOME TARGETS FAILED!" . PHP_EOL;

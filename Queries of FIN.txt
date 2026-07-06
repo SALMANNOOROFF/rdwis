@@ -1,0 +1,626 @@
+TRANSFORM Sum(fin_loans1.amount) AS SumOfamount
+SELECT fin_loans1.[For Project], Sum(fin_loans1.amount) AS SumOfamount1
+FROM fin_loans1
+GROUP BY fin_loans1.[For Project]
+PIVOT fin_loans1.[From Project];
+
+
+
+TRANSFORM First(fin_loans_net3.A) AS FirstOfA
+SELECT fin_loans_net3.For, Sum(fin_loans_net3.A) AS [Sum]
+FROM fin_loans_net3
+GROUP BY fin_loans_net3.For
+PIVOT fin_loans_net3.From;
+SELECT fin_acc_received1.cmt_effhed_id, Sum(fin_acc_received1.amount) AS total_rec
+FROM fin_acc_received1
+GROUP BY fin_acc_received1.cmt_effhed_id;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, fin_commitments.cmt_effhed_id, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("FI","FO","TI")));
+SELECT fin_commitments.*
+FROM fin_commitments
+WHERE (((fin_commitments.cmt_type)="Ps" Or (fin_commitments.cmt_type)="Pt" Or (fin_commitments.cmt_type)="Rb"));
+SELECT fin_commitments.*
+FROM fin_commitments
+WHERE (((fin_commitments.cmt_type)="Sa"));
+SELECT fin_commitments.*
+FROM fin_commitments
+WHERE (((fin_commitments.cmt_type)="FI" Or (fin_commitments.cmt_type)="FO" Or (fin_commitments.cmt_type)="LI" Or (fin_commitments.cmt_type)="LO" Or (fin_commitments.cmt_type)="TI" Or (fin_commitments.cmt_type)="TO"));
+SELECT pur_purcases.pcs_id, pur_purcases.pcs_date, pur_purcases.pcs_title, pur_purcases.pcs_intunt_id, pur_purcases.pcs_hed_id, pur_purcases.pcs_unt_id, pur_purcases.pcs_effhed_id, pur_purcases.pcs_effunt_id, pur_purcases.pcs_intprice, pur_purcases.pcs_inttax, pur_purcases.pcs_midprice, pur_purcases.pcs_midtax, pur_purcases.pcs_price, pur_purcases.pcs_frm_id, pur_purcases.pcs_transtype, pur_purcases.pcs_noloan, fin_commitments.cmt_status, fin_commitments.cmt_id, fin_commitments.cmt_amount, pur_purcases.pcs_minute, fin_commitments.cmt_date, fin_commitments.cmt_effhed_id, fin_commitments.cmt_remarks
+FROM pur_purcases INNER JOIN fin_commitments ON (pur_purcases.pcs_type = fin_commitments.cmt_type) AND (pur_purcases.pcs_id = fin_commitments.cmt_docid)
+WHERE (((pur_purcases.pcs_intunt_id)>=getvar("varLower") And (pur_purcases.pcs_intunt_id)<=getvar("varUpper")))
+ORDER BY pur_purcases.pcs_intunt_id, pur_purcases.pcs_hed_id;
+SELECT fin_commitments_u_pcs.*
+FROM fin_commitments_u_pcs
+WHERE (((fin_commitments_u_pcs.cmt_status)="Paid"))
+ORDER BY fin_commitments_u_pcs.cmt_date DESC;
+SELECT fin_commitments_u_pcs.*
+FROM fin_commitments_u_pcs
+WHERE (((fin_commitments_u_pcs.cmt_status)="Awaited"))
+ORDER BY fin_commitments_u_pcs.cmt_date DESC;
+SELECT fin_commitscat.ctc_cmt_id, fin_commitscat.ctc_amount AS equip_amount
+FROM fin_commitscat
+WHERE (((fin_commitscat.ctc_category)=1));
+SELECT fin_commitscat.ctc_cmt_id, fin_commitscat.ctc_amount AS misc_amount
+FROM fin_commitscat
+WHERE (((fin_commitscat.ctc_category)=3));
+SELECT fin_salorders.sor_id, fin_salorders.sor_emp_id, fin_salorders.sor_empnamecomp, fin_salorders.sor_hed_id, fin_salorders.sor_unt_id, fin_salorders.sor_effhed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_closedtg, fin_salorders.sor_salary, fin_salorders.sor_month, fin_commitments.cmt_status, fin_commitments.cmt_id, fin_salorders.sor_transtype, fin_salorders.sor_noloan, fin_commitments.cmt_amount
+FROM fin_salorders INNER JOIN fin_commitments ON (fin_salorders.sor_type = fin_commitments.cmt_type) AND (fin_salorders.sor_id = fin_commitments.cmt_docid)
+WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")) AND ((fin_salorders.sor_status)<>"Cancelled"))
+ORDER BY fin_salorders.sor_month DESC , fin_salorders.sor_unt_id, fin_salorders.sor_hed_id;
+SELECT fin_commitments_u_so.*
+FROM fin_commitments_u_so
+WHERE (((fin_commitments_u_so.cmt_status)="Paid"));
+SELECT fin_contractsverif.cvf_verif, fin_contractsverif.cvf_dtg, hr_contracts.ctr_id, hr_contracts.ctr_num, hr_emps.emp_name, hr_emps.emp_title, hr_emps.emp_rank, hr_contracts.ctr_unt_id, hr_contracts.ctr_hed_id, hr_contracts.ctr_startdt, hr_contracts.ctr_enddt, hr_contracts.ctr_salary, hr_contracts.ctr_prob, hr_contracts.ctr_probsal, hr_contracts.ctr_grade
+FROM (fin_contractsverif INNER JOIN hr_contracts ON fin_contractsverif.cvf_ctr_id = hr_contracts.ctr_id) INNER JOIN hr_emps ON hr_contracts.ctr_num = hr_emps.emp_id
+WHERE (((hr_contracts.ctr_id) In (Select ctr_id From [hr_contracts_u_last])));
+
+SELECT fin_contractsverif.cvf_verif, fin_contractsverif.cvf_dtg, hr_contracts.ctr_id, hr_contracts.ctr_num, hr_emps.emp_name, hr_emps.emp_title, hr_emps.emp_rank, hr_contracts.ctr_unt_id, hr_contracts.ctr_hed_id, hr_contracts.ctr_startdt, hr_contracts.ctr_enddt, hr_contracts.ctr_salary, hr_contracts.ctr_prob, hr_contracts.ctr_probsal, hr_contracts.ctr_grade
+FROM (fin_contractsverif INNER JOIN hr_contracts ON fin_contractsverif.cvf_ctr_id = hr_contracts.ctr_id) INNER JOIN hr_emps ON hr_contracts.ctr_num = hr_emps.emp_id
+WHERE (((hr_contracts.ctr_id) In (Select ctr_id From [hr_contracts_u_last_active])) AND ((hr_emps.emp_status) Like "Active*"));
+SELECT fin_contractsverif.cvf_verif, fin_contractsverif.cvf_dtg, hr_contracts.ctr_num, hr_emps.emp_name, hr_emps.emp_title, hr_emps.emp_rank, hr_contracts.ctr_unt_id, hr_contracts.ctr_hed_id, hr_contracts.ctr_startdt, hr_contracts.ctr_enddt, hr_contracts.ctr_salary, hr_contracts.ctr_prob, hr_contracts.ctr_probsal, hr_contracts.ctr_grade, hr_contracts.ctr_id
+FROM (fin_contractsverif INNER JOIN hr_contracts ON fin_contractsverif.cvf_ctr_id = hr_contracts.ctr_id) INNER JOIN hr_emps ON hr_contracts.ctr_num = hr_emps.emp_id
+WHERE (((fin_contractsverif.cvf_verif)="0"));
+SELECT fin_contractsverif.cvf_verif, fin_contractsverif.cvf_dtg, hr_contracts.ctr_num, hr_emps.emp_name, hr_emps.emp_title, hr_emps.emp_rank, hr_contracts.ctr_unt_id, hr_contracts.ctr_hed_id, hr_contracts.ctr_startdt, hr_contracts.ctr_enddt, hr_contracts.ctr_salary, hr_contracts.ctr_prob, hr_contracts.ctr_probsal, hr_contracts.ctr_grade, hr_contracts.ctr_id
+FROM (fin_contractsverif INNER JOIN hr_contracts ON fin_contractsverif.cvf_ctr_id = hr_contracts.ctr_id) INNER JOIN hr_emps ON hr_contracts.ctr_num = hr_emps.emp_id
+WHERE (((fin_contractsverif.cvf_verif)="1"))
+ORDER BY fin_contractsverif.cvf_dtg DESC;
+SELECT pur_purcases.pcs_id AS docid, pur_purcases.pcs_type AS doctype, pur_purcases.pcs_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, pur_purcases.pcs_sudohed AS sudohed, pur_purcases.pcs_midprice AS amount1, pur_purcases.pcs_midtax AS tax1, pur_purcases.pcs_price AS amount2, pur_purcases.pcs_transtype AS transtype
+FROM pur_purcases
+WHERE (((pur_purcases.pcs_status) In ("Under Scrutiny","Under Revision","Under Approval")));
+SELECT fin_salorders.sor_id AS docid, fin_salorders.sor_type AS doctype, fin_salorders.sor_releasedtg AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id AS effhed_id, fin_salorders.sor_effunt_id AS effunt_id, fin_salorders.sor_hed_id AS hed_id, fin_salorders.sor_unt_id AS unt_id, fin_salorders.sor_sudohed, fin_salorders.sor_salary AS amount1, 0 AS tax1, fin_salorders.sor_salary AS amount2, fin_salorders.sor_transtype AS transtype
+FROM hr_salreqs INNER JOIN fin_salorders ON hr_salreqs.srq_id = fin_salorders.sor_srq_id
+WHERE (((fin_salorders.sor_status) In ("Draft")) AND ((hr_salreqs.srq_status)="In Process"));
+SELECT fin_ecbreakdown_temp.subtype, Sum(fin_ecbreakdown_temp.amount) AS sum_amount
+FROM fin_ecbreakdown_temp
+GROUP BY fin_ecbreakdown_temp.subtype
+ORDER BY Sum(fin_ecbreakdown_temp.amount) DESC;
+SELECT Count([%$##@_Alias].id) AS doc_count
+FROM (SELECT DISTINCT fin_ecbreakdown_temp.id
+FROM fin_ecbreakdown_temp)  AS [%$##@_Alias];
+SELECT FirstDateThisMonth([docdate]) AS [month], fin_ectimeline_temp.subhead, Sum(fin_ectimeline_temp.amount) AS sum_amount
+FROM fin_ectimeline_temp
+GROUP BY FirstDateThisMonth([docdate]), fin_ectimeline_temp.subhead;
+SELECT pur_purcases.pcs_date, pur_purcases.pcs_id, pur_purcases.pcs_type, pur_purcases.pcs_title, Round(IIf([pcs_status]="Partially Fulfilled",IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]),IIf([pcs_transtype]=1,[pcs_midprice],[pcs_price]))*[pcd_ratio],0) AS price, pur_purcases_shd.pcd_subhead, pur_purcases_shd.pcd_ratio, pur_purcases.pcs_status
+FROM ((pur_purcases INNER JOIN fin_commitments ON (pur_purcases.pcs_id = fin_commitments.cmt_docid) AND (pur_purcases.pcs_type = fin_commitments.cmt_type)) LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) INNER JOIN pur_purcases_shd ON (pur_purcases.pcs_id = pur_purcases_shd.pcd_pcs_id) AND (pur_purcases.pcs_type = pur_purcases_shd.pcd_type)
+WHERE (((pur_purcases.pcs_status)="Approved") And ((pur_purcases.pcs_hed_id)=Forms!vars!Parameter1) And ((pur_purcases.pcs_sudohed) Is Null Or (pur_purcases.pcs_sudohed)="")) Or (((pur_purcases.pcs_status)="Fulfilled") And ((pur_purcases.pcs_hed_id)=Forms!vars!Parameter1) And ((pur_purcases.pcs_sudohed) Is Null Or (pur_purcases.pcs_sudohed)="")) Or (((pur_purcases.pcs_status)="Partially Fulfilled") And ((pur_purcases.pcs_hed_id)=Forms!vars!Parameter1) And ((pur_purcases.pcs_sudohed) Is Null Or (pur_purcases.pcs_sudohed)=""));
+SELECT hr_emps.emp_id, NameComplete([emp_name],[emp_title],[emp_rank]) AS NameFull, hr_emps.emp_unt_id, hr_emps.emp_status, hr_emps.emp_lastdt, fin_empeffheads.eeh_emphed_id, fin_empeffheads.eeh_sudohed, fin_empeffheads.eeh_status, fin_empeffheads.eeh_remarks, fin_empeffheads.eeh_dtg, hr_contractplans.cpn_hed_id, hr_contractplans.cpn_startdt, hr_contractplans.cpn_enddt, IIf([emp_unt_id]>=800000,[emp_unt_id]-1000000,[emp_unt_id]) AS Sorter
+FROM ((fin_empeffheads INNER JOIN hr_emps ON fin_empeffheads.eeh_emp_id = hr_emps.emp_id) LEFT JOIN hr_contracts_u_currentmonth ON fin_empeffheads.eeh_emp_id = hr_contracts_u_currentmonth.ctr_num) LEFT JOIN hr_contractplans ON hr_contracts_u_currentmonth.ctr_id = hr_contractplans.cpn_ctr_id
+WHERE (((hr_contractplans.cpn_startdt)=FirstDateThisMonth(GetNow()))) OR (((hr_contractplans.cpn_enddt)=LastDateThisMonth(GetNow()))) OR (((hr_contractplans.cpn_startdt) Is Null) AND ((hr_contractplans.cpn_enddt) Is Null))
+ORDER BY IIf([emp_unt_id]>=800000,[emp_unt_id]-1000000,[emp_unt_id]), hr_contractplans.cpn_hed_id;
+SELECT fin_empeffheads_u.*, fin_empeffheads_u.eeh_status
+FROM fin_empeffheads_u
+WHERE (((fin_empeffheads_u.eeh_status)="Closed"));
+SELECT fin_empeffheads_u.*, fin_empeffheads_u.eeh_status
+FROM fin_empeffheads_u
+WHERE (((fin_empeffheads_u.eeh_status)="Open"));
+SELECT fin_expenditure1.docid, fin_expenditure1.doctype, DateValue([rdate]) AS rsdate, fin_expenditure1.title, fin_expenditure1.effhed_id, fin_expenditure1.effunt_id, fin_expenditure1.hed_id, fin_expenditure1.unt_id, fin_expenditure1.amount1, fin_expenditure1.tax1, fin_expenditure1.amount2, fin_expenditure1.trn_id, fin_expenditure1.trn_transtype, IIf([doctype]="Sa",0,[docid]) AS sum_id, IIf([doctype]="Sa","Monthly Salary for " & Format([docdate],"mmm yy"),[title]) AS title2
+FROM fin_expenditure1
+ORDER BY DateValue([rdate]);
+SELECT fin_expenditure.effhed_id, fin_expenditure.sum_id, fin_expenditure.title2, First(fin_expenditure.rsdate) AS FirstOfrsdate, First(fin_expenditure.docid) AS FirstOfdocid, First(fin_expenditure.doctype) AS FirstOfdoctype, First(fin_expenditure.hed_id) AS FirstOfhed_id, First(fin_expenditure.effunt_id) AS FirstOfeffunt_id, First(fin_expenditure.unt_id) AS FirstOfunt_id, Sum(fin_expenditure.amount1) AS SumOfamount1, Sum(fin_expenditure.tax1) AS SumOftax1, Sum(fin_expenditure.amount2) AS SumOfamount2, First(fin_expenditure.trn_id) AS FirstOftrn_id, First(fin_expenditure.trn_transtype) AS FirstOftrn_transtype
+FROM fin_expenditure
+GROUP BY fin_expenditure.effhed_id, fin_expenditure.sum_id, fin_expenditure.title2;
+SELECT fin_commitments_pcs.cmt_docid AS docid, fin_commitments_pcs.cmt_type AS doctype, fin_transactions.trn_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id, fin_transactions.trn_transtype, pur_purcases.pcs_date AS docdate
+FROM (pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_pcs.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_transactions.trn_date)>=[Forms]![vars]![Parameter1] And (fin_transactions.trn_date)<=[Forms]![vars]![Parameter2]));
+SELECT fin_salorders.sor_id AS docid, fin_commitments_so.cmt_type AS doctype, fin_transactions.trn_date AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_hed_id, fin_salorders.sor_unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, [trn_amount2]*-1 AS amount2, fin_transactions.trn_id, fin_transactions.trn_transtype, fin_salorders.sor_month AS docdate
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_transactions.trn_date)>=[Forms]![vars]![Parameter1] And (fin_transactions.trn_date)<=[Forms]![vars]![Parameter2]));
+SELECT fin_commitments_trf.cmt_docid AS docid, fin_commitments_trf.cmt_type AS doctype, fin_transactions.trn_date AS rdate, fin_transfers.trf_title AS title, fin_commitments_trf.cmt_effhed_id AS effhed_id, fin_commitments_trf.cmt_effunt_id AS effunt_id, fin_commitments_trf.cmt_hed_id AS hed_id, fin_commitments_trf.cmt_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id, fin_transactions.trn_transtype, fin_transfers.trf_date AS docdate
+FROM (fin_transfers INNER JOIN fin_commitments_trf ON fin_transfers.trf_id = fin_commitments_trf.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_trf.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments_trf.cmt_type) In ("LI","LO","TO","TI")) And ((fin_transactions.trn_date)>=Forms!vars!Parameter1 And (fin_transactions.trn_date)<=Forms!vars!Parameter2));
+SELECT fin_extcompenses.*
+FROM fin_extcompenses
+WHERE (((fin_extcompenses.ecp_unt_id)>=getvar("varLower") And (fin_extcompenses.ecp_unt_id)<=getvar("varUpper")))
+ORDER BY fin_extcompenses.ecp_date DESC;
+SELECT units.unt_namesh, IIf(Nz([hed_code],"")="","Center",[hed_code]) AS project, pur_purcases.pcs_date, pur_purcases.pcs_title, frm_firms.frm_id, frm_firms.frm_name AS frm_name, pur_purcases.pcs_intprice
+FROM ((pur_purcases LEFT JOIN cen_heads ON pur_purcases.pcs_hed_id = cen_heads.hed_id) INNER JOIN frm_firms ON pur_purcases.pcs_frm_id = frm_firms.frm_id) INNER JOIN units ON pur_purcases.pcs_unt_id = units.unt_id
+WHERE (((pur_purcases.pcs_status) In ("Approved","Fulfilled","Partially Fulfilled")));
+SELECT fin_firms_overall3.firm, Sum(fin_firms_overall3.intprice) AS intprice, Sum(fin_firms_overall3.proportion) AS proportion
+FROM fin_firms_overall3
+GROUP BY fin_firms_overall3.firm;
+SELECT Sum(Round([pcs_intprice],0)) AS grand_total
+FROM fin_firms_overall1;
+SELECT IIf([proportion]>0.03,[frm_name],"Others") AS firm, Round([pcs_intprice],0) AS intprice, [pcs_intprice]/[grand_total] AS proportion
+FROM fin_firms_overall1, fin_firms_overall2
+ORDER BY Round([pcs_intprice],0) DESC;
+SELECT fin_commitments.cmt_effhed_id, cen_heads.hed_code, Sum(fin_transactions.trn_amount2) AS SumOftrn_amount2
+FROM (fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) INNER JOIN cen_heads ON fin_commitments.cmt_effhed_id = cen_heads.hed_id
+WHERE (((fin_commitments.cmt_type)="FI") AND ((fin_commitments.cmt_hed_id)=990001))
+GROUP BY fin_commitments.cmt_effhed_id, cen_heads.hed_code;
+SELECT cen_heads_u.hed_id, cen_heads_u.hed_code, cen_heads_u.hed_transtype, GetAccAllocation([hed_id]) AS allocation, GetAccMtssShare([hed_id]) AS mtss_share, GetAccReceived([hed_id]) AS received, GetAccExpenditure([hed_id]) AS expenditure, GetAccOutstandingCommits([hed_id]) AS commitments
+FROM cen_heads_u
+WHERE (((cen_heads_u.hed_type)="Project"))
+ORDER BY cen_heads_u.hed_id;
+SELECT cen_heads_open_u.hed_id, cen_heads_open_u.hed_code, cen_heads_open_u.hed_transtype, GetAccAllocation([hed_id]) AS allocation, GetAccMtssShare([hed_id]) AS mtss_share, GetAccReceived([hed_id]) AS received, GetAccOutstandingCommits([hed_id]) AS commitments, GetAccExpenditure([hed_id]) AS expenditure, GetA16Element("GetAccShares",[hed_id],2) AS chrf_share, GetCfExpenditure([hed_id]) AS chrf_expenditure
+FROM cen_heads_open_u
+WHERE (((cen_heads_open_u.hed_type)="Project"))
+ORDER BY cen_heads_open_u.hed_id;
+SELECT fin_transfers.*
+FROM fin_transfers
+WHERE (((fin_transfers.trf_type)="T"))
+ORDER BY fin_transfers.trf_date DESC;
+SELECT Max(fin_salorders.sor_month) AS max_month
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Fulfilled") And ((fin_salorders.sor_hed_id)=Forms!vars!Parameter1));
+SELECT Max(fin_salorders.sor_month) AS max_month
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Fulfilled") AND ((fin_salorders.sor_hed_id) Is Null));
+SELECT fin_loanadjustments.*
+FROM fin_loanadjustments
+WHERE (((fin_loanadjustments.lad_remarks) Not Like "Amount added to CSRF*")) OR (((fin_loanadjustments.lad_remarks) Like "Amount added to CSRF of *"));
+SELECT fin_loanadjustments.*
+FROM fin_loanadjustments
+WHERE (((fin_loanadjustments.lad_remarks) Like "Amount added to CSRF*" And (fin_loanadjustments.lad_remarks) Not Like "Amount added to CSRF of *"));
+SELECT fin_loans_detail51.loan_first, fin_loans_detail51.from_head AS from_head, fin_loans_detail51.from_div AS from_div, fin_loans_detail51.for_head AS for_head, fin_loans_detail51.for_div AS for_div, fin_loans_detail51.[loan/payback], fin_loans_detail51.type, fin_loans_detail51.loan, fin_loans_detail52.return, fin_loans_detail6.adjustment, [loan]-Nz([return],0)-Nz([adjustment],0) AS final_loan
+FROM (fin_loans_detail51 LEFT JOIN fin_loans_detail52 ON fin_loans_detail51.loan_first = fin_loans_detail52.loan_first) LEFT JOIN fin_loans_detail6 ON fin_loans_detail51.loan_first = fin_loans_detail6.lad_string
+ORDER BY fin_loans_detail51.type, [loan]-Nz([return],0)-Nz([adjustment],0) DESC;
+SELECT fin_loans_detail1_temp.loan_group, Min(fin_loans_detail1_temp.trn_date) AS min_date
+FROM fin_loans_detail1_temp
+GROUP BY fin_loans_detail1_temp.loan_group;
+SELECT DISTINCT [fin_loans_detail1_temp].loan_group, [fin_loans_detail1_temp].loan_string AS loan_first
+FROM fin_loans_detail1_temp INNER JOIN fin_loans_detail2 ON ([fin_loans_detail1_temp].loan_group=fin_loans_detail2.loan_group) AND ([fin_loans_detail1_temp].trn_date=fin_loans_detail2.min_date);
+SELECT fin_loans_detail1_temp.cmt_type, fin_loans_detail1_temp.cmt_docid, fin_loans_detail1_temp.amount, fin_loans_detail1_temp.from_head, fin_loans_detail1_temp.for_head, fin_loans_detail1_temp.loan_string, fin_loans_detail1_temp.loan_group, fin_loans_detail1_temp.trn_date, fin_loans_detail3.loan_first, IIf([loan_string]=[loan_first],"loan","payback") AS [loan/payback], fin_loans_detail1_temp.from_div, fin_loans_detail1_temp.for_div, IIf([from_div]=[for_div],"Internal","External") AS type
+FROM fin_loans_detail1_temp INNER JOIN fin_loans_detail3 ON fin_loans_detail1_temp.loan_group = fin_loans_detail3.loan_group
+ORDER BY fin_loans_detail1_temp.loan_group, fin_loans_detail1_temp.trn_date;
+SELECT fin_loans_detail4.*
+FROM fin_loans_detail4
+WHERE (((fin_loans_detail4.[loan/payback])="loan"));
+SELECT fin_loans_detail41.*, "Salary " & Format([sor_month],"mmm yy") & " - " & Nz([sor_empnamecomp],"unknown") AS sor_title, fin_salorders.sor_releasedtg AS sor_date, pur_purcases.pcs_title, pur_purcases.pcs_date, IIf(IsNull([sor_date]),[pcs_date],[sor_date]) AS doc_date, IIf([cmt_type]="Sa",[sor_title],[pcs_title]) AS doc_title
+FROM (fin_salorders RIGHT JOIN fin_loans_detail41 ON (fin_salorders.sor_type = fin_loans_detail41.cmt_type) AND (fin_salorders.sor_id = fin_loans_detail41.cmt_docid)) LEFT JOIN pur_purcases ON (fin_loans_detail41.cmt_docid = pur_purcases.pcs_id) AND (fin_loans_detail41.cmt_type = pur_purcases.pcs_type);
+SELECT fin_loans_detail41.*, "Salary " & Format([sor_month],"mmm yy") & " - " & Nz([sor_empnamecomp],"unknown") AS sor_title, fin_salorders.sor_releasedtg AS sor_date, pur_purcases.pcs_title, pur_purcases.pcs_date, IIf(IsNull([sor_date]),[pcs_date],[sor_date]) AS doc_date, IIf([cmt_type]="Sa",[sor_title],[pcs_title]) AS doc_title
+FROM (fin_salorders RIGHT JOIN fin_loans_detail41 ON (fin_salorders.sor_type = fin_loans_detail41.cmt_type) AND (fin_salorders.sor_id = fin_loans_detail41.cmt_docid)) LEFT JOIN pur_purcases ON (fin_loans_detail41.cmt_docid = pur_purcases.pcs_id) AND (fin_loans_detail41.cmt_type = pur_purcases.pcs_type);
+SELECT fin_loans_detail42.*, "Salary " & Format([sor_month],"mmm yy") & " - " & Nz([sor_empnamecomp],"unknown") AS sor_title, fin_salorders.sor_releasedtg AS sor_date, pur_purcases.pcs_title, pur_purcases.pcs_date, IIf(IsNull([sor_date]),[pcs_date],[sor_date]) AS doc_date, IIf([cmt_type]="Sa",[sor_title],[pcs_title]) AS doc_title
+FROM (fin_salorders RIGHT JOIN fin_loans_detail42 ON (fin_salorders.sor_id = fin_loans_detail42.cmt_docid) AND (fin_salorders.sor_type = fin_loans_detail42.cmt_type)) LEFT JOIN pur_purcases ON (fin_loans_detail42.cmt_type = pur_purcases.pcs_type) AND (fin_loans_detail42.cmt_docid = pur_purcases.pcs_id);
+SELECT fin_loans_detail41.loan_first, Sum(fin_loans_detail41.amount) AS loan, First(fin_loans_detail41.from_head) AS from_head, First(fin_loans_detail41.from_div) AS from_div, First(fin_loans_detail41.for_head) AS for_head, First(fin_loans_detail41.for_div) AS for_div, First(fin_loans_detail41.[loan/payback]) AS [loan/payback], First(fin_loans_detail41.type) AS type
+FROM fin_loans_detail41
+GROUP BY fin_loans_detail41.loan_first;
+SELECT fin_loans_detail42.loan_first, Sum(fin_loans_detail42.amount) AS return, First(fin_loans_detail42.[loan/payback]) AS [loan/payback], First(fin_loans_detail42.type) AS type
+FROM fin_loans_detail42
+GROUP BY fin_loans_detail42.loan_first;
+SELECT fin_loanadjustments.lad_string AS lad_string, Sum(fin_loanadjustments.lad_amount) AS adjustment
+FROM fin_loanadjustments
+GROUP BY fin_loanadjustments.lad_string;
+SELECT fin_commitments.cmt_type, -1*[trn_amount2] AS amount, IIf([cmt_effunt_id]<800000,[units_1].[unt_namesh],"RDW") AS [From], IIf([cmt_unt_id]<800000,[units].[unt_namesh],"RDW") AS [For], [From] & "-" & Nz([For],"RGA") AS [Loan String]
+FROM ((fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) LEFT JOIN units AS units_1 ON fin_commitments.cmt_effunt_id = units_1.unt_id) LEFT JOIN units ON fin_commitments.cmt_unt_id = units.unt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) AND ((fin_commitments.cmt_effhed_id)<>Nz([cmt_hed_id],160001)) AND ((fin_transactions.trn_noloan)="0") AND ((fin_commitments.cmt_effunt_id)<>[cmt_unt_id]));
+SELECT fin_loans_div1.[Loan String], fin_loans_div1.From, fin_loans_div1.For, Sum(fin_loans_div1.amount) AS SumOfamount
+FROM fin_loans_div1
+GROUP BY fin_loans_div1.[Loan String], fin_loans_div1.From, fin_loans_div1.For;
+SELECT fin_loans_div2.[Loan String], fin_loans_div2.From, fin_loans_div2.For, fin_loans_div2.SumOfamount AS A1, IIf([fin_loans_div2_1].[SumOfamount]<=[fin_loans_div2].[SumOfamount],-1*[fin_loans_div2_1].[SumOfamount],[fin_loans_div2_1].[SumOfamount]) AS A2
+FROM fin_loans_div2 LEFT JOIN fin_loans_div2 AS fin_loans_div2_1 ON (fin_loans_div2.For = fin_loans_div2_1.From) AND (fin_loans_div2.From = fin_loans_div2_1.For);
+SELECT fin_loans_div3.[Loan String], fin_loans_div3.From, fin_loans_div3.For, fin_loans_div3.A1, fin_loans_div3.A2, [A1]+Nz([A2],0) AS A
+FROM fin_loans_div3
+WHERE (((fin_loans_div3.A1)<>[A2]*(-1)) AND ((fin_loans_div3.A2)<0)) OR (((fin_loans_div3.A2) Is Null));
+SELECT fin_loans1.loan_string, IIf(IsNull([From Project]),"RGA",[From Project]) AS [From], IIf(IsNull([For Project]),"RGA",[For Project]) AS [For], Sum(fin_loans1.amount) AS SumOfamount, First(fin_loans1.[From Div]) AS FromDiv, First(fin_loans1.[For Div]) AS ForDiv
+FROM fin_loans1
+GROUP BY fin_loans1.loan_string, IIf(IsNull([From Project]),"RGA",[From Project]), IIf(IsNull([For Project]),"RGA",[For Project])
+ORDER BY fin_loans1.loan_string;
+SELECT fin_loans_net1.loan_string, fin_loans_net1.From, fin_loans_net1.For, fin_loans_net1.SumOfamount AS A1, IIf([fin_loans_net1_1].[SumOfamount]<=[fin_loans_net1].[SumOfamount],-1*[fin_loans_net1_1].[SumOfamount],[fin_loans_net1_1].[SumOfamount]) AS A2, fin_loans_net1.FromDiv, fin_loans_net1.ForDiv
+FROM fin_loans_net1 LEFT JOIN fin_loans_net1 AS fin_loans_net1_1 ON (fin_loans_net1.From = fin_loans_net1_1.For) AND (fin_loans_net1.For = fin_loans_net1_1.From);
+SELECT fin_loans_net2.loan_string, fin_loans_net2.From, fin_loans_net2.For, fin_loans_net2.A1, fin_loans_net2.A2, [A1]+Nz([A2],0) AS A, fin_loans_net2.FromDiv, fin_loans_net2.ForDiv
+FROM fin_loans_net2
+WHERE (((fin_loans_net2.A1)<>[A2]*(-1)) AND ((fin_loans_net2.A2)<0)) OR (((fin_loans_net2.A2) Is Null));
+SELECT fin_commitments.cmt_type, [trn_amount2]*IIf([HeadId]=[cmt_effhed_id],-1,1) AS amount, cen_heads_1.hed_code AS [From Project], units_1.unt_namesh AS [From Div], IIf(IsNull([cen_heads].[hed_code]),"RGA",[cen_heads].[hed_code]) AS [For Project], units.unt_namesh AS [For Div], [From Project] & "-" & Nz([For Project],"RGA") AS loan_string, stringtonumber([From Project])+stringtonumber(Nz([For Project],"RGA")) AS loan_number
+FROM ((((fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) LEFT JOIN cen_heads AS cen_heads_1 ON fin_commitments.cmt_effhed_id = cen_heads_1.hed_id) LEFT JOIN units AS units_1 ON fin_commitments.cmt_effunt_id = units_1.unt_id) LEFT JOIN cen_heads ON fin_commitments.cmt_hed_id = cen_heads.hed_id) LEFT JOIN units ON fin_commitments.cmt_unt_id = units.unt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) AND ((fin_commitments.cmt_effhed_id)<>Nz([cmt_hed_id],160001) And (fin_commitments.cmt_effhed_id)=[HeadId]) AND ((fin_transactions.trn_noloan)="0")) OR (((fin_commitments.cmt_effhed_id)<>Nz([cmt_hed_id],160001)) AND ((fin_transactions.trn_noloan)="0") AND ((fin_commitments.cmt_hed_id)=[HeadId]));
+SELECT fin_commitments.cmt_type, -1*[trn_amount2] AS amount, cen_heads_1.hed_code AS [From Project], units_1.unt_namesh AS [From Div], IIf(IsNull([cen_heads].[hed_code]),"RGA",[cen_heads].[hed_code]) AS [For Project], units.unt_namesh AS [For Div], [From Project] & "-" & Nz([For Project],"RGA") AS loan_string
+FROM ((((fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) LEFT JOIN cen_heads AS cen_heads_1 ON fin_commitments.cmt_effhed_id = cen_heads_1.hed_id) LEFT JOIN units AS units_1 ON fin_commitments.cmt_effunt_id = units_1.unt_id) LEFT JOIN cen_heads ON fin_commitments.cmt_hed_id = cen_heads.hed_id) LEFT JOIN units ON fin_commitments.cmt_unt_id = units.unt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) AND ((fin_commitments.cmt_effhed_id)<>Nz([cmt_hed_id],160001)) AND ((fin_transactions.trn_noloan)="0"));
+SELECT fin_loans1.loan_string, fin_loans1.[From Project], fin_loans1.[For Project], Sum(fin_loans1.amount) AS SumOfamount
+FROM fin_loans1
+GROUP BY fin_loans1.loan_string, fin_loans1.[From Project], fin_loans1.[For Project]
+ORDER BY fin_loans1.loan_string;
+SELECT fin_msncosts.mct_msn_idd, fin_msncosts.mct_msn_id, fin_msncosts.mct_prj_id, fin_msncosts.mct_hed_id, fin_msncosts.mct_cost, prj_milestones.msn_desc, prj_milestones.msn_status, prj_milestones.msn_id
+FROM fin_msncosts RIGHT JOIN prj_milestones ON fin_msncosts.mct_msn_idd = prj_milestones.msn_idd
+WHERE (((fin_msncosts.mct_hed_id)=[Forms]![vars]![Parameter1]))
+ORDER BY prj_milestones.msn_id;
+SELECT fin_msnunpaid1.*, [mct_cost]-Nz([received],0) AS balance, Round(([mct_cost]-Nz([received],0))*(([sha_cf]+[sha_pcc])/[cmt_amount]),0) AS amount
+FROM fin_msnunpaid1 INNER JOIN (fin_sharesalloc INNER JOIN fin_commitments ON fin_sharesalloc.sha_ficmt_id = fin_commitments.cmt_id) ON fin_msnunpaid1.mct_hed_id = fin_sharesalloc.sha_hed_id
+WHERE (((Round(([mct_cost]-Nz([received],0))*(([sha_cf]+[sha_pcc])/[cmt_amount]),0))<>0));
+SELECT fin_msncosts.mct_msn_id, fin_msncosts.mct_msn_idd, fin_msncosts.mct_prj_id, fin_msncosts.mct_hed_id, First(fin_msncosts.mct_cost) AS mct_cost, Sum(fin_transactions.trn_amount2) AS received
+FROM (fin_msncosts LEFT JOIN fin_sharesinstall ON fin_msncosts.mct_msn_idd = fin_sharesinstall.shi_msn_idd) LEFT JOIN fin_transactions ON fin_sharesinstall.shi_fitrn_id = fin_transactions.trn_id
+GROUP BY fin_msncosts.mct_msn_id, fin_msncosts.mct_msn_idd, fin_msncosts.mct_prj_id, fin_msncosts.mct_hed_id
+HAVING (((fin_msncosts.mct_hed_id)=[Forms]![vars]![Parameter1]))
+ORDER BY fin_msncosts.mct_msn_id;
+SELECT fin_msncosts.mct_msn_id, fin_msncosts.mct_msn_idd, fin_msncosts.mct_prj_id, fin_msncosts.mct_hed_id, First(fin_msncosts.mct_cost) AS mct_cost, Sum(fin_transactions.trn_amount2) AS received
+FROM (fin_msncosts LEFT JOIN fin_sharesinstall ON fin_msncosts.mct_msn_idd = fin_sharesinstall.shi_msn_idd) LEFT JOIN fin_transactions ON fin_sharesinstall.shi_fitrn_id = fin_transactions.trn_id
+GROUP BY fin_msncosts.mct_msn_id, fin_msncosts.mct_msn_idd, fin_msncosts.mct_prj_id, fin_msncosts.mct_hed_id
+HAVING (((fin_msncosts.mct_hed_id)=[Forms]![vars]![Parameter1]))
+ORDER BY fin_msncosts.mct_msn_id;
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM pur_purcases LEFT JOIN (fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) ON (pur_purcases.pcs_type = fin_commitments.cmt_type) AND (pur_purcases.pcs_id = fin_commitments.cmt_docid)
+WHERE (((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type)="Pt") And ((fin_commitments.cmt_status)="Awaited") And ((pur_purcases.pcs_date)>=Forms!vars!Parameter2))
+GROUP BY fin_commitments.cmt_id;
+SELECT fin_pto_acc_exp1.cmt_effhed_id, Sum(fin_pto_acc_exp1.amount) AS SumOfamount
+FROM fin_pto_acc_exp1
+GROUP BY fin_pto_acc_exp1.cmt_effhed_id;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_effhed_id, fin_transactions.trn_id
+FROM pur_purcases INNER JOIN (fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) ON (pur_purcases.pcs_type = fin_commitments.cmt_type) AND (pur_purcases.pcs_id = fin_commitments.cmt_docid)
+WHERE (((fin_commitments.cmt_type)="Pt") And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((pur_purcases.pcs_date)=Forms!vars!Parameter2));
+SELECT pur_purcases_u.pcs_id, pur_purcases_u.pcs_date, pur_purcases_u.pcs_minute, pur_purcases_u.pcs_title, pur_purcases_u.pcs_transtype, -1*[cmt_amount] AS commitment, Nz(-1*IIf([pcs_transtype]=1,[sum_trn_amount1],[sum_trn_amount2]),0) AS paid, cen_heads.hed_code AS effhed_code, cen_heads_1.hed_code, frm_firms.frm_name
+FROM ((((pur_purcases_u LEFT JOIN fin_commitments ON (pur_purcases_u.pcs_type = fin_commitments.cmt_type) AND (pur_purcases_u.pcs_id = fin_commitments.cmt_docid)) LEFT JOIN fin_purcases_awaited1 ON fin_commitments.cmt_id = fin_purcases_awaited1.trn_cmt_id) LEFT JOIN cen_heads ON fin_commitments.cmt_effhed_id = cen_heads.hed_id) LEFT JOIN cen_heads AS cen_heads_1 ON fin_commitments.cmt_hed_id = cen_heads_1.hed_id) INNER JOIN frm_firms ON pur_purcases_u.pcs_frm_id = frm_firms.frm_id
+WHERE (((fin_commitments.cmt_status)="Awaited"));
+SELECT fin_transactions_u.trn_cmt_id, Sum(fin_transactions_u.trn_amount1) AS sum_trn_amount1, Sum(fin_transactions_u.trn_tax1) AS sum_trn_tax1, Sum(fin_transactions_u.trn_amount2) AS sum_trn_amount2
+FROM fin_transactions_u
+GROUP BY fin_transactions_u.trn_cmt_id;
+SELECT fin_rdw_exp1.cmt_effhed_id, Sum(fin_rdw_exp1.amount) AS total_exp
+FROM fin_rdw_exp1
+GROUP BY fin_rdw_exp1.cmt_effhed_id;
+SELECT fin_rdw_exp1.cmt_effhed_id, Sum(fin_rdw_exp1.amount) AS total_exp
+FROM fin_rdw_exp1
+GROUP BY fin_rdw_exp1.cmt_effhed_id;
+SELECT fin_rdw_exp1.cmt_effhed_id, Sum(fin_rdw_exp1.amount) AS total_exp
+FROM fin_rdw_exp1
+GROUP BY fin_rdw_exp1.cmt_effhed_id;
+SELECT fin_commitments.cmt_id, fin_commitments.cmt_docid, fin_commitments.cmt_type, fin_commitments.cmt_effhed_id, fin_commitments.cmt_hed_id, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_transactions.trn_transtype
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa","TO")));
+SELECT fin_recordfor1.docid, fin_recordfor1.doctype, DateValue([rdate]) AS rsdate, fin_recordfor1.title, fin_recordfor1.effhed_id, fin_recordfor1.effunt_id, fin_recordfor1.hed_id, fin_recordfor1.unt_id, fin_recordfor1.amount1, fin_recordfor1.tax1, fin_recordfor1.amount2, fin_recordfor1.trn_id
+FROM fin_recordfor1
+ORDER BY DateValue([rdate]);
+SELECT fin_commitments_pcs.cmt_docid AS docid, fin_commitments_pcs.cmt_type AS doctype, fin_transactions.trn_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_pcs.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((pur_purcases.pcs_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_commitments_pcs.cmt_docid AS docid, fin_commitments_pcs.cmt_type AS doctype, fin_transactions.trn_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_pcs.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((pur_purcases.pcs_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_salorders.sor_id AS docid, fin_commitments_so.cmt_type AS doctype, fin_transactions.trn_date AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_hed_id, fin_salorders.sor_unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_salorders.sor_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_salorders.sor_id AS docid, fin_commitments_so.cmt_type AS doctype, fin_transactions.trn_date AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_hed_id, fin_salorders.sor_unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_salorders.sor_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_salorders.sor_id AS docid, fin_commitments_so.cmt_type AS doctype, fin_transactions.trn_date AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_hed_id, fin_salorders.sor_unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_salorders.sor_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_recordfrom1.docid, fin_recordfrom1.doctype, DateValue([rdate]) AS rsdate, fin_recordfrom1.title, fin_recordfrom1.effhed_id, fin_recordfrom1.effunt_id, fin_recordfrom1.hed_id, fin_recordfrom1.unt_id, fin_recordfrom1.amount1, fin_recordfrom1.tax1, fin_recordfrom1.amount2, fin_recordfrom1.trn_id
+FROM fin_recordfrom1
+ORDER BY DateValue([rdate]);
+SELECT fin_commitments_pcs.cmt_docid AS docid, fin_commitments_pcs.cmt_type AS doctype, fin_transactions.trn_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_pcs.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((pur_purcases.pcs_effhed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_salorders.sor_id AS docid, fin_commitments_so.cmt_type AS doctype, fin_transactions.trn_date AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_hed_id, fin_salorders.sor_unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, [trn_amount2]*-1 AS amount2, fin_transactions.trn_id
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_salorders.sor_effhed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_commitments_trf.cmt_docid AS docid, fin_commitments_trf.cmt_type AS doctype, fin_transactions.trn_date AS rdate, fin_transfers.trf_title AS title, fin_commitments_trf.cmt_effhed_id AS effhed_id, fin_commitments_trf.cmt_effunt_id AS effunt_id, fin_commitments_trf.cmt_hed_id AS hed_id, fin_commitments_trf.cmt_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (fin_transfers INNER JOIN fin_commitments_trf ON fin_transfers.trf_id = fin_commitments_trf.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_trf.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments_trf.cmt_type) In ("FI","FO","LI","LO","TI","TO")) And ((fin_commitments_trf.cmt_effhed_id)=Forms!vars!Parameter1));
+SELECT fin_remcomfor1.docid, fin_remcomfor1.doctype, DateValue([rdate]) AS rsdate, fin_remcomfor1.title, fin_remcomfor1.effhed_id, fin_remcomfor1.effunt_id, fin_remcomfor1.hed_id, fin_remcomfor1.unt_id, fin_remcomfor1.commit, fin_remcomfor1.paid, fin_remcomfor1.rem, fin_remcomfor1.sudohead, IIf([doctype]="Sa","sal","pur") AS doctype_mod, fin_remcomfor1.cmt_id
+FROM fin_remcomfor1
+ORDER BY DateValue([rdate]);
+SELECT fin_commitments_pcs.cmt_docid AS docid, fin_commitments_pcs.cmt_type AS doctype, pur_purcases.pcs_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, -1*[cmt_amount] AS [commit], IIf([pcs_transtype]=1,Nz(-1*[trn_amount1],0),Nz(-1*[trn_amount2],0)) AS paid, IIf([pcs_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))-[cmt_amount] AS rem, pur_purcases.pcs_sudohed AS sudohead, fin_commitments_pcs.cmt_id
+FROM (pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid) LEFT JOIN fin_transactions ON fin_commitments_pcs.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((pur_purcases.pcs_hed_id)=Forms!vars!Parameter1) And ((fin_commitments_pcs.cmt_status)="Awaited"));
+SELECT fin_commitments_so.cmt_docid AS docid, fin_commitments_so.cmt_type AS doctype, fin_salorders.sor_releasedtg AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id AS effhed_id, fin_salorders.sor_effunt_id AS effunt_id, fin_salorders.sor_hed_id AS hed_id, fin_salorders.sor_unt_id AS unt_id, -1*[cmt_amount] AS [commit], IIf([sor_transtype]=1,Nz(-1*[trn_amount1],0),Nz(-1*[trn_amount2],0)) AS paid, IIf([sor_transtype]=1,Nz(-1*[trn_amount1],0),Nz(-1*[trn_amount2],0))-[cmt_amount] AS rem, fin_salorders.sor_sudohed AS sudohed, fin_commitments_so.cmt_id
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) LEFT JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_salorders.sor_hed_id)=Forms!vars!Parameter1) And ((fin_commitments_so.cmt_status)="Awaited"));
+SELECT fin_remcomfrom1.docid, fin_remcomfrom1.doctype, DateValue([rdate]) AS rsdate, fin_remcomfrom1.title, fin_remcomfrom1.effhed_id, fin_remcomfrom1.effunt_id, fin_remcomfrom1.hed_id, fin_remcomfrom1.unt_id, fin_remcomfrom1.commit, fin_remcomfrom1.paid, fin_remcomfrom1.rem, fin_remcomfrom1.sudohead, IIf([doctype]="Sa","sal","pur") AS doctype_mod, fin_remcomfrom1.cmt_id
+FROM fin_remcomfrom1
+ORDER BY DateValue([rdate]);
+SELECT fin_commitments_pcs.cmt_docid AS docid, fin_commitments_pcs.cmt_type AS doctype, pur_purcases.pcs_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, -1*[cmt_amount] AS [commit], IIf([pcs_transtype]=1,Nz(-1*[trn_amount1],0),Nz(-1*[trn_amount2],0)) AS paid, IIf([pcs_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))-[cmt_amount] AS rem, pur_purcases.pcs_sudohed AS sudohead, fin_commitments_pcs.cmt_id
+FROM (pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid) LEFT JOIN fin_transactions ON fin_commitments_pcs.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((pur_purcases.pcs_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments_pcs.cmt_status)="Awaited"));
+SELECT fin_commitments_so.cmt_docid AS docid, fin_commitments_so.cmt_type AS doctype, fin_salorders.sor_releasedtg AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id AS effhed_id, fin_salorders.sor_effunt_id AS effunt_id, fin_salorders.sor_hed_id AS hed_id, fin_salorders.sor_unt_id AS unt_id, -1*[cmt_amount] AS [commit], IIf([sor_transtype]=1,Nz(-1*[trn_amount1],0),Nz(-1*[trn_amount2],0)) AS paid, IIf([sor_transtype]=1,Nz(-1*[trn_amount1],0),Nz(-1*[trn_amount2],0))-[cmt_amount] AS rem, fin_salorders.sor_sudohed AS sudohed, fin_commitments_so.cmt_id
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) LEFT JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_salorders.sor_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments_so.cmt_status)="Awaited"));
+SELECT fin_salorders.sor_empnamecomp, fin_salorders.sor_month, fin_salorders.sor_salary, fin_salorders.sor_unt_id, fin_salorders.sor_hed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_effhed_id, IIf([sor_unt_id]=GetVar("varUnitId"),1,0) AS my_person, IIf([sor_unt_id]=[sor_effunt_id],1,0) AS paid_same
+FROM fin_salorders INNER JOIN fin_salariespaid_u_doc1 ON fin_salorders.sor_month = fin_salariespaid_u_doc1.MaxOfsor_month
+WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper"))) OR (((fin_salorders.sor_effunt_id)>=getvar("varLower") And (fin_salorders.sor_effunt_id)<=getvar("varUpper")))
+ORDER BY IIf([sor_unt_id]=GetVar("varUnitId"),1,0) DESC , IIf([sor_unt_id]=[sor_effunt_id],1,0) DESC;
+SELECT fin_salorders.sor_empnamecomp, fin_salorders.sor_month, fin_salorders.sor_salary, fin_salorders.sor_unt_id, fin_salorders.sor_hed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_effhed_id, IIf([sor_unt_id]=GetVar("varUnitId"),1,0) AS my_person, IIf([sor_unt_id]=[sor_effunt_id],1,0) AS paid_same
+FROM fin_salorders INNER JOIN fin_salariespaid_u_doc1 ON fin_salorders.sor_month = fin_salariespaid_u_doc1.MaxOfsor_month
+WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper"))) OR (((fin_salorders.sor_effunt_id)>=getvar("varLower") And (fin_salorders.sor_effunt_id)<=getvar("varUpper")))
+ORDER BY IIf([sor_unt_id]=GetVar("varUnitId"),1,0) DESC , IIf([sor_unt_id]=[sor_effunt_id],1,0) DESC;
+SELECT Max(fin_salorders.sor_month) AS MaxOfsor_month
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Fulfilled"));
+SELECT fin_salorders.*, hr_emps_u_grand.emp_name, hr_emps_u_grand.emp_rank, hr_emps_u_grand.emp_title, hr_emps_u_grand.emp_cnic, hr_emps_u_grand.ctr_jobtitle, hr_emps_u_grand.emp_joindt, hr_emps_u_grand.emp_nokname, hr_emps_u_grand.ctr_unt_id, hr_emps_u_grand.ctr_type, hr_emps_u_grand.bac_accnum, hr_emps_u_grand.bac_bnkname
+FROM fin_salorders INNER JOIN hr_emps_u_grand ON fin_salorders.sor_emp_id = hr_emps_u_grand.emp_id
+WHERE (((fin_salorders.sor_id)=[Forms]![fin_salorders_u]![sor_id]));
+SELECT fin_salarysummary2.unt_mod, fin_salarysummary2.sor_effhed_id, fin_salarysummary2.effhed_mod, fin_salarysummary2.prjcode_mod, fin_salarysummary2.minmonth, fin_salarysummary2.amount, fin_salarysummary2.persons, IIf([effhed_mod] Like "*CSRF*",GetA16Element("GetAccShares",([sor_effhed_id]),2),GetSubheadFigure("GetPrjAllocationsShd",[sor_effhed_id],"HR")) AS share, Nz(IIf([effhed_mod] Like "*CSRF",GetCfExpenditure([sor_effhed_id]),GetSubheadFigure("GetPrjExpenditureShd",[sor_effhed_id],"HR")),0) AS exp, Nz(IIf([effhed_mod] Like "*CSRF",GetCfOutstandingCommits([sor_effhed_id]),GetSubheadFigure("GetPrjOutstandingCommitsShd",[sor_effhed_id],"HR")),0) AS [commit], Nz(IIf([effhed_mod] Like "*CSRF",GetCfInProcess([sor_effhed_id]),GetSubheadFigure("GetPrjInProcessShd",[sor_effhed_id],"HR")),0) AS inprocess, [share]-[exp]-[commit]-[inprocess] AS canbespent, "" AS rmks
+FROM fin_salarysummary2;
+SELECT fin_salorders_u_draft.sor_effhed_id, IIf(Nz([sor_sudohed],"")="",[hed_code],[hed_code] & "-CSRF") AS effhed_mod, IIf([sor_unt_id]<800000,[unt_namesh],"Center") AS unt_mod, IIf([sor_unt_id]<800000,[prj_code],"") AS prjcode_mod, fin_salorders_u_draft.sor_salary, fin_salorders_u_draft.sor_emp_id, fin_salorders_u_draft.sor_month
+FROM units RIGHT JOIN (cen_heads RIGHT JOIN (fin_salorders_u_draft LEFT JOIN prj_projects ON fin_salorders_u_draft.sor_hed_id = prj_projects.prj_id) ON cen_heads.hed_id = fin_salorders_u_draft.sor_effhed_id) ON units.unt_id = fin_salorders_u_draft.sor_unt_id;
+SELECT [fin_salarysummary1].unt_mod, [fin_salarysummary1].sor_effhed_id, [fin_salarysummary1].effhed_mod, [fin_salarysummary1].prjcode_mod, [fin_salarysummary1].sor_month AS minmonth, Sum([fin_salarysummary1].sor_salary) AS amount, Count([fin_salarysummary1].sor_emp_id) AS persons
+FROM fin_salarysummary1
+GROUP BY [fin_salarysummary1].unt_mod, [fin_salarysummary1].sor_effhed_id, [fin_salarysummary1].effhed_mod, [fin_salarysummary1].prjcode_mod, [fin_salarysummary1].sor_month;
+SELECT hr_contracts.ctr_id, hr_contracts.ctr_num, hr_contracts.ctr_unt_id, hr_contracts.ctr_salary, hr_emps.emp_name, hr_emps.emp_joindt, fin_empeffheads.eeh_status, IIf([emp_joindt]>[cpn_startdt],[emp_joindt],[cpn_startdt]) AS cpn_effstartdt, hr_contractplans.cpn_enddt AS cpn_effenddt, hr_contractplans.cpn_hed_id, LastDateThisMonth([cpn_enddt]) AS sal_month
+FROM ((hr_contracts INNER JOIN hr_emps ON hr_contracts.ctr_num = hr_emps.emp_id) INNER JOIN fin_empeffheads ON hr_contracts.ctr_num = fin_empeffheads.eeh_emp_id) INNER JOIN hr_contractplans ON hr_contracts.ctr_id = hr_contractplans.cpn_ctr_id
+WHERE (((fin_empeffheads.eeh_status)="Open") And ((hr_contractplans.cpn_enddt)>[LastSalaryMonth]) And ((hr_contractplans.cpn_hed_id)=Forms!vars!Parameter1))
+ORDER BY IIf([emp_joindt]>[cpn_startdt],[emp_joindt],[cpn_startdt]);
+SELECT hr_contracts.ctr_id, hr_contracts.ctr_num, hr_contracts.ctr_unt_id, hr_contracts.ctr_salary, hr_emps.emp_name, hr_emps.emp_joindt, fin_empeffheads.eeh_status, IIf([emp_joindt]>[ctr_startdt],[emp_joindt],[ctr_startdt]) AS ctr_effstartdt, IIf(IsNull([ctr_termindt]),[ctr_enddt],([ctr_termindt])) AS ctr_effenddt, [datetoday] AS today
+FROM (hr_contracts INNER JOIN hr_emps ON hr_contracts.ctr_num = hr_emps.emp_id) INNER JOIN fin_empeffheads ON hr_contracts.ctr_num = fin_empeffheads.eeh_emp_id
+WHERE (((hr_contracts.ctr_unt_id)<200000 Or (hr_contracts.ctr_unt_id)>=800000) AND ((fin_empeffheads.eeh_status)="Open") AND ((IIf(IsNull([ctr_termindt]),[ctr_enddt],([ctr_termindt])))>=FirstDateThisMonth([datetoday])))
+ORDER BY IIf([emp_joindt]>[ctr_startdt],[emp_joindt],[ctr_startdt]);
+SELECT hr_contracts.ctr_id, hr_contracts.ctr_num, hr_contracts.ctr_unt_id, hr_contracts.ctr_salary, hr_emps.emp_name, hr_emps.emp_joindt, fin_empeffheads.eeh_status, IIf([emp_joindt]>[cpn_startdt],[emp_joindt],[cpn_startdt]) AS cpn_effstartdt, hr_contractplans.cpn_enddt AS cpn_effenddt, hr_contractplans.cpn_hed_id, lastdatethismonth([cpn_enddt]) AS sal_month
+FROM ((hr_contracts INNER JOIN hr_emps ON hr_contracts.ctr_num = hr_emps.emp_id) INNER JOIN fin_empeffheads ON hr_contracts.ctr_num = fin_empeffheads.eeh_emp_id) INNER JOIN hr_contractplans ON hr_contracts.ctr_id = hr_contractplans.cpn_ctr_id
+WHERE (((hr_contracts.ctr_unt_id)=[UnitId]) AND ((fin_empeffheads.eeh_status)="Open") AND ((hr_contractplans.cpn_hed_id) Is Null))
+ORDER BY IIf([emp_joindt]>[cpn_startdt],[emp_joindt],[cpn_startdt]);
+SELECT fin_salorders.sor_id, fin_salorders.sor_releasedtg, fin_salorders.sor_effhed_id, fin_salorders.sor_sudohed
+FROM fin_salorder_last1 INNER JOIN fin_salorders ON fin_salorder_last1.MaxOfsor_releasedtg = fin_salorders.sor_releasedtg;
+SELECT Max(fin_salorders.sor_releasedtg) AS MaxOfsor_releasedtg
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Fulfilled") And ((fin_salorders.sor_emp_id)=Forms!vars!Parameter1));
+SELECT Max(fin_salorders.sor_releasedtg) AS MaxOfsor_releasedtg
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Fulfilled") And ((fin_salorders.sor_emp_id)=Forms!vars!Parameter1));
+SELECT DISTINCT fin_salorders.sor_emp_id
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)='Draft'));
+SELECT Count(hr_emps.emp_id) AS count_empsdue
+FROM hr_emps
+WHERE (((hr_emps.emp_status) Like "Active")) OR (((hr_emps.emp_lastdt)>=(Select max_month From fin_salorderminute_empsdue1)));
+SELECT Max(firstdatethismonth([sor_month])) AS max_month
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Draft"));
+SELECT ConcatRelated("sal_month","fin_salorderminute_months1","","sal_month") AS concat_month
+FROM fin_salorderminute_months1;SELECT ConcatRelated("sal_month","fin_salorderminute_months1","","sal_month") AS concat_month
+FROM fin_salorderminute_months1;
+SELECT Count(fin_salorderminute_payments1.sor_id) AS payments, Sum(fin_salorderminute_payments1.parent) AS parents, Sum(fin_salorderminute_payments1.child) AS children
+FROM fin_salorderminute_payments1;
+SELECT fin_salorders.sor_id, fin_salorders.sor_parent, IIf([sor_parent]=0,1,0) AS parent, IIf([sor_parent]>0,1,0) AS child, fin_salorders.sor_status
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)='Draft'));
+SELECT fin_salorders.*
+FROM fin_salorders
+WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")))
+ORDER BY fin_salorders.sor_month DESC , fin_salorders.sor_unt_id, fin_salorders.sor_hed_id, fin_salorders.sor_emp_id;
+SELECT fin_salorders.*, hr_emps.emp_name, hr_emps.emp_rank
+FROM fin_salorders INNER JOIN hr_emps ON fin_salorders.sor_emp_id = hr_emps.emp_id
+WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")) AND ((fin_salorders.sor_status)="Fulfilled")) OR (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")) AND ((fin_salorders.sor_status)="Cancelled"))
+ORDER BY fin_salorders.sor_month DESC , fin_salorders.sor_unt_id, fin_salorders.sor_hed_id, fin_salorders.sor_emp_id;
+SELECT fin_salorders.*, hr_emps.emp_name, hr_emps.emp_rank
+FROM fin_salorders INNER JOIN hr_emps ON fin_salorders.sor_emp_id = hr_emps.emp_id
+WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")) AND ((fin_salorders.sor_status)="Fulfilled")) OR (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")) AND ((fin_salorders.sor_status)="Cancelled"))
+ORDER BY fin_salorders.sor_month DESC , fin_salorders.sor_unt_id, fin_salorders.sor_hed_id, fin_salorders.sor_emp_id;
+SELECT fin_salorders.*
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Draft"));
+SELECT fin_salorders.*
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Approved" Or (fin_salorders.sor_status)="Under Revision"));
+SELECT hr_ctrcases.ctc_id, hr_ctrcases.ctc_emp_id, hr_ctrcases.ctc_unt_id, hr_ctrcases.ctc_newsalary, hr_ctrcases.ctc_empnamecomp, hr_emps.emp_joindt, hr_ctrcaseplans.ccp_startdt AS ccp_effstartdt, hr_ctrcaseplans.ccp_enddt AS ccp_effenddt, hr_ctrcaseplans.ccp_hed_id, lastdatethismonth([ccp_enddt]) AS sal_month, hr_ctrcases.ctc_status
+FROM (hr_emps INNER JOIN hr_ctrcases ON hr_emps.emp_id = hr_ctrcases.ctc_emp_id) INNER JOIN hr_ctrcaseplans ON hr_ctrcases.ctc_id = hr_ctrcaseplans.ccp_ctc_id
+WHERE (((hr_ctrcaseplans.ccp_hed_id)=Forms!vars!Parameter1) And ((hr_ctrcases.ctc_status) Like "Under*"))
+ORDER BY hr_ctrcaseplans.ccp_startdt;
+SELECT hr_ctrcases.ctc_id, hr_ctrcases.ctc_emp_id, hr_ctrcases.ctc_unt_id, hr_ctrcases.ctc_newsalary, hr_ctrcases.ctc_empnamecomp, hr_emps.emp_joindt, hr_ctrcaseplans.ccp_startdt AS ccp_effstartdt, hr_ctrcaseplans.ccp_enddt AS ccp_effenddt, hr_ctrcaseplans.ccp_hed_id, lastdatethismonth([ccp_enddt]) AS sal_month, hr_ctrcases.ctc_status
+FROM (hr_emps INNER JOIN hr_ctrcases ON hr_emps.emp_id = hr_ctrcases.ctc_emp_id) INNER JOIN hr_ctrcaseplans ON hr_ctrcases.ctc_id = hr_ctrcaseplans.ccp_ctc_id
+WHERE (((hr_ctrcases.ctc_unt_id)<200000 Or (hr_ctrcases.ctc_unt_id)>=800000) AND ((hr_ctrcases.ctc_status) Like "Under*"))
+ORDER BY hr_ctrcaseplans.ccp_startdt;
+SELECT fin_sharesalloc.sha_id, fin_sharesalloc.sha_hed_id, fin_sharesalloc.sha_ficmt_id, fin_commitments.cmt_amount AS alloc, fin_sharesalloc.sha_focmt_id, -1*[fin_commitments_1].[cmt_amount] AS mtss_share, fin_sharesalloc.sha_cf, fin_sharesalloc.sha_pcc, fin_sharesalloc.sha_transtype
+FROM (fin_sharesalloc INNER JOIN fin_commitments ON fin_sharesalloc.sha_ficmt_id = fin_commitments.cmt_id) INNER JOIN fin_commitments AS fin_commitments_1 ON fin_sharesalloc.sha_focmt_id = fin_commitments_1.cmt_id
+WHERE (((fin_sharesalloc.sha_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_sharesalloc.sha_id, fin_sharesalloc.sha_hed_id, fin_sharesalloc.sha_ficmt_id, fin_commitments.cmt_amount AS alloc, fin_sharesalloc.sha_focmt_id, -1*[fin_commitments_1].[cmt_amount] AS mtss_share, fin_sharesalloc.sha_cf, fin_sharesalloc.sha_pcc, fin_sharesalloc.sha_transtype
+FROM (fin_sharesalloc INNER JOIN fin_commitments ON fin_sharesalloc.sha_ficmt_id = fin_commitments.cmt_id) INNER JOIN fin_commitments AS fin_commitments_1 ON fin_sharesalloc.sha_focmt_id = fin_commitments_1.cmt_id
+WHERE (((fin_sharesalloc.sha_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_transfers.trf_id, fin_transfers.trf_date, fin_transfers.trf_type, fin_transfers.trf_title, fin_transfers.trf_amount, fin_transfers.trf_fromhed, fin_transfers.trf_fromunt, fin_transfers.trf_tohed, fin_transfers.trf_tount, fin_transfers.trf_status, fin_commitments_trf.cmt_id, fin_commitments_trf.cmt_status, fin_commitments_trf.cmt_amount
+FROM fin_transfers INNER JOIN fin_commitments_trf ON fin_transfers.trf_id = fin_commitments_trf.cmt_docid
+WHERE (((fin_transfers.trf_type)="FI") And ((fin_transfers.trf_fromunt)>=getvar("varLower") And (fin_transfers.trf_fromunt)<=getvar("varUpper")) And ((fin_transfers.trf_tohed)=Forms!vars!Parameter1) And ((fin_transfers.trf_status)<>"Cancelled") And ((fin_commitments_trf.cmt_status)="Awaited")) Or (((fin_transfers.trf_type)="FI") And ((fin_transfers.trf_tohed)=Forms!vars!Parameter1) And ((fin_transfers.trf_tount)>=getvar("varLower") And (fin_transfers.trf_tount)<=getvar("varUpper")) And ((fin_transfers.trf_status)<>"Cancelled") And ((fin_commitments_trf.cmt_status)="Awaited"));
+SELECT fin_sharesinstall.*, fin_transactions.trn_amount2 AS inward, -1*[fin_transactions_1].[trn_amount2] AS mtss_share, fin_transactions.trn_date, fin_msncosts.mct_msn_id, fin_msncosts.mct_cost, prj_milestones.msn_status
+FROM (((fin_sharesinstall INNER JOIN fin_transactions ON fin_sharesinstall.shi_fitrn_id = fin_transactions.trn_id) INNER JOIN fin_transactions AS fin_transactions_1 ON fin_sharesinstall.shi_fotrn_id = fin_transactions_1.trn_id) LEFT JOIN fin_msncosts ON fin_sharesinstall.shi_msn_idd = fin_msncosts.mct_msn_idd) LEFT JOIN prj_milestones ON fin_sharesinstall.shi_msn_idd = prj_milestones.msn_idd
+WHERE (((fin_sharesinstall.shi_hed_id)=[Forms]![vars]![Parameter1]))
+ORDER BY fin_transactions.trn_date, fin_msncosts.mct_msn_id;
+SELECT Sum([cmt_amount]-Nz([amount],0)) AS SumOfamount
+FROM fin_sto_acc_commitsoutst1;
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa")) And ((fin_commitments.cmt_status)="Awaited"))
+GROUP BY fin_commitments.cmt_id;
+SELECT fin_sto_acc_exp1.cmt_effhed_id, Sum(fin_sto_acc_exp1.amount) AS SumOfamount
+FROM fin_sto_acc_exp1
+GROUP BY fin_sto_acc_exp1.cmt_effhed_id;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_effhed_id, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa","TO")) And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1));
+SELECT fin_sto_acc_ipc1.effhed_id, Sum(fin_sto_acc_ipc1.amount) AS SumOfamount
+FROM fin_sto_acc_ipc1
+GROUP BY fin_sto_acc_ipc1.effhed_id;
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, IIf([transtype]=1,[amount1],[amount2]) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2
+FROM fin_docs_ipc
+WHERE (((fin_docs_ipc.effhed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_sto_acc_rcvmsncompleted2.mct_hed_id, fin_sto_acc_rcvmsncompleted2.costcmp, fin_sto_acc_rcvmsncompleted2.costcmp_acc, Nz([rec_acc],0) AS received, IIf([costcmp]=0,0,[costcmp_acc]-[received]) AS amount
+FROM fin_sto_acc_rcvmsncompleted2 LEFT JOIN fin_sto_acc_rcvmsncompleted3 ON fin_sto_acc_rcvmsncompleted2.mct_hed_id = fin_sto_acc_rcvmsncompleted3.shi_hed_id;
+SELECT fin_msncosts.mct_hed_id, Sum(fin_msncosts.mct_cost) AS costcmp
+FROM prj_milestones INNER JOIN fin_msncosts ON prj_milestones.msn_idd = fin_msncosts.mct_msn_idd
+WHERE (((fin_msncosts.mct_hed_id)=Forms!vars!Parameter1) And ((prj_milestones.msn_status)="Completed"))
+GROUP BY fin_msncosts.mct_hed_id;
+SELECT fin_sto_acc_rcvmsncompleted1.mct_hed_id, fin_sto_acc_rcvmsncompleted1.costcmp, Round([costcmp]*([alloc]-[mtss_share])/[alloc],0) AS costcmp_acc
+FROM fin_sto_acc_rcvmsncompleted1 INNER JOIN fin_sharesalloc_plus ON fin_sto_acc_rcvmsncompleted1.mct_hed_id = fin_sharesalloc_plus.sha_hed_id;
+SELECT fin_sharesinstall_plus.shi_hed_id, Sum([shi_pcc]+[shi_cf]) AS rec_acc
+FROM fin_sharesinstall_plus
+GROUP BY fin_sharesinstall_plus.shi_hed_id;
+SELECT fin_msncosts.mct_hed_id, fin_msncosts.mct_cost, Round([mct_cost]*(([sha_cf]+[sha_pcc])/[cmt_amount]),0) AS amount
+FROM prj_milestones INNER JOIN ((fin_msncosts INNER JOIN fin_sharesalloc ON fin_msncosts.mct_hed_id = fin_sharesalloc.sha_hed_id) INNER JOIN fin_commitments ON fin_sharesalloc.sha_ficmt_id = fin_commitments.cmt_id) ON prj_milestones.msn_idd = fin_msncosts.mct_msn_idd
+WHERE (((fin_msncosts.mct_hed_id)=Forms!vars!Parameter1) And ((prj_milestones.msn_status)="In progress"))
+ORDER BY fin_msncosts.mct_msn_id;
+SELECT fin_sto_acc_received1.cmt_effhed_id, Sum(fin_sto_acc_received1.amount) AS SumOfamount
+FROM fin_sto_acc_received1
+GROUP BY fin_sto_acc_received1.cmt_effhed_id;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, fin_commitments.cmt_effhed_id, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("FI","FO","TI")) AND ((fin_commitments.cmt_effhed_id)=[Forms]![vars]![Parameter1]));
+SELECT Sum([cmt_amount]-Nz([amount],0)) AS SumOfamount
+FROM fin_sto_cf_commitsoutst1;
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa")) And ((fin_commitments.cmt_status)="Awaited") And ((fin_commitments.cmt_sudohed) Is Not Null And (fin_commitments.cmt_sudohed)<>""))
+GROUP BY fin_commitments.cmt_id;
+SELECT Sum(fin_sto_cf_exp1.amount) AS SumOfamount
+FROM fin_sto_cf_exp1;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_effhed_id, fin_commitments.cmt_sudohed, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa")) AND ((fin_commitments.cmt_effhed_id)=[Forms]![vars]![Parameter1]) AND ((fin_commitments.cmt_sudohed) Is Not Null And (fin_commitments.cmt_sudohed)<>""));
+SELECT fin_sto_cf_ipc1.effhed_id, Sum(fin_sto_cf_ipc1.amount) AS SumOfamount
+FROM fin_sto_cf_ipc1
+GROUP BY fin_sto_cf_ipc1.effhed_id;
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, IIf([transtype]=1,[amount1],[amount2]) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2
+FROM fin_docs_ipc
+WHERE (((fin_docs_ipc.effhed_id)=Forms!vars!Parameter1) And ((fin_docs_ipc.sudohed) Is Not Null And (fin_docs_ipc.sudohed)<>""));
+SELECT Sum(fin_sto_cf_received1.amount) AS SumOfamount
+FROM fin_sto_cf_received1;
+SELECT fin_sharesinstall.shi_cf AS amount
+FROM fin_sharesinstall
+WHERE (((fin_sharesinstall.shi_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT Sum(fin_sto_others_loanstaken1.amount) AS SumOfamount
+FROM fin_sto_others_loanstaken1;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_hed_id, fin_commitments.cmt_effhed_id, fin_transactions.trn_noloan, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) And ((fin_commitments.cmt_hed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_effhed_id)<>Forms!vars!Parameter1));
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_hed_id, fin_commitments.cmt_effhed_id, fin_transactions.trn_noloan, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) And ((fin_commitments.cmt_hed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_effhed_id)<>Forms!vars!Parameter1));
+SELECT Sum([cmt_amount]-Nz([amount],0)) AS SumOfamount
+FROM fin_sto_pcc_commitsoutst1;
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_sudohed) Is Null Or (fin_commitments.cmt_sudohed)="") And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa")) And ((fin_commitments.cmt_status)="Awaited"))
+GROUP BY fin_commitments.cmt_id;
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_sudohed) Is Null Or (fin_commitments.cmt_sudohed)="") And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa")) And ((fin_commitments.cmt_status)="Awaited"))
+GROUP BY fin_commitments.cmt_id;
+SELECT Sum(fin_sto_pcc_exp1.amount) AS SumOfamount
+FROM fin_sto_pcc_exp1;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_effhed_id, fin_commitments.cmt_sudohed, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa","TO")) And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_sudohed) Is Null Or (fin_commitments.cmt_sudohed)=""));
+SELECT [fin_sto_pcc_ipc1].effhed_id, Sum([fin_sto_pcc_ipc1].amount) AS SumOfamount
+FROM fin_sto_pcc_ipc1
+GROUP BY [fin_sto_pcc_ipc1].effhed_id;
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, IIf([transtype]=1,[amount1],[amount2]) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2
+FROM fin_docs_ipc
+WHERE (((fin_docs_ipc.effhed_id)=Forms!vars!Parameter1) And ((fin_docs_ipc.sudohed) Is Null Or (fin_docs_ipc.sudohed)=""));
+SELECT fin_sto_pcc_loansadjusted1.hed_id, Sum(fin_sto_pcc_loansadjusted1.amount) AS SumOfamount
+FROM fin_sto_pcc_loansadjusted1
+GROUP BY fin_sto_pcc_loansadjusted1.hed_id;
+SELECT fin_loanadjustments.lad_from, fin_loanadjustments.lad_to, IIf([lad_from]=[HeadId],1,-1)*[lad_amount] AS amount, [HeadId] AS hed_id
+FROM fin_loanadjustments
+WHERE (((fin_loanadjustments.lad_from)=[HeadId])) OR (((fin_loanadjustments.lad_to)=[HeadId]));
+SELECT Sum(fin_sto_pcc_loansgiven1.amount) AS SumOfamount
+FROM fin_sto_pcc_loansgiven1;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_effhed_id, fin_commitments.cmt_hed_id, fin_transactions.trn_noloan, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_hed_id) Is Null) And ((fin_transactions.trn_noloan)="0")) Or (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_hed_id)<>Forms!vars!Parameter1) And ((fin_transactions.trn_noloan)="0"));
+SELECT Sum(fin_sto_pcc_ownexp1.amount) AS SumOfamount
+FROM fin_sto_pcc_ownexp1;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_effhed_id, fin_commitments.cmt_hed_id, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa","TO")) And ((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_hed_id)=Forms!vars!Parameter1));
+SELECT Sum(fin_sto_pcc_received1.amount) AS SumOfamount
+FROM fin_sto_pcc_received1;
+SELECT fin_sharesinstall.shi_pcc AS amount
+FROM fin_sharesinstall
+WHERE (((fin_sharesinstall.shi_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT Sum([cmt_amount]-Nz([amount],0)) AS SumOfamount
+FROM fin_sto_prj_commitsoutst1;
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_hed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa")) And ((fin_commitments.cmt_status)="Awaited"))
+GROUP BY fin_commitments.cmt_id;
+SELECT Sum(fin_sto_prj_exp1.amount) AS SumOfamount
+FROM fin_sto_prj_exp1;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS amount, fin_commitments.cmt_hed_id, fin_transactions.trn_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa","TO")) AND ((fin_commitments.cmt_hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_sto_prj_ipc1.hed_id, Sum(fin_sto_prj_ipc1.amount) AS SumOfamount
+FROM fin_sto_prj_ipc1
+GROUP BY fin_sto_prj_ipc1.hed_id;
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, IIf([transtype]=1,[amount1],[amount2]) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2
+FROM fin_docs_ipc
+WHERE (((fin_docs_ipc.hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_sts_prj_commitsoutst1.subhead, Sum([cmt_amountz]-Nz([amount],0)) AS SumOfamount
+FROM fin_sts_prj_commitsoutst1
+GROUP BY fin_sts_prj_commitsoutst1.subhead;
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_docs_shd.subhead, fin_commitments.cmt_id, First(Round([cmt_amount]*[ratio],2)) AS cmt_amountz, Round(Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0)*[ratio])),2) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM (fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) LEFT JOIN fin_docs_shd ON (fin_commitments.cmt_docid = fin_docs_shd.doc_id) AND (fin_commitments.cmt_type = fin_docs_shd.doc_type)
+WHERE (((fin_commitments.cmt_hed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa")) And ((fin_commitments.cmt_status)="Awaited"))
+GROUP BY fin_docs_shd.subhead, fin_commitments.cmt_id;
+SELECT *
+FROM fin_sts_prj_commitsoutst1
+WHERE subhead = 'Equipment';
+SELECT fin_sts_prj_exp1.subhead, Sum(fin_sts_prj_exp1.amount) AS SumOfamount
+FROM fin_sts_prj_exp1
+GROUP BY fin_sts_prj_exp1.subhead;
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, Round(IIf([trn_transtype]=1,[trn_amount1],[trn_amount2])*[ratio],2) AS amount, fin_commitments.cmt_hed_id, fin_transactions.trn_id, fin_docs_shd.subhead, fin_transactions.trn_amount1, fin_transactions.trn_amount2, fin_transactions.trn_transtype, fin_docs_shd.ratio
+FROM (fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) LEFT JOIN fin_docs_shd ON (fin_commitments.cmt_docid = fin_docs_shd.doc_id) AND (fin_commitments.cmt_type = fin_docs_shd.doc_type)
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa","TO")) And ((fin_commitments.cmt_hed_id)=Forms!vars!Parameter1));
+SELECT *
+FROM fin_sts_prj_exp1
+WHERE subhead = 'Equipment';
+SELECT fin_sts_prj_ipc1.subhead, Sum([amount]*[ratio]) AS sumOfAmount
+FROM fin_sts_prj_ipc1
+GROUP BY fin_sts_prj_ipc1.subhead;
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, Round(IIf([transtype]=1,[amount1],[amount2])*[ratio],2) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2, fin_docs_shd.subhead, fin_docs_shd.ratio
+FROM fin_docs_ipc INNER JOIN fin_docs_shd ON (fin_docs_ipc.doctype = fin_docs_shd.doc_type) AND (fin_docs_ipc.docid = fin_docs_shd.doc_id)
+WHERE (((fin_docs_ipc.hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, Round(IIf([transtype]=1,[amount1],[amount2])*[ratio],2) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2, fin_docs_shd.subhead, fin_docs_shd.ratio
+FROM fin_docs_ipc INNER JOIN fin_docs_shd ON (fin_docs_ipc.doctype = fin_docs_shd.doc_type) AND (fin_docs_ipc.docid = fin_docs_shd.doc_id)
+WHERE (((fin_docs_ipc.hed_id)=[Forms]![vars]![Parameter1]));
+SELECT fin_subheads.sbh_hed_id, fin_subheads.sbh_name, fin_subheads.sbh_alloc, IIf([sbh_name]="Misc","zzz",[sbh_name]) AS sorter
+FROM fin_subheads
+WHERE (((fin_subheads.sbh_hed_id)=[HeadID]))
+ORDER BY IIf([sbh_name]="Misc","zzz",[sbh_name]);
+SELECT fin_timeline_ctr1.*, prj_projects.prj_startdt AS project_start, IIf(IsNull([prj_enddt]),[prj_estenddt],[prj_enddt]) AS project_end
+FROM fin_timeline_ctr1 INNER JOIN prj_projects ON fin_timeline_ctr1.project = prj_projects.prj_id;
+SELECT DISTINCT fin_salforecast_temp.ctr_id, fin_salforecast_temp.cpn_hed_id, fin_salforecast_temp.ctr_salary, First(fin_salforecast_temp.ctr_num) AS ctr_num, First(fin_salforecast_temp.emp_name) AS emp_name, Min(fin_salforecast_temp.cpn_effstartdt) AS start_date, Max(fin_salforecast_temp.cpn_effenddt) AS end_date, Sum(fin_salforecast_temp.salary) AS salary, First(ProjectFromHead([cpn_hed_id])) AS project
+FROM fin_salforecast_temp
+WHERE (((fin_salforecast_temp.salary)<>0))
+GROUP BY fin_salforecast_temp.ctr_id, fin_salforecast_temp.cpn_hed_id, fin_salforecast_temp.ctr_salary;
+SELECT fin_timeline_sal1.sal_month, fin_timeline_sal1.sal_amount, fin_timeline_sal1.num, DSum("[sal_amount]","[fin_timeline_sal]","[num] <= " & [num]) AS cum_sum, [Forms]![fin_timeline_sal_chart]![prj_alloc_sal] AS alloc_sal, CDbl([Forms]![fin_timeline_sal_chart]![prj_exp_sal]) AS exp_sal
+FROM fin_timeline_sal1
+ORDER BY fin_timeline_sal1.sal_month DESC , fin_timeline_sal1.num;
+SELECT fin_salforecast_temp.sal_month, Sum(fin_salforecast_temp.salary) AS sal_amount, First(fin_salforecast_temp.id) AS num
+FROM fin_salforecast_temp
+WHERE (((fin_salforecast_temp.salary)<>0))
+GROUP BY fin_salforecast_temp.sal_month
+ORDER BY fin_salforecast_temp.sal_month;
+SELECT fin_transactions.trn_id, fin_transactions.trn_cmt_id, fin_transactions.trn_date, fin_transactions.trn_amount1, fin_transactions.trn_tax1, fin_transactions.trn_amount2
+FROM fin_transactions
+ORDER BY fin_transactions.trn_date DESC;
+SELECT fin_transactions.*, fin_commitments.cmt_effhed_id
+FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_effhed_id)>=getvar("varLower") And (fin_commitments.cmt_effhed_id)<=getvar("varUpper")));
+SELECT fin_warn_falsepocommits1.cmt_id, fin_warn_falsepocommits1.cmt_docid AS docid, fin_warn_falsepocommits1.cmt_type AS type, First(fin_warn_falsepocommits1.committed) AS committed, Sum(fin_warn_falsepocommits1.paid) AS paid, Sum(fin_warn_falsepocommits1.paidpct) AS paidpct, First(fin_warn_falsepocommits1.cmt_status) AS status
+FROM fin_warn_falsepocommits1
+GROUP BY fin_warn_falsepocommits1.cmt_id, fin_warn_falsepocommits1.cmt_docid, fin_warn_falsepocommits1.cmt_type
+HAVING (((Sum(fin_warn_falsepocommits1.paidpct))>95) AND ((First(fin_warn_falsepocommits1.cmt_status))="Awaited"))
+ORDER BY Sum(fin_warn_falsepocommits1.paidpct) DESC;
+SELECT fin_commitments.cmt_id, fin_commitments.cmt_docid, fin_commitments.cmt_type, fin_commitments.cmt_amount AS committed, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS paid, Round(Nz([paid])/[committed]*100,0) AS paidpct, fin_commitments.cmt_status, fin_commitments.cmt_effhed_id
+FROM fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments.cmt_type)="Ps" Or (fin_commitments.cmt_type)="Pt" Or (fin_commitments.cmt_type)="Rb"));
+SELECT fin_empeffheads.eeh_emphed_id, fin_empeffheads.eeh_status
+FROM fin_empeffheads
+WHERE (((fin_empeffheads.eeh_emphed_id) Is Null) AND ((fin_empeffheads.eeh_status)<>"Closed"));
+SELECT fin_contractsverif.cvf_verif
+FROM fin_contractsverif INNER JOIN hr_contracts_u_last_active ON fin_contractsverif.cvf_ctr_id = hr_contracts_u_last_active.ctr_id
+WHERE (((fin_contractsverif.cvf_verif)="False"));
+SELECT prj_prghistory.*
+FROM prj_prghistory INNER JOIN prj_prghistory_fin_last1 ON (prj_prghistory.pgh_xprj_id = prj_prghistory_fin_last1.pgh_xprj_id) AND (prj_prghistory.pgh_dtg = prj_prghistory_fin_last1.max_dtg);
+SELECT prj_prghistory.pgh_xprj_id, Max(prj_prghistory.pgh_dtg) AS max_dtg
+FROM prj_prghistory
+WHERE (((prj_prghistory.pgh_status)="Finalized"))
+GROUP BY prj_prghistory.pgh_xprj_id;
+SELECT * FROM fin_docs_ipc1
+UNION SELECT * FROM fin_docs_ipc2;
+SELECT sod_sor_id as doc_id, sod_type as doc_type, sod_subhead as subhead, sod_ratio as ratio FROM fin_salorders_shd
+UNION SELECT pcd_pcs_id, pcd_type, pcd_subhead,pcd_ratio FROM pur_purcases_shd;
+Select * From fin_expenditure_trfx
+UNION
+Select * From fin_expenditure_pcs
+UNION Select * From fin_expenditure_so;
+Select * From fin_recordfor_trfx
+UNION
+Select * From fin_recordfor_pcs
+UNION Select * From fin_recordfor_so;
+Select * From fin_recordfrom_trfx
+UNION
+Select * From fin_recordfrom_pcs
+UNION Select * From fin_recordfrom_so;
+Select * From fin_remcomfor_pcs
+UNION Select * From fin_remcomfor_so;
+Select * From fin_remcomfrom_pcs
+UNION Select * From fin_remcomfrom_so;
+
+
+
