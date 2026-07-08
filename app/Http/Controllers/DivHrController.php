@@ -55,6 +55,10 @@ class DivHrController extends Controller
             $q->whereRaw('LOWER(emp_name) LIKE ? OR LOWER(emp_id) LIKE ?', ["%$t%", "%$t%"]);
         }
 
+        if ($request->filled('head_code')) {
+            $q->where('h.hed_code', $request->head_code);
+        }
+
         // Get status and compute counts before status filter is applied
         $status = $request->query('status', 'Current');
         

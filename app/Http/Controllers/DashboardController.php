@@ -16,64 +16,127 @@ class DashboardController extends Controller
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
+        return view('index');
+    }
+
+    public function divisionData()
+    {
+        $user = Auth::user();
+        if (!$user) return response()->json(['error' => 'Unauthenticated'], 401);
+
         $unitId = $user->acc_unt_id;
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
 
         // 1. Project Stats
         $projects = Project::where('prj_unt_id', $unitId)->get();
         $totalProjects = $projects->count();
-        $hucProjects = $projects->where('prj_status', 'Completed')->count(); // HUC = Completed
+        $approvedProjects = $projects->where('prj_status', 'Approved')->count();
+        $completedProjects = $projects->where('prj_status', 'Completed')->count();
+        $inProcessProjects = $totalProjects - $approvedProjects - $completedProjects;
+        if($inProcessProjects < 0) $inProcessProjects = 0;
         
-        // 2. Resource Stats (Books & Licenses)
-        // Check purchase cases for specific remarks or types
-        $booksCount = Purchase::where('pcs_unt_id', $unitId)
-            ->where(function($q) {
-                $q->where('pcs_type', 'book')
-                  ->orWhere('pcs_remarks', 'LIKE', '%"resource_type":"book"%');
-            })->count();
+        $projectsByStage = [
+            'open' => $approvedProjects,
+            'in_process' => $inProcessProjects,
+            'completed' => $completedProjects
+        ];
 
-        $licenseCount = Purchase::where('pcs_unt_id', $unitId)
-            ->where(function($q) {
-                $q->where('pcs_type', 'license')
-                  ->orWhere('pcs_remarks', 'LIKE', '%"resource_type":"license"%');
-            })->count();
-
-        // 3. Procurement Cases
-        $activeCases = Purchase::where('pcs_unt_id', $unitId)
-            ->whereIn('pcs_status', ['Draft', 'Under Scrutiny', 'In Progress'])
-            ->count();
-        
-        $totalCases = Purchase::where('pcs_unt_id', $unitId)->count();
-
-        // 4. Financials (Project-wise Spent vs Approved)
-        $financials = DB::table('prj.projects as p')
-            ->leftJoin('pur.purcases as pc', 'pc.pcs_hed_id', '=', 'p.prj_id')
-            ->select(
-                'p.prj_title',
-                'p.prj_aprvcost as approved',
-                DB::raw('COALESCE(SUM(pc.pcs_price), 0) as spent')
-            )
-            ->where('p.prj_unt_id', $unitId)
-            ->groupBy('p.prj_id', 'p.prj_title', 'p.prj_aprvcost')
-            ->get();
-
-        // 5. Employees per Project
-        $employeeStats = DB::table('cen.heads as h')
-            ->leftJoin('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
-            ->select('h.hed_code', DB::raw('COUNT(e.emp_id) as emp_count'))
+        // 2. Fetch Projects and Detailed Financials
+        $heads = DB::table('cen.heads as h')
+            ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
             ->where('h.hed_unt_id', $unitId)
-            ->groupBy('h.hed_id', 'h.hed_code')
-            ->having(DB::raw('COUNT(e.emp_id)'), '>', 0)
+            ->select('h.hed_id', 'h.hed_prj_id', 'h.hed_code', 'p.prj_title', 'p.prj_status', 'p.prj_aprvdt')
             ->get();
 
-        // 6. Overall Amount
-        $totalAmount = $projects->sum('prj_aprvcost');
-        $totalSpent = $financials->sum('spent');
+        $financials = [];
+        $projectsList = [];
+        $totalAmount = 0;
+        $totalSpent = 0;
 
-        return view('index', compact(
-            'totalProjects', 'hucProjects', 'booksCount', 'licenseCount', 
-            'activeCases', 'totalCases', 'financials', 'employeeStats',
-            'totalAmount', 'totalSpent'
-        ));
+        foreach ($heads as $h) {
+            $fin = $finService->getHeadStatus($h->hed_id);
+            
+            // Collect detailed financials for interactive panel
+            $financials[] = [
+                'head_id' => $h->hed_id,
+                'head_code' => $h->hed_code,
+                'title' => $h->prj_title,
+                
+                // Top Level
+                'approved' => $fin->prj_share ?? 0,
+                'spent' => $fin->prj_expenditure ?? 0,
+                'remaining' => $fin->prj_remaining ?? 0,
+                
+                // Details (Project Scope)
+                'prj_share' => $fin->prj_share ?? 0,
+                'prj_expenditure' => $fin->prj_expenditure ?? 0,
+                'prj_commitments' => $fin->prj_commitments ?? 0,
+                'prj_in_process' => $fin->prj_in_process ?? 0,
+                
+                // Details (CSRF Scope)
+                'csrf_share' => $fin->csrf_share ?? 0,
+                'cf_expenditure' => $fin->cf_expenditure ?? 0,
+                'cf_commitments' => $fin->cf_commitments ?? 0,
+                'cf_in_process' => $fin->cf_in_process ?? 0,
+                'cf_can_be_spent' => $fin->cf_can_be_spent ?? 0,
+            ];
+
+            // For the table (Count only active/current employees)
+            $teamCount = DB::table('hr.emps')
+                ->where('emp_hed_id', $h->hed_id)
+                ->whereRaw('LOWER(emp_status) IN (?, ?)', ['active', 'current'])
+                ->count();
+            
+            // Milestones logic
+            $totalMilestones = DB::table('prj.milestones')->where('msn_xprj_id', $h->hed_prj_id)->count();
+            $completedMilestones = DB::table('prj.milestones')->where('msn_xprj_id', $h->hed_prj_id)->where('msn_status', 'Completed')->count();
+            
+            $projectsList[] = [
+                'prj_id' => $h->hed_prj_id,
+                'title' => $h->prj_title,
+                'team_count' => $teamCount,
+                'milestones' => "$completedMilestones / $totalMilestones",
+                'created_on' => $h->prj_aprvdt ? \Carbon\Carbon::parse($h->prj_aprvdt)->format('M d, Y') : 'N/A',
+                'status' => $h->prj_status,
+                'head_code' => $h->hed_code
+            ];
+
+            $totalAmount += ($fin->prj_share ?? 0);
+            $totalSpent += ($fin->prj_expenditure ?? 0);
+        }
+
+        $totalRemaining = $totalAmount - abs($totalSpent);
+
+        // 3. Purchase Cases Breakdown
+        $casesBreakdown = Purchase::where('pcs_unt_id', $unitId)
+            ->select('pcs_status', DB::raw('count(*) as total'))
+            ->groupBy('pcs_status')
+            ->pluck('total', 'pcs_status')
+            ->toArray();
+        
+        $totalCases = array_sum($casesBreakdown);
+
+        // 4. Hiring Cases 
+        $hiringCases = 0;
+
+        return response()->json([
+            'totalProjects' => $totalProjects,
+            'projectsByStage' => $projectsByStage,
+            'financials' => $financials,
+            'projectsList' => $projectsList,
+            'finSummary' => [
+                'total' => $totalAmount,
+                'spent' => abs($totalSpent),
+                'remaining' => $totalRemaining
+            ],
+            'purchaseStats' => [
+                'breakdown' => $casesBreakdown,
+                'total' => $totalCases
+            ],
+            'hiringStats' => [
+                'active' => $hiringCases
+            ]
+        ]);
     }
 
     public function nrdiDashboard()

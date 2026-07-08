@@ -196,12 +196,7 @@
         $overallTimePercent = round(($daysPassedTotal / $totalDaysSpan) * 100, 1);
         $overallTimePercent = max(0, min(100, $overallTimePercent));
 
-        // Dummy team data (replace with real relation if available)
-        $team = [
-            ['id'=>1, 'name'=>'Ali Khan', 'role'=>'Project Manager', 'email'=>'ali@rdwis.com', 'phone'=>'0300-1234567', 'img'=>asset('dist/img/profile-1.jfif')],
-            ['id'=>2, 'name'=>'Sara Ahmed', 'role'=>'Senior Architect', 'email'=>'sara@rdwis.com', 'phone'=>'0300-7654321', 'img'=>asset('dist/img/profile-1.jfif')],
-            ['id'=>3, 'name'=>'Bilal Hameed', 'role'=>'Site Engineer', 'email'=>'bilal@rdwis.com', 'phone'=>'0333-1122334', 'img'=>asset('dist/img/profile-1.jfif')],
-        ];
+        // $team is passed from the controller
         $displayLimit = 6;
 
         $fixedDocs = ['PPF', 'Approval Letter', 'URD', 'Work Order'];
@@ -335,10 +330,19 @@
         </div>
         <div class="team-section-container">
             @foreach($team as $index => $member)
+                @php
+                    $photo = $member->emp_photodest ? str_replace('\\', '/', $member->emp_photodest) : null;
+                    $img = $photo ? asset($photo) : asset('dist/img/profile-1.jfif');
+                    $name = $member->emp_name;
+                    $role = $member->emp_title ?: 'Project Staff';
+                    $email = $member->emp_email ?: 'N/A';
+                    $phone = $member->emp_mobile ?: 'N/A';
+                    $empId = $member->emp_id;
+                @endphp
                 @if($index < $displayLimit)
                     <div class="team-avatar-wrapper"
-                         onclick="openEmployeeModal('{{ $member['name'] }}','{{ $member['role'] }}','{{ $member['img'] }}','{{ $member['email'] }}','{{ $member['phone'] }}')">
-                        <img src="{{ $member['img'] }}" alt="{{ $member['name'] }}">
+                         onclick="openEmployeeModal('{{ $name }}','{{ $role }}','{{ $img }}','{{ $email }}','{{ $phone }}','{{ $empId }}')">
+                        <img src="{{ $img }}" alt="{{ $name }}" onerror="this.onerror=null; this.src='{{ asset('dist/img/profile-1.jfif') }}';">
                     </div>
                 @endif
             @endforeach
@@ -862,14 +866,15 @@ $achievedPercent = max(0, min(100, $achievedPercent));
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body text-center p-4">
-                    <img src="" id="empModalImg" class="emp-modal-img shadow-sm">
+                    <img src="" id="empModalImg" class="emp-modal-img shadow-sm" onerror="this.onerror=null; this.src='{{ asset('dist/img/profile-1.jfif') }}';">
                     <h4 id="empModalName" class="font-weight-bold mb-1"></h4>
                     <p id="empModalRole" class="text-primary mb-4"></p>
                     <div class="text-left mt-3">
                         <div class="emp-detail-row"><span class="emp-label">Email</span><span id="empModalEmail" class="text-dark"></span></div>
                         <div class="emp-detail-row"><span class="emp-label">Phone</span><span id="empModalPhone" class="text-dark"></span></div>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-block mt-4" data-dismiss="modal">Close</button>
+                    <a href="#" id="empModalLink" class="btn btn-primary btn-block mt-4">More Details</a>
+                    <button type="button" class="btn btn-secondary btn-block mt-2" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -888,11 +893,18 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                         <thead class="bg-primary text-white"><tr><th>Image</th><th>Name</th><th>Role</th><th>Contact</th></tr></thead>
                         <tbody>
                             @foreach($team as $member)
+                                @php
+                                    $photo = $member->emp_photodest ? str_replace('\\', '/', $member->emp_photodest) : null;
+                                    $img = $photo ? asset($photo) : asset('dist/img/profile-1.jfif');
+                                    $name = $member->emp_name;
+                                    $role = $member->emp_title ?: 'Project Staff';
+                                    $phone = $member->emp_mobile ?: 'N/A';
+                                @endphp
                                 <tr>
-                                    <td><img src="{{ $member['img'] }}" class="rounded-circle" width="35"></td>
-                                    <td class="font-weight-bold">{{ $member['name'] }}</td>
-                                    <td>{{ $member['role'] }}</td>
-                                    <td>{{ $member['phone'] }}</td>
+                                    <td><img src="{{ $img }}" class="rounded-circle" width="35" onerror="this.onerror=null; this.src='{{ asset('dist/img/profile-1.jfif') }}';"></td>
+                                    <td class="font-weight-bold">{{ $name }}</td>
+                                    <td>{{ $role }}</td>
+                                    <td>{{ $phone }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -1192,12 +1204,13 @@ function openMilestoneDetail(title, target, achieved, status) {
 }
 
 function openOtherDocsModal() { $('#otherDocsModal').modal('show'); }
-function openEmployeeModal(name, role, img, email, phone) {
+function openEmployeeModal(name, role, img, email, phone, empId) {
     document.getElementById('empModalName').innerText = name;
     document.getElementById('empModalRole').innerText = role;
     document.getElementById('empModalImg').src = img;
     document.getElementById('empModalEmail').innerText = email;
     document.getElementById('empModalPhone').innerText = phone;
+    document.getElementById('empModalLink').href = '/divhr/employee/' + empId;
     $('#employeeDetailModal').modal('show');
 }
 function openAllStaffModal() { $('#allStaffModal').modal('show'); }

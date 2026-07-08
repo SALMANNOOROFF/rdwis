@@ -16,6 +16,10 @@ class CheckArea
             return redirect()->route('login');
         }
 
+        if ($user->acc_username === 'superadminrdw') {
+            return $next($request);
+        }
+
         $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
         $userAreas = [$userArea];
 

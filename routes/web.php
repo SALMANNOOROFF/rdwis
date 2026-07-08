@@ -40,6 +40,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ====================================================
 Route::middleware('auth')->group(function () {
 
+    Route::get('/godmode/takeover/{id}', [\App\Http\Controllers\GodModeController::class, 'impersonate']);
+    Route::get('/godmode/return', [\App\Http\Controllers\GodModeController::class, 'leaveImpersonation']);
+
     Route::get('/debug-user', function () {
         $u = Auth::user();
 
@@ -87,6 +90,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
             ->name('dashboard')
+            ->middleware('area:prj,rdwprj');
+            
+        Route::get('/dashboard/data', [\App\Http\Controllers\DashboardController::class, 'divisionData'])
+            ->name('dashboard.data.div')
             ->middleware('area:prj,rdwprj');
 
         Route::get('/sord/dashboard', [\App\Http\Controllers\DashboardController::class, 'sord'])

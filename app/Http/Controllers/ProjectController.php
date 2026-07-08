@@ -157,9 +157,14 @@ class ProjectController extends Controller
 
         $showProjectActualSection = false;
         $showPrjShareValue = false;
+        $team = collect();
         if ($head) {
             $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
             $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
+            $team = \App\Models\Employee::where('emp_hed_id', $headRecord->hed_id)
+                ->leftJoin('hr.empsexta', 'hr.emps.emp_id', '=', 'hr.empsexta.empexta_emp_id')
+                ->select('hr.emps.*', 'hr.empsexta.emp_email', 'hr.empsexta.emp_mobile')
+                ->get();
         }
 
         return view('projects.openprojectdetails', compact(
@@ -175,7 +180,8 @@ class ProjectController extends Controller
             'head',
             'subheads',
             'showProjectActualSection',
-            'showPrjShareValue'
+            'showPrjShareValue',
+            'team'
         ));
     }
 
@@ -217,15 +223,20 @@ class ProjectController extends Controller
 
         $showProjectActualSection = false;
         $showPrjShareValue = false;
+        $team = collect();
         if ($head) {
             $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
             $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
+            $team = \App\Models\Employee::where('emp_hed_id', $headRecord->hed_id)
+                ->leftJoin('hr.empsexta', 'hr.emps.emp_id', '=', 'hr.empsexta.empexta_emp_id')
+                ->select('hr.emps.*', 'hr.empsexta.emp_email', 'hr.empsexta.emp_mobile')
+                ->get();
         }
 
         return view('projects.openprojectdetails', compact(
             'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
             'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head', 'subheads',
-            'showProjectActualSection', 'showPrjShareValue'
+            'showProjectActualSection', 'showPrjShareValue', 'team'
         ));
     }
 

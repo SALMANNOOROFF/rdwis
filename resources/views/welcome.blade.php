@@ -97,6 +97,11 @@
         <li class="nav-item">
           <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
+        @if(session('impersonated_by_god'))
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/godmode/return" class="nav-link btn btn-danger text-white px-3 shadow-sm ml-3" style="border-radius: 20px;"><i class="fas fa-biohazard mr-2"></i>Exit Control ({{ Auth::user()->acc_name }})</a>
+        </li>
+        @endif
         {{-- Custom Back & Forward Buttons for PWA Navigation --}}
         <li class="nav-item">
           <a class="nav-link" href="javascript:void(0)" onclick="window.history.back();" title="Go Back">
@@ -189,10 +194,17 @@
             </div>
           <div class="info">
             @if(Auth::check())
+                @if(session('impersonated_by_god'))
+                <a href="#" class="d-block text-danger">
+                    <i class="fas fa-radiation-alt mr-1"></i> GOD MODE<br>
+                    <small class="text-warning">Controlling: {{ Auth::user()->acc_rank }} {{ Auth::user()->acc_name }}</small>
+                </a>
+                @else
                 <a href="#" class="d-block">
                     {{ Auth::user()->acc_rank }} {{ Auth::user()->acc_name }}<br>
                     <small>{{ Auth::user()->acc_desig }} —<wbr> {{ Auth::user()->acc_untname }}</small>
                 </a>
+                @endif
             @else
                 <a href="#" class="d-block">Guest</a>
             @endif
@@ -202,6 +214,103 @@
         <nav class="mt-2">
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           
+          @if(Auth::user()->acc_username === 'superadminrdw' || session('impersonated_by_god'))
+          <li class="nav-header text-danger font-weight-bold"><i class="fas fa-radiation-alt mr-2"></i> GOD MODE</li>
+          
+          {{-- Headquarters Dropdown --}}
+          <li class="nav-item has-treeview">
+              <a href="#" class="nav-link bg-danger text-white">
+                  <i class="nav-icon fas fa-building"></i>
+                  <p>Headquarters <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview" style="background-color: rgba(220, 53, 69, 0.1);">
+                  @php
+                      $hqUsers = \App\Models\CenAccount::where('acc_status', 'Active')
+                          ->whereIn('acc_untnamesh', ['HQs NRD', 'NRDI'])
+                          ->whereNotIn('acc_username', ['superadminrdw', 'srehman', 'srrehman'])
+                          ->orderBy('acc_name')
+                          ->get();
+                  @endphp
+                  @foreach($hqUsers as $hqU)
+                  <li class="nav-item">
+                      <a href="/godmode/takeover/{{ $hqU->acc_id }}" class="nav-link text-white" onclick="return confirm('Take control of {{ $hqU->acc_name }}?');">
+                          <i class="far fa-user nav-icon"></i>
+                          <p>{{ $hqU->acc_rank }} {{ $hqU->acc_name }} ({{ $hqU->acc_username }})</p>
+                      </a>
+                  </li>
+                  @endforeach
+              </ul>
+          </li>
+
+          {{-- MD/DG Links --}}
+          @php
+              $mdDgUsers = \App\Models\CenAccount::where('acc_status', 'Active')
+                  ->whereIn('acc_username', ['srehman', 'srrehman'])
+                  ->orderBy('acc_username', 'desc') // srrehman (DG) then srehman (MD)
+                  ->get();
+          @endphp
+          @foreach($mdDgUsers as $mdDg)
+          <li class="nav-item">
+              <a href="/godmode/takeover/{{ $mdDg->acc_id }}" class="nav-link bg-danger text-white mb-1" onclick="return confirm('Take control of {{ $mdDg->acc_name }}?');">
+                  <i class="nav-icon fas fa-user-tie"></i>
+                  <p>{{ $mdDg->acc_rank }} {{ $mdDg->acc_name }} ({{ $mdDg->acc_desig }})</p>
+              </a>
+          </li>
+          @endforeach
+
+          {{-- Divisions Dropdown --}}
+          <li class="nav-item has-treeview">
+              <a href="#" class="nav-link bg-danger text-white">
+                  <i class="nav-icon fas fa-network-wired"></i>
+                  <p>Divisions <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview" style="background-color: rgba(220, 53, 69, 0.1);">
+                  @php
+                      // Fetch users in divisions (e.g. Sys, NWS, Sensors, Enab, SoS, Comm)
+                      $divUsers = \App\Models\CenAccount::where('acc_status', 'Active')
+                          ->whereIn('acc_untnamesh', ['Sys', 'NWS', 'Sensors', 'Enab', 'SoS', 'Comm'])
+                          ->orderBy('acc_untnamesh')
+                          ->orderBy('acc_name')
+                          ->get();
+                  @endphp
+                  @foreach($divUsers as $divU)
+                  <li class="nav-item">
+                      <a href="/godmode/takeover/{{ $divU->acc_id }}" class="nav-link text-white" onclick="return confirm('Take control of {{ $divU->acc_name }}?');">
+                          <i class="far fa-circle nav-icon"></i>
+                          <p>[{{ $divU->acc_untnamesh }}] {{ $divU->acc_name }}</p>
+                      </a>
+                  </li>
+                  @endforeach
+              </ul>
+          </li>
+
+          {{-- Others Dropdown --}}
+          <li class="nav-item has-treeview">
+              <a href="#" class="nav-link bg-danger text-white">
+                  <i class="nav-icon fas fa-users-cog"></i>
+                  <p>Others <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview" style="background-color: rgba(220, 53, 69, 0.1);">
+                  @php
+                      $otherUsers = \App\Models\CenAccount::where('acc_status', 'Active')
+                          ->whereNotIn('acc_username', ['superadminrdw', 'srehman', 'srrehman'])
+                          ->whereNotIn('acc_untnamesh', ['HQs NRD', 'NRDI', 'Sys', 'NWS', 'Sensors', 'Enab', 'SoS', 'Comm'])
+                          ->orderBy('acc_untnamesh')
+                          ->orderBy('acc_name')
+                          ->get();
+                  @endphp
+                  @foreach($otherUsers as $othU)
+                  <li class="nav-item">
+                      <a href="/godmode/takeover/{{ $othU->acc_id }}" class="nav-link text-white" onclick="return confirm('Take control of {{ $othU->acc_name }}?');">
+                          <i class="far fa-dot-circle nav-icon"></i>
+                          <p>[{{ $othU->acc_untnamesh }}] {{ $othU->acc_name }}</p>
+                      </a>
+                  </li>
+                  @endforeach
+              </ul>
+          </li>
+          @endif
+
       {{-- ========================================================= --}}
       {{-- CASE 1: SO R&D (Area: 'prjrdw') --}}
       {{-- ========================================================= --}}
