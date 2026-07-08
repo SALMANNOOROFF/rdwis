@@ -1,0 +1,7 @@
+QUERY: fin_headstatusall_open_temp_chrf_adder
+
+SQL:
+INSERT INTO fin_headstatusall_temp ( hed_id, hed_code, hed_unt_id, transtype, allocation, received, expenditure, commitments, inprocess, available, yettoberec, canbespent )
+SELECT cen_heads_base.hed_id, cen_heads_base.hed_code, cen_heads_base.hed_unt_id, cen_heads_base.hed_transtype, Format(Nz(GetA16Element("GetAccShares",([hed_id]),2),"Undefined"),"#,##0") AS cf_share, Format(GetCfReceived([hed_id]),"#,##0") AS cf_received, Format(GetCfExpenditure([hed_id]),"#,##0") AS cf_exp, Format(GetCfOutstandingCommits([hed_id]),"#,##0") AS cf_commit, Format(GetCfInProcess([hed_id]),"#,##0") AS cf_inprocess, [cf_received]-[cf_exp]-[cf_commit]-[cf_inprocess] AS cf_avlbl, [cf_share]-[cf_received] AS cf_yettoberec, [cf_share]-[cf_exp]-[cf_commit]-[cf_inprocess] AS cf_canbespent
+FROM cen_heads_base
+ORDER BY cen_heads_base.hed_id;

@@ -1,0 +1,436 @@
+Option Compare Database
+Option Explicit
+
+Function NamenTitle(strName As String, strTitle) As String
+strTitle = Nz(strTitle, "")
+NamenTitle = IIf(strTitle = "", "", strTitle & " ") & strName
+End Function
+
+Function NamenTitleThisLead() As String
+On Error GoTo Error_Handler_NameTitile
+Dim strNameThis As String
+Dim strTitleThis
+strNameThis = getVar("varUnitLeadName")
+strTitleThis = getVar("varUnitLeadTitle")
+NamenTitleThisLead = NamenTitle(strNameThis, strTitleThis)
+Error_Handler_NameTitile:
+End Function
+ 
+Function NameComplete(strName As String, strTitle, strRank) As String
+Dim RankFirstPart As String
+Dim RankPN As String
+Dim RankRtd As String
+
+strTitle = Nz(strTitle, "")
+strRank = Nz(strRank, "")
+If IsOfficerRank(strRank) = True Then
+    If strRank Like "*(Rtd)" Then
+        RankFirstPart = Left(strRank, Len(strRank) - 5)
+        RankFirstPart = Trim(RankFirstPart)
+        RankRtd = "(Rtd)"
+        Else
+        RankFirstPart = strRank
+        End If
+    If RankFirstPart Like "*PN" Then
+        RankFirstPart = Left(RankFirstPart, Len(RankFirstPart) - 2)
+        RankFirstPart = Trim(RankFirstPart)
+        RankPN = "PN"
+        End If
+    RankFirstPart = RankFirstPart & IIf(RankRtd = "", "", " " & RankRtd)
+    Else
+    RankFirstPart = ""
+    RankRtd = ""
+    RankPN = strRank
+    End If
+
+NameComplete = IIf(RankFirstPart = "", "", RankFirstPart & " ") & _
+               IIf(strTitle = "", "", strTitle & " ") & _
+               strName & _
+               IIf(RankPN = "", "", " " & RankPN)
+End Function
+
+Function NameCompleteThisLead() As String
+Dim strNameThis As String
+Dim strTitleThis As String
+Dim strRankthis As String
+'Number is in start
+strNameThis = getVar("varUnitLeadName")
+strTitleThis = getVar("varUnitLeadTitle")
+strRankthis = getVar("varUnitLeadRank")
+
+NameCompleteThisLead = NameComplete(strNameThis, strTitleThis, strRankthis)
+
+End Function
+
+Public Function IsOfficerRank(empRank) As Boolean
+Dim dbsRank As Database
+Dim rstRank As Recordset
+
+IsOfficerRank = False
+Set dbsRank = CurrentDb()
+Set rstRank = dbsRank.OpenRecordset("Select * From ranks", dbOpenSnapshot)
+Do While Not rstRank.EOF
+    If empRank Like "*" & rstRank!rankname & "*" Then IsOfficerRank = True
+    If empRank Like "*" & rstRank!ranknamesh & "*" Then IsOfficerRank = True
+    rstRank.MoveNext
+    Loop
+End Function
+
+Public Function RankFirstPart(empRank)
+Dim n As Integer
+On Error Resume Next
+If empRank Like "*PN" Then
+    RankFirstPart = Left(empRank, Len(empRank) - 3)
+    Else
+    RankFirstPart = empRank
+    End If
+
+End Function
+
+
+Public Function StringHasNumber(stringToSearch As String, numberToSearchFor As Integer) As Boolean
+Dim numberModified As String
+Dim foundPosition As Integer
+StringHasNumber = False
+stringToSearch = Replace(stringToSearch, " ", "")
+'Number is in start and stringToSearch has only one number
+If InStr(1, stringToSearch, numberToSearchFor) = 1 And Len(stringToSearch) = Len(numberToSearchFor) Then
+    StringHasNumber = True
+    GoTo The_End
+    End If
+'Number is in start
+numberModified = numberToSearchFor & ","
+If InStr(1, stringToSearch, numberModified) = 1 Then
+    StringHasNumber = True
+    GoTo The_End
+    End If
+'Number is in middle
+numberModified = "," & numberToSearchFor & ","
+If InStr(1, stringToSearch, numberModified) > 0 Then
+    StringHasNumber = True
+    GoTo The_End
+    End If
+'Number in end
+numberModified = "," & numberToSearchFor
+If InStr(1, stringToSearch, numberModified) > 0 And _
+    InStr(1, stringToSearch, numberModified) = Len(stringToSearch) - Len(numberModified) + 1 Then
+    StringHasNumber = True
+    End If
+The_End:
+End Function
+
+
+Function FirstDateThisMonth(dtInput1 As Date) As Date
+FirstDateThisMonth = DateSerial(Year(dtInput1), Month(dtInput1), 1)
+End Function
+
+Function LastDateThisMonth(dtInput2 As Date) As Date
+LastDateThisMonth = DateSerial(Year(dtInput2), Month(dtInput2) + 1, 0)
+End Function
+
+Function FirstDatePrevMonth(dtInput3 As Date) As Date
+FirstDatePrevMonth = DateSerial(Year(dtInput3), Month(dtInput3) - 1, 1)
+End Function
+
+Function LastDatePrevMonth(dtInput4 As Date) As Date
+LastDatePrevMonth = DateSerial(Year(dtInput4), Month(dtInput4), 0)
+End Function
+
+Function FirstDateNextMonth(dtInput5 As Date) As Date
+FirstDateNextMonth = DateSerial(Year(dtInput5), Month(dtInput5) + 1, 1)
+End Function
+
+Function LastDateNextMonth(dtInput6 As Date) As Date
+LastDateNextMonth = DateSerial(Year(dtInput6), Month(dtInput6) + 2, 0)
+End Function
+
+Public Function IntervalInMonths(Date1 As Date, Date2 As Date) As Integer
+Dim dtDate As Date
+Dim intCorr As Integer
+
+dtDate = FirstDateThisMonth(Date1)
+
+Do While dtDate <= FirstDateThisMonth(Date2)
+    Select Case Month(dtDate)
+        Case 1: intCorr = intCorr + 1
+        Case 2: intCorr = intCorr - 2
+        Case 3: intCorr = intCorr + 1
+        Case 5: intCorr = intCorr + 1
+        Case 7: intCorr = intCorr + 1
+        Case 8: intCorr = intCorr + 1
+        Case 10: intCorr = intCorr + 1
+        Case 12: intCorr = intCorr + 1
+        End Select
+        
+    dtDate = DateAdd("m", 1, dtDate)
+    Loop
+IntervalInMonths = Round((DateDiff("d", Date1, Date2) - intCorr) / 30, 0)
+End Function
+
+'Spell a number in words - Main Function
+Function SpellNumber(ByVal MyNumber)
+
+If IsNull(MyNumber) Then Exit Function
+
+Dim Dollars, Cents, Temp
+Dim DecimalPlace, count
+ReDim Place(9) As String
+Place(2) = " Thousand "
+Place(3) = " Million "
+Place(4) = " Billion "
+Place(5) = " Trillion "
+' String representation of amount.
+MyNumber = Trim(str(MyNumber))
+' Position of decimal place 0 if none.
+DecimalPlace = InStr(MyNumber, ".")
+' Convert cents and set MyNumber to dollar amount.
+If DecimalPlace > 0 Then
+    Cents = GetTens(Left(Mid(MyNumber, DecimalPlace + 1) & "00", 2))
+    MyNumber = Trim(Left(MyNumber, DecimalPlace - 1))
+    End If
+count = 1
+Do While MyNumber <> ""
+    Temp = GetHundreds(Right(MyNumber, 3))
+    If Temp <> "" Then Dollars = Temp & Place(count) & Dollars
+    If Len(MyNumber) > 3 Then
+        MyNumber = Left(MyNumber, Len(MyNumber) - 3)
+        Else
+        MyNumber = ""
+        End If
+    count = count + 1
+Loop
+
+Dollars = Trim(Dollars)
+
+Select Case Dollars
+    Case ""
+        Dollars = "No Rupees"
+    Case "One"
+        Dollars = "Rupee One"
+    Case Else
+        Dollars = "Rupees " & Dollars
+    End Select
+
+Select Case Cents
+    Case ""
+        Cents = " Only"  '" and No Paisas"
+    Case "One"
+        Cents = " and One Paisa Only"
+    Case Else
+        Cents = " and " & Cents & " Paisas Only"
+    End Select
+
+SpellNumber = Dollars & Cents
+End Function
+
+' Converts a number from 100-999 into text
+Function GetHundreds(ByVal MyNumber)
+Dim result As String
+If Val(MyNumber) = 0 Then Exit Function
+MyNumber = Right("000" & MyNumber, 3)
+' Convert the hundreds place.
+If Mid(MyNumber, 1, 1) <> "0" Then
+result = GetDigit(Mid(MyNumber, 1, 1)) & " Hundred "
+End If
+' Convert the tens and ones place.
+If Mid(MyNumber, 2, 1) <> "0" Then
+result = result & GetTens(Mid(MyNumber, 2))
+Else
+result = result & GetDigit(Mid(MyNumber, 3))
+End If
+GetHundreds = result
+End Function
+
+' Converts a number from 10 to 99 into text.
+Function GetTens(TensText)
+Dim result As String
+result = "" ' Null out the temporary function value.
+If Val(Left(TensText, 1)) = 1 Then ' If value between 10-19...
+Select Case Val(TensText)
+Case 10: result = "Ten"
+Case 11: result = "Eleven"
+Case 12: result = "Twelve"
+Case 13: result = "Thirteen"
+Case 14: result = "Fourteen"
+Case 15: result = "Fifteen"
+Case 16: result = "Sixteen"
+Case 17: result = "Seventeen"
+Case 18: result = "Eighteen"
+Case 19: result = "Nineteen"
+Case Else
+End Select
+Else ' If value between 20-99...
+Select Case Val(Left(TensText, 1))
+Case 2: result = "Twenty "
+Case 3: result = "Thirty "
+Case 4: result = "Forty "
+Case 5: result = "Fifty "
+Case 6: result = "Sixty "
+Case 7: result = "Seventy "
+Case 8: result = "Eighty "
+Case 9: result = "Ninety "
+Case Else
+End Select
+result = result & GetDigit _
+(Right(TensText, 1)) ' Retrieve ones place.
+End If
+GetTens = result
+End Function
+
+' Converts a number from 1 to 9 into text.
+Function GetDigit(Digit)
+Select Case Val(Digit)
+Case 1: GetDigit = "One"
+Case 2: GetDigit = "Two"
+Case 3: GetDigit = "Three"
+Case 4: GetDigit = "Four"
+Case 5: GetDigit = "Five"
+Case 6: GetDigit = "Six"
+Case 7: GetDigit = "Seven"
+Case 8: GetDigit = "Eight"
+Case 9: GetDigit = "Nine"
+Case Else: GetDigit = ""
+End Select
+End Function
+
+Private Sub BalanceCalculator()
+Dim dbs As Database
+Dim rstHead As Recordset
+Dim rstTrans As Recordset
+Dim strHead As String
+Dim lngOldBalance As Long
+Dim dteOldDate As Date
+Dim intSeq As Integer
+
+Set dbs = CurrentDb()
+Set rstHead = dbs.OpenRecordset("Select hed_id From cen_heads", dbOpenSnapshot)
+
+Do While Not rstHead.EOF
+    strHead = rstHead!hed_id
+    Set rstTrans = dbs.OpenRecordset("Select * From zzzDues3 Where effhead = " & strHead & " Order By tdate")
+    lngOldBalance = 0
+    Do While Not rstTrans.EOF
+        If rstTrans!tdate = dteOldDate Then
+            intSeq = intSeq + 1
+            Else
+            intSeq = 1
+            End If
+        rstTrans.Edit
+        rstTrans!balance = lngOldBalance + rstTrans!amount
+        rstTrans!seq = intSeq
+        rstTrans.Update
+        lngOldBalance = rstTrans!balance
+        dteOldDate = rstTrans!tdate
+        rstTrans.MoveNext
+        Loop
+    Set rstTrans = Nothing
+    rstHead.MoveNext
+    Loop
+MsgBox "Balance amounts updated"
+End Sub
+
+Function StringToNumber(strInput As String) As Long
+Dim n As Integer
+Dim lngOutput As Long
+
+For n = 1 To Len(strInput)
+    lngOutput = lngOutput + n * Asc(Mid(strInput, n, 1))
+    Next
+StringToNumber = lngOutput
+End Function
+
+'Call QuickSort(myArray, LBound(myArray), UBound(myArray))
+Public Sub QuickSort(vArray As Variant, inLow As Long, inHi As Long)
+  Dim pivot   As Variant
+  Dim tmpSwap As Variant
+  Dim tmpLow  As Long
+  Dim tmpHi   As Long
+
+  tmpLow = inLow
+  tmpHi = inHi
+
+  pivot = vArray((inLow + inHi) \ 2)
+
+  While (tmpLow <= tmpHi)
+     While (vArray(tmpLow) < pivot And tmpLow < inHi)
+        tmpLow = tmpLow + 1
+     Wend
+
+     While (pivot < vArray(tmpHi) And tmpHi > inLow)
+        tmpHi = tmpHi - 1
+     Wend
+
+     If (tmpLow <= tmpHi) Then
+        tmpSwap = vArray(tmpLow)
+        vArray(tmpLow) = vArray(tmpHi)
+        vArray(tmpHi) = tmpSwap
+        tmpLow = tmpLow + 1
+        tmpHi = tmpHi - 1
+     End If
+  Wend
+
+  If (inLow < tmpHi) Then QuickSort vArray, inLow, tmpHi
+  If (tmpLow < inHi) Then QuickSort vArray, tmpLow, inHi
+
+End Sub
+
+Sub BubbleSort(arrArray As Variant)
+Dim strTemp As String
+Dim i As Long
+Dim j As Long
+Dim lngMin As Long
+Dim lngMax As Long
+
+On Error GoTo The_End
+
+lngMin = LBound(arrArray)
+lngMax = UBound(arrArray)
+For i = lngMin To lngMax - 1
+    For j = i + 1 To lngMax
+        If arrArray(i) > arrArray(j) Then
+            strTemp = arrArray(i)
+            arrArray(i) = arrArray(j)
+            arrArray(j) = strTemp
+            End If
+        Next j
+    Next i
+ 
+The_End:
+End Sub
+
+Function ArrayFromString(strList As String) As Variant()
+Dim arrArray() As String
+Dim arrOutput() As Variant
+Dim n As Long
+
+If strList = "" Then GoTo The_End
+
+arrArray = Split(strList, ",")
+ReDim arrOutput(UBound(arrArray))
+For n = LBound(arrArray) To UBound(arrArray)
+    arrOutput(n) = arrArray(n)
+    Next n
+
+The_End:
+ArrayFromString = arrOutput
+End Function
+
+Private Sub Doooo()
+Dim arr()
+arr = ArrayFromString("3,2,5")
+Debug.Print arr(0), arr(1), arr(2)
+End Sub
+
+Private Sub Doit()
+'Debug.Print IntervalInMonths(#7/13/2021#, #1/12/2022#)
+Dim arr()
+Dim str As String
+str = "712,711,710"
+arr = Split(str, "'")
+Debug.Print arr(0)
+'Call BubbleSort(arr)
+Call QuickSort(arr, LBound(arr), UBound(arr))
+str = Join(arr)
+
+
+End Sub

@@ -1,0 +1,394 @@
+FORM: hr_emps_sbBnkaccounts
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: hr_bnkaccounts
+DefaultView: 2
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Logo0
+Type: 103
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 300
+Top: 60
+Width: 690
+Height: 460
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: hr_baccounts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1050
+Top: 60
+Width: 4230
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: bac_bchname
+Type: 109
+ControlSource: bac_bchname
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2190
+Top: 1845
+Width: 2970
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label45
+Type: 100
+ControlSource: 
+Caption: Branch name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 1845
+Width: 1768
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: bac_bchcode
+Type: 109
+ControlSource: bac_bchcode
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2190
+Top: 2340
+Width: 2970
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label46
+Type: 100
+ControlSource: 
+Caption: Branch code
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 2340
+Width: 1768
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: bac_acctitle
+Type: 109
+ControlSource: bac_acctitle
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2190
+Top: 855
+Width: 2970
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label47
+Type: 100
+ControlSource: 
+Caption: Account title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 855
+Width: 1768
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: bac_accnum
+Type: 109
+ControlSource: bac_accnum
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2190
+Top: 1350
+Width: 2970
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label48
+Type: 100
+ControlSource: 
+Caption: Account number
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 1350
+Width: 1768
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: bac_bchcity
+Type: 109
+ControlSource: bac_bchcity
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2190
+Top: 2835
+Width: 2970
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label49
+Type: 100
+ControlSource: 
+Caption: Branch city
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 2835
+Width: 1768
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: bac_bnkname
+Type: 111
+ControlSource: bac_bnkname
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2190
+Top: 315
+Width: 2970
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label44
+Type: 100
+ControlSource: 
+Caption: Bank name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 315
+Width: 1768
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: bac_selforpay
+Type: 106
+ControlSource: bac_selforpay
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2190
+Top: 3330
+Width: 2970
+Height: 315
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label102
+Type: 100
+ControlSource: 
+Caption: Selected for Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 3330
+Width: 1768
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_bac_bnkname
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4866
+Top: 300
+Width: 300
+Height: 405
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

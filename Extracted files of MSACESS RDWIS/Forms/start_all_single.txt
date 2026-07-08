@@ -1,0 +1,3756 @@
+FORM: start_all_single
+
+=== FORM PROPERTIES ===
+Caption: RDWIS
+RecordSource: 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: TabCtl288
+Type: 123
+ControlSource: 
+Caption: 
+Value: 0
+Visible: True
+Enabled: True
+Locked: 
+Left: 525
+Top: 2160
+Width: 15165
+Height: 8055
+ForeColor: 8355711
+BackColor: 14869218
+FontName: Calibri Light
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: projects
+Type: 124
+ControlSource: 
+Caption: Projects
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 600
+Top: 2640
+Width: 15015
+Height: 7500
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdProjOpen
+Type: 104
+ControlSource: 
+Caption: Open
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2970
+Top: 3301
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdProjClosed
+Type: 104
+ControlSource: 
+Caption: Closed
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2970
+Top: 4021
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdProjAdd
+Type: 104
+ControlSource: 
+Caption: Add Projects
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3030
+Top: 4815
+Width: 1995
+Height: 450
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPrepReturn
+Type: 104
+ControlSource: 
+Caption: Prepare MPR
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7470
+Top: 3301
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtStatusSummary
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 6690
+Top: 4651
+Width: 3675
+Height: 390
+ForeColor: 0
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 14
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtStatusDetails
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 7395
+Top: 5011
+Width: 2415
+Height: 1560
+ForeColor: 0
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxMPR
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6855
+Top: 3046
+Width: 3300
+Height: 1065
+ForeColor: 
+BackColor: 11854021
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box348
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2370
+Top: 3046
+Width: 3300
+Height: 2520
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label43
+Type: 100
+ControlSource: 
+Caption: Monthly Return
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6990
+Top: 2881
+Width: 1680
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label46
+Type: 100
+ControlSource: 
+Caption: Projects
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2505
+Top: 2881
+Width: 975
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box349
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11370
+Top: 3031
+Width: 3180
+Height: 5730
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box479
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2970
+Top: 4770
+Width: 2100
+Height: 540
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: purchase
+Type: 124
+ControlSource: 
+Caption: Purchase
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 600
+Top: 2640
+Width: 15015
+Height: 7500
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurReqDraft
+Type: 104
+ControlSource: 
+Caption: Draft
+Value: 
+Visible: False
+Enabled: False
+Locked: 
+Left: 7639
+Top: 7175
+Width: 780
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurReqOpen
+Type: 104
+ControlSource: 
+Caption: Open
+Value: 
+Visible: False
+Enabled: False
+Locked: 
+Left: 8574
+Top: 7205
+Width: 780
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurReqClosed
+Type: 104
+ControlSource: 
+Caption: Closed
+Value: 
+Visible: False
+Enabled: False
+Locked: 
+Left: 9448
+Top: 7205
+Width: 780
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurReqNew
+Type: 104
+ControlSource: 
+Caption: Create New 
+Value: 
+Visible: False
+Enabled: False
+Locked: 
+Left: 7676
+Top: 7915
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurCaseDraft
+Type: 104
+ControlSource: 
+Caption: Draft
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2970
+Top: 3301
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurCaseOpen
+Type: 104
+ControlSource: 
+Caption: Open
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2970
+Top: 4021
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurCaseClosed
+Type: 104
+ControlSource: 
+Caption: Closed
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2970
+Top: 4741
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurCaseNew
+Type: 104
+ControlSource: 
+Caption: Create New
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3030
+Top: 5505
+Width: 1995
+Height: 450
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurRecDraft
+Type: 104
+ControlSource: 
+Caption: Draft
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7425
+Top: 3301
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPurRecClosed
+Type: 104
+ControlSource: 
+Caption: Closed
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7425
+Top: 4021
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: mdItemsStatus
+Type: 104
+ControlSource: 
+Caption: Items Status
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 11905
+Top: 5882
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box280
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7039
+Top: 7850
+Width: 3300
+Height: 675
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box270
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7039
+Top: 6935
+Width: 3300
+Height: 915
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label272
+Type: 100
+ControlSource: 
+Caption: Approvals In Principle
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7159
+Top: 6755
+Width: 2220
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box275
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2370
+Top: 3061
+Width: 3300
+Height: 3225
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label277
+Type: 100
+ControlSource: 
+Caption: Purchase Cases
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2490
+Top: 2881
+Width: 1620
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box302
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6825
+Top: 3060
+Width: 3300
+Height: 1770
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label303
+Type: 100
+ControlSource: 
+Caption: Receipts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6945
+Top: 2881
+Width: 1020
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box306
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11370
+Top: 3061
+Width: 3180
+Height: 5746
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box377
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2970
+Top: 5460
+Width: 2100
+Height: 540
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdMissing
+Type: 104
+ControlSource: 
+Caption: Cases with missing items
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 2970
+Top: 6735
+Width: 2100
+Height: 810
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdProg
+Type: 104
+ControlSource: 
+Caption: Cases without Items
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11905
+Top: 3301
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hr
+Type: 124
+ControlSource: 
+Caption: HR
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 600
+Top: 2640
+Width: 15015
+Height: 7500
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdEmpAll
+Type: 104
+ControlSource: 
+Caption: Current
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3060
+Top: 3255
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdEmpPrev
+Type: 104
+ControlSource: 
+Caption: Previous
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3060
+Top: 3975
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAttend
+Type: 104
+ControlSource: 
+Caption: Attendance
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3060
+Top: 5055
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdApplicsActive
+Type: 104
+ControlSource: 
+Caption: Applicants
+Value: 
+Visible: False
+Enabled: False
+Locked: 
+Left: 3075
+Top: 6710
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSalReqsDraft
+Type: 104
+ControlSource: 
+Caption: Draft
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7485
+Top: 3225
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSalReqsInprocess
+Type: 104
+ControlSource: 
+Caption: Open
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7485
+Top: 3945
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSalReqsCompleted
+Type: 104
+ControlSource: 
+Caption: Closed
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7485
+Top: 4665
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCompleteness
+Type: 104
+ControlSource: 
+Caption: Incomplete Data
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11910
+Top: 3301
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdGrades
+Type: 104
+ControlSource: 
+Caption: Grades
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11910
+Top: 4021
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdQualifications
+Type: 104
+ControlSource: 
+Caption: Qualifications
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11910
+Top: 4741
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: CmdPersonnel
+Type: 104
+ControlSource: 
+Caption: Current Employees
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11910
+Top: 5461
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdExServicemen
+Type: 104
+ControlSource: 
+Caption: Ex Servicemen
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11910
+Top: 6181
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSalariesPaid
+Type: 104
+ControlSource: 
+Caption: Salaries Paid
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11910
+Top: 6901
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box192
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2460
+Top: 3015
+Width: 3300
+Height: 1800
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label232
+Type: 100
+ControlSource: 
+Caption: Employees
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2580
+Top: 2835
+Width: 1260
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxProjects1
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2475
+Top: 6469
+Width: 3300
+Height: 1080
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label231
+Type: 100
+ControlSource: 
+Caption: Applicants
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2595
+Top: 6290
+Width: 1200
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box249
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2460
+Top: 4815
+Width: 3300
+Height: 1080
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box216
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11370
+Top: 3001
+Width: 3180
+Height: 5731
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box256
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6885
+Top: 2985
+Width: 3300
+Height: 2460
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label259
+Type: 100
+ControlSource: 
+Caption: Salary Requisitions
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7005
+Top: 2805
+Width: 1980
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: CmdCtrCasesOpenx
+Type: 104
+ControlSource: 
+Caption: Open
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7455
+Top: 7185
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box282
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6885
+Top: 6204
+Width: 3300
+Height: 2520
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label283
+Type: 100
+ControlSource: 
+Caption: Contract Cases
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7002
+Top: 6030
+Width: 1425
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: CmdCtrCasesDraft
+Type: 104
+ControlSource: 
+Caption: Draft
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7455
+Top: 6465
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: CmdCtrCasesOpen
+Type: 104
+ControlSource: 
+Caption: Open
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7455
+Top: 7185
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: CmdCtrCasesClosed
+Type: 104
+ControlSource: 
+Caption: Closed
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 7455
+Top: 7884
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCustom
+Type: 104
+ControlSource: 
+Caption: Custom
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11910
+Top: 7620
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Embedded Macro]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: finance
+Type: 124
+ControlSource: 
+Caption: Finance
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 600
+Top: 2640
+Width: 15015
+Height: 7500
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbAccount
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2895
+Top: 3301
+Width: 2100
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAccStatus
+Type: 104
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2895
+Top: 3871
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdProjectShares
+Type: 104
+ControlSource: 
+Caption: Fundings
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2910
+Top: 6090
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPCAwaited
+Type: 104
+ControlSource: 
+Caption: PCs Awaiting Payment
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11835
+Top: 6945
+Width: 2295
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdChrf
+Type: 104
+ControlSource: 
+Caption: CSRF Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11834
+Top: 6188
+Width: 2295
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box327
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11369
+Top: 3061
+Width: 3225
+Height: 4681
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box330
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2370
+Top: 3061
+Width: 3180
+Height: 3795
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label344
+Type: 100
+ControlSource: 
+Caption: Accounts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2490
+Top: 2911
+Width: 945
+Height: 285
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAccStatusMtss
+Type: 104
+ControlSource: 
+Caption: MTSS Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2910
+Top: 5325
+Width: 2100
+Height: 555
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdLoans
+Type: 104
+ControlSource: 
+Caption: Loans
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2910
+Top: 7080
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box429
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2370
+Top: 6855
+Width: 3180
+Height: 1021
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAccStatusDetails
+Type: 104
+ControlSource: 
+Caption: Detailed Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2910
+Top: 4575
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdProjSharesStatus
+Type: 104
+ControlSource: 
+Caption: Proj Shares Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11835
+Top: 4732
+Width: 2295
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAccountsStatus
+Type: 104
+ControlSource: 
+Caption: Accounts Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11835
+Top: 4005
+Width: 2295
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAllocations
+Type: 104
+ControlSource: 
+Caption: Allocations Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11835
+Top: 3285
+Width: 2295
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSubheadsStatus
+Type: 104
+ControlSource: 
+Caption: Subheads Status
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11834
+Top: 5456
+Width: 2295
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: firms
+Type: 124
+ControlSource: 
+Caption: Firms
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 600
+Top: 2640
+Width: 15015
+Height: 7500
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchFirms
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5550
+Top: 5286
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchProjects
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11850
+Top: 5706
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchPersons
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8730
+Top: 6186
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchOffices
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8730
+Top: 5286
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchOffices
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8730
+Top: 4806
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchPersons
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8730
+Top: 6666
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchFirms
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5550
+Top: 4806
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdFirmsView
+Type: 104
+ControlSource: 
+Caption: View Firms
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2055
+Top: 4096
+Width: 1980
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbType
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2055
+Top: 3436
+Width: 1980
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAdvSearch
+Type: 104
+ControlSource: 
+Caption: Find
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 8730
+Top: 7386
+Width: 2640
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: chkAnyPart
+Type: 106
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 12270
+Top: 6846
+Width: 240
+Height: 240
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: Any part of text
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12555
+Top: 6786
+Width: 1560
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtBoard
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1118
+Top: 7300
+Width: 975
+Height: 345
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchSpecs
+Type: 111
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4039
+Top: 7306
+Width: 795
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchFacils
+Type: 111
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4039
+Top: 7786
+Width: 795
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: oprSearchFirms
+Type: 104
+ControlSource: 
+Caption: =
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 5250
+Top: 5286
+Width: 240
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchProjects
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11850
+Top: 6186
+Width: 2640
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchSpecs
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5550
+Top: 6165
+Width: 2640
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchFacils
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5550
+Top: 7065
+Width: 2640
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtGlobalSearch
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5550
+Top: 3421
+Width: 6780
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSearch
+Type: 104
+ControlSource: 
+Caption: Find
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 12835
+Top: 3361
+Width: 1560
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchInfoOffices
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2916
+Top: 8252
+Width: 825
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchInfoPersons
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1890
+Top: 8258
+Width: 825
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchInfoPersons
+Type: 111
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1890
+Top: 7778
+Width: 825
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchInfoOffices
+Type: 111
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2916
+Top: 7772
+Width: 825
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmbSearchInfoFirms
+Type: 111
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4039
+Top: 8266
+Width: 795
+Height: 360
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSearchInfoFirms
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11820
+Top: 4800
+Width: 2640
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdFirmsAddEdit
+Type: 104
+ControlSource: 
+Caption: Edit / Add Firms
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 2035
+Top: 5186
+Width: 1980
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box82
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5130
+Top: 3141
+Width: 9780
+Height: 960
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxFirms
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1755
+Top: 3136
+Width: 2580
+Height: 1740
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box10
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5130
+Top: 4086
+Width: 9780
+Height: 4200
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label11
+Type: 100
+ControlSource: 
+Caption: Advanced Search
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5305
+Top: 3931
+Width: 1740
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label50
+Type: 100
+ControlSource: 
+Caption: General data
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5490
+Top: 4446
+Width: 1695
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label53
+Type: 100
+ControlSource: 
+Caption: Speciality
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5490
+Top: 5805
+Width: 1050
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label57
+Type: 100
+ControlSource: 
+Caption: Facility
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5490
+Top: 6705
+Width: 975
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label61
+Type: 100
+ControlSource: 
+Caption: Office
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 8670
+Top: 4446
+Width: 975
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label62
+Type: 100
+ControlSource: 
+Caption: Person
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 8670
+Top: 5826
+Width: 975
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label63
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11790
+Top: 5346
+Width: 975
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblReset
+Type: 100
+ControlSource: 
+Caption: Reset Data
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13410
+Top: 7566
+Width: 1140
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label76
+Type: 100
+ControlSource: 
+Caption: Contacts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11760
+Top: 4440
+Width: 975
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label83
+Type: 100
+ControlSource: 
+Caption: Search
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5305
+Top: 2971
+Width: 780
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box364
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1755
+Top: 4861
+Width: 2580
+Height: 1140
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: inv_assets
+Type: 124
+ControlSource: 
+Caption: Inv. && Assets
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 600
+Top: 2640
+Width: 15015
+Height: 7500
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box381
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2355
+Top: 3045
+Width: 3300
+Height: 1785
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label382
+Type: 100
+ControlSource: 
+Caption: Inventory
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2490
+Top: 2880
+Width: 1033
+Height: 315
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box388
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11370
+Top: 3030
+Width: 3300
+Height: 5731
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box415
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2338
+Top: 5290
+Width: 3300
+Height: 1785
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label416
+Type: 100
+ControlSource: 
+Caption: Assets
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2473
+Top: 5125
+Width: 748
+Height: 315
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdOnCharge
+Type: 104
+ControlSource: 
+Caption: On Charge
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2955
+Top: 3300
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdChargedOff
+Type: 104
+ControlSource: 
+Caption: Charged Off
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2955
+Top: 4020
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAssetsOnCharge
+Type: 104
+ControlSource: 
+Caption: On Charge
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2938
+Top: 5545
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAssetsChargedOff
+Type: 104
+ControlSource: 
+Caption: Charged Off
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2938
+Top: 6265
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdEdit
+Type: 104
+ControlSource: 
+Caption: Edit Item Type and Status
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 2409
+Top: 7677
+Width: 3090
+Height: 660
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSharedAssets
+Type: 104
+ControlSource: 
+Caption: Shared Assets
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11985
+Top: 3255
+Width: 2100
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box11
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4080
+Top: 541
+Width: 10680
+Height: 1140
+ForeColor: 
+BackColor: 14869218
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblVersion
+Type: 100
+ControlSource: 
+Caption: 26.13
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 14130
+Top: 1351
+Width: 585
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+FontName: Georgia
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxSecurity
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9209
+Top: 120
+Width: 300
+Height: 300
+ForeColor: 
+BackColor: 2366701
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblUser
+Type: 100
+ControlSource: 
+Caption: DCom - Captain Dr Aleem Mushtaq PN
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 15150
+Top: 481
+Width: 3840
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxGatePassNone
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 19261
+Top: 3841
+Width: 420
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxContractExpiry
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 19261
+Top: 3301
+Width: 420
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label223
+Type: 100
+ControlSource: 
+Caption: No Gate pass
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17250
+Top: 3885
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label224
+Type: 100
+ControlSource: 
+Caption: Contracts Expiry
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17250
+Top: 3345
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxPersonala
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 19261
+Top: 4921
+Width: 420
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label256
+Type: 100
+ControlSource: 
+Caption: No 'Personal 1' data
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17250
+Top: 4965
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxPersonalb
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 19261
+Top: 5461
+Width: 420
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label258
+Type: 100
+ControlSource: 
+Caption: No 'Personal 2' data
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17250
+Top: 5505
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxGatePassExpiry
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 19261
+Top: 4381
+Width: 420
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label265
+Type: 100
+ControlSource: 
+Caption: Gate pass Expiry
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17250
+Top: 4425
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxContractNone
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 19261
+Top: 2761
+Width: 420
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label267
+Type: 100
+ControlSource: 
+Caption: No Contracts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17250
+Top: 2805
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblTitle
+Type: 100
+ControlSource: 
+Caption: COMM DIVISION
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4110
+Top: 781
+Width: 10620
+Height: 600
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Georgia
+FontSize: 30
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdDeptLead
+Type: 104
+ControlSource: 
+Caption: Department Lead
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 1470
+Top: 541
+Width: 1920
+Height: 540
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtDbType
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 90
+Top: 360
+Width: 1365
+Height: 810
+ForeColor: 11957550
+BackColor: 16777215
+FontName: Monotype Corsiva
+FontSize: 28
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box371
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17550
+Top: 8146
+Width: 2115
+Height: 2070
+ForeColor: 
+BackColor: 15189940
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdRevDraft
+Type: 104
+ControlSource: 
+Caption: Draft
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 18030
+Top: 8400
+Width: 1170
+Height: 420
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdRevOpen
+Type: 104
+ControlSource: 
+Caption: Open
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 18030
+Top: 8970
+Width: 1170
+Height: 420
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdRevClosed
+Type: 104
+ControlSource: 
+Caption: Closed
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 18030
+Top: 9540
+Width: 1170
+Height: 420
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label375
+Type: 100
+ControlSource: 
+Caption: Data Reversals
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17595
+Top: 7980
+Width: 1597
+Height: 315
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boxClearance
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 19261
+Top: 6001
+Width: 420
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label433
+Type: 100
+ControlSource: 
+Caption: Clearance Awaited
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 17250
+Top: 6045
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

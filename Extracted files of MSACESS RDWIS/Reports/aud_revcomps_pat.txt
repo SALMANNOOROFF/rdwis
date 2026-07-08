@@ -1,0 +1,35 @@
+REPORT: aud_revcomps_pat
+
+=== REPORT PROPERTIES ===
+RecordSource: aud_revcomps_pat
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Text146
+Type: 109
+ControlSource: =IIf(Count([pat_id])=0,"",Format(Count([pat_id]),"00") & " Attachments")
+Caption: 
+Visible: True
+Left: 170
+Top: 56
+Width: 5316
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pat_id
+Type: 109
+ControlSource: pat_id
+Caption: 
+Visible: True
+Left: 170
+Top: 0
+Width: 1701
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

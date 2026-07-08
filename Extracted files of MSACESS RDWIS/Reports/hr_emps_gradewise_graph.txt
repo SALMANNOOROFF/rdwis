@@ -1,0 +1,52 @@
+REPORT: hr_emps_gradewise_graph
+
+=== REPORT PROPERTIES ===
+RecordSource: 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: EMPLOYEES GRADE WISE
+Value: 
+Visible: True
+Left: 3120
+Top: 120
+Width: 9300
+Height: 480
+ForeColor: 855309
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmdData
+Type: 104
+ControlSource: 
+Caption: Detailed Data
+Value: 
+Visible: True
+Left: 13866
+Top: 118
+Width: 1740
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+Format: 
+
+--------------------
+Name: Graph0
+Type: 113
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 16020
+Height: 9300
+ForeColor: 
+BackColor: 16777215
+Format: 

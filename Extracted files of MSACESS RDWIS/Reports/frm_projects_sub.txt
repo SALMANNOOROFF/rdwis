@@ -1,0 +1,240 @@
+REPORT: frm_projects_sub
+
+=== REPORT PROPERTIES ===
+RecordSource: frm_projects
+Caption: projects_sub
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label43
+Type: 100
+ControlSource: 
+Caption: Projects
+Value: 
+Visible: True
+Left: 60
+Top: 45
+Width: 975
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_name
+Type: 109
+ControlSource: prj_name
+Caption: 
+Visible: True
+Left: 780
+Top: 60
+Width: 5340
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_name_Label
+Type: 100
+ControlSource: 
+Caption: Name :
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 720
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_scope
+Type: 109
+ControlSource: prj_scope
+Caption: 
+Visible: True
+Left: 780
+Top: 540
+Width: 5340
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_scope_Label
+Type: 100
+ControlSource: 
+Caption: Scope :
+Value: 
+Visible: True
+Left: 60
+Top: 540
+Width: 735
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_awarddt
+Type: 109
+ControlSource: prj_awarddt
+Caption: 
+Visible: True
+Left: 9510
+Top: 60
+Width: 1230
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_awarddt_Label
+Type: 100
+ControlSource: 
+Caption: Award date :
+Value: 
+Visible: True
+Left: 8160
+Top: 60
+Width: 1380
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_compdt
+Type: 109
+ControlSource: prj_compdt
+Caption: 
+Visible: True
+Left: 7590
+Top: 1020
+Width: 2400
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_compdt_Label
+Type: 100
+ControlSource: 
+Caption: Comp. date :
+Value: 
+Visible: True
+Left: 6240
+Top: 1020
+Width: 1380
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_tech
+Type: 109
+ControlSource: prj_tech
+Caption: 
+Visible: True
+Left: 1425
+Top: 1020
+Width: 4695
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_tech_Label
+Type: 100
+ControlSource: 
+Caption: Technology :
+Value: 
+Visible: True
+Left: 60
+Top: 1020
+Width: 1305
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_cost
+Type: 109
+ControlSource: prj_cost
+Caption: 
+Visible: True
+Left: 6900
+Top: 60
+Width: 1200
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_cost_Label
+Type: 100
+ControlSource: 
+Caption: Cost :
+Value: 
+Visible: True
+Left: 6240
+Top: 60
+Width: 660
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_status
+Type: 109
+ControlSource: prj_status
+Caption: 
+Visible: True
+Left: 7020
+Top: 540
+Width: 3000
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_status_Label
+Type: 100
+ControlSource: 
+Caption: Status :
+Value: 
+Visible: True
+Left: 6240
+Top: 540
+Width: 780
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line147
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 1500
+Width: 10740
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 

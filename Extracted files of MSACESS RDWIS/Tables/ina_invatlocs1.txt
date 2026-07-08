@@ -1,0 +1,10 @@
+TABLE: ina_invatlocs1
+
+COLUMNS:
+- ial_id | Type:4 | Size:4
+- ial_ias_id | Type:4 | Size:4
+- ial_date | Type:8 | Size:8
+- ial_unt_id | Type:4 | Size:4
+- ial_location | Type:10 | Size:255
+- ial_custgroup | Type:10 | Size:255
+- ial_custperson | Type:10 | Size:255

@@ -1,0 +1,949 @@
+FORM: fin_sharesinstall
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: fin_sharesalloc_plus
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Fundings - 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 180
+Width: 1843
+Height: 524
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: MTSS Share
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3105
+Top: 960
+Width: 1545
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label48
+Type: 100
+ControlSource: 
+Caption: Project Share
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7920
+Top: 960
+Width: 1545
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label79
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1500
+Top: 960
+Width: 1545
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label109
+Type: 100
+ControlSource: 
+Caption: RDW Share
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4710
+Top: 960
+Width: 1545
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sha_hed_id
+Type: 111
+ControlSource: sha_hed_id
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1920
+Top: 180
+Width: 1770
+Height: 480
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_sha_hed_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3435
+Top: 180
+Width: 360
+Height: 540
+ForeColor: 
+BackColor: 15064278
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label149
+Type: 100
+ControlSource: 
+Caption: CSRF Share
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6315
+Top: 960
+Width: 1545
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReport
+Type: 104
+ControlSource: 
+Caption: 2
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 14078
+Top: 188
+Width: 510
+Height: 465
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings
+FontSize: 18
+OnClick: [Embedded Macro]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell275
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 360
+Top: 960
+Width: 1080
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label389
+Type: 100
+ControlSource: 
+Caption: Milestone
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9525
+Top: 960
+Width: 1065
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label396
+Type: 100
+ControlSource: 
+Caption: Cost
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11430
+Top: 960
+Width: 1455
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell309
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 11055
+Top: 960
+Width: 315
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell321
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 10650
+Top: 960
+Width: 345
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label445
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12945
+Top: 960
+Width: 1440
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAddMsnCosts
+Type: 104
+ControlSource: 
+Caption: Milestone Costs
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11572
+Top: 188
+Width: 2025
+Height: 465
+ForeColor: 0
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Embedded Macro]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell356
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 14445
+Top: 960
+Width: 570
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: mtss_share
+Type: 109
+ControlSource: mtss_share
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3105
+Top: 240
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: sha_pcc
+Type: 109
+ControlSource: sha_pcc
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7920
+Top: 240
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: subInstalls
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 259
+Top: 1133
+Width: 14745
+Height: 5220
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: alloc
+Type: 109
+ControlSource: alloc
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1500
+Top: 240
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: rdw_share
+Type: 109
+ControlSource: =[alloc]-[mtss_share]
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4710
+Top: 240
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: sha_cf
+Type: 109
+ControlSource: sha_cf
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 6315
+Top: 240
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: sha_id
+Type: 109
+ControlSource: sha_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 14445
+Top: 240
+Width: 570
+Height: 360
+ForeColor: 12566463
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text271
+Type: 109
+ControlSource: ="l"
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 10650
+Top: 240
+Width: 345
+Height: 360
+ForeColor: 15921906
+BackColor: -2147483613
+FontName: Wingdings
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell323
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 11055
+Top: 240
+Width: 315
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label334
+Type: 100
+ControlSource: 
+Caption: Allocation
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 240
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label336
+Type: 100
+ControlSource: 
+Caption: Received
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 660
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell344
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 10650
+Top: 660
+Width: 345
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell345
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 11055
+Top: 660
+Width: 315
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell347
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 11430
+Top: 660
+Width: 1455
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell348
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 12945
+Top: 660
+Width: 1440
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rec
+Type: 109
+ControlSource: =IIf([subInstalls].[Form].[CurrentRecord]=0,0,[subInstalls].[Form]![sum_inward])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1500
+Top: 660
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: rec_mtss
+Type: 109
+ControlSource: =IIf([subInstalls].[Form].[CurrentRecord]=0,0,[subInstalls].[Form]![sum_mtss_share])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3105
+Top: 660
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: rec_rdw
+Type: 109
+ControlSource: =IIf([subInstalls].[Form].[CurrentRecord]=0,0,[subInstalls].[Form]![sum_rdw_share])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4710
+Top: 660
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: rec_cf
+Type: 109
+ControlSource: =IIf([subInstalls].[Form].[CurrentRecord]=0,0,[subInstalls].[Form]![sum_shi_cf])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 6315
+Top: 660
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: rec_pcc
+Type: 109
+ControlSource: =IIf([subInstalls].[Form].[CurrentRecord]=0,0,[subInstalls].[Form]![sum_shi_pcc])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7920
+Top: 660
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: EmptyCell358
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 14445
+Top: 660
+Width: 570
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell360
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 12945
+Top: 240
+Width: 1440
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cost_total
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 11430
+Top: 240
+Width: 1455
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: EmptyCell371
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 9525
+Top: 240
+Width: 1065
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell372
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 9525
+Top: 660
+Width: 1065
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

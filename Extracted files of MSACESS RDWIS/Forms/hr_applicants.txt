@@ -1,0 +1,393 @@
+FORM: hr_applicants
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT hr_applicants.* FROM hr_applicants WHERE hr_applicants.apl_status="Active"; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: lblTitle
+Type: 100
+ControlSource: 
+Caption: Applicants
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 60
+Top: 300
+Width: 12000
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 30
+Top: 1080
+Width: 2730
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Discipline
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4560
+Top: 1080
+Width: 2340
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Qualification
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6960
+Top: 1080
+Width: 2280
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Application date && time
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11700
+Top: 1080
+Width: 2415
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label518
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 15690
+Top: 1080
+Width: 6360
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label525
+Type: 100
+ControlSource: 
+Caption: Applied for
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9300
+Top: 1080
+Width: 2340
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label543
+Type: 100
+ControlSource: 
+Caption: CNIC
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2820
+Top: 1080
+Width: 1680
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label554
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 14175
+Top: 1080
+Width: 1455
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_namewithrank
+Type: 109
+ControlSource: =Nz([apl_rank],"") & " " & [apl_name]
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 30
+Top: 60
+Width: 2730
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_discip
+Type: 109
+ControlSource: apl_discip
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4560
+Top: 60
+Width: 2340
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_empdt
+Type: 109
+ControlSource: apl_dtg
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11700
+Top: 60
+Width: 2415
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy   hh:nn:ss
+InputMask: 
+
+--------------------
+Name: emp_qualif
+Type: 111
+ControlSource: apl_qualif
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6960
+Top: 60
+Width: 2280
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: apl_remarks
+Type: 109
+ControlSource: apl_remarks
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 15690
+Top: 60
+Width: 6360
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: apl_appliedfor
+Type: 109
+ControlSource: apl_appliedfor
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9300
+Top: 60
+Width: 2340
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: apl_cnic
+Type: 109
+ControlSource: apl_cnic
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2820
+Top: 60
+Width: 1680
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: apl_status
+Type: 111
+ControlSource: apl_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14175
+Top: 60
+Width: 1455
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

@@ -549,49 +549,58 @@
                                     <tr class="text-muted">
                                         <th class="pl-3 border-0">METRIC</th>
                                         <th class="text-right border-0" style="color: #4da3ff;">PROJECT</th>
+                                        <th class="text-right border-0" style="color: #ffb84d;">CSRF</th>
                                         <th class="text-right pr-3 border-0" style="color: #4dff88;">ACTUAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td class="pl-3 text-muted">Received</td>
-                                        <td class="text-right" style="color: #4da3ff;">{{ number_format($head->received ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->received ?? 0) }}</td>
+                                        <td class="text-right" style="color: #4da3ff;">{{ number_format($head->pcc_received ?? 0) }}</td>
+                                        <td class="text-right" style="color: #ffb84d;">{{ number_format($head->cf_received ?? 0) }}</td>
+                                        <td class="text-right pr-3 text-muted">--</td>
                                     </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">Expenditure</td>
-                                        <td class="text-right text-danger">{{ number_format($head->expenditure ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->expenditure ?? 0) }}</td>
+                                        <td class="text-right text-danger">{{ number_format($head->pcc_expenditure ?? 0) }}</td>
+                                        <td class="text-right text-danger">{{ number_format($head->cf_expenditure ?? 0) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_expenditure ?? 0) }}</td>
                                     </tr>
                                     <tr style="background: rgba(255,255,255,0.01);">
                                         <td class="pl-3 text-info font-weight-bold">Balance</td>
-                                        <td class="text-right text-info font-weight-bold">{{ number_format($head->balance ?? 0) }}</td>
+                                        <td class="text-right text-info font-weight-bold">{{ number_format($head->pcc_balance ?? 0) }}</td>
+                                        <td class="text-right text-info font-weight-bold">{{ number_format($head->cf_balance ?? 0) }}</td>
                                         <td class="text-right pr-3 text-muted">--</td>
                                     </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">Commitments</td>
-                                        <td class="text-right text-warning">{{ number_format($head->commitments ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->commitments ?? 0) }}</td>
+                                        <td class="text-right text-warning">{{ number_format($head->pcc_commitments ?? 0) }}</td>
+                                        <td class="text-right text-warning">{{ number_format($head->cf_commitments ?? 0) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_commitments ?? 0) }}</td>
                                     </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">In Process</td>
-                                        <td class="text-right text-muted">{{ number_format($head->in_process ?? 0) }}</td>
-                                        <td class="text-right pr-3 text-muted">0</td>
+                                        <td class="text-right text-muted">{{ number_format($head->pcc_in_process ?? 0) }}</td>
+                                        <td class="text-right text-muted">{{ number_format($head->cf_in_process ?? 0) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_in_process ?? 0) }}</td>
                                     </tr>
                                     <tr style="background: rgba(0,255,100,0.05);">
                                         <td class="pl-3 font-weight-bold">Available</td>
-                                        <td class="text-right font-weight-bold">{{ number_format($head->available ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold">{{ number_format($head->pcc_available ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold">{{ number_format($head->cf_available ?? 0) }}</td>
                                         <td class="text-right pr-3 text-muted">--</td>
                                     </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">Yet to be Rec</td>
-                                        <td class="text-right text-muted">{{ number_format($head->yet_to_be_received ?? 0) }}</td>
+                                        <td class="text-right text-muted">{{ number_format($head->pcc_yet_to_be_received ?? 0) }}</td>
+                                        <td class="text-right text-muted">{{ number_format($head->cf_yet_to_be_received ?? 0) }}</td>
                                         <td class="text-right pr-3 text-muted">--</td>
                                     </tr>
                                     <tr style="background: rgba(255,50,50,0.05);">
                                         <td class="pl-3 text-danger font-weight-bold">Remaining</td>
-                                        <td class="text-right text-danger font-weight-bold">{{ number_format($head->remaining ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->remaining ?? 0) }}</td>
+                                        <td class="text-right text-danger font-weight-bold">{{ number_format($head->pcc_can_be_spent ?? 0) }}</td>
+                                        <td class="text-right text-danger font-weight-bold">{{ number_format($head->cf_can_be_spent ?? 0) }}</td>
+                                        <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_remaining ?? 0) }}</td>
                                     </tr>
                                 </tbody>
                             </table>

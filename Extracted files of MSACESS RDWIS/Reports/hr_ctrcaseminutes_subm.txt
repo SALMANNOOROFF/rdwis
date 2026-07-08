@@ -1,0 +1,91 @@
+REPORT: hr_ctrcaseminutes_subm
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM hr_ctrcaseminuterefs WHERE (((hr_ctrcaseminuterefs.cmr_min)>0)); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Text96
+Type: 109
+ControlSource: =IIf(IsNull([cmr_ref]),"Nil",[cmr_ref])
+Caption: 
+Visible: True
+Left: 60
+Top: 510
+Width: 5204
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text72
+Type: 109
+ControlSource: =IIf(IsNull([cmr_encl]),"","Encl " & [cmr_encl] & IIf(IsNull([cmr_flag]),""," (F/" & [cmr_flag] & ")"))
+Caption: 
+Visible: True
+Left: 6061
+Top: 1200
+Width: 3239
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text64
+Type: 109
+ControlSource: =IIf(IsNull([cmr_from]),"","From: " & [cmr_from])
+Caption: 
+Visible: True
+Left: 6061
+Top: 510
+Width: 3239
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text60
+Type: 109
+ControlSource: =IIf(IsNull([cmr_date]),"","Dated: " & Format([cmr_date],"dd mmm yy"))
+Caption: 
+Visible: True
+Left: 60
+Top: 855
+Width: 2549
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text107
+Type: 109
+ControlSource: =IIf([cmr_title] Like "Contract * Case" And [cmr_ref] Like "*,*",plural([cmr_title]),[cmr_title])
+Caption: 
+Visible: True
+Left: 6060
+Top: 857
+Width: 3239
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: minute
+Type: 109
+ControlSource: =[cmr_min]
+Caption: 
+Visible: True
+Left: 3750
+Top: 0
+Width: 1079
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 

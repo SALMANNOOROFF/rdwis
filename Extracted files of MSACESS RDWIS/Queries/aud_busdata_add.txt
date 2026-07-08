@@ -1,0 +1,5 @@
+QUERY: aud_busdata_add
+
+SQL:
+INSERT INTO aud_busdata ( bdt_dtg, bdt_action, bdt_username, bdt_empname, bdt_empdesig, bdt_formname, bdt_controlname, bdt_fieldname, bdt_recordid, btd_oldvalue, btd_newvalue )
+SELECT [DTG] AS Expr1, [Action] AS Expr2, [UserName] AS Expr3, [EmpName] AS Expr4, [EmpDesig] AS Expr5, [FormName] AS Expr6, [ControlName] AS Expr7, [FieldName] AS Expr8, [RecordId] AS Expr9, [OldValue] AS Expr10, [NewValue] AS Expr11;

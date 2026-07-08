@@ -1,0 +1,18 @@
+TABLE: ina_invenitems
+
+COLUMNS:
+- ini_id | Type:4 | Size:4
+- ini_inv_id | Type:4 | Size:4
+- ini_qty | Type:20 | Size:16
+- ini_qtyunit | Type:10 | Size:255
+- ini_parent_id | Type:4 | Size:4
+- ini_isparent | Type:10 | Size:5
+- ini_isassembly | Type:10 | Size:5
+- ini_location | Type:10 | Size:255
+- ini_group | Type:10 | Size:255
+- ini_person | Type:10 | Size:255
+- ini_dtg | Type:8 | Size:8
+- ini_dispdate | Type:8 | Size:8
+- ini_dispdtg | Type:8 | Size:8
+- ini_status | Type:10 | Size:255
+- ini_remarks | Type:10 | Size:255

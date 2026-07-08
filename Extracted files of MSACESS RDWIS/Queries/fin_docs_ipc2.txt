@@ -1,0 +1,6 @@
+QUERY: fin_docs_ipc2
+
+SQL:
+SELECT fin_salorders.sor_id AS docid, fin_salorders.sor_type AS doctype, fin_salorders.sor_releasedtg AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id AS effhed_id, fin_salorders.sor_effunt_id AS effunt_id, fin_salorders.sor_hed_id AS hed_id, fin_salorders.sor_unt_id AS unt_id, fin_salorders.sor_sudohed, fin_salorders.sor_salary AS amount1, 0 AS tax1, fin_salorders.sor_salary AS amount2, fin_salorders.sor_transtype AS transtype
+FROM hr_salreqs INNER JOIN fin_salorders ON hr_salreqs.srq_id = fin_salorders.sor_srq_id
+WHERE (((fin_salorders.sor_status) In ("Draft")) AND ((hr_salreqs.srq_status)="In Process"));

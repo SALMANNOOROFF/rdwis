@@ -1,0 +1,7 @@
+QUERY: fin_loans_detail1_tempadder
+
+SQL:
+INSERT INTO fin_loans_detail1_temp ( cmt_type, cmt_docid, amount, from_head, for_head, loan_string, loan_group, trn_date, from_div, for_div )
+SELECT fin_commitments.cmt_type, fin_commitments.cmt_docid, -1*[trn_amount1] AS amount, cen_heads_1.hed_code AS from_head, IIf(IsNull([cen_heads].[hed_code]),"RGA",[cen_heads].[hed_code]) AS for_head, [from_head] & "-" & [for_head] AS loan_string, "[" & IIf([from_head]<[for_head],[from_head] & "-" & [for_head],[for_head] & "-" & [from_head]) & "]" AS loan_group, fin_transactions.trn_date, units_1.unt_namesh AS from_div, units.unt_namesh AS for_div
+FROM units AS units_1 RIGHT JOIN (units RIGHT JOIN (((fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) LEFT JOIN cen_heads AS cen_heads_1 ON fin_commitments.cmt_effhed_id = cen_heads_1.hed_id) LEFT JOIN cen_heads ON fin_commitments.cmt_hed_id = cen_heads.hed_id) ON units.unt_id = fin_commitments.cmt_unt_id) ON units_1.unt_id = fin_commitments.cmt_effunt_id
+WHERE (((fin_commitments.cmt_type) In ("Ps","Rb","Sa","LO","TO")) AND ((fin_commitments.cmt_effhed_id)<>Nz([cmt_hed_id],160001)) AND ((fin_commitments.cmt_sudohed) Is Null Or (fin_commitments.cmt_sudohed)="") AND ((fin_transactions.trn_noloan)="0"));

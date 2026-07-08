@@ -1,0 +1,7 @@
+QUERY: hr_applics_empexta_copy
+
+SQL:
+INSERT INTO hr_empsexta ( empexta_emp_id, emp_father, emp_qualif, emp_discip, emp_spec, emp_dob, emp_pob, emp_gender, emp_ntnlty, emp_marital, emp_email, emp_mobile, emp_mobile2, emp_landline, emp_taddress, emp_paddress )
+SELECT [EmployeeId] AS Expr1, hr_applicants.apl_father, hr_applicants.apl_qualif, hr_applicants.apl_discip, hr_applicants.apl_spec, hr_applicants.apl_dob, hr_applicants.apl_pob, hr_applicants.apl_gender, hr_applicants.apl_ntnlty, hr_applicants.apl_marital, hr_applicants.apl_email, hr_applicants.apl_mobile, hr_applicants.apl_mobile2, hr_applicants.apl_landline, hr_applicants.apl_taddress, hr_applicants.apl_paddress
+FROM hr_applicants
+WHERE (((hr_applicants.apl_cnic)=[CNIC]) AND ((hr_applicants.apl_status)="Active"));

@@ -1,0 +1,5 @@
+TABLE: puritems_categories
+
+COLUMNS:
+- cat_id | Type:4 | Size:4
+- cat_name | Type:10 | Size:120

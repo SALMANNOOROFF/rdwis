@@ -1,0 +1,35 @@
+REPORT: hr_attendance_u_oneday_summ_sub1
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_attendance_u_oneday_summary_detail
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: attendance
+Type: 109
+ControlSource: attendance
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1935
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: dp
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Left: 2025
+Top: 30
+Width: 939
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

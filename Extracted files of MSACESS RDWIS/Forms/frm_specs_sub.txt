@@ -1,0 +1,78 @@
+FORM: frm_specs_sub
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: frm_specs
+DefaultView: 1
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Speciality
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 0
+Width: 3120
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: spc_spec
+Type: 111
+ControlSource: spc_spec
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 0
+Top: 0
+Width: 3120
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_spc_spec
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2825
+Top: 0
+Width: 295
+Height: 365
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

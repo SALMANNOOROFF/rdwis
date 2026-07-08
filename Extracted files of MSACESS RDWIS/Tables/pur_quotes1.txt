@@ -1,0 +1,17 @@
+TABLE: pur_quotes1
+
+COLUMNS:
+- qte_date | Type:8 | Size:8
+- qte_firmname | Type:10 | Size:255
+- qte_pcs_id | Type:4 | Size:4
+- qte_num | Type:10 | Size:255
+- qte_id | Type:4 | Size:4
+- qte_price | Type:20 | Size:16
+- qte_frm_id | Type:4 | Size:4
+- qte_techaccept | Type:10 | Size:5
+- qte_recomm | Type:10 | Size:5
+- qte_midprice | Type:20 | Size:16
+- qte_midtax | Type:20 | Size:16
+- qte_intprice | Type:20 | Size:16
+- qte_inttax | Type:20 | Size:16
+- qte_quotetype | Type:3 | Size:2

@@ -1,0 +1,302 @@
+FORM: fin_timeline_sal
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM fin_salforecast_temp WHERE salary>0; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 30
+Top: 900
+Width: 1395
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1485
+Top: 900
+Width: 3555
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label30
+Type: 100
+ControlSource: 
+Caption: Month
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5100
+Top: 900
+Width: 1020
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Ctr. Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6180
+Top: 900
+Width: 1440
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label36
+Type: 100
+ControlSource: 
+Caption: Salary to be Paid
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7680
+Top: 900
+Width: 1665
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Salary Forecast - " & CodeFromHeadId([cpn_hed_id])
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 56
+Top: 226
+Width: 7140
+Height: 460
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReport
+Type: 104
+ControlSource: 
+Caption: 2
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11280
+Top: 225
+Width: 420
+Height: 435
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings
+FontSize: 18
+OnClick: [Embedded Macro]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sum_salary
+Type: 109
+ControlSource: =Sum([salary])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7650
+Top: 450
+Width: 1665
+Height: 345
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: ctr_num
+Type: 109
+ControlSource: ctr_num
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 30
+Top: 30
+Width: 1395
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_name
+Type: 109
+ControlSource: emp_name
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1485
+Top: 30
+Width: 3555
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cpn_effenddt
+Type: 109
+ControlSource: cpn_effenddt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5100
+Top: 30
+Width: 1020
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: mmm yy
+InputMask: 
+
+--------------------
+Name: ctr_salary
+Type: 109
+ControlSource: ctr_salary
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6180
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: salary
+Type: 109
+ControlSource: salary
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7680
+Top: 30
+Width: 1665
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 

@@ -1,0 +1,305 @@
+FORM: ina_item_attach
+
+=== FORM PROPERTIES ===
+Caption: Attach Item
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Attach Item
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 113
+Top: 170
+Width: 8212
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdOk
+Type: 104
+ControlSource: 
+Caption: Attach
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2381
+Top: 5839
+Width: 1369
+Height: 394
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 4422
+Top: 5839
+Width: 1369
+Height: 394
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: parent_held
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6803
+Top: 4932
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: child_qty
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2719
+Top: 4932
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Quantity to be attached:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 283
+Top: 4932
+Width: 2368
+Height: 365
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lstChildren
+Type: 110
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 283
+Top: 624
+Width: 7935
+Height: 4070
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label98
+Type: 100
+ControlSource: 
+Caption: Item ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 285
+Width: 870
+Height: 375
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label99
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1155
+Top: 285
+Width: 4125
+Height: 375
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label100
+Type: 100
+ControlSource: 
+Caption: Charge Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6915
+Top: 285
+Width: 1320
+Height: 375
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: parent_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5272
+Top: 4932
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label123
+Type: 100
+ControlSource: 
+Caption: Units
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6255
+Top: 285
+Width: 660
+Height: 375
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label131
+Type: 100
+ControlSource: 
+Caption: Qty
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5280
+Top: 285
+Width: 975
+Height: 375
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

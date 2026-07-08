@@ -1,0 +1,2182 @@
+REPORT: pur_purcasepettyminutes
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM pur_purcaseminutes WHERE (((pur_purcaseminutes.pcm_id)=[Forms]![pur_purcaseminutes]![pcm_id])); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: subItems
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 56
+Top: 3218
+Width: 10454
+Height: 778
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: pcs_status
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_status]
+Caption: 
+Visible: True
+Left: 4260
+Top: 2190
+Width: 3495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Status:
+Value: 
+Visible: True
+Left: 3465
+Top: 2190
+Width: 735
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_midprice
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_intprice]
+Caption: 
+Visible: True
+Left: 9060
+Top: 1410
+Width: 1395
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Price:
+Value: 
+Visible: True
+Left: 8355
+Top: 1410
+Width: 645
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_midtax
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_midtax]
+Caption: 
+Visible: True
+Left: 9060
+Top: 2190
+Width: 1395
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: GST
+Value: 
+Visible: True
+Left: 8355
+Top: 2190
+Width: 645
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_price
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_price]
+Caption: 
+Visible: True
+Left: 9060
+Top: 2580
+Width: 1395
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label10
+Type: 100
+ControlSource: 
+Caption: Total:
+Value: 
+Visible: True
+Left: 8355
+Top: 2580
+Width: 645
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_title
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_title]
+Caption: 
+Visible: True
+Left: 1020
+Top: 1020
+Width: 9435
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label11
+Type: 100
+ControlSource: 
+Caption: Title:
+Value: 
+Visible: True
+Left: 30
+Top: 1020
+Width: 930
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Head:
+Value: 
+Visible: True
+Left: 3465
+Top: 1410
+Width: 735
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_effhed_id
+Type: 111
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_effhed_id]
+Caption: 
+Visible: True
+Left: 4260
+Top: 1410
+Width: 3495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_intunt_id
+Type: 111
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_intunt_id]
+Caption: 
+Visible: True
+Left: 1020
+Top: 2190
+Width: 1830
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label422
+Type: 100
+ControlSource: 
+Caption: Initiator:
+Value: 
+Visible: True
+Left: 30
+Top: 2190
+Width: 930
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: For:
+Value: 
+Visible: True
+Left: 3465
+Top: 1800
+Width: 735
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_hed_id
+Type: 111
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_hed_id]
+Caption: 
+Visible: True
+Left: 4260
+Top: 1800
+Width: 3495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell591
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2910
+Top: 1410
+Width: 495
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell592
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2910
+Top: 1800
+Width: 495
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell593
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2910
+Top: 2190
+Width: 495
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell607
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7815
+Top: 1410
+Width: 480
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell608
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7815
+Top: 1800
+Width: 480
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell609
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7815
+Top: 2190
+Width: 480
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text663
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_date]
+Caption: 
+Visible: True
+Left: 1020
+Top: 1800
+Width: 1830
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label664
+Type: 100
+ControlSource: 
+Caption: Date:
+Value: 
+Visible: True
+Left: 30
+Top: 1800
+Width: 930
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text665
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_id]
+Caption: 
+Visible: True
+Left: 1020
+Top: 1410
+Width: 1830
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label666
+Type: 100
+ControlSource: 
+Caption: Case ID:
+Value: 
+Visible: True
+Left: 30
+Top: 1410
+Width: 930
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label685
+Type: 100
+ControlSource: 
+Caption: Items:
+Value: 
+Visible: True
+Left: 30
+Top: 2940
+Width: 885
+Height: 285
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label452
+Type: 100
+ControlSource: 
+Caption: Director Finance
+Value: 
+Visible: True
+Left: 4230
+Top: 13305
+Width: 2325
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label454
+Type: 100
+ControlSource: 
+Caption: Managing Director RDW
+Value: 
+Visible: True
+Left: 7725
+Top: 13305
+Width: 2340
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell912
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6615
+Top: 13305
+Width: 15
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell916
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2835
+Top: 13305
+Width: 60
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label921
+Type: 100
+ControlSource: 
+Caption: INCIDENTAL EXPENDITURE APPROVAL PROFORMA
+Value: 
+Visible: True
+Left: 1958
+Top: 60
+Width: 6163
+Height: 449
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label923
+Type: 100
+ControlSource: 
+Caption: (FOR TRANSPORT / MEALS)
+Value: 
+Visible: True
+Left: 3645
+Top: 450
+Width: 2713
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label451
+Type: 109
+ControlSource: =GetVar("varUnitLeadDesigShort")
+Caption: 
+Visible: True
+Left: 630
+Top: 13305
+Width: 2145
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell955
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7815
+Top: 2580
+Width: 480
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_pd
+Type: 109
+ControlSource: [pcm_textc]
+Caption: 
+Visible: True
+Left: 1020
+Top: 4919
+Width: 9465
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label688
+Type: 100
+ControlSource: 
+Caption: Reason:
+Value: 
+Visible: True
+Left: 0
+Top: 4920
+Width: 958
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell1039
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 30
+Top: 2580
+Width: 930
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell1040
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 1020
+Top: 2580
+Width: 2385
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_remarks
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_remarks]
+Caption: 
+Visible: True
+Left: 2267
+Top: 4080
+Width: 8225
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Terms and Conditions:
+Value: 
+Visible: True
+Left: 0
+Top: 4080
+Width: 2233
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text1019
+Type: 111
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_frm_id]
+Caption: 
+Visible: True
+Left: 4260
+Top: 2580
+Width: 3495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1020
+Type: 100
+ControlSource: 
+Caption: Firm:
+Value: 
+Visible: True
+Left: 3465
+Top: 2580
+Width: 735
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line2133
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 4680
+Width: 10488
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label2164
+Type: 100
+ControlSource: 
+Caption: Recommended / Not Recommended
+Value: 
+Visible: True
+Left: 3465
+Top: 11670
+Width: 3553
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2165
+Type: 100
+ControlSource: 
+Caption: Approved / Not Approved
+Value: 
+Visible: True
+Left: 7755
+Top: 11670
+Width: 2548
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2172
+Type: 100
+ControlSource: 
+Caption: Initiated By
+Value: 
+Visible: True
+Left: 0
+Top: 11675
+Width: 2953
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2173
+Type: 100
+ControlSource: 
+Caption: Date:
+Value: 
+Visible: True
+Left: 630
+Top: 13725
+Width: 615
+Height: 285
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2175
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2835
+Top: 13725
+Width: 60
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2177
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6615
+Top: 13725
+Width: 15
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2180
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 4965
+Top: 13725
+Width: 1590
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2181
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 8415
+Top: 13725
+Width: 1650
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2184
+Type: 100
+ControlSource: 
+Caption: Date:
+Value: 
+Visible: True
+Left: 4230
+Top: 13725
+Width: 675
+Height: 285
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2186
+Type: 100
+ControlSource: 
+Caption: Date:
+Value: 
+Visible: True
+Left: 7725
+Top: 13725
+Width: 630
+Height: 285
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2192
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 60
+Top: 13305
+Width: 509
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2193
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 1305
+Top: 13725
+Width: 1470
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2194
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 60
+Top: 13725
+Width: 509
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2195
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2955
+Top: 13305
+Width: 615
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2196
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2955
+Top: 13725
+Width: 615
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2197
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 3630
+Top: 13305
+Width: 540
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2198
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 3630
+Top: 13725
+Width: 540
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2199
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6690
+Top: 13305
+Width: 630
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2200
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6690
+Top: 13725
+Width: 630
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2201
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7380
+Top: 13305
+Width: 285
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2202
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7380
+Top: 13725
+Width: 285
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2203
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 10125
+Top: 13305
+Width: 285
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell2204
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 10125
+Top: 13725
+Width: 285
+Height: 285
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2205
+Type: 100
+ControlSource: 
+Caption: RDW-PUR-002/2
+Value: 
+Visible: True
+Left: 8787
+Top: 56
+Width: 1693
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2252
+Type: 100
+ControlSource: 
+Caption: Financial Status:
+Value: 
+Visible: True
+Left: 0
+Top: 5475
+Width: 958
+Height: 569
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_inttax
+Type: 109
+ControlSource: =[Forms]![pur_purcasespetty_detail]![pcs_inttax]
+Caption: 
+Visible: True
+Left: 9060
+Top: 1800
+Width: 1395
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label2359
+Type: 100
+ControlSource: 
+Caption: SST
+Value: 
+Visible: True
+Left: 8355
+Top: 1800
+Width: 645
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label484
+Type: 100
+ControlSource: 
+Caption: Project Figures:
+Value: 
+Visible: True
+Left: 1020
+Top: 9285
+Width: 2310
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: required
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_ipc])
+Caption: 
+Visible: True
+Left: 3330
+Top: 10725
+Width: 1485
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label1156
+Type: 100
+ControlSource: 
+Caption: In Process
+Value: 
+Visible: True
+Left: 1515
+Top: 10725
+Width: 1815
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_due
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[acc_rcvmsncompleted])
+Caption: 
+Visible: True
+Left: 4530
+Top: 8010
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label1015
+Type: 100
+ControlSource: 
+Caption: Receivable for completed milestones
+Value: 
+Visible: True
+Left: 1515
+Top: 8010
+Width: 3015
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_availableafter
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[acc_availableafter])
+Caption: 
+Visible: True
+Left: 4530
+Top: 8715
+Width: 1695
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label997
+Type: 100
+ControlSource: 
+Caption: Available after recievables
+Value: 
+Visible: True
+Left: 1515
+Top: 8715
+Width: 3015
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_avlbl
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[pcc_avlbl])
+Caption: 
+Visible: True
+Left: 4530
+Top: 7650
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_canbespent
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_canbespent])
+Caption: 
+Visible: True
+Left: 3330
+Top: 11085
+Width: 1485
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label601
+Type: 100
+ControlSource: 
+Caption: Remaining
+Value: 
+Visible: True
+Left: 1515
+Top: 11085
+Width: 1815
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_exp
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_exp])
+Caption: 
+Visible: True
+Left: 3330
+Top: 10035
+Width: 1485
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label122
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 1515
+Top: 10035
+Width: 1815
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_commit
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_commit])
+Caption: 
+Visible: True
+Left: 3330
+Top: 10380
+Width: 1485
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label589
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 1515
+Top: 10380
+Width: 1815
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_share
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_share])
+Caption: 
+Visible: True
+Left: 3330
+Top: 9675
+Width: 1485
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label87
+Type: 100
+ControlSource: 
+Caption: Max Spending Limit
+Value: 
+Visible: True
+Left: 1515
+Top: 9675
+Width: 1815
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_loansnet
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[acc_rcvmsncurrent])
+Caption: 
+Visible: True
+Left: 4530
+Top: 8370
+Width: 1695
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label1007
+Type: 100
+ControlSource: 
+Caption: Receivable for current milestone
+Value: 
+Visible: True
+Left: 1515
+Top: 8370
+Width: 3015
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_ipc
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[pcc_ipc])
+Caption: 
+Visible: True
+Left: 4530
+Top: 7290
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label403
+Type: 100
+ControlSource: 
+Caption: (Excluding CSRF)
+Value: 
+Visible: True
+Left: 2775
+Top: 5490
+Width: 1755
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1246
+Type: 100
+ControlSource: 
+Caption: Account Figures:
+Value: 
+Visible: True
+Left: 1020
+Top: 5490
+Width: 1755
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1250
+Type: 100
+ControlSource: 
+Caption: a.
+Value: 
+Visible: True
+Left: 1020
+Top: 5880
+Width: 495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1257
+Type: 100
+ControlSource: 
+Caption: b.
+Value: 
+Visible: True
+Left: 1020
+Top: 6240
+Width: 495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1259
+Type: 100
+ControlSource: 
+Caption: d.
+Value: 
+Visible: True
+Left: 1020
+Top: 6945
+Width: 495
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1260
+Type: 100
+ControlSource: 
+Caption: e.
+Value: 
+Visible: True
+Left: 1020
+Top: 7290
+Width: 495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1272
+Type: 100
+ControlSource: 
+Caption: g.
+Value: 
+Visible: True
+Left: 1020
+Top: 8010
+Width: 495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1273
+Type: 100
+ControlSource: 
+Caption: h.
+Value: 
+Visible: True
+Left: 1020
+Top: 8370
+Width: 495
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1274
+Type: 100
+ControlSource: 
+Caption: l.
+Value: 
+Visible: True
+Left: 1020
+Top: 10035
+Width: 495
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1275
+Type: 100
+ControlSource: 
+Caption: j.
+Value: 
+Visible: True
+Left: 1020
+Top: 8715
+Width: 495
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1276
+Type: 100
+ControlSource: 
+Caption: k.
+Value: 
+Visible: True
+Left: 1020
+Top: 9675
+Width: 495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: required_b
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_ipc_b])
+Caption: 
+Visible: False
+Left: 5940
+Top: 10725
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_canbespent_b
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_canbespent_b])
+Caption: 
+Visible: False
+Left: 5940
+Top: 11085
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_exp_b
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_exp_b])
+Caption: 
+Visible: False
+Left: 5940
+Top: 10035
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_commit_b
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_commit_b])
+Caption: 
+Visible: False
+Left: 5940
+Top: 10380
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_alloc_b
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_alloc_b])
+Caption: 
+Visible: False
+Left: 5940
+Top: 9675
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: required_a
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_ipc_a])
+Caption: 
+Visible: False
+Left: 4815
+Top: 10725
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_canbespent_a
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_canbespent_a])
+Caption: 
+Visible: False
+Left: 4815
+Top: 11085
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_exp_a
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_exp_a])
+Caption: 
+Visible: False
+Left: 4815
+Top: 10035
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_commit_a
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_commit_a])
+Caption: 
+Visible: False
+Left: 4815
+Top: 10380
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_alloc_a
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_alloc_a])
+Caption: 
+Visible: False
+Left: 4815
+Top: 9675
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label1387
+Type: 100
+ControlSource: 
+Caption: Overall
+Value: 
+Visible: True
+Left: 3330
+Top: 9285
+Width: 1485
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: required_d
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_ipc_d])
+Caption: 
+Visible: False
+Left: 8190
+Top: 10725
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_canbespent_d
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_canbespent_d])
+Caption: 
+Visible: False
+Left: 8190
+Top: 11085
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_exp_d
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_exp_d])
+Caption: 
+Visible: False
+Left: 8190
+Top: 10035
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_commit_d
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_commit_d])
+Caption: 
+Visible: False
+Left: 8190
+Top: 10380
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_alloc_d
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_alloc_d])
+Caption: 
+Visible: False
+Left: 8190
+Top: 9675
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: required_c
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_ipc_c])
+Caption: 
+Visible: False
+Left: 7065
+Top: 10725
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_canbespent_c
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_canbespent_c])
+Caption: 
+Visible: False
+Left: 7065
+Top: 11085
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_exp_c
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_exp_c])
+Caption: 
+Visible: False
+Left: 7065
+Top: 10035
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_commit_c
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_commit_c])
+Caption: 
+Visible: False
+Left: 7065
+Top: 10380
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_alloc_c
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_alloc_c])
+Caption: 
+Visible: False
+Left: 7065
+Top: 9675
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: required_e
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_ipc_e])
+Caption: 
+Visible: False
+Left: 9315
+Top: 10725
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_canbespent_e
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_canbespent_e])
+Caption: 
+Visible: False
+Left: 9315
+Top: 11085
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_exp_e
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_exp_e])
+Caption: 
+Visible: False
+Left: 9315
+Top: 10035
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_commit_e
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_commit_e])
+Caption: 
+Visible: False
+Left: 9315
+Top: 10380
+Width: 1125
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_alloc_e
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_alloc_e])
+Caption: 
+Visible: False
+Left: 9315
+Top: 9675
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_name_a
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_name_a])
+Caption: 
+Visible: False
+Left: 4815
+Top: 9285
+Width: 1125
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_name_b
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_name_b])
+Caption: 
+Visible: False
+Left: 5940
+Top: 9285
+Width: 1125
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_name_c
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_name_c])
+Caption: 
+Visible: False
+Left: 7065
+Top: 9285
+Width: 1125
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_name_d
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_name_d])
+Caption: 
+Visible: False
+Left: 8190
+Top: 9285
+Width: 1125
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_name_e
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[prj_name_e])
+Caption: 
+Visible: False
+Left: 9315
+Top: 9285
+Width: 1125
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1463
+Type: 100
+ControlSource: 
+Caption: Project Share
+Value: 
+Visible: True
+Left: 1515
+Top: 5880
+Width: 3015
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1467
+Type: 100
+ControlSource: 
+Caption: Received
+Value: 
+Visible: True
+Left: 1515
+Top: 6240
+Width: 3015
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1471
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 1515
+Top: 6600
+Width: 3015
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1476
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 1515
+Top: 6945
+Width: 3015
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_commit
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[pcc_commit])
+Caption: 
+Visible: True
+Left: 4530
+Top: 6945
+Width: 1695
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: pcc_exp
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[pcc_exp])
+Caption: 
+Visible: True
+Left: 4530
+Top: 6600
+Width: 1695
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: pcc_received
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[pcc_received])
+Caption: 
+Visible: True
+Left: 4530
+Top: 6240
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: pcc_share
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[pcc_share])
+Caption: 
+Visible: True
+Left: 4530
+Top: 5880
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label1495
+Type: 100
+ControlSource: 
+Caption: m.
+Value: 
+Visible: True
+Left: 1020
+Top: 10380
+Width: 495
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1503
+Type: 100
+ControlSource: 
+Caption: n.
+Value: 
+Visible: True
+Left: 1020
+Top: 10725
+Width: 495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1504
+Type: 100
+ControlSource: 
+Caption: p.
+Value: 
+Visible: True
+Left: 1020
+Top: 11085
+Width: 495
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1469
+Type: 100
+ControlSource: 
+Caption: f.
+Value: 
+Visible: True
+Left: 1020
+Top: 7650
+Width: 495
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1258
+Type: 100
+ControlSource: 
+Caption: c.
+Value: 
+Visible: True
+Left: 1020
+Top: 6600
+Width: 495
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell1673
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 4530
+Top: 5490
+Width: 1695
+Height: 390
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1202
+Type: 100
+ControlSource: 
+Caption: Available
+Value: 
+Visible: True
+Left: 1515
+Top: 7650
+Width: 3015
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label607
+Type: 100
+ControlSource: 
+Caption: In Process
+Value: 
+Visible: True
+Left: 1515
+Top: 7290
+Width: 3015
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_ipc_remarks
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[pcc_ipc_remarks])
+Caption: 
+Visible: True
+Left: 6240
+Top: 7286
+Width: 4155
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label924
+Type: 109
+ControlSource: ="Note: All petty purchase proformae are to be filed in respective project file for record."
+Caption: 
+Visible: True
+Left: 0
+Top: 0
+Width: 10483
+Height: 284
+ForeColor: 0
+BackColor: 16777215
+Format: 

@@ -1,0 +1,1744 @@
+FORM: vars
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: varUnitId
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 3480
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label101
+Type: 100
+ControlSource: 
+Caption: varUnitId
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 3480
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitName
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 3840
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label102
+Type: 100
+ControlSource: 
+Caption: varUnitName
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 3840
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitNameShort
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 4200
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label103
+Type: 100
+ControlSource: 
+Caption: varUnitNameShort
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 4200
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varAccId
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 2160
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label104
+Type: 100
+ControlSource: 
+Caption: varAccId
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 2160
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varAccType
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 2520
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label105
+Type: 100
+ControlSource: 
+Caption: varAccType
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 2520
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varRoleReportLevel
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 1080
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label107
+Type: 100
+ControlSource: 
+Caption: varRoleReportLevel
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 1080
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varRoleLevel
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 720
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label108
+Type: 100
+ControlSource: 
+Caption: varRoleLevel
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 720
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text64
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 3240
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varAccName
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 3240
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label109
+Type: 100
+ControlSource: 
+Caption: varAccName
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 3240
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varAccTitle
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 3600
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label112
+Type: 100
+ControlSource: 
+Caption: varAccTitle
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 3600
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varAccRank
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 3960
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label113
+Type: 100
+ControlSource: 
+Caption: varAccRank
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 3960
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varRoleDesig
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 1440
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label114
+Type: 100
+ControlSource: 
+Caption: varRoleDesig
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 1440
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varRoleDesigShort
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 1800
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label115
+Type: 100
+ControlSource: 
+Caption: varRoleDesigShort
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 1800
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varRoleDesigType
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 2160
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: varRoleDesigType
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 2160
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varAccUsername
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 2880
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: varAccUsername
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 2880
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitType
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 4560
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: varUnitType
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 4560
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: Direct Variables
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 300
+Width: 1545
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label28
+Type: 100
+ControlSource: 
+Caption: Indirect Variables
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 240
+Width: 1710
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varLowerS
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 6000
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label34
+Type: 100
+ControlSource: 
+Caption: varLowerS
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 6000
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUpperS
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 6360
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label36
+Type: 100
+ControlSource: 
+Caption: varUpperS
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 6360
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varLowerM
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 5280
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label38
+Type: 100
+ControlSource: 
+Caption: varLowerM
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 5280
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUpperM
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 5640
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label40
+Type: 100
+ControlSource: 
+Caption: varUpperM
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 5640
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 6740479
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varRoleAccess
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 2520
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label51
+Type: 100
+ControlSource: 
+Caption: varRoleAccess
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 2520
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varLower
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14415
+Top: 2700
+Width: 1305
+Height: 360
+ForeColor: 1137349
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label57
+Type: 100
+ControlSource: 
+Caption: varLower
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13260
+Top: 2700
+Width: 1095
+Height: 360
+ForeColor: 1137349
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label58
+Type: 100
+ControlSource: 
+Caption: Dynamic Variables
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13320
+Top: 1800
+Width: 1785
+Height: 300
+ForeColor: 1137349
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUpper
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14415
+Top: 3060
+Width: 1305
+Height: 360
+ForeColor: 1137349
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label60
+Type: 100
+ControlSource: 
+Caption: varUpper
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13260
+Top: 3060
+Width: 1095
+Height: 360
+ForeColor: 1137349
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varMode
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14415
+Top: 2340
+Width: 1305
+Height: 360
+ForeColor: 1137349
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label69
+Type: 100
+ControlSource: 
+Caption: varMode
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13260
+Top: 2340
+Width: 1095
+Height: 360
+ForeColor: 1137349
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varRoleAuth
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 2880
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label79
+Type: 100
+ControlSource: 
+Caption: varRoleAuth
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 2880
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitArea
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9060
+Top: 4920
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label83
+Type: 100
+ControlSource: 
+Caption: varUnitArea
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6840
+Top: 4920
+Width: 2160
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitLeadName
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3420
+Top: 7800
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label90
+Type: 100
+ControlSource: 
+Caption: varUnitLeadName
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1140
+Top: 7800
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitLeadTitle
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3420
+Top: 8160
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label92
+Type: 100
+ControlSource: 
+Caption: varUnitLeadTitle
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1140
+Top: 8160
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text93
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3420
+Top: 8880
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitLeadDesig
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3420
+Top: 8880
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label95
+Type: 100
+ControlSource: 
+Caption: varUnitLeadDesig
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1140
+Top: 8880
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitLeadDesigShort
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3420
+Top: 9240
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label97
+Type: 100
+ControlSource: 
+Caption: varUnitLeadDesigShort
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1140
+Top: 9240
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varUnitLeadRank
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3420
+Top: 8520
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label99
+Type: 100
+ControlSource: 
+Caption: varUnitLeadRank
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1140
+Top: 8520
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varDatabase
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3360
+Top: 720
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label106
+Type: 100
+ControlSource: 
+Caption: varDatabase
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1080
+Top: 720
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Parameter1
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14922
+Top: 7699
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label110
+Type: 100
+ControlSource: 
+Caption: Parameter1
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12642
+Top: 7699
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Parameter2
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14917
+Top: 8180
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label116
+Type: 100
+ControlSource: 
+Caption: Parameter2
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12637
+Top: 8180
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label117
+Type: 100
+ControlSource: 
+Caption: Parameters
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12637
+Top: 7251
+Width: 1710
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varCurrentForm
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14917
+Top: 9708
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label119
+Type: 100
+ControlSource: 
+Caption: Parameter1
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12637
+Top: 9708
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: varResizeCount
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14917
+Top: 10188
+Width: 2700
+Height: 360
+ForeColor: 4210752
+BackColor: 6737151
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label121
+Type: 100
+ControlSource: 
+Caption: Parameter2
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12637
+Top: 10188
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label122
+Type: 100
+ControlSource: 
+Caption: Compatibility with access 2010
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12642
+Top: 9259
+Width: 2895
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

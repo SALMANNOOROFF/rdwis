@@ -1,0 +1,180 @@
+REPORT: hr_ctrcasehgminutes_sub1
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_ctrcases_minutes
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label38
+Type: 100
+ControlSource: 
+Caption: Case No.
+Value: 
+Visible: True
+Left: 690
+Top: 15
+Width: 960
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Candidate
+Value: 
+Visible: True
+Left: 1650
+Top: 15
+Width: 3345
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Proposed Contract
+Value: 
+Visible: True
+Left: 4995
+Top: 15
+Width: 3240
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label26
+Type: 100
+ControlSource: 
+Caption: Salaries Amount
+Value: 
+Visible: True
+Left: 8235
+Top: 15
+Width: 1140
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label80
+Type: 100
+ControlSource: 
+Caption: S No.
+Value: 
+Visible: True
+Left: 60
+Top: 15
+Width: 630
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell101
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 9375
+Top: 15
+Width: 0
+Height: 630
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text19
+Type: 109
+ControlSource: =Format([ctc_newstartdt],"dd mmm yy") & "  –  " & Format([ctc_newenddt],"dd mmm yy") & " (" & [newctrtype] & ")" & Chr(13) & Chr(10) & "Grade: " & [ctc_newgrade] & "   Salary: " & Format([ctc_newsalary],"#,##0")
+Caption: 
+Visible: True
+Left: 4995
+Top: 0
+Width: 3240
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctc_price
+Type: 109
+ControlSource: ctc_price
+Caption: 
+Visible: True
+Left: 8235
+Top: 0
+Width: 1140
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: ctc_id
+Type: 109
+ControlSource: ctc_id
+Caption: 
+Visible: True
+Left: 690
+Top: 0
+Width: 960
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sno
+Type: 109
+ControlSource: =1
+Caption: 
+Visible: False
+Left: 9375
+Top: 0
+Width: 0
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text71
+Type: 109
+ControlSource: =Chr([sno]+96) & "."
+Caption: 
+Visible: True
+Left: 60
+Top: 0
+Width: 630
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: namenid
+Type: 109
+ControlSource: =[ctc_empnamecomp]
+Caption: 
+Visible: True
+Left: 1650
+Top: 0
+Width: 3345
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 

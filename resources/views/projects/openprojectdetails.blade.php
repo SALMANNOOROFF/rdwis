@@ -937,12 +937,18 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                     </div>
                     <div class="col-md-3 border-right border-dark p-3">
                         <div class="small text-muted rajdhani">RDW SHARE</div>
-                        <div class="h5 mb-0 text-info font-weight-bold rajdhani">{{ number_format($head->rdw_share) }}</div>
+                        <div class="h5 mb-0 text-info font-weight-bold rajdhani">{{ number_format($head->rdw_share ?? 0) }}</div>
                     </div>
-                    <div class="col-md-3 p-3">
+                    <div class="col-md-3 border-right border-dark p-3">
                         <div class="small text-muted rajdhani">CSRF SHARE</div>
-                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->csrf_share) }}</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->csrf_share ?? 0) }}</div>
                     </div>
+                    @if($showPrjShareValue ?? true)
+                    <div class="col-md-3 p-3">
+                        <div class="small text-muted rajdhani">PRJ SHARE</div>
+                        <div class="h5 mb-0 text-warning font-weight-bold rajdhani">{{ number_format($head->prj_share ?? 0) }}</div>
+                    </div>
+                    @endif
                 </div>
 
                 <div class="row no-gutters">
@@ -959,53 +965,99 @@ $achievedPercent = max(0, min(100, $achievedPercent));
                                     <tr class="text-muted">
                                         <th class="pl-3 border-0">METRIC</th>
                                         <th class="text-right border-0" style="color: #4da3ff;">PROJECT</th>
+                                        <th class="text-right border-0" style="color: #ffb84d;">CSRF</th>
+                                        @if($showProjectActualSection ?? true)
                                         <th class="text-right pr-3 border-0" style="color: #4dff88;">ACTUAL</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
                                      <tr>
                                          <td class="pl-3 text-muted">Received</td>
-                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->prj_received ?? 0) }}</td>
-                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->received) }}</td>
+                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->pcc_received ?? 0) }}</td>
+                                         <td class="text-right" style="color: #ffb84d;">{{ number_format($head->cf_received ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
+                                         <td class="text-right pr-3 text-muted">--</td>
+                                         @endif
                                      </tr>
                                      <tr>
                                          <td class="pl-3 text-muted">Expenditure</td>
-                                         <td class="text-right text-danger">{{ number_format($head->prj_expenditure ?? 0) }}</td>
-                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->expenditure) }}</td>
+                                         <td class="text-right text-danger">{{ number_format($head->pcc_expenditure ?? 0) }}</td>
+                                         <td class="text-right text-danger">{{ number_format($head->cf_expenditure ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_expenditure ?? 0) }}</td>
+                                         @endif
                                      </tr>
                                      <tr style="background: rgba(255,255,255,0.01);">
                                          <td class="pl-3 text-info font-weight-bold">Balance</td>
-                                         <td class="text-right text-info font-weight-bold">{{ number_format($head->prj_balance ?? 0) }}</td>
+                                         <td class="text-right text-info font-weight-bold">{{ number_format($head->pcc_balance ?? 0) }}</td>
+                                         <td class="text-right text-info font-weight-bold">{{ number_format($head->cf_balance ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
                                          <td class="text-right pr-3 text-muted">--</td>
+                                         @endif
                                      </tr>
                                      <tr>
                                          <td class="pl-3 text-muted">Commitments</td>
-                                         <td class="text-right text-warning">{{ number_format($head->prj_commitments ?? 0) }}</td>
-                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->commitments) }}</td>
+                                         <td class="text-right text-warning">{{ number_format($head->pcc_commitments ?? 0) }}</td>
+                                         <td class="text-right text-warning">{{ number_format($head->cf_commitments ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_commitments ?? 0) }}</td>
+                                         @endif
                                      </tr>
                                      <tr>
                                          <td class="pl-3 text-muted">In Process</td>
-                                         <td class="text-right text-muted">{{ number_format($head->prj_in_process ?? 0) }}</td>
-                                         <td class="text-right pr-3 text-muted">0</td>
+                                         <td class="text-right text-muted">{{ number_format($head->pcc_in_process ?? 0) }}</td>
+                                         <td class="text-right text-muted">{{ number_format($head->cf_in_process ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_in_process ?? 0) }}</td>
+                                         @endif
                                      </tr>
                                      <tr style="background: rgba(0,255,100,0.05);">
                                          <td class="pl-3 font-weight-bold text-success">Available</td>
-                                         <td class="text-right font-weight-bold text-success">{{ number_format($head->prj_available ?? 0) }}</td>
+                                         <td class="text-right font-weight-bold text-success">{{ number_format($head->pcc_available ?? 0) }}</td>
+                                         <td class="text-right font-weight-bold text-success">{{ number_format($head->cf_available ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
                                          <td class="text-right pr-3 text-muted">--</td>
+                                         @endif
                                      </tr>
                                      <tr>
                                          <td class="pl-3 text-muted">Yet to be Rcvd.</td>
-                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->prj_yet_to_be_received ?? 0) }}</td>
+                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->pcc_yet_to_be_received ?? 0) }}</td>
+                                         <td class="text-right" style="color: #ffb84d;">{{ number_format($head->cf_yet_to_be_received ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
                                          <td class="text-right pr-3 text-muted">--</td>
+                                         @endif
                                      </tr>
                                      <tr style="background: rgba(255,255,255,0.03);">
                                          <td class="pl-3 text-white font-weight-bold">Remaining</td>
-                                         <td class="text-right text-white font-weight-bold">{{ number_format($head->remaining) }}</td>
-                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->remaining) }}</td>
+                                         <td class="text-right text-white font-weight-bold">{{ number_format($head->pcc_can_be_spent ?? 0) }}</td>
+                                         <td class="text-right text-white font-weight-bold">{{ number_format($head->cf_can_be_spent ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_remaining ?? 0) }}</td>
+                                         @endif
                                      </tr>
                                 </tbody>
                             </table>
                         </div>
+
+                        @if($showProjectActualSection ?? true)
+                        {{-- Loan details section --}}
+                        <div class="mt-4 pt-4 border-top border-dark">
+                            <h6 class="rajdhani text-muted mb-3" style="font-size: 12px; letter-spacing: 2px;">LOAN DETAILS</h6>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Project exp. from this account</span>
+                                <span class="text-white rajdhani font-weight-bold">{{ number_format($head->pcc_own_exp ?? 0) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Project exp. from other accounts</span>
+                                <span class="text-warning rajdhani font-weight-bold">{{ number_format($head->others_loans_taken ?? 0) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Other's exp. from this account</span>
+                                <span class="text-info rajdhani font-weight-bold">{{ number_format($head->pcc_loans_given ?? 0) }}</span>
+                            </div>
+                        </div>
+                        @endif
 
                         {{-- Receivables section --}}
                         <div class="mt-4 pt-4 border-top border-dark">

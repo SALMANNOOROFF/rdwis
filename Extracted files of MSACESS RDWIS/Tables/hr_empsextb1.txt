@@ -1,0 +1,17 @@
+TABLE: hr_empsextb1
+
+COLUMNS:
+- empextb_emp_id | Type:10 | Size:13
+- emp_nokname | Type:10 | Size:255
+- emp_nokrelation | Type:10 | Size:255
+- emp_nokcnic | Type:10 | Size:15
+- emp_emername | Type:10 | Size:255
+- emp_emerrelation | Type:10 | Size:255
+- emp_emermobile | Type:10 | Size:255
+- emp_idmark | Type:10 | Size:255
+- emp_height | Type:20 | Size:16
+- emp_caste | Type:10 | Size:255
+- emp_religion | Type:10 | Size:255
+- emp_sect | Type:10 | Size:255
+- emp_police | Type:10 | Size:255
+- emp_political | Type:10 | Size:255

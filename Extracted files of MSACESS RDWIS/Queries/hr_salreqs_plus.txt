@@ -1,0 +1,5 @@
+QUERY: hr_salreqs_plus
+
+SQL:
+SELECT hr_salreqs.*, fin_salorders.sor_id
+FROM hr_salreqs INNER JOIN fin_salorders ON hr_salreqs.srq_id = fin_salorders.sor_srq_id;

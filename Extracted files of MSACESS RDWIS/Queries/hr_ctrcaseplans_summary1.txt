@@ -1,0 +1,6 @@
+QUERY: hr_ctrcaseplans_summary1
+
+SQL:
+SELECT IIf(IsNull([ccp_hed_id]),"Unassigned",[hed_code]) AS hed, hr_ctrcaseplans.ccp_startdt, hr_ctrcaseplans.ccp_enddt, hr_ctrcases.ctc_newsalary, GetCtrCaseSalary([ccp_ctc_id],[ccp_startdt]) AS amount, hr_ctrcaseplans.ccp_ctc_id
+FROM (hr_ctrcases LEFT JOIN hr_ctrcaseplans ON hr_ctrcases.ctc_id = hr_ctrcaseplans.ccp_ctc_id) LEFT JOIN cen_heads ON hr_ctrcaseplans.ccp_hed_id = cen_heads.hed_id
+WHERE (((hr_ctrcaseplans.ccp_ctc_id) In (149)));

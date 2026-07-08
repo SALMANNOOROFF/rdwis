@@ -1,0 +1,16 @@
+TABLE: prj_prghistory1
+
+COLUMNS:
+- pgh_xprj_id | Type:4 | Size:4
+- pgh_id | Type:4 | Size:4
+- pgh_dtg | Type:8 | Size:8
+- pgh_progress | Type:12 | Size:0
+- pgh_author | Type:10 | Size:255
+- pgh_status | Type:10 | Size:255
+- pgh_closedtg | Type:8 | Size:8
+- pgh_level | Type:4 | Size:4
+- pgh_group | Type:10 | Size:255
+- pgh_trail | Type:10 | Size:255
+- pgh_trailinherited | Type:10 | Size:255
+- pgh_underedit | Type:10 | Size:5
+- pgh_path | Type:10 | Size:255

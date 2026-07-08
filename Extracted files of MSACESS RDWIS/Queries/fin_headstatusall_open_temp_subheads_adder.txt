@@ -1,0 +1,7 @@
+QUERY: fin_headstatusall_open_temp_subheads_adder
+
+SQL:
+INSERT INTO fin_headstatusall_temp ( hed_id, hed_code, hed_unt_id, transtype, allocation, expenditure, commitments, inprocess, canbespent, amount1, amount2, text1, amount3 )
+SELECT cen_heads_base_subheads.hed_id, cen_heads_base_subheads.hed_code, cen_heads_base_subheads.hed_unt_id, IIf([hed_transtype]=1,"Without GST","With GST") AS transtype, cen_heads_base_subheads.sbh_alloc AS allocation, Nz(GetSubHeadFigure("GetPrjExpenditureShd",[hed_id],[sbh_name]),0) AS expenditure, Nz(GetSubHeadFigure("GetPrjOutstandingCommitsShd",[hed_id],[sbh_name]),0) AS commitments, Nz(GetSubHeadFigure("GetPrjInProcessShd",[hed_id],[sbh_name]),0) AS inprocess, Round([allocation]-[expenditure]-[commitments]-[inprocess],2) AS canbespent, IIf([sbh_name]="HR",GetPrjSalForecast([hed_id]),Null) AS forecast, IIf([sbh_name]="HR",Round([allocation]-[expenditure]-[forecast],2),Null) AS canbespent2, cen_heads_base_subheads.sbh_name, IIf([sbh_name]="HR",0,Round([allocation]-[expenditure]-[commitments]-[inprocess],2)) AS nonhr_rem
+FROM cen_heads_base_subheads
+ORDER BY cen_heads_base_subheads.hed_id;

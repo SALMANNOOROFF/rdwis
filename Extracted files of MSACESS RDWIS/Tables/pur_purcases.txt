@@ -1,0 +1,30 @@
+TABLE: pur_purcases
+
+COLUMNS:
+- pcs_id | Type:4 | Size:4
+- pcs_date | Type:8 | Size:8
+- pcs_remarks | Type:10 | Size:255
+- pcs_status | Type:10 | Size:255
+- pcs_unt_id | Type:4 | Size:4
+- pcs_hed_id | Type:4 | Size:4
+- pcs_purreqs | Type:10 | Size:255
+- pcs_releasedtg | Type:8 | Size:8
+- pcs_effhed_id | Type:4 | Size:4
+- pcs_intprice | Type:20 | Size:16
+- pcs_inttax | Type:20 | Size:16
+- pcs_midprice | Type:20 | Size:16
+- pcs_midtax | Type:20 | Size:16
+- pcs_price | Type:20 | Size:16
+- pcs_title | Type:10 | Size:255
+- pcs_frm_id | Type:4 | Size:4
+- pcs_type | Type:10 | Size:5
+- pcs_effunt_id | Type:4 | Size:4
+- pcs_intunt_id | Type:4 | Size:4
+- pcs_transtype | Type:3 | Size:2
+- pcs_noloan | Type:10 | Size:5
+- pcs_sudohed | Type:10 | Size:7
+- pcs_minute | Type:3 | Size:2
+- pcs_recomm | Type:10 | Size:255
+- pcs_quotetype | Type:3 | Size:2
+- pcs_approvedtg | Type:8 | Size:8
+- pcs_closedtg | Type:8 | Size:8

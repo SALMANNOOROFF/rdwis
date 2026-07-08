@@ -1,0 +1,399 @@
+REPORT: aud_revobj_sor
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_salorders
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: sor_id
+Type: 109
+ControlSource: sor_id
+Caption: 
+Visible: True
+Left: 1076
+Top: 75
+Width: 855
+Height: 314
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: SO ID:
+Value: 
+Visible: True
+Left: 93
+Top: 77
+Width: 958
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_releasedtg
+Type: 109
+ControlSource: sor_releasedtg
+Caption: 
+Visible: True
+Left: 4104
+Top: 75
+Width: 1335
+Height: 314
+ForeColor: 0
+BackColor: 11854021
+Format: dd mmm yy
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Date:
+Value: 
+Visible: True
+Left: 3200
+Top: 77
+Width: 853
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: remarks
+Type: 109
+ControlSource: =[sor_remarks] & " " & [sor_remarks2]
+Caption: 
+Visible: True
+Left: 1073
+Top: 1339
+Width: 5865
+Height: 314
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Remarks:
+Value: 
+Visible: True
+Left: 90
+Top: 1339
+Width: 958
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_status
+Type: 109
+ControlSource: sor_status
+Caption: 
+Visible: True
+Left: 1073
+Top: 1654
+Width: 1770
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Status:
+Value: 
+Visible: True
+Left: 90
+Top: 1654
+Width: 958
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_title
+Type: 109
+ControlSource: sor_empnamecomp
+Caption: 
+Visible: True
+Left: 1073
+Top: 709
+Width: 5865
+Height: 314
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label116
+Type: 100
+ControlSource: 
+Caption: Name:
+Value: 
+Visible: True
+Left: 90
+Top: 709
+Width: 958
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_emp_id
+Type: 109
+ControlSource: sor_emp_id
+Caption: 
+Visible: True
+Left: 1080
+Top: 394
+Width: 1125
+Height: 314
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label117
+Type: 100
+ControlSource: 
+Caption: Emp. ID:
+Value: 
+Visible: True
+Left: 90
+Top: 394
+Width: 958
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_hed_id
+Type: 111
+ControlSource: sor_hed_id
+Caption: 
+Visible: True
+Left: 8480
+Top: 709
+Width: 1260
+Height: 314
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label10
+Type: 100
+ControlSource: 
+Caption: Head:
+Value: 
+Visible: True
+Left: 7290
+Top: 709
+Width: 1138
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_effhed_id
+Type: 111
+ControlSource: sor_effhed_id
+Caption: 
+Visible: True
+Left: 4109
+Top: 397
+Width: 1335
+Height: 314
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label13
+Type: 100
+ControlSource: 
+Caption: Project:
+Value: 
+Visible: True
+Left: 3202
+Top: 397
+Width: 853
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_month
+Type: 109
+ControlSource: sor_month
+Caption: 
+Visible: True
+Left: 8480
+Top: 394
+Width: 1260
+Height: 314
+ForeColor: 4210752
+BackColor: 16777215
+Format: mmm yy
+
+--------------------
+Name: Label17
+Type: 100
+ControlSource: 
+Caption: Month:
+Value: 
+Visible: True
+Left: 7290
+Top: 394
+Width: 1138
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_salary
+Type: 109
+ControlSource: sor_salary
+Caption: 
+Visible: True
+Left: 8480
+Top: 1654
+Width: 1260
+Height: 314
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: Paid:
+Value: 
+Visible: True
+Left: 7290
+Top: 1654
+Width: 1138
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_ctrsalary
+Type: 109
+ControlSource: sor_ctrsalary
+Caption: 
+Visible: True
+Left: 8480
+Top: 1024
+Width: 1260
+Height: 314
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label25
+Type: 100
+ControlSource: 
+Caption: Contract:
+Value: 
+Visible: True
+Left: 7290
+Top: 1024
+Width: 1138
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_netsalary
+Type: 109
+ControlSource: sor_netsalary
+Caption: 
+Visible: True
+Left: 8480
+Top: 1339
+Width: 1260
+Height: 314
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label26
+Type: 100
+ControlSource: 
+Caption: Calculated:
+Value: 
+Visible: True
+Left: 7290
+Top: 1339
+Width: 1138
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: account
+Type: 109
+ControlSource: =[sor_bnkaccdetail] & [sor_bnkacctitle]
+Caption: 
+Visible: True
+Left: 1073
+Top: 1024
+Width: 5865
+Height: 314
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label30
+Type: 100
+ControlSource: 
+Caption: Account:
+Value: 
+Visible: True
+Left: 90
+Top: 1024
+Width: 958
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label44
+Type: 100
+ControlSource: 
+Caption: Salary
+Value: 
+Visible: True
+Left: 7290
+Top: 75
+Width: 1138
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 

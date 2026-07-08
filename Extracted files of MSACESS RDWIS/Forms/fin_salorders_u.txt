@@ -1,0 +1,996 @@
+FORM: fin_salorders_u
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: fin_salorders_u_draft
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: lblTitle
+Type: 100
+ControlSource: 
+Caption: Salary Orders - Draft
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 90
+Top: 195
+Width: 9780
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Order
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 840
+Width: 990
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label36
+Type: 100
+ControlSource: 
+Caption: Employee 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1290
+Top: 840
+Width: 1455
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: Department
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4830
+Top: 840
+Width: 1380
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Cont. Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6270
+Top: 840
+Width: 1260
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Calculated
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7590
+Top: 840
+Width: 1140
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label42
+Type: 100
+ControlSource: 
+Caption: Payable
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 8790
+Top: 840
+Width: 1020
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13575
+Top: 840
+Width: 2655
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReportSalOrders
+Type: 104
+ControlSource: 
+Caption: 2
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 18480
+Top: 240
+Width: 540
+Height: 405
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings
+FontSize: 18
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdMissing
+Type: 104
+ControlSource: 
+Caption: Remaining  Employees
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 15675
+Top: 240
+Width: 2520
+Height: 405
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label234
+Type: 100
+ControlSource: 
+Caption: Bank Account && Title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10170
+Top: 840
+Width: 3345
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell307
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 9870
+Top: 840
+Width: 240
+Height: 359
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell352
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 2805
+Top: 840
+Width: 1965
+Height: 359
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSalarySlip
+Type: 104
+ControlSource: 
+Caption: Salary Slip
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 14115
+Top: 240
+Width: 1290
+Height: 405
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdMinute
+Type: 104
+ControlSource: 
+Caption: Minute
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 12543
+Top: 236
+Width: 1290
+Height: 405
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell390
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 90
+Top: 840
+Width: 90
+Height: 359
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtBack
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 47
+Top: 0
+Width: 19200
+Height: 840
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_id
+Type: 109
+ControlSource: sor_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 240
+Top: 60
+Width: 990
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_releasedtg
+Type: 109
+ControlSource: sor_releasedtg
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 90
+Top: 435
+Width: 1140
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: sor_remarks
+Type: 109
+ControlSource: sor_remarks
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 13575
+Top: 60
+Width: 2655
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_month
+Type: 109
+ControlSource: sor_month
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6270
+Top: 435
+Width: 1260
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: mmm yy
+InputMask: 
+
+--------------------
+Name: sor_salary
+Type: 109
+ControlSource: sor_salary
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8790
+Top: 60
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: sor_emp_id
+Type: 109
+ControlSource: sor_emp_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1290
+Top: 60
+Width: 1455
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_unt_id
+Type: 111
+ControlSource: sor_unt_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4830
+Top: 60
+Width: 1380
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_hed_id
+Type: 111
+ControlSource: sor_hed_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4830
+Top: 435
+Width: 1380
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_effhed_id
+Type: 111
+ControlSource: sor_effhed_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8790
+Top: 435
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdApprove
+Type: 109
+ControlSource: ="Approve"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 16367
+Top: 420
+Width: 1020
+Height: 315
+ForeColor: 4210752
+BackColor: 15652797
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 109
+ControlSource: ="Cancel"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 17574
+Top: 401
+Width: 1020
+Height: 315
+ForeColor: 4210752
+BackColor: 15652797
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_bnkaccdetail
+Type: 109
+ControlSource: sor_bnkaccdetail
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10170
+Top: 60
+Width: 3345
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_empnamecomp
+Type: 109
+ControlSource: sor_empnamecomp
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1290
+Top: 435
+Width: 3480
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_bnkacctitle
+Type: 109
+ControlSource: sor_bnkacctitle
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10170
+Top: 435
+Width: 3345
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_status
+Type: 109
+ControlSource: sor_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 16367
+Top: 60
+Width: 1440
+Height: 315
+ForeColor: 10921638
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_ctrsalary
+Type: 109
+ControlSource: sor_ctrsalary
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6270
+Top: 60
+Width: 1260
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: EmptyCell253
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 2805
+Top: 60
+Width: 1965
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell320
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 9870
+Top: 60
+Width: 240
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_checked
+Type: 106
+ControlSource: sor_checked
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9900
+Top: 135
+Width: 240
+Height: 240
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_netsalary
+Type: 109
+ControlSource: sor_netsalary
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7590
+Top: 60
+Width: 1140
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: sor_remarks2
+Type: 109
+ControlSource: sor_remarks2
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 13575
+Top: 435
+Width: 2655
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReverse
+Type: 104
+ControlSource: 
+Caption: Q
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 18779
+Top: 377
+Width: 376
+Height: 315
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings 3
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sudohed
+Type: 109
+ControlSource: =IIf(Nz([sor_sudohed],"")="","","CSRF")
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7590
+Top: 435
+Width: 1140
+Height: 360
+ForeColor: 11957550
+BackColor: 16777215
+FontName: Mistral
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_sor_unt_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5955
+Top: 45
+Width: 270
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_sor_hed_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5955
+Top: 420
+Width: 270
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_sor_effhed_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9855
+Top: 420
+Width: 270
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSO
+Type: 104
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 90
+Top: 60
+Width: 90
+Height: 360
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

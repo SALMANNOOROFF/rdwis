@@ -1,0 +1,7 @@
+QUERY: fin_extcompenses_u
+
+SQL:
+SELECT fin_extcompenses.*
+FROM fin_extcompenses
+WHERE (((fin_extcompenses.ecp_unt_id)>=getvar("varLower") And (fin_extcompenses.ecp_unt_id)<=getvar("varUpper")))
+ORDER BY fin_extcompenses.ecp_date DESC;

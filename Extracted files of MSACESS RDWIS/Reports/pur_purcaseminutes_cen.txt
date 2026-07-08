@@ -1,0 +1,672 @@
+REPORT: pur_purcaseminutes_cen
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM pur_purcaseminutes WHERE (((pur_purcaseminutes.pcm_id)=[Forms]![pur_purcaseminutes]![pcm_id])); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: para_fs
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes]![para_3] & ".    Details of purchase case" & IIf([pcm_purcases] Like "*,*","s","") & " mentioned above are placed at Encl " & [Forms]![pur_purcaseminutes]![pc_encl] & " (F/" & [Forms]![pur_purcaseminutes]![pc_flag] & "). Market research report is also placed at Encl " & [Forms]![pur_purcaseminutes]![ms_encl] & " (F/" & [Forms]![pur_purcaseminutes]![ms_flag] & ").                                                                                                                                                        "
+Caption: 
+Visible: True
+Left: 0
+Top: 5380
+Width: 9472
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 4815
+Top: 6060
+Width: 1875
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: received
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[received])
+Caption: 
+Visible: True
+Left: 4815
+Top: 6495
+Width: 1875
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label113
+Type: 100
+ControlSource: 
+Caption: Received
+Value: 
+Visible: True
+Left: 1200
+Top: 6495
+Width: 3615
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_pd
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes]![para_4] & ".    The purchase is to be done from " & [Forms]![pur_purcaseminutes]![effhed_code] & " head. Tabulated below is current state of  the head (including GST)." & [Forms]![pur_purcaseminutes]![pcm_textb] & "                                                                                                                                            "
+Caption: 
+Visible: True
+Left: 0
+Top: 5715
+Width: 9472
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_rq
+Type: 109
+ControlSource: =Forms!pur_purcaseminutes!para_7 & ".    Foregoing in view, approval in principle of Rs. " & Format(Forms!pur_purcaseminutes!price,"#,##0") & " (" & SpellNumber(Forms!pur_purcaseminutes!price) & ") may please be accorded to process the purchase requirement mentioned at para" & Forms!pur_purcaseminutes![para_2] & "/N above through M/s MTSS.                                                                                                                                                        "
+Caption: 
+Visible: True
+Left: 0
+Top: 10245
+Width: 9472
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subMinutes
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 9472
+Height: 1949
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: para_wo
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes]![para_1] & ".    " & IIf(IsNull([Forms]![pur_purcaseminutes]![po_encl]),"Work ","Purchase ") & "order amounting to Rs " & Format([Forms]![pur_purcaseminutes]![pcm_lwoamount],"0,,.0#") & "M for the project titled, " & [Forms]![pur_purcaseminutes]![project_title] & " (" & [Forms]![pur_purcaseminutes]![hed_code] & "), has been released vide Encl " & [Forms]![pur_purcaseminutes]![wo_encl] & " (F/" & [Forms]![pur_purcaseminutes]![wo_flag] & "). Tₒ of the project has been established as " & Format([Forms]![pur_purcaseminutes]![start_date],"dd mmm yy") & IIf(IsNull([Forms]![pur_purcaseminutes]![po_encl]),". Approved project proposal is placed at Encl " & [Forms]![pur_purcaseminutes]![pp_encl] & " (F/" & [Forms]![pur_purcaseminutes]![pp_flag] & "). ",". ") & [Forms]![pur_purcaseminutes]![pcm_texta] & "                                                                                                                                                        "
+Caption: 
+Visible: False
+Left: 0
+Top: 2655
+Width: 9472
+Height: 60
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: expenditure
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[expenditure])
+Caption: 
+Visible: True
+Left: 4815
+Top: 6915
+Width: 1875
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label122
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 1200
+Top: 6915
+Width: 3615
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_pp
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes]![para_2] & ".    Purchase case" & IIf([pcm_purcases] Like "*,*","s","") & " listed below, " & IIf([pcm_purcases] Like "*,*","are","is") & " required for " & [Forms]![pur_purcaseminutes]![pcm_textc] & "                                                                                                                                                        "
+Caption: 
+Visible: True
+Left: 0
+Top: 2715
+Width: 9457
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_a1
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes]![para_5] & ".    " & [pcm_textd] & "                                                                                                                                                    "
+Caption: 
+Visible: True
+Left: 0
+Top: 10155
+Width: 9471
+Height: 45
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text214
+Type: 109
+ControlSource: =IIf(IsNull(GetVar("varUnitLeadTitle")),"",GetVar("varUnitLeadTitle") & " ") & GetVar("varUnitLeadName")
+Caption: 
+Visible: True
+Left: 5955
+Top: 11280
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text237
+Type: 109
+ControlSource: =GetVar("varUnitLeadRank")
+Caption: 
+Visible: True
+Left: 5955
+Top: 11625
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text238
+Type: 109
+ControlSource: =GetVar("varUnitLeadDesig")
+Caption: 
+Visible: True
+Left: 5955
+Top: 11970
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text55
+Type: 109
+ControlSource: ="Minute-" & [Forms]![pur_purcaseminutes]![this_minute]
+Caption: 
+Visible: True
+Left: 3285
+Top: 2040
+Width: 1994
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_a2
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes]![para_6] & ".    " & [pcm_texte] & "                                                                                                                                                    "
+Caption: 
+Visible: True
+Left: 0
+Top: 10200
+Width: 9471
+Height: 45
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell357
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1290
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell358
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1290
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell360
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1710
+Width: 0
+Height: 405
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell361
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1710
+Width: 0
+Height: 405
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell366
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2115
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell367
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2115
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label484
+Type: 100
+ControlSource: 
+Caption: Breakdown
+Value: 
+Visible: True
+Left: 1200
+Top: 6060
+Width: 3615
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: commitments
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[commitments])
+Caption: 
+Visible: True
+Left: 4815
+Top: 7335
+Width: 1875
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label589
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 1200
+Top: 7335
+Width: 3615
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: available
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[available])
+Caption: 
+Visible: True
+Left: 4815
+Top: 7740
+Width: 1875
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label601
+Type: 100
+ControlSource: 
+Caption: Available
+Value: 
+Visible: True
+Left: 1200
+Top: 7740
+Width: 3615
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: required
+Type: 109
+ControlSource: =FormatAsPerType(Forms!pur_purcaseminutes.required)
+Caption: 
+Visible: True
+Left: 4815
+Top: 9435
+Width: 1875
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label607
+Type: 100
+ControlSource: 
+Caption: Proposed Expenditure
+Value: 
+Visible: True
+Left: 1200
+Top: 9435
+Width: 3615
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subItems
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 510
+Top: 3075
+Width: 8954
+Height: 2008
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label91
+Type: 100
+ControlSource: 
+Caption: S No 
+Value: 
+Visible: True
+Left: 570
+Top: 6060
+Width: 630
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label913
+Type: 100
+ControlSource: 
+Caption: a.
+Value: 
+Visible: True
+Left: 570
+Top: 6495
+Width: 630
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label914
+Type: 100
+ControlSource: 
+Caption: b.
+Value: 
+Visible: True
+Left: 570
+Top: 6915
+Width: 630
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label915
+Type: 100
+ControlSource: 
+Caption: c.
+Value: 
+Visible: True
+Left: 570
+Top: 7335
+Width: 630
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label916
+Type: 100
+ControlSource: 
+Caption: d.
+Value: 
+Visible: True
+Left: 570
+Top: 7740
+Width: 630
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label918
+Type: 100
+ControlSource: 
+Caption: e.
+Value: 
+Visible: True
+Left: 570
+Top: 8160
+Width: 630
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label919
+Type: 100
+ControlSource: 
+Caption: f.
+Value: 
+Visible: True
+Left: 570
+Top: 8595
+Width: 630
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label997
+Type: 100
+ControlSource: 
+Caption: Available after recievables and loans
+Value: 
+Visible: True
+Left: 1200
+Top: 9015
+Width: 3615
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label999
+Type: 100
+ControlSource: 
+Caption: Payable Loans
+Value: 
+Visible: True
+Left: 1200
+Top: 8595
+Width: 3615
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1007
+Type: 100
+ControlSource: 
+Caption: Recievable Loans
+Value: 
+Visible: True
+Left: 1200
+Top: 8160
+Width: 3615
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1017
+Type: 100
+ControlSource: 
+Caption: h.
+Value: 
+Visible: True
+Left: 570
+Top: 9435
+Width: 630
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1019
+Type: 100
+ControlSource: 
+Caption: g.
+Value: 
+Visible: True
+Left: 570
+Top: 9015
+Width: 630
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: loansgiven
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[loansgiven])
+Caption: 
+Visible: True
+Left: 4815
+Top: 8160
+Width: 1875
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: loanstaken
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[loanstaken])
+Caption: 
+Visible: True
+Left: 4815
+Top: 8595
+Width: 1875
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: availableafter
+Type: 109
+ControlSource: =FormatAsPerType([Forms]![pur_purcaseminutes].[availableafter])
+Caption: 
+Visible: True
+Left: 4815
+Top: 9015
+Width: 1875
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 

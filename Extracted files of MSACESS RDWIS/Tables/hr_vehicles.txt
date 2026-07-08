@@ -1,0 +1,11 @@
+TABLE: hr_vehicles
+
+COLUMNS:
+- vcl_id | Type:4 | Size:4
+- vcl_emp_id | Type:10 | Size:13
+- vcl_type | Type:10 | Size:255
+- vcl_maker | Type:10 | Size:255
+- vcl_variant | Type:10 | Size:255
+- vcl_year | Type:3 | Size:2
+- vcl_regis | Type:10 | Size:255
+- vcl_color | Type:10 | Size:255

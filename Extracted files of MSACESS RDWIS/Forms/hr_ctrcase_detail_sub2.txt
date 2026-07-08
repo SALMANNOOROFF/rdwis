@@ -1,0 +1,663 @@
+FORM: hr_ctrcase_detail_sub2
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: hr_contracts_last
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: ctr_startdt
+Type: 109
+ControlSource: ctr_startdt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3845
+Top: 170
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label69
+Type: 100
+ControlSource: 
+Caption: Start Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2765
+Top: 170
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_enddt
+Type: 109
+ControlSource: ctr_enddt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3845
+Top: 530
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: End Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2765
+Top: 530
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_jobtitle
+Type: 109
+ControlSource: ctr_jobtitle
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6335
+Top: 170
+Width: 3000
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: Job Title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5435
+Top: 170
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_salary
+Type: 109
+ControlSource: ctr_salary
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10435
+Top: 530
+Width: 1920
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9620
+Top: 530
+Width: 810
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_date
+Type: 109
+ControlSource: ctr_date
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1205
+Top: 170
+Width: 1260
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label56
+Type: 100
+ControlSource: 
+Caption: Sign Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 185
+Top: 170
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_grade
+Type: 111
+ControlSource: ctr_grade
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6335
+Top: 530
+Width: 3000
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Grade
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5435
+Top: 530
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_termindt
+Type: 109
+ControlSource: ctr_termindt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3845
+Top: 890
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: ctr_unt_id
+Type: 111
+ControlSource: ctr_unt_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1205
+Top: 530
+Width: 1260
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label251
+Type: 100
+ControlSource: 
+Caption: Dept
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 185
+Top: 530
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_probnsal
+Type: 109
+ControlSource: =IIf(IsNull([ctr_prob]),"",[ctr_prob] & " months, " & [ctr_probsal])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6815
+Top: 890
+Width: 2520
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label59
+Type: 100
+ControlSource: 
+Caption: Prob && salary 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5435
+Top: 890
+Width: 1380
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box5
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2165
+Top: 530
+Width: 300
+Height: 390
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: boc_ctr_grade
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9035
+Top: 530
+Width: 300
+Height: 360
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_path
+Type: 109
+ControlSource: ctr_path
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11947
+Top: 961
+Width: 150
+Height: 165
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label66
+Type: 100
+ControlSource: 
+Caption: Contract
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10955
+Top: 890
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_type
+Type: 111
+ControlSource: ctr_type
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10435
+Top: 170
+Width: 1920
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label64
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9620
+Top: 170
+Width: 810
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ctr_type
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12060
+Top: 165
+Width: 300
+Height: 360
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label58
+Type: 109
+ControlSource: =IIf(IsNull([ctr_termindt]),"",IIf([ctr_termindt]>[ctr_enddt],"Extended to","Reduced to"))
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 2765
+Top: 890
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 10
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_path2
+Type: 109
+ControlSource: ctr_path2
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10527
+Top: 971
+Width: 150
+Height: 165
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label75
+Type: 100
+ControlSource: 
+Caption: Minute
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9620
+Top: 890
+Width: 810
+Height: 360
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_remarks
+Type: 109
+ControlSource: ctr_remarks
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1200
+Top: 1245
+Width: 11160
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label62
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 1245
+Width: 1035
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

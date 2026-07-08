@@ -1,0 +1,10 @@
+TABLE: hr_devices1
+
+COLUMNS:
+- dvc_id | Type:4 | Size:4
+- dvc_emp_id | Type:10 | Size:13
+- dvc_type | Type:10 | Size:255
+- dvc_brand | Type:10 | Size:255
+- dvc_model | Type:10 | Size:255
+- dvc_imei1 | Type:10 | Size:18
+- dvc_imei2 | Type:10 | Size:18

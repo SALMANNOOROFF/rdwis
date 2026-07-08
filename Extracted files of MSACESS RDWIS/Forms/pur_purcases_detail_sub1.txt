@@ -1,0 +1,906 @@
+FORM: pur_purcases_detail_sub1
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: pur_purcaseitems_plus
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: S No
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 225
+Top: 30
+Width: 630
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 915
+Top: 30
+Width: 3540
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Qty
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4515
+Top: 30
+Width: 840
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5415
+Top: 30
+Width: 960
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label101
+Type: 100
+ControlSource: 
+Caption: Balance
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9540
+Top: 30
+Width: 930
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label123
+Type: 100
+ControlSource: 
+Caption: Subhead
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 16305
+Top: 30
+Width: 1440
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label130
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10530
+Top: 30
+Width: 1560
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label137
+Type: 100
+ControlSource: 
+Caption: Subtype
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12150
+Top: 30
+Width: 2595
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label147
+Type: 100
+ControlSource: 
+Caption: Price
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7920
+Top: 30
+Width: 1560
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label212
+Type: 100
+ControlSource: 
+Caption: Unit Price
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6435
+Top: 30
+Width: 1425
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label230
+Type: 100
+ControlSource: 
+Caption: Inv / Asst
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 14805
+Top: 30
+Width: 1440
+Height: 300
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell248
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 75
+Top: 30
+Width: 86
+Height: 300
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtBack
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 0
+Top: 0
+Width: 17700
+Height: 420
+ForeColor: 16777215
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_serial
+Type: 109
+ControlSource: pci_serial
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 225
+Top: 30
+Width: 630
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_desc
+Type: 109
+ControlSource: pci_desc
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 915
+Top: 30
+Width: 3540
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_qty
+Type: 109
+ControlSource: pci_qty
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4515
+Top: 30
+Width: 840
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: balance_qty
+Type: 109
+ControlSource: balance_qty
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 9540
+Top: 30
+Width: 930
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: price_total
+Type: 109
+ControlSource: price_total
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7920
+Top: 30
+Width: 1560
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: pci_price
+Type: 109
+ControlSource: pci_price
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 6435
+Top: 30
+Width: 1425
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: pci_subtype
+Type: 109
+ControlSource: pci_subtype
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 12150
+Top: 30
+Width: 2595
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_type
+Type: 111
+ControlSource: pci_type
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 10530
+Top: 30
+Width: 1560
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pci_type
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11825
+Top: 30
+Width: 280
+Height: 376
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_qtyunit
+Type: 111
+ControlSource: pci_qtyunit
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 5415
+Top: 30
+Width: 960
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pci_qtyunit
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6090
+Top: 28
+Width: 295
+Height: 376
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_type2
+Type: 111
+ControlSource: pci_type2
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 14805
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pci_type2
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 15980
+Top: 35
+Width: 280
+Height: 376
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_category
+Type: 109
+ControlSource: pci_subhead
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 16305
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPci
+Type: 104
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 75
+Top: 30
+Width: 86
+Height: 360
+ForeColor: 4210752
+BackColor: 15123376
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sum_price_total
+Type: 109
+ControlSource: =Sum([price_total])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7920
+Top: 45
+Width: 1560
+Height: 375
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: EmptyCell183
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 225
+Top: 45
+Width: 630
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell184
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 915
+Top: 45
+Width: 3540
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell185
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 4515
+Top: 45
+Width: 840
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell186
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 5415
+Top: 45
+Width: 960
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell191
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 10530
+Top: 45
+Width: 1560
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell192
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 12150
+Top: 45
+Width: 2595
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label222
+Type: 100
+ControlSource: 
+Caption: Price
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6435
+Top: 45
+Width: 1425
+Height: 375
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell228
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 9540
+Top: 45
+Width: 930
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell237
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 14805
+Top: 45
+Width: 1440
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell244
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 16305
+Top: 45
+Width: 1440
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell250
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 75
+Top: 45
+Width: 86
+Height: 375
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

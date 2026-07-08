@@ -1,0 +1,214 @@
+FORM: salary_matrix_test
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Salary Details
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 170
+Top: 170
+Width: 7980
+Height: 465
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subArrears
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2385
+Top: 5265
+Width: 6765
+Height: 3525
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subMonth
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 120
+Top: 390
+Width: 16095
+Height: 4620
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: salary_month
+Type: 109
+ControlSource: =CDbl(DLookUp("[info]","salary_matrix_test","[sno] =  11"))
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11865
+Top: 6060
+Width: 1530
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Payment for month
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9810
+Top: 6060
+Width: 1995
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: arrears
+Type: 109
+ControlSource: =[subArrears].[Form]![sum_arrears]
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11865
+Top: 6405
+Width: 1530
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Arrears
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9810
+Top: 6405
+Width: 1995
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text6
+Type: 109
+ControlSource: =Round([salary_month]+[arrears],0)
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11865
+Top: 6780
+Width: 1530
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Salary Payable
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9810
+Top: 6780
+Width: 1995
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

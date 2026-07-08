@@ -1,0 +1,9 @@
+TABLE: pur_purnotifications
+
+COLUMNS:
+- pnt_id | Type:4 | Size:4
+- pnt_acc_id | Type:4 | Size:4
+- pnt_pcs_id | Type:4 | Size:4
+- pnt_message | Type:12 | Size:0
+- pnt_is_read | Type:10 | Size:5
+- created_at | Type:8 | Size:8

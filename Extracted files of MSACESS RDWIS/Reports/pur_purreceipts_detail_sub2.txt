@@ -1,0 +1,123 @@
+REPORT: pur_purreceipts_detail_sub2
+
+=== REPORT PROPERTIES ===
+RecordSource: pur_purreceiptitems_plus
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Left: 810
+Top: 60
+Width: 6465
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Quantity
+Value: 
+Visible: True
+Left: 7335
+Top: 60
+Width: 1185
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Denomination
+Value: 
+Visible: True
+Left: 8580
+Top: 60
+Width: 1454
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Serial
+Value: 
+Visible: True
+Left: 30
+Top: 60
+Width: 720
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pti_desc
+Type: 109
+ControlSource: pti_desc
+Caption: 
+Visible: True
+Left: 810
+Top: 30
+Width: 6465
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pti_qty
+Type: 109
+ControlSource: pti_qty
+Caption: 
+Visible: True
+Left: 7335
+Top: 30
+Width: 1185
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pti_serial
+Type: 109
+ControlSource: pti_serial
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 720
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pti_qtyunit
+Type: 111
+ControlSource: pti_qtyunit
+Caption: 
+Visible: True
+Left: 8580
+Top: 30
+Width: 1454
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 

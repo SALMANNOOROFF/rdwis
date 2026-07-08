@@ -1,0 +1,310 @@
+REPORT: hr_attendance_summary_monthly
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_attendance_summary_temp
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Monthly Attendance - " & Format([startdt],"dd mmm yy") & "  to  " & Format([enddt],"dd mmm yy")
+Caption: 
+Visible: True
+Left: 60
+Top: 120
+Width: 7528
+Height: 510
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: tot
+Type: 109
+ControlSource: ="(Total " & [total] & " days)"
+Caption: 
+Visible: True
+Left: 7803
+Top: 226
+Width: 1701
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmdCalMonth
+Type: 104
+ControlSource: 
+Caption: Calendar Month
+Value: 
+Visible: True
+Left: 9930
+Top: 60
+Width: 1134
+Height: 630
+ForeColor: 4210752
+BackColor: 15123357
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Emp ID
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 1590
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Left: 1710
+Top: 60
+Width: 2880
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Leave
+Value: 
+Visible: True
+Left: 8970
+Top: 60
+Width: 1020
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Absent
+Value: 
+Visible: True
+Left: 7890
+Top: 60
+Width: 1020
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Unpaid Leave
+Value: 
+Visible: True
+Left: 10050
+Top: 60
+Width: 1020
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label97
+Type: 100
+ControlSource: 
+Caption: Ty Duty
+Value: 
+Visible: True
+Left: 6810
+Top: 60
+Width: 1020
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label105
+Type: 100
+ControlSource: 
+Caption: Work f Home
+Value: 
+Visible: True
+Left: 5730
+Top: 60
+Width: 1020
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label228
+Type: 100
+ControlSource: 
+Caption: Present
+Value: 
+Visible: True
+Left: 4650
+Top: 60
+Width: 1020
+Height: 629
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: emp_id
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1590
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: empnamecomp
+Type: 109
+ControlSource: empnamecomp
+Caption: 
+Visible: True
+Left: 1710
+Top: 30
+Width: 2880
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: leave
+Type: 109
+ControlSource: l
+Caption: 
+Visible: True
+Left: 8970
+Top: 30
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: absent
+Type: 109
+ControlSource: a
+Caption: 
+Visible: True
+Left: 7890
+Top: 30
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: unpaid_leave
+Type: 109
+ControlSource: u
+Caption: 
+Visible: True
+Left: 10050
+Top: 30
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ty_duty
+Type: 109
+ControlSource: t
+Caption: 
+Visible: True
+Left: 6810
+Top: 30
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: work_from_home
+Type: 109
+ControlSource: w
+Caption: 
+Visible: True
+Left: 5730
+Top: 30
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text229
+Type: 109
+ControlSource: p
+Caption: 
+Visible: True
+Left: 4650
+Top: 30
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text66
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3060
+Top: 0
+Width: 3600
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label114
+Type: 109
+ControlSource: =Count(*) & " employee(s)"
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1635
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

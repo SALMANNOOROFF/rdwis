@@ -1,0 +1,6 @@
+QUERY: pur_purcaseitems_minutes
+
+SQL:
+SELECT *
+FROM pur_purcaseitems_minutes1
+WHERE pcs_id In (2036);

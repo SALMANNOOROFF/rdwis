@@ -1,0 +1,462 @@
+FORM: hr_contracts
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM hr_emps WHERE emp_id = '11-20-10-8913'; 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: lblTitle
+Type: 100
+ControlSource: 
+Caption: Contracts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 330
+Top: 165
+Width: 1635
+Height: 475
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdEmpRecord
+Type: 104
+ControlSource: 
+Caption: Employment History
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 11456
+Top: 188
+Width: 2160
+Height: 426
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: emp_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1275
+Top: 240
+Width: 1560
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 00\-00\-00\-0000;0
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 315
+Top: 240
+Width: 958
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: empnamecomp
+Type: 109
+ControlSource: =NameComplete([emp_name],[emp_title],[emp_rank])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3975
+Top: 240
+Width: 3420
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2955
+Top: 240
+Width: 1018
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_unt_id
+Type: 111
+ControlSource: emp_unt_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1275
+Top: 600
+Width: 1560
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label251
+Type: 100
+ControlSource: 
+Caption: Dept
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 315
+Top: 600
+Width: 960
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_hed_id
+Type: 111
+ControlSource: emp_hed_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 1275
+Top: 960
+Width: 1560
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label305
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 315
+Top: 960
+Width: 960
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_joindt
+Type: 109
+ControlSource: emp_joindt
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3975
+Top: 600
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label306
+Type: 100
+ControlSource: 
+Caption: Joining
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2955
+Top: 600
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subContracts
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 165
+Top: 1395
+Width: 13470
+Height: 5040
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box5
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2535
+Top: 600
+Width: 300
+Height: 720
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_lastdt
+Type: 109
+ControlSource: emp_lastdt
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3975
+Top: 960
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Leaving
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2955
+Top: 960
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdContractAdd
+Type: 104
+ControlSource: 
+Caption: Raise Contract Renewal Case
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 10571
+Top: 990
+Width: 3045
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_status
+Type: 109
+ControlSource: emp_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6198
+Top: 968
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5480
+Top: 968
+Width: 735
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: last_contract
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 7984
+Top: 968
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

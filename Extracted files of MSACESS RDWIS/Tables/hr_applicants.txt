@@ -1,0 +1,31 @@
+TABLE: hr_applicants
+
+COLUMNS:
+- apl_id | Type:4 | Size:4
+- apl_cnic | Type:10 | Size:15
+- apl_name | Type:10 | Size:255
+- apl_discip | Type:10 | Size:255
+- apl_qualif | Type:3 | Size:2
+- apl_spec | Type:10 | Size:255
+- apl_paddress | Type:10 | Size:255
+- apl_dob | Type:8 | Size:8
+- apl_dtg | Type:8 | Size:8
+- apl_marital | Type:10 | Size:255
+- apl_ntnlty | Type:10 | Size:255
+- apl_pob | Type:10 | Size:255
+- apl_taddress | Type:10 | Size:255
+- apl_mobile | Type:10 | Size:13
+- apl_landline | Type:10 | Size:13
+- apl_gender | Type:10 | Size:255
+- apl_mobile2 | Type:10 | Size:255
+- apl_rank | Type:10 | Size:255
+- apl_status | Type:10 | Size:255
+- apl_remarks | Type:10 | Size:255
+- apl_appliedfor | Type:10 | Size:255
+- apl_currentsal | Type:4 | Size:4
+- apl_expectedsal | Type:4 | Size:4
+- apl_experience | Type:20 | Size:16
+- apl_expjoindt | Type:8 | Size:8
+- apl_email | Type:10 | Size:255
+- apl_father | Type:10 | Size:255
+- apl_unt_id | Type:4 | Size:4

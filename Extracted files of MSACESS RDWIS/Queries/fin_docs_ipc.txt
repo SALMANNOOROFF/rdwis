@@ -1,0 +1,5 @@
+QUERY: fin_docs_ipc
+
+SQL:
+SELECT * FROM fin_docs_ipc1
+UNION SELECT * FROM fin_docs_ipc2;

@@ -1,0 +1,6 @@
+QUERY: hr_salreqs_u
+
+SQL:
+SELECT hr_salreqs.*
+FROM hr_salreqs
+WHERE (((hr_salreqs.srq_unt_id)>=getvar("varLower") And (hr_salreqs.srq_unt_id)<=getvar("varUpper")));

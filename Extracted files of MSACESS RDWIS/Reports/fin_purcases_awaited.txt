@@ -1,0 +1,506 @@
+REPORT: fin_purcases_awaited
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_purcases_awaited
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Puchase Cases Awaiting Payments
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 5400
+Height: 570
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 555
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Date
+Value: 
+Visible: True
+Left: 675
+Top: 60
+Width: 1065
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Min
+Value: 
+Visible: True
+Left: 1800
+Top: 60
+Width: 615
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Title
+Value: 
+Visible: True
+Left: 2475
+Top: 60
+Width: 2715
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Cost
+Value: 
+Visible: True
+Left: 7620
+Top: 60
+Width: 1230
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Paid
+Value: 
+Visible: True
+Left: 8910
+Top: 60
+Width: 1230
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label48
+Type: 100
+ControlSource: 
+Caption: Firm
+Value: 
+Visible: True
+Left: 5250
+Top: 60
+Width: 2310
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label68
+Type: 100
+ControlSource: 
+Caption: Balance
+Value: 
+Visible: True
+Left: 10200
+Top: 60
+Width: 1230
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: effhed_code
+Type: 109
+ControlSource: effhed_code
+Caption: 
+Visible: True
+Left: 60
+Top: 120
+Width: 1125
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: tax
+Type: 109
+ControlSource: =IIf([pcs_transtype]=1,"(Without Tax)","(With Tax)")
+Caption: 
+Visible: True
+Left: 1230
+Top: 120
+Width: 1530
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_id
+Type: 109
+ControlSource: pcs_id
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 555
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_date
+Type: 109
+ControlSource: pcs_date
+Caption: 
+Visible: True
+Left: 675
+Top: 30
+Width: 1065
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_minute
+Type: 109
+ControlSource: pcs_minute
+Caption: 
+Visible: True
+Left: 1800
+Top: 30
+Width: 615
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_title
+Type: 109
+ControlSource: pcs_title
+Caption: 
+Visible: True
+Left: 2475
+Top: 30
+Width: 2715
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: commitment
+Type: 109
+ControlSource: commitment
+Caption: 
+Visible: True
+Left: 7620
+Top: 30
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: paid
+Type: 109
+ControlSource: paid
+Caption: 
+Visible: True
+Left: 8910
+Top: 30
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: frm_name
+Type: 109
+ControlSource: frm_name
+Caption: 
+Visible: True
+Left: 5250
+Top: 30
+Width: 2310
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text67
+Type: 109
+ControlSource: =[commitment]-[paid]
+Caption: 
+Visible: True
+Left: 10200
+Top: 30
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text155
+Type: 109
+ControlSource: =Sum([commitment])
+Caption: 
+Visible: True
+Left: 7620
+Top: 45
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text156
+Type: 109
+ControlSource: =Sum([paid])
+Caption: 
+Visible: True
+Left: 8910
+Top: 45
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text158
+Type: 109
+ControlSource: =Sum([commitment]-[paid])
+Caption: 
+Visible: True
+Left: 10200
+Top: 45
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: EmptyCell314
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 60
+Top: 45
+Width: 555
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell315
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 675
+Top: 45
+Width: 1065
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell316
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 1800
+Top: 45
+Width: 615
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell317
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2475
+Top: 45
+Width: 2715
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell321
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5250
+Top: 45
+Width: 2310
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text46
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 4815
+Top: 0
+Width: 1920
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text24
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 8445
+Top: 0
+Width: 2940
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text85
+Type: 109
+ControlSource: =Sum([commitment])
+Caption: 
+Visible: True
+Left: 7590
+Top: 120
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text86
+Type: 109
+ControlSource: =Sum([paid])
+Caption: 
+Visible: True
+Left: 8880
+Top: 120
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text88
+Type: 109
+ControlSource: =Sum([commitment]-[paid])
+Caption: 
+Visible: True
+Left: 10170
+Top: 120
+Width: 1230
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: EmptyCell140
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 30
+Top: 120
+Width: 525
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell141
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 615
+Top: 120
+Width: 3165
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell142
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 3840
+Top: 120
+Width: 3690
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 

@@ -1,0 +1,1410 @@
+FORM: hr_contracts_add
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: contract_startdt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 4200
+Top: 1560
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Start Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3120
+Top: 1560
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_enddt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 4200
+Top: 1920
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: End Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3120
+Top: 1920
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_jobtitle
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 6780
+Top: 1559
+Width: 3000
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: Job Title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5880
+Top: 1560
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_salary
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 11033
+Top: 1920
+Width: 2460
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10133
+Top: 1920
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_date
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1260
+Top: 1560
+Width: 1500
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label56
+Type: 100
+ControlSource: 
+Caption: Sign Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 1560
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_grade
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 6780
+Top: 1920
+Width: 3000
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Grade
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5880
+Top: 1920
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_termindt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 4200
+Top: 2280
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label58
+Type: 100
+ControlSource: 
+Caption: Closure dt
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3120
+Top: 2280
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_unt_id
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1260
+Top: 1920
+Width: 1500
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label251
+Type: 100
+ControlSource: 
+Caption: Dept
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 1920
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box61
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9480
+Top: 1920
+Width: 300
+Height: 360
+ForeColor: 
+BackColor: 15064278
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box5
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2460
+Top: 1920
+Width: 300
+Height: 360
+ForeColor: 
+BackColor: 15064278
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label110
+Type: 100
+ControlSource: 
+Caption: Current Contract
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 1080
+Width: 1680
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_probnsal
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 7260
+Top: 2280
+Width: 2520
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label117
+Type: 100
+ControlSource: 
+Caption: Prob && salary 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5880
+Top: 2280
+Width: 1380
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblTitle
+Type: 100
+ControlSource: 
+Caption: Add New Contract
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 360
+Width: 3180
+Height: 475
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_effenddt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: False
+Locked: True
+Left: 6780
+Top: 480
+Width: 1380
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label121
+Type: 100
+ControlSource: 
+Caption: Effective End Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4920
+Top: 480
+Width: 1860
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_termindtinv
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: False
+Locked: True
+Left: 6780
+Top: 840
+Width: 1380
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label123
+Type: 100
+ControlSource: 
+Caption: Trmn Date invisible
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4920
+Top: 840
+Width: 1860
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: False
+Locked: True
+Left: 10458
+Top: 826
+Width: 1380
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label126
+Type: 100
+ControlSource: 
+Caption: Contract ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9138
+Top: 826
+Width: 1320
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_type
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 11033
+Top: 1559
+Width: 2460
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label128
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10133
+Top: 1559
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box129
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13200
+Top: 1560
+Width: 300
+Height: 360
+ForeColor: 
+BackColor: 15064278
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: contract_remarks
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1250
+Top: 2645
+Width: 12240
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label62
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 236
+Top: 2645
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_startdt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4260
+Top: 660
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label87
+Type: 100
+ControlSource: 
+Caption: Start Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3180
+Top: 660
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_enddt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4260
+Top: 1140
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label89
+Type: 100
+ControlSource: 
+Caption: End Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3180
+Top: 1140
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_jobtitle
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6840
+Top: 660
+Width: 4320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label91
+Type: 100
+ControlSource: 
+Caption: Job Title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5940
+Top: 660
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_salary
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 12187
+Top: 1133
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label93
+Type: 100
+ControlSource: 
+Caption: Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11527
+Top: 1133
+Width: 660
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_date
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1320
+Top: 660
+Width: 1500
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label95
+Type: 100
+ControlSource: 
+Caption: Sign Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 300
+Top: 660
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_grade
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6840
+Top: 1140
+Width: 4320
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label97
+Type: 100
+ControlSource: 
+Caption: Grade
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5940
+Top: 1140
+Width: 900
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_unt_id
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1320
+Top: 1140
+Width: 1500
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label101
+Type: 100
+ControlSource: 
+Caption: Dept
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 300
+Top: 1140
+Width: 1020
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_prob
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7860
+Top: 1620
+Width: 420
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label105
+Type: 100
+ControlSource: 
+Caption: Probation (months)
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5940
+Top: 1620
+Width: 1920
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_probsal
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10020
+Top: 1620
+Width: 1140
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label107
+Type: 100
+ControlSource: 
+Caption: Probation Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 8400
+Top: 1620
+Width: 1620
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label111
+Type: 100
+ControlSource: 
+Caption: New Contract
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 300
+Top: 180
+Width: 1380
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdDiscardnExit
+Type: 104
+ControlSource: 
+Caption: Discard && Exit
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 5645
+Top: 3803
+Width: 1500
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSavenExit
+Type: 104
+ControlSource: 
+Caption: Save && Exit
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 8225
+Top: 3803
+Width: 1500
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_type
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 12165
+Top: 660
+Width: 1350
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label131
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11505
+Top: 660
+Width: 660
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subContractPlan
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 354
+Top: 2214
+Width: 3065
+Height: 5760
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label78
+Type: 100
+ControlSource: 
+Caption: Contract Plan:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 300
+Top: 1875
+Width: 1470
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblWarning
+Type: 100
+ControlSource: 
+Caption: Warning: New contract is starting before end of previous contract. Previous contract will be concluded prematurely on the day before start of the new contract. Please enter reasons for early termination, in contract remarks.
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4606
+Top: 2244
+Width: 6347
+Height: 1245
+ForeColor: 255
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctr_num
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4260
+Top: 1620
+Width: 1320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label137
+Type: 100
+ControlSource: 
+Caption: Ctr Num
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3180
+Top: 1620
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: projects_list
+Type: 111
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1980
+Top: 1860
+Width: 1440
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

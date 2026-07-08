@@ -1,0 +1,152 @@
+REPORT: prj_activmiles
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT prj_milestones.* FROM prj_milestones ORDER BY prj_milestones.msn_id; 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Activities && Milestones
+Value: 
+Visible: True
+Left: 705
+Top: 30
+Width: 4515
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Work Order Timeline
+Value: 
+Visible: True
+Left: 5220
+Top: 30
+Width: 1500
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Achieved Timeline
+Value: 
+Visible: True
+Left: 6720
+Top: 30
+Width: 1440
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Left: 8160
+Top: 30
+Width: 1500
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label67
+Type: 100
+ControlSource: 
+Caption: S No
+Value: 
+Visible: True
+Left: 60
+Top: 30
+Width: 645
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtSno
+Type: 109
+ControlSource: msn_id
+Caption: 
+Visible: True
+Left: 60
+Top: 0
+Width: 645
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: msn_status
+Type: 109
+ControlSource: msn_status
+Caption: 
+Visible: True
+Left: 8160
+Top: 0
+Width: 1500
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: msn_achvdt
+Type: 109
+ControlSource: msn_achvdt
+Caption: 
+Visible: True
+Left: 6720
+Top: 0
+Width: 1440
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: mmm yy
+
+--------------------
+Name: msn_targetdt
+Type: 109
+ControlSource: msn_targetdt
+Caption: 
+Visible: True
+Left: 5220
+Top: 0
+Width: 1500
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: mmm yy
+
+--------------------
+Name: msn_desc
+Type: 109
+ControlSource: msn_desc
+Caption: 
+Visible: True
+Left: 705
+Top: 0
+Width: 4515
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 

@@ -1,0 +1,6 @@
+QUERY: aud_chk_receipts_double
+
+SQL:
+SELECT units.unt_namesh, prj_projects.prj_code, aud_chk_receipts_double2.prt_pcs_id, aud_chk_receipts_double2.prt_id, aud_chk_receipts_double2.receipt_items, aud_chk_receipts_double3.pcase_items, pur_purcases.pcs_status
+FROM (((aud_chk_receipts_double2 INNER JOIN aud_chk_receipts_double3 ON aud_chk_receipts_double2.prt_pcs_id = aud_chk_receipts_double3.prt_pcs_id) INNER JOIN prj_projects ON aud_chk_receipts_double2.prj_id = prj_projects.prj_id) INNER JOIN units ON aud_chk_receipts_double2.unt_id = units.unt_id) INNER JOIN pur_purcases ON aud_chk_receipts_double2.prt_pcs_id = pur_purcases.pcs_id
+ORDER BY units.unt_namesh, prj_projects.prj_code, aud_chk_receipts_double2.prt_pcs_id;

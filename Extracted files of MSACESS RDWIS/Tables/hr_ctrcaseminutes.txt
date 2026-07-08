@@ -1,0 +1,12 @@
+TABLE: hr_ctrcaseminutes
+
+COLUMNS:
+- ccm_id | Type:4 | Size:4
+- ccm_date | Type:8 | Size:8
+- ccm_ctrcases | Type:10 | Size:255
+- ccm_minute | Type:3 | Size:2
+- ccm_lwoamount | Type:4 | Size:4
+- ccm_texta | Type:12 | Size:0
+- ccm_textb | Type:12 | Size:0
+- ccm_textc | Type:12 | Size:0
+- ccm_textd | Type:12 | Size:0

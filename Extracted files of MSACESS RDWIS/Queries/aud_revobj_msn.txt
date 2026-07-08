@@ -1,0 +1,5 @@
+QUERY: aud_revobj_msn
+
+SQL:
+SELECT prj_milestones.*, prj_projects.prj_code
+FROM prj_milestones INNER JOIN prj_projects ON prj_milestones.msn_xprj_id = prj_projects.prj_id;

@@ -1,0 +1,21 @@
+REPORT: prj_prghistory_fin_last
+
+=== REPORT PROPERTIES ===
+RecordSource: prj_prghistory_fin_last
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: pgh_progress
+Type: 109
+ControlSource: pgh_progress
+Caption: 
+Visible: True
+Left: 60
+Top: 0
+Width: 9063
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 

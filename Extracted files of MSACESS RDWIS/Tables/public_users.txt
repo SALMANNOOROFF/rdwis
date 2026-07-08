@@ -1,0 +1,11 @@
+TABLE: public_users
+
+COLUMNS:
+- id | Type:20 | Size:16
+- name | Type:10 | Size:255
+- email | Type:10 | Size:255
+- email_verified_at | Type:8 | Size:8
+- password | Type:10 | Size:255
+- remember_token | Type:10 | Size:100
+- created_at | Type:8 | Size:8
+- updated_at | Type:8 | Size:8

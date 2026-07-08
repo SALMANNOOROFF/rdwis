@@ -1,0 +1,258 @@
+REPORT: aud_revcomps_srq
+
+=== REPORT PROPERTIES ===
+RecordSource: aud_revcomps_srq
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Line136
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 9195
+Top: 345
+Width: 0
+Height: 110
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line137
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 120
+Top: 345
+Width: 9068
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line141
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 120
+Top: 345
+Width: 0
+Height: 110
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label361
+Type: 100
+ControlSource: 
+Caption: Requisition:
+Value: 
+Visible: True
+Left: 113
+Top: 0
+Width: 1288
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: trn_amount1
+Type: 109
+ControlSource: srq_salary
+Caption: 
+Visible: True
+Left: 5447
+Top: 0
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Amount:
+Value: 
+Visible: True
+Left: 4440
+Top: 0
+Width: 973
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: trn_date
+Type: 109
+ControlSource: srq_releasedtg
+Caption: 
+Visible: True
+Left: 2885
+Top: 0
+Width: 1185
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Date:
+Value: 
+Visible: True
+Left: 2265
+Top: 0
+Width: 673
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: trn_id
+Type: 109
+ControlSource: srq_id
+Caption: 
+Visible: True
+Left: 725
+Top: 0
+Width: 1185
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: ID:
+Value: 
+Visible: True
+Left: 285
+Top: 0
+Width: 433
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line135
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 9195
+Top: 0
+Width: 0
+Height: 343
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line140
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 113
+Top: 0
+Width: 0
+Height: 343
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: trn_tax1
+Type: 109
+ControlSource: srq_month
+Caption: 
+Visible: True
+Left: 7657
+Top: 0
+Width: 1416
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label143
+Type: 100
+ControlSource: 
+Caption: Tax:
+Value: 
+Visible: True
+Left: 7170
+Top: 0
+Width: 450
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line138
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 9195
+Top: 0
+Width: 0
+Height: 110
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line142
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 120
+Top: 0
+Width: 0
+Height: 110
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line139
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 120
+Top: 90
+Width: 9083
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 

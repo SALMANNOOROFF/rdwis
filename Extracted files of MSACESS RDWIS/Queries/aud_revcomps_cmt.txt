@@ -1,0 +1,6 @@
+QUERY: aud_revcomps_cmt
+
+SQL:
+SELECT aud_revcomps_plus.rvc_rev_id, fin_commitments.cmt_id, fin_commitments.cmt_date, fin_commitments.cmt_amount
+FROM aud_revcomps_plus INNER JOIN fin_commitments ON aud_revcomps_plus.rvc_rowid_num = fin_commitments.cmt_id
+WHERE (((aud_revcomps_plus.rvc_table)="fin_commitments"));

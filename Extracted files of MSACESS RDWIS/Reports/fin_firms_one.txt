@@ -1,0 +1,322 @@
+REPORT: fin_firms_one
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM fin_firms WHERE (((fin_firms.frm_id)=[Forms]![vars]![Parameter1])); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Date
+Type: 109
+ControlSource: =Format(Date(),"dd mmm yy") & "   " & Format(Time(),"Short Time")
+Caption: 
+Visible: True
+Left: 8640
+Top: 60
+Width: 2490
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: Long Date
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Firm Record - " & [frm_name]
+Caption: 
+Visible: True
+Left: 30
+Top: 60
+Width: 8565
+Height: 480
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text74
+Type: 109
+ControlSource: ="(Price excluding tax of all purchase cases approved till to date)"
+Caption: 
+Visible: True
+Left: 30
+Top: 540
+Width: 8565
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label50
+Type: 100
+ControlSource: 
+Caption: Purchase Case Title
+Value: 
+Visible: True
+Left: 2235
+Top: 60
+Width: 6765
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 1035
+Top: 60
+Width: 1140
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Price excl. Tax
+Value: 
+Visible: True
+Left: 9060
+Top: 60
+Width: 2085
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label40
+Type: 100
+ControlSource: 
+Caption: Division
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 915
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label46
+Type: 100
+ControlSource: 
+Caption: Total price of all purchase cases
+Value: 
+Visible: True
+Left: 2235
+Top: 30
+Width: 6765
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text44
+Type: 109
+ControlSource: =Sum([pcs_intprice])
+Caption: 
+Visible: True
+Left: 9060
+Top: 30
+Width: 2085
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: EmptyCell136
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 1035
+Top: 30
+Width: 1140
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label138
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Left: 60
+Top: 30
+Width: 915
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell24
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 1035
+Top: 30
+Width: 1140
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell25
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2235
+Top: 30
+Width: 6765
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Group Of unt_namesh
+Type: 109
+ControlSource: unt_namesh
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 915
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text62
+Type: 109
+ControlSource: =Sum([pcs_intprice])
+Caption: 
+Visible: True
+Left: 9060
+Top: 30
+Width: 2085
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: price
+Type: 109
+ControlSource: pcs_intprice
+Caption: 
+Visible: True
+Left: 9060
+Top: 30
+Width: 2085
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: pcs_title
+Type: 109
+ControlSource: pcs_title
+Caption: 
+Visible: True
+Left: 2235
+Top: 30
+Width: 6765
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_date
+Type: 109
+ControlSource: pcs_date
+Caption: 
+Visible: True
+Left: 1035
+Top: 30
+Width: 1140
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Group Of project
+Type: 109
+ControlSource: project
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 915
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line64
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 45
+Top: 30
+Width: 11059
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text22
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3720
+Top: 0
+Width: 3600
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text61
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 7889
+Top: 0
+Width: 3225
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard

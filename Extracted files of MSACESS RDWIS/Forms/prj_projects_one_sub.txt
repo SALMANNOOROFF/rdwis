@@ -1,0 +1,76 @@
+FORM: prj_projects_one_sub
+
+=== FORM PROPERTIES ===
+Caption: history
+RecordSource: prj_prghistory_fin_last
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: hst_dtg2
+Type: 109
+ControlSource: pgh_dtg
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 12060
+Top: 60
+Width: 2280
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy    hh:nn:ss
+InputMask: 
+
+--------------------
+Name: hst_rem2
+Type: 109
+ControlSource: pgh_progress
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 180
+Top: 360
+Width: 14175
+Height: 2745
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pgh_authprogress
+Type: 109
+ControlSource: pgh_author
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 120
+Top: 60
+Width: 2700
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

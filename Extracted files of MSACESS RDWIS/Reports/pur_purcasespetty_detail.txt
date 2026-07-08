@@ -1,0 +1,482 @@
+REPORT: pur_purcasespetty_detail
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM pur_purcases WHERE (((pur_purcases.pcs_id)=[Forms]![pur_purcasespetty_detail]![pcs_id])); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Purchase Case " & [pcs_id] & " dated " & Format([pcs_date],"dd mmm yy") & " - " & IIf(Nz([pcs_sudohed],"")="CHRF","CSRF (","") & CodeFromheadid([pcs_effhed_id]) & IIf(Nz([pcs_sudohed],"")="CHRF",") ","")
+Caption: 
+Visible: True
+Left: 60
+Top: 60
+Width: 11400
+Height: 506
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: remarks
+Type: 109
+ControlSource: =IIf(IsNull([pcs_remarks]),"Nil",[pcs_remarks])
+Caption: 
+Visible: True
+Left: 2205
+Top: 4275
+Width: 9255
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Terms and Conditions:
+Value: 
+Visible: True
+Left: 0
+Top: 4275
+Width: 2233
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_title
+Type: 109
+ControlSource: pcs_title
+Caption: 
+Visible: True
+Left: 1085
+Top: 165
+Width: 10380
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label11
+Type: 100
+ControlSource: 
+Caption: Title:
+Value: 
+Visible: True
+Left: 65
+Top: 165
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: SubItems
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 2664
+Width: 11453
+Height: 1499
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: pur_purcases_detail_sub1 Label
+Type: 100
+ControlSource: 
+Caption: Items:
+Value: 
+Visible: True
+Left: 56
+Top: 2310
+Width: 735
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_intunt_id
+Type: 111
+ControlSource: pcs_intunt_id
+Caption: 
+Visible: True
+Left: 1080
+Top: 1365
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label422
+Type: 100
+ControlSource: 
+Caption: Initiator:
+Value: 
+Visible: True
+Left: 60
+Top: 1365
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_frm_id
+Type: 111
+ControlSource: pcs_frm_id
+Caption: 
+Visible: True
+Left: 1080
+Top: 1755
+Width: 3195
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Firm:
+Value: 
+Visible: True
+Left: 60
+Top: 1755
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_minute
+Type: 109
+ControlSource: pcs_minute
+Caption: 
+Visible: True
+Left: 1080
+Top: 585
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label554
+Type: 100
+ControlSource: 
+Caption: Minute:
+Value: 
+Visible: True
+Left: 60
+Top: 585
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_date
+Type: 109
+ControlSource: pcs_date
+Caption: 
+Visible: True
+Left: 1080
+Top: 975
+Width: 1695
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label598
+Type: 100
+ControlSource: 
+Caption: Date:
+Value: 
+Visible: True
+Left: 60
+Top: 975
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: status
+Type: 109
+ControlSource: =IIf([pcs_status]="Cancelled" Or [pcs_status]="Approved" Or [pcs_status] Like "*ulfilled",[pcs_status],"")
+Caption: 
+Visible: True
+Left: 5655
+Top: 1350
+Width: 1770
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Head:
+Value: 
+Visible: True
+Left: 4755
+Top: 570
+Width: 840
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 109
+ControlSource: =IIf([pcs_status]="Cancelled" Or [pcs_status]="Approved" Or [pcs_status] Like "*ulfilled","Status:","")
+Caption: 
+Visible: True
+Left: 4755
+Top: 1350
+Width: 840
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: effhed_id
+Type: 109
+ControlSource: =IIf(Nz([pcs_sudohed],"")="CHRF","CSRF (","") & CodeFromheadid([pcs_effhed_id]) & IIf(Nz([pcs_sudohed],"")="CHRF",") ","")
+Caption: 
+Visible: True
+Left: 5655
+Top: 570
+Width: 1770
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: hed_id
+Type: 109
+ControlSource: =IIf(Nz([pcs_hed_id],0)<>[pcs_effhed_id] And Nz([pcs_sudohed],"")="","Loan for " & CodeFromHeadId([pcs_hed_id]),"")
+Caption: 
+Visible: True
+Left: 4755
+Top: 960
+Width: 2670
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_midtax
+Type: 109
+ControlSource: pcs_midtax
+Caption: 
+Visible: True
+Left: 9945
+Top: 1290
+Width: 1500
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label121
+Type: 100
+ControlSource: 
+Caption: GST:
+Value: 
+Visible: True
+Left: 9255
+Top: 1290
+Width: 630
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_price
+Type: 109
+ControlSource: pcs_price
+Caption: 
+Visible: True
+Left: 9945
+Top: 1650
+Width: 1500
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label122
+Type: 100
+ControlSource: 
+Caption: Total:
+Value: 
+Visible: True
+Left: 9255
+Top: 1650
+Width: 630
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_intprice
+Type: 109
+ControlSource: pcs_intprice
+Caption: 
+Visible: True
+Left: 9945
+Top: 570
+Width: 1500
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label887
+Type: 100
+ControlSource: 
+Caption: Price:
+Value: 
+Visible: True
+Left: 9255
+Top: 570
+Width: 630
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_inttax
+Type: 109
+ControlSource: pcs_inttax
+Caption: 
+Visible: True
+Left: 9945
+Top: 930
+Width: 1500
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label888
+Type: 100
+ControlSource: 
+Caption: SST:
+Value: 
+Visible: True
+Left: 9255
+Top: 930
+Width: 630
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell695
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2835
+Top: 585
+Width: 1440
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell696
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2835
+Top: 975
+Width: 1440
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell700
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 2835
+Top: 1365
+Width: 1440
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text66
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3060
+Top: 0
+Width: 3525
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text91
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 7256
+Top: 0
+Width: 4200
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

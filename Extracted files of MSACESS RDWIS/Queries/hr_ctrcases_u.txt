@@ -1,0 +1,6 @@
+QUERY: hr_ctrcases_u
+
+SQL:
+SELECT hr_ctrcases.*
+FROM hr_ctrcases
+WHERE (((hr_ctrcases.ctc_unt_id)>=getvar("varLower") And (hr_ctrcases.ctc_unt_id)<=getvar("varUpper")));

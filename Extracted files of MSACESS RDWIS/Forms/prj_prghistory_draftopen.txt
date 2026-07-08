@@ -1,0 +1,188 @@
+FORM: prj_prghistory_draftopen
+
+=== FORM PROPERTIES ===
+Caption: history
+RecordSource: prj_prghistory_draftopen
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: path
+Type: 109
+ControlSource: pgh_path
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 254
+Top: 7874
+Width: 216
+Height: 216
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label41
+Type: 100
+ControlSource: 
+Caption: Attachment - Progress Details
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 543
+Top: 7818
+Width: 2820
+Height: 308
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: author
+Type: 109
+ControlSource: =[pgh_author] & " ( " & Format([pgh_dtg],"dd-mmm-yy hh:nn") & " )"
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 60
+Top: 30
+Width: 2730
+Height: 330
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pgh_progress
+Type: 109
+ControlSource: pgh_progress
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 120
+Top: 360
+Width: 6885
+Height: 7440
+ForeColor: 4210752
+BackColor: 15983578
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: status
+Type: 109
+ControlSource: =[pgh_status] & " with " & MprWith([pgh_level])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4050
+Top: 30
+Width: 2940
+Height: 330
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pgh_id
+Type: 109
+ControlSource: pgh_id
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 6030
+Top: 7815
+Width: 930
+Height: 225
+ForeColor: 12566463
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pgh_group
+Type: 109
+ControlSource: pgh_group
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2880
+Top: 45
+Width: 1125
+Height: 270
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: mmm yy
+InputMask: 
+
+--------------------
+Name: cmdPath
+Type: 104
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 240
+Top: 7860
+Width: 230
+Height: 230
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

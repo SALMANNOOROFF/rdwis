@@ -1,0 +1,335 @@
+REPORT: xxx2-3
+
+=== REPORT PROPERTIES ===
+RecordSource: xxx2-3
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Logo0
+Type: 103
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 300
+Top: 60
+Width: 690
+Height: 690
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: xxx2-3
+Value: 
+Visible: True
+Left: 1050
+Top: 60
+Width: 4663
+Height: 690
+ForeColor: 6968388
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Auto_Date
+Type: 109
+ControlSource: =Date()
+Caption: 
+Visible: True
+Left: 5775
+Top: 60
+Width: 5100
+Height: 315
+ForeColor: 6968388
+BackColor: 16777215
+Format: Long Date
+
+--------------------
+Name: Auto_Time
+Type: 109
+ControlSource: =Time()
+Caption: 
+Visible: True
+Left: 5775
+Top: 435
+Width: 5100
+Height: 315
+ForeColor: 6968388
+BackColor: 16777215
+Format: Long Time
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Doc ID
+Value: 
+Visible: True
+Left: 30
+Top: 60
+Width: 795
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Left: 885
+Top: 60
+Width: 4320
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Price
+Value: 
+Visible: True
+Left: 5265
+Top: 60
+Width: 1665
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Left: 6990
+Top: 60
+Width: 3900
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell71
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6990
+Top: 30
+Width: 3900
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Group Of project
+Type: 109
+ControlSource: project
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 5175
+Height: 420
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text92
+Type: 109
+ControlSource: =Sum([price])
+Caption: 
+Visible: True
+Left: 5265
+Top: 30
+Width: 1665
+Height: 420
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: EmptyCell79
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6990
+Top: 30
+Width: 3900
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pci_subhead
+Type: 109
+ControlSource: pci_subhead
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 5175
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text90
+Type: 109
+ControlSource: =Sum([price])
+Caption: 
+Visible: True
+Left: 5265
+Top: 30
+Width: 1665
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: pcs_id
+Type: 109
+ControlSource: pcs_id
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 795
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pci_desc
+Type: 109
+ControlSource: pci_desc
+Caption: 
+Visible: True
+Left: 885
+Top: 30
+Width: 4320
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: price
+Type: 109
+ControlSource: price
+Caption: 
+Visible: True
+Left: 5265
+Top: 30
+Width: 1665
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: subtype
+Type: 109
+ControlSource: =[pci_subtype]
+Caption: 
+Visible: True
+Left: 6990
+Top: 30
+Width: 3900
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text42
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3685
+Top: 0
+Width: 3600
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: AccessTotalspcs_id
+Type: 109
+ControlSource: =Count(*)
+Caption: 
+Visible: True
+Left: 30
+Top: 195
+Width: 795
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell28
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 885
+Top: 195
+Width: 4320
+Height: 240
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell29
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5265
+Top: 195
+Width: 1665
+Height: 240
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell34
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6990
+Top: 195
+Width: 3900
+Height: 240
+ForeColor: 
+BackColor: 16777215
+Format: 

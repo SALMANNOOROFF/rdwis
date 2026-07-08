@@ -1,0 +1,100 @@
+FORM: aud_revs_detail_sub1
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT aud_revcomps.* FROM aud_revcomps WHERE (((aud_revcomps.rvc_type)=1)) OR (((aud_revcomps.rvc_type)=2)) ORDER BY aud_revcomps.rvc_type; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Detail
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 915
+Top: 30
+Width: 10590
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Data ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 30
+Top: 30
+Width: 825
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rvc_detail
+Type: 109
+ControlSource: rvc_detail
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 915
+Top: 60
+Width: 10590
+Height: 585
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rvc_rowid
+Type: 109
+ControlSource: rvc_rowid
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 30
+Top: 60
+Width: 825
+Height: 585
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

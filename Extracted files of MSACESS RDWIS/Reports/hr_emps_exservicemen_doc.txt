@@ -1,0 +1,253 @@
+REPORT: hr_emps_exservicemen_doc
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_emps_exservicemen_doc
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Ex-Servicemen Employees
+Value: 
+Visible: True
+Left: 75
+Top: 60
+Width: 11026
+Height: 645
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Left: 15
+Top: 30
+Width: 1500
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Left: 1515
+Top: 30
+Width: 3840
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Joining dt
+Value: 
+Visible: True
+Left: 8310
+Top: 30
+Width: 1110
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Dept
+Value: 
+Visible: True
+Left: 9420
+Top: 30
+Width: 795
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 10215
+Top: 30
+Width: 900
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label76
+Type: 100
+ControlSource: 
+Caption: Job Title
+Value: 
+Visible: True
+Left: 5355
+Top: 30
+Width: 2955
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: emp_id
+Caption: 
+Visible: True
+Left: 15
+Top: 0
+Width: 1500
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: fullname
+Type: 109
+ControlSource: =NameComplete([emp_name],[emp_title],[emp_rank])
+Caption: 
+Visible: True
+Left: 1515
+Top: 0
+Width: 3840
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_joindt
+Type: 109
+ControlSource: emp_joindt
+Caption: 
+Visible: True
+Left: 8310
+Top: 0
+Width: 1110
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: emp_unt_id
+Type: 111
+ControlSource: emp_unt_id
+Caption: 
+Visible: True
+Left: 9420
+Top: 0
+Width: 795
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_hed_id
+Type: 111
+ControlSource: emp_hed_id
+Caption: 
+Visible: True
+Left: 10215
+Top: 0
+Width: 900
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_jobtitle
+Type: 109
+ControlSource: ctr_jobtitle
+Caption: 
+Visible: True
+Left: 5355
+Top: 0
+Width: 2955
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text54
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 4680
+Top: 120
+Width: 1320
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text107
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 7980
+Top: 120
+Width: 3135
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text73
+Type: 109
+ControlSource: =Count(*) & " employee(s)"
+Caption: 
+Visible: True
+Left: 120
+Top: 120
+Width: 6240
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line74
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 11100
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 

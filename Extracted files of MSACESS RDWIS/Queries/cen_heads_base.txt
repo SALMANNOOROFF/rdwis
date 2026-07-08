@@ -1,0 +1,6 @@
+QUERY: cen_heads_base
+
+SQL:
+SELECT *
+FROM cen_heads
+WHERE hed_type = 'Project' And IsNull([hed_closedt]) And hed_unt_id = 200000;

@@ -1,0 +1,4 @@
+QUERY: dtgnow
+
+SQL:
+SELECT current_timestamp as dtg;

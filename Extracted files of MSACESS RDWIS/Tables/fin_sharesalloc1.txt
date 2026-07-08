@@ -1,0 +1,13 @@
+TABLE: fin_sharesalloc1
+
+COLUMNS:
+- sha_hed_id | Type:4 | Size:4
+- sha_ficmt_id | Type:4 | Size:4
+- sha_focmt_id | Type:4 | Size:4
+- sha_transtype | Type:3 | Size:2
+- sha_id | Type:4 | Size:4
+- sha_cf | Type:20 | Size:16
+- sha_pcc | Type:20 | Size:16
+- sha_prj | Type:20 | Size:16
+- sha_prj_sal | Type:20 | Size:16
+- sha_prj_pur | Type:20 | Size:16

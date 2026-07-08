@@ -1,0 +1,10 @@
+TABLE: public_failed_jobs
+
+COLUMNS:
+- id | Type:20 | Size:16
+- uuid | Type:10 | Size:255
+- connection | Type:12 | Size:0
+- queue | Type:12 | Size:0
+- payload | Type:12 | Size:0
+- exception | Type:12 | Size:0
+- failed_at | Type:8 | Size:8

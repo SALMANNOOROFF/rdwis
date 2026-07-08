@@ -1,0 +1,355 @@
+REPORT: pur_purcasemilestone_sub
+
+=== REPORT PROPERTIES ===
+RecordSource: pur_purcases
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: pcs_id
+Type: 109
+ControlSource: pcs_id
+Caption: 
+Visible: True
+Left: 972
+Top: 90
+Width: 810
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Case Id
+Value: 
+Visible: True
+Left: 122
+Top: 92
+Width: 793
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_date
+Type: 109
+ControlSource: pcs_date
+Caption: 
+Visible: True
+Left: 3255
+Top: 90
+Width: 1245
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: dd mmm yy
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Date
+Value: 
+Visible: True
+Left: 2610
+Top: 90
+Width: 583
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_remarks
+Type: 109
+ControlSource: pcs_remarks
+Caption: 
+Visible: True
+Left: 2342
+Top: 1652
+Width: 7755
+Height: 315
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Terms and Conditions
+Value: 
+Visible: True
+Left: 120
+Top: 1652
+Width: 2173
+Height: 314
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_status
+Type: 109
+ControlSource: pcs_status
+Caption: 
+Visible: True
+Left: 5790
+Top: 872
+Width: 1575
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Left: 5010
+Top: 872
+Width: 720
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_hed_id
+Type: 111
+ControlSource: pcs_hed_id
+Caption: 
+Visible: True
+Left: 3281
+Top: 883
+Width: 1110
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label59
+Type: 100
+ControlSource: 
+Caption: For 
+Value: 
+Visible: True
+Left: 2595
+Top: 883
+Width: 628
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_effhed_id
+Type: 111
+ControlSource: pcs_effhed_id
+Caption: 
+Visible: True
+Left: 957
+Top: 870
+Width: 1110
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label94
+Type: 100
+ControlSource: 
+Caption: Head
+Value: 
+Visible: True
+Left: 122
+Top: 870
+Width: 793
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_title
+Type: 109
+ControlSource: pcs_title
+Caption: 
+Visible: True
+Left: 957
+Top: 482
+Width: 6405
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label116
+Type: 100
+ControlSource: 
+Caption: Title
+Value: 
+Visible: True
+Left: 122
+Top: 482
+Width: 793
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_minute
+Type: 109
+ControlSource: pcs_minute
+Caption: 
+Visible: True
+Left: 5837
+Top: 90
+Width: 465
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label117
+Type: 100
+ControlSource: 
+Caption: Minute
+Value: 
+Visible: True
+Left: 4980
+Top: 90
+Width: 810
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_midprice
+Type: 109
+ControlSource: pcs_midprice
+Caption: 
+Visible: True
+Left: 8461
+Top: 90
+Width: 1575
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: Standard
+
+--------------------
+Name: Label120
+Type: 100
+ControlSource: 
+Caption: Price
+Value: 
+Visible: True
+Left: 7815
+Top: 90
+Width: 600
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_midtax
+Type: 109
+ControlSource: pcs_midtax
+Caption: 
+Visible: True
+Left: 8467
+Top: 482
+Width: 1575
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: Standard
+
+--------------------
+Name: Label121
+Type: 100
+ControlSource: 
+Caption: GST
+Value: 
+Visible: True
+Left: 7821
+Top: 482
+Width: 600
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_price
+Type: 109
+ControlSource: pcs_price
+Caption: 
+Visible: True
+Left: 8465
+Top: 872
+Width: 1575
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: Standard
+
+--------------------
+Name: Label122
+Type: 100
+ControlSource: 
+Caption: Final price
+Value: 
+Visible: True
+Left: 7821
+Top: 872
+Width: 598
+Height: 585
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcs_frm_id
+Type: 111
+ControlSource: pcs_frm_id
+Caption: 
+Visible: True
+Left: 957
+Top: 1262
+Width: 6390
+Height: 330
+ForeColor: 0
+BackColor: 11854021
+Format: 
+
+--------------------
+Name: Label716
+Type: 100
+ControlSource: 
+Caption: Firm
+Value: 
+Visible: True
+Left: 122
+Top: 1262
+Width: 793
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 

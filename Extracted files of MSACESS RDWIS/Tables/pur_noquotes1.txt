@@ -1,0 +1,6 @@
+TABLE: pur_noquotes1
+
+COLUMNS:
+- nqt_id | Type:4 | Size:4
+- nqt_pcs_id | Type:4 | Size:4
+- nqt_frm_id | Type:4 | Size:4

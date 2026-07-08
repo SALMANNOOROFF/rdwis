@@ -1,0 +1,5 @@
+TABLE: cen_levels
+
+COLUMNS:
+- lvl_id | Type:3 | Size:2
+- lvl_cat | Type:10 | Size:255

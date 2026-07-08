@@ -1,0 +1,5 @@
+QUERY: fin_salorderminute_payments
+
+SQL:
+SELECT Count(fin_salorderminute_payments1.sor_id) AS payments, Sum(fin_salorderminute_payments1.parent) AS parents, Sum(fin_salorderminute_payments1.child) AS children
+FROM fin_salorderminute_payments1;

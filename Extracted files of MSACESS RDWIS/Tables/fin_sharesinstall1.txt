@@ -1,0 +1,11 @@
+TABLE: fin_sharesinstall1
+
+COLUMNS:
+- shi_hed_id | Type:4 | Size:4
+- shi_fitrn_id | Type:4 | Size:4
+- shi_fotrn_id | Type:4 | Size:4
+- shi_id | Type:4 | Size:4
+- shi_cf | Type:20 | Size:16
+- shi_pcc | Type:20 | Size:16
+- shi_msn_idd | Type:4 | Size:4
+- shi_prj | Type:20 | Size:16

@@ -1,0 +1,392 @@
+FORM: pur_purreqs_u
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: pur_purreqs_u_open
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: lblHeader
+Type: 100
+ControlSource: 
+Caption: Purchase Requisitions - Open
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 120
+Top: 60
+Width: 6585
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9735
+Top: 825
+Width: 1860
+Height: 360
+ForeColor: 5855577
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: For Project
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7395
+Top: 825
+Width: 1140
+Height: 360
+ForeColor: 5855577
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Req Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5895
+Top: 825
+Width: 1440
+Height: 360
+ForeColor: 5855577
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label22
+Type: 100
+ControlSource: 
+Caption: Req ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 135
+Top: 825
+Width: 900
+Height: 360
+ForeColor: 5855577
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label135
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 8595
+Top: 825
+Width: 1080
+Height: 360
+ForeColor: 5855577
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label146
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1095
+Top: 825
+Width: 4740
+Height: 360
+ForeColor: 5855577
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtBack
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 0
+Top: 0
+Width: 11580
+Height: 465
+ForeColor: 16777215
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label131
+Type: 100
+ControlSource: 
+Caption: Text130
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 0
+Width: 795
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prq_hed_id
+Type: 111
+ControlSource: prq_effhed_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7395
+Top: 60
+Width: 1140
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prq_date
+Type: 109
+ControlSource: prq_date
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5895
+Top: 60
+Width: 1440
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: prq_id
+Type: 109
+ControlSource: prq_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 135
+Top: 60
+Width: 900
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_prq_hed_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 8250
+Top: 60
+Width: 285
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prq_unt_id
+Type: 111
+ControlSource: prq_unt_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8595
+Top: 60
+Width: 1080
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_prq_unt_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 9390
+Top: 60
+Width: 285
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prq_status
+Type: 109
+ControlSource: prq_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9735
+Top: 60
+Width: 1860
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prq_desc
+Type: 109
+ControlSource: prq_desc
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1095
+Top: 60
+Width: 4740
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

@@ -1,0 +1,7877 @@
+FORM: prj_gantt
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: txtTitle
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 180
+Top: 120
+Width: 14460
+Height: 540
+ForeColor: 16777215
+BackColor: 5793136
+FontName: Calibri
+FontSize: 20
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSubTitle
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 180
+Top: 720
+Width: 14460
+Height: 300
+ForeColor: 16777215
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gBorder
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 120
+Top: 60
+Width: 120
+Height: 120
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine1
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 360
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine2
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 420
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine3
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 480
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine4
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 540
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine5
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 600
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine6
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 660
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine7
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 720
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine8
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 780
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine9
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 840
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine10
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 900
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine11
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 960
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine12
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1020
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine13
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1080
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine14
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1140
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine15
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1200
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine16
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1260
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine17
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1320
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine18
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1380
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine19
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1440
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine20
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1500
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine21
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1560
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine22
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1620
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine23
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1680
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine24
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1740
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine25
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1800
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine26
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1860
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine27
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1920
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine28
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1980
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine29
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2040
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine30
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2100
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine31
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2160
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine32
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2220
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine33
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2280
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine34
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2340
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine35
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2400
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine36
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2460
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine37
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2520
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine38
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2580
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine39
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2640
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: gLine40
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2700
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate1
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2940
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate2
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3000
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate3
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3060
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate4
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3120
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate5
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3180
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate6
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3240
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate7
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3300
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate8
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3360
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate9
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3420
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate10
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3480
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate11
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3540
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate12
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3600
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate13
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3660
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate14
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3720
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate15
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3780
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate16
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3840
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate17
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3900
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate18
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3960
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate19
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4020
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate20
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4080
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate21
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4140
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate22
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4200
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate23
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4260
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate24
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4320
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate25
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4380
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate26
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4440
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate27
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4500
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate28
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4560
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate29
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4620
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate30
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4680
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate31
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4740
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate32
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4800
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate33
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4800
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate34
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4860
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate35
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4920
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate36
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4980
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate37
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5040
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate38
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5100
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate39
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5160
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: uDate40
+Type: 100
+ControlSource: 
+Caption: d
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5220
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate1
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5400
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate2
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5460
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate3
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5520
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate4
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5580
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate5
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5640
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate6
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5700
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate7
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5760
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate8
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5820
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate9
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5880
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate10
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5940
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate11
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6000
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate12
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6060
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate13
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6120
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate14
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6180
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate15
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6240
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate16
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6300
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate17
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6360
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate18
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6420
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate19
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6480
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate20
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6540
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate21
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6600
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate22
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6660
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate23
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6720
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate24
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6780
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate25
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6840
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate26
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6900
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate27
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6960
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate28
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7020
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate29
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7080
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate30
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7140
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate31
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7200
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate32
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7260
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate33
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7320
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate34
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7380
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate35
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7440
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate36
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7500
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate37
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7560
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate38
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7620
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate39
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7680
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lDate40
+Type: 100
+ControlSource: 
+Caption: t
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7740
+Top: 60
+Width: 60
+Height: 125
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc1
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7920
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc2
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8040
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc3
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8160
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc4
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8280
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc5
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8400
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc6
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8520
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc7
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8640
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc8
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8760
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc9
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8880
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc10
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9000
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc11
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9120
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc12
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9240
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc13
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9360
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc14
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9480
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc15
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9600
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc16
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9720
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc17
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9840
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc18
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9960
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc19
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10080
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc20
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10200
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc21
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10320
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc22
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10440
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc23
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10560
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc24
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10680
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc25
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10800
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc26
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10920
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc27
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11040
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc28
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11160
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc29
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11280
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iDesc30
+Type: 100
+ControlSource: 
+Caption: #
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11400
+Top: 60
+Width: 125
+Height: 115
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn1
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 120
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn2
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 240
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn3
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 360
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn4
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 480
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn5
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 600
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn6
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 720
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn7
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 840
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn8
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 960
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn9
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1080
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn10
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1200
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn11
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1320
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn12
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1440
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn13
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1560
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn14
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1680
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn15
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1800
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn16
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1920
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn17
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2040
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn18
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2160
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn19
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2280
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn20
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2400
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn21
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2520
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn22
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2640
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn23
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2760
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn24
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2880
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn25
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3000
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn26
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3120
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn27
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3240
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn28
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3360
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn29
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3480
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cMsn30
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3600
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn1
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4080
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn2
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4200
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn3
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4320
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn4
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4440
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn5
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4560
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn6
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4680
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn7
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4800
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn8
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4920
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn9
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5040
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn10
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5160
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn11
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5280
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn12
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5400
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn13
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5520
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn14
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5640
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn15
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5760
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn16
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5880
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn17
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6000
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn18
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6120
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn19
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6240
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn20
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6360
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn21
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6480
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn22
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6600
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn23
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6720
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn24
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6840
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn25
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6960
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn26
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7080
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn27
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7200
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn28
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7320
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn29
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7440
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rMsn30
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7560
+Top: 360
+Width: 124
+Height: 124
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 26
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct5
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 600
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct4
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 480
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct1
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 120
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct2
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 240
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct3
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 360
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct6
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 720
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct7
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 840
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct8
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 960
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct9
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1080
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct10
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1200
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct11
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1320
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct12
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1440
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct13
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1560
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct14
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1680
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct15
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1800
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct16
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 1920
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct17
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2040
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct18
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2160
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct19
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2280
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct20
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2400
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct21
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2520
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct22
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2640
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct23
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2760
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct24
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2880
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct25
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3000
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct26
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3120
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct27
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3240
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct28
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3360
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct29
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3480
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct30
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3600
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct31
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3720
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct32
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3840
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct33
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3960
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct34
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4080
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct35
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4200
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct36
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4320
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct37
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4440
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct38
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4560
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct39
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4680
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct40
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4800
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct41
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4920
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct42
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5040
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct43
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5160
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct44
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5280
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct45
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5400
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct46
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5520
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct47
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5640
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct48
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5760
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct49
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5880
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct50
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6000
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct51
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6120
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct52
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6240
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct53
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6360
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct54
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6480
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct55
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6600
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct56
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6720
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct57
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6840
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct58
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6960
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct59
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7080
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cAct60
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7200
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct1
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7680
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct48
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7800
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct49
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7920
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct50
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8040
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct51
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7560
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct52
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8280
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct53
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8400
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct54
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8520
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct55
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8640
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct56
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8160
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct57
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8880
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct58
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9000
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct59
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9120
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct60
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9240
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct2
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8760
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct3
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9480
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct4
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9600
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct5
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9720
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct6
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9840
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct7
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9360
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct8
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10080
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct9
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10200
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct10
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10320
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct11
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10440
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct12
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 9960
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct13
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10680
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct14
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10800
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct15
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10920
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct16
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11040
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct17
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 10560
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct18
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11280
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct19
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11400
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct20
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11520
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct21
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11640
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct22
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11160
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct23
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11880
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct24
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12000
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct25
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12120
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct26
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12240
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct27
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11760
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct28
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12480
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct29
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12600
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct30
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12720
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct31
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12840
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct32
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12360
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct33
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13080
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct34
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13200
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct35
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13320
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct36
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13440
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct37
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12960
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct38
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13680
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct39
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13800
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct40
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13920
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct41
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 14040
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct42
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 13560
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct43
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 14280
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct44
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 14400
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct45
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 14520
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct46
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 14640
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rAct47
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 14160
+Top: 240
+Width: 60
+Height: 60
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dLine
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 11760
+Top: 60
+Width: 0
+Height: 120
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box396
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 660
+Top: 240
+Width: 6060
+Height: 1080
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box386
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 780
+Top: 360
+Width: 784
+Height: 245
+ForeColor: 
+BackColor: 5793136
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box387
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 780
+Top: 900
+Width: 786
+Height: 245
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label388
+Type: 100
+ControlSource: 
+Caption: ◆
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3840
+Top: 300
+Width: 424
+Height: 416
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label389
+Type: 100
+ControlSource: 
+Caption: ◇
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3840
+Top: 840
+Width: 424
+Height: 416
+ForeColor: 5793136
+BackColor: 16777215
+FontName: Century Gothic
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label392
+Type: 100
+ControlSource: 
+Caption: Completed activity
+
+Remaining activity
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1740
+Top: 360
+Width: 1830
+Height: 825
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label393
+Type: 100
+ControlSource: 
+Caption: Completed Milestone
+
+Remaining Milestone
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4380
+Top: 360
+Width: 2100
+Height: 825
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtDate
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 9900
+Top: 1020
+Width: 4740
+Height: 300
+ForeColor: 16777215
+BackColor: 5793136
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

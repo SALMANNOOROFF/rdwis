@@ -1,0 +1,347 @@
+FORM: ina_item_detach
+
+=== FORM PROPERTIES ===
+Caption: Detach Item
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Detach Item
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 113
+Top: 170
+Width: 7643
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdOk
+Type: 104
+ControlSource: 
+Caption: Detach
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2437
+Top: 3061
+Width: 1369
+Height: 394
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 4478
+Top: 3061
+Width: 1369
+Height: 394
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: child_qty
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2960
+Top: 2085
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Detach quantity:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 705
+Top: 2085
+Width: 2188
+Height: 365
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: child_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: False
+Locked: True
+Left: 5159
+Top: 566
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: child_held
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 2960
+Top: 1590
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label140
+Type: 100
+ControlSource: 
+Caption: Quantity attached:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 705
+Top: 1590
+Width: 2188
+Height: 365
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: child_invat_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 2948
+Top: 566
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label144
+Type: 100
+ControlSource: 
+Caption: Item ID:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 693
+Top: 566
+Width: 2188
+Height: 365
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: child_desc
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 2960
+Top: 1080
+Width: 4860
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label146
+Type: 100
+ControlSource: 
+Caption: Item description:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 705
+Top: 1080
+Width: 2188
+Height: 365
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: parent_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: False
+Locked: True
+Left: 5159
+Top: 113
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: parent_invat_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: False
+Locked: True
+Left: 2948
+Top: 113
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: child_held_units
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 4422
+Top: 1587
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

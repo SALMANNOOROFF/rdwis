@@ -1,0 +1,5 @@
+TABLE: frm_facils1
+
+COLUMNS:
+- fcl_xfrm_id | Type:4 | Size:4
+- fcl_facil | Type:10 | Size:255

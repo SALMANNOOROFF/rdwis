@@ -1,0 +1,8 @@
+TABLE: hr_contractplans
+
+COLUMNS:
+- cpn_id | Type:4 | Size:4
+- cpn_ctr_id | Type:4 | Size:4
+- cpn_startdt | Type:8 | Size:8
+- cpn_enddt | Type:8 | Size:8
+- cpn_hed_id | Type:4 | Size:4

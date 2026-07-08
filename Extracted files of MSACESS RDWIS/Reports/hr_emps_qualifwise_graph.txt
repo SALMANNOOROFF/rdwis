@@ -1,0 +1,52 @@
+REPORT: hr_emps_qualifwise_graph
+
+=== REPORT PROPERTIES ===
+RecordSource: 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: EMPLOYEES QUALIFICATION
+Value: 
+Visible: True
+Left: 3105
+Top: 120
+Width: 9315
+Height: 480
+ForeColor: 855309
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmdData
+Type: 104
+ControlSource: 
+Caption: Data
+Value: 
+Visible: True
+Left: 14598
+Top: 188
+Width: 1245
+Height: 375
+ForeColor: 4210752
+BackColor: 15123357
+Format: 
+
+--------------------
+Name: Graph2
+Type: 113
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 180
+Top: 180
+Width: 15720
+Height: 8880
+ForeColor: 
+BackColor: 16777215
+Format: 

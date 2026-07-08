@@ -1,0 +1,999 @@
+REPORT: fin_salary_slipxxx
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_salary_slip
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Text780
+Type: 109
+ControlSource: ="Printed on " & Format(Date(),"dd mmm yy")
+Caption: 
+Visible: True
+Left: 6690
+Top: 15
+Width: 3345
+Height: 344
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label241
+Type: 100
+ControlSource: 
+Caption: M/S MTSS PAY SLIP
+Value: 
+Visible: True
+Left: 3458
+Top: 0
+Width: 3000
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_emp_id
+Type: 109
+ControlSource: sor_emp_id
+Caption: 
+Visible: True
+Left: 1920
+Top: 405
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Employee ID :
+Value: 
+Visible: True
+Left: 0
+Top: 405
+Width: 1920
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_empnamecomp
+Type: 109
+ControlSource: sor_empnamecomp
+Caption: 
+Visible: True
+Left: 1920
+Top: 765
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Employee Name :
+Value: 
+Visible: True
+Left: 0
+Top: 765
+Width: 1920
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_cnic
+Type: 109
+ControlSource: emp_cnic
+Caption: 
+Visible: True
+Left: 1920
+Top: 1125
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: CNIC No :
+Value: 
+Visible: True
+Left: 0
+Top: 1125
+Width: 1920
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_month
+Type: 109
+ControlSource: ="Apr 25"
+Caption: 
+Visible: True
+Left: 1920
+Top: 1485
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: mmm yyyy
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Salary for Month :
+Value: 
+Visible: True
+Left: 0
+Top: 1485
+Width: 1920
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_jobtitle
+Type: 109
+ControlSource: ctr_jobtitle
+Caption: 
+Visible: True
+Left: 6915
+Top: 405
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Designation :
+Value: 
+Visible: True
+Left: 5265
+Top: 405
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_joindt
+Type: 109
+ControlSource: emp_joindt
+Caption: 
+Visible: True
+Left: 6915
+Top: 1485
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Date of Joining :
+Value: 
+Visible: True
+Left: 5265
+Top: 1485
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_nokname
+Type: 109
+ControlSource: emp_nokname
+Caption: 
+Visible: True
+Left: 6915
+Top: 1845
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Next of Kin :
+Value: 
+Visible: True
+Left: 5265
+Top: 1845
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label376
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 0
+Top: 6705
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label377
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 0
+Top: 7065
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label386
+Type: 100
+ControlSource: 
+Caption: Deductions
+Value: 
+Visible: True
+Left: 0
+Top: 5280
+Width: 3525
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label387
+Type: 100
+ControlSource: 
+Caption: Absent / Leave without pay
+Value: 
+Visible: True
+Left: 0
+Top: 5985
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label388
+Type: 100
+ControlSource: 
+Caption: Dues
+Value: 
+Visible: True
+Left: 0
+Top: 6345
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label389
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 3525
+Top: 5280
+Width: 1513
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label390
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Left: 5040
+Top: 5280
+Width: 5010
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label398
+Type: 100
+ControlSource: 
+Caption: Total Deductions
+Value: 
+Visible: True
+Left: 0
+Top: 7425
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label307
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 0
+Top: 3915
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_grosalary
+Type: 109
+ControlSource: ="210,000"
+Caption: 
+Visible: True
+Left: 3525
+Top: 2835
+Width: 1515
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label10
+Type: 100
+ControlSource: 
+Caption: Base Salary
+Value: 
+Visible: True
+Left: 0
+Top: 2835
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label257
+Type: 100
+ControlSource: 
+Caption: Earnings
+Value: 
+Visible: True
+Left: 0
+Top: 2490
+Width: 3525
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label258
+Type: 100
+ControlSource: 
+Caption: Arrears
+Value: 
+Visible: True
+Left: 0
+Top: 3195
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label259
+Type: 100
+ControlSource: 
+Caption: Advance Salary
+Value: 
+Visible: True
+Left: 0
+Top: 3555
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label262
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 3525
+Top: 2490
+Width: 1515
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label263
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Left: 5040
+Top: 2490
+Width: 4995
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label353
+Type: 100
+ControlSource: 
+Caption: Gross Salary
+Value: 
+Visible: True
+Left: 0
+Top: 4635
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label409
+Type: 100
+ControlSource: 
+Caption: 0
+Value: 
+Visible: True
+Left: 3525
+Top: 3555
+Width: 1515
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label411
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 3525
+Top: 4275
+Width: 1515
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label412
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 3525
+Top: 3915
+Width: 1515
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label547
+Type: 100
+ControlSource: 
+Caption: Income Tax
+Value: 
+Visible: True
+Left: 0
+Top: 5625
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label578
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 3525
+Top: 6705
+Width: 1513
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label579
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 3525
+Top: 7065
+Width: 1513
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label598
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 5040
+Top: 5625
+Width: 5010
+Height: 2160
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label599
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 0
+Top: 4275
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label600
+Type: 100
+ControlSource: 
+Caption: Department :
+Value: 
+Visible: True
+Left: 5265
+Top: 765
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label601
+Type: 100
+ControlSource: 
+Caption: NTN No :
+Value: 
+Visible: True
+Left: 5265
+Top: 1125
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label603
+Type: 100
+ControlSource: 
+Caption: NRDI
+Value: 
+Visible: True
+Left: 6915
+Top: 765
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label619
+Type: 100
+ControlSource: 
+Caption: Employment Type :
+Value: 
+Visible: True
+Left: 0
+Top: 1845
+Width: 1920
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label627
+Type: 100
+ControlSource: 
+Caption:  
+Value: 
+Visible: True
+Left: 6915
+Top: 1125
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label602
+Type: 109
+ControlSource: ="Contract (" & [ctr_type].[Column](1) & ")"
+Caption: 
+Visible: True
+Left: 1920
+Top: 1845
+Width: 3120
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label754
+Type: 100
+ControlSource: 
+Caption: Net Salary
+Value: 
+Visible: True
+Left: 0
+Top: 8055
+Width: 3525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell788
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 165
+Width: 1920
+Height: 240
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell798
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 1920
+Top: 165
+Width: 3120
+Height: 240
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell799
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5265
+Top: 165
+Width: 1650
+Height: 240
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_type
+Type: 111
+ControlSource: ctr_type
+Caption: 
+Visible: False
+Left: 6915
+Top: 165
+Width: 3120
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell873
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5040
+Top: 165
+Width: 225
+Height: 240
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell875
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5040
+Top: 765
+Width: 225
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell876
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5040
+Top: 1125
+Width: 225
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell877
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5040
+Top: 1485
+Width: 225
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell878
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5040
+Top: 1845
+Width: 225
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell879
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5040
+Top: 405
+Width: 225
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: takeaway
+Type: 109
+ControlSource: ="191,240"
+Caption: 
+Visible: True
+Left: 3525
+Top: 8055
+Width: 1515
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: sor_arrears
+Type: 109
+ControlSource: sor_arrears
+Caption: 
+Visible: True
+Left: 3525
+Top: 3195
+Width: 1515
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: tax
+Type: 109
+ControlSource: ="18,760"
+Caption: 
+Visible: True
+Left: 3525
+Top: 5625
+Width: 1513
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: sor_underwork
+Type: 109
+ControlSource: sor_underwork
+Caption: 
+Visible: True
+Left: 3525
+Top: 5985
+Width: 1513
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: sor_dues
+Type: 109
+ControlSource: sor_dues
+Caption: 
+Visible: True
+Left: 3525
+Top: 6345
+Width: 1513
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: total_earnings
+Type: 109
+ControlSource: =[sor_grosalary]+[sor_arrears]
+Caption: 
+Visible: True
+Left: 3525
+Top: 4635
+Width: 1515
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: total_deductions
+Type: 109
+ControlSource: =[tax]+[sor_underwork]+[sor_dues]
+Caption: 
+Visible: True
+Left: 3525
+Top: 7425
+Width: 1513
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: sor_remarks
+Type: 100
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 5040
+Top: 2835
+Width: 4995
+Height: 2160
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: bank
+Type: 109
+ControlSource: =IIf([sor_bnkaccdetail]="(Pay by Cheque)","Paid by cheque.","Deposited in account No. " & [sor_bnkaccdetail] & ", Meezan Bank.")
+Caption: 
+Visible: True
+Left: 0
+Top: 8447
+Width: 4995
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label544
+Type: 100
+ControlSource: 
+Caption: For queries please contact Service Desk: Ground Floor, Bahria Complex I, MT Khan Road, Karachi. Tel # (021) 35612586 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 10050
+Height: 285
+ForeColor: 0
+BackColor: 16777215
+Format: 

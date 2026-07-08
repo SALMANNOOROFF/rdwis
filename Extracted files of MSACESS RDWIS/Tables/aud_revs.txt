@@ -1,0 +1,16 @@
+TABLE: aud_revs
+
+COLUMNS:
+- rev_id | Type:4 | Size:4
+- rev_obj | Type:10 | Size:255
+- rev_releasedtg | Type:8 | Size:8
+- rev_closedtg | Type:8 | Size:8
+- rev_objid | Type:10 | Size:255
+- rev_reason | Type:10 | Size:255
+- rev_status | Type:10 | Size:255
+- rev_unt_id | Type:4 | Size:4
+- rev_date | Type:8 | Size:8
+- rev_type | Type:3 | Size:2
+- rev_intunt_id | Type:4 | Size:4
+- rev_ref | Type:10 | Size:255
+- rev_objext | Type:10 | Size:255

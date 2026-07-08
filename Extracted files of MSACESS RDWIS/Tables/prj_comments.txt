@@ -1,0 +1,9 @@
+TABLE: prj_comments
+
+COLUMNS:
+- cmt_xpgh_id | Type:4 | Size:4
+- cmt_id | Type:4 | Size:4
+- cmt_dtg | Type:8 | Size:8
+- cmt_comment | Type:10 | Size:255
+- cmt_author | Type:10 | Size:15
+- cmt_status | Type:10 | Size:10

@@ -1,0 +1,427 @@
+REPORT: hr_attendance_summary_emp
+
+=== REPORT PROPERTIES ===
+RecordSource: 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Attendance for Contract dated " & Format([Forms]![hr_contracts]![subContracts].[Form]![ctr_date],"dd mmm yy")
+Caption: 
+Visible: True
+Left: 60
+Top: 120
+Width: 9463
+Height: 450
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: =[Forms]![hr_contracts]![emp_id]
+Caption: 
+Visible: True
+Left: 1441
+Top: 285
+Width: 1920
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Employee ID
+Value: 
+Visible: True
+Left: 61
+Top: 285
+Width: 1320
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_joindt
+Type: 109
+ControlSource: =[Forms]![hr_contracts]![emp_joindt]
+Caption: 
+Visible: True
+Left: 1440
+Top: 682
+Width: 1350
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Joining Date
+Value: 
+Visible: True
+Left: 60
+Top: 682
+Width: 1320
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_lastdt
+Type: 109
+ControlSource: =[Forms]![hr_contracts]![emp_lastdt]
+Caption: 
+Visible: True
+Left: 4543
+Top: 675
+Width: 1575
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Last Date
+Value: 
+Visible: True
+Left: 3525
+Top: 675
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subContracts
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 735
+Top: 4098
+Width: 6193
+Height: 2206
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: emp_hed_id
+Type: 111
+ControlSource: =[Forms]![hr_contracts]![emp_hed_id]
+Caption: 
+Visible: True
+Left: 4548
+Top: 1072
+Width: 1365
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 3528
+Top: 1072
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_unt_id
+Type: 111
+ControlSource: =[Forms]![hr_contracts]![emp_unt_id]
+Caption: 
+Visible: True
+Left: 1440
+Top: 1087
+Width: 1350
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Division
+Value: 
+Visible: True
+Left: 60
+Top: 1087
+Width: 1320
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: name_complete
+Type: 109
+ControlSource: =[Forms]![hr_contracts]![empnamecomp]
+Caption: 
+Visible: True
+Left: 4545
+Top: 285
+Width: 4995
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label68
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Left: 3525
+Top: 285
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: contract_dates
+Type: 109
+ControlSource: =Format([Forms]![hr_contracts]![subContracts].[Form]![ctr_startdt],"dd mmm yy") & "  to  " & Format([Forms]![hr_contracts]![subContracts].[Form]![ctr_enddt],"dd mmm yy") & IIf(Not IsNull([Forms]![hr_contracts]![subContracts].[Form]![ctr_termindt]),IIf([Forms]![hr_contracts]![subContracts].[Form]![ctr_termindt]>[Forms]![hr_contracts]![subContracts].[Form]![ctr_enddt]," (extended to " & Format([Forms]![hr_contracts]![subContracts].[Form]![ctr_termindt],"dd mmm yy") & ")"," (reduced to " & Format([Forms]![hr_contracts]![subContracts].[Form]![ctr_termindt],"dd mmm yy") & ")"))
+Caption: 
+Visible: True
+Left: 2399
+Top: 2114
+Width: 4755
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label70
+Type: 100
+ControlSource: 
+Caption: Contract dates
+Value: 
+Visible: True
+Left: 869
+Top: 2114
+Width: 1485
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_jobtitle
+Type: 109
+ControlSource: =[Forms]![hr_contracts]![subContracts].[Form]![ctr_jobtitle]
+Caption: 
+Visible: True
+Left: 4176
+Top: 2924
+Width: 2985
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Job Title
+Value: 
+Visible: True
+Left: 3201
+Top: 2924
+Width: 960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_grade
+Type: 109
+ControlSource: =[Forms]![hr_contracts]![subContracts].[Form]![ctr_grade]
+Caption: 
+Visible: True
+Left: 4169
+Top: 2519
+Width: 2985
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Grade
+Value: 
+Visible: True
+Left: 3194
+Top: 2519
+Width: 915
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_unt_id
+Type: 111
+ControlSource: =[Forms]![hr_contracts]![subContracts].[Form]![ctr_unt_id]
+Caption: 
+Visible: True
+Left: 1844
+Top: 2520
+Width: 1185
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label71
+Type: 100
+ControlSource: 
+Caption: Division
+Value: 
+Visible: True
+Left: 869
+Top: 2519
+Width: 915
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_hed_id
+Type: 111
+ControlSource: =[Forms]![hr_contracts]![subContracts].[Form]![ctr_hed_id]
+Caption: 
+Visible: True
+Left: 1844
+Top: 2925
+Width: 1185
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 869
+Top: 2924
+Width: 915
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Box74
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 764
+Top: 2009
+Width: 6338
+Height: 1372
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label79
+Type: 100
+ControlSource: 
+Caption: Contract Data
+Value: 
+Visible: True
+Left: 690
+Top: 1650
+Width: 1395
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label80
+Type: 109
+ControlSource: ="Attendance from  " & Format([Forms]![vars].[Parameter1],"dd mmm yy") & "  to  " & Format([Forms]![vars].[Parameter2],"dd mmm yy")
+Caption: 
+Visible: True
+Left: 770
+Top: 3690
+Width: 6210
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text26
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3520
+Top: 0
+Width: 2100
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text24
+Type: 111
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 6465
+Top: 0
+Width: 2940
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard

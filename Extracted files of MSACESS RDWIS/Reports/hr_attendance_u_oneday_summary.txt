@@ -1,0 +1,664 @@
+REPORT: hr_attendance_u_oneday_summary
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_attendance_u_oneday_summary
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Contract Employees Attendance - " & Format([attend_date],"ddd  dd mmm yy")
+Caption: 
+Visible: True
+Left: 60
+Top: 60
+Width: 8521
+Height: 480
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Admin
+Value: 
+Visible: True
+Left: 8610
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Comm
+Value: 
+Visible: True
+Left: 3030
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Enab
+Value: 
+Visible: True
+Left: 3960
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: HR
+Value: 
+Visible: True
+Left: 7680
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: IS
+Value: 
+Visible: True
+Left: 9540
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: NWS
+Value: 
+Visible: True
+Left: 4890
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Sensors
+Value: 
+Visible: True
+Left: 5820
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Sys
+Value: 
+Visible: True
+Left: 6750
+Top: 780
+Width: 870
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label125
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Left: 2025
+Top: 780
+Width: 945
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label181
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Left: 30
+Top: 1200
+Width: 1935
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text128
+Type: 109
+ControlSource: =[txtTotal]
+Caption: 
+Visible: True
+Left: 2025
+Top: 1200
+Width: 945
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text129
+Type: 109
+ControlSource: =[txtComm]
+Caption: 
+Visible: True
+Left: 3030
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text130
+Type: 109
+ControlSource: =[txtEnab]
+Caption: 
+Visible: True
+Left: 3960
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text131
+Type: 109
+ControlSource: =[txtNWS]
+Caption: 
+Visible: True
+Left: 4890
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text132
+Type: 109
+ControlSource: =[txtSensors]
+Caption: 
+Visible: True
+Left: 5820
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text156
+Type: 109
+ControlSource: =[txtSys]
+Caption: 
+Visible: True
+Left: 6750
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text157
+Type: 109
+ControlSource: =[txtHR]
+Caption: 
+Visible: True
+Left: 7680
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text158
+Type: 109
+ControlSource: =[txtAdmin]
+Caption: 
+Visible: True
+Left: 8610
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text159
+Type: 109
+ControlSource: =[txtIS]
+Caption: 
+Visible: True
+Left: 9540
+Top: 1200
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell689
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 30
+Top: 780
+Width: 1935
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmdChangeDate
+Type: 104
+ControlSource: 
+Caption: Change Date
+Value: 
+Visible: False
+Left: 8820
+Top: 120
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 15123357
+Format: 
+
+--------------------
+Name: attend_group
+Type: 109
+ControlSource: attend_group
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1935
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Admin
+Type: 109
+ControlSource: Admin
+Caption: 
+Visible: True
+Left: 8610
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Comm
+Type: 109
+ControlSource: Comm
+Caption: 
+Visible: True
+Left: 3030
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Enab
+Type: 109
+ControlSource: Enab
+Caption: 
+Visible: True
+Left: 3960
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: HR
+Type: 109
+ControlSource: HR
+Caption: 
+Visible: True
+Left: 7680
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: IS
+Type: 109
+ControlSource: IS
+Caption: 
+Visible: True
+Left: 9540
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: NWS
+Type: 109
+ControlSource: NWS
+Caption: 
+Visible: True
+Left: 4890
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Sensors
+Type: 109
+ControlSource: Sensors
+Caption: 
+Visible: True
+Left: 5820
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Sys
+Type: 109
+ControlSource: Sys
+Caption: 
+Visible: True
+Left: 6750
+Top: 30
+Width: 870
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Total
+Type: 109
+ControlSource: =Nz([Comm],0)+Nz([Enab],0)+Nz([NWS],0)+Nz([Sensors],0)+Nz([Sys],0)+Nz([HR],0)+Nz([Admin],0)+Nz([IS],0)
+Caption: 
+Visible: True
+Left: 2025
+Top: 30
+Width: 945
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text46
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 4140
+Top: 0
+Width: 1920
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text91
+Type: 109
+ControlSource: ="Printed on " & Format(GetNow(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 6540
+Top: 0
+Width: 3900
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtAdmin
+Type: 109
+ControlSource: =Sum(Nz([Admin],0))
+Caption: 
+Visible: False
+Left: 8640
+Top: 30
+Width: 870
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtComm
+Type: 109
+ControlSource: =Sum(Nz([Comm],0))
+Caption: 
+Visible: False
+Left: 3060
+Top: 30
+Width: 864
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtEnab
+Type: 109
+ControlSource: =Sum(Nz([Enab],0))
+Caption: 
+Visible: False
+Left: 3990
+Top: 30
+Width: 870
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtHR
+Type: 109
+ControlSource: =Sum(Nz([HR],0))
+Caption: 
+Visible: False
+Left: 7710
+Top: 30
+Width: 870
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtIS
+Type: 109
+ControlSource: =Sum(Nz([IS],0))
+Caption: 
+Visible: False
+Left: 9570
+Top: 30
+Width: 870
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtNWS
+Type: 109
+ControlSource: =Sum(Nz([NWS],0))
+Caption: 
+Visible: False
+Left: 4920
+Top: 30
+Width: 870
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtSensors
+Type: 109
+ControlSource: =Sum(Nz([Sensors],0))
+Caption: 
+Visible: False
+Left: 5850
+Top: 30
+Width: 870
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subAway
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 60
+Top: 2040
+Width: 10440
+Height: 1183
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: txtSys
+Type: 109
+ControlSource: =Sum(Nz([sys],0))
+Caption: 
+Visible: False
+Left: 6780
+Top: 30
+Width: 870
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtTotal
+Type: 109
+ControlSource: =Sum(Nz([Comm],0)+Nz([Enab],0)+Nz([NWS],0)+Nz([Sensors],0)+Nz([Sys],0)+Nz([HR],0)+Nz([Admin],0)+Nz([IS],0))
+Caption: 
+Visible: False
+Left: 2055
+Top: 30
+Width: 939
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subDetail
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 30
+Top: 45
+Width: 10470
+Height: 1439
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text692
+Type: 109
+ControlSource: ="Away  (" & [subAway].[Report]![total_count] & ")"
+Caption: 
+Visible: True
+Left: 60
+Top: 1680
+Width: 2595
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

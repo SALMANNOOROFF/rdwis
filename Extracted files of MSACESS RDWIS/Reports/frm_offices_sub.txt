@@ -1,0 +1,124 @@
+REPORT: frm_offices_sub
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT frm_offices.off_id, frm_offices.off_entity, frm_offices.off_xfrm_id, frm_offices.off_name, frm_offices.off_type, frm_offices.off_address, frm_offices.off_city FROM frm_offices; 
+Caption: offices_sub
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: off_type_Label
+Type: 100
+ControlSource: 
+Caption: Office Type
+Value: 
+Visible: True
+Left: 240
+Top: 45
+Width: 1680
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: off_address_Label
+Type: 100
+ControlSource: 
+Caption: Address
+Value: 
+Visible: True
+Left: 3555
+Top: 45
+Width: 7155
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: off_city_Label
+Type: 100
+ControlSource: 
+Caption: City
+Value: 
+Visible: True
+Left: 1980
+Top: 45
+Width: 1515
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line23
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 390
+Width: 10746
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: off_type
+Type: 109
+ControlSource: off_type
+Caption: 
+Visible: True
+Left: 240
+Top: 60
+Width: 1680
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: off_address
+Type: 109
+ControlSource: off_address
+Caption: 
+Visible: True
+Left: 3555
+Top: 60
+Width: 7155
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: off_city
+Type: 109
+ControlSource: off_city
+Caption: 
+Visible: True
+Left: 1980
+Top: 60
+Width: 1515
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: info_sub
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 3435
+Top: 525
+Width: 4365
+Height: 826
+ForeColor: 
+BackColor: 
+Format: 

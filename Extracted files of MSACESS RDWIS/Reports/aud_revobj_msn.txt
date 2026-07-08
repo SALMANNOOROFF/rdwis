@@ -1,0 +1,236 @@
+REPORT: aud_revobj_msn
+
+=== REPORT PROPERTIES ===
+RecordSource: aud_revobj_msn
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: msn_id
+Type: 109
+ControlSource: msn_id
+Caption: 
+Visible: True
+Left: 5325
+Top: 120
+Width: 1305
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label166
+Type: 100
+ControlSource: 
+Caption: Number:
+Value: 
+Visible: True
+Left: 3795
+Top: 120
+Width: 1530
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: msn_type
+Type: 109
+ControlSource: msn_type
+Caption: 
+Visible: True
+Left: 1260
+Top: 120
+Width: 1815
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label173
+Type: 100
+ControlSource: 
+Caption: Type:
+Value: 
+Visible: True
+Left: 60
+Top: 120
+Width: 1200
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell225
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 3075
+Top: 120
+Width: 720
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell233
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6630
+Top: 120
+Width: 555
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: msn_desc
+Type: 109
+ControlSource: msn_desc
+Caption: 
+Visible: True
+Left: 1260
+Top: 435
+Width: 8040
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label247
+Type: 100
+ControlSource: 
+Caption: Description:
+Value: 
+Visible: True
+Left: 60
+Top: 435
+Width: 1200
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell254
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 3075
+Top: 750
+Width: 720
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell257
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6630
+Top: 750
+Width: 555
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell259
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7185
+Top: 750
+Width: 2115
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell290
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 7185
+Top: 120
+Width: 2115
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: msn_targetdt
+Type: 109
+ControlSource: msn_targetdt
+Caption: 
+Visible: True
+Left: 1260
+Top: 750
+Width: 1815
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label299
+Type: 100
+ControlSource: 
+Caption: Target Date:
+Value: 
+Visible: True
+Left: 60
+Top: 750
+Width: 1200
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: msn_achvdt
+Type: 109
+ControlSource: msn_achvdt
+Caption: 
+Visible: True
+Left: 5325
+Top: 750
+Width: 1305
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label309
+Type: 100
+ControlSource: 
+Caption: Achieved Date:
+Value: 
+Visible: True
+Left: 3795
+Top: 750
+Width: 1530
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 

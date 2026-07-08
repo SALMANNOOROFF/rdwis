@@ -1,0 +1,10 @@
+TABLE: aud_revcomps1
+
+COLUMNS:
+- rvc_id | Type:4 | Size:4
+- rvc_rev_id | Type:4 | Size:4
+- rvc_table | Type:10 | Size:255
+- rvc_detail | Type:12 | Size:0
+- rvc_rowid | Type:10 | Size:255
+- rvc_action | Type:10 | Size:255
+- rvc_type | Type:3 | Size:2

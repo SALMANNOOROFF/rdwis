@@ -1,0 +1,138 @@
+REPORT: aud_revobj_att
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_attendance
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: att_emp_id
+Type: 109
+ControlSource: att_emp_id
+Caption: 
+Visible: True
+Left: 1035
+Top: 120
+Width: 1800
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: ID:
+Value: 
+Visible: True
+Left: 120
+Top: 120
+Width: 840
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: att_empnamecomp
+Type: 109
+ControlSource: att_empnamecomp
+Caption: 
+Visible: True
+Left: 3968
+Top: 113
+Width: 5895
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Name:
+Value: 
+Visible: True
+Left: 3180
+Top: 120
+Width: 735
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: att_unt_id
+Type: 111
+ControlSource: att_unt_id
+Caption: 
+Visible: True
+Left: 3968
+Top: 510
+Width: 1800
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 
+
+--------------------
+Name: Label251
+Type: 100
+ControlSource: 
+Caption: Dept:
+Value: 
+Visible: True
+Left: 3174
+Top: 510
+Width: 735
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: box_att_unt_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 5490
+Top: 510
+Width: 300
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: att_startdt
+Type: 109
+ControlSource: att_startdt
+Caption: 
+Visible: True
+Left: 1035
+Top: 510
+Width: 1800
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: mmm yy
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Month:
+Value: 
+Visible: True
+Left: 120
+Top: 510
+Width: 840
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 

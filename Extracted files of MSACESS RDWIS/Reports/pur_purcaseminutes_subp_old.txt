@@ -1,0 +1,179 @@
+REPORT: pur_purcaseminutes_subp_old
+
+=== REPORT PROPERTIES ===
+RecordSource: pur_purcases_minutes
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label87
+Type: 100
+ControlSource: 
+Caption:  Case No
+Value: 
+Visible: True
+Left: 690
+Top: 15
+Width: 1065
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label185
+Type: 100
+ControlSource: 
+Caption: Title
+Value: 
+Visible: True
+Left: 1755
+Top: 15
+Width: 5610
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell394
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 8895
+Top: 15
+Width: 15
+Height: 435
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label91
+Type: 100
+ControlSource: 
+Caption: S No 
+Value: 
+Visible: True
+Left: 30
+Top: 15
+Width: 660
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label129
+Type: 109
+ControlSource: ="Price"
+Caption: 
+Visible: True
+Left: 7365
+Top: 15
+Width: 1530
+Height: 435
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: grand_total
+Type: 109
+ControlSource: =FormatAsPerType([pcs_midprice]+IIf([pcs_transtype]=1,0,[pcs_midtax]))
+Caption: 
+Visible: True
+Left: 7365
+Top: 0
+Width: 1530
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: pcs_title
+Type: 109
+ControlSource: pcs_title
+Caption: 
+Visible: True
+Left: 1755
+Top: 0
+Width: 5610
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text266
+Type: 109
+ControlSource: pcs_id
+Caption: 
+Visible: True
+Left: 690
+Top: 0
+Width: 1065
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sno
+Type: 109
+ControlSource: =Chr([sno_hidden]+96) & "."
+Caption: 
+Visible: True
+Left: 30
+Top: 0
+Width: 660
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: sno_hidden
+Type: 109
+ControlSource: =1
+Caption: 
+Visible: False
+Left: 8895
+Top: 0
+Width: 15
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: total_price
+Type: 109
+ControlSource: =FormatAsPerType(Sum([pcs_midprice]+IIf([pcs_transtype]=1,0,[pcs_midtax])))
+Caption: 
+Visible: True
+Left: 7365
+Top: 0
+Width: 1530
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label495
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Left: 5552
+Top: 0
+Width: 1755
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 

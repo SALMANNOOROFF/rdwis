@@ -1,0 +1,643 @@
+FORM: pur_purcasespettyitems
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM pur_purcaseitems WHERE pci_id = 180; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Item Details
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 120
+Width: 2730
+Height: 460
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdDelete
+Type: 104
+ControlSource: 
+Caption: Delete Item
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 11220
+Top: 120
+Width: 1927
+Height: 450
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblNote
+Type: 100
+ControlSource: 
+Caption: Note:  To Edit or delete the item, first delete all the quotes.
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3750
+Top: 120
+Width: 5716
+Height: 383
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_serial
+Type: 109
+ControlSource: pci_serial
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 737
+Top: 60
+Width: 630
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label132
+Type: 100
+ControlSource: 
+Caption: S No 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 170
+Top: 60
+Width: 570
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_desc
+Type: 109
+ControlSource: pci_desc
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1430
+Top: 64
+Width: 11730
+Height: 735
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Description 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 170
+Top: 514
+Width: 1200
+Height: 285
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_qty
+Type: 109
+ControlSource: pci_qty
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1431
+Top: 861
+Width: 1350
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Quantity
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 171
+Top: 861
+Width: 1200
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_price
+Type: 109
+ControlSource: pci_price
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4320
+Top: 862
+Width: 1680
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label68
+Type: 100
+ControlSource: 
+Caption: Unit Price
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3225
+Top: 862
+Width: 1035
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: total_price
+Type: 109
+ControlSource: =[pci_qty]*[pci_price]
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4320
+Top: 1325
+Width: 1680
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label83
+Type: 100
+ControlSource: 
+Caption: Price
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3225
+Top: 1325
+Width: 1035
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_subtype
+Type: 111
+ControlSource: pci_subtype
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7380
+Top: 1326
+Width: 2610
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Subtype
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6405
+Top: 1326
+Width: 900
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_type
+Type: 111
+ControlSource: pci_type
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7365
+Top: 860
+Width: 2625
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label30
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6410
+Top: 862
+Width: 885
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pci_type
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9710
+Top: 860
+Width: 280
+Height: 391
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pci_subtype
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9710
+Top: 1310
+Width: 280
+Height: 406
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_pcs_id
+Type: 109
+ControlSource: pci_pcs_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6066
+Top: 850
+Width: 150
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_qtyunit
+Type: 111
+ControlSource: pci_qtyunit
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1425
+Top: 1314
+Width: 1350
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 1314
+Width: 1200
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pci_qtyunit
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2494
+Top: 1303
+Width: 280
+Height: 406
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_subhead
+Type: 111
+ControlSource: pci_subhead
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11457
+Top: 860
+Width: 1710
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label152
+Type: 100
+ControlSource: 
+Caption: Subhead
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10431
+Top: 860
+Width: 960
+Height: 390
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pci_subhead
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 12876
+Top: 860
+Width: 295
+Height: 391
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_category
+Type: 109
+ControlSource: pci_category
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 11457
+Top: 1360
+Width: 1701
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label134
+Type: 100
+ControlSource: 
+Caption: Category
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10488
+Top: 1360
+Width: 915
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

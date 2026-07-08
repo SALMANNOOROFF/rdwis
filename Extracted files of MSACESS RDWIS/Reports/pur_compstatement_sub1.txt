@@ -1,0 +1,224 @@
+REPORT: pur_compstatement_sub1
+
+=== REPORT PROPERTIES ===
+RecordSource: pur_compstatementsub_doc
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label91
+Type: 100
+ControlSource: 
+Caption: Items
+Value: 
+Visible: True
+Left: 615
+Top: 45
+Width: 6030
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label99
+Type: 100
+ControlSource: 
+Caption: Unit Price (Rs)
+Value: 
+Visible: True
+Left: 7785
+Top: 45
+Width: 1678
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label111
+Type: 100
+ControlSource: 
+Caption: Qty
+Value: 
+Visible: True
+Left: 6705
+Top: 45
+Width: 1020
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label166
+Type: 100
+ControlSource: 
+Caption: Price (Rs)
+Value: 
+Visible: True
+Left: 9525
+Top: 45
+Width: 1528
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label206
+Type: 100
+ControlSource: 
+Caption: S No
+Value: 
+Visible: True
+Left: 30
+Top: 45
+Width: 525
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: qte_frm_id
+Type: 111
+ControlSource: qte_frm_id
+Caption: 
+Visible: True
+Left: 525
+Top: 30
+Width: 4260
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: qte_pricetotal
+Type: 109
+ControlSource: qte_midprice
+Caption: 
+Visible: True
+Left: 9497
+Top: 30
+Width: 1560
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: qte_techacceptable
+Type: 109
+ControlSource: =IIf([qte_techaccept]=1,"(Technically Acceptable)","(Technically Uncceptable)")
+Caption: 
+Visible: True
+Left: 6930
+Top: 30
+Width: 2535
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label143
+Type: 100
+ControlSource: 
+Caption: M/s
+Value: 
+Visible: True
+Left: 47
+Top: 23
+Width: 473
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: qti_desc
+Type: 109
+ControlSource: qti_desc
+Caption: 
+Visible: True
+Left: 615
+Top: 30
+Width: 6075
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: qti_price
+Type: 109
+ControlSource: qti_price
+Caption: 
+Visible: True
+Left: 7830
+Top: 30
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: qti_quantity
+Type: 109
+ControlSource: =[qti_qty] & " " & IIf([qti_qtyunit]="num","",[qti_qtyunit])
+Caption: 
+Visible: True
+Left: 6750
+Top: 30
+Width: 1020
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: price
+Type: 109
+ControlSource: =[qti_qty]*[qti_price]
+Caption: 
+Visible: True
+Left: 9540
+Top: 30
+Width: 1545
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: qti_serial
+Type: 109
+ControlSource: qti_serial
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 525
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line202
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 11070
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 

@@ -1,0 +1,327 @@
+FORM: fin_timeline_sal_chart
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: txtHeader
+Type: 109
+ControlSource: ="Salary Forecast - " & CodeFromHeadId([Forms]![vars]![Parameter1])
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 6316
+Top: 120
+Width: 5415
+Height: 540
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 20
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdData
+Type: 104
+ControlSource: 
+Caption: Data
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 14853
+Top: 170
+Width: 1470
+Height: 405
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Embedded Macro]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: Salaries to be paid for current contracts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4410
+Top: 690
+Width: 7275
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 14
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Graph1
+Type: 113
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3004
+Top: 120
+Width: 13380
+Height: 6284
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_alloc_sal
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1410
+Top: 525
+Width: 1440
+Height: 315
+ForeColor: 1972705
+BackColor: 1642694
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label169
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 900
+Width: 1185
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Bahnschrift Light Condensed
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_exp_sal
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1410
+Top: 900
+Width: 1440
+Height: 315
+ForeColor: 8319711
+BackColor: 4168548
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: forecast_sal
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1410
+Top: 1275
+Width: 1440
+Height: 315
+ForeColor: 24703
+BackColor: 6724095
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: cbs_afterforecast_sal
+Type: 109
+ControlSource: =[prj_alloc_sal]-[prj_exp_sal]-[forecast_sal]
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1410
+Top: 1650
+Width: 1440
+Height: 600
+ForeColor: 4210752
+BackColor: 9359785
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label490
+Type: 100
+ControlSource: 
+Caption: Forecast
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 1275
+Width: 1185
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Bahnschrift Light Condensed
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label491
+Type: 100
+ControlSource: 
+Caption: Remaining after forecast
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 1650
+Width: 1185
+Height: 600
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Bahnschrift Light Condensed
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Allocation
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 525
+Width: 1185
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Bahnschrift Light Condensed
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Graph9
+Type: 113
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3000
+Top: 6405
+Width: 13380
+Height: 1319
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label602
+Type: 100
+ControlSource: 
+Caption: HR
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 60
+Width: 2685
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri
+FontSize: 14
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

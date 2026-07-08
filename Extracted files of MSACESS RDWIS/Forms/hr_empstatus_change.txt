@@ -1,0 +1,280 @@
+FORM: hr_empstatus_change
+
+=== FORM PROPERTIES ===
+Caption: Change Status
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: remarks
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2151
+Top: 2610
+Width: 2556
+Height: 2220
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 855
+Top: 2610
+Width: 1230
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lastdt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2153
+Top: 1822
+Width: 2556
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Short Date
+InputMask: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Last Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 857
+Top: 1822
+Width: 1230
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: joindt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 2153
+Top: 1425
+Width: 2556
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Joining Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 857
+Top: 1425
+Width: 1230
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: status
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2151
+Top: 2216
+Width: 2556
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 855
+Top: 2216
+Width: 1230
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: empname
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1020
+Top: 283
+Width: 4246
+Height: 405
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 14
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1530
+Top: 735
+Width: 3231
+Height: 405
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 14
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 1305
+Top: 5385
+Width: 1304
+Height: 451
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdSave
+Type: 104
+ControlSource: 
+Caption: Save
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3690
+Top: 5385
+Width: 1304
+Height: 451
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

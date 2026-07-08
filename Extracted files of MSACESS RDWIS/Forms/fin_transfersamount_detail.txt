@@ -1,0 +1,530 @@
+FORM: fin_transfersamount_detail
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM fin_inttransfers_u WHERE trf_id = 64; 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Transfers
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 225
+Top: 345
+Width: 1920
+Height: 465
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_date
+Type: 109
+ControlSource: trf_date
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1425
+Top: 630
+Width: 1410
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 630
+Top: 630
+Width: 733
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_title
+Type: 109
+ControlSource: trf_title
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1425
+Top: 1155
+Width: 7305
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 630
+Top: 1155
+Width: 733
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_amount
+Type: 109
+ControlSource: trf_amount
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4365
+Top: 4545
+Width: 1200
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label65
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2715
+Top: 4545
+Width: 1318
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Line67
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2655
+Top: 4425
+Width: 2951
+Height: 15
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_status
+Type: 109
+ControlSource: trf_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7252
+Top: 1680
+Width: 1470
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label69
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6465
+Top: 1680
+Width: 733
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdFinalize
+Type: 104
+ControlSource: 
+Caption: Finalize
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 6060
+Top: 630
+Width: 1247
+Height: 397
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 7477
+Top: 630
+Width: 1247
+Height: 397
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_fromhed
+Type: 111
+ControlSource: trf_fromhed
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1418
+Top: 1680
+Width: 1470
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: From
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 630
+Top: 1680
+Width: 733
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_tohed
+Type: 111
+ControlSource: trf_tohed
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4117
+Top: 1688
+Width: 1470
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: To
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3690
+Top: 1687
+Width: 373
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_trf_fromhed
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 2632
+Top: 1650
+Width: 265
+Height: 397
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_trf_tohed
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5325
+Top: 1650
+Width: 280
+Height: 397
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_type
+Type: 109
+ControlSource: trf_type
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 3007
+Top: 630
+Width: 1251
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_fromunt
+Type: 109
+ControlSource: trf_fromunt
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 3007
+Top: 1680
+Width: 561
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trf_tount
+Type: 109
+ControlSource: trf_tount
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 5786
+Top: 1681
+Width: 576
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: SubTransfCat
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2610
+Top: 2859
+Width: 3300
+Height: 1470
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: SubTransfCat Label
+Type: 100
+ControlSource: 
+Caption: Categories
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2610
+Top: 2505
+Width: 1290
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

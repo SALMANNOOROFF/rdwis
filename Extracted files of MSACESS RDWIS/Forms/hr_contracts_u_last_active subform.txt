@@ -1,0 +1,55 @@
+FORM: hr_contracts_u_last_active subform
+
+=== FORM PROPERTIES ===
+Caption: hr_contracts_u_last_active subform
+RecordSource: SELECT [hr_contracts_u_last_active].[ctr_grade], [hr_contracts_u_last_active].[ctr_num], [hr_contracts_u_last_active].[ctr_jobtitle] FROM hr_contracts_u_last_active; 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: ctr_grade
+Type: 109
+ControlSource: ctr_grade
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 915
+Top: 0
+Width: 1701
+Height: 315
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Grade
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 0
+Width: 796
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

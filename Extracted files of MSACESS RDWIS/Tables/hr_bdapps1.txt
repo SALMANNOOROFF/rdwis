@@ -1,0 +1,5 @@
+TABLE: hr_bdapps1
+
+COLUMNS:
+- bda_brd_id | Type:4 | Size:4
+- bda_apl_id | Type:4 | Size:4

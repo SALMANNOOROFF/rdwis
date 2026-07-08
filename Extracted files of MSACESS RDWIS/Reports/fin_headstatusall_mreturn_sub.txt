@@ -1,0 +1,108 @@
+REPORT: fin_headstatusall_mreturn_sub
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_expenditure_brief
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Left: 750
+Top: 30
+Width: 3945
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Left: 30
+Top: 30
+Width: 660
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: total_amount
+Type: 109
+ControlSource: =IIf([FirstOftrn_transtype]=1,Sum([SumOfamount1]),Sum([SumOfamount2]))
+Caption: 
+Visible: False
+Left: 4362
+Top: 0
+Width: 123
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 4755
+Top: 30
+Width: 1440
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: title2
+Type: 109
+ControlSource: title2
+Caption: 
+Visible: True
+Left: 750
+Top: 30
+Width: 3945
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: FirstOfdocid
+Type: 109
+ControlSource: FirstOfdocid
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 660
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Amount
+Type: 109
+ControlSource: =IIf([FirstOftrn_transtype]=1,[SumOfamount1],[SumOfamount2])
+Caption: 
+Visible: True
+Left: 4755
+Top: 30
+Width: 1440
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard

@@ -1,0 +1,55 @@
+FORM: prj_selected
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: selected
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: sel_mpr
+Type: 109
+ControlSource: sel_mpr
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 0
+Top: 120
+Width: 0
+Height: 240
+ForeColor: 4210752
+BackColor: -2147483612
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Selected for MPR
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 60
+Top: 60
+Width: 1755
+Height: 300
+ForeColor: 0
+BackColor: -2147483612
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

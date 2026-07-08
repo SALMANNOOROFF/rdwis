@@ -1,0 +1,437 @@
+FORM: pur_purcaseitems_tempchoose
+
+=== FORM PROPERTIES ===
+Caption: Receive Items
+RecordSource: pur_purcaseitems_temp
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Item Selection for Receipt
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 300
+Top: 180
+Width: 5430
+Height: 460
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label188
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 420
+Top: 780
+Width: 4500
+Height: 360
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label211
+Type: 100
+ControlSource: 
+Caption: Qty
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4980
+Top: 780
+Width: 1440
+Height: 360
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label220
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6480
+Top: 780
+Width: 1455
+Height: 360
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label232
+Type: 100
+ControlSource: 
+Caption: Balance
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7995
+Top: 780
+Width: 1455
+Height: 360
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label242
+Type: 100
+ControlSource: 
+Caption: Receive
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9510
+Top: 780
+Width: 1230
+Height: 360
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtBack
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 0
+Top: 0
+Width: 11100
+Height: 420
+ForeColor: 16777215
+BackColor: 16777215
+FontName: Calibri
+FontSize: 5
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: selected
+Type: 106
+ControlSource: selected
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 120
+Top: 105
+Width: 240
+Height: 240
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_desc
+Type: 109
+ControlSource: pci_desc
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 420
+Top: 30
+Width: 4500
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_qty
+Type: 109
+ControlSource: pci_qty
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4980
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pci_qtyunit
+Type: 109
+ControlSource: pci_qtyunit
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 6480
+Top: 30
+Width: 1455
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: balance_qty
+Type: 109
+ControlSource: balance_qty
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7995
+Top: 30
+Width: 1455
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: receive_qty
+Type: 109
+ControlSource: receive_qty
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9510
+Top: 30
+Width: 1230
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Command122
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 9360
+Top: 180
+Width: 1380
+Height: 420
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReceiveItem
+Type: 104
+ControlSource: 
+Caption: Generate Receipt
+Value: 
+Visible: True
+Enabled: False
+Locked: 
+Left: 7275
+Top: 180
+Width: 1905
+Height: 420
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtSelected
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 180
+Top: 240
+Width: 615
+Height: 360
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 14
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label179
+Type: 100
+ControlSource: 
+Caption: items selected
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5670
+Top: 210
+Width: 1605
+Height: 360
+ForeColor: 5855577
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: price_sum
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 1020
+Top: 240
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: value_with_tax
+Type: 109
+ControlSource: =Round([price_sum]*(([Forms]![pur_purcases_detail]![pcs_inttax]+[Forms]![pur_purcases_detail]![pcs_midtax])/[Forms]![pur_purcases_detail]![pcs_intprice]+1),2)
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 2520
+Top: 240
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

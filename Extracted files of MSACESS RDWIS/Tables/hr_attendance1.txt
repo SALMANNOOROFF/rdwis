@@ -1,0 +1,44 @@
+TABLE: hr_attendance1
+
+COLUMNS:
+- att_id | Type:20 | Size:16
+- att_emp_id | Type:10 | Size:13
+- att_empnamecomp | Type:10 | Size:255
+- att_unt_id | Type:4 | Size:4
+- att_startdt | Type:8 | Size:8
+- att_enddt | Type:8 | Size:8
+- att_1 | Type:10 | Size:1
+- att_2 | Type:10 | Size:1
+- att_3 | Type:10 | Size:1
+- att_4 | Type:10 | Size:1
+- att_5 | Type:10 | Size:1
+- att_6 | Type:10 | Size:1
+- att_7 | Type:10 | Size:1
+- att_8 | Type:10 | Size:1
+- att_9 | Type:10 | Size:1
+- att_10 | Type:10 | Size:1
+- att_11 | Type:10 | Size:1
+- att_12 | Type:10 | Size:1
+- att_13 | Type:10 | Size:1
+- att_14 | Type:10 | Size:1
+- att_15 | Type:10 | Size:1
+- att_16 | Type:10 | Size:1
+- att_17 | Type:10 | Size:1
+- att_18 | Type:10 | Size:1
+- att_19 | Type:10 | Size:1
+- att_20 | Type:10 | Size:1
+- att_21 | Type:10 | Size:1
+- att_22 | Type:10 | Size:1
+- att_23 | Type:10 | Size:1
+- att_24 | Type:10 | Size:1
+- att_25 | Type:10 | Size:1
+- att_26 | Type:10 | Size:1
+- att_27 | Type:10 | Size:1
+- att_28 | Type:10 | Size:1
+- att_29 | Type:10 | Size:1
+- att_30 | Type:10 | Size:1
+- att_31 | Type:10 | Size:1
+- att_locked1 | Type:10 | Size:5
+- att_locked2 | Type:10 | Size:5
+- att_eahreplace | Type:10 | Size:5
+- att_locked | Type:3 | Size:2

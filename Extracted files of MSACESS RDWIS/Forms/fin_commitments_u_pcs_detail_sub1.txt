@@ -1,0 +1,145 @@
+FORM: fin_commitments_u_pcs_detail_sub1
+
+=== FORM PROPERTIES ===
+Caption: fin_purcases_u_unpaid_detail_sub
+RecordSource: SELECT [fin_commitscat].[ctc_cmt_id], [fin_commitscat].[ctc_amount], [fin_commitscat].[ctc_category] FROM fin_commitscat; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: amount
+Type: 109
+ControlSource: =-1*[ctc_amount]
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1500
+Top: 60
+Width: 1305
+Height: 315
+ForeColor: 4210752
+BackColor: 14277081
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: ctc_category
+Type: 111
+ControlSource: ctc_category
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 60
+Top: 60
+Width: 1380
+Height: 315
+ForeColor: 4210752
+BackColor: 14277081
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_pcs_hed_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1133
+Top: 0
+Width: 285
+Height: 360
+ForeColor: 
+BackColor: 14277081
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text20
+Type: 109
+ControlSource: =Sum(-1*[ctc_amount])
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1365
+Top: 60
+Width: 1530
+Height: 315
+ForeColor: 4210752
+BackColor: 14277081
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: trn_date_Label
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 60
+Top: 60
+Width: 1245
+Height: 315
+ForeColor: 4210752
+BackColor: 14277081
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Line23
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 0
+Width: 2964
+Height: 0
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

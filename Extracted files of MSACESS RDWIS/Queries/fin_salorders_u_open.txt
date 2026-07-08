@@ -1,0 +1,6 @@
+QUERY: fin_salorders_u_open
+
+SQL:
+SELECT fin_salorders.*
+FROM fin_salorders
+WHERE (((fin_salorders.sor_status)="Approved" Or (fin_salorders.sor_status)="Under Revision"));

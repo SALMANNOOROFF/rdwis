@@ -1,0 +1,8 @@
+TABLE: prj_prjattachments
+
+COLUMNS:
+- jat_objtype | Type:10 | Size:255
+- jat_objid | Type:4 | Size:4
+- jat_type | Type:10 | Size:255
+- jat_path | Type:10 | Size:255
+- jat_id | Type:4 | Size:4

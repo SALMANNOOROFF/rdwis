@@ -1,0 +1,6 @@
+QUERY: fin_loans_detail
+
+SQL:
+SELECT fin_loans_detail51.loan_first, fin_loans_detail51.from_head AS from_head, fin_loans_detail51.from_div AS from_div, fin_loans_detail51.for_head AS for_head, fin_loans_detail51.for_div AS for_div, fin_loans_detail51.[loan/payback], fin_loans_detail51.type, fin_loans_detail51.loan, fin_loans_detail52.return, fin_loans_detail6.adjustment, [loan]-Nz([return],0)-Nz([adjustment],0) AS final_loan
+FROM (fin_loans_detail51 LEFT JOIN fin_loans_detail52 ON fin_loans_detail51.loan_first = fin_loans_detail52.loan_first) LEFT JOIN fin_loans_detail6 ON fin_loans_detail51.loan_first = fin_loans_detail6.lad_string
+ORDER BY fin_loans_detail51.type, [loan]-Nz([return],0)-Nz([adjustment],0) DESC;

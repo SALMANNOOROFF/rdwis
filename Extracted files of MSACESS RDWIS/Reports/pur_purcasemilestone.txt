@@ -1,0 +1,194 @@
+REPORT: pur_purcasemilestone
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT pur_purcases.* FROM pur_purcases WHERE (((pur_purcases.pcs_id)=[Forms]![pur_purcasemilestone].[purcase_id])); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Payment Due Certificate
+Value: 
+Visible: True
+Left: 0
+Top: 60
+Width: 9105
+Height: 495
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text87
+Type: 109
+ControlSource: ="Director Finance"
+Caption: 
+Visible: True
+Left: 5835
+Top: 6750
+Width: 2160
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Combo567
+Type: 109
+ControlSource: =getVar("varUnitLeadDesigShort")
+Caption: 
+Visible: True
+Left: 2040
+Top: 6765
+Width: 2160
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtStat1
+Type: 109
+ControlSource: ="It is certified that payment is due for for above mentioned event. Following document is attached."
+Caption: 
+Visible: True
+Left: 2
+Top: 4368
+Width: 10140
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: txtStat3
+Type: 109
+ControlSource: =[Forms]![pur_purcasemilestone]![completed_milestone]
+Caption: 
+Visible: True
+Left: 7
+Top: 3622
+Width: 6015
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label390
+Type: 100
+ControlSource: 
+Caption: Payment Due Event
+Value: 
+Visible: True
+Left: 7
+Top: 3225
+Width: 2040
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label391
+Type: 100
+ControlSource: 
+Caption: Payment Due
+Value: 
+Visible: True
+Left: 6640
+Top: 3225
+Width: 1890
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text392
+Type: 109
+ControlSource: =[Forms]![pur_purcasemilestone]![txtPayment]
+Caption: 
+Visible: True
+Left: 6923
+Top: 3622
+Width: 1305
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pur_purcasemilestone_sub
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2
+Top: 738
+Width: 10162
+Height: 2039
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label393
+Type: 100
+ControlSource: 
+Caption: Purchase Case
+Value: 
+Visible: True
+Left: 0
+Top: 450
+Width: 2565
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text394
+Type: 109
+ControlSource: ="-Invoice"
+Caption: 
+Visible: True
+Left: 0
+Top: 4695
+Width: 10140
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text50
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 4022
+Top: 0
+Width: 1755
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text91
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 6242
+Top: 0
+Width: 3900
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 

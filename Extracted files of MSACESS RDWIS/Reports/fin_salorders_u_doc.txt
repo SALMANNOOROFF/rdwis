@@ -1,0 +1,563 @@
+REPORT: fin_salorders_u_doc
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM fin_salorders_u_doc WHERE sor_status like 'Draft'; 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: SALARIES OF CONTRACT EMPLOYEES AT R&&D WING (NRDI) 
+Value: 
+Visible: True
+Left: 4830
+Top: 30
+Width: 5835
+Height: 270
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmdShowCheckedOnly
+Type: 104
+ControlSource: 
+Caption: Show Checked Only
+Value: 
+Visible: True
+Left: 13500
+Top: 0
+Width: 2040
+Height: 360
+ForeColor: 4210752
+BackColor: 15123357
+Format: 
+
+--------------------
+Name: Label354
+Type: 109
+ControlSource: =UCase(Format([sor_month],"mmmm yy"))
+Caption: 
+Visible: True
+Left: 4830
+Top: 285
+Width: 5835
+Height: 270
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label93
+Type: 100
+ControlSource: 
+Caption: Cont. From
+Cont. To
+Value: 
+Visible: True
+Left: 7980
+Top: 30
+Width: 1125
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label102
+Type: 100
+ControlSource: 
+Caption: Salary
+Month
+Value: 
+Visible: True
+Left: 9105
+Top: 30
+Width: 945
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label110
+Type: 100
+ControlSource: 
+Caption: Meezan Bank Account
+Account Title
+
+Value: 
+Visible: True
+Left: 11385
+Top: 30
+Width: 2520
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label140
+Type: 100
+ControlSource: 
+Caption: S No
+Value: 
+Visible: True
+Left: 0
+Top: 30
+Width: 525
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label155
+Type: 100
+ControlSource: 
+Caption: Employee ID
+CNIC 
+Value: 
+Visible: True
+Left: 525
+Top: 30
+Width: 1740
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line246
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 540
+Width: 15600
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label247
+Type: 100
+ControlSource: 
+Caption: Name
+Grade
+
+Value: 
+Visible: True
+Left: 2265
+Top: 30
+Width: 2640
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label326
+Type: 100
+ControlSource: 
+Caption: Department
+Value: 
+Visible: True
+Left: 6645
+Top: 30
+Width: 1335
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label359
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Left: 13905
+Top: 30
+Width: 1740
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label412
+Type: 100
+ControlSource: 
+Caption: Job Title
+Value: 
+Visible: True
+Left: 4905
+Top: 30
+Width: 1740
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label442
+Type: 100
+ControlSource: 
+Caption: Paid from
+Value: 
+Visible: True
+Left: 10050
+Top: 30
+Width: 1335
+Height: 510
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_empdt
+Type: 109
+ControlSource: emp_joindt
+Caption: 
+Visible: True
+Left: 7980
+Top: 0
+Width: 1125
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: account_title
+Type: 109
+ControlSource: sor_bnkacctitle
+Caption: 
+Visible: True
+Left: 11385
+Top: 330
+Width: 2520
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_bnkaccdetail
+Type: 109
+ControlSource: sor_bnkaccdetail
+Caption: 
+Visible: True
+Left: 11385
+Top: 0
+Width: 2520
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text139
+Type: 109
+ControlSource: =1
+Caption: 
+Visible: True
+Left: 0
+Top: 0
+Width: 525
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: sor_emp_id
+Caption: 
+Visible: True
+Left: 525
+Top: 0
+Width: 1740
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_cnic
+Type: 109
+ControlSource: emp_cnic
+Caption: 
+Visible: True
+Left: 525
+Top: 330
+Width: 1740
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell211
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 330
+Width: 525
+Height: 330
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_end
+Type: 109
+ControlSource: =IIf(IsNull([ctr_termindt]),[ctr_enddt],[ctr_termindt])
+Caption: 
+Visible: True
+Left: 7980
+Top: 330
+Width: 1125
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Line245
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 660
+Width: 15660
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: ctr_grade
+Type: 109
+ControlSource: ctr_grade
+Caption: 
+Visible: True
+Left: 2265
+Top: 330
+Width: 2640
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_jobtitle
+Type: 109
+ControlSource: ctr_jobtitle
+Caption: 
+Visible: True
+Left: 4905
+Top: 0
+Width: 1740
+Height: 660
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: paid
+Type: 109
+ControlSource: =[effunt_namesh] & " (" & [effhed_code] & ")"
+Caption: 
+Visible: True
+Left: 10050
+Top: 0
+Width: 1335
+Height: 660
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_empnamecomp
+Type: 109
+ControlSource: sor_empnamecomp
+Caption: 
+Visible: True
+Left: 2265
+Top: 0
+Width: 2640
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text287
+Type: 109
+ControlSource: =[sor_salary]
+Caption: 
+Visible: True
+Left: 9105
+Top: 0
+Width: 945
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: borne
+Type: 109
+ControlSource: =[unt_namesh] & IIf(IsNull([hed_code]),""," (" & [hed_code] & ")")
+Caption: 
+Visible: True
+Left: 6645
+Top: 0
+Width: 1335
+Height: 660
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_remarksfull
+Type: 109
+ControlSource: =[sor_remarks] & IIf([sor_remarks2]="","",Chr(13) & Chr(10) & [sor_remarks2])
+Caption: 
+Visible: True
+Left: 13905
+Top: 0
+Width: 1740
+Height: 660
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_month
+Type: 109
+ControlSource: sor_month
+Caption: 
+Visible: True
+Left: 9105
+Top: 330
+Width: 945
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: mmm yy
+
+--------------------
+Name: Text66
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 7140
+Top: 60
+Width: 1500
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Auto_Time
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy hh:nn")
+Caption: 
+Visible: True
+Left: 11340
+Top: 60
+Width: 4320
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: Long Time
+
+--------------------
+Name: AccessTotalsemp_id
+Type: 109
+ControlSource: ="Total " & Count(*) & " salaries"
+Caption: 
+Visible: True
+Left: 30
+Top: 60
+Width: 3356
+Height: 329
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text450
+Type: 109
+ControlSource: ="Total Salary  Rs " & Format(Sum([sor_salary]),"#,##0") & "/-"
+Caption: 
+Visible: True
+Left: 8070
+Top: 60
+Width: 3356
+Height: 329
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label451
+Type: 100
+ControlSource: 
+Caption: SO Finance
+Value: 
+Visible: True
+Left: 2041
+Top: 1800
+Width: 1078
+Height: 299
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label452
+Type: 100
+ControlSource: 
+Caption: Director Finance
+Value: 
+Visible: True
+Left: 6720
+Top: 1800
+Width: 1620
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label454
+Type: 100
+ControlSource: 
+Caption: Managing Director RDW
+Value: 
+Visible: True
+Left: 11640
+Top: 1800
+Width: 2085
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 

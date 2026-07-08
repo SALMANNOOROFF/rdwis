@@ -1,0 +1,32 @@
+FORM: prj_comments_created
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM prj_comments WHERE (((prj_comments.cmt_status)="Draft") And ((prj_comments.cmt_xpgh_id)=Forms![prj_projects_detail_mpr].subProgress.Form!pgh_id)); 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: cmt_comment
+Type: 109
+ControlSource: cmt_comment
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 180
+Top: 120
+Width: 3495
+Height: 1419
+ForeColor: 4210752
+BackColor: 11272191
+FontName: Monotype Corsiva
+FontSize: 13
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

@@ -1,0 +1,529 @@
+FORM: hr_emps_sbEduc
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT hr_qualifs.* FROM hr_qualifs WHERE (((hr_qualifs.qlf_type)="Degree")) ORDER BY hr_qualifs.qlf_id; 
+DefaultView: 2
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Logo0
+Type: 103
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 300
+Top: 60
+Width: 690
+Height: 460
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Education
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1050
+Top: 60
+Width: 5610
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_name
+Type: 109
+ControlSource: qlf_name
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 1425
+Width: 4650
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Degree/Diploma Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 1425
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_inst
+Type: 109
+ControlSource: qlf_inst
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 1965
+Width: 4650
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Institution
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 1965
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_duration
+Type: 109
+ControlSource: qlf_duration
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 2505
+Width: 4650
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Duration
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 2505
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_unit
+Type: 109
+ControlSource: qlf_unit
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2640
+Top: 3045
+Width: 4650
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 3045
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_enddt
+Type: 109
+ControlSource: qlf_enddt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 3585
+Width: 4650
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: Completion Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 3585
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_grade
+Type: 109
+ControlSource: qlf_grade
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 4125
+Width: 4650
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: GPA/Grade/Division
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 4125
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_license
+Type: 109
+ControlSource: qlf_license
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 4665
+Width: 4650
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label30
+Type: 100
+ControlSource: 
+Caption: License
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 4665
+Width: 2220
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_type
+Type: 109
+ControlSource: qlf_type
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2640
+Top: 345
+Width: 4650
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 345
+Width: 2220
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_level
+Type: 111
+ControlSource: qlf_level
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 885
+Width: 4650
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Level
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 885
+Width: 2220
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qlf_spec
+Type: 109
+ControlSource: qlf_spec
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2640
+Top: 5205
+Width: 4650
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label39
+Type: 100
+ControlSource: 
+Caption: Majors
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 5205
+Width: 2220
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_qlf_level
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6975
+Top: 855
+Width: 315
+Height: 435
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

@@ -1,0 +1,491 @@
+REPORT: hr_salreqs_u_doc
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM hr_salreqs_u_doc WHERE srq_status like 'In Process'; 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Contract Employees Salary Requisitions for " & Format([srq_month],"mmm yy") & " - " & [unt_namesh] & " " & [unt_type]
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 15480
+Height: 480
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label165
+Type: 109
+ControlSource: =Plr(Count(*),"employee") & " from " & GetVar("varUnitName") & " may please be paid salaries of amount Rs " & Format(Sum([srq_salary]),"#,###")
+Caption: 
+Visible: True
+Left: 75
+Top: 765
+Width: 15435
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Employee
+Value: 
+Visible: True
+Left: 1155
+Top: 30
+Width: 3840
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Payable
+Value: 
+Visible: True
+Left: 7635
+Top: 30
+Width: 1245
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Contract Salary
+Value: 
+Visible: True
+Left: 6105
+Top: 30
+Width: 1515
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label11
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Left: 12315
+Top: 30
+Width: 3240
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Req.
+Value: 
+Visible: True
+Left: 45
+Top: 30
+Width: 1095
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label158
+Type: 100
+ControlSource: 
+Caption: Meezan Account Details
+Value: 
+Visible: True
+Left: 8895
+Top: 30
+Width: 3405
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label192
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 5010
+Top: 30
+Width: 1080
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text380
+Type: 109
+ControlSource: effhed_code
+Caption: 
+Visible: True
+Left: 75
+Top: 165
+Width: 1020
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text187
+Type: 109
+ControlSource: =Plr(Count(*)," employee")
+Caption: 
+Visible: True
+Left: 1155
+Top: 165
+Width: 2895
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Long Time
+
+--------------------
+Name: Text382
+Type: 109
+ControlSource: =Sum([srq_salary])
+Caption: 
+Visible: True
+Left: 7425
+Top: 165
+Width: 1485
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: EmptyCell416
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 4110
+Top: 165
+Width: 3255
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell425
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 8970
+Top: 165
+Width: 6570
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: srq_emp_id
+Type: 109
+ControlSource: srq_emp_id
+Caption: 
+Visible: True
+Left: 1155
+Top: 0
+Width: 3840
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: srq_empnamecomp
+Type: 109
+ControlSource: srq_empnamecomp
+Caption: 
+Visible: True
+Left: 1155
+Top: 360
+Width: 3840
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: hed_code
+Type: 109
+ControlSource: hed_code
+Caption: 
+Visible: True
+Left: 5010
+Top: 0
+Width: 1080
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: srq_salary
+Type: 109
+ControlSource: srq_salary
+Caption: 
+Visible: True
+Left: 7635
+Top: 0
+Width: 1245
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: remarks
+Type: 109
+ControlSource: =[srq_remarks] & IIf([srq_remarks2]="","",Chr(13) & Chr(10) & [srq_remarks2])
+Caption: 
+Visible: True
+Left: 12315
+Top: 0
+Width: 3240
+Height: 720
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: srq_releasedtg
+Type: 109
+ControlSource: srq_releasedtg
+Caption: 
+Visible: True
+Left: 45
+Top: 360
+Width: 1095
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: srq_ctrsalary
+Type: 109
+ControlSource: srq_ctrsalary
+Caption: 
+Visible: True
+Left: 6105
+Top: 0
+Width: 1515
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: effhed_code
+Type: 109
+ControlSource: effhed_code
+Caption: 
+Visible: True
+Left: 7635
+Top: 360
+Width: 1245
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: srq_bnkaccdetail
+Type: 109
+ControlSource: srq_bnkaccdetail
+Caption: 
+Visible: True
+Left: 8895
+Top: 0
+Width: 3405
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: srq_bnkacctitle
+Type: 109
+ControlSource: srq_bnkacctitle
+Caption: 
+Visible: True
+Left: 8895
+Top: 360
+Width: 3405
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: srq_id
+Type: 109
+ControlSource: srq_id
+Caption: 
+Visible: True
+Left: 45
+Top: 0
+Width: 1095
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell189
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5010
+Top: 360
+Width: 1080
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell462
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 6105
+Top: 360
+Width: 1515
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sudohed
+Type: 109
+ControlSource: =IIf(Nz([srq_sudohed],"")="","","CSRF")
+Caption: 
+Visible: True
+Left: 8625
+Top: 405
+Width: 405
+Height: 255
+ForeColor: 11957550
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line427
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 15471
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text66
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 5100
+Top: 60
+Width: 1920
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text178
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy    hh:nn")
+Caption: 
+Visible: True
+Left: 11175
+Top: 45
+Width: 4380
+Height: 300
+ForeColor: 4210752
+BackColor: 16777215
+Format: Long Time
+
+--------------------
+Name: Text166
+Type: 109
+ControlSource: =NamenTitleThisLead()
+Caption: 
+Visible: True
+Left: 12120
+Top: 1095
+Width: 3420
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text168
+Type: 109
+ControlSource: =getVar("varUnitLeadRank")
+Caption: 
+Visible: True
+Left: 12120
+Top: 1395
+Width: 3420
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text169
+Type: 109
+ControlSource: =getVar("varUnitLeadDesig")
+Caption: 
+Visible: True
+Left: 12120
+Top: 1695
+Width: 3420
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

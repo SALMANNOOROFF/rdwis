@@ -1,0 +1,21 @@
+TABLE: hr_contracts
+
+COLUMNS:
+- ctr_unt_id | Type:4 | Size:4
+- ctr_num | Type:10 | Size:13
+- ctr_startdt | Type:8 | Size:8
+- ctr_enddt | Type:8 | Size:8
+- ctr_date | Type:8 | Size:8
+- ctr_jobtitle | Type:10 | Size:255
+- ctr_grade | Type:10 | Size:255
+- ctr_salary | Type:4 | Size:4
+- ctr_hed_id | Type:4 | Size:4
+- ctr_id | Type:4 | Size:4
+- ctr_prob | Type:3 | Size:2
+- ctr_probsal | Type:4 | Size:4
+- ctr_termindt | Type:8 | Size:8
+- ctr_remarks | Type:10 | Size:255
+- ctr_path | Type:10 | Size:255
+- ctr_type | Type:3 | Size:2
+- ctr_path2 | Type:10 | Size:255
+- ctr_ctc_id | Type:4 | Size:4

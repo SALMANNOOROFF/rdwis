@@ -1,0 +1,11 @@
+TABLE: frm_projects
+
+COLUMNS:
+- prj_xfrm_id | Type:4 | Size:4
+- prj_name | Type:10 | Size:255
+- prj_scope | Type:10 | Size:255
+- prj_awarddt | Type:8 | Size:8
+- prj_status | Type:10 | Size:255
+- prj_compdt | Type:8 | Size:8
+- prj_tech | Type:10 | Size:255
+- prj_cost | Type:4 | Size:4

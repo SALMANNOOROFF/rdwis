@@ -1,0 +1,31 @@
+Option Compare Database
+Option Explicit
+Declare Function isZoomed Lib "user32" (ByVal WinHandle As Long) As Long
+Declare Function isIconic Lib "user32" (ByVal WinHandle As Long) As Long
+
+Public Sub SuppressRestore(SenderForm As String)
+Dim strActiveForm As String
+
+'strActiveForm = Screen.ActiveForm.Name
+'If SenderForm = strActiveForm Then
+'    If SenderForm = Forms!vars!varCurrentForm Then
+'            Forms!vars!varResizeCount = Forms!vars!varResizeCount + 1
+'            Else
+'            Forms!vars!varResizeCount = 1
+'            End If
+'    Forms!vars!varCurrentForm = SenderForm
+'    If Not SenderForm Like "start*" And Forms!vars!varResizeCount > 1 Then
+'        DoCmd.Close acForm, SenderForm
+'        End If
+'    End If
+'
+'Debug.Print Forms!vars!varCurrentForm & " - " & Forms!vars!varResizeCount & "------" & Screen.ActiveForm.Name
+
+Debug.Print SenderForm & " --- " & strActiveForm & " --- " & isZoomed(Screen.ActiveForm.hwnd)
+
+End Sub
+
+
+'Dim frmRes As Form
+'Set frmRes = Screen.ActiveForm
+'MsgBox isZoomed(frmRes.hwnd)

@@ -1,0 +1,8 @@
+TABLE: aud_audattachments1
+
+COLUMNS:
+- aat_objtype | Type:10 | Size:255
+- aat_objid | Type:4 | Size:4
+- aat_type | Type:10 | Size:255
+- aat_path | Type:10 | Size:255
+- aat_id | Type:4 | Size:4

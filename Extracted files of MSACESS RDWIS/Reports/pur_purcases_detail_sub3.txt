@@ -1,0 +1,65 @@
+REPORT: pur_purcases_detail_sub3
+
+=== REPORT PROPERTIES ===
+RecordSource: pur_noquotes
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Line91
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 45
+Width: 10763
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: CountOfRecords
+Type: 109
+ControlSource: ="(" & Count(*) & ")"
+Caption: 
+Visible: True
+Left: 15
+Top: 0
+Width: 45
+Height: 59
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: qte_frm_id
+Type: 111
+ControlSource: nqt_frm_id
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 10755
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line90
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 10763
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 

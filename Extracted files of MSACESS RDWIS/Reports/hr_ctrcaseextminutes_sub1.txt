@@ -1,0 +1,209 @@
+REPORT: hr_ctrcaseextminutes_sub1
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_ctrcases_minutes
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label38
+Type: 100
+ControlSource: 
+Caption: Case No.
+Value: 
+Visible: True
+Left: 525
+Top: 15
+Width: 570
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Employee
+Value: 
+Visible: True
+Left: 1095
+Top: 15
+Width: 2895
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Contract Dates
+Value: 
+Visible: True
+Left: 3990
+Top: 15
+Width: 2550
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label26
+Type: 100
+ControlSource: 
+Caption: Salaries Amount
+Value: 
+Visible: True
+Left: 8235
+Top: 15
+Width: 1140
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label80
+Type: 100
+ControlSource: 
+Caption: S No.
+Value: 
+Visible: True
+Left: 60
+Top: 15
+Width: 465
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell101
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 9375
+Top: 15
+Width: 0
+Height: 630
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label121
+Type: 100
+ControlSource: 
+Caption: Extension Upto
+Value: 
+Visible: True
+Left: 6540
+Top: 15
+Width: 1695
+Height: 630
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text19
+Type: 109
+ControlSource: =Format([ctr_startdt],"dd mmm yy") & "  –  " & IIf(IsNull([ctr_termindt]),Format([ctr_enddt],"dd mmm yy"),Format([ctr_termindt],"dd mmm yy"))
+Caption: 
+Visible: True
+Left: 3990
+Top: 0
+Width: 2550
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctc_price
+Type: 109
+ControlSource: ctc_price
+Caption: 
+Visible: True
+Left: 8235
+Top: 0
+Width: 1140
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: ctc_id
+Type: 109
+ControlSource: ctc_id
+Caption: 
+Visible: True
+Left: 525
+Top: 0
+Width: 570
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sno
+Type: 109
+ControlSource: =1
+Caption: 
+Visible: False
+Left: 9375
+Top: 0
+Width: 0
+Height: 390
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text71
+Type: 109
+ControlSource: =Chr([sno]+96) & "."
+Caption: 
+Visible: True
+Left: 60
+Top: 0
+Width: 465
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: namenid
+Type: 109
+ControlSource: =[ctc_empnamecomp] & Chr(13) & Chr(10) & "(" & [ctc_emp_id] & ")"
+Caption: 
+Visible: True
+Left: 1095
+Top: 0
+Width: 2895
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctc_newenddt
+Type: 109
+ControlSource: ctc_newenddt
+Caption: 
+Visible: True
+Left: 6540
+Top: 0
+Width: 1695
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy

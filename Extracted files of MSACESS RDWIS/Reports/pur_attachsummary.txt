@@ -1,0 +1,106 @@
+REPORT: pur_attachsummary
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM pur_purattachsummary1 WHERE status = "Missing"; 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label41
+Type: 100
+ControlSource: 
+Caption: Missing Attachments - PC
+Value: 
+Visible: True
+Left: 19
+Top: 120
+Width: 2670
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Currency
+Type: 109
+ControlSource: Currency
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1665
+Height: 420
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: eat_type
+Type: 109
+ControlSource: pat_type
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1770
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sumtype
+Type: 109
+ControlSource: =Count([pcs_id])
+Caption: 
+Visible: True
+Left: 1860
+Top: 30
+Width: 570
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: pcs_id
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 2655
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text22
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 0
+Top: 0
+Width: 2715
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: AccessTotalsemp_id
+Type: 109
+ControlSource: =Count(*)
+Caption: 
+Visible: True
+Left: 60
+Top: 195
+Width: 2655
+Height: 375
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

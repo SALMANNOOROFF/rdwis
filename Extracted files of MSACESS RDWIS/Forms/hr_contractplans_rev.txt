@@ -1,0 +1,394 @@
+FORM: hr_contractplans_rev
+
+=== FORM PROPERTIES ===
+Caption: Data Revision Form
+RecordSource: hr_contractplan_temp
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Data Revision Form
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1065
+Top: 240
+Width: 3225
+Height: 480
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label637
+Type: 100
+ControlSource: 
+Caption: Month
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1125
+Top: 915
+Width: 1365
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label638
+Type: 100
+ControlSource: 
+Caption: Head
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2550
+Top: 915
+Width: 1455
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: object_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 188
+Top: 357
+Width: 463
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label325
+Type: 100
+ControlSource: 
+Caption: Object ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 188
+Top: 47
+Width: 463
+Height: 314
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: unit_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4665
+Top: 400
+Width: 433
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label582
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4665
+Top: 90
+Width: 463
+Height: 329
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label704
+Type: 100
+ControlSource: 
+Caption: cpn_hed_id_old
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4065
+Top: 915
+Width: 405
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label711
+Type: 100
+ControlSource: 
+Caption: cpn_hed_id_detail
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 4530
+Top: 915
+Width: 465
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label729
+Type: 100
+ControlSource: 
+Caption: cpn_id
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 360
+Top: 915
+Width: 705
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cpn_startdt
+Type: 109
+ControlSource: cpn_startdt
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1125
+Top: 30
+Width: 1365
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: mmm yy
+InputMask: 
+
+--------------------
+Name: cpn_hed_id_old
+Type: 109
+ControlSource: cpn_hed_id_old
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4065
+Top: 30
+Width: 405
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: cpn_hed_id_detail
+Type: 109
+ControlSource: cpn_hed_id_detail
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4530
+Top: 30
+Width: 465
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cpn_hed_id
+Type: 111
+ControlSource: cpn_hed_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2550
+Top: 30
+Width: 1455
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cpn_id
+Type: 109
+ControlSource: cpn_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 360
+Top: 30
+Width: 705
+Height: 345
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 1095
+Top: 210
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdGenerate
+Type: 104
+ControlSource: 
+Caption: Generate
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3120
+Top: 195
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

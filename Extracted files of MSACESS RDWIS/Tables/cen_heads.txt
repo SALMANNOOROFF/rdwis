@@ -1,0 +1,12 @@
+TABLE: cen_heads
+
+COLUMNS:
+- hed_id | Type:4 | Size:4
+- hed_name | Type:10 | Size:255
+- hed_type | Type:10 | Size:255
+- hed_code | Type:10 | Size:255
+- hed_opendt | Type:8 | Size:8
+- hed_closedt | Type:8 | Size:8
+- hed_transtype | Type:3 | Size:2
+- hed_unt_id | Type:4 | Size:4
+- hed_prj_id | Type:4 | Size:4

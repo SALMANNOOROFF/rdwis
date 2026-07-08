@@ -1,0 +1,414 @@
+FORM: fin_msncosts_rev
+
+=== FORM PROPERTIES ===
+Caption: Data Revision Form
+RecordSource: fin_msncosts_plus_temp
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Data Revision Form
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1755
+Top: 60
+Width: 4020
+Height: 480
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label639
+Type: 100
+ControlSource: 
+Caption: Num
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 420
+Top: 705
+Width: 645
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label637
+Type: 100
+ControlSource: 
+Caption: Cost
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5175
+Top: 705
+Width: 1350
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label638
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1125
+Top: 705
+Width: 3990
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: object_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6213
+Top: 94
+Width: 313
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: unit_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6591
+Top: 94
+Width: 313
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label704
+Type: 100
+ControlSource: 
+Caption: mct_cost_old
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6585
+Top: 705
+Width: 165
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label711
+Type: 100
+ControlSource: 
+Caption: mct_cost_detail
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6810
+Top: 705
+Width: 180
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: object_code
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 165
+Top: 90
+Width: 1093
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: alloc
+Type: 109
+ControlSource: =[Forms]![fin_sharesinstall_add]![alloc]
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5835
+Top: 90
+Width: 313
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: mct_cost
+Type: 109
+ControlSource: mct_cost
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5175
+Top: 90
+Width: 1350
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: msn_desc
+Type: 109
+ControlSource: msn_desc
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1125
+Top: 90
+Width: 3990
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: mct_msn_id
+Type: 109
+ControlSource: mct_msn_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 420
+Top: 90
+Width: 645
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: mct_cost_old
+Type: 109
+ControlSource: mct_cost_old
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6585
+Top: 90
+Width: 165
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: mct_cost_detail
+Type: 109
+ControlSource: mct_cost_detail
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6810
+Top: 90
+Width: 180
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 1629
+Top: 283
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdGenerate
+Type: 104
+ControlSource: 
+Caption: Generate
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3708
+Top: 283
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sum_mct_cost
+Type: 109
+ControlSource: =Sum([mct_cost])
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5196
+Top: 0
+Width: 1350
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 

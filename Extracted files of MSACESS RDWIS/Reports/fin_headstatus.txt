@@ -1,0 +1,1160 @@
+REPORT: fin_headstatus
+
+=== REPORT PROPERTIES ===
+RecordSource: 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label32
+Type: 100
+ControlSource: 
+Caption: ACCOUNT SUMMARY  -
+Value: 
+Visible: True
+Left: 2550
+Top: 75
+Width: 3778
+Height: 418
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lblTax
+Type: 100
+ControlSource: 
+Caption: (Million Rupees with GST)
+Value: 
+Visible: True
+Left: 2970
+Top: 570
+Width: 4155
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmbAccount
+Type: 111
+ControlSource: =[Forms]![fin_headstatus]![cmbAccount]
+Caption: 
+Visible: True
+Left: 6345
+Top: 60
+Width: 1470
+Height: 418
+ForeColor: 0
+BackColor: -2147483613
+Format: 
+
+--------------------
+Name: dated
+Type: 111
+ControlSource: ="Dated " & Format(Date(),"dd mmm yy")
+Caption: 
+Visible: True
+Left: 3846
+Top: 1020
+Width: 2505
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Box73
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 3525
+Top: 1695
+Width: 2970
+Height: 1170
+ForeColor: 
+BackColor: 12566463
+Format: 
+
+--------------------
+Name: acc_allocation
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![acc_allocation]
+Caption: 
+Visible: True
+Left: 4935
+Top: 1727
+Width: 1440
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label76
+Type: 100
+ControlSource: 
+Caption: Allocation
+Value: 
+Visible: True
+Left: 3645
+Top: 1727
+Width: 1303
+Height: 358
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: mtss_share
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![mtss_share]
+Caption: 
+Visible: True
+Left: 4935
+Top: 2102
+Width: 1440
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label78
+Type: 100
+ControlSource: 
+Caption: MTSS Share
+Value: 
+Visible: True
+Left: 3645
+Top: 2102
+Width: 1303
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: rdw_share
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![rdw_share]
+Caption: 
+Visible: True
+Left: 4935
+Top: 2475
+Width: 1440
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label391
+Type: 100
+ControlSource: 
+Caption: RDW Share
+Value: 
+Visible: True
+Left: 3645
+Top: 2475
+Width: 1303
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Box380
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6347
+Top: 840
+Width: 1425
+Height: 3135
+ForeColor: 
+BackColor: 15189940
+Format: 
+
+--------------------
+Name: cf_canbespent
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_canbespent]
+Caption: 
+Visible: True
+Left: 6395
+Top: 3559
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label171
+Type: 100
+ControlSource: 
+Caption: Remaining
+Value: 
+Visible: True
+Left: 7923
+Top: 3559
+Width: 1515
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cf_share
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_share]
+Caption: 
+Visible: True
+Left: 6347
+Top: 513
+Width: 1440
+Height: 313
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label383
+Type: 100
+ControlSource: 
+Caption: CSRF
+Value: 
+Visible: True
+Left: 6347
+Top: 165
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cf_received
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_received]
+Caption: 
+Visible: True
+Left: 6395
+Top: 905
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label173
+Type: 100
+ControlSource: 
+Caption: Received
+Value: 
+Visible: True
+Left: 7923
+Top: 905
+Width: 1035
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cf_commit
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_commit]
+Caption: 
+Visible: True
+Left: 6395
+Top: 2055
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label170
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 7923
+Top: 2055
+Width: 1515
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cf_exp
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_exp]
+Caption: 
+Visible: True
+Left: 6395
+Top: 1290
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label169
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 7923
+Top: 1290
+Width: 1515
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cf_avlbl
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_avlbl]
+Caption: 
+Visible: True
+Left: 6395
+Top: 2805
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label172
+Type: 100
+ControlSource: 
+Caption: Available
+Value: 
+Visible: True
+Left: 7923
+Top: 2805
+Width: 1515
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cf_yettoberec
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_yettoberec]
+Caption: 
+Visible: True
+Left: 6395
+Top: 3180
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label174
+Type: 100
+ControlSource: 
+Caption: Yet to be Received
+Value: 
+Visible: True
+Left: 7923
+Top: 3180
+Width: 1905
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cf_balance
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_balance]
+Caption: 
+Visible: True
+Left: 6395
+Top: 1673
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label358
+Type: 100
+ControlSource: 
+Caption: Balance
+Value: 
+Visible: True
+Left: 7923
+Top: 1673
+Width: 1515
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line93
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6359
+Top: 2809
+Width: 1410
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line94
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6359
+Top: 3139
+Width: 1410
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line95
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6359
+Top: 1680
+Width: 1410
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line96
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6359
+Top: 2010
+Width: 1410
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: boxExpbd
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2695
+Top: 5644
+Width: 1425
+Height: 1245
+ForeColor: 
+BackColor: 12566463
+Format: 
+
+--------------------
+Name: pcc_ownexp
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_ownexp]
+Caption: 
+Visible: True
+Left: 2742
+Top: 5734
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_ownexp
+Type: 100
+ControlSource: 
+Caption: Project exp. from this account
+Value: 
+Visible: True
+Left: 0
+Top: 5749
+Width: 2580
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: others_loanstaken
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![others_loanstaken]
+Caption: 
+Visible: True
+Left: 2742
+Top: 6109
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_others_loanstaken
+Type: 100
+ControlSource: 
+Caption: Project exp. from other accounts
+
+Value: 
+Visible: True
+Left: 0
+Top: 6126
+Width: 2580
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_loansgiven
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_loansgiven]
+Caption: 
+Visible: True
+Left: 2742
+Top: 6486
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_pcc_loansgiven
+Type: 100
+ControlSource: 
+Caption: Other's exp. from this account
+
+Value: 
+Visible: True
+Left: 0
+Top: 6501
+Width: 2580
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: boxGreen
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 4120
+Top: 1245
+Width: 1425
+Height: 2730
+ForeColor: 
+BackColor: 12566463
+Format: 
+
+--------------------
+Name: lneAvl1
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2715
+Top: 2809
+Width: 2835
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: lneAvl2
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2715
+Top: 3139
+Width: 2835
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: lneBal1
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2715
+Top: 1680
+Width: 2835
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: lneBal2
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2715
+Top: 2010
+Width: 2835
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: boxBlue
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2695
+Top: 840
+Width: 1425
+Height: 3135
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lblGreen
+Type: 100
+ControlSource: 
+Caption: Actual
+Project Figures
+Value: 
+Visible: True
+Left: 4120
+Top: 825
+Width: 1425
+Height: 420
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_share
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_share]
+Caption: 
+Visible: True
+Left: 2695
+Top: 513
+Width: 1425
+Height: 313
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lblProject
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 2695
+Top: 165
+Width: 1425
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_exp
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_exp]
+Caption: 
+Visible: True
+Left: 2742
+Top: 1290
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_exp
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 0
+Top: 1286
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_commit
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_commit]
+Caption: 
+Visible: True
+Left: 2742
+Top: 2051
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_commit
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 0
+Top: 2051
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_canbespent
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_canbespent]
+Caption: 
+Visible: True
+Left: 2742
+Top: 3559
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_canbespent
+Type: 100
+ControlSource: 
+Caption: Remaining
+Value: 
+Visible: True
+Left: 0
+Top: 3565
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_avlbl
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_avlbl]
+Caption: 
+Visible: True
+Left: 2742
+Top: 2805
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_avlbl
+Type: 100
+ControlSource: 
+Caption: Available
+Value: 
+Visible: True
+Left: 0
+Top: 2805
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_canbespent
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![prj_canbespent]
+Caption: 
+Visible: True
+Left: 4165
+Top: 3559
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: pcc_received
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_received]
+Caption: 
+Visible: True
+Left: 2742
+Top: 905
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_received
+Type: 100
+ControlSource: 
+Caption: Received
+Value: 
+Visible: True
+Left: 0
+Top: 905
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_yettoberec
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_yettoberec]
+Caption: 
+Visible: True
+Left: 2742
+Top: 3180
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_yettoberec
+Type: 100
+ControlSource: 
+Caption: Yet to be Received
+Value: 
+Visible: True
+Left: 0
+Top: 3180
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_exp
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![prj_exp]
+Caption: 
+Visible: True
+Left: 4165
+Top: 1290
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: txtWarnCat
+Type: 109
+ControlSource: ="Overspent"
+Caption: 
+Visible: True
+Left: 4390
+Top: 210
+Width: 990
+Height: 300
+ForeColor: 16777215
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_balance
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_balance]
+Caption: 
+Visible: True
+Left: 2742
+Top: 1673
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_balance
+Type: 100
+ControlSource: 
+Caption: Balance
+Value: 
+Visible: True
+Left: 0
+Top: 1673
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_commit
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![prj_commit]
+Caption: 
+Visible: True
+Left: 4165
+Top: 2055
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: prj_share
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![prj_share]
+Caption: 
+Visible: True
+Left: 4120
+Top: 513
+Width: 1425
+Height: 313
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: acc_rcvmsncompleted
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![acc_rcvmsncompleted]
+Caption: 
+Visible: True
+Left: 2742
+Top: 4202
+Width: 1335
+Height: 358
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_rcvmsncompleted
+Type: 100
+ControlSource: 
+Caption: Receivable for Comp. Milestones
+Value: 
+Visible: True
+Left: 0
+Top: 4200
+Width: 2580
+Height: 358
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_availableafter
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![acc_availableafter]
+Caption: 
+Visible: True
+Left: 2742
+Top: 5010
+Width: 1335
+Height: 358
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_availableafter
+Type: 100
+ControlSource: 
+Caption: Available after Receivables
+Value: 
+Visible: True
+Left: 0
+Top: 5010
+Width: 2580
+Height: 358
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_rcvmsncurrent
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![acc_rcvmsncurrent]
+Caption: 
+Visible: True
+Left: 2742
+Top: 4620
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_loansnet
+Type: 100
+ControlSource: 
+Caption: Receivable for Current Milestone
+Value: 
+Visible: True
+Left: 0
+Top: 4620
+Width: 2580
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: boxRcv
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2695
+Top: 4114
+Width: 1425
+Height: 1335
+ForeColor: 
+BackColor: 12566463
+Format: 
+
+--------------------
+Name: cf_ipc
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![cf_ipc]
+Caption: 
+Visible: True
+Left: 6395
+Top: 2434
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label101
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 7923
+Top: 2434
+Width: 1515
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: pcc_ipc
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![pcc_ipc]
+Caption: 
+Visible: True
+Left: 2742
+Top: 2430
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label103
+Type: 100
+ControlSource: 
+Caption: In Process
+Value: 
+Visible: True
+Left: 0
+Top: 2430
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_ipc
+Type: 109
+ControlSource: =[Forms]![fin_headstatus]![prj_ipc]
+Caption: 
+Visible: True
+Left: 4165
+Top: 2434
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0

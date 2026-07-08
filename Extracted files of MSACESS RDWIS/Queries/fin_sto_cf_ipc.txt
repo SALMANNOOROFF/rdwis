@@ -1,0 +1,6 @@
+QUERY: fin_sto_cf_ipc
+
+SQL:
+SELECT fin_sto_cf_ipc1.effhed_id, Sum(fin_sto_cf_ipc1.amount) AS SumOfamount
+FROM fin_sto_cf_ipc1
+GROUP BY fin_sto_cf_ipc1.effhed_id;

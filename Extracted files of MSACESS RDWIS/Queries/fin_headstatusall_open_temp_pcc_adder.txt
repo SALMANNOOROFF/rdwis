@@ -1,0 +1,7 @@
+QUERY: fin_headstatusall_open_temp_pcc_adder
+
+SQL:
+INSERT INTO fin_headstatusall_temp ( hed_id, hed_code, hed_unt_id, transtype, allocation, received, expenditure, commitments, inprocess, available, yettoberec, canbespent, amount1, amount2 )
+SELECT cen_heads_base.hed_id, cen_heads_base.hed_code, cen_heads_base.hed_unt_id, IIf([hed_transtype]=1,"Without GST","With GST") AS transtype, GetA16Element("GetAccShares",[hed_id],1) AS allocation, GetPccReceived([hed_id]) AS received, GetPccExpenditure([hed_id]) AS expenditure, GetPccOutstandingCommits([hed_id]) AS commitments, GetPccInProcess([hed_id]) AS inprocess, Round([received]-[expenditure]-[commitments]-[inprocess],2) AS available, Round([allocation]-[received],2) AS yettoberec, Round([allocation]-[expenditure]-[commitments]-[inprocess],2) AS canbespent, GetAccReceivableMsnCompleted([hed_id]) AS rcvblcompms, Round([received]-[expenditure]-[commitments]+[rcvblcompms],2) AS avlbl2
+FROM cen_heads_base
+ORDER BY cen_heads_base.hed_id;

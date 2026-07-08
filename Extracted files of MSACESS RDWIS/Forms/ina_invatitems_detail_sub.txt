@@ -1,0 +1,235 @@
+FORM: ina_invatitems_detail_sub
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: ina_invatitems
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Item ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 60
+Top: 30
+Width: 915
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1035
+Top: 30
+Width: 5655
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Charge date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 8040
+Top: 30
+Width: 1485
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label54
+Type: 100
+ControlSource: 
+Caption: Quantity
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6750
+Top: 30
+Width: 1230
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_id
+Type: 109
+ControlSource: ias_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 60
+Top: 30
+Width: 915
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_desc
+Type: 109
+ControlSource: ias_desc
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1035
+Top: 30
+Width: 5655
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_chargedate
+Type: 109
+ControlSource: ias_chargedate
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8040
+Top: 30
+Width: 1485
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: qty
+Type: 109
+ControlSource: =[iac_qty] & " " & [iac_qtyunit]
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6750
+Top: 30
+Width: 1230
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdDetach
+Type: 104
+ControlSource: 
+Caption:  x
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 9581
+Top: 56
+Width: 225
+Height: 255
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 8
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_id
+Type: 109
+ControlSource: iac_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9864
+Top: 56
+Width: 726
+Height: 315
+ForeColor: 10921638
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

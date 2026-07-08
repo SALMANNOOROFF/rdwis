@@ -1,0 +1,327 @@
+FORM: cen_heads_pa_u
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: cen_heads_paopen_u
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: lbl_title
+Type: 100
+ControlSource: 
+Caption: Accounts
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 170
+Top: 340
+Width: 8280
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Account  Code
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 165
+Top: 1020
+Width: 1455
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Opening Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3150
+Top: 1020
+Width: 1440
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Closing Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6525
+Top: 1020
+Width: 1575
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: GST
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4650
+Top: 1020
+Width: 1815
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: Division
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1680
+Top: 1020
+Width: 1410
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_code
+Type: 109
+ControlSource: hed_code
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 165
+Top: 30
+Width: 1455
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_opendt
+Type: 109
+ControlSource: hed_opendt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3150
+Top: 30
+Width: 1440
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: hed_closedt
+Type: 109
+ControlSource: hed_closedt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6525
+Top: 30
+Width: 1575
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: hed_unt
+Type: 111
+ControlSource: hed_unt_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1680
+Top: 30
+Width: 1410
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_transtype
+Type: 111
+ControlSource: hed_transtype
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4650
+Top: 30
+Width: 1815
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_hed_unt
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2790
+Top: 0
+Width: 283
+Height: 395
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box191
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6180
+Top: 0
+Width: 283
+Height: 382
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReverse
+Type: 104
+ControlSource: 
+Caption: Q
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 8220
+Top: 45
+Width: 301
+Height: 315
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings 3
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

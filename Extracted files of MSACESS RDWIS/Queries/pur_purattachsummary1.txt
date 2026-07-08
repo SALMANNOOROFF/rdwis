@@ -1,0 +1,6 @@
+QUERY: pur_purattachsummary1
+
+SQL:
+SELECT pur_purcases.pcs_id, IIf([pcs_date]<#1/1/2022#,"Old","Recent") AS [Currency], pur_purattachments.pat_type, IIf(IsNull([pat_path]),"Missing","Attached") AS Status
+FROM pur_purcases INNER JOIN pur_purattachments ON pur_purcases.pcs_id = pur_purattachments.pat_objid
+WHERE (((pur_purcases.pcs_status)="Approved" Or (pur_purcases.pcs_status)="Fulfilled"));

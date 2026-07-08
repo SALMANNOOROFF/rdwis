@@ -1,0 +1,7 @@
+TABLE: pur_purcases_shd
+
+COLUMNS:
+- pcd_pcs_id | Type:4 | Size:4
+- pcd_subhead | Type:10 | Size:255
+- pcd_ratio | Type:20 | Size:16
+- pcd_type | Type:10 | Size:5

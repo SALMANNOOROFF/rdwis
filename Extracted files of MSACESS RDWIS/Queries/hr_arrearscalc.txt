@@ -1,0 +1,6 @@
+QUERY: hr_arrearscalc
+
+SQL:
+SELECT First(fin_salorders.sor_id) AS marker, Sum(fin_salorders.sor_award) AS sor_award, Sum(fin_salorders.sor_penalty) AS sor_penalty, Sum(fin_salorders.sor_withheld) AS sor_withheld, Sum(fin_salorders.sor_loaned) AS sor_loaned, Sum(fin_salorders.sor_salary) AS sor_salary
+FROM fin_salorders
+WHERE (((fin_salorders.sor_emp_id)=[EmpId]) AND ((fin_salorders.sor_status)='Fulfilled') AND ((fin_salorders.sor_month)=[SalMonth]));

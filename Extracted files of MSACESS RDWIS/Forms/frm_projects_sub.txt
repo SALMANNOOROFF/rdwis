@@ -1,0 +1,371 @@
+FORM: frm_projects_sub
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: frm_projects
+DefaultView: 1
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: prj_name
+Type: 109
+ControlSource: prj_name
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1140
+Top: 180
+Width: 6180
+Height: 391
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 180
+Width: 840
+Height: 391
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_scope
+Type: 109
+ControlSource: prj_scope
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1140
+Top: 660
+Width: 6180
+Height: 840
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Scope
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 240
+Top: 660
+Width: 840
+Height: 840
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_awarddt
+Type: 109
+ControlSource: prj_awarddt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9360
+Top: 1140
+Width: 2340
+Height: 391
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Award date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7980
+Top: 1140
+Width: 1320
+Height: 391
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_status
+Type: 111
+ControlSource: prj_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14160
+Top: 660
+Width: 2340
+Height: 391
+ForeColor: 3484194
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12300
+Top: 660
+Width: 1800
+Height: 391
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_compdt
+Type: 109
+ControlSource: prj_compdt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14160
+Top: 1140
+Width: 2340
+Height: 391
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Completion date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12300
+Top: 1140
+Width: 1800
+Height: 391
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_tech
+Type: 109
+ControlSource: prj_tech
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9360
+Top: 180
+Width: 7140
+Height: 391
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Technology
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7980
+Top: 180
+Width: 1320
+Height: 391
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: prj_cost
+Type: 109
+ControlSource: prj_cost
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9360
+Top: 660
+Width: 2340
+Height: 391
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: #,##0
+InputMask: 
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Cost
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7980
+Top: 660
+Width: 1320
+Height: 391
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Line72
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 1680
+Width: 16980
+Height: 0
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_prj_status
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 16230
+Top: 660
+Width: 295
+Height: 410
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

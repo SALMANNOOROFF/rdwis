@@ -1,0 +1,1210 @@
+REPORT: hr_personnel_doc
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM hr_emps_u_grand WHERE emp_id = Forms![hr_emps_u]![emp_id]; 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: name_comp
+Type: 109
+ControlSource: =NameComplete([emp_name],[emp_title],[emp_rank])
+Caption: 
+Visible: True
+Left: 1500
+Top: 3420
+Width: 8220
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: 1.    FULL NAME
+Value: 
+Visible: True
+Left: 0
+Top: 3420
+Width: 1455
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_father
+Type: 109
+ControlSource: emp_father
+Caption: 
+Visible: True
+Left: 1800
+Top: 3900
+Width: 7920
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: 2.    FATHER NAME
+Value: 
+Visible: True
+Left: 0
+Top: 3900
+Width: 1740
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_mobile
+Type: 109
+ControlSource: emp_mobile
+Caption: 
+Visible: True
+Left: 1740
+Top: 4380
+Width: 2580
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: 3.    CONTACT NO
+Value: 
+Visible: True
+Left: 0
+Top: 4380
+Width: 1680
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_dob
+Type: 109
+ControlSource: emp_dob
+Caption: 
+Visible: True
+Left: 1860
+Top: 4860
+Width: 2460
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: 5.    DATE OF BIRTH
+Value: 
+Visible: True
+Left: 0
+Top: 4860
+Width: 1800
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_marital
+Type: 109
+ControlSource: emp_marital
+Caption: 
+Visible: True
+Left: 6780
+Top: 4380
+Width: 2940
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: 4.    MARITAL STATUS
+Value: 
+Visible: True
+Left: 4740
+Top: 4380
+Width: 1980
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_pob
+Type: 109
+ControlSource: emp_pob
+Caption: 
+Visible: True
+Left: 6660
+Top: 4860
+Width: 3060
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: 6.    PLACE OF BIRTH
+Value: 
+Visible: True
+Left: 4740
+Top: 4860
+Width: 1860
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label23
+Type: 100
+ControlSource: 
+Caption: PERSONAL DATA FORM
+Value: 
+Visible: True
+Left: 2865
+Top: 1020
+Width: 3135
+Height: 375
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line24
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1500
+Top: 3660
+Width: 8220
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line25
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1800
+Top: 4140
+Width: 7920
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line26
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1740
+Top: 4620
+Width: 2580
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line27
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1860
+Top: 5100
+Width: 2460
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line46
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6660
+Top: 5100
+Width: 3060
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line48
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6780
+Top: 4620
+Width: 2940
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: emp_id
+Caption: 
+Visible: True
+Left: 8100
+Top: 2940
+Width: 1515
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label61
+Type: 100
+ControlSource: 
+Caption: ID:
+Value: 
+Visible: True
+Left: 7740
+Top: 2940
+Width: 330
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_caste
+Type: 109
+ControlSource: emp_caste
+Caption: 
+Visible: True
+Left: 1080
+Top: 6330
+Width: 3240
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: 9.    CASTE
+Value: 
+Visible: True
+Left: 0
+Top: 6330
+Width: 1020
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_grade
+Type: 109
+ControlSource: ctr_grade
+Caption: 
+Visible: True
+Left: 2460
+Top: 6810
+Width: 1860
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label10
+Type: 100
+ControlSource: 
+Caption: 11.  TRAGE/GRADE/DESIG
+Value: 
+Visible: True
+Left: 0
+Top: 6810
+Width: 2400
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_cnic
+Type: 109
+ControlSource: emp_cnic
+Caption: 
+Visible: True
+Left: 6000
+Top: 6330
+Width: 3720
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label11
+Type: 100
+ControlSource: 
+Caption: 10.  CNIC NO
+Value: 
+Visible: True
+Left: 4740
+Top: 6330
+Width: 1215
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_nok
+Type: 109
+ControlSource: =[emp_nokname] & " / " & [emp_nokrelation]
+Caption: 
+Visible: True
+Left: 3300
+Top: 7770
+Width: 6420
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: 15.  NEXT OF KIN NAME/RELATION
+Value: 
+Visible: True
+Left: 0
+Top: 7770
+Width: 3240
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_religion
+Type: 109
+ControlSource: emp_religion
+Caption: 
+Visible: True
+Left: 1380
+Top: 8250
+Width: 2940
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label13
+Type: 100
+ControlSource: 
+Caption: 16.  RELIGION
+Value: 
+Visible: True
+Left: 0
+Top: 8250
+Width: 1320
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_sect
+Type: 109
+ControlSource: emp_sect
+Caption: 
+Visible: True
+Left: 5715
+Top: 8235
+Width: 4020
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label14
+Type: 100
+ControlSource: 
+Caption: 17. SECT
+Value: 
+Visible: True
+Left: 4755
+Top: 8235
+Width: 900
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_joindt
+Type: 109
+ControlSource: emp_joindt
+Caption: 
+Visible: True
+Left: 2700
+Top: 8730
+Width: 7020
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: 18.  DATE OF APPOINTMENT
+Value: 
+Visible: True
+Left: 0
+Top: 8730
+Width: 2640
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_paddress
+Type: 109
+ControlSource: emp_paddress
+Caption: 
+Visible: True
+Left: 2580
+Top: 9690
+Width: 7140
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label16
+Type: 100
+ControlSource: 
+Caption: 20.  PERMANENT ADDRESS
+Value: 
+Visible: True
+Left: 0
+Top: 9690
+Width: 2520
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_taddress
+Type: 109
+ControlSource: emp_taddress
+Caption: 
+Visible: True
+Left: 2160
+Top: 9210
+Width: 7560
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label17
+Type: 100
+ControlSource: 
+Caption: 19.  PRESENT ADDRESS
+Value: 
+Visible: True
+Left: 0
+Top: 9210
+Width: 2100
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_police
+Type: 109
+ControlSource: emp_police
+Caption: 
+Visible: True
+Left: 1980
+Top: 10170
+Width: 7740
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: 21.  POLICE STATION
+Value: 
+Visible: True
+Left: 0
+Top: 10170
+Width: 1935
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_political
+Type: 109
+ControlSource: emp_political
+Caption: 
+Visible: True
+Left: 2640
+Top: 11130
+Width: 7080
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label19
+Type: 100
+ControlSource: 
+Caption: 23.  POLITICAL AFFILIATION
+Value: 
+Visible: True
+Left: 0
+Top: 11130
+Width: 2580
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: bac_acc
+Type: 109
+ControlSource: =[bac_bnkname] & ", " & [bac_accnum]
+Caption: 
+Visible: True
+Left: 1740
+Top: 10650
+Width: 7980
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label20
+Type: 100
+ControlSource: 
+Caption: 22.  BANK A/C NO
+Value: 
+Visible: True
+Left: 0
+Top: 10650
+Width: 1680
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: height
+Type: 109
+ControlSource: =[emp_height] & " cms"
+Caption: 
+Visible: True
+Left: 5940
+Top: 7290
+Width: 3780
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: 14.  HEIGHT
+Value: 
+Visible: True
+Left: 4740
+Top: 7290
+Width: 1140
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: idmark
+Type: 109
+ControlSource: =Nz([emp_idmark],"Nil")
+Caption: 
+Visible: True
+Left: 1305
+Top: 7290
+Width: 3015
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label22
+Type: 100
+ControlSource: 
+Caption: 13.  ID MARK
+Value: 
+Visible: True
+Left: 0
+Top: 7290
+Width: 1260
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line28
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1080
+Top: 6570
+Width: 3240
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line29
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2460
+Top: 7050
+Width: 1860
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line30
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1335
+Top: 7530
+Width: 3000
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line31
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 3300
+Top: 8010
+Width: 6420
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line32
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1380
+Top: 8490
+Width: 2940
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line33
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 5715
+Top: 8475
+Width: 3975
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line37
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1980
+Top: 10410
+Width: 7740
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line38
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2580
+Top: 9930
+Width: 7140
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line39
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2160
+Top: 9450
+Width: 7560
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line40
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2700
+Top: 8970
+Width: 7020
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line41
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 2640
+Top: 11370
+Width: 7080
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line42
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1740
+Top: 10890
+Width: 7980
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line47
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 5940
+Top: 7530
+Width: 3780
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Line49
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6000
+Top: 6570
+Width: 3720
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text51
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Left: 660
+Top: 13530
+Width: 2640
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label52
+Type: 100
+ControlSource: 
+Caption: DATE
+Value: 
+Visible: True
+Left: 0
+Top: 13530
+Width: 600
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line53
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 660
+Top: 13770
+Width: 2640
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text54
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Left: 7080
+Top: 13530
+Width: 2640
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label55
+Type: 100
+ControlSource: 
+Caption: SIGNATURE
+Value: 
+Visible: True
+Left: 5820
+Top: 13530
+Width: 1200
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line56
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 7080
+Top: 13770
+Width: 2640
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: unit
+Type: 109
+ControlSource: unt_name
+Caption: 
+Visible: True
+Left: 6600
+Top: 6810
+Width: 3120
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label58
+Type: 100
+ControlSource: 
+Caption: 12.  W/SHOP/DEPT
+Value: 
+Visible: True
+Left: 4740
+Top: 6810
+Width: 1800
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line50
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 6600
+Top: 7050
+Width: 3120
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label59
+Type: 100
+ControlSource: 
+Caption:  THUMB IMPRESSION
+Value: 
+Visible: True
+Left: 0
+Top: 11970
+Width: 3300
+Height: 1005
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: exp
+Type: 109
+ControlSource: =Nz([Experience],"Nil")
+Caption: 
+Visible: True
+Left: 1545
+Top: 5820
+Width: 8190
+Height: 240
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label65
+Type: 100
+ControlSource: 
+Caption: 8.    EXPERIENCE
+Value: 
+Visible: True
+Left: 0
+Top: 5820
+Width: 1500
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line67
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1575
+Top: 6066
+Width: 8130
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Image325
+Type: 103
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 7560
+Top: 0
+Width: 2145
+Height: 2880
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_qualif
+Type: 111
+ControlSource: emp_qualif
+Caption: 
+Visible: False
+Left: 1963
+Top: 0
+Width: 1650
+Height: 255
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label62
+Type: 100
+ControlSource: 
+Caption: 7.   QUALIFICATION
+Value: 
+Visible: True
+Left: 70
+Top: 0
+Width: 1830
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Combo67
+Type: 111
+ControlSource: =[emp_qualif].[column](1) & IIf([emp_discip]="-",""," (" & [emp_discip] & ")")
+Caption: 
+Visible: True
+Left: 1893
+Top: 5340
+Width: 7815
+Height: 255
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label68
+Type: 100
+ControlSource: 
+Caption: 7.   QUALIFICATION
+Value: 
+Visible: True
+Left: 0
+Top: 5340
+Width: 1830
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line66
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1905
+Top: 5588
+Width: 7815
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 

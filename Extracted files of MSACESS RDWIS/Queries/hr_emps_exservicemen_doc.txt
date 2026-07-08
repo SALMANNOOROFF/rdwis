@@ -1,0 +1,7 @@
+QUERY: hr_emps_exservicemen_doc
+
+SQL:
+SELECT hr_emps_u_active.*, ranks.ranksen, hr_contracts_last.ctr_jobtitle
+FROM (hr_emps_u_active LEFT JOIN ranks ON hr_emps_u_active.emp_rank = ranks.rankentered) LEFT JOIN hr_contracts_last ON hr_emps_u_active.emp_id = hr_contracts_last.ctr_num
+WHERE (((hr_emps_u_active.emp_rank) Is Not Null))
+ORDER BY ranks.ranksen DESC , hr_emps_u_active.emp_rank, hr_emps_u_active.emp_unt_id;

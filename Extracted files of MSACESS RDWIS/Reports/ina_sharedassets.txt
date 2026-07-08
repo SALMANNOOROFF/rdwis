@@ -1,0 +1,195 @@
+REPORT: ina_sharedassets
+
+=== REPORT PROPERTIES ===
+RecordSource: ina_sharedassets
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Assets Available for Sharing
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 5893
+Height: 450
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Left: 795
+Top: 60
+Width: 5160
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Qty
+Value: 
+Visible: True
+Left: 6015
+Top: 60
+Width: 780
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Division
+Value: 
+Visible: True
+Left: 6855
+Top: 60
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Location
+Value: 
+Visible: True
+Left: 8565
+Top: 60
+Width: 2100
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label40
+Type: 100
+ControlSource: 
+Caption: S No
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 675
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ias_desc
+Type: 109
+ControlSource: ias_desc
+Caption: 
+Visible: True
+Left: 795
+Top: 45
+Width: 5160
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: iac_qty
+Type: 109
+ControlSource: iac_qty
+Caption: 
+Visible: True
+Left: 6015
+Top: 45
+Width: 780
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: iac_location
+Type: 109
+ControlSource: iac_location
+Caption: 
+Visible: True
+Left: 8565
+Top: 45
+Width: 2100
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ias_unt_id
+Type: 111
+ControlSource: ias_unt_id
+Caption: 
+Visible: True
+Left: 6855
+Top: 45
+Width: 1650
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text39
+Type: 109
+ControlSource: =1
+Caption: 
+Visible: True
+Left: 60
+Top: 45
+Width: 675
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text30
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3345
+Top: 225
+Width: 2910
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text24
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 7191
+Top: 225
+Width: 3450
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard

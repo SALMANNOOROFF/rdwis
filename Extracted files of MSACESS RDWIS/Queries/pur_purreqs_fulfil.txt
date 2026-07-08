@@ -1,0 +1,5 @@
+QUERY: pur_purreqs_fulfil
+
+SQL:
+UPDATE pur_purreqs INNER JOIN pur_purreqitems ON pur_purreqs.prq_id = pur_purreqitems.pri_prq_id SET pur_purreqs.prq_fulfilled = "1"
+WHERE (((pur_purreqitems.pri_id)=[ReqItemId]) AND ((Exists (Select pri_prq_id  From pur_purreqitems as AllItems Where AllItems.pri_prq_id=pur_purreqs.prq_id And Nz([pri_fulfilment],0)< Nz([pri_appqty],[pri_qty])))=False));

@@ -1,0 +1,6 @@
+QUERY: hr_salreqs_u_doc
+
+SQL:
+SELECT hr_salreqs.srq_emp_id, hr_salreqs.srq_empnamecomp, units.unt_namesh AS unt_namesh, units_1.unt_namesh AS effunt_namesh, units.unt_type, cen_heads.hed_code AS hed_code, cen_heads_1.hed_code AS effhed_code, hr_salreqs.srq_month, hr_salreqs.srq_releasedtg, hr_salreqs.srq_remarks, hr_salreqs.srq_salary, hr_salreqs.srq_status, hr_salreqs.srq_ctrsalary, hr_salreqs.srq_bnkaccdetail, hr_salreqs.srq_bnkacctitle, hr_salreqs.srq_id, hr_salreqs.srq_remarks2, hr_salreqs.srq_sudohed
+FROM (((hr_salreqs LEFT JOIN units ON hr_salreqs.srq_unt_id = units.unt_id) LEFT JOIN cen_heads ON hr_salreqs.srq_hed_id = cen_heads.hed_id) LEFT JOIN cen_heads AS cen_heads_1 ON hr_salreqs.srq_effhed_id = cen_heads_1.hed_id) LEFT JOIN units AS units_1 ON hr_salreqs.srq_effunt_id = units_1.unt_id
+WHERE (((hr_salreqs.srq_unt_id)>=getvar("varLower") And (hr_salreqs.srq_unt_id)<=getvar("varUpper")));

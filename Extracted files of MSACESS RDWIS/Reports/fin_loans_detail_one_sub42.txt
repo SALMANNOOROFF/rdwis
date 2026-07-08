@@ -1,0 +1,152 @@
+REPORT: fin_loans_detail_one_sub42
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_loans_detail42_plus
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label31
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Left: 30
+Top: 30
+Width: 885
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label32
+Type: 100
+ControlSource: 
+Caption: Doc Id
+Value: 
+Visible: True
+Left: 975
+Top: 30
+Width: 960
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 3300
+Top: 30
+Width: 1455
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label34
+Type: 100
+ControlSource: 
+Caption: Date
+Value: 
+Visible: True
+Left: 1995
+Top: 30
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label35
+Type: 100
+ControlSource: 
+Caption: Title
+Value: 
+Visible: True
+Left: 4815
+Top: 30
+Width: 6030
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmt_type
+Type: 109
+ControlSource: cmt_type
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 885
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmt_docid
+Type: 109
+ControlSource: cmt_docid
+Caption: 
+Visible: True
+Left: 975
+Top: 30
+Width: 960
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: amount
+Type: 109
+ControlSource: amount
+Caption: 
+Visible: True
+Left: 3300
+Top: 30
+Width: 1455
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: doc_date
+Type: 109
+ControlSource: doc_date
+Caption: 
+Visible: True
+Left: 1995
+Top: 30
+Width: 1245
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: doc_title
+Type: 109
+ControlSource: doc_title
+Caption: 
+Visible: True
+Left: 4815
+Top: 30
+Width: 6030
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

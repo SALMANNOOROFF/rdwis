@@ -1,0 +1,94 @@
+REPORT: hr_emps_u_devices_sub2
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_sims
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: CSP
+Value: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1155
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Number
+Value: 
+Visible: True
+Left: 1245
+Top: 30
+Width: 1620
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label53
+Type: 100
+ControlSource: 
+Caption: Registered
+Value: 
+Visible: True
+Left: 2925
+Top: 30
+Width: 2181
+Height: 300
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sim_csp
+Type: 109
+ControlSource: sim_csp
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1155
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sim_num
+Type: 109
+ControlSource: sim_num
+Caption: 
+Visible: True
+Left: 1245
+Top: 30
+Width: 1620
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sim_reg
+Type: 109
+ControlSource: sim_reg
+Caption: 
+Visible: True
+Left: 2925
+Top: 30
+Width: 2181
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 

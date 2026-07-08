@@ -1,0 +1,7 @@
+QUERY: fin_inttransfers_u
+
+SQL:
+SELECT fin_transfers.*
+FROM fin_transfers
+WHERE (((fin_transfers.trf_type)="T"))
+ORDER BY fin_transfers.trf_date DESC;

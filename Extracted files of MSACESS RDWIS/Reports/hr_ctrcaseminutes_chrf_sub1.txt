@@ -1,0 +1,181 @@
+REPORT: hr_ctrcaseminutes_chrf_sub1
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_ctrcaseminute_status_temp
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Allocation
+Value: 
+Visible: True
+Left: 15
+Top: 15
+Width: 1590
+Height: 615
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 1605
+Top: 15
+Width: 1515
+Height: 615
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: Commitment
+Value: 
+Visible: True
+Left: 3120
+Top: 15
+Width: 1528
+Height: 615
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Forecast
+Value: 
+Visible: True
+Left: 4650
+Top: 15
+Width: 1590
+Height: 615
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: In Process
+Value: 
+Visible: True
+Left: 6240
+Top: 15
+Width: 1470
+Height: 615
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label30
+Type: 100
+ControlSource: 
+Caption: Remaining after Forecast
+Value: 
+Visible: True
+Left: 7710
+Top: 15
+Width: 1740
+Height: 615
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: prj_share_hr
+Type: 109
+ControlSource: prj_share_hr
+Caption: 
+Visible: True
+Left: 15
+Top: 0
+Width: 1590
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_exp_hr
+Type: 109
+ControlSource: prj_exp_hr
+Caption: 
+Visible: True
+Left: 1605
+Top: 0
+Width: 1515
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: prj_commit_hr
+Type: 109
+ControlSource: prj_commit_hr
+Caption: 
+Visible: True
+Left: 3120
+Top: 0
+Width: 1528
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: forecast
+Type: 109
+ControlSource: forecast
+Caption: 
+Visible: True
+Left: 4650
+Top: 0
+Width: 1590
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: underway_mod
+Type: 109
+ControlSource: underway
+Caption: 
+Visible: True
+Left: 6240
+Top: 0
+Width: 1470
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: diff
+Type: 109
+ControlSource: diff
+Caption: 
+Visible: True
+Left: 7710
+Top: 0
+Width: 1740
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: Standard

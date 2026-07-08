@@ -1,0 +1,349 @@
+FORM: cen_accounts_u
+
+=== FORM PROPERTIES ===
+Caption: Account Detail
+RecordSource: 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Account Detail
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1500
+Top: 120
+Width: 3525
+Height: 540
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Georgia
+FontSize: 22
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: acc_username
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1740
+Top: 2565
+Width: 3120
+Height: 375
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Username
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 615
+Top: 2565
+Width: 1065
+Height: 375
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: acc_name
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1740
+Top: 345
+Width: 3120
+Height: 375
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 615
+Top: 345
+Width: 1065
+Height: 375
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: acc_title
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1740
+Top: 1455
+Width: 3120
+Height: 375
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 615
+Top: 1455
+Width: 1065
+Height: 375
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: acc_rank
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1740
+Top: 900
+Width: 3120
+Height: 375
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Rank
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 615
+Top: 900
+Width: 1065
+Height: 375
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: acc_desig
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1740
+Top: 2010
+Width: 3120
+Height: 375
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: Desig
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 615
+Top: 2010
+Width: 1065
+Height: 375
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdChangePass
+Type: 104
+ControlSource: 
+Caption: Change password
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 3240
+Top: 3180
+Width: 1620
+Height: 300
+ForeColor: 4210752
+BackColor: -2147483604
+FontName: Calibri
+FontSize: 10
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdChangeTitle
+Type: 104
+ControlSource: 
+Caption: Change
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 5100
+Top: 1500
+Width: 780
+Height: 300
+ForeColor: 4210752
+BackColor: -2147483604
+FontName: Calibri
+FontSize: 10
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdChangeRank
+Type: 104
+ControlSource: 
+Caption: Change
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 5100
+Top: 960
+Width: 780
+Height: 300
+ForeColor: 4210752
+BackColor: -2147483604
+FontName: Calibri
+FontSize: 10
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: acc_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 60
+Top: 120
+Width: 420
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

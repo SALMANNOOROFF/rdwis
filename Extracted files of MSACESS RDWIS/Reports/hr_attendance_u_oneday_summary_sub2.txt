@@ -1,0 +1,165 @@
+REPORT: hr_attendance_u_oneday_summary_sub2
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT hr_attendance_u_oneday.*, * FROM hr_attendance_u_oneday WHERE (((hr_attendance_u_oneday.att)<>"P")) OR (((hr_attendance_u_oneday.att) Is Null)); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Employee ID
+Value: 
+Visible: True
+Left: 1035
+Top: 60
+Width: 1560
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Left: 2655
+Top: 60
+Width: 3180
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Div
+Value: 
+Visible: True
+Left: 30
+Top: 60
+Width: 945
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Left: 5895
+Top: 60
+Width: 4425
+Height: 300
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: total_count
+Type: 109
+ControlSource: =Count([att_unt_id])
+Caption: 
+Visible: False
+Left: 10380
+Top: 60
+Width: 0
+Height: 300
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: attendancencount
+Type: 109
+ControlSource: =[attendance] & "  (" & Count([att_unt_id]) & ")"
+Caption: 
+Visible: True
+Left: 30
+Top: 120
+Width: 3360
+Height: 329
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: att_emp_id
+Type: 109
+ControlSource: att_emp_id
+Caption: 
+Visible: True
+Left: 1035
+Top: 30
+Width: 1560
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: att_empnamecomp
+Type: 109
+ControlSource: att_empnamecomp
+Caption: 
+Visible: True
+Left: 2655
+Top: 30
+Width: 3180
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: atr_remarks
+Type: 109
+ControlSource: atr_remarks
+Caption: 
+Visible: True
+Left: 5895
+Top: 30
+Width: 4425
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: att_unt_id
+Type: 111
+ControlSource: att_unt_id
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 945
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell101
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 10380
+Top: 30
+Width: 0
+Height: 330
+ForeColor: 
+BackColor: 16777215
+Format: 

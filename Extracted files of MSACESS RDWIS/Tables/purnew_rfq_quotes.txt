@@ -1,0 +1,10 @@
+TABLE: purnew_rfq_quotes
+
+COLUMNS:
+- rq_id | Type:4 | Size:4
+- rfq_id | Type:4 | Size:4
+- rfq_item_id | Type:4 | Size:4
+- frm_id | Type:4 | Size:4
+- quoted_price | Type:20 | Size:16
+- is_accepted | Type:10 | Size:5
+- created_at | Type:8 | Size:8

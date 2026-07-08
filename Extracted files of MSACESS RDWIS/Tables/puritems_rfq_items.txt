@@ -1,0 +1,9 @@
+TABLE: puritems_rfq_items
+
+COLUMNS:
+- rfi_id | Type:4 | Size:4
+- rfi_rfq_id | Type:4 | Size:4
+- rfi_itm_id | Type:4 | Size:4
+- rfi_price_id | Type:4 | Size:4
+- rfi_qty | Type:20 | Size:16
+- rfi_total | Type:20 | Size:16

@@ -1,0 +1,235 @@
+REPORT: fin_ecbreakdown
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_ecbreakdown_temp
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Date
+Type: 109
+ControlSource: =Format(Now(),"dd mmm yy"", ""hh:nn")
+Caption: 
+Visible: True
+Left: 6405
+Top: 225
+Width: 3915
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Long Date
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Spending Breakdown - " & CodeFromHeadId([Forms]![vars]![Parameter1])
+Caption: 
+Visible: True
+Left: 0
+Top: 165
+Width: 6345
+Height: 460
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Document ID
+Value: 
+Visible: True
+Left: 4935
+Top: 60
+Width: 1440
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Item Description
+Value: 
+Visible: True
+Left: 45
+Top: 60
+Width: 4830
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 6435
+Top: 60
+Width: 1440
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text45
+Type: 109
+ControlSource: =plr(Count([Description]),"Item")
+Caption: 
+Visible: True
+Left: 45
+Top: 30
+Width: 4830
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text46
+Type: 109
+ControlSource: =Sum([amount])
+Caption: 
+Visible: True
+Left: 6435
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text48
+Type: 109
+ControlSource: =plr(DSum("[doc_count]","[fin_ecbreakdown_sta]"),"doc")
+Caption: 
+Visible: True
+Left: 4935
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Group Of subtype
+Type: 109
+ControlSource: subtype
+Caption: 
+Visible: True
+Left: 45
+Top: 30
+Width: 4830
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text30
+Type: 109
+ControlSource: =Sum([amount])
+Caption: 
+Visible: True
+Left: 6435
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: EmptyCell73
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 4935
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: id
+Type: 109
+ControlSource: id
+Caption: 
+Visible: True
+Left: 4935
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: description
+Type: 109
+ControlSource: description
+Caption: 
+Visible: True
+Left: 45
+Top: 30
+Width: 4830
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: amount
+Type: 109
+ControlSource: amount
+Caption: 
+Visible: True
+Left: 6435
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Line43
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 60
+Top: 0
+Width: 7821
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text22
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 1303
+Top: 0
+Width: 3600
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

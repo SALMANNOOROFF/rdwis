@@ -1,0 +1,167 @@
+REPORT: aud_revdata
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT aud_revdata.* FROM aud_revdata WHERE (((aud_revdata.rvd_type)=1 Or (aud_revdata.rvd_type)=2)) ORDER BY aud_revdata.rvd_type, aud_revdata.rvd_attrib, aud_revdata.rvd_rowid; 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Attribute
+Value: 
+Visible: True
+Left: 1545
+Top: 30
+Width: 2745
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Old Value
+Value: 
+Visible: True
+Left: 4350
+Top: 30
+Width: 2610
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line102
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 390
+Width: 10091
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: New Value
+Value: 
+Visible: True
+Left: 7020
+Top: 30
+Width: 2745
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label128
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1461
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label147
+Type: 100
+ControlSource: 
+Caption: Attribute
+Value: 
+Visible: False
+Left: 9825
+Top: 30
+Width: 210
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: rvd_attrib
+Type: 111
+ControlSource: rvd_attrib
+Caption: 
+Visible: False
+Left: 9825
+Top: 30
+Width: 210
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: value
+Type: 111
+ControlSource: =FormatAsPerType([rvd_oldvalue])
+Caption: 
+Visible: True
+Left: 4350
+Top: 30
+Width: 2610
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: newvalue
+Type: 111
+ControlSource: =FormatAsPerType([rvd_newvalue])
+Caption: 
+Visible: True
+Left: 7020
+Top: 30
+Width: 2745
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: rowid
+Type: 109
+ControlSource: =IIf([rvd_rowid]="(none)","",[rvd_rowid])
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1461
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: fieldname
+Type: 109
+ControlSource: rvd_alias
+Caption: 
+Visible: True
+Left: 1545
+Top: 30
+Width: 2745
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

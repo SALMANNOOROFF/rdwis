@@ -1,0 +1,190 @@
+FORM: aud_revs_detail_sub2
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT aud_revdata.* FROM aud_revdata WHERE (((aud_revdata.rvd_type)=1 Or (aud_revdata.rvd_type)=2)) ORDER BY aud_revdata.rvd_type, aud_revdata.rvd_attrib, aud_revdata.rvd_rowid; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label55
+Type: 100
+ControlSource: 
+Caption: Field
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1650
+Top: 30
+Width: 2790
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label56
+Type: 100
+ControlSource: 
+Caption: Old Value
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4500
+Top: 30
+Width: 2250
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label57
+Type: 100
+ControlSource: 
+Caption: New Value
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6810
+Top: 30
+Width: 2310
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label107
+Type: 100
+ControlSource: 
+Caption: Id
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 30
+Top: 30
+Width: 1566
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: oldvalue
+Type: 109
+ControlSource: =FormatAsPerType([rvd_oldvalue])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4500
+Top: 60
+Width: 2250
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: newvalue
+Type: 109
+ControlSource: =FormatAsPerType([rvd_newvalue])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6810
+Top: 60
+Width: 2310
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rowid
+Type: 109
+ControlSource: =IIf([rvd_rowid]="(none)","",[rvd_rowid])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 30
+Top: 60
+Width: 1566
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: rvd_alias
+Type: 109
+ControlSource: rvd_alias
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1650
+Top: 60
+Width: 2790
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

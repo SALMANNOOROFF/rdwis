@@ -1,0 +1,303 @@
+FORM: hr_emps_sbVehicles
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: hr_vehicles
+DefaultView: 2
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: vcl_maker
+Type: 109
+ControlSource: vcl_maker
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1695
+Top: 870
+Width: 5355
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Maker
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 870
+Width: 1275
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: vcl_variant
+Type: 109
+ControlSource: vcl_variant
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1695
+Top: 1410
+Width: 5355
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Variant
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 1410
+Width: 1275
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: vcl_year
+Type: 109
+ControlSource: vcl_year
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1695
+Top: 1950
+Width: 5355
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label15
+Type: 100
+ControlSource: 
+Caption: Year
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 1950
+Width: 1275
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: vcl_regis
+Type: 109
+ControlSource: vcl_regis
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1695
+Top: 2490
+Width: 5355
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: Registration
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 2490
+Width: 1275
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: vcl_color
+Type: 109
+ControlSource: vcl_color
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1695
+Top: 3030
+Width: 5355
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label21
+Type: 100
+ControlSource: 
+Caption: Color
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 3030
+Width: 1275
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: vcl_type
+Type: 111
+ControlSource: vcl_type
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1695
+Top: 330
+Width: 5355
+Height: 359
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 360
+Top: 330
+Width: 1275
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_vcl_type
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 6779
+Top: 300
+Width: 300
+Height: 420
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

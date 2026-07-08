@@ -1,0 +1,6 @@
+QUERY: fin_sts_prj_exp1
+
+SQL:
+SELECT fin_commitments.cmt_docid, fin_commitments.cmt_type, Round(IIf([trn_transtype]=1,[trn_amount1],[trn_amount2])*[ratio],2) AS amount, fin_commitments.cmt_hed_id, fin_transactions.trn_id, fin_docs_shd.subhead, fin_transactions.trn_amount1, fin_transactions.trn_amount2, fin_transactions.trn_transtype, fin_docs_shd.ratio
+FROM (fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) LEFT JOIN fin_docs_shd ON (fin_commitments.cmt_docid = fin_docs_shd.doc_id) AND (fin_commitments.cmt_type = fin_docs_shd.doc_type)
+WHERE (((fin_commitments.cmt_type) In ("Ps","Pt","Rb","Sa","TO")) And ((fin_commitments.cmt_hed_id)=Forms!vars!Parameter1));

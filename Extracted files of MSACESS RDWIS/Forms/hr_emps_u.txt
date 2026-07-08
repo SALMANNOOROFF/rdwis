@@ -1,0 +1,575 @@
+FORM: hr_emps_u
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: hr_emps_u_active
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: lblTitle
+Type: 100
+ControlSource: 
+Caption: Employees
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 90
+Top: 165
+Width: 7440
+Height: 465
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 210
+Top: 810
+Width: 1560
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1830
+Top: 810
+Width: 5370
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Joining Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10380
+Top: 810
+Width: 1335
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label69
+Type: 100
+ControlSource: 
+Caption: Locked
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13575
+Top: 810
+Width: 1095
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label491
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11775
+Top: 810
+Width: 1740
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label512
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 14730
+Top: 810
+Width: 3045
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label616
+Type: 100
+ControlSource: 
+Caption: Department
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7260
+Top: 810
+Width: 3060
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblctr_enddt
+Type: 100
+ControlSource: 
+Caption: Contract Expiry
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 17835
+Top: 810
+Width: 1515
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblemp_cexpdt
+Type: 100
+ControlSource: 
+Caption: Card expiry
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 19410
+Top: 810
+Width: 1515
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell658
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 60
+Top: 810
+Width: 86
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAddCtrCaseHiring
+Type: 104
+ControlSource: 
+Caption: Raise Hiring Case
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 15495
+Top: 195
+Width: 2235
+Height: 331
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: emp_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 210
+Top: 30
+Width: 1560
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_namewithrank
+Type: 109
+ControlSource: =NameComplete([emp_name],[emp_title],[emp_rank])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1830
+Top: 30
+Width: 5370
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_joindt
+Type: 109
+ControlSource: emp_joindt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10380
+Top: 30
+Width: 1335
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: emp_remarks
+Type: 109
+ControlSource: emp_remarks
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14730
+Top: 30
+Width: 3045
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_complete
+Type: 111
+ControlSource: emp_locked
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 13575
+Top: 30
+Width: 1095
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_status
+Type: 111
+ControlSource: emp_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11775
+Top: 30
+Width: 1740
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: emp_unt_id
+Type: 111
+ControlSource: emp_unt_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7260
+Top: 30
+Width: 3060
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: enddt
+Type: 109
+ControlSource: =IIf(IsNull([ctr_termindt]),[ctr_enddt],[ctr_termindt])
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 17835
+Top: 30
+Width: 1515
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm  yy
+InputMask: 
+
+--------------------
+Name: emp_cexpdt
+Type: 109
+ControlSource: emp_cexpdt
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 19410
+Top: 30
+Width: 1515
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box651
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10034
+Top: 15
+Width: 286
+Height: 383
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box653
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13199
+Top: 20
+Width: 331
+Height: 368
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box654
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 14399
+Top: 20
+Width: 286
+Height: 383
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCtr
+Type: 104
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 60
+Top: 30
+Width: 86
+Height: 359
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

@@ -1,0 +1,212 @@
+FORM: attachments
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label55
+Type: 100
+ControlSource: 
+Caption: Attachments
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 60
+Width: 1309
+Height: 205
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAddAttach
+Type: 104
+ControlSource: 
+Caption: +
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2340
+Top: 60
+Width: 227
+Height: 227
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Cooper Black
+FontSize: 7
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: objid
+Type: 109
+ControlSource: pat_objid
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1755
+Top: 30
+Width: 105
+Height: 255
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: objtype
+Type: 109
+ControlSource: pat_objtype
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1868
+Top: 30
+Width: 105
+Height: 255
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: id
+Type: 109
+ControlSource: pat_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1981
+Top: 30
+Width: 105
+Height: 255
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Line62
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 330
+Width: 2889
+Height: 0
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: type
+Type: 109
+ControlSource: pat_type
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 0
+Top: 15
+Width: 2325
+Height: 255
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: path
+Type: 109
+ControlSource: pat_path
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 2355
+Top: 45
+Width: 216
+Height: 216
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdPath
+Type: 104
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2340
+Top: 30
+Width: 230
+Height: 230
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

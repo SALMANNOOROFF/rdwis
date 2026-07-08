@@ -1,0 +1,5 @@
+QUERY: hr_update_empdata
+
+SQL:
+UPDATE hr_emps SET hr_emps.emp_unt_id = [Unit]
+WHERE (((hr_emps.emp_id)=[Emp]));

@@ -1,0 +1,167 @@
+FORM: fin_loans_detail_one_sub1
+
+=== FORM PROPERTIES ===
+Caption: fin_loans_detail41 subform
+RecordSource: fin_loanadjustments_self
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: amount_Label
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1155
+Top: 60
+Width: 1875
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trn_date_Label
+Type: 100
+ControlSource: 
+Caption:  Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 30
+Top: 60
+Width: 1061
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label89
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3090
+Top: 60
+Width: 8880
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lad_amount
+Type: 109
+ControlSource: lad_amount
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1155
+Top: 30
+Width: 1875
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: lad_dtg
+Type: 109
+ControlSource: lad_dtg
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 30
+Top: 30
+Width: 1061
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: lad_remarks
+Type: 109
+ControlSource: lad_remarks
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3090
+Top: 30
+Width: 8880
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sum_amount
+Type: 109
+ControlSource: =Sum([lad_amount])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1133
+Top: 0
+Width: 1875
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 

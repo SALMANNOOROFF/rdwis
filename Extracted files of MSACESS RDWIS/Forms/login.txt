@@ -1,0 +1,123 @@
+FORM: login
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: txtUserName
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4080
+Top: 1260
+Width: 1800
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: User name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2880
+Top: 1260
+Width: 1200
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtPassword
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4080
+Top: 2100
+Width: 1800
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: Password
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Password
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2880
+Top: 2100
+Width: 1200
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdLogin
+Type: 104
+ControlSource: 
+Caption: Login
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 4140
+Top: 3480
+Width: 1680
+Height: 480
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

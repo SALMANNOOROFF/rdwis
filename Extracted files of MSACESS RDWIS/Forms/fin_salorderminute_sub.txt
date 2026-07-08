@@ -1,0 +1,324 @@
+FORM: fin_salorderminute_sub
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: fin_salarysummary
+DefaultView: 1
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Department
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 60
+Width: 1275
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Head
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1275
+Top: 60
+Width: 1395
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3750
+Top: 60
+Width: 1470
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Payments
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2670
+Top: 60
+Width: 1080
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label41
+Type: 100
+ControlSource: 
+Caption: Remaining
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5220
+Top: 60
+Width: 1485
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label61
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6705
+Top: 60
+Width: 4635
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: unt_namesh
+Type: 109
+ControlSource: unt_mod
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 0
+Top: 0
+Width: 1275
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_code
+Type: 109
+ControlSource: effhed_mod
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1275
+Top: 0
+Width: 1395
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: amount
+Type: 109
+ControlSource: amount
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3750
+Top: 0
+Width: 1470
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: persons
+Type: 109
+ControlSource: persons
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2670
+Top: 0
+Width: 1080
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: c2
+Type: 109
+ControlSource: canbespent
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5220
+Top: 0
+Width: 1485
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: remarks
+Type: 109
+ControlSource: rmks
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6705
+Top: 0
+Width: 4635
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sum_amount
+Type: 109
+ControlSource: =Sum([amount])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3690
+Top: 0
+Width: 1530
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: sum_persons
+Type: 109
+ControlSource: =Sum([persons])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2655
+Top: 0
+Width: 1035
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

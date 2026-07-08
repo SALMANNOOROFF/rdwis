@@ -1,0 +1,302 @@
+REPORT: fin_salorderminute
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_salorderminute_temp
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: para_pp
+Type: 109
+ControlSource: ="1.   " & [empsdue] & " employees are due for salary. Salaries of " & [empspaid] & " employees are being paid for the month of " & [salmonths] & " against projects mentioned below. " & [parentorders] & " salaries are split into " & ([parentorders]+[childorders]) & " payments. Salary sheet is placed at Encl " & [encl] & ". " & "                                                                                                                                                          "
+Caption: 
+Visible: True
+Left: 0
+Top: 2732
+Width: 9457
+Height: 555
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text214
+Type: 109
+ControlSource: =IIf(IsNull(GetVar("varUnitLeadTitle")),"",GetVar("varUnitLeadTitle") & " ") & GetVar("varUnitLeadName")
+Caption: 
+Visible: True
+Left: 5955
+Top: 7110
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text237
+Type: 109
+ControlSource: =GetVar("varUnitLeadRank")
+Caption: 
+Visible: True
+Left: 5955
+Top: 7455
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text238
+Type: 109
+ControlSource: =GetVar("varUnitLeadDesig")
+Caption: 
+Visible: True
+Left: 5955
+Top: 7800
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text239
+Type: 109
+ControlSource: =Format(Date(),"mmm yy")
+Caption: 
+Visible: True
+Left: 6450
+Top: 8130
+Width: 3022
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text55
+Type: 109
+ControlSource: =[minute]-1
+Caption: 
+Visible: True
+Left: 3225
+Top: 0
+Width: 1994
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell357
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1755
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell358
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1755
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell360
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2175
+Width: 0
+Height: 405
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell361
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2175
+Width: 0
+Height: 405
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell366
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2580
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell367
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2580
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text96
+Type: 109
+ControlSource: ="Nil"
+Caption: 
+Visible: True
+Left: 60
+Top: 630
+Width: 2549
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text72
+Type: 109
+ControlSource: =IIf(IsNull([encl]),"","Encl " & [encl])
+Caption: 
+Visible: True
+Left: 4759
+Top: 1328
+Width: 4709
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text64
+Type: 109
+ControlSource: ="Director Finance"
+Caption: 
+Visible: True
+Left: 4759
+Top: 638
+Width: 4709
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text60
+Type: 109
+ControlSource: =IIf(IsNull([mindate]),"","Dated: " & Format([mindate],"dd mmm yy"))
+Caption: 
+Visible: True
+Left: 60
+Top: 975
+Width: 2549
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text107
+Type: 109
+ControlSource: ="Contract Employees Salary Sheet - " & Format([salmonths],"mmm yy")
+Caption: 
+Visible: True
+Left: 4759
+Top: 983
+Width: 4724
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text1023
+Type: 109
+ControlSource: =IIf(Nz([texta],"")="","2","3") & ".    Foregoing in view, approval of Rs. " & Format([Forms]![fin_salorderminute].[subSummary].[Form].[sum_amount],"#,##0") & " (" & SpellNumber([Forms]![fin_salorderminute].[subSummary].[Form].[sum_amount]) & ") for salaries of " & [empspaid] & " employees for month of " & [salmonths] & ", may please be accorded for release of the payment through M/s MTSS." & "                                                                                                                                                          "
+Caption: 
+Visible: True
+Left: 0
+Top: 5340
+Width: 9457
+Height: 1575
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subSummary
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 3315
+Width: 9465
+Height: 1604
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text1136
+Type: 109
+ControlSource: ="Minute " & [minute]
+Caption: 
+Visible: True
+Left: 3225
+Top: 2100
+Width: 1994
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text1137
+Type: 109
+ControlSource: =IIf(Nz([texta],"")="","","2.   " & [texta] & "                                                                                                                                                          ")
+Caption: 
+Visible: True
+Left: 0
+Top: 5265
+Width: 9457
+Height: 60
+ForeColor: 0
+BackColor: 16777215
+Format: 

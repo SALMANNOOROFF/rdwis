@@ -1,0 +1,44 @@
+TABLE: hr_ctrcases
+
+COLUMNS:
+- ctc_id | Type:4 | Size:4
+- ctc_ctr_id | Type:4 | Size:4
+- ctc_emp_id | Type:10 | Size:255
+- ctc_empnamecomp | Type:10 | Size:255
+- ctc_type | Type:10 | Size:255
+- ctc_unt_id | Type:4 | Size:4
+- ctc_date | Type:8 | Size:8
+- ctc_newunt_id | Type:4 | Size:4
+- ctc_newgrade | Type:10 | Size:255
+- ctc_newjobtitle | Type:10 | Size:255
+- ctc_newsalary | Type:4 | Size:4
+- ctc_newctrtype | Type:3 | Size:2
+- ctc_status | Type:10 | Size:255
+- ctc_remarks | Type:10 | Size:255
+- ctc_releasedtg | Type:8 | Size:8
+- ctc_closedtg | Type:8 | Size:8
+- ctc_newstartdt | Type:8 | Size:8
+- ctc_newenddt | Type:8 | Size:8
+- ctc_termindt | Type:8 | Size:8
+- ctc_terminremarks | Type:10 | Size:255
+- ctc_price | Type:20 | Size:16
+- ctc_transtype | Type:3 | Size:2
+- ctc_minute | Type:3 | Size:2
+- ctc_approvedunt_id | Type:4 | Size:4
+- ctc_approvedstartdt | Type:8 | Size:8
+- ctc_approvedenddt | Type:8 | Size:8
+- ctc_approvedgrade | Type:10 | Size:255
+- ctc_approvedjobtitle | Type:10 | Size:255
+- ctc_approvedsalary | Type:4 | Size:4
+- ctc_approvedctrtype | Type:3 | Size:2
+- ctc_newsigndt | Type:8 | Size:8
+- ctc_newctr_id | Type:4 | Size:4
+- ctc_newprob | Type:3 | Size:2
+- ctc_newprobsal | Type:4 | Size:4
+- ctc_approvedprob | Type:3 | Size:2
+- ctc_approvedprobsal | Type:4 | Size:4
+- ctc_prj_id | Type:4 | Size:4
+- ctc_divisionid | Type:4 | Size:4
+- ctc_createdby | Type:4 | Size:4
+- ctc_createdat | Type:8 | Size:8
+- ctc_releasedby | Type:4 | Size:4

@@ -1,0 +1,5 @@
+QUERY: frm_search_persons
+
+SQL:
+SELECT frm_firms.frm_id, frm_persons.*
+FROM frm_firms INNER JOIN frm_persons ON frm_firms.frm_id = frm_persons.per_xfrm_id;

@@ -1,0 +1,121 @@
+REPORT: hr_ctrcase_detail_sub1
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_ctrcaseplans_summary
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label72
+Type: 100
+ControlSource: 
+Caption: Tenure
+Value: 
+Visible: True
+Left: 1320
+Top: 390
+Width: 1980
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label79
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 3300
+Top: 390
+Width: 1725
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: amount_sum
+Type: 109
+ControlSource: =Sum([amount])
+Caption: 
+Visible: False
+Left: 3060
+Top: 15
+Width: 1725
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label65
+Type: 109
+ControlSource: =IIf([parent]![ctc_newunt_id]>=200000 And [parent]![ctc_newunt_id]<800000,"Project","Head")
+Caption: 
+Visible: True
+Left: 60
+Top: 390
+Width: 1260
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label197
+Type: 109
+ControlSource: =IIf([parent]![ctc_newunt_id]>=200000 And [parent]![ctc_newunt_id]<800000,"Project Assignment :","Salaries :")
+Caption: 
+Visible: True
+Left: 0
+Top: 0
+Width: 2055
+Height: 375
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: hed_mod
+Type: 109
+ControlSource: =IIf([parent]![ctc_newunt_id]>=200000 And [parent]![ctc_newunt_id]<800000,[hed],"CSRF")
+Caption: 
+Visible: True
+Left: 60
+Top: 0
+Width: 1260
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: tenure
+Type: 109
+ControlSource: tenure
+Caption: 
+Visible: True
+Left: 1320
+Top: 0
+Width: 1980
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: amount
+Type: 109
+ControlSource: amount
+Caption: 
+Visible: True
+Left: 3300
+Top: 0
+Width: 1725
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard

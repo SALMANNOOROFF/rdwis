@@ -1,0 +1,14 @@
+TABLE: hr_jobs
+
+COLUMNS:
+- job_company | Type:10 | Size:255
+- job_jobtitle | Type:10 | Size:255
+- job_repto | Type:10 | Size:255
+- job_team | Type:3 | Size:2
+- job_from | Type:8 | Size:8
+- job_to | Type:8 | Size:8
+- job_resp | Type:10 | Size:255
+- job_ach | Type:10 | Size:255
+- job_emp_id | Type:10 | Size:13
+- job_id | Type:4 | Size:4
+- job_city | Type:10 | Size:255

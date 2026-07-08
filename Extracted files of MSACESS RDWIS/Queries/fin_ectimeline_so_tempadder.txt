@@ -1,0 +1,8 @@
+QUERY: fin_ectimeline_so_tempadder
+
+SQL:
+INSERT INTO fin_ectimeline_temp ( id, subhead, docdate, description, amount, status )
+SELECT fin_salorders.sor_id, fin_salorders_shd.sod_subhead, DateValue([sor_releasedtg]) AS sor_date, fin_salorders.sor_empnamecomp, fin_salorders.sor_salary, fin_salorders.sor_status
+FROM fin_salorders INNER JOIN fin_salorders_shd ON (fin_salorders.sor_id = fin_salorders_shd.sod_sor_id) AND (fin_salorders.sor_type = fin_salorders_shd.sod_type)
+WHERE (((fin_salorders.sor_status)="Approved") And ((fin_salorders.sor_hed_id)=Forms!vars!Parameter1) And ((fin_salorders.sor_sudohed) Is Null Or (fin_salorders.sor_sudohed)="")) Or (((fin_salorders.sor_status)="Fulfilled") And ((fin_salorders.sor_hed_id)=Forms!vars!Parameter1) And ((fin_salorders.sor_sudohed) Is Null Or (fin_salorders.sor_sudohed)=""))
+ORDER BY fin_salorders.sor_salary DESC;

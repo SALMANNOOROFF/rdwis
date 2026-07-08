@@ -1,0 +1,6 @@
+TABLE: fin_contractsverif1
+
+COLUMNS:
+- cvf_ctr_id | Type:4 | Size:4
+- cvf_verif | Type:10 | Size:5
+- cvf_dtg | Type:8 | Size:8

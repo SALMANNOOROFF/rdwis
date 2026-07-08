@@ -1,0 +1,5 @@
+QUERY: prj_selected_add
+
+SQL:
+INSERT INTO selected ( sel_mpr )
+SELECT [ProjectId] AS Expr1;

@@ -1,0 +1,6 @@
+QUERY: xxx3
+
+SQL:
+SELECT hr_emps_u_grand.emp_id, namecomplete([emp_name],[emp_title],[emp_rank]) AS name, hr_emps_u_grand.emp_cnic, hr_emps_u_grand.ctr_grade, hr_emps_u_grand.ctr_jobtitle, hr_emps_u_grand.emp_joindt, hr_emps_u_grand.emp_lastdt, hr_emps_u_grand.qlf_name, hr_emps_u_grand.experience, hr_emps_u_grand.emp_status, ccc.ctr_startdt, ccc.ctr_jobtitle, ccc.ctr_grade, ccc.ctr_salary
+FROM hr_emps_u_grand INNER JOIN hr_contracts AS ccc ON hr_emps_u_grand.emp_id = ccc.ctr_num
+ORDER BY hr_emps_u_grand.emp_id, ccc.ctr_startdt;

@@ -1,0 +1,8 @@
+TABLE: hr_empsextc
+
+COLUMNS:
+- empextc_emp_id | Type:10 | Size:13
+- emp_cnum | Type:10 | Size:255
+- emp_cissuedt | Type:8 | Size:8
+- emp_cexpdt | Type:8 | Size:8
+- emp_secclear | Type:10 | Size:255

@@ -1,0 +1,3379 @@
+FORM: hr_attendance_rev
+
+=== FORM PROPERTIES ===
+Caption: Data Revision Form
+RecordSource: 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Data Revision Form
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 540
+Top: 45
+Width: 3360
+Height: 480
+ForeColor: 0
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 5970
+Top: 3975
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdGenerate
+Type: 104
+ControlSource: 
+Caption: Generate
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 8196
+Top: 3984
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: object_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 7140
+Top: 846
+Width: 988
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label325
+Type: 100
+ControlSource: 
+Caption: Object ID
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 7140
+Top: 493
+Width: 988
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: unit_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 8294
+Top: 846
+Width: 988
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label582
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 8294
+Top: 491
+Width: 988
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_emp_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2016
+Top: 426
+Width: 1440
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label247
+Type: 100
+ControlSource: 
+Caption: Emp ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 742
+Top: 424
+Width: 1245
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_empnamecomp
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2016
+Top: 827
+Width: 4545
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label248
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 742
+Top: 827
+Width: 1245
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_startdt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2016
+Top: 1631
+Width: 1440
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: mmm yy
+InputMask: 
+
+--------------------
+Name: Label250
+Type: 100
+ControlSource: 
+Caption: Month
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 742
+Top: 1631
+Width: 1245
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_1_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 735
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_2_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1200
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_3_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1665
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_4_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2130
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_5_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2595
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_6_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 3060
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_7_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 3525
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_8_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 3990
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_9_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4455
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_10_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4920
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_11_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5385
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_12_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5850
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_13_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6315
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_14_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6780
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_15_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 7245
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_16_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 7710
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_17_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 8175
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_18_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 8640
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_19_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 9105
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_20_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 9570
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_21_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 10035
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_22_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 10500
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_23_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 10965
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_24_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 11430
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_25_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 11895
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_26_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 12360
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_27_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 12825
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_28_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 13290
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_29_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 13755
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_30_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 14220
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_31_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 14685
+Top: 3165
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_1_detail
+Type: 109
+ControlSource: ="s,att_1,Attendance 01,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 735
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_2_detail
+Type: 109
+ControlSource: ="s,att_2,Attendance 02,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1200
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_3_detail
+Type: 109
+ControlSource: ="s,att_3,Attendance 03,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1665
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_4_detail
+Type: 109
+ControlSource: ="s,att_4,Attendance 04,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2130
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_5_detail
+Type: 109
+ControlSource: ="s,att_5,Attendance 05,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2595
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_6_detail
+Type: 109
+ControlSource: ="s,att_6,Attendance 06,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 3060
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_7_detail
+Type: 109
+ControlSource: ="s,att_7,Attendance 07,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 3525
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_8_detail
+Type: 109
+ControlSource: ="s,att_8,Attendance 08,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 3990
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_9_detail
+Type: 109
+ControlSource: ="s,att_9,Attendance 09,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4455
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_10_detail
+Type: 109
+ControlSource: ="s,att_10,Attendance 10,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4920
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_11_detail
+Type: 109
+ControlSource: ="s,att_11,Attendance 11,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5385
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_12_detail
+Type: 109
+ControlSource: ="s,att_12,Attendance 12,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5850
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_13_detail
+Type: 109
+ControlSource: ="s,att_13,Attendance 13,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6315
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_14_detail
+Type: 109
+ControlSource: ="s,att_14,Attendance 14,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6780
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_15_detail
+Type: 109
+ControlSource: ="s,att_15,Attendance 15,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 7245
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_16_detail
+Type: 109
+ControlSource: ="s,att_16,Attendance 16,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 7710
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_17_detail
+Type: 109
+ControlSource: ="s,att_17,Attendance 17,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 8175
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_18_detail
+Type: 109
+ControlSource: ="s,att_18,Attendance 18,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 8640
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_19_detail
+Type: 109
+ControlSource: ="s,att_19,Attendance 19,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 9105
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_20_detail
+Type: 109
+ControlSource: ="s,att_20,Attendance 20,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 9570
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_21_detail
+Type: 109
+ControlSource: ="s,att_21,Attendance 21,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 10035
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_22_detail
+Type: 109
+ControlSource: ="s,att_22,Attendance 22,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 10500
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_23_detail
+Type: 109
+ControlSource: ="s,att_23,Attendance 23,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 10965
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_24_detail
+Type: 109
+ControlSource: ="s,att_24,Attendance 24,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 11430
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_25_detail
+Type: 109
+ControlSource: ="s,att_25,Attendance 25,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 11895
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_26_detail
+Type: 109
+ControlSource: ="s,att_26,Attendance 26,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 12360
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_27_detail
+Type: 109
+ControlSource: ="s,att_27,Attendance 27,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 12825
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_28_detail
+Type: 109
+ControlSource: ="s,att_28,Attendance 28,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 13290
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_29_detail
+Type: 109
+ControlSource: ="s,att_29,Attendance 29,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 13755
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_30_detail
+Type: 109
+ControlSource: ="s,att_30,Attendance 30,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 14220
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_31_detail
+Type: 109
+ControlSource: ="s,att_31,Attendance 31,(_att_startdt_text),1,varchar,i,i,,,Select * From hr_attendance Where att_id = P1,(_object_id),,,,hr_attendance,att_id,(att_id),i,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 14685
+Top: 3555
+Width: 390
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_1
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 735
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_2
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1200
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_3
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1665
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_4
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2130
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_5
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 2595
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_6
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3060
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_7
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3525
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_8
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3990
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_9
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4455
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_10
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4920
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_11
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5385
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_12
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5850
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_13
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6315
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_14
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6780
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_15
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7245
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_16
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7710
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_17
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8175
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_18
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 8640
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_19
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9105
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_20
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9570
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_21
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10035
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_22
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10500
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_23
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 10965
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_24
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11430
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_25
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11895
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_26
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 12360
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_27
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 12825
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_28
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 13290
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_29
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 13755
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_30
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14220
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_31
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14685
+Top: 2730
+Width: 390
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label882
+Type: 100
+ControlSource: 
+Caption: Present
+Work from home
+Ty duty
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 10140
+Top: 480
+Width: 1500
+Height: 675
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 10
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1031
+Type: 100
+ControlSource: 
+Caption: Leave
+Absent
+Unpaid Leave
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 12075
+Top: 480
+Width: 1200
+Height: 690
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 10
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1034
+Type: 100
+ControlSource: 
+Caption: P
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9840
+Top: 480
+Width: 195
+Height: 195
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1035
+Type: 100
+ControlSource: 
+Caption: W
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9840
+Top: 705
+Width: 195
+Height: 210
+ForeColor: 8355711
+BackColor: 11854021
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1036
+Type: 100
+ControlSource: 
+Caption: T
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9840
+Top: 960
+Width: 195
+Height: 210
+ForeColor: 8355711
+BackColor: 11854021
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1037
+Type: 100
+ControlSource: 
+Caption: L
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11790
+Top: 480
+Width: 195
+Height: 195
+ForeColor: 8355711
+BackColor: 15123357
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1038
+Type: 100
+ControlSource: 
+Caption: A
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11790
+Top: 699
+Width: 195
+Height: 210
+ForeColor: 8355711
+BackColor: 10856415
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1039
+Type: 100
+ControlSource: 
+Caption: U
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11790
+Top: 954
+Width: 195
+Height: 210
+ForeColor: 8355711
+BackColor: 11193849
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1040
+Type: 100
+ControlSource: 
+Caption: N
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13425
+Top: 480
+Width: 195
+Height: 195
+ForeColor: 8355711
+BackColor: 12566463
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1041
+Type: 100
+ControlSource: 
+Caption: Not Applicable
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 13710
+Top: 480
+Width: 1275
+Height: 690
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 10
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box1042
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 9720
+Top: 420
+Width: 5335
+Height: 803
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_unt_id
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2016
+Top: 1229
+Width: 1440
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label249
+Type: 100
+ControlSource: 
+Caption: Dept
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 742
+Top: 1229
+Width: 1245
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Box1253
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3188
+Top: 1228
+Width: 307
+Height: 331
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_1
+Type: 109
+ControlSource: =1
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 735
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_2
+Type: 109
+ControlSource: =2
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1200
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_3
+Type: 109
+ControlSource: =3
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1665
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_4
+Type: 109
+ControlSource: =4
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2130
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_5
+Type: 109
+ControlSource: =5
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 2595
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_6
+Type: 109
+ControlSource: =6
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3060
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_7
+Type: 109
+ControlSource: =7
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3525
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_8
+Type: 109
+ControlSource: =8
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3990
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_9
+Type: 109
+ControlSource: =9
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4455
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_10
+Type: 109
+ControlSource: =10
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4920
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_11
+Type: 109
+ControlSource: =11
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 5385
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_12
+Type: 109
+ControlSource: =12
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 5850
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_13
+Type: 109
+ControlSource: =13
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 6315
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_14
+Type: 109
+ControlSource: =14
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 6780
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_15
+Type: 109
+ControlSource: =15
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7245
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_16
+Type: 109
+ControlSource: =16
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7710
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_17
+Type: 109
+ControlSource: =17
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 8175
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_18
+Type: 109
+ControlSource: =18
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 8640
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_19
+Type: 109
+ControlSource: =19
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 9105
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_20
+Type: 109
+ControlSource: =20
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 9570
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_21
+Type: 109
+ControlSource: =21
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 10035
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_22
+Type: 109
+ControlSource: =22
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 10500
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_23
+Type: 109
+ControlSource: =23
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 10965
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_24
+Type: 109
+ControlSource: =24
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 11430
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_25
+Type: 109
+ControlSource: =25
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 11895
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_26
+Type: 109
+ControlSource: =26
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 12360
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_27
+Type: 109
+ControlSource: =27
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 12825
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_28
+Type: 109
+ControlSource: =28
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 13290
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_29
+Type: 109
+ControlSource: =29
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 13755
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_30
+Type: 109
+ControlSource: =30
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 14220
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lbl_att_31
+Type: 109
+ControlSource: =31
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 14685
+Top: 2340
+Width: 390
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: att_startdt_text
+Type: 109
+ControlSource: =Right([att_startdt],Len([att_startdt])-3)
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 3732
+Top: 1629
+Width: 1440
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: mmm yy
+InputMask: 

@@ -1,0 +1,1220 @@
+FORM: ina_invatitems_detail
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM ina_inventoryitemsp_u WHERE iac_id = 5372; 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: lblHeading
+Type: 100
+ControlSource: 
+Caption: Inventory
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 165
+Width: 2768
+Height: 460
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: shared_label
+Type: 109
+ControlSource: ="Available for Sharing"
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 8100
+Top: 195
+Width: 3015
+Height: 375
+ForeColor: 12566463
+BackColor: 15064278
+FontName: Lucida Calligraphy
+FontSize: 12
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: shared
+Type: 109
+ControlSource: =IIf([iac_shared]=0,Null,8)
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 11220
+Top: 165
+Width: 426
+Height: 435
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Wingdings 2
+FontSize: 20
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text473
+Type: 109
+ControlSource: ="Assembly"
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 3855
+Top: 170
+Width: 1628
+Height: 465
+ForeColor: 15064278
+BackColor: 15064278
+FontName: Lucida Calligraphy
+FontSize: 12
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_price
+Type: 109
+ControlSource: ias_price
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1590
+Top: 3930
+Width: 2445
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: ias_subtype
+Type: 109
+ControlSource: ias_subtype
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1590
+Top: 3090
+Width: 2445
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label30
+Type: 100
+ControlSource: 
+Caption: Unit Price:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 3930
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Sub Type:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 3090
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: qty
+Type: 109
+ControlSource: =[iac_qty] & " " & [iac_qtyunit]
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1590
+Top: 3510
+Width: 2445
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label169
+Type: 100
+ControlSource: 
+Caption: Quantity:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 3510
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_remarks
+Type: 109
+ControlSource: iac_remarks
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1590
+Top: 4785
+Width: 10035
+Height: 780
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_dispdate
+Type: 109
+ControlSource: iac_dispdate
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 6465
+Top: 4350
+Width: 1552
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label189
+Type: 100
+ControlSource: 
+Caption: Disposal Dt:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5160
+Top: 4350
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_desc
+Type: 109
+ControlSource: ias_desc
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 285
+Top: 510
+Width: 11340
+Height: 405
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 14
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_details
+Type: 109
+ControlSource: iac_details
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 287
+Top: 1929
+Width: 11340
+Height: 630
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Additional Details:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 1590
+Width: 1888
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_id
+Type: 109
+ControlSource: ias_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1170
+Top: 60
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Item ID:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 60
+Width: 825
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_pcs_id
+Type: 109
+ControlSource: ias_pcs_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4020
+Top: 60
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: P/Case ID:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2895
+Top: 60
+Width: 1065
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_chargedate
+Type: 109
+ControlSource: ias_chargedate
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 7086
+Top: 56
+Width: 1515
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: Charge Date:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5730
+Top: 60
+Width: 1305
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell279
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 4095
+Top: 2655
+Width: 1005
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell280
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 4095
+Top: 3090
+Width: 1005
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell282
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 4095
+Top: 3930
+Width: 1005
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell283
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 4095
+Top: 3510
+Width: 1005
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label184
+Type: 100
+ControlSource: 
+Caption: Remarks:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 4785
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_status
+Type: 111
+ControlSource: iac_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1590
+Top: 4350
+Width: 2445
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label329
+Type: 100
+ControlSource: 
+Caption: Status:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 4350
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_iac_status
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3756
+Top: 4321
+Width: 280
+Height: 367
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_type
+Type: 111
+ControlSource: ias_type
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1590
+Top: 2655
+Width: 2445
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label158
+Type: 100
+ControlSource: 
+Caption: Type:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 2655
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ias_type
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3753
+Top: 2655
+Width: 280
+Height: 352
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell369
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 4095
+Top: 4350
+Width: 1005
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_location
+Type: 109
+ControlSource: iac_location
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6465
+Top: 2655
+Width: 5160
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label376
+Type: 100
+ControlSource: 
+Caption: Location:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5160
+Top: 2655
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_group
+Type: 109
+ControlSource: iac_group
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 6465
+Top: 3090
+Width: 5160
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label381
+Type: 100
+ControlSource: 
+Caption: Group:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5160
+Top: 3090
+Width: 1245
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell416
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 285
+Top: 5205
+Width: 1245
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell422
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 8070
+Top: 4350
+Width: 3555
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell423
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 6465
+Top: 3930
+Width: 5160
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell424
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 5160
+Top: 3930
+Width: 1245
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell425
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 5160
+Top: 3510
+Width: 1245
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell426
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 6465
+Top: 3510
+Width: 5160
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ias_details
+Type: 109
+ControlSource: ias_details
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 283
+Top: 907
+Width: 11340
+Height: 630
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdChargeOff
+Type: 104
+ControlSource: 
+Caption: Charge Off
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 10425
+Top: 90
+Width: 1203
+Height: 337
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: iac_id
+Type: 109
+ControlSource: iac_id
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 10771
+Top: 1700
+Width: 846
+Height: 225
+ForeColor: 12566463
+BackColor: 16777215
+FontName: Calibri
+FontSize: 8
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subChildren
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 290
+Top: 6068
+Width: 11340
+Height: 2775
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label468
+Type: 100
+ControlSource: 
+Caption: Attached Items:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 5730
+Width: 1871
+Height: 344
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdAttach
+Type: 104
+ControlSource: 
+Caption: Attach
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 10427
+Top: 5670
+Width: 1203
+Height: 337
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: parent_ias_id
+Type: 109
+ControlSource: parent_ias_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 1541
+Top: 5730
+Width: 1311
+Height: 344
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label471
+Type: 100
+ControlSource: 
+Caption: Parent id:
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 290
+Top: 5730
+Width: 1185
+Height: 344
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdDelete
+Type: 104
+ControlSource: 
+Caption: Delete
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 9014
+Top: 90
+Width: 1203
+Height: 337
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text475
+Type: 109
+ControlSource: ="Attached"
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 3465
+Top: 5730
+Width: 1628
+Height: 330
+ForeColor: 16777215
+BackColor: 15064278
+FontName: Lucida Calligraphy
+FontSize: 12
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

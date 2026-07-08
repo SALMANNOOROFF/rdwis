@@ -1,0 +1,7 @@
+QUERY: pur_quote_taxes
+
+SQL:
+SELECT Sum([qti_price]*[qti_qty]) AS price, Sum([qti_price]*[qti_qty]*IIf([pci_type]=3,0.13,0)) AS sst, Sum([qti_price]*[qti_qty]*IIf([pci_type]<>3,0.18,0)) AS gst, pur_quoteitems.qti_qte_id
+FROM pur_purcaseitems INNER JOIN pur_quoteitems ON pur_purcaseitems.pci_id = pur_quoteitems.qti_pci_id
+GROUP BY pur_quoteitems.qti_qte_id
+HAVING (((pur_quoteitems.qti_qte_id)=[QteId]));

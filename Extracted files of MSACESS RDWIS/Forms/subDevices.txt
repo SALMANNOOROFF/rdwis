@@ -1,0 +1,235 @@
+FORM: subDevices
+
+=== FORM PROPERTIES ===
+Caption: subDevices
+RecordSource: hr_devices
+DefaultView: 2
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: dvc_type
+Type: 109
+ControlSource: dvc_type
+Caption: 
+Visible: False
+Enabled: True
+Locked: True
+Left: 1541
+Top: 113
+Width: 3465
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dvc_type_Label
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 401
+Top: 113
+Width: 1050
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dvc_brand
+Type: 109
+ControlSource: dvc_brand
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1541
+Top: 510
+Width: 3465
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dvc_brand_Label
+Type: 100
+ControlSource: 
+Caption: Brand
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 401
+Top: 510
+Width: 1050
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dvc_model
+Type: 109
+ControlSource: dvc_model
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1543
+Top: 912
+Width: 3465
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dvc_model_Label
+Type: 100
+ControlSource: 
+Caption: Model
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 403
+Top: 912
+Width: 1050
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dvc_imei1
+Type: 109
+ControlSource: dvc_imei1
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1543
+Top: 1309
+Width: 2220
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 00000000000000000;;_
+
+--------------------
+Name: dvc_imei1_Label
+Type: 100
+ControlSource: 
+Caption: IMEI1
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 403
+Top: 1309
+Width: 1050
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: dvc_imei2
+Type: 109
+ControlSource: dvc_imei2
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1543
+Top: 1708
+Width: 2220
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 00000000000000000;;_
+
+--------------------
+Name: dvc_imei2_Label
+Type: 100
+ControlSource: 
+Caption: IMEI2
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 403
+Top: 1708
+Width: 1050
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

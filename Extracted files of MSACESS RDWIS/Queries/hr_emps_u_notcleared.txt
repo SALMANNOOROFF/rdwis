@@ -1,0 +1,6 @@
+QUERY: hr_emps_u_notcleared
+
+SQL:
+SELECT hr_emps_u.*
+FROM hr_emps_u
+WHERE (((hr_emps_u.emp_status) Not Like "Active") AND ((hr_emps_u.emp_cleared)="0"));

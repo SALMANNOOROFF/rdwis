@@ -1,0 +1,351 @@
+REPORT: fin_salariespaid-u_doc
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_salariespaid_u_doc
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Salaries Paid From " & Getvar("varUnitName") & " - " & Format([sor_month],"mmm yy")
+Caption: 
+Visible: True
+Left: 60
+Top: 60
+Width: 9616
+Height: 465
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Employee Name
+Value: 
+Visible: True
+Left: 720
+Top: 120
+Width: 3675
+Height: 299
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 5640
+Top: 120
+Width: 1245
+Height: 299
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label6
+Type: 100
+ControlSource: 
+Caption: Paid from
+Value: 
+Visible: True
+Left: 6945
+Top: 120
+Width: 1305
+Height: 299
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label88
+Type: 100
+ControlSource: 
+Caption: S No
+Value: 
+Visible: True
+Left: 60
+Top: 120
+Width: 600
+Height: 299
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label96
+Type: 100
+ControlSource: 
+Caption: Dept.
+Value: 
+Visible: True
+Left: 4455
+Top: 120
+Width: 1125
+Height: 299
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label109
+Type: 100
+ControlSource: 
+Caption: Salary Paid
+Value: 
+Visible: True
+Left: 8310
+Top: 120
+Width: 1440
+Height: 299
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text104
+Type: 109
+ControlSource: =IIf([my_person]=1,"","Other Departments")
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 8370
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_empnamecomp
+Type: 109
+ControlSource: sor_empnamecomp
+Caption: 
+Visible: True
+Left: 720
+Top: 30
+Width: 3675
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_hed_id
+Type: 111
+ControlSource: sor_hed_id
+Caption: 
+Visible: True
+Left: 5640
+Top: 30
+Width: 1245
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_effhed_id
+Type: 111
+ControlSource: sor_effhed_id
+Caption: 
+Visible: True
+Left: 6945
+Top: 30
+Width: 1305
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text87
+Type: 109
+ControlSource: =1
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 600
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_unt_id
+Type: 111
+ControlSource: sor_unt_id
+Caption: 
+Visible: True
+Left: 4455
+Top: 30
+Width: 1125
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: sor_salary
+Type: 109
+ControlSource: sor_salary
+Caption: 
+Visible: True
+Left: 8310
+Top: 30
+Width: 1440
+Height: 359
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text117
+Type: 109
+ControlSource: =Sum([sor_salary])
+Caption: 
+Visible: True
+Left: 8310
+Top: 0
+Width: 1440
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label118
+Type: 100
+ControlSource: 
+Caption: Total: 
+Value: 
+Visible: True
+Left: 6945
+Top: 0
+Width: 1305
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text42
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 4140
+Top: 60
+Width: 1080
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text107
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 6540
+Top: 60
+Width: 3135
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: AccessTotalssor_empnamecomp
+Type: 109
+ControlSource: ="(" & Count(*) & " persons)"
+Caption: 
+Visible: True
+Left: 720
+Top: 225
+Width: 3675
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell95
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 60
+Top: 225
+Width: 600
+Height: 345
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell103
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 4455
+Top: 225
+Width: 1125
+Height: 345
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text120
+Type: 109
+ControlSource: =Sum([sor_salary])
+Caption: 
+Visible: True
+Left: 8310
+Top: 225
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label121
+Type: 100
+ControlSource: 
+Caption:  Grand Total: 
+Value: 
+Visible: True
+Left: 6945
+Top: 225
+Width: 1305
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell127
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5640
+Top: 225
+Width: 1245
+Height: 345
+ForeColor: 
+BackColor: 16777215
+Format: 

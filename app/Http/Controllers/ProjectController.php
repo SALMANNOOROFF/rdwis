@@ -155,6 +155,13 @@ class ProjectController extends Controller
 
         $readOnly = true;
 
+        $showProjectActualSection = false;
+        $showPrjShareValue = false;
+        if ($head) {
+            $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
+            $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
+        }
+
         return view('projects.openprojectdetails', compact(
             'project',
             'totalSpent',
@@ -166,7 +173,9 @@ class ProjectController extends Controller
             'totalMonths',
             'readOnly',
             'head',
-            'subheads'
+            'subheads',
+            'showProjectActualSection',
+            'showPrjShareValue'
         ));
     }
 
@@ -206,9 +215,17 @@ class ProjectController extends Controller
 
         $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
 
+        $showProjectActualSection = false;
+        $showPrjShareValue = false;
+        if ($head) {
+            $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
+            $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
+        }
+
         return view('projects.openprojectdetails', compact(
             'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
-            'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head', 'subheads'
+            'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head', 'subheads',
+            'showProjectActualSection', 'showPrjShareValue'
         ));
     }
 
@@ -696,9 +713,17 @@ public function markMilestoneComplete(Request $request)
        if($totalMonths < 1) $totalMonths = 1;
        $mprsLeft = max(0, $totalMonths - $mprsSubmitted);
 
+       $showProjectActualSection = false;
+       $showPrjShareValue = false;
+       if ($head) {
+           $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
+           $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
+       }
+
        return view('SORD.project_details', compact(
            'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
-           'mprsSubmitted', 'mprsLeft', 'totalMonths'
+           'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head',
+           'showProjectActualSection', 'showPrjShareValue'
        ));
    }
 }

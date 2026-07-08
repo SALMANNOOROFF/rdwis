@@ -1,0 +1,8 @@
+QUERY: hr_contractplan_temp_adder
+
+SQL:
+INSERT INTO hr_contractplan_temp ( cpn_id, cpn_ctr_id, cpn_startdt, cpn_enddt, cpn_hed_id, cpn_hed_id_old, cpn_hed_id_detail )
+SELECT hr_contractplans.cpn_id, hr_contractplans.cpn_ctr_id, hr_contractplans.cpn_startdt, hr_contractplans.cpn_enddt, hr_contractplans.cpn_hed_id, hr_contractplans.cpn_hed_id, "c,cpn_hed_id,Employee Project,,1,int4,i,i,,,Select * From hr_contractplans Where cpn_id = P1,(cpn_id),,,,hr_contractplans,cpn_id,(cpn_id),i,," AS detail
+FROM hr_contractplans
+WHERE (((hr_contractplans.cpn_ctr_id)=[CtrId]))
+ORDER BY hr_contractplans.cpn_startdt;

@@ -1,0 +1,664 @@
+REPORT: fin_headstatusall_open_acc
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_headstatusall_temp
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Accounts Status
+Value: 
+Visible: True
+Left: 56
+Top: 56
+Width: 2653
+Height: 450
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text171
+Type: 109
+ControlSource: =Sum([allocation])
+Caption: 
+Visible: True
+Left: 1365
+Top: 735
+Width: 1583
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: EmptyCell176
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 60
+Top: 735
+Width: 1247
+Height: 345
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text209
+Type: 109
+ControlSource: =Sum([mtss_share])
+Caption: 
+Visible: True
+Left: 3015
+Top: 735
+Width: 1441
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text210
+Type: 109
+ControlSource: =Sum([commitments])
+Caption: 
+Visible: True
+Left: 10320
+Top: 735
+Width: 1440
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text211
+Type: 109
+ControlSource: =Sum([expenditure])
+Caption: 
+Visible: True
+Left: 7515
+Top: 735
+Width: 1440
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text212
+Type: 109
+ControlSource: =Sum([allocation]-[mtss_share])
+Caption: 
+Visible: True
+Left: 4515
+Top: 735
+Width: 1440
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text213
+Type: 109
+ControlSource: =Sum([received])
+Caption: 
+Visible: True
+Left: 6015
+Top: 735
+Width: 1440
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text214
+Type: 109
+ControlSource: =Sum([available])
+Caption: 
+Visible: True
+Left: 11820
+Top: 735
+Width: 1500
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text215
+Type: 109
+ControlSource: =Sum([canbespent])
+Caption: 
+Visible: True
+Left: 13380
+Top: 735
+Width: 1545
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label437
+Type: 100
+ControlSource: 
+Caption: (Project + CSRF)
+Value: 
+Visible: True
+Left: 2700
+Top: 165
+Width: 1770
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmdShowHide
+Type: 104
+ControlSource: 
+Caption: Show/Hide Details
+Value: 
+Visible: True
+Left: 12855
+Top: 60
+Width: 2054
+Height: 340
+ForeColor: 4210752
+BackColor: 15123357
+Format: 
+
+--------------------
+Name: Text252
+Type: 109
+ControlSource: =Sum([inprocess])
+Caption: 
+Visible: True
+Left: 9015
+Top: 735
+Width: 1245
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label86
+Type: 100
+ControlSource: 
+Caption: Remaining
+Value: 
+Visible: True
+Left: 13380
+Top: 30
+Width: 1545
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label81
+Type: 100
+ControlSource: 
+Caption: Available
+Value: 
+Visible: True
+Left: 11820
+Top: 30
+Width: 1500
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 10320
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 7515
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label41
+Type: 100
+ControlSource: 
+Caption: Received
+Value: 
+Visible: True
+Left: 6015
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label32
+Type: 100
+ControlSource: 
+Caption: RDW Share
+Value: 
+Visible: True
+Left: 4515
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: MTSS Share
+Value: 
+Visible: True
+Left: 3015
+Top: 30
+Width: 1441
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Allocation
+Value: 
+Visible: True
+Left: 1365
+Top: 30
+Width: 1583
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lblCol1
+Type: 100
+ControlSource: 
+Caption: Head
+Value: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1247
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label239
+Type: 100
+ControlSource: 
+Caption: In Process
+Value: 
+Visible: True
+Left: 9015
+Top: 30
+Width: 1245
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: hed_unt_id
+Type: 111
+ControlSource: hed_unt_id
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1247
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text155
+Type: 109
+ControlSource: =Sum([allocation])
+Caption: 
+Visible: True
+Left: 1365
+Top: 30
+Width: 1583
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text156
+Type: 109
+ControlSource: =Sum([mtss_share])
+Caption: 
+Visible: True
+Left: 3015
+Top: 30
+Width: 1441
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text157
+Type: 109
+ControlSource: =Sum([commitments])
+Caption: 
+Visible: True
+Left: 10320
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text158
+Type: 109
+ControlSource: =Sum([inprocess])
+Caption: 
+Visible: True
+Left: 9015
+Top: 30
+Width: 1245
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text159
+Type: 109
+ControlSource: =Sum([allocation]-[mtss_share])
+Caption: 
+Visible: True
+Left: 4515
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text160
+Type: 109
+ControlSource: =Sum([received])
+Caption: 
+Visible: True
+Left: 6015
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text161
+Type: 109
+ControlSource: =Sum([available])
+Caption: 
+Visible: True
+Left: 11820
+Top: 30
+Width: 1500
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text162
+Type: 109
+ControlSource: =Sum([canbespent])
+Caption: 
+Visible: True
+Left: 13380
+Top: 30
+Width: 1545
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text259
+Type: 109
+ControlSource: =Sum([expenditure])
+Caption: 
+Visible: True
+Left: 7515
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: hed
+Type: 109
+ControlSource: =[hed_code] & IIf([transtype]="With GST","*","")
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1247
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: allocation
+Type: 109
+ControlSource: allocation
+Caption: 
+Visible: True
+Left: 1365
+Top: 30
+Width: 1583
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: mtss_share
+Type: 109
+ControlSource: mtss_share
+Caption: 
+Visible: True
+Left: 3015
+Top: 30
+Width: 1441
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: commitments
+Type: 109
+ControlSource: commitments
+Caption: 
+Visible: True
+Left: 10320
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: expenditure
+Type: 109
+ControlSource: expenditure
+Caption: 
+Visible: True
+Left: 7515
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: rdw_share
+Type: 109
+ControlSource: rdw_share
+Caption: 
+Visible: True
+Left: 4515
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: received
+Type: 109
+ControlSource: received
+Caption: 
+Visible: True
+Left: 6015
+Top: 30
+Width: 1440
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: available
+Type: 109
+ControlSource: available
+Caption: 
+Visible: True
+Left: 11820
+Top: 30
+Width: 1500
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: canbespent
+Type: 109
+ControlSource: canbespent
+Caption: 
+Visible: True
+Left: 13380
+Top: 30
+Width: 1545
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: inprocess
+Type: 109
+ControlSource: inprocess
+Caption: 
+Visible: True
+Left: 9015
+Top: 30
+Width: 1245
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text30
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 4988
+Top: 0
+Width: 3600
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text24
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 11970
+Top: 0
+Width: 2940
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Label225
+Type: 109
+ControlSource: =IIf(DCount("hed_id","fin_headstatusall_temp","transtype='With GST'")>0,"* With GST","")
+Caption: 
+Visible: True
+Left: 60
+Top: 0
+Width: 1275
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 

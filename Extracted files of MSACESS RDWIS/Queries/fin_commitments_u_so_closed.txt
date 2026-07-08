@@ -1,0 +1,6 @@
+QUERY: fin_commitments_u_so_closed
+
+SQL:
+SELECT fin_commitments_u_so.*
+FROM fin_commitments_u_so
+WHERE (((fin_commitments_u_so.cmt_status)="Paid"));

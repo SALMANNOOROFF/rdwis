@@ -1,0 +1,12 @@
+TABLE: hr_bnkaccounts1
+
+COLUMNS:
+- bac_id | Type:4 | Size:4
+- bac_emp_id | Type:10 | Size:13
+- bac_bnkname | Type:10 | Size:255
+- bac_bchname | Type:10 | Size:255
+- bac_bchcode | Type:10 | Size:255
+- bac_acctitle | Type:10 | Size:255
+- bac_accnum | Type:10 | Size:255
+- bac_bchcity | Type:10 | Size:255
+- bac_selforpay | Type:10 | Size:5

@@ -1,0 +1,49 @@
+REPORT: xxx1_sb
+
+=== REPORT PROPERTIES ===
+RecordSource: xxxt
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: rem
+Type: 109
+ControlSource: lad_amount
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lad_remarks
+Type: 109
+ControlSource: lad_remarks
+Caption: 
+Visible: True
+Left: 1560
+Top: 30
+Width: 3420
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lad
+Type: 109
+ControlSource: lad
+Caption: 
+Visible: True
+Left: 5045
+Top: 56
+Width: 1071
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

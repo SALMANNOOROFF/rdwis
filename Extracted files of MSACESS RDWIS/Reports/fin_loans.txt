@@ -1,0 +1,524 @@
+REPORT: fin_loans
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_loans
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Cross Expenditure in Millions (Inc. tax)
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 7141
+Height: 480
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Consumers
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 1245
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: ELINT
+Value: 
+Visible: True
+Left: 3465
+Top: 60
+Width: 990
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: EH
+Value: 
+Visible: True
+Left: 2415
+Top: 60
+Width: 990
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: HSTD
+Value: 
+Visible: True
+Left: 4515
+Top: 60
+Width: 990
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: RGA
+Value: 
+Visible: True
+Left: 7665
+Top: 60
+Width: 990
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label5
+Type: 100
+ControlSource: 
+Caption: ROV
+Value: 
+Visible: True
+Left: 8715
+Top: 60
+Width: 990
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label70
+Type: 100
+ControlSource: 
+Caption: Total Taken
+Value: 
+Visible: True
+Left: 10815
+Top: 60
+Width: 1230
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label111
+Type: 100
+ControlSource: 
+Caption: DVBS
+Value: 
+Visible: True
+Left: 1365
+Top: 60
+Width: 987
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label137
+Type: 100
+ControlSource: 
+Caption: NIU
+Value: 
+Visible: True
+Left: 6615
+Top: 60
+Width: 990
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label184
+Type: 100
+ControlSource: 
+Caption: VTS
+Value: 
+Visible: True
+Left: 9765
+Top: 60
+Width: 990
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label199
+Type: 100
+ControlSource: 
+Caption: MC
+Value: 
+Visible: True
+Left: 5565
+Top: 60
+Width: 991
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: For Project
+Type: 109
+ControlSource: For Project
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1245
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ELINT
+Type: 109
+ControlSource: ELINT
+Caption: 
+Visible: True
+Left: 3465
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: GPS
+Type: 109
+ControlSource: EH
+Caption: 
+Visible: True
+Left: 2415
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: HSTD
+Type: 109
+ControlSource: HSTD
+Caption: 
+Visible: True
+Left: 4515
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: RGA
+Type: 109
+ControlSource: RGA
+Caption: 
+Visible: True
+Left: 7665
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: ROV
+Type: 109
+ControlSource: ROV
+Caption: 
+Visible: True
+Left: 8715
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: SumOfamount1
+Type: 109
+ControlSource: SumOfamount1
+Caption: 
+Visible: True
+Left: 10815
+Top: 30
+Width: 1230
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text104
+Type: 109
+ControlSource: DVBS
+Caption: 
+Visible: True
+Left: 1365
+Top: 30
+Width: 987
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: NIU
+Type: 109
+ControlSource: NIU
+Caption: 
+Visible: True
+Left: 6615
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: VTS
+Type: 109
+ControlSource: VTS
+Caption: 
+Visible: True
+Left: 9765
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text192
+Type: 109
+ControlSource: MC
+Caption: 
+Visible: True
+Left: 5565
+Top: 30
+Width: 991
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text99
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3259
+Top: 165
+Width: 3600
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text24
+Type: 109
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 11415
+Top: 165
+Width: 2940
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text40
+Type: 109
+ControlSource: =Sum([ELINT])
+Caption: 
+Visible: True
+Left: 3465
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text41
+Type: 109
+ControlSource: =Sum([EH])
+Caption: 
+Visible: True
+Left: 2415
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text42
+Type: 109
+ControlSource: =Sum([HSTD])
+Caption: 
+Visible: True
+Left: 4515
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text43
+Type: 109
+ControlSource: =Sum([RGA])
+Caption: 
+Visible: True
+Left: 7665
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text44
+Type: 109
+ControlSource: =Sum([ROV])
+Caption: 
+Visible: True
+Left: 8715
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text125
+Type: 109
+ControlSource: =Sum([DVBS])
+Caption: 
+Visible: True
+Left: 1365
+Top: 30
+Width: 987
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text153
+Type: 109
+ControlSource: =Sum([NIU])
+Caption: 
+Visible: True
+Left: 6615
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text160
+Type: 100
+ControlSource: 
+Caption: Total Given
+Value: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1245
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text187
+Type: 109
+ControlSource: =Sum([VTS])
+Caption: 
+Visible: True
+Left: 9765
+Top: 30
+Width: 990
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text201
+Type: 109
+ControlSource: =Sum([MC])
+Caption: 
+Visible: True
+Left: 5565
+Top: 30
+Width: 991
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,
+
+--------------------
+Name: Text203
+Type: 109
+ControlSource: =Sum([SumOfamount1])
+Caption: 
+Visible: True
+Left: 10815
+Top: 30
+Width: 1230
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 0,,

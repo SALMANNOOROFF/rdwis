@@ -1,0 +1,1987 @@
+FORM: hr_ctrcasehg_detail
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM hr_ctrcases WHERE ctc_id = 87; 
+DefaultView: 0
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Hiring Case
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 285
+Top: 165
+Width: 4710
+Height: 465
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdMinute
+Type: 104
+ControlSource: 
+Caption: Minute
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 11280
+Top: 165
+Width: 1245
+Height: 422
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCtrCase
+Type: 104
+ControlSource: 
+Caption: 2
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 12697
+Top: 170
+Width: 450
+Height: 422
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings
+FontSize: 18
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_id
+Type: 109
+ControlSource: ctc_id
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1200
+Top: 285
+Width: 1125
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Case ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 285
+Width: 795
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_date
+Type: 109
+ControlSource: ctc_date
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1200
+Top: 705
+Width: 1125
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label18
+Type: 100
+ControlSource: 
+Caption: Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 705
+Width: 795
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label36
+Type: 100
+ControlSource: 
+Caption: Status
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 1125
+Width: 795
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newjobtitle
+Type: 109
+ControlSource: ctc_newjobtitle
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 4155
+Width: 3585
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newsalary
+Type: 109
+ControlSource: ctc_newsalary
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 5835
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label24
+Type: 100
+ControlSource: 
+Caption: Grade
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 4575
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label27
+Type: 100
+ControlSource: 
+Caption: Job Title
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 4155
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label30
+Type: 100
+ControlSource: 
+Caption: Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 5835
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Type
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 6255
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_status
+Type: 109
+ControlSource: ctc_status
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 1200
+Top: 1125
+Width: 2280
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newstartdt
+Type: 109
+ControlSource: ctc_newstartdt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 3315
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label257
+Type: 100
+ControlSource: 
+Caption: Start Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 3315
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newenddt
+Type: 109
+ControlSource: ctc_newenddt
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 3735
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label258
+Type: 100
+ControlSource: 
+Caption: End Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 3735
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_terminremarks
+Type: 109
+ControlSource: ctc_terminremarks
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 8614
+Width: 3675
+Height: 915
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1701
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5190
+Top: 8285
+Width: 3675
+Height: 330
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell336
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3150
+Top: 3735
+Width: 1950
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell341
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3150
+Top: 3315
+Width: 1950
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newctrtype
+Type: 111
+ControlSource: ctc_newctrtype
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 6255
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ctc_newctrtype
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2775
+Top: 6230
+Width: 300
+Height: 405
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newgrade
+Type: 111
+ControlSource: ctc_newgrade
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 4575
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ctc_newgrade
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2793
+Top: 4530
+Width: 300
+Height: 405
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell445
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3150
+Top: 5835
+Width: 1950
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 11520
+Top: 226
+Width: 1080
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdRelease
+Type: 104
+ControlSource: 
+Caption: Release
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 10080
+Top: 226
+Width: 1200
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReceive
+Type: 104
+ControlSource: 
+Caption: Receive Items
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 8280
+Top: 226
+Width: 1620
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReturn
+Type: 104
+ControlSource: 
+Caption: Return
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 11565
+Top: 226
+Width: 1080
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReject
+Type: 104
+ControlSource: 
+Caption: Not Approved
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 10095
+Top: 226
+Width: 1410
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdForward
+Type: 104
+ControlSource: 
+Caption: Forward
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 10230
+Top: 226
+Width: 1080
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReverse
+Type: 104
+ControlSource: 
+Caption: Q
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 12761
+Top: 228
+Width: 376
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings 3
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1341
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 2385
+Top: 285
+Width: 330
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1520
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 2775
+Top: 285
+Width: 705
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1523
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 2385
+Top: 705
+Width: 330
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1525
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 2775
+Top: 705
+Width: 705
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1778
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3150
+Top: 4575
+Width: 1950
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newunt_id
+Type: 111
+ControlSource: ctc_newunt_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1515
+Top: 6675
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1785
+Type: 100
+ControlSource: 
+Caption: Div
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 6675
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ctc_newunt_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 2775
+Top: 6629
+Width: 300
+Height: 450
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1795
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3150
+Top: 6675
+Width: 1950
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1800
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3150
+Top: 6255
+Width: 1950
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_minute
+Type: 109
+ControlSource: ctc_minute
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4544
+Top: 285
+Width: 561
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1832
+Type: 100
+ControlSource: 
+Caption: Minute
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3693
+Top: 285
+Width: 825
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_price
+Type: 109
+ControlSource: ctc_price
+Caption: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 4544
+Top: 705
+Width: 1206
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label1834
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3690
+Top: 705
+Width: 825
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_approvedstartdt
+Type: 109
+ControlSource: ctc_approvedstartdt
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 3315
+Width: 1845
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: ctc_approvedenddt
+Type: 109
+ControlSource: ctc_approvedenddt
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 3735
+Width: 3705
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: ctc_approvedjobtitle
+Type: 109
+ControlSource: ctc_approvedjobtitle
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 4155
+Width: 3705
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_approvedsalary
+Type: 109
+ControlSource: ctc_approvedsalary
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 5835
+Width: 1845
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: lblApproved
+Type: 100
+ControlSource: 
+Caption: Approved
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 5190
+Top: 2895
+Width: 3705
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_approvedunt_id
+Type: 111
+ControlSource: ctc_approvedunt_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 6675
+Width: 1845
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_approvedgrade
+Type: 111
+ControlSource: ctc_approvedgrade
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 4575
+Width: 1845
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_approvedctrtype
+Type: 111
+ControlSource: ctc_approvedctrtype
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 6255
+Width: 1845
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ctc_approvedunt_id
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6785
+Top: 6627
+Width: 285
+Height: 465
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ctc_approvedgrade
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6787
+Top: 4560
+Width: 285
+Height: 375
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: box_ctc_approvedctrtype
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 6780
+Top: 6243
+Width: 285
+Height: 390
+ForeColor: 
+BackColor: -2147483613
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1937
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 7125
+Top: 3315
+Width: 1770
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1939
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 7125
+Top: 4575
+Width: 1770
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1940
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 7125
+Top: 5835
+Width: 1770
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1941
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 7125
+Top: 6255
+Width: 1770
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell1946
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 7125
+Top: 6675
+Width: 1770
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newsigndt
+Type: 109
+ControlSource: ctc_newsigndt
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 7660
+Width: 1875
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1947
+Type: 100
+ControlSource: 
+Caption: Sign Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5190
+Top: 7320
+Width: 1020
+Height: 285
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_empnamecomp
+Type: 109
+ControlSource: ctc_empnamecomp
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 2895
+Width: 3585
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1991
+Type: 100
+ControlSource: 
+Caption: Candidate 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 2895
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subPlan
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 9525
+Top: 2895
+Width: 3615
+Height: 5730
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subAttachments
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: True
+Left: 10260
+Top: 855
+Width: 2850
+Height: 1770
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newprob
+Type: 109
+ControlSource: ctc_newprob
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 4995
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label1996
+Type: 100
+ControlSource: 
+Caption: Probation
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 4995
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_newprobsal
+Type: 109
+ControlSource: ctc_newprobsal
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1515
+Top: 5415
+Width: 1545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label1997
+Type: 100
+ControlSource: 
+Caption: Prob Salary
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 345
+Top: 5415
+Width: 1110
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell2008
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3150
+Top: 5415
+Width: 1950
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell2010
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 7125
+Top: 5415
+Width: 1770
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell2015
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 7125
+Top: 4995
+Width: 1770
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_approvedprob
+Type: 109
+ControlSource: ctc_approvedprob
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 4995
+Width: 1845
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_approvedprobsal
+Type: 109
+ControlSource: ctc_approvedprobsal
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5190
+Top: 5415
+Width: 1845
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label2025
+Type: 100
+ControlSource: 
+Caption: (months)
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3150
+Top: 4995
+Width: 1950
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: ctc_prj_id
+Type: 109
+ControlSource: ctc_prj_id
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1452
+Top: 7200
+Width: 1701
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label2027
+Type: 100
+ControlSource: 
+Caption: ctc_prj_id
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 432
+Top: 7200
+Width: 975
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdApprove
+Type: 104
+ControlSource: 
+Caption: Approved
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 8955
+Top: 225
+Width: 1080
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdFulfill
+Type: 104
+ControlSource: 
+Caption: Fulfill
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 10204
+Top: 226
+Width: 1080
+Height: 330
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdEmpAdd
+Type: 104
+ControlSource: 
+Caption: Add Employee
+Value: 
+Visible: False
+Enabled: True
+Locked: 
+Left: 5160
+Top: 1695
+Width: 1845
+Height: 510
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: new_contract
+Type: 109
+ControlSource: =IIf(IsNull([ctc_newctr_id]),Null,"Contract added:  " & [ctc_newctr_id])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 345
+Top: 8265
+Width: 4545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: new_employee
+Type: 109
+ControlSource: =IIf(IsNull([ctc_emp_id]),Null,"Employee added:  " & [ctc_emp_id])
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 345
+Top: 7905
+Width: 4545
+Height: 360
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

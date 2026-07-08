@@ -1,0 +1,6 @@
+TABLE: public_migrations
+
+COLUMNS:
+- id | Type:4 | Size:4
+- migration | Type:10 | Size:255
+- batch | Type:4 | Size:4

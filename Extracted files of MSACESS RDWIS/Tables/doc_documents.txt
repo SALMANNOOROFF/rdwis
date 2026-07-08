@@ -1,0 +1,12 @@
+TABLE: doc_documents
+
+COLUMNS:
+- doc_id | Type:4 | Size:4
+- prj_id | Type:4 | Size:4
+- doc_type | Type:10 | Size:50
+- doc_ref_no | Type:10 | Size:100
+- current_owner_id | Type:4 | Size:4
+- creator_id | Type:4 | Size:4
+- status | Type:10 | Size:50
+- created_at | Type:8 | Size:8
+- updated_at | Type:8 | Size:8

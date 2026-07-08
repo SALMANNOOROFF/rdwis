@@ -1,0 +1,7 @@
+QUERY: pur_quoteitems_bytype
+
+SQL:
+SELECT pur_purcaseitems.pci_type AS type, Sum([qti_price]*[qti_qty]) AS price_sum
+FROM pur_quoteitems INNER JOIN pur_purcaseitems ON pur_quoteitems.qti_pci_id = pur_purcaseitems.pci_id
+WHERE (((pur_quoteitems.qti_qte_id)=[QteId]))
+GROUP BY pur_purcaseitems.pci_type;

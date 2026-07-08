@@ -1,0 +1,76 @@
+FORM: prj_comments_fin
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT prj_comments.*, * FROM prj_comments WHERE (((prj_comments.cmt_status)="Finalized") And ((prj_comments.cmt_xpgh_id)=Forms![prj_projects_detail_mpr].subProgress.Form!pgh_id)) ORDER BY prj_comments.cmt_dtg DESC; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: cmt_dtg
+Type: 109
+ControlSource: cmt_dtg
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1740
+Top: 60
+Width: 1935
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy   mm:hh:nn
+InputMask: 
+
+--------------------
+Name: cmt_comment
+Type: 109
+ControlSource: cmt_comment
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 180
+Top: 360
+Width: 3495
+Height: 1429
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Monotype Corsiva
+FontSize: 13
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmt_author
+Type: 109
+ControlSource: cmt_author
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 120
+Top: 60
+Width: 1695
+Height: 300
+ForeColor: 8355711
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

@@ -1,0 +1,13 @@
+TABLE: puritems_items
+
+COLUMNS:
+- itm_id | Type:4 | Size:4
+- itm_title | Type:12 | Size:0
+- itm_desc | Type:12 | Size:0
+- itm_qtyunit | Type:10 | Size:32
+- itm_cat_id | Type:4 | Size:4
+- itm_sub_id | Type:4 | Size:4
+- itm_unt_id | Type:4 | Size:4
+- itm_hed_id | Type:4 | Size:4
+- itm_acc_id | Type:4 | Size:4
+- created_at | Type:8 | Size:8

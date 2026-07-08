@@ -1,0 +1,5 @@
+TABLE: cen_version
+
+COLUMNS:
+- ver_version | Type:20 | Size:16
+- ver_compat | Type:20 | Size:16

@@ -1,0 +1,1 @@
+Report_pur_compstatement -> (-2147352567, 'Exception occurred.', (0, '', 'Invalid procedure call or argument', 'C:\\Program Files (x86)\\Common Files\\Microsoft Shared\\VBA\\VBA7.1\\1033\\VbLR6.chm', 1000005, -2147024809), None)

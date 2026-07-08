@@ -1,0 +1,7 @@
+QUERY: aud_chk_items_receipts1
+
+SQL:
+SELECT pur_purreceiptitems.pti_pci_id, Sum(pur_purreceiptitems.pti_qty) AS sum_pti_qty, Count(pur_purreceiptitems.pti_id) AS count_pti_id
+FROM pur_purreceipts INNER JOIN pur_purreceiptitems ON pur_purreceipts.prt_id = pur_purreceiptitems.pti_prt_id
+WHERE (((pur_purreceipts.prt_status)<>"Cancelled" And (pur_purreceipts.prt_status)<>"Draft"))
+GROUP BY pur_purreceiptitems.pti_pci_id;

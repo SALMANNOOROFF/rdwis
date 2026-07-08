@@ -1,0 +1,9 @@
+TABLE: fin_empeffheads
+
+COLUMNS:
+- eeh_emp_id | Type:10 | Size:255
+- eeh_emphed_id | Type:4 | Size:4
+- eeh_dtg | Type:8 | Size:8
+- eeh_status | Type:10 | Size:255
+- eeh_remarks | Type:10 | Size:255
+- eeh_sudohed | Type:10 | Size:7

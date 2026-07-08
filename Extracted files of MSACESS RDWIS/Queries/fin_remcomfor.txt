@@ -1,0 +1,6 @@
+QUERY: fin_remcomfor
+
+SQL:
+SELECT fin_remcomfor1.docid, fin_remcomfor1.doctype, DateValue([rdate]) AS rsdate, fin_remcomfor1.title, fin_remcomfor1.effhed_id, fin_remcomfor1.effunt_id, fin_remcomfor1.hed_id, fin_remcomfor1.unt_id, fin_remcomfor1.commit, fin_remcomfor1.paid, fin_remcomfor1.rem, fin_remcomfor1.sudohead, IIf([doctype]="Sa","sal","pur") AS doctype_mod, fin_remcomfor1.cmt_id
+FROM fin_remcomfor1
+ORDER BY DateValue([rdate]);

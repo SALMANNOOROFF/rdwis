@@ -1,0 +1,55 @@
+FORM: fin_msncosts_plus_sb
+
+=== FORM PROPERTIES ===
+Caption: fin_msncosts_sb
+RecordSource: SELECT * FROM prj_prjattachments WHERE (((prj_prjattachments.jat_type)="Work Order")); 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: pat_path
+Type: 109
+ControlSource: jat_path
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1425
+Top: 120
+Width: 165
+Height: 165
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pat_type
+Type: 100
+ControlSource: 
+Caption: Work Order
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 30
+Width: 1350
+Height: 330
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

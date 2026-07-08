@@ -1,0 +1,25 @@
+TABLE: prj_projects1
+
+COLUMNS:
+- prj_title | Type:10 | Size:255
+- prj_id | Type:4 | Size:4
+- prj_startdt | Type:8 | Size:8
+- prj_id_old | Type:3 | Size:2
+- prj_scope | Type:10 | Size:255
+- prj_sponsor | Type:10 | Size:255
+- prj_rcptdt | Type:8 | Size:8
+- prj_assigndt | Type:8 | Size:8
+- prj_propdt | Type:8 | Size:8
+- prj_propcost | Type:4 | Size:4
+- prj_aprvdt | Type:8 | Size:8
+- prj_aprvcost | Type:4 | Size:4
+- prj_estenddt | Type:8 | Size:8
+- prj_cfycost | Type:4 | Size:4
+- prj_status | Type:10 | Size:255
+- prj_enddt | Type:8 | Size:8
+- prj_rem | Type:12 | Size:0
+- prj_notes | Type:12 | Size:0
+- prj_notes1 | Type:10 | Size:255
+- prj_unt_id | Type:4 | Size:4
+- prj_reporting | Type:10 | Size:5
+- prj_code | Type:10 | Size:9

@@ -1,0 +1,280 @@
+REPORT: fin_salorderminute_sub
+
+=== REPORT PROPERTIES ===
+RecordSource: fin_salarysummary
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label7
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Left: 2580
+Top: 30
+Width: 990
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label8
+Type: 100
+ControlSource: 
+Caption: Payments
+Value: 
+Visible: True
+Left: 1545
+Top: 30
+Width: 975
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label291
+Type: 100
+ControlSource: 
+Caption: Remaining
+Value: 
+Visible: True
+Left: 3630
+Top: 30
+Width: 1485
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label318
+Type: 100
+ControlSource: 
+Caption: Remarks
+Value: 
+Visible: True
+Left: 5175
+Top: 30
+Width: 4260
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label337
+Type: 100
+ControlSource: 
+Caption: Paid From
+Value: 
+Visible: True
+Left: 30
+Top: 30
+Width: 1455
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Group Of unt_name
+Type: 109
+ControlSource: unt_mod
+Caption: 
+Visible: True
+Left: 30
+Top: 30
+Width: 3570
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell297
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 3660
+Top: 30
+Width: 1455
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell324
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5175
+Top: 30
+Width: 4185
+Height: 315
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: amount
+Type: 109
+ControlSource: amount
+Caption: 
+Visible: True
+Left: 2520
+Top: 0
+Width: 1080
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: persons
+Type: 109
+ControlSource: persons
+Caption: 
+Visible: True
+Left: 1650
+Top: 0
+Width: 810
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: project
+Type: 109
+ControlSource: effhed_mod
+Caption: 
+Visible: True
+Left: 30
+Top: 0
+Width: 1560
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: rem
+Type: 109
+ControlSource: rmks
+Caption: 
+Visible: True
+Left: 5175
+Top: 0
+Width: 4185
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text373
+Type: 109
+ControlSource: canbespent
+Caption: 
+Visible: True
+Left: 3660
+Top: 0
+Width: 1455
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Line386
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 9431
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label120
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Left: 30
+Top: 60
+Width: 1560
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text237
+Type: 109
+ControlSource: =Sum([amount])
+Caption: 
+Visible: True
+Left: 2520
+Top: 60
+Width: 1080
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Text239
+Type: 109
+ControlSource: =Sum([persons])
+Caption: 
+Visible: True
+Left: 1650
+Top: 60
+Width: 810
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell301
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 3660
+Top: 60
+Width: 1455
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell385
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 5175
+Top: 60
+Width: 4185
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 

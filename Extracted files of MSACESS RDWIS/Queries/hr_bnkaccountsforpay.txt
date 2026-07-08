@@ -1,0 +1,6 @@
+QUERY: hr_bnkaccountsforpay
+
+SQL:
+SELECT hr_bnkaccounts.*
+FROM hr_bnkaccounts
+WHERE (((hr_bnkaccounts.bac_selforpay)="1"));

@@ -1,0 +1,16 @@
+Option Compare Database
+Option Explicit
+
+Public Sub CloseDownSteps(FormName As String)
+
+If FormName Like "*single" And getVar("varRoleAccess") = "multiple" Then
+    SetDynamicVariables ("m")
+    Else
+    DoCmd.Close acForm, "vars", acSaveNo
+    Call AccessCloseButtonEnabled(True)
+    If Application.CommandBars("Ribbon").Height < 100 Then CommandBars.ExecuteMso "MinimizeRibbon"
+    'DoCmd.ShowToolbar "Ribbon", acToolbarYes
+    If CurrentDb.name Like "*.accde" Then DoCmd.Quit
+    End If
+
+End Sub

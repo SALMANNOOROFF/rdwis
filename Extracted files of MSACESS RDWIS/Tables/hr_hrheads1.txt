@@ -1,0 +1,6 @@
+TABLE: hr_hrheads1
+
+COLUMNS:
+- hhd_id | Type:3 | Size:2
+- hhd_dpt_id | Type:3 | Size:2
+- hhd_name | Type:10 | Size:255

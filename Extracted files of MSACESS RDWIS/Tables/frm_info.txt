@@ -1,0 +1,7 @@
+TABLE: frm_info
+
+COLUMNS:
+- inf_xmsc_id | Type:4 | Size:4
+- inf_xmsc_entity | Type:10 | Size:255
+- inf_type | Type:10 | Size:255
+- inf_value | Type:10 | Size:255

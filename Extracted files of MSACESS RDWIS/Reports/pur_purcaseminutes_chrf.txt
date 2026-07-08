@@ -1,0 +1,233 @@
+REPORT: pur_purcaseminutes_chrf
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM pur_purcaseminutes WHERE (((pur_purcaseminutes.pcm_id)=[Forms]![pur_purcaseminutes_chrf]![pcm_id])); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: subMinutes
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 56
+Width: 9472
+Height: 89
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: subItems
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 510
+Top: 1323
+Width: 8954
+Height: 1183
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text214
+Type: 109
+ControlSource: =IIf(IsNull(GetVar("varUnitLeadTitle")),"",GetVar("varUnitLeadTitle") & " ") & GetVar("varUnitLeadName")
+Caption: 
+Visible: True
+Left: 5955
+Top: 4068
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text237
+Type: 109
+ControlSource: =GetVar("varUnitLeadRank")
+Caption: 
+Visible: True
+Left: 5955
+Top: 4413
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text238
+Type: 109
+ControlSource: =GetVar("varUnitLeadDesig")
+Caption: 
+Visible: True
+Left: 5955
+Top: 4758
+Width: 3532
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text55
+Type: 109
+ControlSource: ="Minute-" & [Forms]![pur_purcaseminutes_chrf]![this_minute]
+Caption: 
+Visible: True
+Left: 3750
+Top: 285
+Width: 1994
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell357
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1410
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell358
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1410
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell360
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1830
+Width: 0
+Height: 405
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell361
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 1830
+Width: 0
+Height: 405
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell366
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2235
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell367
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 0
+Top: 2235
+Width: 0
+Height: 420
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_pp
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes_chrf]![para_2] & ".     Purchase case " & IIf([pcm_purcases] Like "*,*","s","") & " listed below, from CSRF Fund," & IIf([pcm_purcases] Like "*,*"," are"," is") & " required " & [Forms]![pur_purcaseminutes_chrf]![pcm_textc] & "                                                                                                                                            "
+Caption: 
+Visible: True
+Left: 0
+Top: 978
+Width: 9457
+Height: 345
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_rq
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes_chrf]![para_7] & ".    Foregoing in view, approval may please be accorded to process the purchase requirement mentioned at para" & [Forms]![pur_purcaseminutes_chrf]![para_2] & "/N above through M/s MTSS.                                                                                                                                                        "
+Caption: 
+Visible: True
+Left: 0
+Top: 2838
+Width: 9472
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_a1
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes_chrf]![para_5] & ".    " & [pcm_textd] & "                                                                                                                                                    "
+Caption: 
+Visible: True
+Left: 0
+Top: 2748
+Width: 9471
+Height: 45
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: para_a2
+Type: 109
+ControlSource: =[Forms]![pur_purcaseminutes_chrf]![para_6] & ".    " & [pcm_texte] & "                                                                                                                                                    "
+Caption: 
+Visible: False
+Left: 0
+Top: 2793
+Width: 9471
+Height: 45
+ForeColor: 0
+BackColor: 16777215
+Format: 

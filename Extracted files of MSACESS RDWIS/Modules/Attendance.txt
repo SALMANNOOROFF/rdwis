@@ -1,0 +1,561 @@
+Option Compare Database
+Option Explicit
+
+Public Sub makeAttendanceSheet(thisDate As Date)
+Dim dbs As Database
+Dim rst As Recordset
+Dim qdf As QueryDef
+Dim strSql As String
+Dim dtStart As Date
+Dim dtEnd As Date
+Dim dtLoop As Date
+Dim n As Integer
+On Error GoTo Error_Handler
+
+dtStart = FirstDateThisMonth(thisDate)
+dtEnd = LastDateThisMonth(thisDate)
+
+'Create a new sheet and open it
+Set dbs = CurrentDb()
+Set qdf = dbs.QueryDefs("hr_attsheetmaker")
+qdf.Parameters("StartDate") = dtStart
+qdf.Parameters("EndDate") = dtEnd
+qdf.Execute
+qdf.Close
+
+'Mark weekends
+Set rst = dbs.OpenRecordset("Select * From hr_attendance Where att_startdt = #" & dtStart & "#")
+For dtLoop = dtStart To dtEnd
+    If Weekday(dtLoop, vbMonday) > 5 Then
+        rst.MoveFirst
+        Do While rst.EOF = False
+            rst.Edit
+            rst.Fields("att_" & Day(dtLoop)) = "Z"
+            rst.Update
+            rst.MoveNext
+            Loop
+        End If
+    Next dtLoop
+
+'Mark invalid dates
+For n = Day(dtEnd) + 1 To 31
+    If IsDate(Month(dtEnd) & "/" & n & "/" & Year(dtEnd)) = False Then
+        rst.MoveFirst
+        Do While rst.EOF = False
+            rst.Edit
+            rst.Fields("att_" & n) = "X"
+            rst.Update
+            rst.MoveNext
+            Loop
+        End If
+    Next n
+
+'Mark days before joining of an individual
+'Yet to be done
+
+Exit Sub
+Error_Handler:
+MsgBox Err.Number & " -- " & Err.Description
+End Sub
+
+Public Sub AddInAttendanceSheet(strEmpId As String, strName As String, strUnitId As Long, dteFrom As Date)
+Dim dbsAdd As Database
+Dim rstAdd As Recordset
+Dim qdfAdd As QueryDef
+Dim n As Integer
+
+If dteFrom < #1/1/2021# Then dteFrom = #1/1/2021#
+dteFrom = FirstDateThisMonth(dteFrom)
+Set dbsAdd = CurrentDb
+Set qdfAdd = dbsAdd.QueryDefs("hr_attendance_add")
+Do
+    Set rstAdd = dbsAdd.OpenRecordset("Select * From hr_attendance Where att_startdt = #" & dteFrom & "#", dbOpenSnapshot)
+    If rstAdd.EOF Then Exit Do
+    rstAdd.FindFirst "[att_emp_id] = '" & strEmpId & "'"
+    If rstAdd.NoMatch Then
+        rstAdd.MoveFirst
+        qdfAdd.Parameters("EmpID") = strEmpId
+        qdfAdd.Parameters("Empname") = strName
+        qdfAdd.Parameters("UnitId") = strUnitId
+        qdfAdd.Parameters("StartDate") = dteFrom
+        qdfAdd.Parameters("EndDate") = LastDateThisMonth(dteFrom)
+        qdfAdd.Parameters("FirstDate") = DateValue(GetNow())
+        For n = 1 To 31
+            Select Case rstAdd("att_" & n)
+                Case "Z"
+                    qdfAdd.Parameters("d" & n) = "Z"
+                Case "X"
+                    qdfAdd.Parameters("d" & n) = "X"
+                Case Else
+                    qdfAdd.Parameters("d" & n) = ""
+                End Select
+            Next n
+        Select Case DateDiff("m", dteFrom, Date)
+            Case 0
+                qdfAdd.Parameters("locked1") = 0
+                qdfAdd.Parameters("locked2") = 0
+            Case 1
+                qdfAdd.Parameters("locked1") = 1
+                qdfAdd.Parameters("locked2") = 0
+            Case Else
+                qdfAdd.Parameters("locked1") = 1
+                qdfAdd.Parameters("locked2") = 1
+            End Select
+        qdfAdd.Execute
+        End If
+    dteFrom = DateAdd("m", 1, dteFrom)
+    Loop
+End Sub
+
+Private Function ddsd()
+AddInAttendanceSheet "11-26-04-6765", "Zia Ahmed shah", 200000, #4/1/2026#
+End Function
+
+
+Private Sub AddAllMissingInAttendanceSheet()
+Dim dbsMiss As Database
+Dim qdfMiss As QueryDef
+Dim rstMiss As Recordset
+Dim intCount As Integer
+Dim intDecision As Integer
+
+Set dbsMiss = CurrentDb()
+Set qdfMiss = dbsMiss.QueryDefs("adm_attendance_missing")
+Set rstMiss = qdfMiss.OpenRecordset(dbOpenSnapshot)
+rstMiss.MoveLast
+intCount = rstMiss.RecordCount
+intDecision = MsgBox("Attendance of " & intCount & " person(s) will be added in attendance sheet. Do you want to continue?", vbExclamation + vbYesNo, "Confirmation")
+If intDecision = 7 Then Exit Sub
+
+intCount = 0
+rstMiss.MoveFirst
+Do While Not rstMiss.EOF
+    AddInAttendanceSheet rstMiss!ctr_num, NameComplete(rstMiss!emp_name, rstMiss!emp_title, rstMiss!emp_rank), rstMiss!ctr_unt_id, rstMiss!ctr_startdt
+    intCount = intCount + 1
+    rstMiss.MoveNext
+    Loop
+MsgBox "Attendance of " & intCount & " person(s) added in attendance sheet"
+End Sub
+
+Function AttMonthStartDate(InputDate As Date) As Date
+Dim dbsAtt As Database
+Dim rstAtt As Recordset
+Dim intDay As Integer
+
+Set dbsAtt = CurrentDb()
+Set rstAtt = dbsAtt.OpenRecordset("Select gvar_value From cen_globalvars Where gvar_name = 'attstart_for_pay'", dbOpenSnapshot)
+intDay = rstAtt!gvar_value
+
+Select Case intDay
+    Case 21, 22, 23, 24, 25, 26, 27
+        AttMonthStartDate = DateSerial(Year(DateAdd("m", -1, InputDate)), Month(DateAdd("m", -1, InputDate)), intDay)
+    Case Else
+        AttMonthStartDate = FirstDateThisMonth(InputDate)
+    End Select
+End Function
+
+Function AttMonthEndDate(InputDate As Date) As Date
+Dim dbsAtt As Database
+Dim rstAtt As Recordset
+Dim intDay As Integer
+
+Set dbsAtt = CurrentDb()
+Set rstAtt = dbsAtt.OpenRecordset("Select gvar_value From cen_globalvars Where gvar_name = 'attstart_for_pay'", dbOpenSnapshot)
+intDay = rstAtt!gvar_value
+
+Select Case intDay
+    Case 21, 22, 23, 24, 25, 26, 27
+        AttMonthEndDate = DateSerial(Year(InputDate), Month(InputDate), intDay - 1)
+    Case Else
+        AttMonthEndDate = FirstDateThisMonth(InputDate)
+    End Select
+End Function
+
+Function AttMonthStartDay() As Integer
+Dim dbsAtt As Database
+Dim rstAtt As Recordset
+Dim intDay As Integer
+
+Set dbsAtt = CurrentDb()
+Set rstAtt = dbsAtt.OpenRecordset("Select gvar_value From cen_globalvars Where gvar_name = 'attstart_for_pay'", dbOpenSnapshot)
+intDay = rstAtt!gvar_value
+
+Select Case intDay
+    Case 21, 22, 23, 24, 25, 26, 27
+        AttMonthStartDay = intDay
+    Case Else
+        AttMonthStartDay = 1
+    End Select
+End Function
+
+Function DecodeAttendance(attendance As String) As String
+Select Case attendance
+    Case "P": DecodeAttendance = "Present"
+    Case "W": DecodeAttendance = "Work from Home"
+    Case "T": DecodeAttendance = "Ty Duty"
+    Case "L": DecodeAttendance = "Leave"
+    Case "A": DecodeAttendance = "Absent"
+    Case "U": DecodeAttendance = "Unpaid Leave"
+    Case "N": DecodeAttendance = "Not Applicable"
+    Case Else: DecodeAttendance = "Not Marked"
+    End Select
+End Function
+
+Function AttendanceSorter(attendance As String) As Integer
+Select Case attendance
+    Case "P": AttendanceSorter = 1
+    Case "W": AttendanceSorter = 3
+    Case "T": AttendanceSorter = 4
+    Case "A": AttendanceSorter = 5
+    Case "L": AttendanceSorter = 6
+    Case "U": AttendanceSorter = 7
+    Case "N": AttendanceSorter = 8
+    Case Else: AttendanceSorter = 9
+    End Select
+End Function
+
+Function SetOneDayAttendanceSql(AttendanceStartDate As Date, AttendanceDay As Integer) As Date
+Dim dbsOdas As Database
+Dim qdfOdas As QueryDef
+Dim strSql As String
+Dim intStart As Integer
+Dim intEnd As Integer
+Dim strSqlLeft As String
+Dim strSqlRight As String
+Dim dtAtt As Date
+
+Set dbsOdas = CurrentDb()
+Set qdfOdas = dbsOdas.QueryDefs("hr_attendance_u_oneday")
+dtAtt = DateSerial(Year(AttendanceStartDate), Month(AttendanceStartDate), AttendanceDay)
+strSql = qdfOdas.sql
+
+intEnd = InStr(strSql, "AS att,") - 2
+intStart = InStrRev(strSql, "_", InStr(strSql, "AS att,")) + 1
+strSqlLeft = Left(strSql, intStart - 1)
+strSqlRight = Right(strSql, Len(strSql) - intEnd)
+strSql = strSqlLeft & CStr(AttendanceDay) & strSqlRight
+
+intStart = InStr(strSql, "#") + 1
+intEnd = InStr(intStart, strSql, "#") - 1
+strSqlLeft = Left(strSql, intStart - 1)
+strSqlRight = Right(strSql, Len(strSql) - intEnd)
+strSql = strSqlLeft & dtAtt & strSqlRight
+
+qdfOdas.sql = strSql
+Forms!vars.Parameter1 = AttendanceStartDate
+Forms!vars.Parameter2 = AttendanceDay
+
+SetOneDayAttendanceSql = dtAtt
+
+End Function
+
+Sub zzz()
+SetOneDayAttendanceSql #10/1/2025#, 3
+End Sub
+
+Public Function KeyDownWork(KeyValue As Integer) As Integer
+Dim frmDown As Form
+On Error GoTo The_End
+Set frmDown = Screen.ActiveForm
+'Move down the sheet when enter key is pressed
+If KeyValue = 13 Then
+    KeyValue = 0
+    DoCmd.GoToRecord acDataForm, frmDown.name, acNext
+    End If
+The_End:
+KeyDownWork = KeyValue
+End Function
+
+Public Function KeyPressWork(KeyVal As Integer) As Integer
+
+'Capitalize letters
+If KeyVal >= 97 And KeyVal <= 122 Then KeyVal = KeyVal - 32
+If getVar("varRoleAccess") <> "single" Then GoTo Function_End
+
+'Allow legal entries for locked, blank, old rows
+Dim frmPress As Form
+Dim strDay As String
+Dim dtOneDate As Date
+
+Set frmPress = Screen.ActiveForm
+If frmPress.ActiveControl.Locked = False Or Nz(frmPress.ActiveControl, "") <> "" Then GoTo Function_End
+Select Case frmPress.ActiveControl.name
+    Case "att": strDay = Day(frmPress!attend_date)
+    Case Else: strDay = Right(frmPress.ActiveControl.name, Len(frmPress.ActiveControl.name) - 4)
+    End Select
+dtOneDate = DateSerial(Year(frmPress!att_startdt), Month((frmPress!att_startdt)), CInt(strDay))
+If dtOneDate > DateValue(GetNow()) Then GoTo Function_End
+
+Allow1:  'Allow 'N'
+'If Chr(KeyVal) <> "N" Then GoTo Allow2
+'frmPress(frmPress.ActiveControl.name) = UCase(Chr(KeyVal))
+'GoTo Function_End
+
+Allow2:  'Allow entries for date before first date
+If dtOneDate > frmPress!att_firstdt Then GoTo Allow3
+If Chr(KeyVal) = "P" Or Chr(KeyVal) = "T" Or _
+   Chr(KeyVal) = "A" Or Chr(KeyVal) = "W" Or _
+   Chr(KeyVal) = "L" Or Chr(KeyVal) = "U" Or _
+   Chr(KeyVal) = "N" Then
+    frmPress(frmPress.ActiveControl.name) = UCase(Chr(KeyVal))
+    End If
+GoTo Function_End
+
+Allow3:  'Allow entries for Directors
+'Dim dbsAtt As Database
+'Dim rstAtt As Recordset
+'Set dbsAtt = CurrentDb
+'Set rstAtt = dbsAtt.OpenRecordset("Select ctr_grade From hr_contracts_u_last Where ctr_num = '" & frmPress!att_emp_id & "'", dbOpenSnapshot)
+'If rstAtt.EOF Then GoTo Function_End
+'If rstAtt!ctr_grade <> "Director" Then GoTo Function_End
+'If Chr(KeyVal) = "P" Or Chr(KeyVal) = "T" Or _
+'   Chr(KeyVal) = "A" Or Chr(KeyVal) = "W" Or _
+'   Chr(KeyVal) = "L" Or Chr(KeyVal) = "U" Or _
+'   Chr(KeyVal) = "N" Then
+'    frmPress(frmPress.ActiveControl.name) = UCase(Chr(KeyVal))
+'    End If
+        
+Function_End:
+KeyPressWork = KeyVal
+End Function
+
+
+Function EmpAttendance(emp As String, DStart As Date, DEnd As Date) As Variant
+Dim dbsEmpAtt As Database
+Dim rstEmpAtt As Recordset
+Dim strEmpAtt As String, strPrefix As String, strSuffix As String, strTemp As String
+Dim objRgex As RegExp
+Dim colMatch As MatchCollection
+Dim dcnOutput As Variant
+Dim arr(3) As String
+Dim x As Variant, m As Variant
+Dim intEmpAtt As Integer, intPrefix As Integer, intSuffix As Integer, n As Integer
+Dim intWorkingDays As Integer, intPublicHolidays As Integer
+Dim booPrefixRequired As Boolean, booSuffixRequired As Boolean
+Dim char As String
+Dim dtTemp As Date
+
+'Initialize dictionary, regex object & active characters array
+Set dcnOutput = CreateObject("Scripting.Dictionary")
+dcnOutput.Add "EmpId", emp
+dcnOutput.Add "EmpNameComp", ""
+dcnOutput.Add "StartDate", DStart
+dcnOutput.Add "EndDate", DEnd
+dcnOutput.Add "P", 0
+dcnOutput.Add "W", 0
+dcnOutput.Add "T", 0
+dcnOutput.Add "A", 0
+dcnOutput.Add "L", 0
+dcnOutput.Add "U", 0
+dcnOutput.Add "N", 0
+dcnOutput.Add "Z", 0
+dcnOutput.Add "Q", 0
+dcnOutput.Add "X", 0
+dcnOutput.Add "Total", 0
+dcnOutput.Add "WD", 0
+dcnOutput.Add "PH", 0
+dcnOutput.Add "Conversion", 0
+dcnOutput.Add "OrigAtt", ""
+dcnOutput.Add "ConvAtt", ""
+dcnOutput.Add "Error", ""
+
+Set objRgex = New RegExp
+objRgex.IgnoreCase = False
+objRgex.Global = True
+objRgex.MultiLine = False
+
+arr(0) = "A"
+arr(1) = "L"
+arr(2) = "U"
+arr(3) = "T"
+
+'Get 3 attendance strings
+Set dbsEmpAtt = CurrentDb()
+Set rstEmpAtt = dbsEmpAtt.OpenRecordset("Select * from hr_attendance Where att_emp_id = '" & emp & "' " & _
+                                        "And Sgn([att_startdt]-#" & DEnd & "#)*Sgn(#" & DStart & "#-[att_enddt]) >=0 " & _
+                                        "Order by att_startdt", dbOpenSnapshot)
+
+If rstEmpAtt.EOF Then GoTo Set_Output
+dcnOutput("EmpNameComp") = rstEmpAtt!att_empnamecomp
+If rstEmpAtt.EOF Then
+    Set EmpAttendance = dcnOutput
+    Exit Function
+    End If
+
+Do While Not rstEmpAtt.EOF
+    For n = 1 To Day(rstEmpAtt!att_enddt)
+        Select Case True
+            Case DateSerial(Year(rstEmpAtt!att_startdt), Month(rstEmpAtt!att_startdt), n) < DStart
+                strPrefix = strPrefix & Nz(rstEmpAtt("att_" & n), "Q")
+            Case DateSerial(Year(rstEmpAtt!att_startdt), Month(rstEmpAtt!att_startdt), n) > DEnd
+                strSuffix = strSuffix & Nz(rstEmpAtt("att_" & n), "Q")
+            Case Else
+                strEmpAtt = strEmpAtt & Nz(rstEmpAtt("att_" & n), "Q")
+            End Select
+        Next n
+    rstEmpAtt.MoveNext
+    Loop
+
+'Add to prefix string if required
+For Each x In arr
+    objRgex.Pattern = "^Z+" & x
+    If objRgex.test(strEmpAtt) = True Then
+        objRgex.Pattern = "Z+"
+        If strPrefix = "" Or objRgex.test(strPrefix) = True Then
+            booPrefixRequired = True
+            End If
+        End If
+    Next x
+    
+If booPrefixRequired = True Then
+    Set rstEmpAtt = dbsEmpAtt.OpenRecordset("Select * from hr_attendance Where att_emp_id = '" & emp & "' " & _
+                                        "And [att_startdt] = #" & FirstDateThisMonth(DateAdd("m", "-1", DStart)) & "#")
+    If Not rstEmpAtt.EOF Then
+        For n = 1 To Day(rstEmpAtt!att_enddt)
+            strTemp = strTemp & Nz(rstEmpAtt("att_" & n), "Q")
+            Next n
+        End If
+    strPrefix = strTemp & strPrefix
+    End If
+
+'Add to suffix string if required
+For Each x In arr
+    objRgex.Pattern = x & "Z+$"
+    If objRgex.test(strEmpAtt) = True Then
+        objRgex.Pattern = "Z+"
+        If strSuffix = "" Or objRgex.test(strSuffix) = True Then
+            booSuffixRequired = True
+            End If
+        End If
+    Next x
+
+If booSuffixRequired = True Then
+    Set rstEmpAtt = dbsEmpAtt.OpenRecordset("Select * from hr_attendance Where att_emp_id = '" & emp & "' " & _
+                                        "And [att_startdt] = #" & FirstDateThisMonth(DateAdd("m", "1", DEnd)) & "#")
+    If Not rstEmpAtt.EOF Then
+        For n = 1 To Day(rstEmpAtt!att_enddt)
+            strSuffix = strSuffix & Nz(rstEmpAtt("att_" & n), "Q")
+            Next n
+        End If
+    End If
+
+'------------- Test Block --------------'
+'strPrefix = "A"
+'strEmpAtt = "ZZAPUZZUPAZZ"
+'strSuffix = "A"
+'---------------------------------------'
+
+dcnOutput("OrigAtt") = strPrefix & "-" & strEmpAtt & "-" & strSuffix
+
+'Note working days and public holidays
+For n = 1 To Len(strEmpAtt)
+    If (Mid(strEmpAtt, n, 1)) = "Z" Then intPublicHolidays = intPublicHolidays + 1
+    Next
+intWorkingDays = Len(strEmpAtt) - intPublicHolidays
+    
+'Create super attendance string
+strTemp = strPrefix & strEmpAtt & strSuffix
+intPrefix = Len(strPrefix)
+intEmpAtt = Len(strEmpAtt)
+intSuffix = Len(strSuffix)
+
+'Replace Holidays where required
+For Each x In arr
+    objRgex.Pattern = x & "Z+" & x
+    Do While objRgex.test(strTemp)
+        Set colMatch = objRgex.Execute(strTemp)
+        For Each m In colMatch
+            strTemp = Replace(strTemp, m.Value, String(Len(m.Value), x))
+            Next m
+        Loop
+    Next x
+
+'Recreate the 3 attendance strings
+strPrefix = Left(strTemp, intPrefix)
+strEmpAtt = Mid(strTemp, intPrefix + 1, Len(strTemp) - intPrefix - intSuffix)
+strSuffix = Right(strTemp, intSuffix)
+
+'Modify main string for explicit leaves
+Set rstEmpAtt = dbsEmpAtt.OpenRecordset("Select * From hr_leaves Where " & _
+                                        "lve_emp_id = '" & emp & "' And " & _
+                                        "Sgn([lve_from]-#" & DEnd & "#)*Sgn(#" & DStart & "#-[lve_to]) >=0 ", dbOpenSnapshot)
+Do While Not rstEmpAtt.EOF
+    dtTemp = DStart
+    For n = 1 To Len(strEmpAtt)
+        If dtTemp >= rstEmpAtt!lve_from And dtTemp <= rstEmpAtt!lve_to Then
+            strEmpAtt = Left(strEmpAtt, n - 1) & rstEmpAtt!lve_type & Right(strEmpAtt, Len(strEmpAtt) - n)
+            End If
+        dtTemp = dtTemp + 1
+        Next n
+    rstEmpAtt.MoveNext
+    Loop
+    
+'Populate output dictionary with data
+For n = 1 To Len(strEmpAtt)
+    char = (Mid(strEmpAtt, n, 1))
+    dcnOutput(char) = dcnOutput(char) + 1
+    dcnOutput("Total") = dcnOutput("Total") + 1
+    Next
+dcnOutput("WD") = intWorkingDays
+dcnOutput("PH") = intPublicHolidays
+dcnOutput("Conversion") = intPublicHolidays - dcnOutput("Z")
+dcnOutput("ConvAtt") = strPrefix & "-" & strEmpAtt & "-" & strSuffix
+dcnOutput("Error") = IIf(dcnOutput("X") > 0, "Invalid Days.", "")
+dcnOutput("Error") = dcnOutput("Error") + IIf(dcnOutput("Total") <> dcnOutput("WD") + dcnOutput("PH"), "Incorrect attendance.", "")
+
+Set_Output:
+Set EmpAttendance = dcnOutput
+
+End Function
+
+Sub sdfdfsd()
+'EmpAttendance "12-23-07-8573", #7/1/2024#, #7/14/2024#
+PrintDict EmpAttendance("12-23-07-8573", #7/1/2024#, #7/14/2024#)
+'DictToTable EmpAttendance("12-23-07-8573", #7/1/2024#, #7/14/2024#), "hr_attendance_summary_temp"
+End Sub
+
+Sub Doo()
+Dim objRgex As RegExp
+Dim objMatch As MatchCollection
+Set objRgex = New RegExp
+objRgex.Global = True
+objRgex.Pattern = "A"
+Set objMatch = objRgex.Execute("AAAXXXAAA")
+End Sub
+
+Sub test()
+Dim n As Integer
+Dim strTemp As String
+Dim x As Variant, m As Variant
+Dim arr(3) As String
+Dim objRgex As RegExp
+Dim colMatch As MatchCollection
+
+Set objRgex = New RegExp
+objRgex.IgnoreCase = False
+objRgex.Global = True
+objRgex.MultiLine = False
+strTemp = "ZZLPZZUUUUUZZUUUPPZZPPPPPZZUUUZUZZUUUUUZZUUUUUZZUUUUUZZUUUUUZZUUPPPZZPUUUPZZPUUUPZZPQQQQZZQ"
+arr(0) = "A"
+arr(1) = "L"
+arr(2) = "U"
+arr(3) = "T"
+
+For Each x In arr
+    objRgex.Pattern = x & "Z+" & x
+    Do While objRgex.test(strTemp)
+        Set colMatch = objRgex.Execute(strTemp)
+        For Each m In colMatch
+            strTemp = Replace(strTemp, m.Value, String(Len(m.Value), x))
+            Next m
+        Loop
+    Next x
+
+Debug.Print strTemp
+
+End Sub
+
+
+
+
+

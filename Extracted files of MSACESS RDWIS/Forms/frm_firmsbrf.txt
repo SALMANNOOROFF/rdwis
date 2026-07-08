@@ -1,0 +1,349 @@
+FORM: frm_firmsbrf
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: frm_firmsbrf
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 30
+Top: 780
+Width: 3390
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label33
+Type: 100
+ControlSource: 
+Caption: Speciality 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3480
+Top: 780
+Width: 4230
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label35
+Type: 100
+ControlSource: 
+Caption: Facilities 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 7770
+Top: 780
+Width: 3765
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label63
+Type: 100
+ControlSource: 
+Caption: Persons 
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 11595
+Top: 780
+Width: 3180
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label66
+Type: 100
+ControlSource: 
+Caption: Head Office Phones
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 14835
+Top: 780
+Width: 2070
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: lblTitle
+Type: 100
+ControlSource: 
+Caption: Firms
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 0
+Top: 120
+Width: 19200
+Height: 660
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Georgia
+FontSize: 24
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label74
+Type: 100
+ControlSource: 
+Caption: City
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 16965
+Top: 780
+Width: 1440
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label89
+Type: 100
+ControlSource: 
+Caption: Details
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 18420
+Top: 780
+Width: 810
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: frm_name
+Type: 109
+ControlSource: frm_name
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 30
+Top: 30
+Width: 3390
+Height: 690
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text32
+Type: 109
+ControlSource: specs_all
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3480
+Top: 30
+Width: 4230
+Height: 690
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text34
+Type: 109
+ControlSource: facils_all
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 7770
+Top: 30
+Width: 3765
+Height: 690
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text57
+Type: 109
+ControlSource: persons_all
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 11595
+Top: 30
+Width: 3180
+Height: 690
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: phones_all
+Type: 109
+ControlSource: phones_all
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 14835
+Top: 30
+Width: 2070
+Height: 690
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: city
+Type: 109
+ControlSource: city
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 16965
+Top: 30
+Width: 1440
+Height: 690
+ForeColor: 4210752
+BackColor: -2147483613
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdDetails
+Type: 104
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 18660
+Top: 180
+Width: 255
+Height: 285
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

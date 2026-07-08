@@ -1,0 +1,8 @@
+QUERY: fin_ecbreakdown_pc_tempadder
+
+SQL:
+INSERT INTO fin_ecbreakdown_temp ( id, subtype, description, amount, status )
+SELECT pur_purcases.pcs_id, pur_purcaseitems.pci_subtype, pur_purcaseitems.pci_desc, Round([pci_price]*IIf([pcs_status]="Partially Fulfilled",[pci_fulfilment],[pci_qty]),0) AS amount, pur_purcases.pcs_status
+FROM pur_purcases INNER JOIN pur_purcaseitems ON pur_purcases.pcs_id = pur_purcaseitems.pci_pcs_id
+WHERE (((pur_purcases.pcs_status)="Approved") AND ((pur_purcases.pcs_hed_id)=[Forms]![vars]![Parameter1]) AND ((pur_purcases.pcs_sudohed) Is Null Or (pur_purcases.pcs_sudohed)="")) OR (((pur_purcases.pcs_status)="Fulfilled") AND ((pur_purcases.pcs_hed_id)=[Forms]![vars]![Parameter1]) AND ((pur_purcases.pcs_sudohed) Is Null Or (pur_purcases.pcs_sudohed)="")) OR (((pur_purcases.pcs_status)="Partially Fulfilled") AND ((pur_purcases.pcs_hed_id)=[Forms]![vars]![Parameter1]) AND ((pur_purcases.pcs_sudohed) Is Null Or (pur_purcases.pcs_sudohed)=""))
+ORDER BY Round([pci_price]*IIf([pcs_status]="Partially Fulfilled",[pci_fulfilment],[pci_qty]),0) DESC;

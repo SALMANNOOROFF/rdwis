@@ -1,0 +1,21 @@
+TABLE: hr_empsexta1
+
+COLUMNS:
+- empexta_emp_id | Type:10 | Size:13
+- emp_discip | Type:10 | Size:255
+- emp_qualif | Type:3 | Size:2
+- emp_spec | Type:10 | Size:255
+- emp_paddress | Type:10 | Size:255
+- emp_dob | Type:8 | Size:8
+- emp_marital | Type:10 | Size:255
+- emp_ntnlty | Type:10 | Size:255
+- emp_pob | Type:10 | Size:255
+- emp_taddress | Type:10 | Size:255
+- emp_mobile | Type:10 | Size:13
+- emp_landline | Type:10 | Size:13
+- emp_gender | Type:10 | Size:255
+- emp_mobile2 | Type:10 | Size:255
+- emp_email | Type:10 | Size:255
+- emp_father | Type:10 | Size:255
+- emp_father_cnic | Type:10 | Size:15
+- emp_ntnlty_other | Type:10 | Size:255

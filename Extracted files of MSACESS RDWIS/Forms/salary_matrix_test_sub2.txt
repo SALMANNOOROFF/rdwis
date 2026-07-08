@@ -1,0 +1,212 @@
+FORM: salary_matrix_test_sub2
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: SELECT * FROM salary_matrix_test WHERE type="11"; 
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label9
+Type: 100
+ControlSource: 
+Caption: Month
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 60
+Top: 450
+Width: 1320
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Due
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1380
+Top: 450
+Width: 1701
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label325
+Type: 100
+ControlSource: 
+Caption: Paid
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3075
+Top: 450
+Width: 1695
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label445
+Type: 100
+ControlSource: 
+Caption: Arrears
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 4770
+Top: 450
+Width: 1935
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sum_arrears
+Type: 109
+ControlSource: =Sum([msal]-[sal])
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 4755
+Top: 120
+Width: 1965
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: end
+Type: 109
+ControlSource: end
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 60
+Top: 0
+Width: 1320
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: mmm yy
+InputMask: 
+
+--------------------
+Name: msal
+Type: 109
+ControlSource: msal
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1380
+Top: 0
+Width: 1701
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: sal
+Type: 109
+ControlSource: sal
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3075
+Top: 0
+Width: 1695
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: arrear
+Type: 109
+ControlSource: =[msal]-[sal]
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 4770
+Top: 0
+Width: 1935
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 

@@ -1,0 +1,6 @@
+QUERY: pur_purcasestadaitems_plus
+
+SQL:
+SELECT pur_purcaseitems.*, Mid([pci_desc],InStr([pci_desc],"ID:")+4,13) AS emp_id, Left([pci_desc],InStr([pci_desc],"for")-1) AS type, Mid([pci_desc],InStr([pci_desc],"for")+4,InStr([pci_desc],Chr(13))-InStr([pci_desc],"for")-4) AS emp, Mid([pci_desc],InStr([pci_desc],Chr(10))+1,50) AS account, InStr([pci_desc],Chr(13)) AS Expr1, InStr([pci_desc],Chr(10)) AS Expr4
+FROM pur_purcaseitems
+WHERE (((pur_purcaseitems.pci_pcs_id)=[Forms]![pur_purcasestada_detail]![pcs_id]));

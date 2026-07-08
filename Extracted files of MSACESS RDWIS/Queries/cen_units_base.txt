@@ -1,0 +1,6 @@
+QUERY: cen_units_base
+
+SQL:
+SELECT *
+FROM cen_units
+WHERE unt_type = 'Division' And unt_id = 200000;

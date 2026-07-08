@@ -1,0 +1,11 @@
+TABLE: pur_purreceiptitems
+
+COLUMNS:
+- pti_id | Type:4 | Size:4
+- pti_prt_id | Type:4 | Size:4
+- pti_desc | Type:12 | Size:0
+- pti_qty | Type:20 | Size:16
+- pti_qtyunit | Type:10 | Size:255
+- pti_pci_id | Type:4 | Size:4
+- pti_pri_id | Type:4 | Size:4
+- pti_serial | Type:3 | Size:2

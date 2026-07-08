@@ -1,0 +1,7 @@
+TABLE: prj_mprgroup
+
+COLUMNS:
+- mgp_id | Type:4 | Size:4
+- mgp_name | Type:10 | Size:255
+- mgp_dtg | Type:8 | Size:8
+- mgp_status | Type:10 | Size:255

@@ -1,0 +1,11 @@
+TABLE: hr_ctrcaseminuterefs
+
+COLUMNS:
+- cmr_ccm_id | Type:4 | Size:4
+- cmr_min | Type:3 | Size:2
+- cmr_title | Type:10 | Size:255
+- cmr_date | Type:8 | Size:8
+- cmr_from | Type:10 | Size:255
+- cmr_flag | Type:10 | Size:255
+- cmr_ref | Type:10 | Size:255
+- cmr_encl | Type:10 | Size:255

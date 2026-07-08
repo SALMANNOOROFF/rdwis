@@ -1,0 +1,5 @@
+QUERY: frm_firmsbrf
+
+SQL:
+SELECT firms.frm_id AS Expr1, firms.frm_type AS Expr2, firms.frm_name AS Expr3, ConcatRelated("spc_spec","specs","spc_xfrm_id = " & [frm_id],"[spc_spec]") AS specs_all, ConcatRelated("fcl_facil","facils","fcl_xfrm_id = " & [frm_id],"[fcl_facil]") AS facils_all, ConcatRelated("per_desc","firmsbrf1","per_xfrm_id = " & [frm_id],"[per_desig]") AS persons_all, ConcatRelated("inf_value","firmsbrf2","off_xfrm_id = " & [frm_id]) AS phones_all, FirstRelated("off_city","firmsbrf2","off_xfrm_id = " & [frm_id]) AS city
+FROM firms;

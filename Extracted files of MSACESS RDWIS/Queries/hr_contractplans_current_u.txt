@@ -1,0 +1,7 @@
+QUERY: hr_contractplans_current_u
+
+SQL:
+SELECT hr_emps.emp_id, NameComplete([emp_name],[emp_title],[emp_rank]) AS name_full, hr_contractplans.cpn_hed_id, hr_emps.emp_status, hr_emps.emp_lastdt
+FROM (hr_contracts_u_currentmonth LEFT JOIN hr_contractplans ON hr_contracts_u_currentmonth.ctr_id = hr_contractplans.cpn_ctr_id) INNER JOIN hr_emps ON hr_contracts_u_currentmonth.ctr_num = hr_emps.emp_id
+WHERE (((hr_contractplans.cpn_startdt)=FirstDateThisMonth(GetNow()))) OR (((hr_contractplans.cpn_enddt)=LastDateThisMonth(GetNow()))) OR (((hr_contractplans.cpn_startdt) Is Null) AND ((hr_contractplans.cpn_enddt) Is Null))
+ORDER BY IIf([emp_unt_id]>=800000,[emp_unt_id]-1000000,[emp_unt_id]), hr_contractplans.cpn_hed_id;

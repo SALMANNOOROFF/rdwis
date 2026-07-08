@@ -1,0 +1,7 @@
+QUERY: fin_commitments_u_pcs
+
+SQL:
+SELECT pur_purcases.pcs_id, pur_purcases.pcs_date, pur_purcases.pcs_title, pur_purcases.pcs_intunt_id, pur_purcases.pcs_hed_id, pur_purcases.pcs_unt_id, pur_purcases.pcs_effhed_id, pur_purcases.pcs_effunt_id, pur_purcases.pcs_intprice, pur_purcases.pcs_inttax, pur_purcases.pcs_midprice, pur_purcases.pcs_midtax, pur_purcases.pcs_price, pur_purcases.pcs_frm_id, pur_purcases.pcs_transtype, pur_purcases.pcs_noloan, fin_commitments.cmt_status, fin_commitments.cmt_id, fin_commitments.cmt_amount, pur_purcases.pcs_minute, fin_commitments.cmt_date, fin_commitments.cmt_effhed_id, fin_commitments.cmt_remarks
+FROM pur_purcases INNER JOIN fin_commitments ON (pur_purcases.pcs_id = fin_commitments.cmt_docid) AND (pur_purcases.pcs_type = fin_commitments.cmt_type)
+WHERE (((pur_purcases.pcs_intunt_id)>=getvar("varLower") And (pur_purcases.pcs_intunt_id)<=getvar("varUpper")))
+ORDER BY pur_purcases.pcs_intunt_id, pur_purcases.pcs_hed_id;

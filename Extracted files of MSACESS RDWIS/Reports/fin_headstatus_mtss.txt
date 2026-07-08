@@ -1,0 +1,474 @@
+REPORT: fin_headstatus_mtss
+
+=== REPORT PROPERTIES ===
+RecordSource: 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label32
+Type: 100
+ControlSource: 
+Caption: ACCOUNT SUMMARY  -
+Value: 
+Visible: True
+Left: 2550
+Top: 75
+Width: 3778
+Height: 418
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lblTax
+Type: 100
+ControlSource: 
+Caption: (Million Rupees with GST)
+Value: 
+Visible: True
+Left: 2970
+Top: 570
+Width: 4155
+Height: 420
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: cmbAccount
+Type: 111
+ControlSource: =[Forms]![fin_headstatus_mtss]![cmbAccount]
+Caption: 
+Visible: True
+Left: 6345
+Top: 60
+Width: 1470
+Height: 418
+ForeColor: 0
+BackColor: -2147483613
+Format: 
+
+--------------------
+Name: dated
+Type: 111
+ControlSource: ="Dated " & Format(Date(),"dd mmm yy")
+Caption: 
+Visible: True
+Left: 3846
+Top: 1020
+Width: 2505
+Height: 405
+ForeColor: 0
+BackColor: 16777215
+Format: Standard
+
+--------------------
+Name: Box73
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 3645
+Top: 1695
+Width: 2970
+Height: 795
+ForeColor: 
+BackColor: 12566463
+Format: 
+
+--------------------
+Name: acc_allocation
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_allocation]
+Caption: 
+Visible: True
+Left: 5055
+Top: 1727
+Width: 1440
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label76
+Type: 100
+ControlSource: 
+Caption: Allocation
+Value: 
+Visible: True
+Left: 3765
+Top: 1727
+Width: 1303
+Height: 358
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: mtss_share
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![mtss_share]
+Caption: 
+Visible: True
+Left: 5055
+Top: 2102
+Width: 1440
+Height: 360
+ForeColor: 0
+BackColor: -2147483613
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label78
+Type: 100
+ControlSource: 
+Caption: MTSS Share
+Value: 
+Visible: True
+Left: 3765
+Top: 2102
+Width: 1303
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lneAvl1
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 4410
+Top: 2809
+Width: 1425
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: lneAvl2
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 4410
+Top: 3139
+Width: 1425
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: lneBal1
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 4410
+Top: 1680
+Width: 1425
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: lneBal2
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 4410
+Top: 2010
+Width: 1425
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: boxBlue
+Type: 101
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 4390
+Top: 840
+Width: 1425
+Height: 3135
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_share
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_share]
+Caption: 
+Visible: True
+Left: 4390
+Top: 513
+Width: 1425
+Height: 313
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lblProject
+Type: 100
+ControlSource: 
+Caption: Account
+Value: 
+Visible: True
+Left: 4380
+Top: 165
+Width: 1455
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_exp
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_exp]
+Caption: 
+Visible: True
+Left: 4437
+Top: 1290
+Width: 1335
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_exp
+Type: 100
+ControlSource: 
+Caption: Expenditure
+Value: 
+Visible: True
+Left: 1695
+Top: 1286
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_commit
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_commit]
+Caption: 
+Visible: True
+Left: 4437
+Top: 2051
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_commit
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: True
+Left: 1695
+Top: 2051
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_canbespent
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_canbespent]
+Caption: 
+Visible: True
+Left: 4437
+Top: 3559
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_canbespent
+Type: 100
+ControlSource: 
+Caption: Remaining
+Value: 
+Visible: True
+Left: 1695
+Top: 3565
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_avlbl
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_avlbl]
+Caption: 
+Visible: True
+Left: 4437
+Top: 2805
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_avlbl
+Type: 100
+ControlSource: 
+Caption: Available
+Value: 
+Visible: True
+Left: 1695
+Top: 2805
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_received
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_received]
+Caption: 
+Visible: True
+Left: 4437
+Top: 905
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_received
+Type: 100
+ControlSource: 
+Caption: Received
+Value: 
+Visible: True
+Left: 1695
+Top: 905
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_yettoberec
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_yettoberec]
+Caption: 
+Visible: True
+Left: 4437
+Top: 3180
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_yettoberec
+Type: 100
+ControlSource: 
+Caption: Yet to be Received
+Value: 
+Visible: True
+Left: 1695
+Top: 3180
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_balance
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_balance]
+Caption: 
+Visible: True
+Left: 4437
+Top: 1673
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: lbl_balance
+Type: 100
+ControlSource: 
+Caption: Balance
+Value: 
+Visible: True
+Left: 1695
+Top: 1673
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: acc_ipc
+Type: 109
+ControlSource: =[Forms]![fin_headstatus_mtss]![acc_ipc]
+Caption: 
+Visible: True
+Left: 4437
+Top: 2430
+Width: 1335
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 0,,.0#;-0,,.0#;0
+
+--------------------
+Name: Label103
+Type: 100
+ControlSource: 
+Caption: In Process
+Value: 
+Visible: True
+Left: 1695
+Top: 2430
+Width: 2580
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 

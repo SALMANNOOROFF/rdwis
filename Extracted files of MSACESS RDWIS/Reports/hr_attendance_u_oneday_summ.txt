@@ -1,0 +1,193 @@
+REPORT: hr_attendance_u_oneday_summ
+
+=== REPORT PROPERTIES ===
+RecordSource: hr_attendance_u_oneday_summary
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 109
+ControlSource: ="Contract Employees Attendance - " & Format([attend_date],"ddd  dd mmm yy")
+Caption: 
+Visible: True
+Left: 60
+Top: 60
+Width: 10381
+Height: 480
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: lbl
+Type: 100
+ControlSource: 
+Caption: Comm
+Value: 
+Visible: True
+Left: 2145
+Top: 780
+Width: 945
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label181
+Type: 100
+ControlSource: 
+Caption: Total
+Value: 
+Visible: True
+Left: 150
+Top: 1200
+Width: 1935
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text128
+Type: 109
+ControlSource: =[dept_sum]
+Caption: 
+Visible: True
+Left: 2145
+Top: 1200
+Width: 945
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: EmptyCell689
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Left: 150
+Top: 780
+Width: 1935
+Height: 360
+ForeColor: 
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: attend_group
+Type: 109
+ControlSource: attend_group
+Caption: 
+Visible: True
+Left: 150
+Top: 30
+Width: 1935
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: dept
+Type: 109
+ControlSource: Comm
+Caption: 
+Visible: True
+Left: 2145
+Top: 30
+Width: 945
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text46
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 4140
+Top: 0
+Width: 1920
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text91
+Type: 109
+ControlSource: ="Printed on " & Format(GetNow(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 6540
+Top: 0
+Width: 3900
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subAway
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 60
+Top: 2100
+Width: 10440
+Height: 1183
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: dept_sum
+Type: 109
+ControlSource: =Sum(Nz([Comm],"0"))
+Caption: 
+Visible: False
+Left: 2175
+Top: 30
+Width: 939
+Height: 330
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text692
+Type: 109
+ControlSource: ="Away  (" & [subAway].[Report]![total_count] & ")"
+Caption: 
+Visible: True
+Left: 60
+Top: 1740
+Width: 2595
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subDetail
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 120
+Top: 60
+Width: 3054
+Height: 1379
+ForeColor: 
+BackColor: 
+Format: 

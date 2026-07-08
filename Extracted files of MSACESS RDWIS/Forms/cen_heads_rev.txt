@@ -1,0 +1,1126 @@
+FORM: cen_heads_rev
+
+=== FORM PROPERTIES ===
+Caption: Data Revision Form
+RecordSource: 
+DefaultView: 0
+AllowAdditions: True
+AllowDeletions: True
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Data Revision Form
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 585
+Top: 45
+Width: 6855
+Height: 480
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdCancel
+Type: 104
+ControlSource: 
+Caption: Cancel
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 2265
+Top: 3360
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdGenerate
+Type: 104
+ControlSource: 
+Caption: Generate
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 4674
+Top: 3360
+Width: 1488
+Height: 427
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Calibri
+FontSize: 11
+OnClick: [Event Procedure]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_opendt
+Type: 109
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3090
+Top: 825
+Width: 3345
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: Label12
+Type: 100
+ControlSource: 
+Caption: Opening Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1620
+Top: 825
+Width: 1410
+Height: 360
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_opendt_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6495
+Top: 825
+Width: 345
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: hed_opendt_detail
+Type: 109
+ControlSource: ="s,hed_opendt,Account Opening Date,,1,date,,,,,Select * From cen_heads Where hed_id = P1,(_object_id),,,,cen_heads,hed_id,(hed_id),,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6900
+Top: 825
+Width: 330
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: hed_transtype_detail
+Type: 109
+ControlSource: ="s,hed_transtype,Head Processing,,1,int2,,,,,Select * From cen_heads Where hed_id = P1,(_object_id),,,,cen_heads,hed_id,(hed_id),,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6900
+Top: 1260
+Width: 330
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 
+
+--------------------
+Name: frmOption
+Type: 107
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 855
+Top: 240
+Width: 6422
+Height: 2575
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Option1
+Type: 105
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1039
+Top: 495
+Width: 260
+Height: 240
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label171
+Type: 100
+ControlSource: 
+Caption: Data Change
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1269
+Top: 420
+Width: 1290
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Option2
+Type: 105
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: False
+Locked: False
+Left: 1035
+Top: 1965
+Width: 260
+Height: 240
+ForeColor: 
+BackColor: 
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label173
+Type: 100
+ControlSource: 
+Caption: Data Reversal
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1265
+Top: 1890
+Width: 1875
+Height: 315
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label174
+Type: 100
+ControlSource: 
+Caption: Account status will be changed back to 'Open'.
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1620
+Top: 2274
+Width: 4633
+Height: 344
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sha_transtype_detail
+Type: 109
+ControlSource: ="s,sha_transtype,Head Processing,,3,int2,,,,,Select * From fin_sharesalloc Where sha_hed_id = P1,(_object_id),,,,fin_sharesalloc,sha_id,(sha_id),,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2145
+Top: 3990
+Width: 990
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pcs_transtype_detail
+Type: 109
+ControlSource: ="s,pcs_transtype,Purchase Case Processing,,2,int2,,,,,Select * From pur_purcases Where pcs_effhed_id = P1,(_object_id),,,,pur_purcases,pcs_id,(pcs_id),,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2145
+Top: 4230
+Width: 990
+Height: 255
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_transtype
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1575
+Top: 4485
+Width: 284
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label212
+Type: 100
+ControlSource: 
+Caption: Salary orders
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 195
+Top: 4485
+Width: 1380
+Height: 240
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_transtype_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1860
+Top: 4485
+Width: 285
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sor_transtype_detail
+Type: 109
+ControlSource: ="s,sor_transtype,Salary Order Processing,,2,int2,,,,,Select * From fin_salorders Where sor_effhed_id = P1,(_object_id),,,,fin_salorders,sor_id,(sor_id),,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 2145
+Top: 4485
+Width: 990
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: object_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 92
+Top: 1415
+Width: 673
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label325
+Type: 100
+ControlSource: 
+Caption: Object ID
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 92
+Top: 1129
+Width: 673
+Height: 314
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: unit_id
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 45
+Top: 609
+Width: 763
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label582
+Type: 100
+ControlSource: 
+Caption: Unit
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 45
+Top: 255
+Width: 763
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_transtype_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 6495
+Top: 1260
+Width: 345
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sha_transtype
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1575
+Top: 3990
+Width: 284
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label206
+Type: 100
+ControlSource: 
+Caption: Shares
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 195
+Top: 3990
+Width: 1380
+Height: 240
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pcs_transtype
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1575
+Top: 4230
+Width: 284
+Height: 255
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label204
+Type: 100
+ControlSource: 
+Caption: Purchase cases
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 195
+Top: 4230
+Width: 1380
+Height: 255
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: sha_transtype_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1860
+Top: 3990
+Width: 285
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: pcs_transtype_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 1860
+Top: 4230
+Width: 285
+Height: 255
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: hed_transtype
+Type: 111
+ControlSource: 
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3090
+Top: 1260
+Width: 3345
+Height: 359
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: GST
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1620
+Top: 1260
+Width: 1410
+Height: 359
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: object_code
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 45
+Top: 2170
+Width: 763
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label348
+Type: 100
+ControlSource: 
+Caption: Object Code
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 45
+Top: 1884
+Width: 763
+Height: 314
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trn_transtype
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5265
+Top: 4230
+Width: 285
+Height: 255
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label234
+Type: 100
+ControlSource: 
+Caption: Payments
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3825
+Top: 4230
+Width: 1440
+Height: 255
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trn_transtype_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5550
+Top: 4230
+Width: 285
+Height: 255
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmt_amount
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5265
+Top: 3990
+Width: 285
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label288
+Type: 100
+ControlSource: 
+Caption: Commitments
+Value: 
+Visible: False
+Enabled: 
+Locked: 
+Left: 3825
+Top: 3990
+Width: 1440
+Height: 240
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmt_amount_old
+Type: 109
+ControlSource: 
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5550
+Top: 3990
+Width: 285
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: trn_transtype_detail
+Type: 109
+ControlSource: ="s,trn_transtype,Payment Processing,,2,int2,,,,,Select * From fin_transactions Inner Join fin_commitments On fin_transactions.trn_cmt_id = fin_commitments.cmt_id  Where cmt_effhed_id = P1,(_object_id),,cmt_effhed_id,,fin_transactions,trn_id,(trn_id),,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5835
+Top: 4230
+Width: 1440
+Height: 255
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmt_amount_detail
+Type: 109
+ControlSource: ="s,cmt_amount,Commitment Amount,,2,numeric,,,,,Select * From fin_commitments Inner Join pur_purcases On (fin_commitments.cmt_type = pur_purcases.pcs_type) And (fin_commitments.cmt_docid = pur_purcases.pcs_id) Where cmt_effhed_id = P1,(_object_id),,,,fin_commitments,cmt_id,(cmt_id),n,,"
+Caption: 
+Visible: False
+Enabled: True
+Locked: False
+Left: 5835
+Top: 3990
+Width: 1440
+Height: 240
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 9
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell498
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3135
+Top: 4230
+Width: 690
+Height: 255
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell499
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3135
+Top: 4485
+Width: 690
+Height: 240
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell530
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3135
+Top: 3990
+Width: 690
+Height: 240
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell541
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 5835
+Top: 4485
+Width: 1440
+Height: 240
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell542
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 5550
+Top: 4485
+Width: 285
+Height: 240
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell543
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 5265
+Top: 4485
+Width: 285
+Height: 240
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell544
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3825
+Top: 4485
+Width: 1440
+Height: 240
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 

@@ -1,0 +1,269 @@
+REPORT: hr_contracts
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT * FROM hr_emps WHERE (((hr_emps.[emp_id])=[forms]![hr_contracts]![emp_id])); 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Employment Record
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 4993
+Height: 450
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: emp_id
+Caption: 
+Visible: True
+Left: 1441
+Top: 285
+Width: 1920
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: Employee ID
+Value: 
+Visible: True
+Left: 61
+Top: 285
+Width: 1320
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_joindt
+Type: 109
+ControlSource: emp_joindt
+Caption: 
+Visible: True
+Left: 1440
+Top: 682
+Width: 1350
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: dd mmm yy
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: Joining Date
+Value: 
+Visible: True
+Left: 60
+Top: 682
+Width: 1320
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_lastdt
+Type: 109
+ControlSource: emp_lastdt
+Caption: 
+Visible: True
+Left: 4543
+Top: 675
+Width: 1575
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label4
+Type: 100
+ControlSource: 
+Caption: Last Date
+Value: 
+Visible: True
+Left: 3465
+Top: 675
+Width: 1020
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: subContracts
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 60
+Top: 2130
+Width: 9868
+Height: 1756
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: emp_hed_id
+Type: 111
+ControlSource: emp_hed_id
+Caption: 
+Visible: True
+Left: 4548
+Top: 1072
+Width: 1365
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Project
+Value: 
+Visible: True
+Left: 3468
+Top: 1072
+Width: 1020
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_unt_id
+Type: 111
+ControlSource: emp_unt_id
+Caption: 
+Visible: True
+Left: 1440
+Top: 1087
+Width: 1350
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Division
+Value: 
+Visible: True
+Left: 60
+Top: 1087
+Width: 1320
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: name_complete
+Type: 109
+ControlSource: =NameComplete([emp_name],[emp_title],[emp_rank])
+Caption: 
+Visible: True
+Left: 4545
+Top: 285
+Width: 5325
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label68
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Left: 3465
+Top: 285
+Width: 1020
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label69
+Type: 100
+ControlSource: 
+Caption: Contracts
+Value: 
+Visible: True
+Left: 60
+Top: 1755
+Width: 1320
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line187
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 60
+Top: 2085
+Width: 9875
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Text26
+Type: 109
+ControlSource: =[Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 3975
+Top: 0
+Width: 2100
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text24
+Type: 111
+ControlSource: ="Printed on " & Format(Now(),"dd mmm yy   hh:nn")
+Caption: 
+Visible: True
+Left: 6960
+Top: 0
+Width: 2940
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: Standard

@@ -1,0 +1,6 @@
+TABLE: fin_subheads_zzz1
+
+COLUMNS:
+- sbh_hed_id | Type:4 | Size:4
+- sbh_name | Type:10 | Size:255
+- sbh_alloc | Type:20 | Size:16

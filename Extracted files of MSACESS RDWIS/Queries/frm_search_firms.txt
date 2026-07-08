@@ -1,0 +1,5 @@
+QUERY: frm_search_firms
+
+SQL:
+SELECT frm_firms.*
+FROM frm_firms;

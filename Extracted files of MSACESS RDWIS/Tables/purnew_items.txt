@@ -1,0 +1,9 @@
+TABLE: purnew_items
+
+COLUMNS:
+- item_id | Type:4 | Size:4
+- title | Type:12 | Size:0
+- serial | Type:3 | Size:2
+- unt_id | Type:4 | Size:4
+- type | Type:3 | Size:2
+- subtype | Type:10 | Size:255

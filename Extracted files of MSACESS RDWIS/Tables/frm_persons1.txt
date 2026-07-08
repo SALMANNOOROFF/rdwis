@@ -1,0 +1,11 @@
+TABLE: frm_persons1
+
+COLUMNS:
+- per_id | Type:4 | Size:4
+- per_entity | Type:10 | Size:255
+- per_xfrm_id | Type:4 | Size:4
+- per_title | Type:10 | Size:255
+- per_name | Type:10 | Size:50
+- per_desig | Type:10 | Size:255
+- per_dept | Type:10 | Size:255
+- per_exprt | Type:10 | Size:255

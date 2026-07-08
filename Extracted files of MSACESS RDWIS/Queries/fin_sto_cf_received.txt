@@ -1,0 +1,5 @@
+QUERY: fin_sto_cf_received
+
+SQL:
+SELECT Sum(fin_sto_cf_received1.amount) AS SumOfamount
+FROM fin_sto_cf_received1;

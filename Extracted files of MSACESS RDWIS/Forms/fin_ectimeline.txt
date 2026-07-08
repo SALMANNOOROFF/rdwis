@@ -1,0 +1,390 @@
+FORM: fin_ectimeline
+
+=== FORM PROPERTIES ===
+Caption: 
+RecordSource: fin_ectimeline_temp
+DefaultView: 1
+AllowAdditions: False
+AllowDeletions: False
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Label3
+Type: 100
+ControlSource: 
+Caption: Amount
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 1605
+Top: 1215
+Width: 1425
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: txtHeader
+Type: 109
+ControlSource: ="Spending Timeline - " & CodeFromHeadId([Forms]![vars]![Parameter1])
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 113
+Top: 170
+Width: 7245
+Height: 480
+ForeColor: 6968388
+BackColor: 16777215
+FontName: Calibri Light
+FontSize: 18
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Text21
+Type: 109
+ControlSource: =Sum([amount])
+Caption: 
+Visible: True
+Enabled: False
+Locked: True
+Left: 1605
+Top: 795
+Width: 1425
+Height: 360
+ForeColor: 4210752
+BackColor: 15064278
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: Label22
+Type: 100
+ControlSource: 
+Caption: Doc ID
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3090
+Top: 1215
+Width: 705
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label29
+Type: 100
+ControlSource: 
+Caption: Description
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 5160
+Top: 1215
+Width: 3960
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell57
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 5160
+Top: 795
+Width: 3960
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cmdReport
+Type: 104
+ControlSource: 
+Caption: 2
+Value: 
+Visible: True
+Enabled: True
+Locked: 
+Left: 8325
+Top: 165
+Width: 420
+Height: 435
+ForeColor: 4210752
+BackColor: 15123357
+FontName: Wingdings
+FontSize: 18
+OnClick: [Embedded Macro]
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label89
+Type: 100
+ControlSource: 
+Caption: Subhead
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 105
+Top: 1215
+Width: 1440
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: Label111
+Type: 100
+ControlSource: 
+Caption: Date
+Value: 
+Visible: True
+Enabled: 
+Locked: 
+Left: 3855
+Top: 1215
+Width: 1245
+Height: 345
+ForeColor: 8355711
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell146
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3090
+Top: 795
+Width: 705
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell151
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 3855
+Top: 795
+Width: 1245
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: EmptyCell156
+Type: 127
+ControlSource: 
+Caption: 
+Value: 
+Enabled: 
+Locked: 
+Left: 105
+Top: 795
+Width: 1440
+Height: 360
+ForeColor: 
+BackColor: 16777215
+FontName: 
+FontSize: 
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: cost
+Type: 109
+ControlSource: amount
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 1605
+Top: 30
+Width: 1425
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: Standard
+InputMask: 
+
+--------------------
+Name: id
+Type: 109
+ControlSource: id
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3090
+Top: 30
+Width: 705
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: description
+Type: 109
+ControlSource: description
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 5160
+Top: 30
+Width: 3960
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: subhead
+Type: 109
+ControlSource: subhead
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 105
+Top: 30
+Width: 1440
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: 
+InputMask: 
+
+--------------------
+Name: docdate
+Type: 109
+ControlSource: docdate
+Caption: 
+Visible: True
+Enabled: True
+Locked: False
+Left: 3855
+Top: 30
+Width: 1245
+Height: 360
+ForeColor: 4210752
+BackColor: 16777215
+FontName: Calibri
+FontSize: 11
+OnClick: 
+OnLoad: 
+OnOpen: 
+Format: dd mmm yy
+InputMask: 

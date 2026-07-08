@@ -1,0 +1,8 @@
+TABLE: hr_ctrcaseplans1
+
+COLUMNS:
+- ccp_id | Type:4 | Size:4
+- ccp_ctc_id | Type:4 | Size:4
+- ccp_startdt | Type:8 | Size:8
+- ccp_enddt | Type:8 | Size:8
+- ccp_hed_id | Type:4 | Size:4

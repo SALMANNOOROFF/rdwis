@@ -1,0 +1,80 @@
+REPORT: pur_compstatement_sub2
+
+=== REPORT PROPERTIES ===
+RecordSource: pur_noquotes
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Line91
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 375
+Width: 11048
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: CountOfRecords
+Type: 109
+ControlSource: ="(" & Count(*) & ")"
+Caption: 
+Visible: True
+Left: 15
+Top: 0
+Width: 45
+Height: 59
+ForeColor: 4210752
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label91
+Type: 100
+ControlSource: 
+Caption: Quotes Not Received
+Value: 
+Visible: True
+Left: 0
+Top: 60
+Width: 6075
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: qte_frm_id
+Type: 111
+ControlSource: nqt_frm_id
+Caption: 
+Visible: True
+Left: 0
+Top: 0
+Width: 11010
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line90
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 0
+Width: 11048
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 

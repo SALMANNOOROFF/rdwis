@@ -1,0 +1,10 @@
+TABLE: doc_document_versions
+
+COLUMNS:
+- ver_id | Type:4 | Size:4
+- doc_id | Type:4 | Size:4
+- version_no | Type:10 | Size:20
+- content_data | Type:10 | Size:255
+- remarks | Type:12 | Size:0
+- action_by | Type:4 | Size:4
+- action_date | Type:8 | Size:8

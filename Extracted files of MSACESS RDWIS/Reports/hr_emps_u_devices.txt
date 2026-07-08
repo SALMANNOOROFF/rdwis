@@ -1,0 +1,256 @@
+REPORT: hr_emps_u_devices
+
+=== REPORT PROPERTIES ===
+RecordSource: SELECT emp_id, emp_name, emp_title, emp_rank, emp_cnic, ctr_jobtitle, emp_email FROM hr_emps_u_grand WHERE emp_status like "Active*"; 
+Caption: 
+
+=== CONTROLS FULL DUMP ===
+
+--------------------
+Name: Auto_Header0
+Type: 100
+ControlSource: 
+Caption: Mobile Phone and SIM Data of Contract Employees – R&&D Wing
+Value: 
+Visible: True
+Left: 0
+Top: 60
+Width: 11100
+Height: 390
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label0
+Type: 100
+ControlSource: 
+Caption: ID
+Value: 
+Visible: True
+Left: 60
+Top: 60
+Width: 1511
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label1
+Type: 100
+ControlSource: 
+Caption: CNIC
+Value: 
+Visible: True
+Left: 5385
+Top: 60
+Width: 1830
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label2
+Type: 100
+ControlSource: 
+Caption: Name
+Value: 
+Visible: True
+Left: 1635
+Top: 60
+Width: 3686
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label91
+Type: 100
+ControlSource: 
+Caption: Designation
+Value: 
+Visible: True
+Left: 7275
+Top: 60
+Width: 3960
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Label104
+Type: 100
+ControlSource: 
+Caption: Email
+Value: 
+Visible: True
+Left: 11295
+Top: 60
+Width: 4545
+Height: 330
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_id
+Type: 109
+ControlSource: emp_id
+Caption: 
+Visible: True
+Left: 60
+Top: 30
+Width: 1511
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_cnic
+Type: 109
+ControlSource: emp_cnic
+Caption: 
+Visible: True
+Left: 5385
+Top: 30
+Width: 1830
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: name
+Type: 109
+ControlSource: =NameComplete([emp_name],[emp_title],[emp_rank])
+Caption: 
+Visible: True
+Left: 1635
+Top: 30
+Width: 3686
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: ctr_jobtitle
+Type: 109
+ControlSource: ctr_jobtitle
+Caption: 
+Visible: True
+Left: 7275
+Top: 30
+Width: 3960
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: emp_email
+Type: 109
+ControlSource: emp_email
+Caption: 
+Visible: True
+Left: 11295
+Top: 30
+Width: 4545
+Height: 360
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: hr_emps_u_devices_sub
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 1680
+Top: 510
+Width: 7613
+Height: 1416
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label122
+Type: 100
+ControlSource: 
+Caption: Mobiles 
+Value: 
+Visible: True
+Left: 737
+Top: 510
+Width: 898
+Height: 299
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Line129
+Type: 102
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 0
+Top: 1984
+Width: 15338
+Height: 0
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: hr_emps_u_devices_sub2
+Type: 112
+ControlSource: 
+Caption: 
+Value: 
+Visible: True
+Left: 10207
+Top: 524
+Width: 5145
+Height: 1401
+ForeColor: 
+BackColor: 
+Format: 
+
+--------------------
+Name: Label127
+Type: 100
+ControlSource: 
+Caption: SIMs
+Value: 
+Visible: True
+Left: 9585
+Top: 510
+Width: 583
+Height: 315
+ForeColor: 0
+BackColor: 16777215
+Format: 
+
+--------------------
+Name: Text66
+Type: 109
+ControlSource: ="Page " & [Page] & " of " & [Pages]
+Caption: 
+Visible: True
+Left: 5555
+Top: 0
+Width: 3600
+Height: 315
+ForeColor: 4210752
+BackColor: 16777215
+Format: 

@@ -1,0 +1,7 @@
+TABLE: hr_bdmems
+
+COLUMNS:
+- bdm_id | Type:3 | Size:2
+- bdm_brd_id | Type:4 | Size:4
+- bdm_name | Type:10 | Size:255
+- bdm_rank | Type:10 | Size:255
