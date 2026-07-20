@@ -1,0 +1,4 @@
+Indexes for Table: fin_commitments
+------------------------------------------------------------
+IndexName: commitments_pk	Primary: True	Unique: True	Fields: cmt_docid; cmt_type; 
+IndexName: commitments_un	Primary: False	Unique: True	Fields: cmt_id; 

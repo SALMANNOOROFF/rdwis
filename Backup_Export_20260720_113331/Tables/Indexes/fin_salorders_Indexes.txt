@@ -1,0 +1,3 @@
+Indexes for Table: fin_salorders
+------------------------------------------------------------
+IndexName: salorders_pk	Primary: True	Unique: True	Fields: sor_id; 

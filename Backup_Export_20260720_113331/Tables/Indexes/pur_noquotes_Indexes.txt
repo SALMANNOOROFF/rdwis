@@ -1,0 +1,4 @@
+Indexes for Table: pur_noquotes
+------------------------------------------------------------
+IndexName: noquotes_pk	Primary: True	Unique: True	Fields: nqt_id; 
+IndexName: noquotes_unique	Primary: False	Unique: True	Fields: nqt_pcs_id; nqt_frm_id; 

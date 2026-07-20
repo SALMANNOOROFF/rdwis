@@ -1,0 +1,3 @@
+Indexes for Table: fin_salorders_shd
+------------------------------------------------------------
+IndexName: salorders_shd_pk	Primary: True	Unique: True	Fields: sod_sor_id; sod_subhead; 

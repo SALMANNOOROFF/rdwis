@@ -1,5 +1,0 @@
-QUERY: aud_revobj_fnd
-
-SQL:
-SELECT fin_sharesinstall.shi_id, fin_transactions.trn_amount1 AS funding, -1*[fin_transactions_1].[trn_amount1] AS mtss_share, fin_sharesinstall.shi_cf, fin_sharesinstall.shi_pcc
-FROM (fin_sharesinstall INNER JOIN fin_transactions ON fin_sharesinstall.shi_fitrn_id = fin_transactions.trn_id) INNER JOIN fin_transactions AS fin_transactions_1 ON fin_sharesinstall.shi_fotrn_id = fin_transactions_1.trn_id;

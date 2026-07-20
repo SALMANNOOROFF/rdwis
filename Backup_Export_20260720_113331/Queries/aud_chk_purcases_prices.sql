@@ -1,0 +1,7 @@
+-- Query: aud_chk_purcases_prices
+-- Type: 0
+
+SELECT pur_purcases.pcs_id, cen_heads.hed_code AS eff_hed, pur_purcases.pcs_midprice, pur_purcases.pcs_midtax, pur_purcases.pcs_price
+FROM pur_purcases INNER JOIN cen_heads ON pur_purcases.pcs_effhed_id = cen_heads.hed_id
+WHERE (((pur_purcases.pcs_price)<>[pcs_midprice]+[pcs_midtax]));
+

@@ -1,8 +1,0 @@
-TABLE: ina_inaattachments1
-
-COLUMNS:
-- iat_objtype | Type:10 | Size:255
-- iat_objid | Type:4 | Size:4
-- iat_type | Type:10 | Size:255
-- iat_path | Type:10 | Size:255
-- iat_id | Type:4 | Size:4

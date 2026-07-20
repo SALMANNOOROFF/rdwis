@@ -1,0 +1,21 @@
+Table: ina_invatcomps
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+iac_id	Long	4	True	False	
+iac_ias_id	Long	4	True	False	
+iac_qty	Decimal	16	True	False	
+iac_qtyunit	Text	255	True	True	
+iac_parent_id	Long	4	False	False	
+iac_isparent	Text	5	True	True	
+iac_isassembly	Text	5	True	True	
+iac_location	Text	255	False	True	
+iac_group	Text	255	False	True	
+iac_person	Text	255	False	True	
+iac_dtg	Date/Time	8	True	False	
+iac_dispdate	Date/Time	8	False	False	
+iac_dispdtg	Date/Time	8	False	False	
+iac_status	Text	255	True	True	
+iac_remarks	Text	255	False	True	
+iac_details	Memo	0	False	True	
+iac_shared	Text	5	True	True	

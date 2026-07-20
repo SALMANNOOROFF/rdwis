@@ -1,0 +1,12 @@
+Table: cen_roles2
+RecordCount: 25
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rol_unt_id	Long	4	False	False	
+rol_level	Integer	2	False	False	
+rol_desig	Text	255	False	True	
+rol_desigshort	Text	255	False	True	
+rol_desigtype	Text	255	False	True	
+rol_reportlevel	Integer	2	False	False	
+rol_access	Text	255	False	True	
+rol_auth	Text	255	False	True	

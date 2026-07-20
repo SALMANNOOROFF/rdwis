@@ -1,0 +1,19 @@
+Table: prj_milestones
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+msn_id	Long	4	True	False	
+msn_xprj_id	Long	4	True	False	
+msn_type	Text	255	True	True	
+msn_desc	Text	255	True	True	
+msn_cost	Long	4	False	False	
+msn_startdt	Date/Time	8	False	False	
+msn_targetdt	Date/Time	8	False	False	
+msn_achvdt	Date/Time	8	False	False	
+msn_comp	Long	4	False	False	
+msn_pay	Long	4	False	False	
+msn_paydt	Date/Time	8	False	False	
+msn_status	Text	255	True	True	
+msn_rem	Text	255	False	True	
+msn_idd	Long	4	True	False	
+msn_cc_path	Text	255	False	True	

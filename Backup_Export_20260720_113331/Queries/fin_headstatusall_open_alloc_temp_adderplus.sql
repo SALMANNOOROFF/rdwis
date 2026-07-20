@@ -1,0 +1,9 @@
+-- Query: fin_headstatusall_open_alloc_temp_adderplus
+-- Type: 64
+
+INSERT INTO fin_headstatusall_alloc_temp ( hed_id, hed_code, hed_unt_id, transtype, allocation, mtss_share, rdw_share, pcc_share, csrf_share, prj_share, prj_a, prj_b, prj_c, prj_exp, prj_commit, prj_canbespent, prj_exp_a, prj_commit_a, prj_canbespent_a, prj_exp_b, prj_commit_b, prj_canbespent_b, prj_exp_c, prj_commit_c, prj_canbespent_c )
+SELECT cen_heads_u.hed_id, cen_heads_u.hed_code, cen_heads_u.hed_unt_id, IIf([hed_transtype]=1,"Without GST","With GST") AS transtype, GetAccAllocation([hed_id]) AS allocation, GetAccMtssShare([hed_id]) AS mtss_share, Round([allocation]-[mtss_share],1) AS rdw_share, GetA16Element("GetAccShares",[hed_id],1) AS pcc_share, GetA16Element("GetAccShares",[hed_id],2) AS cf_share, GetA16Element("GetAccShares",[hed_id],3) AS prj_share, GetSubHeadFigure("GetPrjAllocationsShd",[hed_id],"Equipment") AS prj_a, GetSubHeadFigure("GetPrjAllocationsShd",[hed_id],"HR") AS prj_b, GetSubHeadFigure("GetPrjAllocationsShd",[hed_id],"Misc") AS prj_c, GetPrjExpenditure([hed_id]) AS prj_exp, GetPrjOutstandingCommits([hed_id]) AS prj_commit, [prj_share]-[prj_exp]-[prj_commit] AS prj_canbespent, Nz(GetSubHeadFigure("GetPrjExpenditureShd",[hed_id],"Equipment"),0) AS prj_exp_a, Nz(GetSubHeadFigure("GetPrjOutstandingCommitsShd",[hed_id],"Equipment"),0) AS prj_commit_a, [prj_a]-[prj_exp_a]-[prj_commit_a] AS prj_canbespent_a, Nz(GetSubHeadFigure("GetPrjExpenditureShd",[hed_id],"HR"),0) AS prj_exp_b, Nz(GetSubHeadFigure("GetPrjOutstandingCommitsShd",[hed_id],"HR"),0) AS prj_commit_b, [prj_b]-[prj_exp_b]-[prj_commit_b] AS prj_canbespent_b, Nz(GetSubHeadFigure("GetPrjExpenditureShd",[hed_id],"Misc"),0) AS prj_exp_c, Nz(GetSubHeadFigure("GetPrjOutstandingCommitsShd",[hed_id],"Misc"),0) AS prj_commit_c, [prj_c]-[prj_exp_c]-[prj_commit_c] AS prj_canbespent_c
+FROM cen_heads_u
+WHERE (((cen_heads_u.hed_type)="Project"))
+ORDER BY cen_heads_u.hed_id;
+

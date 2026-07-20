@@ -1,0 +1,6 @@
+Table: fin_loanremarks1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+lrm_string	Text	255	False	True	
+lrm_remarks	Text	255	False	True	

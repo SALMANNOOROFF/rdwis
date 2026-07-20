@@ -1,0 +1,7 @@
+-- Query: ina_inventoryitemsp_u_oncharge
+-- Type: 0
+
+SELECT ina_inventoryitemsp_u.*
+FROM ina_inventoryitemsp_u
+WHERE (((ina_inventoryitemsp_u.iac_status)="Untagged" Or (ina_inventoryitemsp_u.iac_status)="Tagged" Or (ina_inventoryitemsp_u.iac_status)="Held"));
+

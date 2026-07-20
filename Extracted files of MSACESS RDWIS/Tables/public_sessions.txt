@@ -1,9 +1,0 @@
-TABLE: public_sessions
-
-COLUMNS:
-- id | Type:10 | Size:255
-- user_id | Type:20 | Size:16
-- ip_address | Type:10 | Size:45
-- user_agent | Type:12 | Size:0
-- payload | Type:12 | Size:0
-- last_activity | Type:4 | Size:4

@@ -1,0 +1,8 @@
+-- Query: pur_purcasechrf_status_tempadder
+-- Type: 64
+
+INSERT INTO pur_purcasechrf_status_temp ( hed_id, hed_code, hed_transtype, cf_mod, cf_rec_mod, cf_exp_mod, cf_cmt_mod, cf_ipc_mod, cf_avl_mod, pcs_midprice, funds_after_exp )
+SELECT pur_purcasechrf_status.hed_id, pur_purcasechrf_status.hed_code, pur_purcasechrf_status.hed_transtype, pur_purcasechrf_status.cf_mod, pur_purcasechrf_status.cf_rec_mod, pur_purcasechrf_status.cf_exp_mod, pur_purcasechrf_status.cf_cmt_mod, pur_purcasechrf_status.cf_ipc_mod, pur_purcasechrf_status.cf_avl_mod, pur_purcasechrf_status.pcs_midprice, [cf_avl_mod]-[pcs_midprice] AS avl_after_exp
+FROM pur_purcasechrf_status
+ORDER BY pur_purcasechrf_status.pcs_id;
+

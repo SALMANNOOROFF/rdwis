@@ -1,0 +1,11 @@
+Table: purnew_rfq
+RecordCount: 1220
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rfq_id	Long	4	False	False	
+pcs_date	Date/Time	8	False	False	
+pcs_unt_id	Long	4	False	False	
+pcs_hed_id	Long	4	False	False	
+pcs_effhed_id	Long	4	False	False	
+pcs_effunt_id	Long	4	False	False	
+pcs_title	Text	255	False	True	

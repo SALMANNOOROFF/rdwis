@@ -1,0 +1,7 @@
+-- Query: fin_recordfrom_so
+-- Type: 0
+
+SELECT fin_salorders.sor_id AS docid, fin_commitments_so.cmt_type AS doctype, fin_transactions.trn_date AS rdate, "Salary for " & [sor_empnamecomp] AS title, fin_salorders.sor_effhed_id, fin_salorders.sor_effunt_id, fin_salorders.sor_hed_id, fin_salorders.sor_unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, [trn_amount2]*-1 AS amount2, fin_transactions.trn_id
+FROM (fin_salorders INNER JOIN fin_commitments_so ON fin_salorders.sor_id = fin_commitments_so.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_so.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_salorders.sor_effhed_id)=[Forms]![vars]![Parameter1]));
+

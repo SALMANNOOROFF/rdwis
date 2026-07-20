@@ -1,0 +1,7 @@
+Table: public_cache_locks
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+key	Text	255	False	True	
+owner	Text	255	False	True	
+expiration	Long	4	False	False	

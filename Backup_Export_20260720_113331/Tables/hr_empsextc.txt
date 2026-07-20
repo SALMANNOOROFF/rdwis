@@ -1,0 +1,9 @@
+Table: hr_empsextc
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+empextc_emp_id	Text	13	True	True	
+emp_cnum	Text	255	False	True	
+emp_cissuedt	Date/Time	8	False	False	
+emp_cexpdt	Date/Time	8	False	False	
+emp_secclear	Text	255	False	True	

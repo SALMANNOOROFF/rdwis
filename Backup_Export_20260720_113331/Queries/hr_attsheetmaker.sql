@@ -1,0 +1,8 @@
+-- Query: hr_attsheetmaker
+-- Type: 64
+
+INSERT INTO hr_attendance ( att_emp_id, att_empnamecomp, att_unt_id, att_startdt, att_enddt )
+SELECT hr_emps.emp_id, NameComplete([emp_name],[emp_title],[emp_rank]) AS Expr3, hr_emps.emp_unt_id, Format([StartDate],"dd mmm yy") AS Expr1, Format([EndDate],"dd mmm yy") AS Expr2
+FROM hr_emps
+WHERE (((hr_emps.emp_id) In (Select [ctr_num] From [hr_contracts_relevant] Where relevance>=0))) OR (((hr_emps.emp_status) Like "Active*"));
+

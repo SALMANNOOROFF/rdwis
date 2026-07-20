@@ -1,5 +1,0 @@
-QUERY: pur_purcase_updatetolowest_nothing
-
-SQL:
-UPDATE pur_purcaseitems SET pur_purcaseitems.pci_price = ""
-WHERE (((pur_purcaseitems.pci_pcs_id)=[PurCaseId]));

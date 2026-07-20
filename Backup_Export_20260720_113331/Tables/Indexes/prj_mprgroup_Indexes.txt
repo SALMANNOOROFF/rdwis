@@ -1,0 +1,3 @@
+Indexes for Table: prj_mprgroup
+------------------------------------------------------------
+IndexName: mprgroup_pk	Primary: True	Unique: True	Fields: mgp_id; 

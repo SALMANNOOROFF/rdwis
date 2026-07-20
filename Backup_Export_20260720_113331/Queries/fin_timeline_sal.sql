@@ -1,0 +1,7 @@
+-- Query: fin_timeline_sal
+-- Type: 0
+
+SELECT fin_timeline_sal1.sal_month, fin_timeline_sal1.sal_amount, fin_timeline_sal1.num, DSum("[sal_amount]","[fin_timeline_sal]","[num] <= " & [num]) AS cum_sum, [Forms]![fin_timeline_sal_chart]![prj_alloc_sal] AS alloc_sal, CDbl([Forms]![fin_timeline_sal_chart]![prj_exp_sal]) AS exp_sal
+FROM fin_timeline_sal1
+ORDER BY fin_timeline_sal1.sal_month DESC , fin_timeline_sal1.num;
+

@@ -1,0 +1,7 @@
+-- Query: fin_firms_overall
+-- Type: 0
+
+SELECT fin_firms_overall3.firm, Sum(fin_firms_overall3.intprice) AS intprice, Sum(fin_firms_overall3.proportion) AS proportion
+FROM fin_firms_overall3
+GROUP BY fin_firms_overall3.firm;
+

@@ -1,0 +1,10 @@
+Table: pur_purnotifications1
+RecordCount: 209
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pnt_id	Long	4	False	False	
+pnt_acc_id	Long	4	False	False	
+pnt_pcs_id	Long	4	False	False	
+pnt_message	Memo	0	False	True	
+pnt_is_read	Text	5	False	True	
+created_at	Date/Time	8	False	False	

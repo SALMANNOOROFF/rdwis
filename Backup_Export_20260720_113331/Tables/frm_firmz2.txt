@@ -1,0 +1,16 @@
+Table: frm_firmz2
+RecordCount: 206
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+frm_id	Long	4	False	False	
+frm_name	Text	255	False	True	
+frm_entity	Text	255	False	True	
+frm_type	Text	255	False	True	
+frm_group	Text	255	False	True	
+frm_emp	Long	4	False	False	
+frm_points	Long	4	False	False	
+frm_black	Text	5	False	True	
+frm_notes	Memo	0	False	True	
+frm_id_old	Long	4	False	False	
+frm_ntn	Text	255	False	True	
+frm_gst	Text	255	False	True	

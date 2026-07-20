@@ -1,0 +1,3 @@
+Indexes for Table: cen_levels
+------------------------------------------------------------
+IndexName: levels_pk	Primary: True	Unique: True	Fields: lvl_id; 

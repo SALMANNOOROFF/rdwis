@@ -1,5 +1,0 @@
-QUERY: hr_attendance_u_oneday_summary1
-
-SQL:
-SELECT hr_attendance_u_oneday_temp.*, IIf([attendance]="Present","Present","Away") AS attend_group
-FROM hr_attendance_u_oneday_temp;

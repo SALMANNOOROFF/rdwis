@@ -1,0 +1,11 @@
+Table: aud_revcomps
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rvc_id	Long	4	True	False	
+rvc_rev_id	Long	4	True	False	
+rvc_table	Text	255	True	True	
+rvc_detail	Memo	0	True	True	
+rvc_rowid	Text	255	True	True	
+rvc_action	Text	255	True	True	
+rvc_type	Integer	2	False	False	

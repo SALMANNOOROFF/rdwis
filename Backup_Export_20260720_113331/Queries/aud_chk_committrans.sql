@@ -1,0 +1,8 @@
+-- Query: aud_chk_committrans
+-- Type: 0
+
+SELECT aud_chk_committrans1.cmt_id, aud_chk_committrans1.cmt_amount, aud_chk_committrans1.trn_amount_eff, aud_chk_committrans1.transtype, Round([trn_amount_eff]/[cmt_amount]*100,0) AS percentage
+FROM aud_chk_committrans1
+WHERE (((Round([trn_amount_eff]/[cmt_amount]*100,0))<>100))
+ORDER BY Round([trn_amount_eff]/[cmt_amount]*100,0);
+

@@ -1,0 +1,10 @@
+Table: prj_comments2
+RecordCount: 28
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cmt_xpgh_id	Long	4	False	False	
+cmt_id	Long	4	False	False	
+cmt_dtg	Date/Time	8	False	False	
+cmt_comment	Text	255	False	True	
+cmt_author	Text	15	False	True	
+cmt_status	Text	10	False	True	

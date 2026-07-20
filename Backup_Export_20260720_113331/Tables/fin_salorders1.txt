@@ -1,0 +1,40 @@
+Table: fin_salorders1
+RecordCount: 3888
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+sor_id	Long	4	False	False	
+sor_hed_id	Long	4	False	False	
+sor_releasedtg	Date/Time	8	False	False	
+sor_status	Text	255	False	True	
+sor_remarks	Text	255	False	True	
+sor_srq_id	Long	4	False	False	
+sor_closedtg	Date/Time	8	False	False	
+sor_unt_id	Long	4	False	False	
+sor_month	Date/Time	8	False	False	
+sor_netsalary	Long	4	False	False	
+sor_salary	Long	4	False	False	
+sor_emp_id	Text	255	False	True	
+sor_effhed_id	Long	4	False	False	
+sor_empnamecomp	Text	255	False	True	
+sor_bnkacctitle	Text	255	False	True	
+sor_effunt_id	Long	4	False	False	
+sor_bnkaccdetail	Text	255	False	True	
+sor_ctrsalary	Long	4	False	False	
+sor_checked	Text	5	False	True	
+sor_contracts	Text	255	False	True	
+sor_noloan	Text	5	False	True	
+sor_transtype	Integer	2	False	False	
+sor_sudohed	Text	7	False	True	
+sor_remarks2	Text	255	False	True	
+sor_type	Text	5	False	True	
+sor_grosalary	Long	4	False	False	
+sor_arrears	Long	4	False	False	
+sor_dues	Long	4	False	False	
+sor_overwork	Long	4	False	False	
+sor_underwork	Long	4	False	False	
+sor_loaned	Long	4	False	False	
+sor_withheld	Long	4	False	False	
+sor_award	Long	4	False	False	
+sor_penalty	Long	4	False	False	
+sor_paidalready	Long	4	False	False	
+sor_parent	Long	4	False	False	

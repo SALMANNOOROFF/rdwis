@@ -1,0 +1,3 @@
+Indexes for Table: USysRibbons
+------------------------------------------------------------
+IndexName: PrimaryKey	Primary: True	Unique: True	Fields: RibbonName; 

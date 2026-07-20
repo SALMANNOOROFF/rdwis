@@ -1,7 +1,0 @@
-TABLE: fin_subheads1
-
-COLUMNS:
-- sbh_hed_id | Type:4 | Size:4
-- sbh_name | Type:10 | Size:255
-- sbh_alloc | Type:20 | Size:16
-- sbh_id | Type:4 | Size:4

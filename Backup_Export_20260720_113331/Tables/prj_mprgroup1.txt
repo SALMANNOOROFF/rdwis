@@ -1,0 +1,8 @@
+Table: prj_mprgroup1
+RecordCount: 53
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+mgp_id	Long	4	False	False	
+mgp_name	Text	255	False	True	
+mgp_dtg	Date/Time	8	False	False	
+mgp_status	Text	255	False	True	

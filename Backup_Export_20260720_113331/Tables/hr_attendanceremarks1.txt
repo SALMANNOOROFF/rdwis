@@ -1,0 +1,8 @@
+Table: hr_attendanceremarks1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+atr_id	Decimal	16	False	False	
+atr_att_id	Decimal	16	False	False	
+atr_remarks	Text	255	False	True	
+atr_attday	Integer	2	False	False	

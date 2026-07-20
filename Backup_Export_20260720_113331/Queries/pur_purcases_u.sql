@@ -1,0 +1,8 @@
+-- Query: pur_purcases_u
+-- Type: 0
+
+SELECT pur_purcases.*
+FROM pur_purcases
+WHERE (((pur_purcases.pcs_unt_id)>=getvar("varLower") And (pur_purcases.pcs_unt_id)<=getvar("varUpper"))) OR (((pur_purcases.pcs_intunt_id)>=getvar("varLower") And (pur_purcases.pcs_intunt_id)<=getvar("varUpper")))
+ORDER BY pur_purcases.pcs_effhed_id, pur_purcases.pcs_date DESC;
+

@@ -1,0 +1,4 @@
+Indexes for Table: hr_ctrcaseattachments
+------------------------------------------------------------
+IndexName: ctrcaseattachments_pk	Primary: True	Unique: True	Fields: cat_id; 
+IndexName: ctrcaseattachments_unique	Primary: False	Unique: True	Fields: cat_objtype; cat_objid; cat_type; 

@@ -1,0 +1,16 @@
+Table: aud_revdata2
+RecordCount: 345
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rvd_id	Long	4	False	False	
+rvd_rev_id	Long	4	False	False	
+rvd_table	Text	255	False	True	
+rvd_rowid	Text	255	False	True	
+rvd_attrib	Text	255	False	True	
+rvd_oldvalue	Text	255	False	True	
+rvd_newvalue	Text	255	False	True	
+rvd_datatype	Text	255	False	True	
+rvd_type	Integer	2	False	False	
+rvd_conversion	Text	1	False	True	
+rvd_colname	Text	255	False	True	
+rvd_alias	Text	255	False	True	

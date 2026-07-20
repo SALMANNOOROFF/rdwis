@@ -1,0 +1,4 @@
+Indexes for Table: cen_heads
+------------------------------------------------------------
+IndexName: heads_pk	Primary: True	Unique: True	Fields: hed_id; 
+IndexName: heads_un	Primary: False	Unique: True	Fields: hed_code; 

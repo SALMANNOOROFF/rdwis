@@ -1,0 +1,11 @@
+Table: fin_loanadjustments
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+lad_string	Text	255	True	True	
+lad_amount	Decimal	16	True	False	
+lad_remarks	Text	255	True	True	
+lad_id	Long	4	True	False	
+lad_dtg	Date/Time	8	True	False	
+lad_from	Long	4	False	False	
+lad_to	Long	4	False	False	

@@ -1,8 +1,0 @@
-TABLE: hr_sims1
-
-COLUMNS:
-- sim_id | Type:4 | Size:4
-- sim_emp_id | Type:10 | Size:13
-- sim_csp | Type:10 | Size:255
-- sim_num | Type:10 | Size:255
-- sim_reg | Type:10 | Size:255

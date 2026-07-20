@@ -1,0 +1,10 @@
+Table: public_sessions1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+id	Text	255	False	True	
+user_id	Decimal	16	False	False	
+ip_address	Text	45	False	True	
+user_agent	Memo	0	False	True	
+payload	Memo	0	False	True	
+last_activity	Long	4	False	False	

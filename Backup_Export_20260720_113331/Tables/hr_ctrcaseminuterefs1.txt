@@ -1,0 +1,12 @@
+Table: hr_ctrcaseminuterefs1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cmr_ccm_id	Long	4	False	False	
+cmr_min	Integer	2	False	False	
+cmr_title	Text	255	False	True	
+cmr_date	Date/Time	8	False	False	
+cmr_from	Text	255	False	True	
+cmr_flag	Text	255	False	True	
+cmr_ref	Text	255	False	True	
+cmr_encl	Text	255	False	True	

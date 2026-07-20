@@ -1,0 +1,39 @@
+Table: hr_salreqs2
+RecordCount: 2902
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+srq_id	Long	4	False	False	
+srq_emp_id	Text	255	False	True	
+srq_empnamecomp	Text	255	False	True	
+srq_unt_id	Long	4	False	False	
+srq_hed_id	Long	4	False	False	
+srq_effunt_id	Long	4	False	False	
+srq_effhed_id	Long	4	False	False	
+srq_month	Date/Time	8	False	False	
+srq_unpaiddays	Integer	2	False	False	
+srq_salary	Long	4	False	False	
+srq_status	Text	255	False	True	
+srq_remarks	Text	255	False	True	
+srq_releasedtg	Date/Time	8	False	False	
+srq_closedtg	Date/Time	8	False	False	
+srq_fulfilment	Long	4	False	False	
+srq_ctrsalary	Long	4	False	False	
+srq_grosalary	Long	4	False	False	
+srq_netsalary	Long	4	False	False	
+srq_bnkaccdetail	Text	255	False	True	
+srq_bnkacctitle	Text	255	False	True	
+srq_contracts	Text	255	False	True	
+srq_checked	Text	5	False	True	
+srq_arrears	Long	4	False	False	
+srq_dues	Long	4	False	False	
+srq_overwork	Long	4	False	False	
+srq_underwork	Long	4	False	False	
+srq_loaned	Long	4	False	False	
+srq_withheld	Long	4	False	False	
+srq_award	Long	4	False	False	
+srq_penalty	Long	4	False	False	
+srq_paidalready	Long	4	False	False	
+srq_paidholidays	Integer	2	False	False	
+srq_remarks2	Text	255	False	True	
+srq_sudohed	Text	7	False	True	
+srq_parent	Long	4	False	False	

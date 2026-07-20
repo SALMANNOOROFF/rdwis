@@ -1,0 +1,12 @@
+Table: hr_hirings2
+RecordCount: 55
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+hir_id	Long	4	False	False	
+hir_hhd_id	Integer	2	False	False	
+hir_reference	Text	255	False	True	
+hir_date	Date/Time	8	False	False	
+hir_jobtitle	Text	255	False	True	
+hir_grade	Text	255	False	True	
+hir_salarymin	Long	4	False	False	
+hir_salarymax	Long	4	False	False	

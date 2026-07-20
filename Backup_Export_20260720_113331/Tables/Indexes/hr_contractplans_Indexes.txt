@@ -1,0 +1,3 @@
+Indexes for Table: hr_contractplans
+------------------------------------------------------------
+IndexName: contractplans_pk	Primary: True	Unique: True	Fields: cpn_id; 

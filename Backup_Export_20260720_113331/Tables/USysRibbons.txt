@@ -1,0 +1,6 @@
+Table: USysRibbons
+RecordCount: 6
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+RibbonName	Text	255	True	True	
+RibbonXml	Memo	0	False	True	

@@ -1,6 +1,0 @@
-QUERY: fin_ecbreakdown_sta
-
-SQL:
-SELECT Count([%$##@_Alias].id) AS doc_count
-FROM (SELECT DISTINCT fin_ecbreakdown_temp.id
-FROM fin_ecbreakdown_temp)  AS [%$##@_Alias];

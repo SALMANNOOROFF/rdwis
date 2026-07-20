@@ -1,0 +1,7 @@
+-- Query: aud_chk_commitments_catsum
+-- Type: 0
+
+SELECT aud_chk_commitments_catsum1.cmt_id, aud_chk_commitments_catsum1.cmt_docid, aud_chk_commitments_catsum1.cmt_type, aud_chk_commitments_catsum1.hed_code, aud_chk_commitments_catsum1.commit, aud_chk_commitments_catsum1.sumcommitcomps, aud_chk_commitments_catsum1.FirstOfcmt_status
+FROM aud_chk_commitments_catsum1
+WHERE (((aud_chk_commitments_catsum1.sumcommitcomps)<>[commit]));
+

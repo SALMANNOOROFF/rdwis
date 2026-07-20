@@ -1,0 +1,7 @@
+-- Query: fin_purcases_awaited1
+-- Type: 0
+
+SELECT fin_transactions_u.trn_cmt_id, Sum(fin_transactions_u.trn_amount1) AS sum_trn_amount1, Sum(fin_transactions_u.trn_tax1) AS sum_trn_tax1, Sum(fin_transactions_u.trn_amount2) AS sum_trn_amount2
+FROM fin_transactions_u
+GROUP BY fin_transactions_u.trn_cmt_id;
+

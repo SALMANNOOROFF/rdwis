@@ -1,0 +1,3 @@
+Indexes for Table: hr_applicqualifs
+------------------------------------------------------------
+IndexName: applicqualifs_pk	Primary: True	Unique: True	Fields: apq_id; 

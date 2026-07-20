@@ -1,6 +1,0 @@
-QUERY: prj_mpr-i
-
-SQL:
-SELECT prj_mpr.*
-FROM prj_mpr
-WHERE (((prj_mpr.prj_startdt) Is Not Null));

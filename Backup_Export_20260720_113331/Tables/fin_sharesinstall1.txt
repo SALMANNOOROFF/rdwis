@@ -1,0 +1,12 @@
+Table: fin_sharesinstall1
+RecordCount: 196
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+shi_hed_id	Long	4	False	False	
+shi_fitrn_id	Long	4	False	False	
+shi_fotrn_id	Long	4	False	False	
+shi_id	Long	4	False	False	
+shi_cf	Decimal	16	False	False	
+shi_pcc	Decimal	16	False	False	
+shi_msn_idd	Long	4	False	False	
+shi_prj	Decimal	16	False	False	

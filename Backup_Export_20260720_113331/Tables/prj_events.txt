@@ -1,0 +1,12 @@
+Table: prj_events
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+evt_id	Long	4	True	False	
+evt_name	Text	255	False	True	
+evt_doer	Text	15	False	True	
+evt_effectee	Text	15	False	True	
+evt_dtg	Date/Time	8	False	False	
+evt_xprj_id	Long	4	False	False	
+evt_xpgh_id	Long	4	False	False	
+evt_xcmt_id	Long	4	False	False	

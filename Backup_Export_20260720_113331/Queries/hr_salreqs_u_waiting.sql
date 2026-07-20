@@ -1,0 +1,8 @@
+-- Query: hr_salreqs_u_waiting
+-- Type: 0
+
+SELECT hr_salreqs_u_inprocess.*
+FROM hr_salreqs_u_inprocess
+WHERE (((hr_salreqs_u_inprocess.srq_id) Not In (Select sor_srq_id from fin_salorders Where sor_status = "Draft" Or sor_status = "Fulfilled")))
+ORDER BY hr_salreqs_u_inprocess.srq_empnamecomp, hr_salreqs_u_inprocess.srq_parent;
+

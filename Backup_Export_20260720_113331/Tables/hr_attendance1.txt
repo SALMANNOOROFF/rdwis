@@ -1,0 +1,45 @@
+Table: hr_attendance1
+RecordCount: 3259
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+att_id	Decimal	16	False	False	
+att_emp_id	Text	13	False	True	
+att_empnamecomp	Text	255	False	True	
+att_unt_id	Long	4	False	False	
+att_startdt	Date/Time	8	False	False	
+att_enddt	Date/Time	8	False	False	
+att_1	Text	1	False	True	
+att_2	Text	1	False	True	
+att_3	Text	1	False	True	
+att_4	Text	1	False	True	
+att_5	Text	1	False	True	
+att_6	Text	1	False	True	
+att_7	Text	1	False	True	
+att_8	Text	1	False	True	
+att_9	Text	1	False	True	
+att_10	Text	1	False	True	
+att_11	Text	1	False	True	
+att_12	Text	1	False	True	
+att_13	Text	1	False	True	
+att_14	Text	1	False	True	
+att_15	Text	1	False	True	
+att_16	Text	1	False	True	
+att_17	Text	1	False	True	
+att_18	Text	1	False	True	
+att_19	Text	1	False	True	
+att_20	Text	1	False	True	
+att_21	Text	1	False	True	
+att_22	Text	1	False	True	
+att_23	Text	1	False	True	
+att_24	Text	1	False	True	
+att_25	Text	1	False	True	
+att_26	Text	1	False	True	
+att_27	Text	1	False	True	
+att_28	Text	1	False	True	
+att_29	Text	1	False	True	
+att_30	Text	1	False	True	
+att_31	Text	1	False	True	
+att_locked1	Text	5	False	True	
+att_locked2	Text	5	False	True	
+att_eahreplace	Text	5	False	True	
+att_locked	Integer	2	False	False	

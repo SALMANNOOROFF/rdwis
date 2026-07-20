@@ -1,8 +1,0 @@
-TABLE: hr_empattachments1
-
-COLUMNS:
-- eat_objtype | Type:10 | Size:255
-- eat_objid | Type:10 | Size:255
-- eat_type | Type:10 | Size:255
-- eat_path | Type:10 | Size:255
-- eat_id | Type:4 | Size:4

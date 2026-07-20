@@ -1,0 +1,14 @@
+Table: fin_transfers
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+trf_id	Long	4	True	False	
+trf_date	Date/Time	8	True	False	
+trf_type	Text	3	True	True	
+trf_title	Text	255	True	True	
+trf_amount	Long	4	True	False	
+trf_fromhed	Long	4	True	False	
+trf_fromunt	Long	4	True	False	
+trf_tohed	Long	4	True	False	
+trf_tount	Long	4	True	False	
+trf_status	Text	255	True	True	

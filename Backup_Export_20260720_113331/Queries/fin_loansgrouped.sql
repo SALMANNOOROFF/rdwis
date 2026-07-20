@@ -1,0 +1,8 @@
+-- Query: fin_loansgrouped
+-- Type: 0
+
+SELECT fin_loans1.loan_string, fin_loans1.[From Project], fin_loans1.[For Project], Sum(fin_loans1.amount) AS SumOfamount
+FROM fin_loans1
+GROUP BY fin_loans1.loan_string, fin_loans1.[From Project], fin_loans1.[For Project]
+ORDER BY fin_loans1.loan_string;
+

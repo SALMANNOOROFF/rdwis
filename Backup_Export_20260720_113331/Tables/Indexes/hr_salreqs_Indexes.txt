@@ -1,0 +1,3 @@
+Indexes for Table: hr_salreqs
+------------------------------------------------------------
+IndexName: salreqs_pk	Primary: True	Unique: True	Fields: srq_id; 

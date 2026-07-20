@@ -1,6 +1,0 @@
-TABLE: public_cache_locks
-
-COLUMNS:
-- key | Type:10 | Size:255
-- owner | Type:10 | Size:255
-- expiration | Type:4 | Size:4

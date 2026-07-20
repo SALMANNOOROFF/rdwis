@@ -1,0 +1,3 @@
+Indexes for Table: aud_revdata
+------------------------------------------------------------
+IndexName: revdata_pk	Primary: True	Unique: True	Fields: rvd_id; 

@@ -1,0 +1,10 @@
+-- Query: hr_attachsummary5
+-- Type: 128
+
+Select * From hr_attachsummary1
+Union All
+Select * From hr_attachsummary2
+UNION All
+Select * From hr_attachsummary3
+UNION ALL Select * From hr_attachsummary4;
+

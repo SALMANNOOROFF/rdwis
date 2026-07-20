@@ -1,0 +1,3 @@
+Indexes for Table: aud_busdata
+------------------------------------------------------------
+IndexName: busdata_pk	Primary: True	Unique: True	Fields: bdt_id; 

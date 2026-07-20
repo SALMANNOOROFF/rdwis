@@ -1,0 +1,13 @@
+Table: cen_heads
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+hed_id	Long	4	True	False	
+hed_name	Text	255	True	True	
+hed_type	Text	255	True	True	
+hed_code	Text	255	True	True	
+hed_opendt	Date/Time	8	False	False	
+hed_closedt	Date/Time	8	False	False	
+hed_transtype	Integer	2	False	False	
+hed_unt_id	Long	4	True	False	
+hed_prj_id	Long	4	False	False	

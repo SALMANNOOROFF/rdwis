@@ -1,0 +1,3 @@
+Indexes for Table: hr_vehicles
+------------------------------------------------------------
+IndexName: vehicles_pk	Primary: True	Unique: True	Fields: vcl_id; 

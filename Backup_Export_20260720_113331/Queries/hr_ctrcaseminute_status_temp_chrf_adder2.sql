@@ -1,0 +1,6 @@
+-- Query: hr_ctrcaseminute_status_temp_chrf_adder2
+-- Type: 0
+
+SELECT "CSRF" AS head_code, Sum(hr_ctrcaseminute_status_temp_chrf_adder1.share) AS share, Sum(hr_ctrcaseminute_status_temp_chrf_adder1.Exp) AS exp, Sum(hr_ctrcaseminute_status_temp_chrf_adder1.commit) AS [commit], Sum(hr_ctrcaseminute_status_temp_chrf_adder1.inproc) AS inproc, GetCfSalUnderway() AS underway, GetCfSalForecast() AS forecast
+FROM hr_ctrcaseminute_status_temp_chrf_adder1;
+

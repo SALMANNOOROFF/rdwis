@@ -1,7 +1,0 @@
-QUERY: aud_chk_committrans1
-
-SQL:
-SELECT fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, First(fin_transactions.trn_transtype) AS transtype, Sum(IIf([trn_transtype]=1,[trn_amount1],[trn_amount2])) AS trn_amount_eff
-FROM fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
-WHERE (((fin_commitments.cmt_status)="Paid"))
-GROUP BY fin_commitments.cmt_id;

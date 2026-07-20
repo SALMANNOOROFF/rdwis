@@ -1,0 +1,13 @@
+Table: puritems_prices
+RecordCount: 23856
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+prc_id	Long	4	False	False	
+prc_itm_id	Long	4	False	False	
+prc_base	Decimal	16	False	False	
+prc_gst	Decimal	16	False	False	
+prc_sst	Decimal	16	False	False	
+prc_gross	Decimal	16	False	False	
+prc_qty	Decimal	16	False	False	
+prc_qtyunit	Text	32	False	True	
+effective_date	Date/Time	8	False	False	

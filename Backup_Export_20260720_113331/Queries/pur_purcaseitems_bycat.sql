@@ -1,0 +1,7 @@
+-- Query: pur_purcaseitems_bycat
+-- Type: 0
+
+SELECT pur_purcaseitems_bycat3.pci_category AS cat, Sum(pur_purcaseitems_bycat3.price) AS price_sum, Sum(pur_purcaseitems_bycat3.tax) AS tax_sum, First(pur_purcaseitems_bycat3.pcs_midtax) AS pcs_midtax
+FROM pur_purcaseitems_bycat3
+GROUP BY pur_purcaseitems_bycat3.pci_category;
+

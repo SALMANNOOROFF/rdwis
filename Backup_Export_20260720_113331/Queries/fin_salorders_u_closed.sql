@@ -1,0 +1,8 @@
+-- Query: fin_salorders_u_closed
+-- Type: 0
+
+SELECT fin_salorders.*, hr_emps.emp_name, hr_emps.emp_rank
+FROM fin_salorders INNER JOIN hr_emps ON fin_salorders.sor_emp_id = hr_emps.emp_id
+WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")) AND ((fin_salorders.sor_status)="Fulfilled")) OR (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")) AND ((fin_salorders.sor_status)="Cancelled"))
+ORDER BY fin_salorders.sor_month DESC , fin_salorders.sor_unt_id, fin_salorders.sor_hed_id, fin_salorders.sor_emp_id;
+

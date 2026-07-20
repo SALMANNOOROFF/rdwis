@@ -1,0 +1,12 @@
+Table: public_users1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+id	Decimal	16	False	False	
+name	Text	255	False	True	
+email	Text	255	False	True	
+email_verified_at	Date/Time	8	False	False	
+password	Text	255	False	True	
+remember_token	Text	100	False	True	
+created_at	Date/Time	8	False	False	
+updated_at	Date/Time	8	False	False	

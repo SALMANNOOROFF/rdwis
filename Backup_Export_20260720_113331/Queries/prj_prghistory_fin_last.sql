@@ -1,0 +1,6 @@
+-- Query: prj_prghistory_fin_last
+-- Type: 0
+
+SELECT prj_prghistory.*
+FROM prj_prghistory INNER JOIN prj_prghistory_fin_last1 ON (prj_prghistory.pgh_dtg = prj_prghistory_fin_last1.max_dtg) AND (prj_prghistory.pgh_xprj_id = prj_prghistory_fin_last1.pgh_xprj_id);
+

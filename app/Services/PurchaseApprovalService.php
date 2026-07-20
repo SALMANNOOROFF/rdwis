@@ -157,6 +157,28 @@ class PurchaseApprovalService
             $case->pcs_status = $toStatus;
             $case->save();
 
+            // 2b. Insert Fund Commitment on Approval
+            if ($toStatus === 'Approved') {
+                $exists = DB::table('fin.commitments')
+                    ->where('cmt_docid', $case->pcs_id)
+                    ->whereIn('cmt_type', ['Ps', 'Pt', 'Rb'])
+                    ->exists();
+                if (!$exists) {
+                    DB::table('fin.commitments')->insert([
+                        'cmt_docid'     => $case->pcs_id,
+                        'cmt_type'      => $this->mapToLegacyType($case->pcs_type ?? 'mat'),
+                        'cmt_date'      => now()->toDateString(),
+                        'cmt_amount'    => -1 * ($case->pcs_transtype == 1 ? ($case->pcs_midprice ?? 0) : ($case->pcs_price ?? 0)),
+                        'cmt_status'    => 'Awaited',
+                        'cmt_effhed_id' => $case->pcs_effhed_id,
+                        'cmt_effunt_id' => $case->pcs_effunt_id,
+                        'cmt_hed_id'    => $case->pcs_hed_id,
+                        'cmt_unt_id'    => $case->pcs_unt_id,
+                        'cmt_sudohed'   => $case->pcs_sudohed,
+                    ]);
+                }
+            }
+
             // 3. Notify Interested Parties (Feedback Loop)
             $this->notifyInterestedParties($case, $action, $user, $remarks);
 
@@ -333,5 +355,18 @@ class PurchaseApprovalService
                       ->where('acc_untarea', 'prj')
                       ->first();
         return $initiator ? $initiator->acc_id : 1; // Fallback
+    }
+
+    /**
+     * Map RDWIS purchase type code to legacy cmt_type code
+     */
+    protected function mapToLegacyType(string $pcsType): string
+    {
+        return match(strtolower(trim($pcsType))) {
+            'mat', 'civ', 'tran', 'book', 'lic', 'net', 'pub', 'stat' => 'Ps',
+            'cons', 'serv' => 'Rb',
+            'tada', 'trn'  => 'Pt',
+            default => 'Ps',
+        };
     }
 }

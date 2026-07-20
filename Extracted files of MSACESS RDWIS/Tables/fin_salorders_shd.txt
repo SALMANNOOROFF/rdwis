@@ -1,7 +1,0 @@
-TABLE: fin_salorders_shd
-
-COLUMNS:
-- sod_sor_id | Type:4 | Size:4
-- sod_type | Type:10 | Size:5
-- sod_subhead | Type:10 | Size:255
-- sod_ratio | Type:20 | Size:16

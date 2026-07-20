@@ -1,0 +1,8 @@
+Table: pur_purcases_shd
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pcd_pcs_id	Long	4	True	False	
+pcd_subhead	Text	255	True	True	
+pcd_ratio	Decimal	16	True	False	
+pcd_type	Text	5	False	True	

@@ -1,0 +1,14 @@
+Table: fin_sharesalloc
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+sha_hed_id	Long	4	True	False	
+sha_ficmt_id	Long	4	True	False	
+sha_focmt_id	Long	4	False	False	
+sha_transtype	Integer	2	False	False	
+sha_id	Long	4	True	False	
+sha_cf	Decimal	16	False	False	
+sha_pcc	Decimal	16	False	False	
+sha_prj	Decimal	16	False	False	
+sha_prj_sal	Decimal	16	False	False	
+sha_prj_pur	Decimal	16	False	False	

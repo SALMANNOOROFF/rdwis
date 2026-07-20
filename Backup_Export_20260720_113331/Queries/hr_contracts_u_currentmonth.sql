@@ -1,0 +1,7 @@
+-- Query: hr_contracts_u_currentmonth
+-- Type: 0
+
+SELECT hr_contracts.*, IIf([emp_joindt]>[ctr_startdt],[emp_joindt],[ctr_startdt]) AS effstartdt, IIf(IsNull([ctr_termindt]),[ctr_enddt],[ctr_termindt]) AS effenddt
+FROM hr_contracts INNER JOIN hr_emps_u ON hr_contracts.ctr_num = hr_emps_u.emp_id
+WHERE (((IIf([emp_joindt]>[ctr_startdt],[emp_joindt],[ctr_startdt]))<=Lastdatethismonth(Getnow())) AND ((IIf(IsNull([ctr_termindt]),[ctr_enddt],[ctr_termindt]))>=Firstdatethismonth(Getnow())));
+

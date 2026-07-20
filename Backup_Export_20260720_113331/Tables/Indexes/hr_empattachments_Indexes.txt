@@ -1,0 +1,4 @@
+Indexes for Table: hr_empattachments
+------------------------------------------------------------
+IndexName: empattachments_pk	Primary: True	Unique: True	Fields: eat_id; 
+IndexName: empattachments_unique	Primary: False	Unique: True	Fields: eat_objtype; eat_objid; eat_type; 

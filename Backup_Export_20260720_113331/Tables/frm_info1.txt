@@ -1,0 +1,8 @@
+Table: frm_info1
+RecordCount: 219
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+inf_xmsc_id	Long	4	False	False	
+inf_xmsc_entity	Text	255	False	True	
+inf_type	Text	255	False	True	
+inf_value	Text	255	False	True	

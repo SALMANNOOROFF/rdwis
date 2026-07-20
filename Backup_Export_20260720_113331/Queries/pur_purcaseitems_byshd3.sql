@@ -1,0 +1,7 @@
+-- Query: pur_purcaseitems_byshd3
+-- Type: 0
+
+SELECT pur_purcaseitems_byshd1.pci_serial, Round([price1],2)/[sum_price1] AS ratio1, Round([price2],2)/[sum_price2] AS ratio2, pur_purcaseitems_byshd1.pci_subhead
+FROM pur_purcaseitems_byshd1, pur_purcaseitems_byshd2
+ORDER BY pur_purcaseitems_byshd1.pci_serial;
+

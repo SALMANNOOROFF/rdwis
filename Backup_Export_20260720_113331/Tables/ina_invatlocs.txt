@@ -1,0 +1,11 @@
+Table: ina_invatlocs
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ial_id	Long	4	True	False	
+ial_ias_id	Long	4	True	False	
+ial_date	Date/Time	8	True	False	
+ial_unt_id	Long	4	True	False	
+ial_location	Text	255	True	True	
+ial_custgroup	Text	255	True	True	
+ial_custperson	Text	255	True	True	

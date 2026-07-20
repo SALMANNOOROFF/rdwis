@@ -1,0 +1,8 @@
+-- Query: aud_chk_purcases-transactions
+-- Type: 0
+
+SELECT [aud_chk_purcases-transactions1].pcs_id, [aud_chk_purcases-transactions1].eff_hed, [aud_chk_purcases-transactions1].pcs_midprice, [aud_chk_purcases-transactions1].pcs_midtax, [aud_chk_purcases-transactions1].pcs_price, [aud_chk_purcases-transactions1].pcs_transtype, [aud_chk_purcases-transactions1].sum1, [aud_chk_purcases-transactions1].sum2, [aud_chk_purcases-transactions1].trn_id, Round((IIf([pcs_transtype]=1,[sum1]/[pcs_midprice],[sum2]/[pcs_price]))*100,0) AS Expr1
+FROM [aud_chk_purcases-transactions1]
+WHERE ((([aud_chk_purcases-transactions1].pcs_transtype)=1) AND (([aud_chk_purcases-transactions1].sum1)>1.1*[pcs_midprice])) OR ((([aud_chk_purcases-transactions1].pcs_transtype)=1) AND (([aud_chk_purcases-transactions1].sum1)<0.9*[pcs_midprice])) OR ((([aud_chk_purcases-transactions1].pcs_transtype)=2) AND (([aud_chk_purcases-transactions1].sum2)>1.1*[pcs_price])) OR ((([aud_chk_purcases-transactions1].pcs_transtype)=2) AND (([aud_chk_purcases-transactions1].sum2)<0.9*[pcs_price]))
+ORDER BY Round((IIf([pcs_transtype]=1,[sum1]/[pcs_midprice],[sum2]/[pcs_price]))*100,0);
+

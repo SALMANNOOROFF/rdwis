@@ -1,0 +1,3 @@
+Indexes for Table: pur_purcases
+------------------------------------------------------------
+IndexName: compstat_pk	Primary: True	Unique: True	Fields: pcs_id; 

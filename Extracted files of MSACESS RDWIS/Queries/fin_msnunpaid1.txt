@@ -1,8 +1,0 @@
-QUERY: fin_msnunpaid1
-
-SQL:
-SELECT fin_msncosts.mct_msn_id, fin_msncosts.mct_msn_idd, fin_msncosts.mct_prj_id, fin_msncosts.mct_hed_id, First(fin_msncosts.mct_cost) AS mct_cost, Sum(fin_transactions.trn_amount2) AS received
-FROM (fin_msncosts LEFT JOIN fin_sharesinstall ON fin_msncosts.mct_msn_idd = fin_sharesinstall.shi_msn_idd) LEFT JOIN fin_transactions ON fin_sharesinstall.shi_fitrn_id = fin_transactions.trn_id
-GROUP BY fin_msncosts.mct_msn_id, fin_msncosts.mct_msn_idd, fin_msncosts.mct_prj_id, fin_msncosts.mct_hed_id
-HAVING (((fin_msncosts.mct_hed_id)=[Forms]![vars]![Parameter1]))
-ORDER BY fin_msncosts.mct_msn_id;

@@ -1,0 +1,12 @@
+Table: pur_purcaseminuterefs
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pmr_pcm_id	Long	4	True	False	
+pmr_min	Integer	2	True	False	
+pmr_title	Text	255	True	True	
+pmr_date	Date/Time	8	False	False	
+pmr_from	Text	255	False	True	
+pmr_flag	Text	255	False	True	
+pmr_ref	Text	255	False	True	
+pmr_encl	Text	255	False	True	

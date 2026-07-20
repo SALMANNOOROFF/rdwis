@@ -1,0 +1,9 @@
+Table: ina_inaattachments
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+iat_objtype	Text	255	True	True	
+iat_objid	Long	4	True	False	
+iat_type	Text	255	True	True	
+iat_path	Text	255	False	True	
+iat_id	Long	4	True	False	

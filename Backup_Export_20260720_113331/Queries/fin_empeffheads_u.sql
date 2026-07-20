@@ -1,0 +1,8 @@
+-- Query: fin_empeffheads_u
+-- Type: 0
+
+SELECT hr_emps.emp_id, NameComplete([emp_name],[emp_title],[emp_rank]) AS NameFull, hr_emps.emp_unt_id, hr_emps.emp_status, hr_emps.emp_lastdt, fin_empeffheads.eeh_emphed_id, fin_empeffheads.eeh_sudohed, fin_empeffheads.eeh_status, fin_empeffheads.eeh_remarks, fin_empeffheads.eeh_dtg, hr_contractplans.cpn_hed_id, hr_contractplans.cpn_startdt, hr_contractplans.cpn_enddt, IIf([emp_unt_id]>=800000,[emp_unt_id]-1000000,[emp_unt_id]) AS Sorter
+FROM ((fin_empeffheads INNER JOIN hr_emps ON fin_empeffheads.eeh_emp_id = hr_emps.emp_id) LEFT JOIN hr_contracts_u_currentmonth ON fin_empeffheads.eeh_emp_id = hr_contracts_u_currentmonth.ctr_num) LEFT JOIN hr_contractplans ON hr_contracts_u_currentmonth.ctr_id = hr_contractplans.cpn_ctr_id
+WHERE (((hr_contractplans.cpn_startdt)=FirstDateThisMonth(GetNow()))) OR (((hr_contractplans.cpn_enddt)=LastDateThisMonth(GetNow()))) OR (((hr_contractplans.cpn_startdt) Is Null) AND ((hr_contractplans.cpn_enddt) Is Null))
+ORDER BY IIf([emp_unt_id]>=800000,[emp_unt_id]-1000000,[emp_unt_id]), hr_contractplans.cpn_hed_id;
+

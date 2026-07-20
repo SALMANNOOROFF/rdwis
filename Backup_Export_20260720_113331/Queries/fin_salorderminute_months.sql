@@ -1,0 +1,6 @@
+-- Query: fin_salorderminute_months
+-- Type: 0
+
+SELECT ConcatRelated("sal_month","fin_salorderminute_months1","","sal_month") AS concat_month
+FROM fin_salorderminute_months1;
+

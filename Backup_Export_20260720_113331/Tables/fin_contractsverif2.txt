@@ -1,0 +1,7 @@
+Table: fin_contractsverif2
+RecordCount: 481
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cvf_ctr_id	Long	4	False	False	
+cvf_verif	Text	5	False	True	
+cvf_dtg	Date/Time	8	False	False	

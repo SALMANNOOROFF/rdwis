@@ -1,5 +1,0 @@
-QUERY: hr_ctrcases_plus
-
-SQL:
-SELECT hr_ctrcases.*, hr_emps.emp_joindt, hr_contracts.ctr_unt_id, hr_contracts.ctr_startdt, hr_contracts.ctr_enddt, hr_contracts.ctr_termindt, hr_contracts.ctr_jobtitle, hr_contracts.ctr_grade, hr_contracts.ctr_salary, hr_contracts.ctr_type
-FROM (hr_ctrcases INNER JOIN hr_emps ON hr_ctrcases.ctc_emp_id = hr_emps.emp_id) INNER JOIN hr_contracts ON hr_ctrcases.ctc_ctr_id = hr_contracts.ctr_id;

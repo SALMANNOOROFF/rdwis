@@ -1,5 +1,0 @@
-QUERY: fin_contractsverif_add
-
-SQL:
-INSERT INTO fin_contractsverif ( cvf_ctr_id )
-SELECT [ContractId] AS Expr1;

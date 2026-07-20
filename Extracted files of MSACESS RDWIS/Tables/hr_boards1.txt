@@ -1,7 +1,0 @@
-TABLE: hr_boards1
-
-COLUMNS:
-- brd_id | Type:4 | Size:4
-- brd_date | Type:8 | Size:8
-- brd_status | Type:10 | Size:255
-- brd_hir_id | Type:4 | Size:4

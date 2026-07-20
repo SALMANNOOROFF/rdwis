@@ -266,6 +266,7 @@ class FinancialIntelligenceService
         $status['available'] = round($status['acc_received'] - $status['acc_expenditure'] - $status['acc_commitments'] - $status['acc_in_process'], 2);
         $status['yet_to_be_received'] = round($status['acc_share'] - $status['acc_received'], 2);
         $status['can_be_spent'] = round($status['acc_share'] - $status['acc_expenditure'] - $status['acc_commitments'] - $status['acc_in_process'], 2);
+        $status['remaining'] = round($status['rdw_share'] - $status['expenditure'] - $status['commitments'] - $status['in_process'], 2);
         $status['acc_remaining'] = $status['pcc_can_be_spent'];
         
         // Project metrics (PrjCanBeSpent)

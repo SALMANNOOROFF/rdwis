@@ -1,0 +1,3 @@
+Indexes for Table: cen_units
+------------------------------------------------------------
+IndexName: units_pk	Primary: True	Unique: True	Fields: unt_id; 

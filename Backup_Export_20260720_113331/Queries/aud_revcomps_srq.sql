@@ -1,0 +1,7 @@
+-- Query: aud_revcomps_srq
+-- Type: 0
+
+SELECT aud_revcomps_plus.rvc_rev_id, hr_salreqs.srq_id, hr_salreqs.srq_releasedtg, hr_salreqs.srq_month, hr_salreqs.srq_salary
+FROM aud_revcomps_plus INNER JOIN hr_salreqs ON aud_revcomps_plus.rvc_rowid_num = hr_salreqs.srq_id
+WHERE (((aud_revcomps_plus.rvc_table)="hr_salreqs"));
+

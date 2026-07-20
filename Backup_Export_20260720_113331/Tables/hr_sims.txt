@@ -1,0 +1,9 @@
+Table: hr_sims
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+sim_id	Long	4	True	False	
+sim_emp_id	Text	13	True	True	
+sim_csp	Text	255	True	True	
+sim_num	Text	255	True	True	
+sim_reg	Text	255	True	True	

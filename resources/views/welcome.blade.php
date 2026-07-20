@@ -409,6 +409,13 @@
           </li>
 
           <li class="nav-item">
+              <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-boxes text-info"></i>
+                  <p>INVENTORY & ASSETS</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
               <a href="{{ route('training.index') }}" class="nav-link {{ Request::routeIs('training.index') || Request::routeIs('training.create') ? 'active' : '' }}">
                   <i class="fas fa-chalkboard-teacher nav-icon"></i>
                   <p>TRAINING</p>
@@ -543,8 +550,24 @@
                           <i class="fas fa-file-signature nav-icon"></i><p>Contract Cases</p>
                       </a>
                   </li>
-          </ul>
+              </ul>
           </li>
+
+          <li class="nav-item">
+              <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-boxes text-info"></i>
+                  <p>INVENTORY & ASSETS</p>
+              </a>
+          </li>
+
+          @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'nrdi', 'hqs']) || session('impersonated_by_god'))
+          <li class="nav-item">
+              <a href="{{ route('fin.payments.index') }}" class="nav-link {{ Request::routeIs('fin.payments.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-money-check-alt text-primary"></i>
+                  <p>DISBURSEMENTS & PAYMENTS</p>
+              </a>
+          </li>
+          @endif
 
       @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
           <li class="nav-header">SYSTEM ADMIN</li>

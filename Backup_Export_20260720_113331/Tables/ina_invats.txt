@@ -1,0 +1,21 @@
+Table: ina_invats
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ias_id	Long	4	True	False	
+ias_pcs_id	Long	4	False	False	
+ias_pci_id	Long	4	False	False	
+ias_desc	Memo	0	True	True	
+ias_details	Memo	0	False	True	
+ias_spec_id	Long	4	False	False	
+ias_qty	Decimal	16	True	False	
+ias_qtyunit	Text	255	True	True	
+ias_unt_id	Long	4	True	False	
+ias_prj_id	Long	4	False	False	
+ias_effhed_id	Long	4	False	False	
+ias_chargedate	Date/Time	8	True	False	
+ias_price	Decimal	16	False	False	
+ias_type	Integer	2	True	False	
+ias_subtype	Text	255	False	True	
+ias_dtg	Date/Time	8	False	False	
+ias_type2	Integer	2	False	False	

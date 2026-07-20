@@ -1,0 +1,3 @@
+Indexes for Table: cen_version
+------------------------------------------------------------
+IndexName: version_pk	Primary: True	Unique: True	Fields: ver_version; 

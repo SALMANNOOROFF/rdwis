@@ -1,0 +1,26 @@
+Table: prj_projects
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+prj_title	Text	255	True	True	
+prj_id	Long	4	True	False	
+prj_startdt	Date/Time	8	False	False	
+prj_id_old	Integer	2	False	False	
+prj_scope	Text	255	False	True	
+prj_sponsor	Text	255	False	True	
+prj_rcptdt	Date/Time	8	False	False	
+prj_assigndt	Date/Time	8	False	False	
+prj_propdt	Date/Time	8	False	False	
+prj_propcost	Long	4	False	False	
+prj_aprvdt	Date/Time	8	False	False	
+prj_aprvcost	Long	4	False	False	
+prj_estenddt	Date/Time	8	False	False	
+prj_cfycost	Long	4	False	False	
+prj_status	Text	255	True	True	
+prj_enddt	Date/Time	8	False	False	
+prj_rem	Memo	0	False	True	
+prj_notes	Memo	0	False	True	
+prj_notes1	Text	255	False	True	
+prj_unt_id	Long	4	True	False	
+prj_reporting	Text	5	True	True	
+prj_code	Text	9	True	True	

@@ -1,0 +1,7 @@
+-- Query: aud_chk_receipts_double2
+-- Type: 0
+
+SELECT First(pur_purreceipts.prt_unt_id) AS unt_id, First(pur_purreceipts.prt_prj_id) AS prj_id, pur_purreceipts.prt_pcs_id, pur_purreceipts.prt_id, Count(pur_purreceiptitems.pti_id) AS receipt_items
+FROM (aud_chk_receipts_double1 INNER JOIN pur_purreceipts ON aud_chk_receipts_double1.prt_pcs_id = pur_purreceipts.prt_pcs_id) INNER JOIN pur_purreceiptitems ON pur_purreceipts.prt_id = pur_purreceiptitems.pti_prt_id
+GROUP BY pur_purreceipts.prt_pcs_id, pur_purreceipts.prt_id;
+

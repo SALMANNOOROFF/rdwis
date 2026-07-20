@@ -1,0 +1,8 @@
+-- Query: prj_prghistory_last1
+-- Type: 0
+
+SELECT prj_prghistory_u.pgh_xprj_id, Max(prj_prghistory_u.pgh_dtg) AS dtg_val_last
+FROM prj_prghistory_u
+WHERE (((prj_prghistory_u.pgh_status)<>"Edited"))
+GROUP BY prj_prghistory_u.pgh_xprj_id;
+

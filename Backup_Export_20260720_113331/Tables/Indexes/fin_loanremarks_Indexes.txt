@@ -1,0 +1,3 @@
+Indexes for Table: fin_loanremarks
+------------------------------------------------------------
+IndexName: loanremarks_pk	Primary: True	Unique: True	Fields: lrm_string; 

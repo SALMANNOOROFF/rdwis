@@ -1,0 +1,3 @@
+Indexes for Table: hr_ctrcaseminuterefs
+------------------------------------------------------------
+IndexName: ctrcaseminuterefs_pk	Primary: True	Unique: True	Fields: cmr_ccm_id; cmr_min; 

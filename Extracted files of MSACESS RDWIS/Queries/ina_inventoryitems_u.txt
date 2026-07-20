@@ -1,7 +1,0 @@
-QUERY: ina_inventoryitems_u
-
-SQL:
-SELECT ina_invats.*, ina_invatcomps.*
-FROM ina_invats INNER JOIN ina_invatcomps ON ina_invats.ias_id = ina_invatcomps.iac_ias_id
-WHERE (((ina_invats.ias_unt_id)>=getvar("varLower") And (ina_invats.ias_unt_id)<=getvar("varUpper")) AND ((ina_invats.ias_type2)=5))
-ORDER BY ina_invats.ias_id DESC;

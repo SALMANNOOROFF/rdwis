@@ -1,0 +1,6 @@
+-- Query: prj_projects_detail
+-- Type: 0
+
+SELECT prj_projects_u.*, cen_accounts.acc_rank, cen_accounts.acc_title, cen_accounts.acc_name
+FROM (units LEFT JOIN cen_accounts ON units.unt_id = cen_accounts.acc_unt_id) RIGHT JOIN prj_projects_u ON units.unt_id = prj_projects_u.prj_unt_id;
+

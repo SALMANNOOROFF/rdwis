@@ -1,0 +1,10 @@
+-- Query: hr_emps_gradewise_doc
+-- Type: 16
+
+TRANSFORM Count(hr_contracts_u_last_active.ctr_num) AS CountOfctr_num
+SELECT hr_contracts_u_last_active.ctr_grade, grades.grade_id, Count(hr_contracts_u_last_active.ctr_num) AS Total
+FROM (units INNER JOIN hr_contracts_u_last_active ON units.unt_id = hr_contracts_u_last_active.ctr_unt_id) LEFT JOIN grades ON hr_contracts_u_last_active.ctr_grade = grades.grade_short
+GROUP BY hr_contracts_u_last_active.ctr_grade, grades.grade_id
+ORDER BY grades.grade_id DESC 
+PIVOT units.unt_namesh In ("Comm","Enab","NWS","Sensors","SoSE","Sys","Fin","HR","Admin","IT","IS");
+

@@ -1,0 +1,7 @@
+Table: hr_hrheads2
+RecordCount: 14
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+hhd_id	Integer	2	False	False	
+hhd_dpt_id	Integer	2	False	False	
+hhd_name	Text	255	False	True	

@@ -1,6 +1,0 @@
-TABLE: puritems_subcategories
-
-COLUMNS:
-- sub_id | Type:4 | Size:4
-- sub_name | Type:10 | Size:120
-- sub_cat_id | Type:4 | Size:4

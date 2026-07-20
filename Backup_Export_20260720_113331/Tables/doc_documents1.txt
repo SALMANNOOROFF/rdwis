@@ -1,0 +1,13 @@
+Table: doc_documents1
+RecordCount: 3
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+doc_id	Long	4	False	False	
+prj_id	Long	4	False	False	
+doc_type	Text	50	False	True	
+doc_ref_no	Text	100	False	True	
+current_owner_id	Long	4	False	False	
+creator_id	Long	4	False	False	
+status	Text	50	False	True	
+created_at	Date/Time	8	False	False	
+updated_at	Date/Time	8	False	False	

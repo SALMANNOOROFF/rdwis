@@ -1,0 +1,3 @@
+Indexes for Table: frm_facils
+------------------------------------------------------------
+IndexName: facils_pk	Primary: True	Unique: True	Fields: fcl_xfrm_id; fcl_facil; 

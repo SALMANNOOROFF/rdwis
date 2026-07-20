@@ -1,0 +1,7 @@
+-- Query: fin_recordfrom_trfx
+-- Type: 0
+
+SELECT fin_commitments_trf.cmt_docid AS docid, fin_commitments_trf.cmt_type AS doctype, fin_transactions.trn_date AS rdate, fin_transfers.trf_title AS title, fin_commitments_trf.cmt_effhed_id AS effhed_id, fin_commitments_trf.cmt_effunt_id AS effunt_id, fin_commitments_trf.cmt_hed_id AS hed_id, fin_commitments_trf.cmt_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (fin_transfers INNER JOIN fin_commitments_trf ON fin_transfers.trf_id = fin_commitments_trf.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_trf.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((fin_commitments_trf.cmt_type) In ("FI","FO","LI","LO","TI","TO")) And ((fin_commitments_trf.cmt_effhed_id)=Forms!vars!Parameter1));
+

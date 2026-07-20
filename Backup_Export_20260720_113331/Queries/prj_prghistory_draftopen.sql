@@ -1,0 +1,7 @@
+-- Query: prj_prghistory_draftopen
+-- Type: 0
+
+SELECT prj_prghistory.*
+FROM prj_prghistory INNER JOIN prj_mprgroup ON prj_prghistory.pgh_group = prj_mprgroup.mgp_name
+WHERE (((prj_prghistory.pgh_status)="Draft" Or (prj_prghistory.pgh_status)="Under Finalization" Or (prj_prghistory.pgh_status)="Under Review") AND ((prj_mprgroup.mgp_status)="Current"));
+

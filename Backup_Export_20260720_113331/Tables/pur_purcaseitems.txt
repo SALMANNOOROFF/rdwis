@@ -1,0 +1,19 @@
+Table: pur_purcaseitems
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pci_pri_id	Long	4	False	False	
+pci_serial	Integer	2	True	False	
+pci_desc	Memo	0	True	True	
+pci_estprice	Decimal	16	False	False	
+pci_qty	Decimal	16	True	False	
+pci_qtyunit	Text	255	True	True	
+pci_id	Long	4	True	False	
+pci_pcs_id	Long	4	True	False	
+pci_price	Decimal	16	False	False	
+pci_fulfilment	Decimal	16	False	False	
+pci_type	Integer	2	True	False	
+pci_subtype	Text	255	True	True	
+pci_category	Integer	2	False	False	
+pci_type2	Integer	2	False	False	
+pci_subhead	Text	255	False	True	

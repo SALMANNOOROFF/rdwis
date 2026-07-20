@@ -1,0 +1,6 @@
+Table: cen_routes1
+RecordCount: 1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rte_doc	Text	255	False	True	
+rte_steps	Text	255	False	True	

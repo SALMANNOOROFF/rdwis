@@ -1,0 +1,7 @@
+-- Query: frm_firmsbrf2
+-- Type: 0
+
+SELECT frm_offices.off_xfrm_id, frm_offices.off_id, frm_offices.off_type, frm_info_offices.inf_type, frm_info_offices.inf_value, frm_offices.off_city
+FROM frm_offices LEFT JOIN frm_info_offices ON frm_offices.off_id = frm_info_offices.inf_xmsc_id
+WHERE (((frm_offices.off_type)="Head Office") AND ((frm_info_offices.inf_type)="Landline")) OR (((frm_info_offices.inf_type)="Mobile"));
+

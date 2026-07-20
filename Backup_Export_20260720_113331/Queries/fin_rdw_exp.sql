@@ -1,0 +1,7 @@
+-- Query: fin_rdw_exp
+-- Type: 0
+
+SELECT fin_rdw_exp1.cmt_effhed_id, Sum(fin_rdw_exp1.amount) AS total_exp
+FROM fin_rdw_exp1
+GROUP BY fin_rdw_exp1.cmt_effhed_id;
+

@@ -1,0 +1,14 @@
+Table: fin_transactions1
+RecordCount: 5255
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+trn_id	Long	4	False	False	
+trn_cmt_id	Long	4	False	False	
+trn_date	Date/Time	8	False	False	
+trn_amount1	Decimal	16	False	False	
+trn_balance	Decimal	16	False	False	
+trn_seq	Integer	2	False	False	
+trn_tax1	Decimal	16	False	False	
+trn_amount2	Decimal	16	False	False	
+trn_transtype	Integer	2	False	False	
+trn_noloan	Text	5	False	True	

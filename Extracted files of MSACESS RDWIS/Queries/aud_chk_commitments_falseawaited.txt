@@ -1,8 +1,0 @@
-QUERY: aud_chk_commitments_falseawaited
-
-SQL:
-SELECT aud_chk_commitments_false1.cmt_id, aud_chk_commitments_false1.cmt_docid AS docid, aud_chk_commitments_false1.cmt_type AS type, First(aud_chk_commitments_false1.committed) AS committed, Sum(aud_chk_commitments_false1.paid) AS paid, Sum(aud_chk_commitments_false1.paidpct) AS paidpct, First(aud_chk_commitments_false1.cmt_status) AS status, First(aud_chk_commitments_false1.hed_code) AS head
-FROM aud_chk_commitments_false1
-GROUP BY aud_chk_commitments_false1.cmt_id, aud_chk_commitments_false1.cmt_docid, aud_chk_commitments_false1.cmt_type
-HAVING (((Sum(aud_chk_commitments_false1.paidpct))>95) AND ((First(aud_chk_commitments_false1.cmt_status))="Awaited"))
-ORDER BY Sum(aud_chk_commitments_false1.paidpct) DESC;

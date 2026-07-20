@@ -1,0 +1,16 @@
+Table: hr_applicqualifs1
+RecordCount: 2
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+apq_id	Long	4	False	False	
+apq_type	Text	255	False	True	
+apq_level	Integer	2	False	False	
+apq_name	Text	255	False	True	
+apq_inst	Text	255	False	True	
+apq_duration	Decimal	16	False	False	
+apq_unit	Text	255	False	True	
+apq_enddt	Date/Time	8	False	False	
+apq_apl_id	Long	4	False	False	
+apq_grade	Text	255	False	True	
+apq_license	Text	255	False	True	
+apq_spec	Text	255	False	True	

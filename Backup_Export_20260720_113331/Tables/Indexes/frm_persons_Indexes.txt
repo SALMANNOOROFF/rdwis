@@ -1,0 +1,3 @@
+Indexes for Table: frm_persons
+------------------------------------------------------------
+IndexName: persons_pk	Primary: True	Unique: True	Fields: per_id; 

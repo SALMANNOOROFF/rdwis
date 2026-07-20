@@ -1,6 +1,0 @@
-TABLE: ina_invatspecs1
-
-COLUMNS:
-- iap_ias_id | Type:4 | Size:4
-- iap_specname | Type:10 | Size:255
-- iap_specvalue | Type:10 | Size:255

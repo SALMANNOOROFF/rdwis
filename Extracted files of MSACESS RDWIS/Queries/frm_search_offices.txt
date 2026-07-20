@@ -1,5 +1,0 @@
-QUERY: frm_search_offices
-
-SQL:
-SELECT frm_firms.frm_id, frm_offices.*
-FROM frm_firms INNER JOIN frm_offices ON frm_firms.frm_id = frm_offices.off_xfrm_id;

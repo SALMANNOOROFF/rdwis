@@ -1,0 +1,7 @@
+-- Query: pur_purcaseitems_plus
+-- Type: 0
+
+SELECT pur_purcaseitems.*, [pci_price]*[pci_qty] AS price_total, [pci_qty]-Nz([pci_fulfilment],0) AS balance_qty
+FROM pur_purcaseitems
+ORDER BY pur_purcaseitems.pci_serial;
+

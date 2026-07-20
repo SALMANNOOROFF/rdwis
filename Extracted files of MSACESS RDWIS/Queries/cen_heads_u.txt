@@ -1,6 +1,0 @@
-QUERY: cen_heads_u
-
-SQL:
-SELECT cen_heads.*
-FROM cen_heads
-WHERE (((cen_heads.hed_unt_id)>=getvar("varLower") And (cen_heads.hed_unt_id)<=getvar("varUpper")));

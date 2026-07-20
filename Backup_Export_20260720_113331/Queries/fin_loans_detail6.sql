@@ -1,0 +1,7 @@
+-- Query: fin_loans_detail6
+-- Type: 0
+
+SELECT fin_loanadjustments.lad_string AS lad_string, Sum(fin_loanadjustments.lad_amount) AS adjustment
+FROM fin_loanadjustments
+GROUP BY fin_loanadjustments.lad_string;
+

@@ -1,0 +1,17 @@
+Table: fin_docs_ipc3
+RecordCount: 14
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+docid	Long	4	False	False	
+doctype	Text	5	False	True	
+rdate	Date/Time	8	False	False	
+title	Text	255	False	True	
+effhed_id	Long	4	False	False	
+effunt_id	Long	4	False	False	
+hed_id	Long	4	False	False	
+unt_id	Long	4	False	False	
+sudohed	Text	7	False	True	
+amount1	Decimal	16	False	False	
+tax1	Decimal	16	False	False	
+amount2	Decimal	16	False	False	
+transtype	Integer	2	False	False	

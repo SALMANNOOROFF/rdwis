@@ -1,6 +1,0 @@
-QUERY: xxx2-2
-
-SQL:
-SELECT fin_salorders.sor_id, "Salary of " & [sor_empnamecomp] & " for " & Format([sor_month],"mmm yy") AS [desc], fin_salorders.sor_salary, cen_heads.hed_code, fin_salorders.sor_sudohed, IIf(IsNull([hed_code]),"Center/CSRF",[hed_code]) AS project, "Salary" AS subtype, IIf(IsNull([hed_code]),"","HR") AS subhead, fin_salorders.sor_status
-FROM fin_salorders LEFT JOIN cen_heads ON fin_salorders.sor_hed_id = cen_heads.hed_id
-WHERE (((fin_salorders.sor_status) Like "*Fulfilled"));

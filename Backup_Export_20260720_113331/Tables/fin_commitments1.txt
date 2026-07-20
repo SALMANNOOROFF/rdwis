@@ -1,0 +1,16 @@
+Table: fin_commitments1
+RecordCount: 4929
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cmt_id	Long	4	False	False	
+cmt_docid	Long	4	False	False	
+cmt_type	Text	2	False	True	
+cmt_date	Date/Time	8	False	False	
+cmt_amount	Decimal	16	False	False	
+cmt_status	Text	255	False	True	
+cmt_effhed_id	Long	4	False	False	
+cmt_effunt_id	Long	4	False	False	
+cmt_hed_id	Long	4	False	False	
+cmt_unt_id	Long	4	False	False	
+cmt_sudohed	Text	7	False	True	
+cmt_remarks	Text	255	False	True	

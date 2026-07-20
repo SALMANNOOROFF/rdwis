@@ -1,0 +1,4 @@
+Indexes for Table: pur_purreqitems
+------------------------------------------------------------
+IndexName: items_pk	Primary: True	Unique: True	Fields: pri_prq_id; pri_serial; 
+IndexName: puritems_un	Primary: False	Unique: True	Fields: pri_id; 

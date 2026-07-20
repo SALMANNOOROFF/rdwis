@@ -1,0 +1,3 @@
+Indexes for Table: frm_specs
+------------------------------------------------------------
+IndexName: specs_pk	Primary: True	Unique: True	Fields: spc_xfrm_id; spc_spec; 

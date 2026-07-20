@@ -1,0 +1,7 @@
+-- Query: hr_vehiclesconcat
+-- Type: 0
+
+SELECT hr_vehicles.vcl_emp_id, ConcatRelated("vcl_type","hr_vehicles","vcl_emp_id = '" & [vcl_emp_id] & "'") AS AllTypes, ConcatRelated("vcl_regis","hr_vehicles","vcl_emp_id = '" & [vcl_emp_id] & "'") AS AllRegis
+FROM hr_vehicles
+GROUP BY hr_vehicles.vcl_emp_id;
+

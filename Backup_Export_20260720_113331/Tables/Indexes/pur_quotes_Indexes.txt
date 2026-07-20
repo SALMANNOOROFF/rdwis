@@ -1,0 +1,3 @@
+Indexes for Table: pur_quotes
+------------------------------------------------------------
+IndexName: quotes_pk	Primary: True	Unique: True	Fields: qte_id; 

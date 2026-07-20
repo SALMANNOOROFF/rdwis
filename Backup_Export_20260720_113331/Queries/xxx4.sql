@@ -1,0 +1,8 @@
+-- Query: xxx4
+-- Type: 0
+
+SELECT pur_purcases.pcs_date, pur_purcases.pcs_id, pur_purcases.pcs_type, pur_purcaseitems.pci_desc, pur_purcaseitems.pci_price, pur_purcaseitems.pci_qty, pur_purcaseitems.pci_qtyunit, units.unt_namesh
+FROM (pur_purcases INNER JOIN pur_purcaseitems ON pur_purcases.pcs_id = pur_purcaseitems.pci_pcs_id) INNER JOIN units ON pur_purcases.pcs_intunt_id = units.unt_id
+WHERE (((pur_purcases.pcs_type)="Rb") AND ((pur_purcases.pcs_status)<>"Cancelled" And (pur_purcases.pcs_status)<>"Draft"))
+ORDER BY pur_purcases.pcs_date;
+

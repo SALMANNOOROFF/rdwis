@@ -1,0 +1,6 @@
+-- Query: fin_timeline_ctr
+-- Type: 0
+
+SELECT fin_timeline_ctr1.*, prj_projects.prj_startdt AS project_start, IIf(IsNull([prj_enddt]),[prj_estenddt],[prj_enddt]) AS project_end
+FROM fin_timeline_ctr1 INNER JOIN prj_projects ON fin_timeline_ctr1.project = prj_projects.prj_id;
+

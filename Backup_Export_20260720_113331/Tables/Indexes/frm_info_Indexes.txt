@@ -1,0 +1,3 @@
+Indexes for Table: frm_info
+------------------------------------------------------------
+IndexName: info_pk	Primary: True	Unique: True	Fields: inf_xmsc_id; inf_xmsc_entity; inf_type; inf_value; 

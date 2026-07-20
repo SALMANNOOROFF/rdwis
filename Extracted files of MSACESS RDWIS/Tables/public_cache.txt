@@ -1,6 +1,0 @@
-TABLE: public_cache
-
-COLUMNS:
-- key | Type:10 | Size:255
-- value | Type:12 | Size:0
-- expiration | Type:4 | Size:4

@@ -1,0 +1,7 @@
+-- Query: fin_sts_prj_ipc1
+-- Type: 0
+
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, Round(IIf([transtype]=1,[amount1],[amount2])*[ratio],2) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2, fin_docs_shd.subhead, fin_docs_shd.ratio
+FROM fin_docs_ipc INNER JOIN fin_docs_shd ON (fin_docs_ipc.doctype = fin_docs_shd.doc_type) AND (fin_docs_ipc.docid = fin_docs_shd.doc_id)
+WHERE (((fin_docs_ipc.hed_id)=[Forms]![vars]![Parameter1]));
+

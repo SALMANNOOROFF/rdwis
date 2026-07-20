@@ -1,0 +1,14 @@
+Table: puritems_items1
+RecordCount: 9048
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+itm_id	Long	4	False	False	
+itm_title	Memo	0	False	True	
+itm_desc	Memo	0	False	True	
+itm_qtyunit	Text	32	False	True	
+itm_cat_id	Long	4	False	False	
+itm_sub_id	Long	4	False	False	
+itm_unt_id	Long	4	False	False	
+itm_hed_id	Long	4	False	False	
+itm_acc_id	Long	4	False	False	
+created_at	Date/Time	8	False	False	

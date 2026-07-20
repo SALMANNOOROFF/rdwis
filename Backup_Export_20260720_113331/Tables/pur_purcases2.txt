@@ -1,0 +1,31 @@
+Table: pur_purcases2
+RecordCount: 1238
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pcs_id	Long	4	False	False	
+pcs_date	Date/Time	8	False	False	
+pcs_remarks	Text	255	False	True	
+pcs_status	Text	255	False	True	
+pcs_unt_id	Long	4	False	False	
+pcs_hed_id	Long	4	False	False	
+pcs_purreqs	Text	255	False	True	
+pcs_releasedtg	Date/Time	8	False	False	
+pcs_effhed_id	Long	4	False	False	
+pcs_intprice	Decimal	16	False	False	
+pcs_inttax	Decimal	16	False	False	
+pcs_midprice	Decimal	16	False	False	
+pcs_midtax	Decimal	16	False	False	
+pcs_price	Decimal	16	False	False	
+pcs_title	Text	255	False	True	
+pcs_frm_id	Long	4	False	False	
+pcs_type	Text	5	False	True	
+pcs_effunt_id	Long	4	False	False	
+pcs_intunt_id	Long	4	False	False	
+pcs_transtype	Integer	2	False	False	
+pcs_noloan	Text	5	False	True	
+pcs_sudohed	Text	7	False	True	
+pcs_minute	Integer	2	False	False	
+pcs_recomm	Text	255	False	True	
+pcs_quotetype	Integer	2	False	False	
+pcs_approvedtg	Date/Time	8	False	False	
+pcs_closedtg	Date/Time	8	False	False	

@@ -1,0 +1,18 @@
+Table: hr_empsextb
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+empextb_emp_id	Text	13	True	True	
+emp_nokname	Text	255	True	True	
+emp_nokrelation	Text	255	True	True	
+emp_nokcnic	Text	15	True	True	
+emp_emername	Text	255	True	True	
+emp_emerrelation	Text	255	True	True	
+emp_emermobile	Text	255	True	True	
+emp_idmark	Text	255	True	True	
+emp_height	Decimal	16	True	False	
+emp_caste	Text	255	True	True	
+emp_religion	Text	255	True	True	
+emp_sect	Text	255	True	True	
+emp_police	Text	255	True	True	
+emp_political	Text	255	True	True	

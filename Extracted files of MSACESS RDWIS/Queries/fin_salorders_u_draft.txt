@@ -1,6 +1,0 @@
-QUERY: fin_salorders_u_draft
-
-SQL:
-SELECT fin_salorders.*
-FROM fin_salorders
-WHERE (((fin_salorders.sor_status)="Draft"));

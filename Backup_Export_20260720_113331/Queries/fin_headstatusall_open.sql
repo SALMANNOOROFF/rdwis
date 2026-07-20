@@ -1,0 +1,8 @@
+-- Query: fin_headstatusall_open
+-- Type: 0
+
+SELECT cen_heads_open_u.hed_id, cen_heads_open_u.hed_code, cen_heads_open_u.hed_transtype, GetAccAllocation([hed_id]) AS allocation, GetAccMtssShare([hed_id]) AS mtss_share, GetAccReceived([hed_id]) AS received, GetAccOutstandingCommits([hed_id]) AS commitments, GetAccExpenditure([hed_id]) AS expenditure, GetA16Element("GetAccShares",[hed_id],2) AS chrf_share, GetCfExpenditure([hed_id]) AS chrf_expenditure
+FROM cen_heads_open_u
+WHERE (((cen_heads_open_u.hed_type)="Project"))
+ORDER BY cen_heads_open_u.hed_id;
+

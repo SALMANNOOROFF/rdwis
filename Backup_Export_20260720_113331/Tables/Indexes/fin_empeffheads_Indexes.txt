@@ -1,0 +1,3 @@
+Indexes for Table: fin_empeffheads
+------------------------------------------------------------
+IndexName: empsfinhead_pk	Primary: True	Unique: True	Fields: eeh_emp_id; 

@@ -1,0 +1,4 @@
+Indexes for Table: pur_purattachments
+------------------------------------------------------------
+IndexName: purattachments_pk	Primary: True	Unique: True	Fields: pat_id; 
+IndexName: purattachments_unique	Primary: False	Unique: True	Fields: pat_objtype; pat_objid; pat_type; 

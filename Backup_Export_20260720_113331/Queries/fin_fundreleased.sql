@@ -1,0 +1,8 @@
+-- Query: fin_fundreleased
+-- Type: 0
+
+SELECT fin_commitments.cmt_effhed_id, cen_heads.hed_code, Sum(fin_transactions.trn_amount2) AS SumOftrn_amount2
+FROM (fin_commitments INNER JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) INNER JOIN cen_heads ON fin_commitments.cmt_effhed_id = cen_heads.hed_id
+WHERE (((fin_commitments.cmt_type)="FI") AND ((fin_commitments.cmt_hed_id)=990001))
+GROUP BY fin_commitments.cmt_effhed_id, cen_heads.hed_code;
+

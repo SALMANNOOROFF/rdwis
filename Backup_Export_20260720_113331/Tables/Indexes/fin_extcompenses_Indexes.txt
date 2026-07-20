@@ -1,0 +1,3 @@
+Indexes for Table: fin_extcompenses
+------------------------------------------------------------
+IndexName: extcompense_pk	Primary: True	Unique: True	Fields: ecp_id; 

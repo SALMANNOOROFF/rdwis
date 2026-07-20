@@ -1,0 +1,6 @@
+Table: hr_bdapps
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+bda_brd_id	Long	4	True	False	
+bda_apl_id	Long	4	True	False	

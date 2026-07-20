@@ -1,0 +1,6 @@
+Table: cen_version2
+RecordCount: 1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ver_version	Decimal	16	False	False	
+ver_compat	Decimal	16	False	False	

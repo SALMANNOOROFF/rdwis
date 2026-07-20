@@ -1,0 +1,11 @@
+Table: pur_purreceipts2
+RecordCount: 575
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+prt_id	Long	4	False	False	
+prt_date	Date/Time	8	False	False	
+prt_unt_id	Long	4	False	False	
+prt_prj_id	Long	4	False	False	
+prt_status	Text	255	False	True	
+prt_pcs_id	Long	4	False	False	
+prt_dtg	Date/Time	8	False	False	

@@ -1,0 +1,7 @@
+-- Query: fin_firms_overall3
+-- Type: 0
+
+SELECT IIf([proportion]>0.03,[frm_name],"Others") AS firm, Round([pcs_intprice],0) AS intprice, [pcs_intprice]/[grand_total] AS proportion
+FROM fin_firms_overall1, fin_firms_overall2
+ORDER BY Round([pcs_intprice],0) DESC;
+

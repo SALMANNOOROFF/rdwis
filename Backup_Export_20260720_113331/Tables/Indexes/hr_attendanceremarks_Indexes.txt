@@ -1,0 +1,4 @@
+Indexes for Table: hr_attendanceremarks
+------------------------------------------------------------
+IndexName: attendanceremarks_pk	Primary: True	Unique: True	Fields: atr_id; 
+IndexName: attendanceremarks_unique	Primary: False	Unique: True	Fields: atr_attday; atr_att_id; 

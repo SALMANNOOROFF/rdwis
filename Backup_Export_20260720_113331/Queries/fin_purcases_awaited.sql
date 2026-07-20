@@ -1,0 +1,7 @@
+-- Query: fin_purcases_awaited
+-- Type: 0
+
+SELECT pur_purcases_u.pcs_id, pur_purcases_u.pcs_date, pur_purcases_u.pcs_minute, pur_purcases_u.pcs_title, pur_purcases_u.pcs_transtype, -1*[cmt_amount] AS commitment, Nz(-1*IIf([pcs_transtype]=1,[sum_trn_amount1],[sum_trn_amount2]),0) AS paid, cen_heads.hed_code AS effhed_code, cen_heads_1.hed_code, frm_firms.frm_name
+FROM ((((pur_purcases_u LEFT JOIN fin_commitments ON (pur_purcases_u.pcs_id = fin_commitments.cmt_docid) AND (pur_purcases_u.pcs_type = fin_commitments.cmt_type)) LEFT JOIN fin_purcases_awaited1 ON fin_commitments.cmt_id = fin_purcases_awaited1.trn_cmt_id) LEFT JOIN cen_heads ON fin_commitments.cmt_effhed_id = cen_heads.hed_id) LEFT JOIN cen_heads AS cen_heads_1 ON fin_commitments.cmt_hed_id = cen_heads_1.hed_id) INNER JOIN frm_firms ON pur_purcases_u.pcs_frm_id = frm_firms.frm_id
+WHERE (((fin_commitments.cmt_status)="Awaited"));
+

@@ -1,0 +1,30 @@
+Table: cen_accounts
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+acc_id	Long	4	True	False	
+acc_unt_id	Long	4	True	False	
+acc_level	Integer	2	True	False	
+acc_type	Text	255	True	True	
+acc_reportlevel	Long	4	False	False	
+acc_username	Text	255	True	True	
+acc_pass	Text	255	True	True	
+acc_startdt	Date/Time	8	True	False	
+acc_status	Text	255	True	True	
+acc_enddt	Date/Time	8	False	False	
+acc_name	Text	255	True	True	
+acc_title	Text	255	False	True	
+acc_rank	Text	255	False	True	
+acc_desig	Text	255	True	True	
+acc_desigshort	Text	255	True	True	
+acc_desigtype	Text	10	True	True	
+acc_lowerm	Long	4	True	False	
+acc_upperm	Long	4	True	False	
+acc_access	Text	255	True	True	
+acc_lowers	Long	4	True	False	
+acc_uppers	Long	4	True	False	
+acc_untname	Text	255	True	True	
+acc_untnamesh	Text	255	True	True	
+acc_unttype	Text	255	True	True	
+acc_auth	Text	255	True	True	
+acc_untarea	Text	255	True	True	

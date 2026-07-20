@@ -1,0 +1,7 @@
+-- Query: prj_projects_mproverview1
+-- Type: 0
+
+SELECT prj_prghistory.pgh_id, prj_prghistory.pgh_level, prj_prghistory.pgh_xprj_id, prj_prghistory.pgh_status
+FROM prj_prghistory INNER JOIN prj_mprgroup ON prj_prghistory.pgh_group = prj_mprgroup.mgp_name
+WHERE (((prj_prghistory.pgh_status)<>"Cancelled" And (prj_prghistory.pgh_status)<>"Edited") AND ((prj_mprgroup.mgp_status)="Current"));
+

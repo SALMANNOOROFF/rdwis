@@ -1,0 +1,15 @@
+Table: hr_jobs2
+RecordCount: 237
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+job_company	Text	255	False	True	
+job_jobtitle	Text	255	False	True	
+job_repto	Text	255	False	True	
+job_team	Integer	2	False	False	
+job_from	Date/Time	8	False	False	
+job_to	Date/Time	8	False	False	
+job_resp	Text	255	False	True	
+job_ach	Text	255	False	True	
+job_emp_id	Text	13	False	True	
+job_id	Long	4	False	False	
+job_city	Text	255	False	True	

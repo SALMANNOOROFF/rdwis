@@ -1,5 +1,0 @@
-TABLE: fin_loanremarks
-
-COLUMNS:
-- lrm_string | Type:10 | Size:255
-- lrm_remarks | Type:10 | Size:255

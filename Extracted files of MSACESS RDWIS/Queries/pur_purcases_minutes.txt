@@ -1,6 +1,0 @@
-QUERY: pur_purcases_minutes
-
-SQL:
-SELECT *
-FROM pur_purcases
-WHERE pcs_id In (2036);

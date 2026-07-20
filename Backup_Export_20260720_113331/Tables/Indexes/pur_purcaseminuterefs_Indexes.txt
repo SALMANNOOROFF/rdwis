@@ -1,0 +1,3 @@
+Indexes for Table: pur_purcaseminuterefs
+------------------------------------------------------------
+IndexName: purcasetextref_pk_1	Primary: True	Unique: True	Fields: pmr_pcm_id; pmr_min; 

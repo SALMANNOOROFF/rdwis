@@ -1,0 +1,4 @@
+Indexes for Table: hr_applicants
+------------------------------------------------------------
+IndexName: applicants_pk	Primary: True	Unique: True	Fields: apl_id; 
+IndexName: applicants_un	Primary: False	Unique: True	Fields: apl_cnic; apl_dtg; 

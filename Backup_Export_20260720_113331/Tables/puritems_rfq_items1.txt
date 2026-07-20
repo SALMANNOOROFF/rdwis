@@ -1,0 +1,10 @@
+Table: puritems_rfq_items1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rfi_id	Long	4	False	False	
+rfi_rfq_id	Long	4	False	False	
+rfi_itm_id	Long	4	False	False	
+rfi_price_id	Long	4	False	False	
+rfi_qty	Decimal	16	False	False	
+rfi_total	Decimal	16	False	False	

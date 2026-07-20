@@ -1,5 +1,0 @@
-QUERY: pur_purcase_updatetolowest
-
-SQL:
-UPDATE (pur_purcaseitems INNER JOIN pur_quoteitems ON pur_purcaseitems.pci_id = pur_quoteitems.qti_pci_id) INNER JOIN pur_quotes ON pur_quoteitems.qti_qte_id = pur_quotes.qte_id SET pur_purcaseitems.pci_price = [qti_price]
-WHERE (((pur_purcaseitems.pci_pcs_id)=[PurCaseId]) AND ((pur_quotes.qte_recomm)="1"));

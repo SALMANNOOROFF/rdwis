@@ -1,0 +1,6 @@
+-- Query: prj_event_last
+-- Type: 0
+
+SELECT events.evt_id, events.evt_xprj_id, events.evt_xpgh_id
+FROM events INNER JOIN event_last1 ON (events.evt_dtg = event_last1.dtg_last) AND (events.evt_xpgh_id = event_last1.evt_xpgh_id);
+

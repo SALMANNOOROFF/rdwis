@@ -1,0 +1,7 @@
+-- Query: fin_acc_received
+-- Type: 0
+
+SELECT fin_acc_received1.cmt_effhed_id, Sum(fin_acc_received1.amount) AS total_rec
+FROM fin_acc_received1
+GROUP BY fin_acc_received1.cmt_effhed_id;
+

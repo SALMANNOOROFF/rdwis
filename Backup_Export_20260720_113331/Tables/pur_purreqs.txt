@@ -1,0 +1,16 @@
+Table: pur_purreqs
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+prq_id	Long	4	True	False	
+prq_date	Date/Time	8	True	False	
+prq_unt_id	Long	4	True	False	
+prq_hed_id	Long	4	True	False	
+prq_status	Text	255	True	True	
+prq_fulfilled	Text	5	True	True	
+prq_dtg	Date/Time	8	False	False	
+prq_effhed_id	Long	4	True	False	
+prq_appeffhed_id	Long	4	False	False	
+prq_intunt_id	Long	4	True	False	
+prq_desc	Text	255	True	True	
+prq_minute	Integer	2	True	False	

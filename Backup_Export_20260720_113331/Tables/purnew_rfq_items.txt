@@ -1,0 +1,9 @@
+Table: purnew_rfq_items
+RecordCount: 9790
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rfq_item_id	Long	4	False	False	
+rfq_id	Long	4	False	False	
+item_id	Long	4	False	False	
+est_price	Decimal	16	False	False	
+price	Decimal	16	False	False	

@@ -1,0 +1,7 @@
+-- Query: fin_recordfor_pcs
+-- Type: 0
+
+SELECT fin_commitments_pcs.cmt_docid AS docid, fin_commitments_pcs.cmt_type AS doctype, fin_transactions.trn_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, -1*[trn_amount1] AS amount1, -1*[trn_tax1] AS tax1, -1*[trn_amount2] AS amount2, fin_transactions.trn_id
+FROM (pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid) INNER JOIN fin_transactions ON fin_commitments_pcs.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((pur_purcases.pcs_hed_id)=[Forms]![vars]![Parameter1]));
+

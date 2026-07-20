@@ -1,0 +1,9 @@
+Table: aud_audattachments
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+aat_objtype	Text	255	True	True	
+aat_objid	Long	4	True	False	
+aat_type	Text	255	True	True	
+aat_path	Text	255	False	True	
+aat_id	Long	4	True	False	

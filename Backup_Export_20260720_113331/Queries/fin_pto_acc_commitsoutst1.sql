@@ -1,0 +1,8 @@
+-- Query: fin_pto_acc_commitsoutst1
+-- Type: 0
+
+SELECT First(fin_commitments.cmt_docid) AS cmt_docid, First(fin_commitments.cmt_type) AS cmt_type, fin_commitments.cmt_id, First(fin_commitments.cmt_amount) AS cmt_amount, Sum(IIf([trn_transtype]=1,Nz([trn_amount1],0),Nz([trn_amount2],0))) AS amount, First(fin_commitments.cmt_effhed_id) AS cmt_effhed_id, First(fin_commitments.cmt_hed_id) AS cmt_hed_id, First(fin_transactions.trn_id) AS trn_id
+FROM pur_purcases LEFT JOIN (fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id) ON (pur_purcases.pcs_type = fin_commitments.cmt_type) AND (pur_purcases.pcs_id = fin_commitments.cmt_docid)
+WHERE (((fin_commitments.cmt_effhed_id)=Forms!vars!Parameter1) And ((fin_commitments.cmt_type)="Pt") And ((fin_commitments.cmt_status)="Awaited") And ((pur_purcases.pcs_date)>=Forms!vars!Parameter2))
+GROUP BY fin_commitments.cmt_id;
+

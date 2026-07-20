@@ -1,0 +1,11 @@
+Table: doc_document_versions
+RecordCount: 10
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ver_id	Long	4	False	False	
+doc_id	Long	4	False	False	
+version_no	Text	20	False	True	
+content_data	Text	255	False	True	
+remarks	Memo	0	False	True	
+action_by	Long	4	False	False	
+action_date	Date/Time	8	False	False	

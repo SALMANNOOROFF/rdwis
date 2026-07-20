@@ -1,0 +1,4 @@
+Indexes for Table: hr_ctrcaseminutes
+------------------------------------------------------------
+IndexName: ctrcaseminutes_pk	Primary: True	Unique: True	Fields: ccm_id; 
+IndexName: ctrcaseminutes_unique	Primary: False	Unique: True	Fields: ccm_ctrcases; 

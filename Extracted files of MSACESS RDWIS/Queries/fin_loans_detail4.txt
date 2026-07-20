@@ -1,6 +1,0 @@
-QUERY: fin_loans_detail4
-
-SQL:
-SELECT fin_loans_detail1_temp.cmt_type, fin_loans_detail1_temp.cmt_docid, fin_loans_detail1_temp.amount, fin_loans_detail1_temp.from_head, fin_loans_detail1_temp.for_head, fin_loans_detail1_temp.loan_string, fin_loans_detail1_temp.loan_group, fin_loans_detail1_temp.trn_date, fin_loans_detail3.loan_first, IIf([loan_string]=[loan_first],"loan","payback") AS [loan/payback], fin_loans_detail1_temp.from_div, fin_loans_detail1_temp.for_div, IIf([from_div]=[for_div],"Internal","External") AS type
-FROM fin_loans_detail1_temp INNER JOIN fin_loans_detail3 ON fin_loans_detail1_temp.loan_group = fin_loans_detail3.loan_group
-ORDER BY fin_loans_detail1_temp.loan_group, fin_loans_detail1_temp.trn_date;

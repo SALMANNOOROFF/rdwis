@@ -1,0 +1,7 @@
+Table: public_migrations1
+RecordCount: 11
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+id	Long	4	False	False	
+migration	Text	255	False	True	
+batch	Long	4	False	False	

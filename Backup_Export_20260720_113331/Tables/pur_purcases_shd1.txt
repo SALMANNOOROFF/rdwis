@@ -1,0 +1,8 @@
+Table: pur_purcases_shd1
+RecordCount: 980
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pcd_pcs_id	Long	4	False	False	
+pcd_subhead	Text	255	False	True	
+pcd_ratio	Decimal	16	False	False	
+pcd_type	Text	5	False	True	

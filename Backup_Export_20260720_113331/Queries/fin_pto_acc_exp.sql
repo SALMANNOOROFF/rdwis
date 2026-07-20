@@ -1,0 +1,7 @@
+-- Query: fin_pto_acc_exp
+-- Type: 0
+
+SELECT fin_pto_acc_exp1.cmt_effhed_id, Sum(fin_pto_acc_exp1.amount) AS SumOfamount
+FROM fin_pto_acc_exp1
+GROUP BY fin_pto_acc_exp1.cmt_effhed_id;
+

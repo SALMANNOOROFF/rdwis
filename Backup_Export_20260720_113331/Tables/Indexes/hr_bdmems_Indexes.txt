@@ -1,0 +1,3 @@
+Indexes for Table: hr_bdmems
+------------------------------------------------------------
+IndexName: bdmems_pk	Primary: True	Unique: True	Fields: bdm_id; bdm_brd_id; 

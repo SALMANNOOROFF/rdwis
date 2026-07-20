@@ -1,0 +1,11 @@
+Table: puritems_rfqs1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rfq_id	Long	4	False	False	
+rfq_title	Text	180	False	True	
+rfq_unt_id	Long	4	False	False	
+rfq_created_by	Long	4	False	False	
+rfq_status	Text	24	False	True	
+rfq_total	Decimal	16	False	False	
+created_at	Date/Time	8	False	False	

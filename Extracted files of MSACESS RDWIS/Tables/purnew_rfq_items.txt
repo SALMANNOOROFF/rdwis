@@ -1,8 +1,0 @@
-TABLE: purnew_rfq_items
-
-COLUMNS:
-- rfq_item_id | Type:4 | Size:4
-- rfq_id | Type:4 | Size:4
-- item_id | Type:4 | Size:4
-- est_price | Type:20 | Size:16
-- price | Type:20 | Size:16

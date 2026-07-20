@@ -1,0 +1,3 @@
+Indexes for Table: prj_events
+------------------------------------------------------------
+IndexName: events_pk	Primary: True	Unique: True	Fields: evt_id; 

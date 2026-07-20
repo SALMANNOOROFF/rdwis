@@ -1,0 +1,12 @@
+Table: frm_projects1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+prj_xfrm_id	Long	4	False	False	
+prj_name	Text	255	False	True	
+prj_scope	Text	255	False	True	
+prj_awarddt	Date/Time	8	False	False	
+prj_status	Text	255	False	True	
+prj_compdt	Date/Time	8	False	False	
+prj_tech	Text	255	False	True	
+prj_cost	Long	4	False	False	

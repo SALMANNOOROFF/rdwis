@@ -1,0 +1,3 @@
+Indexes for Table: pur_purreqs
+------------------------------------------------------------
+IndexName: purreqs_pk	Primary: True	Unique: True	Fields: prq_id; 

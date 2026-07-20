@@ -1,0 +1,11 @@
+Table: purnew_rfq_quotes
+RecordCount: 16
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rq_id	Long	4	False	False	
+rfq_id	Long	4	False	False	
+rfq_item_id	Long	4	False	False	
+frm_id	Long	4	False	False	
+quoted_price	Decimal	16	False	False	
+is_accepted	Text	5	False	True	
+created_at	Date/Time	8	False	False	

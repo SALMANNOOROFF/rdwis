@@ -1,6 +1,0 @@
-QUERY: fin_salorders_u_doc
-
-SQL:
-SELECT fin_salorders.*, units.unt_namesh AS unt_namesh, units_1.unt_namesh AS effunt_namesh, cen_heads.hed_code AS hed_code, cen_heads_1.hed_code AS effhed_code, hr_contracts_last.ctr_startdt, hr_contracts_last.ctr_enddt, hr_contracts_last.ctr_termindt, hr_contracts_last.ctr_jobtitle, hr_contracts_last.ctr_grade, hr_emps.emp_joindt, hr_emps.emp_cnic
-FROM (((((fin_salorders LEFT JOIN units ON fin_salorders.sor_unt_id = units.unt_id) LEFT JOIN cen_heads ON fin_salorders.sor_hed_id = cen_heads.hed_id) LEFT JOIN cen_heads AS cen_heads_1 ON fin_salorders.sor_effhed_id = cen_heads_1.hed_id) LEFT JOIN hr_contracts_last ON fin_salorders.sor_emp_id = hr_contracts_last.ctr_num) LEFT JOIN hr_emps ON fin_salorders.sor_emp_id = hr_emps.emp_id) LEFT JOIN units AS units_1 ON fin_salorders.sor_effunt_id = units_1.unt_id
-WHERE (((fin_salorders.sor_unt_id)>=getvar("varLower") And (fin_salorders.sor_unt_id)<=getvar("varUpper")));

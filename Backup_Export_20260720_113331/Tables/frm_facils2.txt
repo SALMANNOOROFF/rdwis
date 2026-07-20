@@ -1,0 +1,6 @@
+Table: frm_facils2
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+fcl_xfrm_id	Long	4	False	False	
+fcl_facil	Text	255	False	True	

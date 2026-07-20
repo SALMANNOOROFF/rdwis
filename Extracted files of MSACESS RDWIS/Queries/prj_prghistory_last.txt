@@ -1,5 +1,0 @@
-QUERY: prj_prghistory_last
-
-SQL:
-SELECT prj_prghistory_u.pgh_id, prj_prghistory_u.pgh_xprj_id, prj_prghistory_u.pgh_status, prj_prghistory_u.pgh_level, prj_prghistory_u.pgh_trail, prj_prghistory_u.pgh_closedtg
-FROM prj_prghistory_last1 INNER JOIN prj_prghistory_u ON (prj_prghistory_last1.pgh_xprj_id = prj_prghistory_u.pgh_xprj_id) AND (prj_prghistory_last1.dtg_val_last = prj_prghistory_u.pgh_dtg);

@@ -1,6 +1,0 @@
-QUERY: cen_heads_base_subheads
-
-SQL:
-SELECT IIf(IsNull([hed_closedt]),"Open","Closed") AS status, *
-FROM cen_heads INNER JOIN fin_subheads ON cen_heads.hed_id = fin_subheads.sbh_hed_id
-WHERE (((IIf(IsNull([hed_closedt]),"Open","Closed"))=[stat]) AND ((cen_heads.hed_type)='Project') AND ((cen_heads.hed_unt_id)=[hed]));

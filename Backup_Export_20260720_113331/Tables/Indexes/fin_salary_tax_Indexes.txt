@@ -1,0 +1,3 @@
+Indexes for Table: fin_salary_tax
+------------------------------------------------------------
+IndexName: salary_tax_pk	Primary: True	Unique: True	Fields: slt_from; slt_to; 

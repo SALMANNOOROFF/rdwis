@@ -1,0 +1,8 @@
+-- Query: hr_attendance_u_oneday
+-- Type: 0
+
+SELECT #04-May-26# AS attend_date, cen_units.unt_namesh, hr_attendance.att_unt_id, hr_attendance.att_id, hr_attendance.att_emp_id, hr_attendance.att_empnamecomp, hr_attendance.att_4 AS att, hr_attendance.att_firstdt, DecodeAttendance(Nz([att],"")) AS attendance, AttendanceSorter(Nz([att],"")) AS attend_sort, hr_attendance.att_startdt, hr_attendance_u_oneday1.*
+FROM (hr_attendance INNER JOIN cen_units ON hr_attendance.att_unt_id = cen_units.unt_id) LEFT JOIN hr_attendance_u_oneday1 ON hr_attendance.att_id = hr_attendance_u_oneday1.atr_att_id
+WHERE (((hr_attendance.att_unt_id)>=getvar("varLower") And (hr_attendance.att_unt_id)<=getvar("varUpper")) And ((hr_attendance.att_startdt)=Forms!vars!Parameter1) And ((hr_attendance_u_oneday1.atr_attday)=Forms!vars!Parameter2 Or (hr_attendance_u_oneday1.atr_attday) Is Null))
+ORDER BY hr_attendance.att_unt_id, hr_attendance.att_emp_id;
+

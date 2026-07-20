@@ -1,6 +1,0 @@
-QUERY: fin_commitments_so
-
-SQL:
-SELECT fin_commitments.*
-FROM fin_commitments
-WHERE (((fin_commitments.cmt_type)="Sa"));

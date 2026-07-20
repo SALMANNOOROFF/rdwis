@@ -1,0 +1,8 @@
+Table: fin_docs_shd1
+RecordCount: 4506
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+doc_id	Long	4	False	False	
+doc_type	Text	5	False	True	
+subhead	Text	255	False	True	
+ratio	Decimal	16	False	False	

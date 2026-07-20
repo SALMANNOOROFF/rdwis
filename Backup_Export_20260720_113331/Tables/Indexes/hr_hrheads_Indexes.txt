@@ -1,0 +1,3 @@
+Indexes for Table: hr_hrheads
+------------------------------------------------------------
+IndexName: hrheads_pk	Primary: True	Unique: True	Fields: hhd_id; 

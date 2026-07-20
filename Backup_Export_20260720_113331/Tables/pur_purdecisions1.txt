@@ -1,0 +1,14 @@
+Table: pur_purdecisions1
+RecordCount: 74
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pdec_id	Long	4	False	False	
+pdec_pcs_id	Long	4	False	False	
+pdec_acc_id	Long	4	False	False	
+pdec_role	Text	50	False	True	
+pdec_action	Text	50	False	True	
+pdec_from_status	Text	50	False	True	
+pdec_to_status	Text	50	False	True	
+pdec_remarks	Memo	0	False	True	
+pdec_amount	Decimal	16	False	False	
+created_at	Date/Time	8	False	False	

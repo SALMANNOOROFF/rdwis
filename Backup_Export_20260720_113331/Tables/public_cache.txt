@@ -1,0 +1,7 @@
+Table: public_cache
+RecordCount: 2
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+key	Text	255	False	True	
+value	Memo	0	False	True	
+expiration	Long	4	False	False	

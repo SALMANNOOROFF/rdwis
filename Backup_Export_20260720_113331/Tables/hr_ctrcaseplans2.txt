@@ -1,0 +1,9 @@
+Table: hr_ctrcaseplans2
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ccp_id	Long	4	False	False	
+ccp_ctc_id	Long	4	False	False	
+ccp_startdt	Date/Time	8	False	False	
+ccp_enddt	Date/Time	8	False	False	
+ccp_hed_id	Long	4	False	False	

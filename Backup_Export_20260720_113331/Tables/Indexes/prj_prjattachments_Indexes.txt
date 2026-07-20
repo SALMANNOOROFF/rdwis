@@ -1,0 +1,4 @@
+Indexes for Table: prj_prjattachments
+------------------------------------------------------------
+IndexName: prjattachments_unique	Primary: False	Unique: True	Fields: jat_objtype; jat_objid; jat_type; 
+IndexName: purattachments_pk	Primary: True	Unique: True	Fields: jat_id; 

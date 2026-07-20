@@ -1,0 +1,8 @@
+-- Query: fin_ectimeline_pc_tempadder
+-- Type: 64
+
+INSERT INTO fin_ectimeline_temp ( id, subhead, docdate, description, amount, status )
+SELECT fin_ectimeline_pc_tempadder1.pcs_id, First(fin_ectimeline_pc_tempadder1.pcd_subhead) AS FirstOfpcd_subhead, First(fin_ectimeline_pc_tempadder1.pcs_date) AS FirstOfpcs_date, First(fin_ectimeline_pc_tempadder1.pcs_title) AS FirstOfpcs_title, First(fin_ectimeline_pc_tempadder1.price) AS FirstOfprice, First(fin_ectimeline_pc_tempadder1.pcs_status) AS FirstOfpcs_status
+FROM fin_ectimeline_pc_tempadder1
+GROUP BY fin_ectimeline_pc_tempadder1.pcs_id;
+

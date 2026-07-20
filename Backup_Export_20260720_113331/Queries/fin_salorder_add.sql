@@ -1,0 +1,6 @@
+-- Query: fin_salorder_add
+-- Type: 64
+
+INSERT INTO fin_salorders ( sor_srq_id, sor_unt_id, sor_hed_id, sor_emp_id, sor_month, sor_effhed_id, sor_effunt_id, sor_ctrsalary, sor_netsalary, sor_salary, sor_releasedtg, sor_status, sor_empnamecomp, sor_bnkaccdetail, sor_bnkacctitle, sor_contracts, sor_remarks, sor_transtype, sor_noloan, sor_sudohed, sor_type, sor_grosalary, sor_arrears, sor_dues, sor_paidalready, sor_overwork, sor_underwork, sor_loaned, sor_withheld, sor_award, sor_penalty, sor_remarks2, sor_parent )
+SELECT [SrqID] AS Expr3, [UnitId] AS Expr4, [HeadId] AS Expr5, [EmpId] AS Expr6, [Month] AS Expr7, [EffHeadId] AS Expr8, [EffUnitId] AS Expr18, [CtrSalary] AS Expr9, [NetSalary] AS Expr10, [Salary] AS Expr11, [ReleaseDtg] AS Expr2, "Draft" AS Expr1, [EmpNameComp] AS Expr14, [BankAccountDetail] AS Expr15, [BankAccountTitle] AS Expr16, [Contracts] AS Expr17, [Remarks] AS Expr13, [TransType] AS Expr12, [NoLoan] AS Expr19, [SudoHead] AS Expr20, "Sa" AS Expr21, [GrossSalary] AS Expr22, [Arrears] AS Expr23, [Dues] AS Expr24, [PaidAlready] AS Expr25, [OverWork] AS Expr26, [UnderWork] AS Expr27, [Loaned] AS Expr28, [WithHeld] AS Expr29, [Award] AS Expr30, [Penalty] AS Expr31, [Remarks2] AS Expr32, [Parent] AS Expr33;
+

@@ -1,6 +1,0 @@
-QUERY: hr_contractplan_add
-
-SQL:
-INSERT INTO hr_contractplans ( cpn_ctr_id, cpn_startdt, cpn_enddt, cpn_hed_id )
-SELECT hr_contractplan_temp.cpn_ctr_id, hr_contractplan_temp.cpn_startdt, hr_contractplan_temp.cpn_enddt, hr_contractplan_temp.cpn_hed_id
-FROM hr_contractplan_temp;

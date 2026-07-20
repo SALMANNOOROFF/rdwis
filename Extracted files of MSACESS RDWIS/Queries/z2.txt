@@ -1,6 +1,0 @@
-QUERY: z2
-
-SQL:
-SELECT z1.prt_id, Round([sum]*(([pcs_inttax]+[pcs_midtax])/[pcs_intprice]+1),0) AS [value]
-FROM pur_purcases INNER JOIN z1 ON pur_purcases.pcs_id = z1.prt_pcs_id
-ORDER BY z1.prt_id DESC;

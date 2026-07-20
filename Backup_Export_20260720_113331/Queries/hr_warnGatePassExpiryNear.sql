@@ -1,0 +1,7 @@
+-- Query: hr_warnGatePassExpiryNear
+-- Type: 0
+
+SELECT hr_empsextc.empextc_emp_id
+FROM hr_empsextc INNER JOIN hr_emps_u_active ON hr_empsextc.empextc_emp_id = hr_emps_u_active.emp_id
+WHERE (((DateDiff("d",Date(),[emp_cexpdt]))<30 And (DateDiff("d",Date(),[emp_cexpdt]))>=0));
+

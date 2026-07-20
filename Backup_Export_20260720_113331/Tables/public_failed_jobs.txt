@@ -1,0 +1,11 @@
+Table: public_failed_jobs
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+id	Decimal	16	False	False	
+uuid	Text	255	False	True	
+connection	Memo	0	False	True	
+queue	Memo	0	False	True	
+payload	Memo	0	False	True	
+exception	Memo	0	False	True	
+failed_at	Date/Time	8	False	False	

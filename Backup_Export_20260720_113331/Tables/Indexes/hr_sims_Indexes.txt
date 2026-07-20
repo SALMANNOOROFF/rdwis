@@ -1,0 +1,3 @@
+Indexes for Table: hr_sims
+------------------------------------------------------------
+IndexName: sims_pk	Primary: True	Unique: True	Fields: sim_id; 

@@ -262,6 +262,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/gantchartpr', function () { return view('projects.gantchartpr'); })->name('gantchartpr');
 
         // --- PURCHASE & REPORTS (Project area) ---
+        Route::get('/purchase/receipts', [\App\Http\Controllers\PurchaseReceiptController::class, 'index'])->name('purchase.receipts.index');
+        Route::get('/purchase/receipts/case/{pcs_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'create'])->name('purchase.receipts.create');
+        Route::post('/purchase/receipts/case/{pcs_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'store'])->name('purchase.receipts.store');
+        Route::get('/inventory/assets', [\App\Http\Controllers\PurchaseReceiptController::class, 'assetsIndex'])->name('inventory.assets.index');
+        Route::post('/inventory/assets/transition/{iac_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'updateAssetStatus'])->name('inventory.assets.update_status');
+
         Route::get('/pc-initiation', [\App\Http\Controllers\PurchaseInitiationController::class, 'index'])->name('purchase.initiation.index');
         Route::get('/pc-initiation/case/{id}', [\App\Http\Controllers\PurchaseInitiationController::class, 'show'])->name('purchase.initiation.show');
         Route::post('/pc-initiation/case/{id}/save', [\App\Http\Controllers\PurchaseInitiationController::class, 'save'])->name('purchase.initiation.save');
@@ -470,6 +476,9 @@ Route::middleware('auth')->group(function () {
         ->middleware(['area:fin'])
         ->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'finDashboard'])->name('dashboard');
+            Route::get('/payments', [\App\Http\Controllers\Finance\PaymentController::class, 'index'])->name('payments.index');
+            Route::get('/payments/{cmt_id}', [\App\Http\Controllers\Finance\PaymentController::class, 'show'])->name('payments.show');
+            Route::post('/payments/{cmt_id}/transaction', [\App\Http\Controllers\Finance\PaymentController::class, 'storeTransaction'])->name('payments.store_transaction');
         });
 
     // Unified Group for High-Level Approvals (DProc, DFin, MD, DDG, DG)

@@ -1,0 +1,3 @@
+Indexes for Table: hr_jobs
+------------------------------------------------------------
+IndexName: jobs_pk	Primary: True	Unique: True	Fields: job_id; 

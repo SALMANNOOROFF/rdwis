@@ -1,0 +1,11 @@
+Table: frm_offices1
+RecordCount: 82
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+off_id	Long	4	False	False	
+off_entity	Text	255	False	True	
+off_xfrm_id	Long	4	False	False	
+off_name	Text	255	False	True	
+off_type	Text	255	False	True	
+off_address	Memo	0	False	True	
+off_city	Text	255	False	True	

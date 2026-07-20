@@ -1,0 +1,8 @@
+-- Query: pur_purcases_u_draft
+-- Type: 0
+
+SELECT pur_purcases_u.*
+FROM pur_purcases_u
+WHERE (((pur_purcases_u.pcs_unt_id)>=getvar("varLower") And (pur_purcases_u.pcs_unt_id)<=getvar("varUpper")) AND ((pur_purcases_u.pcs_status)="Draft")) OR (((pur_purcases_u.pcs_intunt_id)>=getvar("varLower") And (pur_purcases_u.pcs_intunt_id)<=getvar("varUpper")) AND ((pur_purcases_u.pcs_status)="Draft"))
+ORDER BY pur_purcases_u.pcs_id DESC;
+

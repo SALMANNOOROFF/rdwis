@@ -1,0 +1,8 @@
+-- Query: aud_revs_u_open
+-- Type: 0
+
+SELECT aud_revs_u.*
+FROM aud_revs_u
+WHERE (((aud_revs_u.rev_status)="In Process" Or (aud_revs_u.rev_status)="Under Revision"))
+ORDER BY aud_revs_u.rev_id DESC , aud_revs_u.rev_id DESC;
+

@@ -1,0 +1,12 @@
+Table: hr_vehicles
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+vcl_id	Long	4	True	False	
+vcl_emp_id	Text	13	True	True	
+vcl_type	Text	255	True	True	
+vcl_maker	Text	255	True	True	
+vcl_variant	Text	255	True	True	
+vcl_year	Integer	2	True	False	
+vcl_regis	Text	255	True	True	
+vcl_color	Text	255	True	True	

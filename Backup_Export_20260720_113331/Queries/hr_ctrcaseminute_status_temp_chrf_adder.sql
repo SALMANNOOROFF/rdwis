@@ -1,0 +1,7 @@
+-- Query: hr_ctrcaseminute_status_temp_chrf_adder
+-- Type: 64
+
+INSERT INTO hr_ctrcaseminute_status_temp ( hed_code, amount, prj_share_hr, prj_exp_hr, prj_commit_hr, underway, forecast, diff )
+SELECT hr_ctrcaseminute_status_temp_chrf_adder2.head_code, hr_ctrcaseminute_status_chrf.amount, hr_ctrcaseminute_status_temp_chrf_adder2.share, hr_ctrcaseminute_status_temp_chrf_adder2.Exp, hr_ctrcaseminute_status_temp_chrf_adder2.commit, [underway]+[inproc]+IIf([status]="Draft",[amount],0) AS underway_mod, hr_ctrcaseminute_status_temp_chrf_adder2.forecast, [share]-[exp]-[commit]-[forecast]-[underway_mod] AS diff
+FROM hr_ctrcaseminute_status_temp_chrf_adder2, hr_ctrcaseminute_status_chrf;
+

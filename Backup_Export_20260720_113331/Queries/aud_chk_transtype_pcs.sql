@@ -1,0 +1,8 @@
+-- Query: aud_chk_transtype_pcs
+-- Type: 0
+
+SELECT cen_heads.hed_id, cen_heads.hed_code, cen_heads.hed_transtype, pur_purcases.pcs_id, pur_purcases.pcs_transtype, fin_transactions.trn_id, fin_transactions.trn_transtype
+FROM ((pur_purcases LEFT JOIN fin_commitments ON (pur_purcases.pcs_type = fin_commitments.cmt_type) AND (pur_purcases.pcs_id = fin_commitments.cmt_docid)) INNER JOIN cen_heads ON pur_purcases.pcs_effhed_id = cen_heads.hed_id) LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
+WHERE (((pur_purcases.pcs_transtype)<>[trn_transtype] Or (pur_purcases.pcs_transtype)<>[hed_transtype])) OR (((fin_transactions.trn_transtype)<>[hed_transtype]))
+ORDER BY cen_heads.hed_id;
+

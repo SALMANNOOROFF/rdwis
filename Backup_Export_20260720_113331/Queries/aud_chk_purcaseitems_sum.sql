@@ -1,0 +1,7 @@
+-- Query: aud_chk_purcaseitems_sum
+-- Type: 0
+
+SELECT aud_chk_purcaseitems_sum2.pcs_id, aud_chk_purcaseitems_sum2.pcs_midprice AS [Pcs Price1], aud_chk_purcaseitems_sum1.[Items Price], Round([Items Price]/[pcs_midprice],1) AS Ratio
+FROM aud_chk_purcaseitems_sum1 INNER JOIN aud_chk_purcaseitems_sum2 ON aud_chk_purcaseitems_sum1.pci_pcs_id = aud_chk_purcaseitems_sum2.pcs_id
+ORDER BY Round([Items Price]/[pcs_midprice],1);
+

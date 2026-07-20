@@ -1,0 +1,13 @@
+Table: pur_quoteitems
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+qti_qte_id	Long	4	True	False	
+qti_serial	Integer	2	True	False	
+qti_desc	Memo	0	True	True	
+qti_price	Decimal	16	True	False	
+qti_qty	Decimal	16	True	False	
+qti_qtyunit	Text	255	True	True	
+qti_id	Long	4	True	False	
+qti_pcsdesc	Memo	0	True	True	
+qti_pci_id	Long	4	False	False	

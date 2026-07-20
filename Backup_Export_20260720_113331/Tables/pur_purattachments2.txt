@@ -1,0 +1,9 @@
+Table: pur_purattachments2
+RecordCount: 2910
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pat_objtype	Text	255	False	True	
+pat_objid	Long	4	False	False	
+pat_type	Text	255	False	True	
+pat_path	Text	255	False	True	
+pat_id	Long	4	False	False	

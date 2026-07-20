@@ -1,0 +1,8 @@
+-- Query: aud_chk_purcaseitems_sum1
+-- Type: 0
+
+SELECT pur_purcaseitems.pci_pcs_id, Sum([pci_price]*[pci_qty]) AS [Items Price]
+FROM pur_purcaseitems
+GROUP BY pur_purcaseitems.pci_pcs_id
+ORDER BY pur_purcaseitems.pci_pcs_id;
+

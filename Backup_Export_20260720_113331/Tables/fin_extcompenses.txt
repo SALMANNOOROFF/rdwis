@@ -1,0 +1,13 @@
+Table: fin_extcompenses
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ecp_id	Long	4	True	False	
+ecp_date	Date/Time	8	True	False	
+ecp_emp_id	Text	255	True	True	
+ecp_empnamecomp	Text	255	True	True	
+ecp_unt_id	Long	4	True	False	
+ecp_type	Text	255	True	True	
+ecp_month	Date/Time	8	False	False	
+ecp_amount	Decimal	16	True	False	
+ecp_remarks	Text	255	False	True	

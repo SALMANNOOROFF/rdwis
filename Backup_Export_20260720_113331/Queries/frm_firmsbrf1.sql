@@ -1,0 +1,6 @@
+-- Query: frm_firmsbrf1
+-- Type: 0
+
+SELECT frm_persons.per_xfrm_id, frm_persons.per_title, frm_persons.per_name, frm_persons.per_desig, IIf([per_title]<>"",[per_title] & " ","") & [per_name] & IIf([per_desig]<>""," (" & [per_desig] & ")","") AS per_desc
+FROM frm_persons;
+

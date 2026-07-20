@@ -1,6 +1,0 @@
-QUERY: fin_recordfor
-
-SQL:
-SELECT fin_recordfor1.docid, fin_recordfor1.doctype, DateValue([rdate]) AS rsdate, fin_recordfor1.title, fin_recordfor1.effhed_id, fin_recordfor1.effunt_id, fin_recordfor1.hed_id, fin_recordfor1.unt_id, fin_recordfor1.amount1, fin_recordfor1.tax1, fin_recordfor1.amount2, fin_recordfor1.trn_id
-FROM fin_recordfor1
-ORDER BY DateValue([rdate]);

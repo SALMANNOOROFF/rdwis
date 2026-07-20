@@ -1,0 +1,3 @@
+Indexes for Table: ina_invatspecs
+------------------------------------------------------------
+IndexName: invatspecs_pk	Primary: True	Unique: True	Fields: iap_ias_id; iap_specname; 

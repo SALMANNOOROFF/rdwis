@@ -1,0 +1,6 @@
+-- Query: hr_qualifs_max
+-- Type: 0
+
+SELECT hr_qualifs.*
+FROM hr_qualifs_max1 INNER JOIN hr_qualifs ON (hr_qualifs_max1.qlf_emp_id = hr_qualifs.qlf_emp_id) AND (hr_qualifs_max1.MaxOfqlf_level = hr_qualifs.qlf_level);
+

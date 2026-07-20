@@ -1,0 +1,7 @@
+-- Query: fin_salarysummary2
+-- Type: 0
+
+SELECT [fin_salarysummary1].unt_mod, [fin_salarysummary1].sor_effhed_id, [fin_salarysummary1].effhed_mod, [fin_salarysummary1].prjcode_mod, [fin_salarysummary1].sor_month AS minmonth, Sum([fin_salarysummary1].sor_salary) AS amount, Count([fin_salarysummary1].sor_emp_id) AS persons
+FROM fin_salarysummary1
+GROUP BY [fin_salarysummary1].unt_mod, [fin_salarysummary1].sor_effhed_id, [fin_salarysummary1].effhed_mod, [fin_salarysummary1].prjcode_mod, [fin_salarysummary1].sor_month;
+

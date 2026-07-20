@@ -1,0 +1,8 @@
+Table: fin_subheads2
+RecordCount: 159
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+sbh_hed_id	Long	4	False	False	
+sbh_name	Text	255	False	True	
+sbh_alloc	Decimal	16	False	False	
+sbh_id	Long	4	False	False	

@@ -1,0 +1,11 @@
+Table: hr_leaves
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+lve_emp_id	Text	255	True	True	
+lve_empnamecomp	Text	255	True	True	
+lve_unt_id	Long	4	True	False	
+lve_type	Text	255	True	True	
+lve_from	Date/Time	8	True	False	
+lve_to	Date/Time	8	True	False	
+lve_remarks	Text	255	False	True	

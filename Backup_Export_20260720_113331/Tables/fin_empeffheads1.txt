@@ -1,0 +1,10 @@
+Table: fin_empeffheads1
+RecordCount: 179
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+eeh_emp_id	Text	255	False	True	
+eeh_emphed_id	Long	4	False	False	
+eeh_dtg	Date/Time	8	False	False	
+eeh_status	Text	255	False	True	
+eeh_remarks	Text	255	False	True	
+eeh_sudohed	Text	7	False	True	

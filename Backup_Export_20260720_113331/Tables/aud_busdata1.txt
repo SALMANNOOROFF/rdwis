@@ -1,0 +1,16 @@
+Table: aud_busdata1
+RecordCount: 1096
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+bdt_id	Long	4	False	False	
+bdt_username	Text	255	False	True	
+bdt_dtg	Date/Time	8	False	False	
+bdt_action	Text	255	False	True	
+bdt_formname	Text	255	False	True	
+bdt_controlname	Text	255	False	True	
+bdt_fieldname	Text	255	False	True	
+bdt_recordid	Text	255	False	True	
+btd_oldvalue	Text	255	False	True	
+btd_newvalue	Text	255	False	True	
+bdt_empname	Text	255	False	True	
+bdt_empdesig	Text	255	False	True	

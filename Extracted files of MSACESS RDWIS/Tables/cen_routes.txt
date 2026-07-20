@@ -1,5 +1,0 @@
-TABLE: cen_routes
-
-COLUMNS:
-- rte_doc | Type:10 | Size:255
-- rte_steps | Type:10 | Size:255

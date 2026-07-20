@@ -1,0 +1,3 @@
+Indexes for Table: hr_leaves
+------------------------------------------------------------
+IndexName: leaves_unique	Primary: True	Unique: True	Fields: lve_emp_id; lve_from; 

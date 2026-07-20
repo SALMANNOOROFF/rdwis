@@ -1,0 +1,3 @@
+Indexes for Table: hr_qualifs
+------------------------------------------------------------
+IndexName: qualifs_pk	Primary: True	Unique: True	Fields: qlf_id; 

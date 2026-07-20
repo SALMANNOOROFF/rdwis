@@ -1,5 +1,0 @@
-TABLE: USysRibbons
-
-COLUMNS:
-- RibbonName | Type:10 | Size:255
-- RibbonXml | Type:12 | Size:0

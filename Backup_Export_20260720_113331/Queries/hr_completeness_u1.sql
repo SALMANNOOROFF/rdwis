@@ -1,0 +1,7 @@
+-- Query: hr_completeness_u1
+-- Type: 0
+
+SELECT hr_emps.emp_id, Count(hr_qualifs.qlf_id) AS CountOfqlf_id
+FROM hr_emps LEFT JOIN hr_qualifs ON hr_emps.emp_id = hr_qualifs.qlf_emp_id
+GROUP BY hr_emps.emp_id;
+

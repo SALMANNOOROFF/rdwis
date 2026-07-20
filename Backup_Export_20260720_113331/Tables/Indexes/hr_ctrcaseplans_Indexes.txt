@@ -1,0 +1,3 @@
+Indexes for Table: hr_ctrcaseplans
+------------------------------------------------------------
+IndexName: ctrcaseplans_pk	Primary: True	Unique: True	Fields: ccp_id; 

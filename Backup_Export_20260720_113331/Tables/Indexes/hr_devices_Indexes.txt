@@ -1,0 +1,3 @@
+Indexes for Table: hr_devices
+------------------------------------------------------------
+IndexName: devices_pk	Primary: True	Unique: True	Fields: dvc_id; 

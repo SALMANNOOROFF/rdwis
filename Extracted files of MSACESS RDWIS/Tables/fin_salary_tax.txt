@@ -1,8 +1,0 @@
-TABLE: fin_salary_tax
-
-COLUMNS:
-- slt_from | Type:4 | Size:4
-- slt_to | Type:4 | Size:4
-- slt_inttax | Type:4 | Size:4
-- slt_midamount | Type:4 | Size:4
-- slt_midtax | Type:20 | Size:16

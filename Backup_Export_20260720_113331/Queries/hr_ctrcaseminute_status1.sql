@@ -1,0 +1,7 @@
+-- Query: hr_ctrcaseminute_status1
+-- Type: 0
+
+SELECT hr_ctrcases.ctc_id, hr_ctrcases.ctc_emp_id, hr_ctrcaseplans.ccp_id, hr_ctrcaseplans.ccp_startdt, hr_ctrcaseplans.ccp_enddt, hr_ctrcaseplans.ccp_hed_id, IIf(IsNull([hed_code]),"Unassigned",[hed_code]) AS head_code, hr_ctrcases.ctc_newsalary, Round([ctc_newsalary]/(Lastdatethismonth([ccp_startdt])-Firstdatethismonth([ccp_startdt])+1)*([ccp_enddt]-[ccp_startdt]+1),0) AS amount, Year([ccp_startdt])*100+Month([ccp_startdt]) AS sorter, hr_ctrcases.ctc_status
+FROM (hr_ctrcases INNER JOIN hr_ctrcaseplans ON hr_ctrcases.ctc_id = hr_ctrcaseplans.ccp_ctc_id) LEFT JOIN cen_heads ON hr_ctrcaseplans.ccp_hed_id = cen_heads.hed_id
+WHERE (((hr_ctrcases.ctc_id) In (31)));
+

@@ -1,0 +1,7 @@
+Table: fin_contractsverif
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cvf_ctr_id	Long	4	True	False	
+cvf_verif	Text	5	True	True	
+cvf_dtg	Date/Time	8	False	False	

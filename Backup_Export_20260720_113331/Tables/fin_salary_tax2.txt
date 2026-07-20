@@ -1,0 +1,9 @@
+Table: fin_salary_tax2
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+slt_from	Long	4	False	False	
+slt_to	Long	4	False	False	
+slt_inttax	Long	4	False	False	
+slt_midamount	Long	4	False	False	
+slt_midtax	Decimal	16	False	False	

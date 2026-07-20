@@ -1,0 +1,9 @@
+-- Query: xxx5
+-- Type: 0
+
+SELECT [xxx5-1].id, First([xxx5-1].sor_emp_id) AS FirstOfsor_emp_id, First([xxx5-1].sor_empnamecomp) AS FirstOfsor_empnamecomp, First([xxx5-1].sor_month) AS FirstOfsor_month, First([xxx5-1].sor_ctrsalary) AS FirstOfsor_ctrsalary, Sum([xxx5-1].sor_salary) AS SumOfsor_salary, Count([xxx5-1].sor_id) AS CountOfsor_id
+FROM [xxx5-1]
+GROUP BY [xxx5-1].id
+HAVING (((Count([xxx5-1].sor_id))>1))
+ORDER BY First([xxx5-1].sor_emp_id), First([xxx5-1].sor_month);
+

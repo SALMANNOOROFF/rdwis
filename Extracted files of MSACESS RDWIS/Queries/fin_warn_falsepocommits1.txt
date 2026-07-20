@@ -1,6 +1,0 @@
-QUERY: fin_warn_falsepocommits1
-
-SQL:
-SELECT fin_commitments.cmt_id, fin_commitments.cmt_docid, fin_commitments.cmt_type, fin_commitments.cmt_amount AS committed, IIf([trn_transtype]=1,[trn_amount1],[trn_amount2]) AS paid, Round(Nz([paid])/[committed]*100,0) AS paidpct, fin_commitments.cmt_status, fin_commitments.cmt_effhed_id
-FROM fin_commitments LEFT JOIN fin_transactions ON fin_commitments.cmt_id = fin_transactions.trn_cmt_id
-WHERE (((fin_commitments.cmt_type)="Ps" Or (fin_commitments.cmt_type)="Pt" Or (fin_commitments.cmt_type)="Rb"));

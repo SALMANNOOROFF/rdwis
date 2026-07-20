@@ -1,0 +1,11 @@
+Table: hr_devices
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+dvc_id	Long	4	True	False	
+dvc_emp_id	Text	13	True	True	
+dvc_type	Text	255	True	True	
+dvc_brand	Text	255	True	True	
+dvc_model	Text	255	True	True	
+dvc_imei1	Text	18	True	True	
+dvc_imei2	Text	18	False	True	

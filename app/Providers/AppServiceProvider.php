@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Auth\CenAccountUserProvider;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,9 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFour();
+
         Auth::provider('cen_accounts', function ($app, array $config) {
             return new CenAccountUserProvider($app['hash'], $config['model']);
         });
     }
 }
-

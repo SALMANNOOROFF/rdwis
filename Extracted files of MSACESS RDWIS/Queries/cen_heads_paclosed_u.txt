@@ -1,7 +1,0 @@
-QUERY: cen_heads_paclosed_u
-
-SQL:
-SELECT cen_heads.*
-FROM cen_heads
-WHERE (((cen_heads.hed_type)="Project") AND ((cen_heads.hed_unt_id)>=getvar("varLower") And (cen_heads.hed_unt_id)<=getvar("varUpper")) AND ((cen_heads.hed_closedt) Is Not Null))
-ORDER BY cen_heads.hed_code;

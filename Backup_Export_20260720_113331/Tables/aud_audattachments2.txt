@@ -1,0 +1,9 @@
+Table: aud_audattachments2
+RecordCount: 148
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+aat_objtype	Text	255	False	True	
+aat_objid	Long	4	False	False	
+aat_type	Text	255	False	True	
+aat_path	Text	255	False	True	
+aat_id	Long	4	False	False	

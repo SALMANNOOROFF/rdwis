@@ -1,0 +1,8 @@
+Table: hr_boards
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+brd_id	Long	4	True	False	
+brd_date	Date/Time	8	True	False	
+brd_status	Text	255	False	True	
+brd_hir_id	Long	4	True	False	

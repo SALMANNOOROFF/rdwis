@@ -1,7 +1,0 @@
-TABLE: hr_attendanceremarks1
-
-COLUMNS:
-- atr_id | Type:20 | Size:16
-- atr_att_id | Type:20 | Size:16
-- atr_remarks | Type:10 | Size:255
-- atr_attday | Type:3 | Size:2

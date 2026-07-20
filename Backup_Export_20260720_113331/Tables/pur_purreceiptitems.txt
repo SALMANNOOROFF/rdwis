@@ -1,0 +1,12 @@
+Table: pur_purreceiptitems
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pti_id	Long	4	True	False	
+pti_prt_id	Long	4	True	False	
+pti_desc	Memo	0	True	True	
+pti_qty	Decimal	16	True	False	
+pti_qtyunit	Text	255	True	True	
+pti_pci_id	Long	4	True	False	
+pti_pri_id	Long	4	False	False	
+pti_serial	Integer	2	True	False	

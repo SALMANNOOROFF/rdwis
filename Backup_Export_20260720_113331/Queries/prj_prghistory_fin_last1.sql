@@ -1,0 +1,8 @@
+-- Query: prj_prghistory_fin_last1
+-- Type: 0
+
+SELECT prj_prghistory.pgh_xprj_id, Max(prj_prghistory.pgh_dtg) AS max_dtg
+FROM prj_prghistory
+WHERE (((prj_prghistory.pgh_status)="Finalized"))
+GROUP BY prj_prghistory.pgh_xprj_id;
+

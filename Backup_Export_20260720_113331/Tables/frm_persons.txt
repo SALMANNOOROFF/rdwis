@@ -1,0 +1,12 @@
+Table: frm_persons
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+per_id	Long	4	True	False	
+per_entity	Text	255	False	True	
+per_xfrm_id	Long	4	False	False	
+per_title	Text	255	False	True	
+per_name	Text	50	False	True	
+per_desig	Text	255	False	True	
+per_dept	Text	255	False	True	
+per_exprt	Text	255	False	True	

@@ -1,0 +1,6 @@
+Table: cen_levels1
+RecordCount: 60
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+lvl_id	Integer	2	False	False	
+lvl_cat	Text	255	False	True	

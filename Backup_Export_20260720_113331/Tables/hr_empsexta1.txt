@@ -1,0 +1,22 @@
+Table: hr_empsexta1
+RecordCount: 181
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+empexta_emp_id	Text	13	False	True	
+emp_discip	Text	255	False	True	
+emp_qualif	Integer	2	False	False	
+emp_spec	Text	255	False	True	
+emp_paddress	Text	255	False	True	
+emp_dob	Date/Time	8	False	False	
+emp_marital	Text	255	False	True	
+emp_ntnlty	Text	255	False	True	
+emp_pob	Text	255	False	True	
+emp_taddress	Text	255	False	True	
+emp_mobile	Text	13	False	True	
+emp_landline	Text	13	False	True	
+emp_gender	Text	255	False	True	
+emp_mobile2	Text	255	False	True	
+emp_email	Text	255	False	True	
+emp_father	Text	255	False	True	
+emp_father_cnic	Text	15	False	True	
+emp_ntnlty_other	Text	255	False	True	

@@ -1,8 +1,0 @@
-TABLE: pur_purattachments
-
-COLUMNS:
-- pat_objtype | Type:10 | Size:255
-- pat_objid | Type:4 | Size:4
-- pat_type | Type:10 | Size:255
-- pat_path | Type:10 | Size:255
-- pat_id | Type:4 | Size:4

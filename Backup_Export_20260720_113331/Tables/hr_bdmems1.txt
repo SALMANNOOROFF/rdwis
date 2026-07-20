@@ -1,0 +1,8 @@
+Table: hr_bdmems1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+bdm_id	Integer	2	False	False	
+bdm_brd_id	Long	4	False	False	
+bdm_name	Text	255	False	True	
+bdm_rank	Text	255	False	True	

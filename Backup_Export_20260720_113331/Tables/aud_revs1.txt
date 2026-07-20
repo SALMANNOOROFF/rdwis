@@ -1,0 +1,17 @@
+Table: aud_revs1
+RecordCount: 216
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+rev_id	Long	4	False	False	
+rev_obj	Text	255	False	True	
+rev_releasedtg	Date/Time	8	False	False	
+rev_closedtg	Date/Time	8	False	False	
+rev_objid	Text	255	False	True	
+rev_reason	Text	255	False	True	
+rev_status	Text	255	False	True	
+rev_unt_id	Long	4	False	False	
+rev_date	Date/Time	8	False	False	
+rev_type	Integer	2	False	False	
+rev_intunt_id	Long	4	False	False	
+rev_ref	Text	255	False	True	
+rev_objext	Text	255	False	True	

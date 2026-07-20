@@ -1,0 +1,8 @@
+-- Query: hr_attendance_u_oneday_adder
+-- Type: 64
+
+INSERT INTO hr_attendance_u_oneday_temp ( emp_id, emp_namecomp, attend_date, unt_id, unt_namesh, attendance, attend_sort, att, atr_remarks, atr_remarks_old, atr_remarks_detail, att_id, atr_id )
+SELECT hr_attendance_u_oneday.att_emp_id, hr_attendance_u_oneday.att_empnamecomp, hr_attendance_u_oneday.attend_date, hr_attendance_u_oneday.att_unt_id, hr_attendance_u_oneday.unt_namesh, hr_attendance_u_oneday.attendance, hr_attendance_u_oneday.attend_sort, hr_attendance_u_oneday.att, hr_attendance_u_oneday.atr_remarks, hr_attendance_u_oneday.atr_remarks, "c,atr_remarks,Remarks,(emp_namecomp),1,varchar,,,,,Select * From hr_attendanceremarks Where atr_id = P1,(atr_id),,,,hr_attendanceremarks,atr_id,(atr_id),,," AS Expr1, hr_attendance_u_oneday.att_id, hr_attendance_u_oneday.atr_id
+FROM hr_attendance_u_oneday
+ORDER BY hr_attendance_u_oneday.unt_namesh, hr_attendance_u_oneday.attend_sort;
+

@@ -1,0 +1,7 @@
+-- Query: fin_loans_detail51
+-- Type: 0
+
+SELECT fin_loans_detail41.loan_first, Sum(fin_loans_detail41.amount) AS loan, First(fin_loans_detail41.from_head) AS from_head, First(fin_loans_detail41.from_div) AS from_div, First(fin_loans_detail41.for_head) AS for_head, First(fin_loans_detail41.for_div) AS for_div, First(fin_loans_detail41.[loan/payback]) AS [loan/payback], First(fin_loans_detail41.type) AS type
+FROM fin_loans_detail41
+GROUP BY fin_loans_detail41.loan_first;
+

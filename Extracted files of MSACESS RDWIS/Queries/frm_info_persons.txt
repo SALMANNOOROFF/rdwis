@@ -1,6 +1,0 @@
-QUERY: frm_info_persons
-
-SQL:
-SELECT frm_info.*
-FROM frm_info
-WHERE (((frm_info.inf_xmsc_entity)="persons"));

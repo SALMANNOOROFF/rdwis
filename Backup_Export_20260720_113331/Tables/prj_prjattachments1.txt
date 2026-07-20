@@ -1,0 +1,9 @@
+Table: prj_prjattachments1
+RecordCount: 301
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+jat_objtype	Text	255	False	True	
+jat_objid	Long	4	False	False	
+jat_type	Text	255	False	True	
+jat_path	Text	255	False	True	
+jat_id	Long	4	False	False	

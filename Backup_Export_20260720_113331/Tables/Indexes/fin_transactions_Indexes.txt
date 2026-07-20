@@ -1,0 +1,3 @@
+Indexes for Table: fin_transactions
+------------------------------------------------------------
+IndexName: transactions_pk	Primary: True	Unique: True	Fields: trn_id; 

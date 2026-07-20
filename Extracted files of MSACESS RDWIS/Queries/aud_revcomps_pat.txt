@@ -1,6 +1,0 @@
-QUERY: aud_revcomps_pat
-
-SQL:
-SELECT aud_revcomps_plus.rvc_rev_id, pur_purattachments.pat_id, pur_purattachments.pat_type
-FROM aud_revcomps_plus INNER JOIN pur_purattachments ON aud_revcomps_plus.rvc_rowid_num = pur_purattachments.pat_objid
-WHERE (((pur_purattachments.pat_objtype)="pcs") AND ((aud_revcomps_plus.rvc_table)="pur_purattachments"));

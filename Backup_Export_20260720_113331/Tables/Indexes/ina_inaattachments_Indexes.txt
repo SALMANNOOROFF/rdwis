@@ -1,0 +1,4 @@
+Indexes for Table: ina_inaattachments
+------------------------------------------------------------
+IndexName: inaattachments_unique	Primary: False	Unique: True	Fields: iat_objtype; iat_objid; iat_type; 
+IndexName: intattachments_pk	Primary: True	Unique: True	Fields: iat_id; 

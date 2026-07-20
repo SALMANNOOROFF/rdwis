@@ -1,5 +1,0 @@
-QUERY: fin_salarysummary
-
-SQL:
-SELECT fin_salarysummary2.unt_mod, fin_salarysummary2.sor_effhed_id, fin_salarysummary2.effhed_mod, fin_salarysummary2.prjcode_mod, fin_salarysummary2.minmonth, fin_salarysummary2.amount, fin_salarysummary2.persons, IIf([effhed_mod] Like "*CSRF*",GetA16Element("GetAccShares",([sor_effhed_id]),2),GetSubheadFigure("GetPrjAllocationsShd",[sor_effhed_id],"HR")) AS share, Nz(IIf([effhed_mod] Like "*CSRF",GetCfExpenditure([sor_effhed_id]),GetSubheadFigure("GetPrjExpenditureShd",[sor_effhed_id],"HR")),0) AS exp, Nz(IIf([effhed_mod] Like "*CSRF",GetCfOutstandingCommits([sor_effhed_id]),GetSubheadFigure("GetPrjOutstandingCommitsShd",[sor_effhed_id],"HR")),0) AS [commit], Nz(IIf([effhed_mod] Like "*CSRF",GetCfInProcess([sor_effhed_id]),GetSubheadFigure("GetPrjInProcessShd",[sor_effhed_id],"HR")),0) AS inprocess, [share]-[exp]-[commit]-[inprocess] AS canbespent, "" AS rmks
-FROM fin_salarysummary2;

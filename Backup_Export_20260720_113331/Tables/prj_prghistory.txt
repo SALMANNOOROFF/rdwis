@@ -1,0 +1,17 @@
+Table: prj_prghistory
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pgh_xprj_id	Long	4	True	False	
+pgh_id	Long	4	True	False	
+pgh_dtg	Date/Time	8	False	False	
+pgh_progress	Memo	0	False	True	
+pgh_author	Text	255	True	True	
+pgh_status	Text	255	True	True	
+pgh_closedtg	Date/Time	8	False	False	
+pgh_level	Long	4	True	False	
+pgh_group	Text	255	False	True	
+pgh_trail	Text	255	False	True	
+pgh_trailinherited	Text	255	False	True	
+pgh_underedit	Text	5	True	True	
+pgh_path	Text	255	False	True	

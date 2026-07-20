@@ -1,0 +1,3 @@
+Indexes for Table: pur_purreceipts
+------------------------------------------------------------
+IndexName: purreceipts_pk	Primary: True	Unique: True	Fields: prt_id; 

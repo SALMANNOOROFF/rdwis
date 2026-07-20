@@ -1,0 +1,6 @@
+-- Query: pur_quotes_recomm
+-- Type: 48
+
+UPDATE pur_quotes SET pur_quotes.qte_recomm = IIf([qte_id]=[Id],1,0)
+WHERE (((pur_quotes.qte_pcs_id)=[PurCaseId]));
+

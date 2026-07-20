@@ -1,5 +1,0 @@
-QUERY: fin_salarysummary1
-
-SQL:
-SELECT fin_salorders_u_draft.sor_effhed_id, IIf(Nz([sor_sudohed],"")="",[hed_code],[hed_code] & "-CSRF") AS effhed_mod, IIf([sor_unt_id]<800000,[unt_namesh],"Center") AS unt_mod, IIf([sor_unt_id]<800000,[prj_code],"") AS prjcode_mod, fin_salorders_u_draft.sor_salary, fin_salorders_u_draft.sor_emp_id, fin_salorders_u_draft.sor_month
-FROM units RIGHT JOIN (cen_heads RIGHT JOIN (fin_salorders_u_draft LEFT JOIN prj_projects ON fin_salorders_u_draft.sor_hed_id = prj_projects.prj_id) ON cen_heads.hed_id = fin_salorders_u_draft.sor_effhed_id) ON units.unt_id = fin_salorders_u_draft.sor_unt_id;

@@ -1,0 +1,3 @@
+Indexes for Table: ina_invatcomps
+------------------------------------------------------------
+IndexName: invatcomps_pk	Primary: True	Unique: True	Fields: iac_id; 

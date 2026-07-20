@@ -1,0 +1,8 @@
+-- Query: fin_sharesinstall_plus
+-- Type: 0
+
+SELECT fin_sharesinstall.*, fin_transactions.trn_amount2 AS inward, -1*[fin_transactions_1].[trn_amount2] AS mtss_share, fin_transactions.trn_date, fin_msncosts.mct_msn_id, fin_msncosts.mct_cost, prj_milestones.msn_status
+FROM (((fin_sharesinstall INNER JOIN fin_transactions ON fin_sharesinstall.shi_fitrn_id = fin_transactions.trn_id) INNER JOIN fin_transactions AS fin_transactions_1 ON fin_sharesinstall.shi_fotrn_id = fin_transactions_1.trn_id) LEFT JOIN fin_msncosts ON fin_sharesinstall.shi_msn_idd = fin_msncosts.mct_msn_idd) LEFT JOIN prj_milestones ON fin_sharesinstall.shi_msn_idd = prj_milestones.msn_idd
+WHERE (((fin_sharesinstall.shi_hed_id)=[Forms]![vars]![Parameter1]))
+ORDER BY fin_transactions.trn_date, fin_msncosts.mct_msn_id;
+

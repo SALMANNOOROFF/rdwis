@@ -1,0 +1,6 @@
+-- Query: fin_loans_net2
+-- Type: 0
+
+SELECT fin_loans_net1.loan_string, fin_loans_net1.From, fin_loans_net1.For, fin_loans_net1.SumOfamount AS A1, IIf([fin_loans_net1_1].[SumOfamount]<=[fin_loans_net1].[SumOfamount],-1*[fin_loans_net1_1].[SumOfamount],[fin_loans_net1_1].[SumOfamount]) AS A2, fin_loans_net1.FromDiv, fin_loans_net1.ForDiv
+FROM fin_loans_net1 LEFT JOIN fin_loans_net1 AS fin_loans_net1_1 ON (fin_loans_net1.From = fin_loans_net1_1.For) AND (fin_loans_net1.For = fin_loans_net1_1.From);
+

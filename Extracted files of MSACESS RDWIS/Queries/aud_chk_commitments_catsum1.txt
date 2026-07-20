@@ -1,7 +1,0 @@
-QUERY: aud_chk_commitments_catsum1
-
-SQL:
-SELECT fin_commitments.cmt_id, fin_commitments.cmt_docid, fin_commitments.cmt_type, cen_heads.hed_code, First(fin_commitments.cmt_amount) AS [commit], Sum(Nz([ctc_amount])) AS sumcommitcomps, First(fin_commitments.cmt_status) AS FirstOfcmt_status
-FROM (fin_commitments LEFT JOIN fin_commitscat ON fin_commitments.cmt_id = fin_commitscat.ctc_cmt_id) LEFT JOIN cen_heads ON fin_commitments.cmt_effhed_id = cen_heads.hed_id
-WHERE (((fin_commitments.cmt_type) Like "P*" Or (fin_commitments.cmt_type) Like "Rb" Or (fin_commitments.cmt_type) Like "S*"))
-GROUP BY fin_commitments.cmt_id, fin_commitments.cmt_docid, fin_commitments.cmt_type, cen_heads.hed_code;

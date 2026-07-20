@@ -1,0 +1,7 @@
+Table: pur_noquotes1
+RecordCount: 16
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+nqt_id	Long	4	False	False	
+nqt_pcs_id	Long	4	False	False	
+nqt_frm_id	Long	4	False	False	

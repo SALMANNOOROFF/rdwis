@@ -1,0 +1,7 @@
+-- Query: pur_purcase_taxes
+-- Type: 0
+
+SELECT Sum([pci_price]*[pci_qty]) AS price, Sum([pci_price]*[pci_qty]*IIf([pci_type]=3,taxrate([pci_type]),0)) AS sst, Sum([pci_price]*[pci_qty]*IIf([pci_type]<>3,taxrate([pci_type]),0)) AS gst
+FROM pur_purcaseitems
+WHERE (((pur_purcaseitems.pci_pcs_id)=[PcsId]));
+

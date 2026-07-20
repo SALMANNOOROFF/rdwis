@@ -1,0 +1,7 @@
+-- Query: fin_loans_detail52
+-- Type: 0
+
+SELECT fin_loans_detail42.loan_first, Sum(fin_loans_detail42.amount) AS return, First(fin_loans_detail42.[loan/payback]) AS [loan/payback], First(fin_loans_detail42.type) AS type
+FROM fin_loans_detail42
+GROUP BY fin_loans_detail42.loan_first;
+

@@ -1,0 +1,17 @@
+Table: pur_purcaseminutes
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pcm_id	Long	4	True	False	
+pcm_texta	Memo	0	False	True	
+pcm_textb	Memo	0	False	True	
+pcm_textc	Memo	0	False	True	
+pcm_textd	Memo	0	False	True	
+pcm_texte	Memo	0	False	True	
+pcm_lwoamount	Long	4	False	False	
+pcm_minute	Integer	2	True	False	
+pcm_purcases	Text	255	True	True	
+pcm_eqdue	Decimal	16	False	False	
+pcm_hrdue	Decimal	16	False	False	
+pcm_msdue	Decimal	16	False	False	
+pcm_date	Date/Time	8	False	False	

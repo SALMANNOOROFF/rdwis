@@ -1,0 +1,49 @@
+Table: hr_ctrcases2
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ctc_id	Long	4	False	False	
+ctc_ctr_id	Long	4	False	False	
+ctc_emp_id	Text	255	False	True	
+ctc_empnamecomp	Text	255	False	True	
+ctc_type	Text	255	False	True	
+ctc_unt_id	Long	4	False	False	
+ctc_date	Date/Time	8	False	False	
+ctc_newunt_id	Long	4	False	False	
+ctc_newgrade	Text	255	False	True	
+ctc_newjobtitle	Text	255	False	True	
+ctc_newsalary	Long	4	False	False	
+ctc_newctrtype	Integer	2	False	False	
+ctc_status	Text	255	False	True	
+ctc_remarks	Text	255	False	True	
+ctc_releasedtg	Date/Time	8	False	False	
+ctc_closedtg	Date/Time	8	False	False	
+ctc_newstartdt	Date/Time	8	False	False	
+ctc_newenddt	Date/Time	8	False	False	
+ctc_termindt	Date/Time	8	False	False	
+ctc_terminremarks	Text	255	False	True	
+ctc_price	Decimal	16	False	False	
+ctc_transtype	Integer	2	False	False	
+ctc_minute	Integer	2	False	False	
+ctc_approvedunt_id	Long	4	False	False	
+ctc_approvedstartdt	Date/Time	8	False	False	
+ctc_approvedenddt	Date/Time	8	False	False	
+ctc_approvedgrade	Text	255	False	True	
+ctc_approvedjobtitle	Text	255	False	True	
+ctc_approvedsalary	Long	4	False	False	
+ctc_approvedctrtype	Integer	2	False	False	
+ctc_newsigndt	Date/Time	8	False	False	
+ctc_newctr_id	Long	4	False	False	
+ctc_newprob	Integer	2	False	False	
+ctc_newprobsal	Long	4	False	False	
+ctc_approvedprob	Integer	2	False	False	
+ctc_approvedprobsal	Long	4	False	False	
+ctc_prj_id	Long	4	False	False	
+ctc_divisionid	Long	4	False	False	
+ctc_createdby	Long	4	False	False	
+ctc_createdat	Date/Time	8	False	False	
+ctc_releasedby	Long	4	False	False	
+ctc_cnic	Text	15	False	True	
+ctc_contact	Text	255	False	True	
+ctc_cv_path	Text	255	False	True	
+ctc_emp_type	Text	255	False	True	

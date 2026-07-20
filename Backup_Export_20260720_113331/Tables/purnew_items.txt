@@ -1,0 +1,10 @@
+Table: purnew_items
+RecordCount: 9759
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+item_id	Long	4	False	False	
+title	Memo	0	False	True	
+serial	Integer	2	False	False	
+unt_id	Long	4	False	False	
+type	Integer	2	False	False	
+subtype	Text	255	False	True	

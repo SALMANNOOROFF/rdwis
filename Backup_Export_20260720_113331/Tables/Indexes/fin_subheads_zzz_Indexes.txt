@@ -1,0 +1,3 @@
+Indexes for Table: fin_subheads_zzz
+------------------------------------------------------------
+IndexName: subheads_pk	Primary: True	Unique: True	Fields: sbh_hed_id; sbh_name; 

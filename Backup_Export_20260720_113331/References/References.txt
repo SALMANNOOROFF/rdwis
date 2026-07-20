@@ -1,0 +1,74 @@
+VBA Project References
+----------------------------------------------------------------------
+Name:    VBA
+Path:    C:\Program Files (x86)\Common Files\Microsoft Shared\VBA\VBA7.1\VBE7.DLL
+GUID:    {000204EF-0000-0000-C000-000000000046}
+Version: 4.2
+Broken:  False
+----------------------------------------
+Name:    Access
+Path:    C:\Program Files (x86)\Microsoft Office\root\Office16\MSACC.OLB
+GUID:    {4AFFC9A0-5F99-101B-AF4E-00AA003F0F07}
+Version: 9.0
+Broken:  False
+----------------------------------------
+Name:    stdole
+Path:    C:\Windows\SysWOW64\stdole2.tlb
+GUID:    {00020430-0000-0000-C000-000000000046}
+Version: 2.0
+Broken:  False
+----------------------------------------
+Name:    DAO
+Path:    C:\Program Files (x86)\Common Files\Microsoft Shared\OFFICE16\ACEDAO.DLL
+GUID:    {4AC9E1DA-5BAD-4AC7-86E3-24F4CDCECA28}
+Version: 12.0
+Broken:  False
+----------------------------------------
+Name:    MSForms
+Path:    C:\Windows\SysWOW64\FM20.DLL
+GUID:    {0D452EE1-E08F-101A-852E-02608C4D0BB4}
+Version: 2.0
+Broken:  False
+----------------------------------------
+Name:    Office
+Path:    C:\Program Files (x86)\Common Files\Microsoft Shared\OFFICE16\MSO.DLL
+GUID:    {2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}
+Version: 2.8
+Broken:  False
+----------------------------------------
+Name:    Word
+Path:    C:\Program Files (x86)\Microsoft Office\root\Office16\MSWORD.OLB
+GUID:    {00020905-0000-0000-C000-000000000046}
+Version: 8.7
+Broken:  False
+----------------------------------------
+Name:    VBScript_RegExp_55
+Path:    C:\Windows\SysWOW64\vbscript.dll\3
+GUID:    {3F4DACA7-160D-11D2-A8E9-00104B365C9F}
+Version: 5.5
+Broken:  False
+----------------------------------------
+Name:    Scripting
+Path:    C:\Windows\SysWOW64\scrrun.dll
+GUID:    {420B2830-E718-11CF-893D-00A0C9054228}
+Version: 1.0
+Broken:  False
+----------------------------------------
+Name:    Graph
+Path:    C:\Program Files (x86)\Microsoft Office\root\Office16\GRAPH.EXE
+GUID:    {00020802-0000-0000-C000-000000000046}
+Version: 1.9
+Broken:  False
+----------------------------------------
+Name:    SHDocVw
+Path:    C:\Windows\SysWOW64\ieframe.dll
+GUID:    {EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}
+Version: 1.1
+Broken:  False
+----------------------------------------
+Name:    AcroPDFLib
+Path:    C:\Program Files (x86)\Common Files\Adobe\Acrobat\ActiveX\AcroPDF.dll
+GUID:    {05BFD3F1-6319-4F30-B752-C7A22889BCC4}
+Version: 1.0
+Broken:  False
+----------------------------------------

@@ -1,0 +1,6 @@
+-- Query: hr_contracts_u
+-- Type: 0
+
+SELECT hr_contracts.*, IIf(IsNull([ctr_termindt]),[ctr_enddt],[ctr_termindt]) AS ctr_effenddt, IIf([emp_joindt]>[ctr_startdt] And [emp_joindt]<[ctr_enddt],[emp_joindt],[ctr_startdt]) AS ctr_effstartdt, hr_emps_u.emp_joindt
+FROM hr_emps_u INNER JOIN hr_contracts ON hr_emps_u.emp_id = hr_contracts.ctr_num;
+

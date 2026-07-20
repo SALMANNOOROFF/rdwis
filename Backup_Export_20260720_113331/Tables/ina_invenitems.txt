@@ -1,0 +1,19 @@
+Table: ina_invenitems
+RecordCount: 4647
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ini_id	Long	4	False	False	
+ini_inv_id	Long	4	False	False	
+ini_qty	Decimal	16	False	False	
+ini_qtyunit	Text	255	False	True	
+ini_parent_id	Long	4	False	False	
+ini_isparent	Text	5	False	True	
+ini_isassembly	Text	5	False	True	
+ini_location	Text	255	False	True	
+ini_group	Text	255	False	True	
+ini_person	Text	255	False	True	
+ini_dtg	Date/Time	8	False	False	
+ini_dispdate	Date/Time	8	False	False	
+ini_dispdtg	Date/Time	8	False	False	
+ini_status	Text	255	False	True	
+ini_remarks	Text	255	False	True	

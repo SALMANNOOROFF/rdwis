@@ -1,0 +1,6 @@
+Table: frm_specs2
+RecordCount: 87
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+spc_xfrm_id	Long	4	False	False	
+spc_spec	Text	255	False	True	

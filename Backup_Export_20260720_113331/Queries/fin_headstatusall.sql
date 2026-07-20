@@ -1,0 +1,8 @@
+-- Query: fin_headstatusall
+-- Type: 0
+
+SELECT cen_heads_u.hed_id, cen_heads_u.hed_code, cen_heads_u.hed_transtype, GetAccAllocation([hed_id]) AS allocation, GetAccMtssShare([hed_id]) AS mtss_share, GetAccReceived([hed_id]) AS received, GetAccExpenditure([hed_id]) AS expenditure, GetAccOutstandingCommits([hed_id]) AS commitments
+FROM cen_heads_u
+WHERE (((cen_heads_u.hed_type)="Project"))
+ORDER BY cen_heads_u.hed_id;
+

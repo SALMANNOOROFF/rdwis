@@ -1,0 +1,3 @@
+Indexes for Table: fin_sharesalloc
+------------------------------------------------------------
+IndexName: sharesalloc_pk	Primary: True	Unique: True	Fields: sha_hed_id; sha_ficmt_id; 

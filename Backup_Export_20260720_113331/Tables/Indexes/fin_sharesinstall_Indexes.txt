@@ -1,0 +1,3 @@
+Indexes for Table: fin_sharesinstall
+------------------------------------------------------------
+IndexName: shareinstall_pk	Primary: True	Unique: True	Fields: shi_hed_id; shi_fitrn_id; 

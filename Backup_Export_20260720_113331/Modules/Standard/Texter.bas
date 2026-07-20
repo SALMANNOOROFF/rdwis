@@ -1,0 +1,181 @@
+Attribute VB_Name = "Texter"
+Option Compare Database
+Option Explicit
+
+Public Sub sanitizeClipboard()
+
+Dim myData As DataObject
+Dim myText As String
+
+Set myData = New DataObject
+myData.GetFromClipboard
+myText = myData.GetText
+myText = Formatify(myText)
+myData.Clear
+myData.SetText (myText)
+myData.PutInClipboard
+
+End Sub
+
+Public Function UCaseSmart(strIn As String) As String
+
+Dim varArray As Variant
+Dim i As Integer
+Dim strFirst As String
+Dim strLast As String
+
+varArray = Split(strIn, " ")
+For i = LBound(varArray) To UBound(varArray)
+    strFirst = Left(varArray(i), Len(varArray(i)) - 1)
+    strLast = Right(varArray(i), 1)
+    If StrComp(strFirst, UCase(strFirst), vbBinaryCompare) <> 0 Or StrComp(strLast, LCase(strLast), vbBinaryCompare) <> 0 Then
+        varArray(i) = UCase(varArray(i))
+        End If
+    Next i
+UCaseSmart = Join(varArray, " ")
+End Function
+
+Function InList(Item As String, list As String) As Boolean
+If list = Item Then InList = True                       'same
+If list Like Item & ",*" Then InList = True             'start
+If list Like "*," & Item & ",*" Then InList = True      'middle
+If list Like "*," & Item Then InList = True             'end
+End Function
+
+Public Function Plural(WordGroup As String) As String
+Dim Words() As String
+Dim Item As Variant
+
+Words() = Split(WordGroup, " ")
+For Each Item In Words
+    Select Case True
+        Case Item = "is"
+            Plural = Plural & " " & "are"
+        Case Item Like "*y" And Not Item Like "*ay" And Not Item Like "*ey" And Not Item Like "*oy" And Not Item Like "*uy"
+            Plural = Plural & " " & Left(Item, Len(Item) - 1) & "ies"
+        Case Else
+            Plural = Plural & " " & Item & "s"
+        End Select
+    Next Item
+Plural = Trim(Plural)
+End Function
+
+Public Function Plr(qty, Item As String) As String
+
+If qty = 1 Then
+    Plr = qty & " " & Item
+    Exit Function
+    End If
+
+If Item Like "*y" And Not Item Like "*ay" And Not Item Like "*ey" And Not Item Like "*oy" And Not Item Like "*uy" Then
+        Plr = qty & " " & Left(Item, Len(Item) - 1) & "ies"
+        Exit Function
+        End If
+        
+Plr = qty & " " & Item & "s"
+    
+End Function
+
+Function MakePoints(IText As String) As String
+Dim strOText As String
+Dim n As Integer
+Dim intFrom As Integer
+Dim intTo As Integer
+Dim intLen As Integer
+
+intTo = 1
+intLen = Len(IText)
+For n = 97 To 104
+    intFrom = intTo
+    intTo = InStr(intFrom, IText, Chr(n + 1) & ".   ")
+    intTo = IIf(intTo = 0, intLen + 2, intTo)
+    strOText = strOText & Mid(IText, intFrom, intTo - intFrom - 1) & vbCrLf
+    'Debug.Print strOText
+    If intTo >= intLen Then GoTo After_Loop:
+    Next n
+After_Loop:
+MakePoints = strOText
+End Function
+
+Public Function Formatify(Content As String) As String
+Dim objRgex As RegExp
+Dim objMatch As MatchCollection
+Dim n As Integer
+Dim arrContent() As String
+Dim strReplace As String
+
+Set objRgex = New RegExp
+objRgex.IgnoreCase = True
+objRgex.Global = True
+objRgex.MultiLine = True
+
+'Remove Tabs
+objRgex.Pattern = "\t+"
+Content = objRgex.Replace(Content, " ")
+
+'Delete contents of paragraphs consisting of spaces only
+objRgex.Pattern = "\r\n +"
+Content = objRgex.Replace(Content, vbCrLf)
+
+'Remove double paragraph marks
+objRgex.Pattern = "(\r\n){2,}"
+Content = objRgex.Replace(Content, vbCrLf)
+
+objRgex.Global = False
+objRgex.MultiLine = False
+arrContent = Split(Content, vbCrLf)
+For n = 0 To UBound(arrContent)
+    'Format level 1 para numbers and alphabets
+    objRgex.Pattern = "^ *\w* *\. *"
+    If objRgex.test(arrContent(n)) = False Then GoTo Level_1_Ends
+    Set objMatch = objRgex.Execute(arrContent(n))
+    strReplace = objMatch(0)
+    Do While InStr(strReplace, " ") <> 0
+        strReplace = Replace(strReplace, " ", "")
+        Loop
+    If strReplace Like "#*" Then
+        strReplace = strReplace & String(3, " ")
+        Else
+        strReplace = String(7, " ") & strReplace & String(3, " ")
+        End If
+    arrContent(n) = objRgex.Replace(arrContent(n), strReplace)
+Level_1_Ends:
+
+    'Format level 2 para numbers and alphabets
+    objRgex.Pattern = "^ *\(\w*\) * *"
+    If objRgex.test(arrContent(n)) = False Then GoTo Level_2_Ends
+    Set objMatch = objRgex.Execute(arrContent(n))
+    strReplace = objMatch(0)
+    Do While InStr(strReplace, " ") <> 0
+        strReplace = Replace(strReplace, " ", "")
+        Loop
+    If strReplace Like "(#)*" Or strReplace Like "(##)*" Then
+        strReplace = String(14, " ") & strReplace & String(3, " ")
+        Else
+        strReplace = String(23, " ") & strReplace & String(3, " ")
+        End If
+    arrContent(n) = objRgex.Replace(arrContent(n), strReplace)
+Level_2_Ends:
+    
+    Next
+
+Content = ""
+For n = 0 To UBound(arrContent)
+    Content = Content & IIf(Content = "", "", vbCrLf) & arrContent(n)
+    Next
+
+'Add double paragraph marks
+objRgex.Global = True
+objRgex.MultiLine = True
+objRgex.Pattern = "(\r\n)"
+Content = objRgex.Replace(Content, vbCrLf & vbCrLf)
+
+Formatify = Content
+
+End Function
+
+
+Sub Doit()
+Debug.Print MakePoints("a.   sdf. b.   werw5.")
+'Debug.Print Chr(97)
+End Sub

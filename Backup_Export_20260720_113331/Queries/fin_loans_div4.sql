@@ -1,0 +1,7 @@
+-- Query: fin_loans_div4
+-- Type: 0
+
+SELECT fin_loans_div3.[Loan String], fin_loans_div3.From, fin_loans_div3.For, fin_loans_div3.A1, fin_loans_div3.A2, [A1]+Nz([A2],0) AS A
+FROM fin_loans_div3
+WHERE (((fin_loans_div3.A1)<>[A2]*(-1)) AND ((fin_loans_div3.A2)<0)) OR (((fin_loans_div3.A2) Is Null));
+

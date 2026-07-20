@@ -1,0 +1,7 @@
+-- Query: prj_events_detail
+-- Type: 0
+
+SELECT prj_events.evt_id, prj_events.evt_name, prj_events.evt_doer, prj_events.evt_effectee, prj_events.evt_dtg, prj_events.evt_xprj_id, prj_events.evt_xpgh_id, prj_events.evt_xcmt_id, prj_comments.cmt_comment, prj_comments.cmt_author, prj_prghistory.pgh_group
+FROM (prj_events LEFT JOIN prj_comments ON prj_events.evt_xcmt_id = prj_comments.cmt_id) INNER JOIN prj_prghistory ON prj_events.evt_xpgh_id = prj_prghistory.pgh_id
+ORDER BY prj_events.evt_dtg DESC;
+

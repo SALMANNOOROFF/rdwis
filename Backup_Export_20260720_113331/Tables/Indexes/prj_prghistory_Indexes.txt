@@ -1,0 +1,3 @@
+Indexes for Table: prj_prghistory
+------------------------------------------------------------
+IndexName: prghistory_pk	Primary: True	Unique: True	Fields: pgh_id; 

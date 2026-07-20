@@ -1,0 +1,7 @@
+-- Query: fin_sto_pcc_ipc1
+-- Type: 0
+
+SELECT fin_docs_ipc.docid, fin_docs_ipc.doctype, DateValue([rdate]) AS rsdate, fin_docs_ipc.title, fin_docs_ipc.effhed_id, fin_docs_ipc.effunt_id, fin_docs_ipc.hed_id, fin_docs_ipc.unt_id, IIf([transtype]=1,[amount1],[amount2]) AS amount, fin_docs_ipc.sudohed, fin_docs_ipc.amount1, fin_docs_ipc.tax1, fin_docs_ipc.amount2
+FROM fin_docs_ipc
+WHERE (((fin_docs_ipc.effhed_id)=Forms!vars!Parameter1) And ((fin_docs_ipc.sudohed) Is Null Or (fin_docs_ipc.sudohed)=""));
+

@@ -1,5 +1,0 @@
-QUERY: fin_sto_pcc_loansgiven
-
-SQL:
-SELECT Sum(fin_sto_pcc_loansgiven1.amount) AS SumOfamount
-FROM fin_sto_pcc_loansgiven1;

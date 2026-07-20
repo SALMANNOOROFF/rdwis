@@ -1,0 +1,63 @@
+CurrentDb Properties
+----------------------------------------------------------------------
+Name = H:\RDWIS 2.0\IS\dev.accdb
+Connect = 
+Transactions = True
+Updatable = True
+CollatingOrder = 1033
+QueryTimeout = 60
+Version = 14.0
+RecordsAffected = 0
+ReplicaID = 
+DesignMasterID = 
+ANSI Query Mode = 0
+Themed Form Controls = 1
+Use Microsoft Access 2007 compatible cache = 1
+Clear Cache on Close = 0
+Never Cache = 0
+AccessVersion = 09.50
+NavPane Category = 0
+Show Navigation Pane Search Bar = 1
+UseMDIMode = 1
+ShowDocumentTabs = True
+Picture Property Storage Format = 0
+WebDesignMode = 0
+CheckTruncatedNumFields = 1
+ProjVer = 142
+HasOfflineLists = 70
+Theme Resource Name = Office Theme
+NavPane Closed = 0
+NavPane Width = 438
+NavPane View By = 0
+NavPane Sort By = 1
+Property Sheet Label Width = 1845
+AppTitle = RDWIS
+StartUpShowDBWindow = False
+StartUpShowStatusBar = True
+AllowShortcutMenus = False
+AllowFullMenus = False
+AllowBuiltInToolbars = True
+AllowToolbarChanges = True
+AllowSpecialKeys = True
+UseAppIconForFrmRpt = False
+AllowDatasheetSchema = True
+CustomRibbonID = QATnClose
+DesignWithData = True
+StartUpForm = login
+Show Values Limit = 1000
+Show Values in Indexed = 1
+Show Values in Non-Indexed = 1
+Show Values in Remote = 0
+Auto Compact = 0
+FrontendType = fe_projects
+AllowBypassKey = True
+Use BigInt for linking and importing data = 0
+Continuous Form Navigation Keys = 0
+Use DateTime2 for linking and importing data = 0
+ConWord = Nothing
+ReadyForDeployment = False
+Build = 1150
+Continuous Form Record Navigation Keys = 0
+
+CurrentProject Properties
+----------------------------------------------------------------------

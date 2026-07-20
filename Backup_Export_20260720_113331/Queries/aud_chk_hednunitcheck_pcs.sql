@@ -1,0 +1,7 @@
+-- Query: aud_chk_hednunitcheck_pcs
+-- Type: 0
+
+SELECT pur_purcases.pcs_id, fin_commitments_pcs.cmt_id, pur_purcases.pcs_effhed_id, fin_commitments_pcs.cmt_effhed_id, pur_purcases.pcs_effunt_id, fin_commitments_pcs.cmt_effunt_id, pur_purcases.pcs_hed_id, fin_commitments_pcs.cmt_hed_id, pur_purcases.pcs_unt_id, fin_commitments_pcs.cmt_unt_id
+FROM pur_purcases INNER JOIN fin_commitments_pcs ON pur_purcases.pcs_id = fin_commitments_pcs.cmt_docid
+WHERE (((fin_commitments_pcs.cmt_effhed_id)<>[pcs_effhed_id])) OR (((fin_commitments_pcs.cmt_effunt_id)<>[pcs_effunt_id])) OR (((fin_commitments_pcs.cmt_hed_id)<>Nz([pcs_hed_id],0))) OR (((fin_commitments_pcs.cmt_unt_id)<>Nz([pcs_unt_id],0)));
+

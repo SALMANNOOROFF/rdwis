@@ -1,0 +1,7 @@
+Table: ina_invatspecs
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+iap_ias_id	Long	4	True	False	
+iap_specname	Text	255	True	True	
+iap_specvalue	Text	255	True	True	

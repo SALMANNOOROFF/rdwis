@@ -1,0 +1,8 @@
+-- Query: fin_headstatusall_open_temp_ua_adder
+-- Type: 64
+
+INSERT INTO fin_headstatusall_temp ( hed_unt_id, amount1, hed_code )
+SELECT cen_units_base_subheads.unt_id, GetUaSalForecast([unt_id]) AS forecast, "Unassigned" AS Expr1
+FROM cen_units_base_subheads
+WHERE (((GetUaSalForecast([unt_id]))<>0));
+

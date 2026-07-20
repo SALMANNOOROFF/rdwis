@@ -1,0 +1,15 @@
+Table: hr_jobs
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+job_company	Text	255	True	True	
+job_jobtitle	Text	255	True	True	
+job_repto	Text	255	False	True	
+job_team	Integer	2	False	False	
+job_from	Date/Time	8	True	False	
+job_to	Date/Time	8	False	False	
+job_resp	Text	255	False	True	
+job_ach	Text	255	False	True	
+job_emp_id	Text	13	True	True	
+job_id	Long	4	True	False	
+job_city	Text	255	True	True	

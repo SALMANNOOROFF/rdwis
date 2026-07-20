@@ -1,7 +1,0 @@
-QUERY: hr_completeness_u
-
-SQL:
-SELECT hr_emps_u.*, hr_empsexta.*, hr_empsextb.*, hr_empsextc.*, hr_completeness_u1.CountOfqlf_id, hr_completeness_u2.CountOfjob_emp_id, hr_completeness_u3.CountOfbac_emp_id, hr_completeness_u4.CountOfvcl_emp_id, hr_emps_u.emp_status
-FROM ((((((hr_emps_u LEFT JOIN hr_completeness_u1 ON hr_emps_u.emp_id = hr_completeness_u1.emp_id) LEFT JOIN hr_completeness_u2 ON hr_emps_u.emp_id = hr_completeness_u2.emp_id) LEFT JOIN hr_completeness_u3 ON hr_emps_u.emp_id = hr_completeness_u3.emp_id) LEFT JOIN hr_completeness_u4 ON hr_emps_u.emp_id = hr_completeness_u4.emp_id) LEFT JOIN hr_empsexta ON hr_emps_u.emp_id = hr_empsexta.empexta_emp_id) LEFT JOIN hr_empsextb ON hr_emps_u.emp_id = hr_empsextb.empextb_emp_id) LEFT JOIN hr_empsextc ON hr_emps_u.emp_id = hr_empsextc.empextc_emp_id
-WHERE (((hr_emps_u.emp_status) Like "Active*"))
-ORDER BY hr_emps_u.emp_unt_id, hr_emps_u.emp_name;

@@ -1,0 +1,3 @@
+Indexes for Table: hr_hirings
+------------------------------------------------------------
+IndexName: hirings_pk	Primary: True	Unique: True	Fields: hir_id; 

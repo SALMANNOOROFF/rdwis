@@ -1,0 +1,8 @@
+-- Query: pur_purreqitems_tempadder1
+-- Type: 0
+
+SELECT pur_purcaseitems.pci_pri_id, Sum(pur_purcaseitems.pci_qty) AS sum_pci_qty
+FROM pur_purcaseitems INNER JOIN pur_purcases ON pur_purcaseitems.pci_pcs_id = pur_purcases.pcs_id
+WHERE (((pur_purcases.pcs_status)="Draft"))
+GROUP BY pur_purcaseitems.pci_pri_id;
+

@@ -1,0 +1,16 @@
+Table: hr_qualifs2
+RecordCount: 499
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+qlf_id	Long	4	False	False	
+qlf_type	Text	255	False	True	
+qlf_level	Integer	2	False	False	
+qlf_name	Text	255	False	True	
+qlf_inst	Text	255	False	True	
+qlf_duration	Decimal	16	False	False	
+qlf_unit	Text	255	False	True	
+qlf_enddt	Date/Time	8	False	False	
+qlf_emp_id	Text	13	False	True	
+qlf_grade	Text	255	False	True	
+qlf_license	Text	255	False	True	
+qlf_spec	Text	255	False	True	

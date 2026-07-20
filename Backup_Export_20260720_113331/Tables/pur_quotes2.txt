@@ -1,0 +1,18 @@
+Table: pur_quotes2
+RecordCount: 1529
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+qte_date	Date/Time	8	False	False	
+qte_firmname	Text	255	False	True	
+qte_pcs_id	Long	4	False	False	
+qte_num	Text	255	False	True	
+qte_id	Long	4	False	False	
+qte_price	Decimal	16	False	False	
+qte_frm_id	Long	4	False	False	
+qte_techaccept	Text	5	False	True	
+qte_recomm	Text	5	False	True	
+qte_midprice	Decimal	16	False	False	
+qte_midtax	Decimal	16	False	False	
+qte_intprice	Decimal	16	False	False	
+qte_inttax	Decimal	16	False	False	
+qte_quotetype	Integer	2	False	False	

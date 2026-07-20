@@ -1,0 +1,9 @@
+Table: hr_contractplans2
+RecordCount: 3454
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cpn_id	Long	4	False	False	
+cpn_ctr_id	Long	4	False	False	
+cpn_startdt	Date/Time	8	False	False	
+cpn_enddt	Date/Time	8	False	False	
+cpn_hed_id	Long	4	False	False	

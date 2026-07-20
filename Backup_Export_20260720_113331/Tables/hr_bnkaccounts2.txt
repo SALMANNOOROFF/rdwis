@@ -1,0 +1,13 @@
+Table: hr_bnkaccounts2
+RecordCount: 205
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+bac_id	Long	4	False	False	
+bac_emp_id	Text	13	False	True	
+bac_bnkname	Text	255	False	True	
+bac_bchname	Text	255	False	True	
+bac_bchcode	Text	255	False	True	
+bac_acctitle	Text	255	False	True	
+bac_accnum	Text	255	False	True	
+bac_bchcity	Text	255	False	True	
+bac_selforpay	Text	5	False	True	

@@ -1,7 +1,0 @@
-TABLE: cen_globalvars1
-
-COLUMNS:
-- gvar_name | Type:10 | Size:255
-- gvar_value | Type:10 | Size:255
-- gvar_type | Type:10 | Size:255
-- gvar_remarks | Type:10 | Size:255

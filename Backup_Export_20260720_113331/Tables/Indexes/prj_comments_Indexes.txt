@@ -1,0 +1,3 @@
+Indexes for Table: prj_comments
+------------------------------------------------------------
+IndexName: comments_pk	Primary: True	Unique: True	Fields: cmt_id; 

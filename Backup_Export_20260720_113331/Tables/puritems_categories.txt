@@ -1,0 +1,6 @@
+Table: puritems_categories
+RecordCount: 1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cat_id	Long	4	False	False	
+cat_name	Text	120	False	True	

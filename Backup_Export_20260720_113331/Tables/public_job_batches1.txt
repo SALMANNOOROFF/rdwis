@@ -1,0 +1,14 @@
+Table: public_job_batches1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+id	Text	255	False	True	
+name	Text	255	False	True	
+total_jobs	Long	4	False	False	
+pending_jobs	Long	4	False	False	
+failed_jobs	Long	4	False	False	
+failed_job_ids	Memo	0	False	True	
+options	Memo	0	False	True	
+cancelled_at	Long	4	False	False	
+created_at	Long	4	False	False	
+finished_at	Long	4	False	False	

@@ -1,0 +1,9 @@
+Table: hr_empattachments
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+eat_objtype	Text	255	True	True	
+eat_objid	Text	255	True	True	
+eat_type	Text	255	True	True	
+eat_path	Text	255	False	True	
+eat_id	Long	4	True	False	

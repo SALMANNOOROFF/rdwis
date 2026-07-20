@@ -1,0 +1,3 @@
+Indexes for Table: hr_ctrcases
+------------------------------------------------------------
+IndexName: ctrcases_pk	Primary: True	Unique: True	Fields: ctc_id; 

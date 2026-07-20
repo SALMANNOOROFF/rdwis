@@ -1,0 +1,3 @@
+Indexes for Table: hr_empsextb
+------------------------------------------------------------
+IndexName: empsextb_pk	Primary: True	Unique: True	Fields: empextb_emp_id; 

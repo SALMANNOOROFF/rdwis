@@ -1,0 +1,7 @@
+-- Query: prj_mpr2
+-- Type: 0
+
+SELECT prj_prghistory_u.pgh_id, prj_prghistory_u.pgh_xprj_id, prj_prghistory_u.pgh_progress, prj_prghistory_u.pgh_status
+FROM prj_prghistory_u INNER JOIN prj_mprgroup ON prj_prghistory_u.pgh_xmgp_id = prj_mprgroup.mgp_id
+WHERE (((prj_mprgroup.mgp_status)="Last"));
+

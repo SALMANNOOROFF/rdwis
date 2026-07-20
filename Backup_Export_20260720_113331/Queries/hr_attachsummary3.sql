@@ -1,0 +1,6 @@
+-- Query: hr_attachsummary3
+-- Type: 0
+
+SELECT hr_contracts.ctr_num, IIf([ctr_startdt]<#1/1/2022#,"Old","Recent") AS [Currency], "Contract" AS eat_type, IIf(IsNull([ctr_path]),"Missing","Attached") AS Status
+FROM hr_contracts;
+

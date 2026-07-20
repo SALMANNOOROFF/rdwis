@@ -1,7 +1,0 @@
-QUERY: hr_ctrcases_u_draft
-
-SQL:
-SELECT hr_ctrcases_u.*
-FROM hr_ctrcases_u
-WHERE (((hr_ctrcases_u.ctc_status)="Draft"))
-ORDER BY hr_ctrcases_u.ctc_id DESC;

@@ -1,0 +1,13 @@
+Table: hr_ctrcaseminutes
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ccm_id	Long	4	True	False	
+ccm_date	Date/Time	8	False	False	
+ccm_ctrcases	Text	255	True	True	
+ccm_minute	Integer	2	True	False	
+ccm_lwoamount	Long	4	False	False	
+ccm_texta	Memo	0	False	True	
+ccm_textb	Memo	0	False	True	
+ccm_textc	Memo	0	False	True	
+ccm_textd	Memo	0	False	True	

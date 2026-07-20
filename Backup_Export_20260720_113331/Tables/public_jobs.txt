@@ -1,0 +1,11 @@
+Table: public_jobs
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+id	Decimal	16	False	False	
+queue	Text	255	False	True	
+payload	Memo	0	False	True	
+attempts	Integer	2	False	False	
+reserved_at	Long	4	False	False	
+available_at	Long	4	False	False	
+created_at	Long	4	False	False	

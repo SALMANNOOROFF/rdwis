@@ -1,5 +1,0 @@
-QUERY: fin_loans_detail3
-
-SQL:
-SELECT DISTINCT [fin_loans_detail1_temp].loan_group, [fin_loans_detail1_temp].loan_string AS loan_first
-FROM fin_loans_detail1_temp INNER JOIN fin_loans_detail2 ON ([fin_loans_detail1_temp].loan_group=fin_loans_detail2.loan_group) AND ([fin_loans_detail1_temp].trn_date=fin_loans_detail2.min_date);

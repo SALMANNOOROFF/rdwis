@@ -1,0 +1,11 @@
+Table: public_project_activities1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pja_id	Decimal	16	False	False	
+pja_prj_id	Decimal	16	False	False	
+pja_action	Text	255	False	True	
+pja_details	Memo	0	False	True	
+pja_user	Text	255	False	True	
+created_at	Date/Time	8	False	False	
+updated_at	Date/Time	8	False	False	

@@ -1,0 +1,7 @@
+-- Query: fin_docs_ipc1
+-- Type: 0
+
+SELECT pur_purcases.pcs_id AS docid, pur_purcases.pcs_type AS doctype, pur_purcases.pcs_date AS rdate, pur_purcases.pcs_title AS title, pur_purcases.pcs_effhed_id AS effhed_id, pur_purcases.pcs_effunt_id AS effunt_id, pur_purcases.pcs_hed_id AS hed_id, pur_purcases.pcs_unt_id AS unt_id, pur_purcases.pcs_sudohed AS sudohed, pur_purcases.pcs_midprice AS amount1, pur_purcases.pcs_midtax AS tax1, pur_purcases.pcs_price AS amount2, pur_purcases.pcs_transtype AS transtype
+FROM pur_purcases
+WHERE (((pur_purcases.pcs_status) In ("Under Scrutiny","Under Revision","Under Approval")));
+

@@ -1,0 +1,7 @@
+-- Query: hr_warnContractExpiryNear
+-- Type: 0
+
+SELECT hr_contracts_u_last_active.ctr_num
+FROM hr_contracts_u_last_active
+WHERE (((DateDiff("d",Date(),IIf(IsNull([ctr_termindt]),[ctr_enddt],[ctr_termindt])))<=60 And (DateDiff("d",Date(),IIf(IsNull([ctr_termindt]),[ctr_enddt],[ctr_termindt])))>=0));
+

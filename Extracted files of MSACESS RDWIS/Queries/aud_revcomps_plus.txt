@@ -1,5 +1,0 @@
-QUERY: aud_revcomps_plus
-
-SQL:
-SELECT aud_revcomps.*, CLng([rvc_rowid]) AS rvc_rowid_num
-FROM aud_revcomps;

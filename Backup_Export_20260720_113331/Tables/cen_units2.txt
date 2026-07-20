@@ -1,0 +1,18 @@
+Table: cen_units2
+RecordCount: 17
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+unt_id	Long	4	False	False	
+unt_type	Text	255	False	True	
+unt_name	Text	255	False	True	
+unt_namesh	Text	255	False	True	
+unt_lowerm	Long	4	False	False	
+unt_upperm	Long	4	False	False	
+unt_lowers	Long	4	False	False	
+unt_uppers	Long	4	False	False	
+unt_area	Text	255	False	True	
+unt_leadname	Text	255	False	True	
+unt_leadtitle	Text	255	False	True	
+unt_leadrank	Text	255	False	True	
+unt_leaddesig	Text	255	False	True	
+unt_leaddesigshort	Text	255	False	True	

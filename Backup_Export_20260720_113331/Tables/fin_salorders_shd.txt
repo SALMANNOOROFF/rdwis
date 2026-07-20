@@ -1,0 +1,8 @@
+Table: fin_salorders_shd
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+sod_sor_id	Long	4	True	False	
+sod_type	Text	5	False	True	
+sod_subhead	Text	255	True	True	
+sod_ratio	Decimal	16	True	False	

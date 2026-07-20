@@ -1,0 +1,22 @@
+Table: hr_contracts
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+ctr_unt_id	Long	4	True	False	
+ctr_num	Text	13	True	True	
+ctr_startdt	Date/Time	8	True	False	
+ctr_enddt	Date/Time	8	True	False	
+ctr_date	Date/Time	8	True	False	
+ctr_jobtitle	Text	255	True	True	
+ctr_grade	Text	255	True	True	
+ctr_salary	Long	4	True	False	
+ctr_hed_id	Long	4	False	False	
+ctr_id	Long	4	True	False	
+ctr_prob	Integer	2	False	False	
+ctr_probsal	Long	4	False	False	
+ctr_termindt	Date/Time	8	False	False	
+ctr_remarks	Text	255	False	True	
+ctr_path	Text	255	False	True	
+ctr_type	Integer	2	True	False	
+ctr_path2	Text	255	False	True	
+ctr_ctc_id	Long	4	False	False	

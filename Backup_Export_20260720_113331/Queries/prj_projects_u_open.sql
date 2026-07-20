@@ -1,0 +1,7 @@
+-- Query: prj_projects_u_open
+-- Type: 0
+
+SELECT prj_projects_u.*
+FROM prj_projects_u
+WHERE (((prj_projects_u.prj_status)<>"Completed" And (prj_projects_u.prj_status)<>"Cancelled"));
+

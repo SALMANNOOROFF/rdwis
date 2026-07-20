@@ -1,0 +1,3 @@
+Indexes for Table: cen_globalvars
+------------------------------------------------------------
+IndexName: globalvars_pk	Primary: True	Unique: True	Fields: gvar_name; 

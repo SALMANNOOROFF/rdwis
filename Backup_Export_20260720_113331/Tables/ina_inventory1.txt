@@ -1,0 +1,19 @@
+Table: ina_inventory1
+RecordCount: 4647
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+inv_id	Long	4	False	False	
+inv_pcs_id	Long	4	False	False	
+inv_pci_id	Long	4	False	False	
+inv_desc	Text	255	False	True	
+inv_details	Text	255	False	True	
+inv_spec_id	Long	4	False	False	
+inv_qty	Decimal	16	False	False	
+inv_qtyunit	Text	255	False	True	
+inv_unt_id	Long	4	False	False	
+inv_chargedate	Date/Time	8	False	False	
+inv_price	Decimal	16	False	False	
+inv_type	Text	255	False	True	
+inv_subtype	Text	255	False	True	
+inv_dtg	Date/Time	8	False	False	
+inv_prj_id	Long	4	False	False	

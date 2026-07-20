@@ -1,0 +1,3 @@
+Indexes for Table: hr_applicjobs
+------------------------------------------------------------
+IndexName: applicjobs_pk	Primary: True	Unique: True	Fields: apj_id; 

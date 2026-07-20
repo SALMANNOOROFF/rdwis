@@ -1,6 +1,0 @@
-QUERY: ina_assetitemsp_u_chargedoff
-
-SQL:
-SELECT ina_assetitemsp_u.*
-FROM ina_assetitemsp_u
-WHERE (((ina_assetitemsp_u.iac_status)="Issued to User" Or (ina_assetitemsp_u.iac_status)="Installed" Or (ina_assetitemsp_u.iac_status)="Consumed" Or (ina_assetitemsp_u.iac_status)="Written Off"));

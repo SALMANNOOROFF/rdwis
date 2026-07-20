@@ -1,0 +1,15 @@
+Table: hr_applicjobs1
+RecordCount: 1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+apj_company	Text	255	False	True	
+apj_jobtitle	Text	255	False	True	
+apj_repto	Text	255	False	True	
+apj_team	Integer	2	False	False	
+apj_from	Date/Time	8	False	False	
+apj_to	Date/Time	8	False	False	
+apj_resp	Text	255	False	True	
+apj_ach	Text	255	False	True	
+apj_id	Long	4	False	False	
+apj_apl_id	Long	4	False	False	
+apj_city	Text	255	False	True	

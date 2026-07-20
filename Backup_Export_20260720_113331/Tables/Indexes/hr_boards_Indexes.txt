@@ -1,0 +1,3 @@
+Indexes for Table: hr_boards
+------------------------------------------------------------
+IndexName: boards_pk	Primary: True	Unique: True	Fields: brd_id; 

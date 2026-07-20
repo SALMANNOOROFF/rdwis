@@ -1,0 +1,7 @@
+-- Query: fin_recordfrom
+-- Type: 0
+
+SELECT fin_recordfrom1.docid, fin_recordfrom1.doctype, DateValue([rdate]) AS rsdate, fin_recordfrom1.title, fin_recordfrom1.effhed_id, fin_recordfrom1.effunt_id, fin_recordfrom1.hed_id, fin_recordfrom1.unt_id, fin_recordfrom1.amount1, fin_recordfrom1.tax1, fin_recordfrom1.amount2, fin_recordfrom1.trn_id
+FROM fin_recordfrom1
+ORDER BY DateValue([rdate]);
+

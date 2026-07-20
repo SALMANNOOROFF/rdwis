@@ -1,0 +1,14 @@
+Database Relationships
+----------------------------------------------------------------------
+Relationship: MSysNavPaneGroupCategoriesMSysNavPaneGroups
+  Table:       MSysNavPaneGroupCategories
+  ForeignTable:MSysNavPaneGroups
+  Attributes:  4352
+  Field: Id -> ForeignName: GroupCategoryID
+----------------------------------------
+Relationship: MSysNavPaneGroupsMSysNavPaneGroupToObjects
+  Table:       MSysNavPaneGroups
+  ForeignTable:MSysNavPaneGroupToObjects
+  Attributes:  4352
+  Field: Id -> ForeignName: GroupID
+----------------------------------------

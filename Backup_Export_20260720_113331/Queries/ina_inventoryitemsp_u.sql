@@ -1,0 +1,8 @@
+-- Query: ina_inventoryitemsp_u
+-- Type: 0
+
+SELECT ina_invats.*, ina_invatcompsp.*, IIf(IsNull([iac_parent_id]),[ias_id],[parent_ias_id]) AS s, IIf(IsNull([iac_parent_id]),[iac_id],[iac_parent_id]) AS c
+FROM ina_invats INNER JOIN ina_invatcompsp ON ina_invats.ias_id = ina_invatcompsp.iac_ias_id
+WHERE (((ina_invats.ias_unt_id)>=getvar("varLower") And (ina_invats.ias_unt_id)<=getvar("varUpper")) AND ((ina_invats.ias_type2)=5))
+ORDER BY IIf(IsNull([iac_parent_id]),[ias_id],[parent_ias_id]) DESC , IIf(IsNull([iac_parent_id]),[iac_id],[iac_parent_id]) DESC , ina_invatcompsp.iac_isparent DESC , ina_invats.ias_desc;
+

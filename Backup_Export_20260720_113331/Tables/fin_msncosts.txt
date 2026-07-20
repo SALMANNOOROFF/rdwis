@@ -1,0 +1,9 @@
+Table: fin_msncosts
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+mct_prj_id	Long	4	True	False	
+mct_hed_id	Long	4	True	False	
+mct_msn_id	Long	4	True	False	
+mct_cost	Long	4	True	False	
+mct_msn_idd	Long	4	True	False	

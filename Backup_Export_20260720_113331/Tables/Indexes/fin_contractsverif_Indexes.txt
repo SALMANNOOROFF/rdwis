@@ -1,0 +1,3 @@
+Indexes for Table: fin_contractsverif
+------------------------------------------------------------
+IndexName: contractsverif_pk	Primary: True	Unique: True	Fields: cvf_ctr_id; 

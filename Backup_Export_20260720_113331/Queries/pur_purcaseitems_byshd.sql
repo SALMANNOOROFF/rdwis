@@ -1,0 +1,6 @@
+-- Query: pur_purcaseitems_byshd
+-- Type: 0
+
+SELECT pur_purcaseitems_byshd4.pci_subhead, Round([SumOfratio1],12) AS ratio1, Round([SumOfratio2],12) AS ratio2
+FROM pur_purcaseitems_byshd4;
+

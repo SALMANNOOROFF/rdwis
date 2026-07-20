@@ -1,5 +1,0 @@
-TABLE: frm_specs
-
-COLUMNS:
-- spc_xfrm_id | Type:4 | Size:4
-- spc_spec | Type:10 | Size:255

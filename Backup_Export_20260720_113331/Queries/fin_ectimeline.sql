@@ -1,0 +1,7 @@
+-- Query: fin_ectimeline
+-- Type: 0
+
+SELECT FirstDateThisMonth([docdate]) AS [month], fin_ectimeline_temp.subhead, Sum(fin_ectimeline_temp.amount) AS sum_amount
+FROM fin_ectimeline_temp
+GROUP BY FirstDateThisMonth([docdate]), fin_ectimeline_temp.subhead;
+

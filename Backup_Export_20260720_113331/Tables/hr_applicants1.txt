@@ -1,0 +1,32 @@
+Table: hr_applicants1
+RecordCount: 1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+apl_id	Long	4	False	False	
+apl_cnic	Text	15	False	True	
+apl_name	Text	255	False	True	
+apl_discip	Text	255	False	True	
+apl_qualif	Integer	2	False	False	
+apl_spec	Text	255	False	True	
+apl_paddress	Text	255	False	True	
+apl_dob	Date/Time	8	False	False	
+apl_dtg	Date/Time	8	False	False	
+apl_marital	Text	255	False	True	
+apl_ntnlty	Text	255	False	True	
+apl_pob	Text	255	False	True	
+apl_taddress	Text	255	False	True	
+apl_mobile	Text	13	False	True	
+apl_landline	Text	13	False	True	
+apl_gender	Text	255	False	True	
+apl_mobile2	Text	255	False	True	
+apl_rank	Text	255	False	True	
+apl_status	Text	255	False	True	
+apl_remarks	Text	255	False	True	
+apl_appliedfor	Text	255	False	True	
+apl_currentsal	Long	4	False	False	
+apl_expectedsal	Long	4	False	False	
+apl_experience	Decimal	16	False	False	
+apl_expjoindt	Date/Time	8	False	False	
+apl_email	Text	255	False	True	
+apl_father	Text	255	False	True	
+apl_unt_id	Long	4	False	False	

@@ -1,0 +1,3 @@
+Indexes for Table: frm_projects
+------------------------------------------------------------
+IndexName: projects_pk	Primary: True	Unique: True	Fields: prj_xfrm_id; prj_name; 

@@ -1,5 +1,0 @@
-QUERY: aud_revs_plus
-
-SQL:
-SELECT aud_revs.*, CLng([rev_objid]) AS rev_obj_id_num
-FROM aud_revs;

@@ -1,0 +1,4 @@
+Indexes for Table: fin_msncosts
+------------------------------------------------------------
+IndexName: msncosts_pk	Primary: True	Unique: True	Fields: mct_msn_idd; 
+IndexName: msncosts_un	Primary: False	Unique: True	Fields: mct_prj_id; mct_msn_id; 

@@ -1,0 +1,8 @@
+Table: cen_globalvars2
+RecordCount: 5
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+gvar_name	Text	255	False	True	
+gvar_value	Text	255	False	True	
+gvar_type	Text	255	False	True	
+gvar_remarks	Text	255	False	True	

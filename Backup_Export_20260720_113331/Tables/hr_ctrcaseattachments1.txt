@@ -1,0 +1,9 @@
+Table: hr_ctrcaseattachments1
+RecordCount: 0
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+cat_objtype	Text	255	False	True	
+cat_objid	Long	4	False	False	
+cat_type	Text	255	False	True	
+cat_path	Text	255	False	True	
+cat_id	Long	4	False	False	

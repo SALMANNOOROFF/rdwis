@@ -1,0 +1,17 @@
+Table: pur_purreqitems
+RecordCount: -1
+------------------------------------------------------------
+FieldName	Type	Size	Required	AllowZeroLength	DefaultValue
+pri_prq_id	Long	4	True	False	
+pri_serial	Integer	2	True	False	
+pri_desc	Memo	0	True	True	
+pri_price	Decimal	16	True	False	
+pri_qty	Decimal	16	True	False	
+pri_qtyunit	Text	255	True	True	
+pri_type	Integer	2	True	False	
+pri_category	Integer	2	True	False	
+pri_id	Long	4	True	False	
+pri_fulfilment	Decimal	16	False	False	
+pri_appqty	Decimal	16	False	False	
+pri_remarks	Text	255	False	True	
+pri_subtype	Text	255	True	True	
