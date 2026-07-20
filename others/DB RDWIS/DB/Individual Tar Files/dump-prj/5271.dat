@@ -1,0 +1,407 @@
+9	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	135
+1	200002	Milestone	Concept Demonstration	\N	\N	2017-12-03	2017-11-28	\N	\N	\N	Completed	\N	1
+2	200002	Milestone	Validation onboard PNS SAIF and ZULFIQUAR	\N	\N	2018-01-03	2018-01-12	\N	\N	\N	Completed	\N	2
+3	200002	Milestone	Interfacing of 04 x F22P Ships	\N	\N	2018-04-03	2019-01-15	\N	\N	\N	Completed	\N	3
+1	200003	Milestone	Global Plan	\N	\N	2020-03-20	2020-01-31	\N	\N	\N	Completed	\N	5
+2	200003	Milestone	CDR	\N	\N	2020-12-31	2020-12-15	\N	\N	\N	Completed	hardware ordered	6
+3	200003	Milestone	Analog interfaces	\N	\N	2020-07-31	2020-01-31	\N	\N	\N	Completed	\N	7
+6	200003	Milestone	Warranty	\N	\N	2023-09-30	2023-10-31	\N	\N	\N	Completed	\N	10
+1	200004	Milestone	Submission of Project Plan	\N	\N	2020-10-20	2020-10-20	\N	\N	\N	Completed	\N	11
+2	200004	Milestone	Submission of baseline performance analysis	\N	\N	2020-11-23	2021-03-15	\N	\N	\N	Completed	\N	12
+3	200004	Milestone	Submission of hardware purchase order	\N	\N	2021-11-30	2021-12-15	\N	\N	\N	Completed	\N	13
+6	200004	Milestone	Warranty	\N	\N	2022-06-15	\N	\N	\N	\N	Awaited	\N	16
+1	200006	Milestone	Submission of GPP and list of deliverables	4000000	\N	2022-02-04	2022-01-25	\N	\N	\N	Completed	\N	17
+2	200006	Milestone	Submission of CDR	4000000	\N	2022-02-21	2022-01-25	\N	\N	\N	Completed	\N	18
+3	200006	Milestone	Installation and testing of non-ruggedized prototype	4000000	\N	2022-03-21	2022-01-25	\N	\N	\N	Completed	\N	19
+1	200007	Milestone	Submission of GPP	\N	\N	2022-04-14	2022-04-04	\N	\N	\N	Completed	\N	22
+2	200007	Milestone	Submission of CDR	\N	\N	2022-05-14	2022-04-07	\N	\N	\N	Completed	\N	23
+3	200007	Milestone	Installation of non-rugged prototype	\N	\N	2022-10-15	2022-11-07	\N	\N	\N	Completed	\N	24
+1	200008	Milestone	Submission of Global Plan	2500000	\N	2021-11-20	2021-10-18	\N	\N	\N	Completed	\N	27
+2	200008	Milestone	Submission of CDR	2500000	\N	2022-01-20	2022-05-15	\N	\N	\N	Completed	\N	28
+3	200008	Milestone	Lab trials of Decoder and LEDs	3000000	\N	2022-03-21	2022-12-01	\N	\N	\N	Completed	\N	29
+1	250001	Milestone	Face detection and recognition of registered pedestrians	\N	\N	2018-12-15	2018-12-15	\N	\N	\N	Completed	\N	47
+2	250001	Milestone	Automatic number plate detection and  recognition of registered vehicles	\N	\N	2018-12-15	2018-12-15	\N	\N	\N	Completed	\N	48
+3	250001	Milestone	Identification of stopped/ suspicious  vehicle on unit adjacent road	\N	\N	2018-12-15	2018-12-15	\N	\N	\N	Completed	\N	49
+6	250001	Milestone	Object Classification	\N	\N	2019-07-15	2019-07-15	\N	\N	\N	Completed	\N	52
+7	250001	Milestone	Object (Persons and Vehicles) Count	\N	\N	2019-07-15	2019-07-15	\N	\N	\N	Completed	\N	53
+8	250001	Milestone	Main GUI	\N	\N	2019-07-15	2019-07-15	\N	\N	\N	Completed	\N	54
+0	250002	Milestone	Approval of VRC work order	0	\N	\N	\N	\N	\N	\N	Not started	\N	55
+1	250002	Milestone	Submission of VR Center Plan and infrastructure design	4400000	\N	\N	\N	\N	\N	\N	Not started	\N	56
+2	250002	Milestone	Basic VR infrastructure / test environment development	6600000	\N	\N	\N	\N	\N	\N	Not started	\N	57
+3	250002	Milestone	Procurement of Batch-1 VR basic hardware such as computational equipment, headgear, body gear and controllers, scanners and 360 degree cameras etc. including installation and test/trials	6600000	\N	\N	\N	\N	\N	\N	Not started	\N	58
+1	250003	Milestone	Acceptance of Work Order	0	\N	2023-07-15	2023-07-15	\N	\N	\N	Completed	\N	61
+2	250003	Milestone	Submission of Initial Design Document	\N	\N	2023-07-31	2023-07-31	\N	\N	\N	Completed	\N	62
+2	200011	Milestone	Acceptance by CICP	\N	\N	2022-12-28	2023-01-12	\N	\N	\N	Completed	\N	32
+6	200013	Milestone	Warranty	\N	\N	2023-10-06	\N	\N	\N	\N	Not started	\N	39
+1	200014	Milestone	Submission of Global Project Plan	\N	\N	2023-10-06	2023-10-06	\N	\N	\N	Completed	\N	40
+1	300001	Milestone	Acceptance of Work Order	\N	\N	2020-07-10	2020-07-11	\N	\N	\N	Completed	\N	70
+2	300001	Milestone	Submission of Project Plan	\N	\N	2020-08-09	2020-08-07	\N	\N	\N	Completed	\N	71
+3	300001	Milestone	Submission of Hardware Purchase Order	\N	\N	2020-10-09	2020-10-09	\N	\N	\N	Completed	\N	72
+1	300003	Milestone	Acceptance of Work Order	\N	\N	2022-01-01	2022-01-01	\N	\N	\N	Completed	\N	75
+2	300003	Milestone	Submission of Project Plan	\N	\N	2022-02-01	2022-01-24	\N	\N	\N	Completed	\N	76
+3	300003	Milestone	Submission of Hardware Purchase Order	\N	\N	2022-03-01	2022-01-24	\N	\N	\N	Completed	\N	77
+6	300003	Milestone	Submission of Design of the Prototype ROV GUI Console	\N	\N	2022-07-01	2022-06-28	\N	\N	\N	Completed	\N	80
+7	300003	Milestone	Preliminary Lab Trials of the Prototype ROV	\N	\N	2023-01-01	2022-12-27	\N	\N	\N	Completed	\N	81
+1	200013	Milestone	Submission of Global Project Plan	\N	\N	2023-06-15	2024-07-04	\N	\N	\N	Completed	\N	34
+2	200013	Milestone	Acceptance of Comprehensive System Design	\N	\N	2023-09-15	2024-10-25	\N	\N	\N	Completed	\N	35
+3	200013	Milestone	Acceptance of MMI	\N	\N	2023-11-30	2024-10-25	\N	\N	\N	Completed	\N	36
+1	300004	Milestone	Acceptance of Work Order	\N	\N	\N	\N	\N	\N	\N	Not started	\N	82
+5	200003	Physical	Final Acceptance	\N	\N	2023-09-30	2023-10-31	\N	\N	\N	Completed	\N	9
+5	200004	Physical	Acceptance by PN	\N	\N	2021-11-30	\N	\N	\N	\N	In progress	\N	15
+5	200006	Physical	Warranty	8000000	\N	2023-07-31	\N	\N	\N	\N	In progress	\N	21
+5	200007	Physical	Completion of Warranty	\N	\N	2024-05-21	\N	\N	\N	\N	In progress	\N	26
+5	200008	Physical	Warranty	500000	\N	2023-06-21	\N	\N	\N	\N	Not started	\N	31
+5	250001	Physical	Crowd Detection	\N	\N	2018-12-15	2018-12-15	\N	\N	\N	Completed	\N	51
+5	250002	Physical	Submission of VRC Phase-I completion report	400000	\N	\N	\N	\N	\N	\N	Not started	\N	60
+5	200013	Physical	SATs	\N	\N	2023-10-06	\N	\N	\N	\N	Not started	\N	38
+5	250003	Physical	Release of GUI dashboard	\N	\N	\N	\N	\N	\N	\N	Not started	\N	65
+5	300001	Physical	Submission of Final Design, experiments/ lab trials/ simulation results	\N	\N	2021-05-09	2021-05-07	\N	\N	\N	Completed	\N	74
+5	300003	Physical	Submission of Design of the ROV Development & Testing Facility	\N	\N	2022-05-01	2022-04-28	\N	\N	\N	Completed	\N	79
+2	300004	Milestone	Submission of Project Plan	\N	\N	\N	\N	\N	\N	\N	Not started	\N	83
+3	300004	Milestone	Submission of Hardware Purchase Order	\N	\N	\N	\N	\N	\N	\N	Not started	\N	84
+6	300004	Milestone	Submission of Final Design, Experiments/ Lab Trials/ Simulation Results	\N	\N	\N	\N	\N	\N	\N	Not started	\N	87
+1	350002	Milestone	PoC of jamming	\N	\N	2019-02-28	2019-02-28	\N	\N	\N	Completed	\N	94
+2	350002	Milestone	Installation at Naval Air Station (NAS), TURBAT	\N	\N	2019-08-29	2019-08-31	\N	\N	\N	Completed	\N	95
+3	350002	Milestone	PoC of Static Spoofing	\N	\N	2019-08-30	2019-08-31	\N	\N	\N	Completed	\N	96
+6	350002	Milestone	Reactive Jamming (Eagle Hunt-02)	\N	\N	2020-02-15	2020-06-30	\N	\N	\N	Completed	\N	99
+7	350002	Milestone	PoC of 3D Dynamic Spoofing	\N	\N	2020-03-31	2020-03-31	\N	\N	\N	Completed	\N	100
+8	350002	Milestone	Final Spoofing Trials (Eagle Hunt-03)	\N	\N	2020-05-31	2020-11-13	\N	\N	\N	Completed	\N	101
+9	350002	Milestone	Complete Solution in Container & Product Handover	\N	\N	2020-07-30	2022-03-30	\N	\N	\N	Completed	\N	102
+1	350003	Milestone	Acceptance of Work Order	\N	\N	2020-07-12	2020-07-12	\N	\N	\N	Completed	\N	103
+2	350003	Milestone	Submission of Global Project Plan	\N	\N	2020-08-31	2020-08-31	\N	\N	\N	Completed	\N	104
+3	350003	Milestone	Submission of Hardware purchase order for lab development	\N	\N	2020-09-30	2020-09-22	\N	\N	\N	Completed	\N	105
+6	350003	Milestone	Submission of \r\n(a) Final Design \r\n(b) Report of Power Combining of two 1 KW commercial magnetrons \r\n(c) Research plan for next stage\r\n(d) Physical inspection of delivered stores/items	\N	\N	2021-07-31	2021-07-30	\N	\N	\N	Completed	\N	108
+1	350004	Milestone	Acceptance of Work Order	\N	\N	2020-07-12	2020-07-07	\N	\N	\N	Completed	\N	109
+2	350004	Milestone	Submission of Project Plan	\N	\N	2020-08-31	2020-08-30	\N	\N	\N	Completed	\N	110
+3	350004	Milestone	Submission of  Purchase Order	\N	\N	2020-09-30	2020-09-22	\N	\N	\N	Completed	\N	111
+6	350004	Milestone	Submission of Final Design of MALE UCAV and physical inspection of delivered stores/ items	\N	\N	2021-07-31	2021-07-30	\N	\N	\N	Completed	\N	114
+7	350004	Milestone	Acceptance of WO 2	\N	\N	2021-08-01	\N	\N	\N	\N	Awaited	\N	115
+8	350004	Milestone	Submission of Project Plan	\N	\N	2021-09-01	\N	\N	\N	\N	Not started	\N	116
+9	350004	Milestone	Submission of Hardare/ Deliverable purchase order for raw material and partial avionics	\N	\N	2021-10-01	\N	\N	\N	\N	Not started	\N	117
+10	350004	Milestone	Engine Test Bed Design	\N	\N	2021-11-01	\N	\N	\N	\N	Not started	\N	118
+11	350004	Milestone	Avionics Test Bed Design	\N	\N	2021-11-01	\N	\N	\N	\N	Not started	\N	119
+12	350004	Milestone	Material Testing Initiation for Airframe Manufacturing	\N	\N	2021-11-01	\N	\N	\N	\N	Not started	\N	120
+13	350004	Milestone	Initiation of Airframe Manufacturing	\N	\N	2022-02-01	\N	\N	\N	\N	Not started	\N	121
+14	350004	Milestone	Engine testing	\N	\N	2022-04-01	\N	\N	\N	\N	Not started	\N	122
+15	350004	Milestone	Initiation of Bench testing of partial avionics components - Initiation of development of ICDs	\N	\N	2022-05-01	\N	\N	\N	\N	Not started	\N	123
+16	350004	Milestone	Bench Testing of Partial Avionics, test sheet submission, inspection of acquired items/ stores	\N	\N	2022-07-01	\N	\N	\N	\N	Not started	\N	124
+17	350004	Milestone	Manufacturing of airframe components and plans for wind tunnel	\N	\N	2022-07-31	\N	\N	\N	\N	Not started	\N	125
+0	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	126
+1	350005	Milestone	Acceptance of Work Order	\N	\N	2020-07-30	2020-07-11	\N	\N	\N	Completed	\N	127
+2	350005	Milestone	Submission of Project Plan	\N	\N	2020-08-31	2020-07-31	\N	\N	\N	Completed	\N	128
+7	250003	Milestone	Delivery of VR based STLT simulator, system deployment, testing & evaluation, submission of user manuals, acceptance trials, user training and deliverables	\N	\N	\N	\N	\N	\N	\N	Not started	\N	67
+8	250003	Milestone	Acceptance of STLT system and submission of completion report	\N	\N	\N	\N	\N	\N	\N	Not started	\N	68
+9	250003	Milestone	Completion of warranty period	\N	\N	\N	\N	\N	\N	\N	Not started	\N	69
+3	350005	Milestone	Submission of Purchase Order	\N	\N	2020-09-30	2020-09-22	\N	\N	\N	Completed	\N	129
+6	350005	Milestone	Submission of Final Design	\N	\N	2021-01-31	2021-01-20	\N	\N	\N	Completed	\N	132
+7	350005	Milestone	Delivery of Prototype High Speed Target Drone\r\nand physical inspection of delivered stores/ items	\N	\N	2021-07-31	2021-07-30	\N	\N	\N	Completed	\N	133
+8	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	134
+10	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	136
+11	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	137
+12	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	138
+13	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	139
+14	350005	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	140
+1	350006	Milestone	Acceptance of Work order	\N	\N	2021-12-15	2021-12-15	\N	\N	\N	Completed	\N	141
+2	350006	Milestone	Submission of Phase II Project Plan	\N	\N	2022-01-15	2022-04-15	\N	\N	\N	Completed	\N	142
+3	350006	Milestone	Submission of Design Engineering Study	\N	\N	2022-02-15	2022-02-15	\N	\N	\N	Completed	\N	143
+6	350006	Milestone	Handling over of Documentation / ILS	\N	\N	2022-05-15	2022-06-16	\N	\N	\N	Completed	\N	146
+7	350006	Milestone	Conduct of Aerial Test in lines with mutually agreed ATPs	\N	\N	2022-06-15	\N	\N	\N	\N	Not started	\N	147
+1	350009	Milestone	Issuance of work order	\N	\N	2020-06-01	2020-06-01	\N	\N	\N	Completed	\N	148
+2	350009	Milestone	Submission of Project Management Plan (PMP)	\N	\N	2020-06-15	2020-06-15	\N	\N	\N	Completed	\N	149
+3	350009	Milestone	Submission of System Design  Document	\N	\N	2020-07-30	2020-07-30	\N	\N	\N	Completed	\N	150
+6	350009	Milestone	Delivery of batch-II (3 to 5 systems)	\N	\N	2021-02-28	2021-02-27	\N	\N	\N	Completed	\N	153
+7	350009	Milestone	Delivery of Third  batch-III (complete 10 systems)	\N	\N	2021-05-31	2021-05-31	\N	\N	\N	Completed	\N	154
+1	350021	Milestone	Work Order Effective Date	\N	\N	2023-03-01	2023-03-01	\N	\N	\N	Completed	\N	226
+5	300004	Physical	Submission of Critical Design	\N	\N	\N	\N	\N	\N	\N	Not started	\N	86
+5	350002	Physical	PoC of 2D Dynamic Spoofing	\N	\N	2019-11-30	2019-11-30	\N	\N	\N	Completed	\N	98
+5	350003	Physical	Submission of critical design	\N	\N	2020-11-30	2020-11-27	\N	\N	\N	Completed	\N	107
+5	350004	Physical	Submission of (critical) design	\N	\N	2020-11-30	2020-11-27	\N	\N	\N	Completed	\N	113
+5	350005	Physical	Submission of critical design	\N	\N	2020-11-30	2020-11-27	\N	\N	\N	Completed	\N	131
+5	350006	Physical	Conduct of Ground Test in lines with mutually agreed ATPs	\N	\N	2022-04-15	2022-10-24	\N	\N	\N	Completed	\N	145
+5	350009	Physical	Delivery of batch-I (3 to 5 systems)	\N	\N	2020-09-30	2020-09-29	\N	\N	\N	Completed	\N	152
+8	350009	Milestone	Conduct of training, provision of complete documentation and ILS package data	\N	\N	2021-06-30	2021-07-09	\N	\N	\N	Completed	\N	155
+9	350009	Milestone	Completion of warranty period	\N	\N	2022-05-31	2022-05-30	\N	\N	\N	Completed	\N	156
+1	350010	Milestone	Acceptance of Work Order	\N	\N	2021-02-01	2021-02-02	\N	\N	\N	Completed	\N	157
+2	350010	Milestone	Submission of Project Plan	\N	\N	2021-02-01	2021-03-03	\N	\N	\N	Completed	\N	158
+3	350010	Milestone	Submission of Design Engineering Study	\N	\N	2021-03-30	2021-03-29	\N	\N	\N	Completed	\N	159
+6	350010	Milestone	(1) Acceptance / Project Completion Certificate              (2) Documentations i.a.w clause-21 of Annex A to work order	\N	\N	2022-04-01	2022-07-28	\N	\N	\N	Completed	\N	162
+7	350010	Milestone	Warranty Completion	\N	\N	2023-07-29	2023-07-29	\N	\N	\N	Completed	\N	163
+1	350011	Activity	Issuance of Work order	\N	2021-04-15	\N	\N	0	\N	\N	In progress	\N	164
+2	350011	Activity	Submission of Project Plan	\N	2021-05-15	\N	\N	0	\N	\N	Not started	\N	165
+3	350011	Activity	Submission of Design Engineering Study	\N	2021-06-15	\N	\N	0	\N	\N	Not started	\N	166
+6	350011	Activity	Delivery of POC-02	\N	2022-08-15	\N	\N	0	\N	\N	Not started	\N	169
+1	350012	Activity	Issuance of Work order	\N	2021-06-10	\N	2021-06-10	100	\N	\N	Completed	\N	170
+2	350012	Activity	Submission of Project Plan	\N	2021-07-10	\N	2021-07-09	100	\N	\N	Completed	\N	171
+3	350012	Activity	Submission of Finalized Case Study	\N	2021-09-10	\N	2021-09-06	100	\N	\N	Completed	\N	172
+6	350012	Activity	Validation of Framework and Development of GUI	\N	2022-03-10	\N	2023-07-05	100	\N	\N	Completed	\N	175
+7	350012	Activity	Training of PN Personnel	\N	2023-07-10	\N	2023-10-23	100	\N	\N	Completed	\N	176
+8	350012	Activity	Acceptance of System Documentation	\N	2023-07-10	\N	\N	0	\N	\N	In progress	\N	177
+1	350013	Milestone	Issuance of Work Order.	\N	\N	2020-04-30	2020-04-30	\N	\N	\N	Completed	\N	179
+2	350013	Milestone	Submission of Project Plan	\N	\N	2020-05-31	2020-04-30	\N	\N	\N	Completed	\N	180
+3	350013	Milestone	Submission of SDD (System Design Documents) including Hardware List	\N	\N	2020-06-30	2020-04-30	\N	\N	\N	Completed	\N	181
+6	350013	Milestone	Los VTS trials onboard ship through Video Streaming Server (VSS)	\N	\N	2021-02-08	2020-12-30	\N	\N	\N	Completed	\N	184
+7	350013	Milestone	Receipt and FATs of 2nd Batch of equipment (01 x TX, 02 x RX, 01x GT&RS and 01 xLoS VTS Vans Development)	\N	\N	2022-03-08	2022-03-07	\N	\N	\N	Completed	\N	185
+8	350013	Milestone	Land approval for GT&RS	\N	\N	2022-06-07	2022-12-13	\N	\N	\N	Completed	\N	186
+9	350013	Milestone	Completion of Warranty Period (1st Batch)	\N	\N	2021-12-30	2021-12-30	\N	\N	\N	Completed	\N	187
+10	350013	Milestone	Receipt and FATs of 3rd Batch of equipment (02 x TX, 03 x RX, 02 x GT&RS and 01 x LoS VTS Vans Development) and installation of all systems	\N	\N	2022-06-07	2022-06-03	\N	\N	\N	Completed	\N	188
+11	350013	Milestone	Construction of 03 x GT&RS	\N	\N	2022-12-08	2023-06-02	\N	\N	\N	Completed	\N	189
+12	350013	Milestone	Completion of Warranty Period (2nd Batch)	\N	\N	2023-03-08	2023-03-01	\N	\N	\N	Completed	\N	190
+13	350013	Milestone	Installation & ATPs of Complete System	\N	\N	2023-02-08	2023-07-31	\N	\N	\N	Completed	\N	191
+14	350013	Milestone	Completion of Warranty Period (3rd Batch)	\N	\N	2023-06-07	2023-06-03	\N	\N	\N	Completed	\N	192
+1	350014	Milestone	Acceptance of Work Order	\N	\N	2021-08-15	2021-08-14	\N	\N	\N	Completed	\N	193
+2	350014	Milestone	Submission of Project Plan	\N	\N	2021-09-15	2021-09-14	\N	\N	\N	Completed	\N	194
+3	350014	Milestone	Submission of Design Engineering Study	\N	\N	2021-10-15	2021-10-14	\N	\N	\N	Completed	\N	195
+6	350014	Milestone	Lab & Field trials	\N	\N	2022-08-15	2022-10-29	\N	\N	\N	Completed	\N	198
+7	350014	Milestone	Warranty	\N	\N	2023-08-14	2023-08-15	\N	\N	\N	Completed	\N	199
+1	350015	Milestone	Acceptance of Work Order	\N	\N	2021-12-15	2021-12-15	\N	\N	\N	Completed	\N	200
+2	350015	Milestone	Submission of Project Plan Stage-II	\N	\N	2022-01-15	2022-01-15	\N	\N	\N	Completed	\N	201
+3	350015	Milestone	Submission of hardware purchase order for Experimental Components for Magnetron Combination\r\n\r\npurchase order for Experimental Components for Magnetron Combination\r\n\r\npurchase order for Experimental Components for Magnetron Combination	\N	\N	2022-02-15	2022-02-15	\N	\N	\N	Completed	\N	202
+6	350015	Milestone	Submission of experiment Report of FPGA based implementation of control loops for injection locking of single magnetron	\N	\N	2022-06-15	2022-06-30	\N	\N	\N	Completed	\N	205
+7	350015	Milestone	(a)\tSubmission of experiment Report of FPGA based implementation of control loops for injection locking of two magnetron\r\n(b) Physical inspection of delivered stores/items\r\n\tPhysical inspection of delivered stores/ items	\N	\N	2022-08-15	2022-08-22	\N	\N	\N	Completed	\N	206
+1	350019	Milestone	Work Order Effective Date	\N	\N	2023-03-01	2023-03-01	\N	\N	\N	Completed	\N	213
+2	350019	Milestone	Submission of Global Project Plan	\N	\N	2023-03-01	2023-04-01	\N	\N	\N	Completed	\N	214
+3	350019	Milestone	Submission of Degradation Report	\N	\N	2023-05-01	2023-05-02	\N	\N	\N	Completed	\N	215
+7	350019	Milestone	Field testing with LUNA Ground Station	\N	\N	2024-03-01	\N	\N	\N	\N	Not started	\N	219
+1	350020	Milestone	Work Order Effective Date	\N	\N	2023-03-01	2023-03-01	\N	\N	\N	Completed	\N	220
+2	350020	Milestone	Submission of Global Project Plan	\N	\N	2023-03-01	2023-04-01	\N	\N	\N	Completed	\N	221
+6	350019	Milestone	Submission of Documentation	\N	\N	2024-02-01	2024-02-01	\N	\N	\N	Completed	\N	218
+3	350020	Milestone	Submission of Design Engineering Study	\N	\N	2023-05-01	2023-05-02	\N	\N	\N	Completed	\N	222
+5	350010	Physical	Acceptance of FATs	\N	\N	2022-02-01	2021-12-31	\N	\N	\N	Completed	\N	161
+5	350011	Physical	Delivery of POC-01	\N	2021-12-15	\N	\N	0	\N	\N	Not started	\N	168
+5	350012	Physical	Implementation of RUL Prediction Algorithms on historical database	\N	2022-01-10	\N	2022-01-07	100	\N	\N	Completed	\N	174
+5	350013	Physical	ATPs /Commissioning of 1st Batch of equipment (02 x TX, 02 x RX, 01 x GTRS and 01 x LoS VTS Vans Development)	\N	\N	2021-01-08	2020-12-08	\N	\N	\N	Completed	\N	183
+5	350014	Physical	Hardware Lab Assembly	\N	\N	2022-05-15	2022-05-13	\N	\N	\N	Completed	\N	197
+5	350015	Physical	Submission of Design of feedback control systems  for power combining of two  injection locked magnetrons	\N	\N	2022-05-15	2022-05-13	\N	\N	\N	Completed	\N	204
+2	350021	Milestone	Submission of Project Plan	\N	\N	2023-03-01	2023-03-06	\N	\N	\N	Completed	\N	227
+3	350021	Milestone	Submission of Digital Video Link Design Report	\N	\N	2023-09-01	2023-08-30	\N	\N	\N	Completed	\N	228
+6	350021	Milestone	Installation & Field Testing	\N	\N	2024-03-01	\N	\N	\N	\N	Not started	\N	231
+1	350022	Milestone	Work Order Effective Date	\N	\N	2023-03-01	2023-03-01	\N	\N	\N	Completed	\N	232
+2	350022	Milestone	Submission of Global Project Plan	\N	\N	2023-03-01	2023-03-15	\N	\N	\N	Completed	\N	233
+3	350022	Milestone	Hardware Purchase Order	\N	\N	2023-03-31	2023-03-31	\N	\N	\N	Completed	\N	234
+6	350022	Milestone	Final Testing & Field Trials of 1st prototype	\N	\N	2023-05-31	2023-08-30	\N	\N	\N	Completed	\N	237
+7	350022	Milestone	Delivery of 03 additional dish antennas	\N	\N	2023-06-30	2023-09-07	\N	\N	\N	Completed	\N	238
+8	350022	Milestone	Warranty Expires	\N	\N	2024-06-29	\N	\N	\N	\N	In progress	\N	239
+1	350023	Milestone	Work Order Effective Date	\N	\N	2023-03-01	2023-03-01	\N	\N	\N	Completed	\N	240
+2	350023	Milestone	Submission of Global Project Plan	\N	\N	2023-03-01	2023-03-06	\N	\N	\N	Completed	\N	241
+3	350023	Milestone	Hardware Purchase Order	\N	\N	2023-05-01	2023-05-02	\N	\N	\N	Completed	\N	242
+6	350023	Milestone	Installation & Field Testing	\N	\N	2023-09-01	\N	\N	\N	\N	In progress	\N	245
+7	350023	Milestone	Warranty	\N	\N	2024-08-31	\N	\N	\N	\N	Not started	\N	246
+1	350024	Milestone	Work Order Effective Date	\N	\N	2023-04-01	2023-04-01	\N	\N	\N	Completed	\N	247
+2	350024	Milestone	Submission of Project Plan & List of Deliverables	\N	\N	2023-05-01	2023-04-15	\N	\N	\N	Completed	\N	248
+6	350024	Milestone	Delivery of Radome with Base	\N	\N	2023-06-30	2023-07-03	\N	\N	\N	Completed	\N	250
+8	350024	Milestone	Acceptance of System	\N	\N	2023-07-30	2023-10-03	\N	\N	\N	Completed	\N	251
+9	350024	Milestone	Warranty Completion	\N	\N	2025-07-30	\N	\N	\N	\N	\N	\N	252
+1	350025	Milestone	Work order effective date	\N	\N	2023-06-01	2023-06-01	\N	\N	\N	Completed	\N	253
+2	350025	Milestone	Submission of Project Plan	\N	\N	2023-07-01	2023-06-05	\N	\N	\N	Completed	\N	254
+3	350025	Milestone	Ordering of Hardware for development of TWT	\N	\N	2023-09-01	2023-06-27	\N	\N	\N	Completed	\N	255
+7	350025	Milestone	Physical Inspection of stores related to TWT components	\N	\N	2024-09-01	\N	\N	\N	\N	Not started	\N	259
+8	350025	Milestone	Field testing of developed TWT	\N	\N	2024-12-01	\N	\N	\N	\N	Not started	\N	260
+9	350025	Milestone	Warranty	\N	\N	2025-09-01	\N	\N	\N	\N	Not started	\N	261
+1	350026	Milestone	Acceptance of Work Order	\N	\N	\N	2023-06-01	\N	\N	\N	Completed	\N	262
+2	350026	Milestone	Submission of Global Project Plan	\N	\N	\N	2023-07-07	\N	\N	\N	Completed	\N	263
+3	350026	Milestone	Preliminary Design Report	\N	\N	\N	2023-06-16	\N	\N	\N	Completed	\N	264
+8	350026	Milestone	Detailed report and way forward	\N	\N	\N	\N	\N	\N	\N	Not started	\N	269
+1	350027	Milestone	Work order effective date	\N	\N	2023-07-01	2023-07-01	\N	\N	\N	Completed	\N	270
+2	350027	Milestone	Submission of Global Project Plan	\N	\N	2023-08-01	2023-07-18	\N	\N	\N	Completed	\N	271
+3	350027	Milestone	Submission of Preliminary Design Report	\N	\N	2023-09-01	2023-08-23	\N	\N	\N	Completed	\N	272
+8	350027	Milestone	Warranty Completion	\N	\N	2025-01-01	\N	\N	\N	\N	Not started	\N	277
+1	350028	Milestone	work order effective date	\N	\N	\N	2023-07-01	\N	\N	\N	Completed	\N	278
+2	350028	Milestone	Submission of Project Plan	\N	\N	\N	2023-07-06	\N	\N	\N	Completed	\N	279
+3	350028	Milestone	Submission of hardware purchase order for Remaining Experimental Components for Magnetrons Combination & Design Engineering Study	\N	\N	\N	2023-07-18	\N	\N	\N	Completed	\N	280
+6	350028	Milestone	Submission of Research plan for next stage (power combination of pulsed magnetrons) & Physical inspection of delivered stores/ items.	\N	\N	\N	\N	\N	\N	\N	Not started	\N	283
+1	350030	Milestone	Submission of Global Project Plan	\N	\N	2023-09-01	2023-09-01	\N	\N	\N	Completed	\N	284
+2	350030	Milestone	Submission of Preliminary Design Report	\N	\N	2023-10-01	2023-10-01	\N	\N	\N	Completed	\N	285
+6	350030	Milestone	Flight Testing	\N	\N	2024-11-01	\N	\N	\N	\N	Not started	\N	289
+7	350030	Milestone	Completion Warranty	\N	\N	2025-11-01	\N	\N	\N	\N	Not started	\N	290
+1	350031	Activity	Acceptance of Purchase Order	\N	2023-09-01	2023-09-01	2023-09-01	100	\N	\N	Completed	\N	291
+2	350031	Activity	Acceptance of drawings	\N	2023-09-01	2023-10-01	2023-09-04	100	\N	\N	Completed	\N	292
+3	350030	Activity	Submission of Detailed Design Report	\N	2023-10-02	2023-12-01	2023-11-29	100	\N	\N	Completed	\N	286
+6	350026	Milestone	Installation of Filter onboard MCMV	\N	\N	2023-11-15	2023-12-05	\N	\N	\N	Completed	\N	267
+6	350027	Milestone	Hardware Lab Assembly	\N	\N	2023-12-01	2023-12-02	\N	\N	\N	Completed	\N	275
+6	350025	Milestone	Submission of Critical Design Report	\N	\N	2024-06-01	2024-02-21	\N	\N	\N	Completed	\N	258
+6	350020	Milestone	Lab & Field Trials	\N	\N	2024-03-01	2024-03-01	\N	\N	\N	Completed	\N	225
+7	350027	Milestone	Installation onboard ship HATs/SATs	\N	\N	2024-01-01	\N	\N	\N	\N	In progress	\N	276
+7	350026	Milestone	Final Testing and Field Trials of PoC 1	\N	\N	\N	\N	\N	\N	\N	In progress	\N	268
+1	400002	Milestone	Acceptance of Work Order	\N	\N	2021-02-01	2021-02-01	\N	\N	\N	Completed	\N	296
+2	400002	Milestone	Submission of Global Project Plan	\N	\N	2021-03-01	2021-02-10	\N	\N	\N	Completed	\N	297
+3	400002	Milestone	Submission of Critical Design Review	\N	\N	2021-04-01	2021-02-19	\N	\N	\N	Completed	\N	298
+5	350022	Physical	Submission of critical design report	\N	\N	2023-04-30	2023-04-30	\N	\N	\N	Completed	\N	236
+5	350023	Physical	Submission of Lab Testing Report	\N	\N	2023-07-01	2023-06-27	\N	\N	\N	Completed	\N	244
+5	350026	Physical	Hardware Purchase Order	\N	\N	\N	2023-07-18	\N	\N	\N	Completed	\N	266
+5	350030	Physical	Submission of Documentation	\N	\N	2024-09-01	\N	\N	\N	\N	Not started	\N	288
+5	350025	Physical	Submission of Preliminary Design Report	\N	\N	2024-02-01	2024-01-30	\N	\N	\N	Completed	\N	257
+5	350021	Physical	Lab Trials	\N	2023-12-04	2024-02-01	2024-02-01	100	\N	\N	Completed	\N	230
+5	350027	Physical	Hardware Purchase Order	\N	\N	2023-11-01	2023-10-17	\N	\N	\N	Completed	\N	274
+5	350020	Physical	Hardware Lab Assembly	\N	\N	2024-02-01	2024-02-01	\N	\N	\N	Completed	\N	224
+6	400002	Milestone	Submission of Sea Acceptance Trials (SATs)	\N	\N	2021-07-01	2021-04-30	\N	\N	\N	Completed	\N	301
+7	400002	Milestone	Delivery of finalized product	\N	\N	2021-08-01	2021-07-12	\N	\N	\N	Completed	\N	302
+6	450002	Milestone	Issuance of Payment Release Order	\N	\N	\N	\N	\N	\N	\N	Awaited	\N	308
+7	450002	Milestone	Hardware Lab Assembly , Forwarding of Acceptance Trials Procedure	\N	\N	2023-11-30	\N	\N	\N	\N	In progress	\N	309
+8	450002	Milestone	Installation of designed system at site, Testing and validation of gun, Submission of Documentation i.a.w clause 13 of work order	\N	\N	2023-12-31	\N	\N	\N	\N	Not started	\N	310
+1	350018	Milestone	Acceptance of work order	\N	\N	2022-04-01	2022-04-01	\N	\N	\N	Completed	\N	207
+2	350018	Milestone	Submission of Project Plan	\N	\N	2022-05-02	2022-04-21	\N	\N	\N	Completed	\N	208
+1	450002	Milestone	Submission of Global Project Plan	\N	\N	2023-07-17	\N	\N	\N	\N	Completed	\N	303
+2	450002	Milestone	Issuance of Payment Release Order	\N	\N	\N	\N	\N	\N	\N	Completed	\N	304
+3	450002	Milestone	Submission of Preliminary Design Review	\N	\N	2023-08-31	\N	\N	\N	\N	Completed	\N	305
+3	350031	Activity	Inspection of Raw Material	\N	2023-10-01	2023-12-01	2023-10-18	100	\N	\N	Completed	\N	293
+3	350018	Milestone	Design Demonstration and testing	\N	\N	2022-06-01	2022-05-02	\N	\N	\N	Completed	\N	209
+6	350018	Milestone	Completion of Warranty from the date of acceptance	\N	\N	2023-09-30	\N	\N	\N	\N	Not started	\N	212
+1	300005	Milestone	Acceptance of Work Order	25000000	\N	2023-02-27	2023-02-27	\N	\N	\N	Completed	\N	88
+2	300005	Milestone	Submission of Project Plan	25000000	\N	2023-03-26	2023-03-30	\N	\N	\N	Completed	\N	89
+3	300005	Milestone	Submission of Hardware Purchase Order	20000000	\N	2023-04-26	2023-04-19	\N	\N	\N	Completed	\N	90
+2	300007	Milestone	Submission of Project Plan	\N	\N	2023-12-09	2023-12-08	\N	\N	\N	Completed	\N	325
+3	200011	Milestone	SATs	\N	\N	2023-01-11	\N	\N	\N	\N	Completed	\N	33
+1	300006	Milestone	Submission of project plan.	\N	\N	2023-10-08	2023-10-08	\N	\N	\N	Completed	\N	312
+2	300006	Milestone	Submission of ATPs to end user for approval / revision prior finalization.	\N	\N	2023-11-08	2023-11-08	\N	\N	\N	Completed	\N	313
+6	200014	Milestone	Installation , STW and integration of the computer system	\N	\N	2023-10-06	\N	\N	\N	\N	Not started	\N	45
+7	200014	Milestone	Acceptance of the system 	\N	\N	2023-10-06	\N	\N	\N	\N	Not started	\N	46
+6	250003	Milestone	Release of beta version after debugging/ addressing user observations	\N	\N	\N	\N	\N	\N	\N	Not started	\N	66
+1	300007	Milestone	Acceptance of Work Order	\N	\N	2023-10-10	2023-10-10	\N	\N	\N	Completed	\N	324
+6	300007	Milestone	Acceptance Trials & Delivery for 06 x Rugged Version Control System for PAP-104 System Vehicles and 03 x Operator GUI Consoles followed by Operators and Maintainers Training to PN Personnel	\N	\N	2024-05-09	\N	\N	\N	\N	Not started	\N	329
+7	300007	Milestone	Completion of Warranty from the date of Acceptance	\N	\N	2025-05-09	\N	\N	\N	\N	Not started	\N	330
+3	300006	Milestone	Submission of final design and hardware (to be used for experiments/simulation) purchase order.	\N	\N	2023-11-20	2023-11-22	\N	\N	\N	Completed	\N	314
+1	200017	Milestone	Deliver SSMLP to the user	\N	\N	2024-03-31	\N	\N	\N	\N	Not started	\N	338
+3	300007	Milestone	Submission of Hardware Purchase Order	\N	\N	2024-01-09	2024-01-11	\N	\N	\N	Completed	\N	326
+2	200014	Milestone	Submission of Comprehensive System Design	\N	\N	2023-10-06	2023-12-05	\N	\N	\N	Completed	\N	41
+6	200018	Milestone	STW and Acceptance trials followed by training	\N	\N	2025-01-15	\N	\N	\N	\N	Not started	\N	353
+7	200018	Milestone	Testing with iterface computer and receiver	\N	\N	2025-03-17	\N	\N	\N	\N	Not started	\N	354
+8	200018	Milestone	Completion of Warranty	\N	\N	2026-03-16	\N	\N	\N	\N	Not started	\N	355
+3	200014	Milestone	Ordering of major components of the hardware	\N	\N	2023-10-06	\N	\N	\N	\N	In progress	\N	42
+2	200018	Milestone	Submission of Global Project Plan	\N	\N	2024-02-15	2024-01-31	\N	\N	\N	Completed	\N	343
+3	200018	Milestone	Submission of Comprehensive Design	\N	\N	2024-03-15	2024-03-01	\N	\N	\N	Completed	\N	344
+6	300005	Milestone	Performance Trials of the Prototype ROV	5000000	\N	2024-02-26	2024-03-26	\N	\N	\N	Completed	\N	93
+1	200018	Milestone	Acceptance of work order	\N	\N	2024-01-15	2024-01-15	\N	\N	\N	Completed	\N	342
+9	350012	Activity	Deployment & acceptance of the complete system along with Documentation	\N	2023-08-10	\N	\N	0	\N	\N	In progress	\N	178
+3	250003	Milestone	Submission of wire diagram of submarine TLT section	\N	\N	\N	2024-02-16	\N	\N	\N	Completed	\N	63
+6	300008	Milestone	Field Trials of the Prototype ROV	\N	\N	2025-02-28	\N	\N	\N	\N	Not started	\N	361
+1	300008	Milestone	Acceptance of work order	\N	\N	2024-03-01	2024-03-01	\N	\N	\N	Completed	\N	356
+2	300008	Milestone	Submission of Project Plan	\N	\N	2024-03-31	2024-04-01	\N	\N	\N	Completed	\N	357
+5	450002	Physical	Submission of Critical Design Review	\N	\N	2023-09-30	\N	\N	\N	\N	Completed	\N	307
+5	350018	Physical	Installation , STW , HATs , SATs of Antenna Units along with associated accessories	\N	\N	2022-10-01	2023-07-25	\N	\N	\N	Completed	\N	211
+5	200014	Physical	Development of MMI and Control System	\N	\N	2023-10-06	\N	\N	\N	\N	Not started	\N	44
+5	300005	Physical	Fabrication of Operator GUI Console	10000000	\N	2023-08-26	2023-08-11	\N	\N	\N	Completed	\N	92
+5	300006	Physical	Delivery / Acceptance of ROV system.	\N	\N	2024-02-20	\N	\N	\N	\N	Not started	\N	316
+5	350019	Physical	Bench testing for propulsion unit	\N	2023-09-04	2023-12-01	2023-12-01	100	\N	\N	Completed	\N	217
+5	200018	Physical	Integration of SDR with RF along with lab trials and provision of technical manuals	\N	\N	2024-11-15	\N	\N	\N	\N	Not started	\N	352
+5	300007	Physical	Delivery of 02 x Rugged Version Control System for PAP-104 System Vehicles for Preliminary Sea Trials on board MCMVs along with provision of Technical Manuals & Interface Control Documents	\N	\N	2024-04-09	2024-03-08	\N	\N	\N	Completed	\N	328
+5	350031	Physical	Workshop trials	\N	2024-06-01	2024-12-01	\N	0	\N	\N	In progress	\N	295
+3	300008	Milestone	Submission of Hardware Purchase Order	\N	\N	2024-04-30	2024-05-02	\N	\N	\N	Completed	\N	358
+1	350029	Milestone	Delivery of 01 Variable Frequency Drive	\N	\N	2023-04-30	2023-04-17	\N	\N	\N	Completed	\N	363
+3	350032	Milestone	Submission of Design Study	\N	\N	2024-08-01	\N	\N	\N	\N	Not started	\N	366
+6	350032	Milestone	Aerial Testing of Prototype Tank onboard SE & Delivery of Prototype	\N	\N	2025-01-01	\N	\N	\N	\N	Not started	\N	369
+7	350032	Milestone	Delivery of Remaining 25x Fuel Tanks & Documentation	\N	\N	2025-05-01	\N	\N	\N	\N	Not started	\N	370
+1	350032	Milestone	Work Order Effective Date	\N	\N	2024-05-01	2024-05-01	\N	\N	\N	Completed	\N	364
+2	350032	Milestone	Submission of Global Project Plan	\N	\N	2024-06-01	2024-05-14	\N	\N	\N	Completed	\N	365
+1	350034	Milestone	Acceptance of terms & conditions of work order	\N	\N	\N	\N	\N	\N	\N	Not started	\N	371
+2	350034	Milestone	Submission of Project Plan and List of Deliverables	\N	\N	\N	\N	\N	\N	\N	Not started	\N	372
+6	350034	Milestone	Delivery of 03x Base Assemblies	\N	\N	\N	\N	\N	\N	\N	Not started	\N	376
+8	350034	Milestone	Acceptance of systems	\N	\N	\N	\N	\N	\N	\N	Not started	\N	378
+9	350034	Milestone	Warranty Completion	\N	\N	\N	\N	\N	\N	\N	Not started	\N	379
+3	350034	Milestone	Issuance of Payment Release Order	\N	\N	\N	\N	\N	\N	\N	Not started	\N	373
+7	350034	Milestone	Issuance of Payment Release Order	\N	\N	\N	\N	\N	\N	\N	Not started	\N	377
+6	250007	Milestone	Release of beta version after debugging and detailed testing.	\N	\N	2024-12-25	\N	\N	\N	\N	Not started	\N	385
+7	250007	Milestone	Delivery of VR based 3D Harbah model (portable and installable), submission of user manual, acceptance trials and user training.	\N	\N	2025-02-25	\N	\N	\N	\N	Not started	\N	386
+1	250008	Milestone	Acceptance of Work Order	\N	\N	2024-06-25	2024-06-25	\N	\N	\N	Completed	\N	389
+8	250007	Milestone	Submission of completion report.	\N	\N	2025-03-25	\N	\N	\N	\N	Not started	\N	387
+9	250007	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	Not started	\N	388
+1	250007	Milestone	Acceptance of work order.	\N	\N	2024-03-25	2024-03-25	\N	\N	\N	Completed	\N	380
+2	250007	Milestone	Submission of Initial Design Document	\N	\N	2024-04-25	2024-04-23	\N	\N	\N	Completed	\N	381
+3	250007	Milestone	Submission of wire diagram of Harbah Missile showing sub-assemblies.	\N	\N	2024-07-25	\N	\N	\N	\N	In progress	\N	382
+2	250008	Milestone	Submission of Initial Design Document	\N	\N	2024-07-25	\N	\N	\N	\N	In progress	\N	390
+3	250008	Milestone	Submission of wire diagram of LY 80(N) Missile System and its environment	\N	\N	\N	\N	\N	\N	\N	Not started	\N	391
+6	250008	Milestone	Release of Beta version after debugging/ addressing user observations	\N	\N	\N	\N	\N	\N	\N	Not started	\N	394
+7	250008	Milestone	Delivery of VR based LY 80(N) missile simulator, system deployment, testing and evaluation, submission of user manuals, acceptance trials and user training	\N	\N	\N	\N	\N	\N	\N	Not started	\N	395
+9	250008	Milestone	Completion of warranty period	\N	\N	2026-06-25	\N	\N	\N	\N	Not started	\N	397
+8	250008	Milestone	Submission of completion report	\N	\N	2025-06-25	\N	\N	\N	\N	Not started	\N	396
+111	200019	Milestone	sad	\N	\N	2025-11-29	\N	\N	\N	\N	Not started	\N	398
+1	250009	Milestone	\N	\N	\N	\N	\N	\N	\N	\N	Not started	\N	399
+112	200001	Financial	saaasa	\N	\N	2026-01-13	\N	\N	\N	\N	In Progress	\N	403
+113	200001	Financial	saaasa	\N	\N	2026-01-15	\N	\N	\N	\N	In Progress	\N	404
+114	200001	Physical	dfsasasasasasasasasasa	\N	\N	2026-01-13	\N	\N	\N	\N	In Progress	\N	405
+116	200009	General	a	\N	\N	2026-01-21	\N	\N	\N	\N	Completed	\N	407
+117	450005	Financial	adsa	\N	\N	2026-01-29	\N	\N	\N	\N	In Progress	\N	408
+118	200009	General	saaasa	\N	\N	2026-01-16	\N	\N	\N	\N	Pending	\N	409
+119	200009	Financial	adsa	\N	\N	2026-01-04	\N	\N	\N	\N	Completed	\N	410
+120	200009	General	adsa	\N	\N	2026-01-04	\N	\N	\N	\N	Pending	\N	411
+4	250002	General	Procurement of Batch-2 VR hardware such as 3D modeling equipment and game development software etc. including installation and test/trials	4000000	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	59
+4	200002	General	Installation on remaining 05 Ships	\N	\N	2026-01-01	2021-05-28	\N	\N	\N	In Progress	\N	4
+4	200003	General	Ruggedized enclosure with GUI	\N	\N	2026-01-01	2020-01-31	\N	\N	\N	In Progress	\N	8
+4	200004	General	Delivery of repaired/upgraded hardware	\N	\N	2026-01-01	2021-12-15	\N	\N	\N	In Progress	\N	14
+115	200001	General	work	\N	\N	2026-01-07	\N	\N	\N	\N	In Progress	\N	406
+5	350032	Physical	Ground Testing of Prototype Tank onboard SE	\N	\N	2024-12-01	\N	\N	\N	\N	Not started	\N	368
+5	350034	Physical	Issuance of Payment Release Order	\N	\N	\N	\N	\N	\N	\N	Not started	\N	375
+5	250007	Physical	Release of Instructor/ Supervisor Graphical User Interface (GUI).	\N	\N	2024-11-25	\N	\N	\N	\N	Not started	\N	384
+5	250008	Physical	Release of Instructor GUI dashboard	\N	\N	\N	\N	\N	\N	\N	Not started	\N	393
+5	300008	Physical	Development of Prototype ROV Training Simulator	\N	\N	2024-11-30	\N	\N	\N	\N	Not started	\N	360
+4	350012	General	Deployment of Data loggers	\N	2021-11-10	2026-01-01	2021-11-10	100	\N	\N	In Progress	\N	173
+4	350013	General	Submission of Design Engineering Study	\N	\N	2026-01-01	2020-08-31	\N	\N	\N	In Progress	\N	182
+4	350014	General	Submission of Hardware Purchase Orders	\N	\N	2026-01-01	2021-11-15	\N	\N	\N	In Progress	\N	196
+4	350015	General	Submission of Design of feedback control system for single magnetron injection locking\r\nDesign of Feedback control systems for single magnetron injection locking\r\n\r\nDesign of Feedback control systems for single magnetron injection locking	\N	\N	2026-01-01	2022-03-15	\N	\N	\N	In Progress	\N	203
+4	350019	General	Submission of Maintenance report	\N	\N	2026-01-01	2023-08-31	\N	\N	\N	In Progress	\N	216
+4	350020	General	Submission of Hardware Purchase Order	\N	\N	2026-01-01	2023-08-28	\N	\N	\N	In Progress	\N	223
+4	350022	General	Detailed Design Report	\N	\N	2026-01-01	2023-04-15	\N	\N	\N	In Progress	\N	235
+4	350023	General	Submission of Design Report	\N	\N	2026-01-01	2023-05-31	\N	\N	\N	In Progress	\N	243
+4	350024	General	Submission of Design Report & Drawings	\N	\N	2026-01-01	2023-05-02	\N	\N	\N	In Progress	\N	249
+4	350021	General	Hardware Lab Assembly	\N	\N	2026-01-01	2023-11-30	\N	\N	\N	In Progress	\N	229
+4	350025	General	Submission of Design Engineering Study	\N	\N	2026-01-01	2023-09-28	\N	\N	\N	In Progress	\N	256
+4	350026	General	Critical Design Report	\N	\N	2026-01-01	2023-07-07	\N	\N	\N	In Progress	\N	265
+4	350027	General	Design Engineering Study	\N	\N	2026-01-01	2023-09-28	\N	\N	\N	In Progress	\N	273
+4	350030	General	Ground Testing	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	287
+4	400002	General	Submission of Laboratory Test Acceptance Certificate	\N	\N	2026-01-01	2021-03-05	\N	\N	\N	In Progress	\N	299
+4	450002	General	Issuance of Payment Release Order	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	306
+4	350018	General	Factory Acceptance Trials (FATs)	\N	\N	2026-01-01	2022-09-30	\N	\N	\N	In Progress	\N	210
+4	300005	General	Development and Integration of ROV's Tether Management System	15000000	\N	2026-01-01	2023-05-16	\N	\N	\N	In Progress	\N	91
+4	300006	General	Conduct of acceptance Trials of ROV.	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	315
+4	200006	General	Installation of ruggedized solution	32000000	\N	2026-01-01	2022-11-28	\N	\N	\N	In Progress	\N	20
+4	200007	General	Installation of rugged solution	\N	\N	2026-01-01	2023-05-22	\N	\N	\N	In Progress	\N	25
+4	200008	General	Installation and SATs	1500000	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	30
+4	250001	General	Identification of unattended belongings	\N	\N	2026-01-01	2018-12-15	\N	\N	\N	In Progress	\N	50
+4	200013	General	Repairs of sensors and Installation of MMI, Cables and Sensors	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	37
+4	300001	General	Submission of Preliminary Design	\N	\N	2026-01-01	2020-11-11	\N	\N	\N	In Progress	\N	73
+4	300003	General	Submission of Structural Drawings/ CFD Simulation Results	\N	\N	2026-01-01	2022-03-29	\N	\N	\N	In Progress	\N	78
+4	300004	General	Submission Preliminary Design	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	85
+4	350002	General	Ruggedized Jammer (Eagle Hunt-01) Trials at SUJAWAL	\N	\N	2026-01-01	2019-11-30	\N	\N	\N	In Progress	\N	97
+4	350003	General	Submission of Preliminary Design	\N	\N	2026-01-01	2020-10-28	\N	\N	\N	In Progress	\N	106
+4	350004	General	Submission of Preliminary Design	\N	\N	2026-01-01	2020-10-28	\N	\N	\N	In Progress	\N	112
+4	350005	General	Submission of Preliminary Design	\N	\N	2026-01-01	2020-10-28	\N	\N	\N	In Progress	\N	130
+4	350009	General	Conduct of Factory Acceptance Trials (FATs)	\N	\N	2026-01-01	2020-09-15	\N	\N	\N	In Progress	\N	151
+4	350006	General	Submission of test benches for HSTD avionics and aerospace components	\N	\N	2026-01-01	2022-03-15	\N	\N	\N	In Progress	\N	144
+4	350010	General	Supply Of Hardware at INTELL Facility	\N	\N	2026-01-01	2021-09-30	\N	\N	\N	In Progress	\N	160
+4	350011	General	Submission of Hardware Purchase Order	\N	2021-07-15	2026-01-01	\N	0	\N	\N	In Progress	\N	167
+4	350034	General	Delivery of 03x Radomes	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	374
+4	200014	General	Delivery of major components of hardware	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	43
+4	350028	General	Submission of laboratory based implementation report for power combining of 4 1kW commercial magnetrons & Antenna Mode Convertor Design	\N	2023-09-04	2026-01-01	2023-12-11	100	\N	\N	In Progress	\N	281
+4	200018	General	SDR, RF System Design and Development	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	351
+4	350031	General	Inspection of Control Monitoring Chassis	\N	2023-12-04	2026-01-01	2024-02-28	100	\N	\N	In Progress	\N	294
+4	300007	General	Development and Integration of Subsystems for 02 x Rugged Version Control System for PAP-104 Systems Vehicles	\N	\N	2026-01-01	2024-02-09	\N	\N	\N	In Progress	\N	327
+4	250003	General	Release of alpha version (graphical models) for user testing/ debugging & designed info-graphics (audio, video and images etc).	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	64
+121	200006	General	saaasa	\N	\N	2026-01-09	\N	\N	\N	\N	In Progress	\N	413
+122	450013	Technical	sadasdas	\N	\N	2026-01-16	\N	\N	\N	\N	Pending	\N	414
+123	450013	Technical	asdasd	\N	\N	2026-01-16	\N	\N	\N	\N	Pending	\N	415
+124	450013	Technical	fsdfs	\N	\N	2026-01-23	\N	\N	\N	\N	Pending	\N	416
+125	450012	Technical	sadasd	\N	\N	2026-01-21	\N	\N	\N	\N	Pending	\N	418
+126	450012	Technical	asdasdsad	\N	\N	2026-01-26	\N	\N	\N	\N	Pending	\N	419
+127	450015	Technical	sadasdasd	\N	\N	2026-01-20	\N	\N	\N	\N	Pending	\N	420
+128	450016	Technical	sadsadasdasdasdsa	\N	\N	2026-02-17	\N	\N	\N	\N	Pending	\N	421
+129	450016	Technical	ssdasdasdadsa	\N	\N	2026-02-19	\N	\N	\N	\N	Pending	\N	422
+130	450017	Technical	dsadasdasdasdsadasda	\N	\N	2026-02-08	\N	\N	\N	\N	Pending	\N	423
+131	450017	Technical	sadasdasdsad	\N	\N	2026-02-23	\N	\N	\N	\N	Pending	\N	424
+132	450017	Technical	dsadasdasdasdsadasda	\N	\N	2026-02-08	\N	\N	\N	\N	Pending	\N	425
+133	450017	Technical	sdsadasdasdasd	\N	\N	2026-02-23	\N	\N	\N	\N	Pending	\N	426
+134	450018	Technical	Scratch the case	\N	\N	2026-02-09	\N	\N	\N	\N	Pending	\N	427
+135	450018	Technical	Overhaul	\N	\N	2026-02-24	\N	\N	\N	\N	Pending	\N	428
+136	450019	Technical	SDADSADS	\N	\N	2026-02-09	\N	\N	\N	\N	Pending	\N	429
+137	450020	Technical	sadadsad	\N	\N	2026-02-16	\N	\N	\N	\N	Pending	\N	430
+138	450021	Technical	sdaadsadsad	\N	\N	2026-02-17	\N	\N	\N	\N	Pending	\N	431
+139	450022	Technical	dasdadsadsa	\N	\N	2026-02-16	\N	\N	\N	\N	Pending	\N	432
+140	450023	Technical	afasfsaa	\N	\N	2026-01-30	\N	\N	\N	\N	Pending	\N	433
+141	450004	General	adsa	\N	\N	2026-01-20	\N	\N	\N	\N	In Progress	\N	434
+5	350028	Physical	Antenna Mode Conversion Implementation & Filed Demonstration of Power Combination	\N	\N	\N	\N	\N	\N	\N	In progress	\N	282
+5	400002	Physical	Submission of Harbor Acceptance Trials (HATs)	\N	\N	2021-06-01	2021-03-20	\N	\N	\N	Completed	\N	300
+4	300008	General	Development of Protype ROV Tests Benches	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	359
+4	350032	General	On-site Inspection of the Fabricated Tank	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	367
+4	250007	General	Release of desingned info graphics (Audio, Video and images etc. ) and supervisory control.	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	383
+4	250008	General	Release of designed infographics (audio, video, images etc.)	\N	\N	2026-01-01	\N	\N	\N	\N	In Progress	\N	392
+\.
+
+

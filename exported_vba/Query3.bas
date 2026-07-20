@@ -1,0 +1,18 @@
+Attribute VB_Name = "Query3"
+Option Compare Database
+Option Explicit
+
+Public Function SearchInQuery(SearchString As String) As String
+Dim dbsSearch As Database
+Dim qrySearch As QueryDef
+Dim strOutput As String
+Set dbsSearch = CurrentDb()
+For Each qrySearch In dbsSearch.QueryDefs
+    If InStr(qrySearch.sql, SearchString) <> 0 Then strOutput = strOutput & IIf(strOutput = "", "", vbCrLf) & qrySearch.Name
+    Next
+SearchInQuery = strOutput
+End Function
+
+Sub dooo()
+Debug.Print SearchInQuery("GetAccCfSharesCat")
+End Sub

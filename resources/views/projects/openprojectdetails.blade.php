@@ -1,0 +1,1214 @@
+@extends('welcome')
+@section('content')
+<div class="content-wrapper pt-3 {{ ($readOnly ?? false) ? 'command-view' : '' }}">
+    <style>
+        /* --- GLOBAL & UTILS --- */
+        .card-primary.card-outline { border-top: 3px solid var(--rd-accent); }
+        .bg-light-blue { background-color: var(--rd-bg); }
+        
+        /* --- HEADER & CONTROLS --- */
+        .header-controls { display: flex; align-items: center; gap: 8px; }
+        .milestone-box-compact {
+            background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 30px;
+            padding: 8px 15px; display: inline-flex; align-items: center; justify-content: space-between;
+            min-width: 250px; max-width: 100%; height: auto; min-height: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin: 5px 0;
+        }
+        /* --- INFO PANEL --- */
+        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; flex-wrap: wrap; overflow: visible; }
+        .info-left-content { flex: 1; padding: 15px; display: flex; align-items: center; min-width: 300px; }
+        .info-right-team { width: 350px; background: var(--rd-surface); border-left: 1px solid var(--rd-border); padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; }
+        @media (max-width: 991.98px) {
+            .info-panel { flex-direction: column; }
+            .info-right-team { width: 100%; border-left: none; border-top: 1px solid var(--rd-border); padding: 20px 15px; }
+            .info-left-content { border-right: none !important; }
+        }
+        .info-label { font-size: 0.7rem; text-transform: uppercase; color: var(--rd-text3); font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+        .info-value { font-size: 0.9rem; color: var(--rd-text1); font-weight: 600; line-height: 1.4; }
+        .cost-tag { background: var(--rd-success-soft); color: var(--rd-success); padding: 4px 10px; border-radius: 4px; font-weight: 700; border: 1px solid var(--rd-success); display: inline-block; }
+        /* --- TEAM SECTION --- */
+        .team-section-container { display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; }
+        .team-avatar-wrapper { width: 42px; height: 42px; margin-left: -10px; position: relative; z-index: 10; cursor: pointer; transition: transform 0.2s; }
+        .team-avatar-wrapper:hover { transform: scale(1.2); z-index: 100; margin: 0 5px; }
+        .team-avatar-wrapper img { width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--rd-surface); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); object-fit: cover; background: var(--rd-surface); }
+        .more-staff-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--rd-surface); color: var(--rd-text2); border: 2px dashed var(--rd-border); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-left: 5px; z-index: 0; }
+        
+        /* --- DATES & DOCS --- */
+        .date-grid-item { position: relative; padding-left: 10px; margin-bottom: 12px; border-left: 2px solid var(--rd-border); }
+        .date-grid-item.active { border-left-color: var(--rd-accent); }
+        .date-grid-item.done { border-left-color: var(--rd-success); }
+        .d-title { font-size: 0.65rem; font-weight: 700; color: var(--rd-text3); text-transform: uppercase; display: block; line-height: 1; margin-bottom: 3px; }
+        .d-value { font-size: 0.8rem; color: var(--rd-text1); font-weight: 600; line-height: 1; }
+        .doc-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-left: 3px solid var(--rd-accent); border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+        .doc-card:hover { transform: translateX(3px); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        .doc-content { display: flex; align-items: center; overflow: hidden; margin-right: 10px; }
+        .doc-icon { width: 28px; height: 28px; background: var(--rd-surface2); color: var(--rd-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 0.75rem; flex-shrink: 0; }
+        .doc-title { font-size: 0.8rem; font-weight: 600; color: var(--rd-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-input-hidden { display: none !important; }
+        .doc-card.other { border-left-color: var(--rd-accent); cursor: pointer; background: var(--rd-surface); }
+        .doc-card.other:hover { background-color: var(--rd-surface2); }
+        .doc-icon.other { color: var(--rd-accent); background-color: var(--rd-accent-soft); }
+        h6[data-toggle="collapse"] i.fa-chevron-down { transition: transform 0.3s ease; }
+        h6[data-toggle="collapse"][aria-expanded="true"] i.fa-chevron-down { transform: rotate(180deg); }
+
+        /* --- OVERALL STEPS WIZARD --- */
+        .steps-container {
+            position: relative; display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 35px; margin-top: 35px; padding: 0 44px;
+            min-width: 800px;
+        }
+        .steps-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 40px;
+            margin-bottom: -20px;
+        }
+        @media (max-width: 991.98px) {
+            .steps-wrapper::-webkit-scrollbar { height: 4px; }
+            .steps-wrapper::-webkit-scrollbar-thumb { background: var(--rd-border); border-radius: 10px; }
+        }
+        .steps-track {
+            position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: var(--rd-border);
+            transform: translateY(-50%); z-index: 1; border-radius: 2px;
+        }
+        .steps-fill { height: 100%; background: var(--rd-success); transition: width 0.4s ease; border-radius: 2px; }
+        .step-item {
+            position: relative; z-index: 2; width: 32px; height: 32px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+        }
+        .step-dot {
+            width: 32px; height: 32px; border-radius: 50%; background: var(--rd-surface); border: 3px solid var(--rd-border);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem;
+            color: var(--rd-text3); transition: all 0.3s; position: relative; z-index: 2;
+        }
+        .step-item.completed .step-dot { background: var(--rd-success); border-color: var(--rd-success); color: #fff; }
+        .step-item.active .step-dot { background: var(--rd-accent); border-color: var(--rd-accent); color: #fff; transform: scale(1.2); box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.15); }
+        .step-label {
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            font-size: 0.65rem; font-weight: 700; color: var(--rd-text3); white-space: nowrap;
+        }
+        .step-item.active .step-label { color: var(--rd-accent); }
+        .step-date {
+            position: absolute; bottom: -30px; width: 100px; left: 50%; margin-left: -50px;
+            text-align: center; font-size: 0.6rem; color: var(--rd-text3); white-space: nowrap; font-weight: 500;
+        }
+        .step-item.active .step-date { color: var(--rd-accent); font-weight: 700; }
+        .step-tooltip {
+            display: none; position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%);
+            background: var(--rd-surface3); color: var(--rd-text1); padding: 6px 10px; border-radius: 4px;
+            font-size: 0.7rem; white-space: nowrap; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .step-tooltip::after {
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;
+            border-width: 5px; border-style: solid; border-color: var(--rd-surface3) transparent transparent transparent;
+        }
+        .step-item:hover .step-tooltip { display: block; }
+
+        /* --- TODAY MARKER --- */
+        .overall-today-marker {
+            position: absolute; top: 50%; width: 2px; height: 35px; background: transparent; z-index: 5;
+            transition: left 1s ease;
+        }
+        .overall-today-marker .status-bubble{
+            position: absolute; top: 42px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            padding: 6px 10px; border-radius: 14px; font-size: .6rem; font-weight: 700;
+            color: #fff; text-align: center; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,.4);
+        }
+        .overall-today-marker .status-bubble::before{
+            content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+            border-left: 6px solid transparent; border-right: 6px solid transparent;
+            border-bottom: 6px solid var(--rd-danger);
+        }
+        .status-bubble.late { background: var(--rd-danger); box-shadow: 0 0 10px rgba(220,53,69,.3); }
+        .status-bubble.ontrack { background: var(--rd-success); box-shadow: 0 0 10px rgba(40,167,69,.3); }
+
+        /* --- MILESTONE TABLE --- */
+        .milestone-container { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; overflow: hidden; }
+        .milestone-scroll-box { max-height: 450px; overflow-y: auto; overflow-x: auto; }
+        .table-custom thead th { background: var(--rd-surface2); color: var(--rd-text3); text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid var(--rd-border); padding: 12px 15px; position: sticky; top: 0; z-index: 5; }
+        .table-custom tbody td { padding: 10px 15px; vertical-align: middle; color: var(--rd-text2); font-size: 0.85rem; border-bottom: 1px solid var(--rd-border); }
+
+        /* --- FINANCE KNobs --- */
+        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+        .finance-box {
+            width: 120px; height: 140px; background: var(--rd-surface); border-radius: 14px; padding: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .finance-box canvas { width: 90px; height: 90px; }
+        .finance-title { margin-top: 10px; font-size: 11px; font-weight: 800; color: var(--rd-text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .command-view a[href*="attachment/delete"] { display: none !important; }
+        .command-view form[action*="upload-single"],
+        .command-view form[action*="upload-other"],
+        .command-view form[action*="mark-complete"] { display: none !important; }
+
+      
+        /* --- MODAL --- */
+        .glass-modal .modal-content { background: var(--rd-surface); border-radius: 15px; border: 1px solid var(--rd-border2); }
+        .emp-modal-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--rd-surface2); margin-bottom: 15px; }
+        .emp-detail-row { border-bottom: 1px solid var(--rd-border); padding: 10px 0; display: flex; justify-content: space-between; }
+    </style>
+
+   @php
+        $today = \Carbon\Carbon::today();
+
+        // EDC logic
+        $edc = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : null;
+        $edcClass = $edc && $today->gt($edc) ? 'text-danger' : 'text-success';
+
+        // Milestones
+        $milestones = $project->milestones->sortBy('msn_targetdt')->values();
+        $nextMilestone = $milestones->firstWhere('msn_status', '!=', 'Completed');
+        $totalMilestones = $milestones->count();
+        $completedMilestones = $milestones->where('msn_status', 'Completed')->count();
+
+        // Next milestone status
+        $isOverdue = false;
+        $statusMsg = "All Done";
+        $statusClass = "text-secondary";
+        if ($nextMilestone && $nextMilestone->msn_targetdt) {
+            $target = \Carbon\Carbon::parse($nextMilestone->msn_targetdt)->startOfDay();
+            $diff = $today->diffInDays($target, false);
+            if ($diff < 0) {
+                $isOverdue = true;
+                $statusMsg = abs($diff) . " Days Late";
+                $statusClass = "text-danger";
+            } else {
+                $statusMsg = $diff . " Days Left";
+                $statusClass = "text-success";
+            }
+        }
+
+        // Progress calculation
+        $overallPercent = $totalMilestones > 0 ? ($completedMilestones / max(1, $totalMilestones)) * 100 : 0;
+        $overallPercent = round(max(0, min(100, $overallPercent)), 1);
+
+        $firstMs  = $milestones->first();
+        $lastMs   = $milestones->last();
+        $prjStart = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : ($firstMs ? \Carbon\Carbon::parse($firstMs->msn_targetdt) : $today);
+        $prjEnd   = $lastMs ? \Carbon\Carbon::parse($lastMs->msn_targetdt) : $today;
+        if ($prjEnd->lt($prjStart)) $prjEnd = $prjStart->copy()->addDay();
+
+        $totalDaysSpan   = $prjStart->diffInDays($prjEnd) ?: 1;
+        $daysPassedTotal = $prjStart->diffInDays($today, false);
+        $overallTimePercent = round(($daysPassedTotal / $totalDaysSpan) * 100, 1);
+        $overallTimePercent = max(0, min(100, $overallTimePercent));
+
+        // Dummy team data (replace with real relation if available)
+        $team = [
+            ['id'=>1, 'name'=>'Ali Khan', 'role'=>'Project Manager', 'email'=>'ali@rdwis.com', 'phone'=>'0300-1234567', 'img'=>asset('dist/img/profile-1.jfif')],
+            ['id'=>2, 'name'=>'Sara Ahmed', 'role'=>'Senior Architect', 'email'=>'sara@rdwis.com', 'phone'=>'0300-7654321', 'img'=>asset('dist/img/profile-1.jfif')],
+            ['id'=>3, 'name'=>'Bilal Hameed', 'role'=>'Site Engineer', 'email'=>'bilal@rdwis.com', 'phone'=>'0333-1122334', 'img'=>asset('dist/img/profile-1.jfif')],
+        ];
+        $displayLimit = 6;
+
+        $fixedDocs = ['PPF', 'Approval Letter', 'URD', 'Work Order'];
+        $allAttachments = $project->attachments;
+        $otherDocsCount = $allAttachments->whereNotIn('jat_type', $fixedDocs)->count();
+    @endphp
+
+    <div class="container-fluid">
+        <div class="card card-primary card-outline shadow-sm border-0">
+            <div class="card-header p-3 bg-white border-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="d-flex align-items-center mb-1 flex-wrap" style="gap:5px;">
+                            <span class="badge badge-light border">CODE: {{ $project->prj_code }}</span>
+                            <span class="font-weight-bolder {{ $edcClass }} small">
+                                <i class="fas fa-flag-checkered mr-1"></i> EDC: {{ $edc ? $edc->format('d M, Y') : 'TBD' }}
+                            </span>
+                        </div>
+                        <h4 class="text-dark font-weight-bold m-0 text-truncate" title="{{ $project->prj_title }}" style="font-family:'Rajdhani',sans-serif; letter-spacing:0.5px;">
+                            {{ $project->prj_title }}
+                        </h4>
+                    </div>
+
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        @if($nextMilestone)
+                            <div class="milestone-box-compact">
+                                <div class="d-flex align-items-center pr-3 border-right mr-3">
+                                    <span class="font-weight-bold {{ $statusClass }}" style="font-size: 0.95rem;">
+                                        <i class="fas {{ $isOverdue ? 'fa-exclamation-triangle' : 'fa-clock' }} mr-1"></i>
+                                        {{ $statusMsg }}
+                                    </span>
+                                </div>
+                                <div class="text-left flex-grow-1" style="min-width:0;">
+                                    <div class="font-weight-bold text-dark text-truncate" style="max-width:160px;" title="{{ $nextMilestone->msn_desc }}">
+                                        {{ $nextMilestone->msn_desc }}
+                                    </div>
+                                    <small class="text-muted">Target: {{ \Carbon\Carbon::parse($nextMilestone->msn_targetdt)->format('d M, Y') }}</small>
+                                </div>
+                            </div>
+                        @else
+                            <span class="text-success font-weight-bold">
+                                <i class="fas fa-check-circle mr-1"></i> All Milestones Completed
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="col-md-4 text-center text-md-right">
+                        <div class="header-controls justify-content-center justify-content-md-end flex-wrap">
+                            {{-- LOG HISTORY BUTTON (NEW) --}}
+                            <a href="{{ route('projecthistory', ['project_id' => $project->prj_id]) }}" class="btn btn-outline-info btn-sm shadow-sm font-weight-bold">
+                                <i class="fas fa-history mr-1"></i> History
+                            </a>
+
+                            <a href="{{ route('projecthistory', $project->prj_id) }}" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold">
+                                <i class="fas fa-list-alt mr-1"></i> MPRs
+                            </a>
+                            @if(!($readOnly ?? false))
+                                <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm font-weight-bold px-3">
+                                    <i class="fas fa-plus-circle mr-1"></i> MPR
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body bg-light-blue">
+
+            <!-- INFO PANEL (Sponsor + Budget + Team) -->
+<div class="info-panel">
+    <div class="info-left-content">
+        <div class="row w-100 m-0 align-items-center">
+            <div class="col-md-4 pl-0 border-right">
+                <div class="mb-4">
+                    <span class="badge badge-light border px-3 py-2 rounded-pill text-uppercase shadow-sm">
+                        <i class="fas fa-handshake text-primary mr-1"></i> {{ $project->prj_sponsor ?? 'N/A' }}
+                    </span>
+                </div>
+                <div>
+                    <h6 class="text-dark font-weight-bold mb-1" style="font-size:0.95rem;">Scope of Work</h6>
+                    <p class="text-muted m-0 mb-2" style="font-size:0.85rem; line-height:1.45;">
+                        {{ Str::limit($project->prj_scope ?? 'No scope defined.', 110) }}
+                    </p>
+                    @if($head)
+                        <button type="button" class="btn btn-xs btn-outline-info rajdhani font-weight-bold" data-toggle="modal" data-target="#financialIntelligenceModal">
+                            <i class="fas fa-chart-line mr-1"></i> DETAILED FINANCIAL VIEW
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            <div class="col-md-8 px-4">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <span class="d-block text-muted text-uppercase small fw-bold">Total Budget</span>
+                            <span class="d-block text-dark fw-bold fs-5">
+                                Rs. {{ number_format($project->prj_propcost / 1_000_000, 2) }} M
+                            </span>
+                        </div>
+                        <div>
+                            <span class="d-block text-muted text-uppercase small fw-bold">Total Spent</span>
+                            <span class="d-block text-danger fw-bold fs-5">
+                                Rs. {{ number_format(($totalSpent ?? 0) / 1_000_000, 2) }} M
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8 d-flex justify-content-around">
+                        <div class="finance-bars-wrap">
+                            <div class="finance-box">
+                                <input type="text" class="knob" value="30" data-skin="tron" data-thickness="0.2"
+                                       data-width="90" data-height="90" data-fgColor="#FC7A58" data-readonly="true">
+                                <div class="finance-title mt-2">Equip</div>
+                            </div>
+                            <div class="finance-box">
+                                <input type="text" class="knob" value="50" data-skin="tron" data-thickness="0.2"
+                                       data-width="90" data-height="90" data-fgColor="#42e695" data-readonly="true">
+                                <div class="finance-title mt-2">HR</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-right-team">
+        <div class="d-flex justify-content-end mb-3">
+            <span class="info-label text-primary">Team ({{ count($team) }})</span>
+        </div>
+        <div class="team-section-container">
+            @foreach($team as $index => $member)
+                @if($index < $displayLimit)
+                    <div class="team-avatar-wrapper"
+                         onclick="openEmployeeModal('{{ $member['name'] }}','{{ $member['role'] }}','{{ $member['img'] }}','{{ $member['email'] }}','{{ $member['phone'] }}')">
+                        <img src="{{ $member['img'] }}" alt="{{ $member['name'] }}">
+                    </div>
+                @endif
+            @endforeach
+
+            @if(count($team) > $displayLimit)
+                <button type="button" class="more-staff-btn" onclick="openAllStaffModal()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            @endif
+        </div>
+    </div>
+</div>
+<style>
+/* ===== START & END RED SQUARES ===== */
+.edge-box {
+    width: 44px;
+    height: 44px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+
+/* ===== DIAMOND MILESTONE ===== */
+.step-dot {
+    width: 30px;
+    height: 30px;
+    transform: rotate(45deg);
+    border-radius: 4px;
+}
+
+.step-dot * {
+    transform: rotate(-45deg);
+}
+
+.step-item.completed .step-dot {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.step-item.active .step-dot {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+/* ===== TODAY BUBBLE WITH FLAG ===== */
+.today-bubble {
+    position: absolute;
+    top: -45px;
+    background: #dc3545;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 14px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.today-flag {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #dc3545;
+    font-size: 14px;
+}
+
+/* ===== ACHIEVED DATE UNDER DIAMOND ===== */
+.achieved-wrap {
+    position: absolute;
+    bottom: -42px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #28a745;
+    white-space: nowrap;
+}
+
+.achieved-wrap .flag {
+    font-size: 11px;
+    color: #28a745;
+
+}.achieved-marker{
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 6;
+    pointer-events: none;
+}
+
+.achieved-marker i{
+    font-size: 14px;
+}
+
+.achieved-marker .achieved-ms{
+    font-size: 0.6rem;
+    font-weight: 800;
+    margin-top: 2px;
+}
+
+.achieved-marker .achieved-date{
+    font-size: 0.55rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ON TIME / EARLY */
+.achieved-marker.ontime i,
+.achieved-marker.ontime .achieved-ms,
+.achieved-marker.ontime .achieved-date{
+    color: #28a745;
+}
+
+/* LATE */
+.achieved-marker.late i,
+.achieved-marker.late .achieved-ms,
+.achieved-marker.late .achieved-date{
+    color: #dc3545;
+}
+
+
+</style>
+<!-- ================= PROGRESS ROW ================= -->
+<div class="row mt-4">
+
+    <div class="col-lg-12">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="font-weight-bold m-0 text-dark">
+                <i class="fas fa-chart-line text-primary mr-2"></i> Milestone Progress
+            </h6>
+            <span class="badge badge-light border">
+                {{ $completedMilestones }} / {{ $totalMilestones }} Completed
+            </span>
+        </div>
+
+        <div class="steps-wrapper">
+            <div class="steps-container mb-4">
+
+    <div class="steps-track">
+        <div class="steps-fill" style="width: {{ $overallPercent }}%;"></div>
+    </div>
+
+    {{-- START BOX --}}
+    <div class="edge-box">
+        START
+        <small>{{ $prjStart->format('d M Y') }}</small>
+
+    </div>
+
+    {{-- TODAY MARKER --}}
+    <div style="position:absolute; left:{{ $overallTimePercent }}%; top:50%; transform:translateX(-50%);">
+        <div class="today-bubble">{{ $today->format('d M Y') }}</div>
+        <div class="today-flag"><i class="fas fa-flag"></i></div>
+    </div>
+
+   {{-- MILESTONES --}}
+@foreach($milestones as $ms)
+    @php
+        $stepClass = '';
+        if (strtolower($ms->msn_status) === 'completed') {
+            $stepClass = 'completed';
+        } elseif (optional($nextMilestone)->msn_id === $ms->msn_id) {
+            $stepClass = 'active';
+        }
+
+        $targetDate   = \Carbon\Carbon::parse($ms->msn_targetdt);
+        $achievedDate = $ms->msn_achvdt ? \Carbon\Carbon::parse($ms->msn_achvdt) : null;
+
+        $isLate = $achievedDate && $achievedDate->gt($targetDate);
+
+        if ($achievedDate) {
+          // milestone ka percent on progress bar
+$milestoneIndex = $loop->index;
+$milestonePercent = ($milestoneIndex / max(1, $totalMilestones - 1)) * 100;
+
+// achieved vs target difference
+$diffDays = $achievedDate->diffInDays($targetDate, false);
+
+// 1 day = kitna percent shift kare
+$oneDayPercent = 100 / max(1, $totalDaysSpan);
+
+// final achieved position
+$achievedPercent = $milestonePercent + ($diffDays * $oneDayPercent);
+
+// clamp 0–100
+$achievedPercent = max(0, min(100, $achievedPercent));
+
+        }
+    @endphp
+{{-- ACHIEVED FLAG (ON PROGRESS LINE) --}}
+
+
+    <div class="step-item {{ $stepClass }}"
+     onclick="openMilestoneDetail(
+        'MS-{{ $loop->iteration }}',
+        '{{ $targetDate->format('d M Y') }}',
+        '{{ $achievedDate ? $achievedDate->format('d M Y') : 'Not achieved' }}',
+        '{{ $isLate ? 'Late' : 'On Time' }}'
+     )">
+
+
+        {{-- MS LABEL --}}
+        <div class="step-label">MS-{{ $loop->iteration }}</div>
+
+        {{-- DIAMOND --}}
+        <div class="step-dot">
+            @if($stepClass === 'completed')
+                <i class="fas fa-check text-white" style="font-size:0.6rem"></i>
+            @else
+                {{ $loop->iteration }}
+            @endif
+        </div>
+
+        {{-- TARGET DATE (UNDER DIAMOND) --}}
+        <div class="step-date">
+            {{ $targetDate->format('d M Y') }}
+        </div>
+    </div>
+
+    {{-- ACHIEVED FLAG (ON PROGRESS LINE) --}}
+   @if($achievedDate)
+    <div class="achieved-marker {{ $isLate ? 'late' : 'ontime' }}"
+         style="left: {{ $achievedPercent }}%;">
+         
+        <i class="fas fa-flag"></i>
+
+        {{-- 🔹 MILESTONE LABEL --}}
+        <div class="achieved-ms">
+            MS-{{ $loop->iteration }}
+        </div>
+
+        {{-- 🔹 ACHIEVED DATE --}}
+        <div class="achieved-date">
+            {{ $achievedDate->format('d M Y') }}
+        </div>
+    </div>
+@endif
+
+@endforeach
+
+
+    {{-- END BOX --}}
+    <div class="edge-box">
+        END
+        <small>{{ $edc ? $edc->format('d M Y') : $prjEnd->format('d M Y') }}</small>
+
+    </div>
+
+</div>
+
+
+    </div>
+
+</div>
+<div class="modal fade" id="milestoneDetailModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="msTitle"></h5>
+        <button class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Target Date:</strong> <span id="msTarget"></span></p>
+        <p><strong>Achieved Date:</strong> <span id="msAchieved"></span></p>
+        <p><strong>Status:</strong> <span id="msStatus"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================= SECOND ROW ================= -->
+<div class="row mt-4">
+
+    <!-- LEFT -->
+    <div class="col-lg-10 col-md-9">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="font-weight-bold m-0 text-dark">
+                <i class="fas fa-list-ol text-primary mr-2"></i> Milestones Detail
+            </h6>
+            <!-- <a href="{{ route('projects.add-milestone', $project->prj_id) }}"
+               class="btn btn-primary btn-sm shadow-sm">
+                <i class="fas fa-plus mr-1"></i> Add Milestone
+            </a> -->
+        </div>
+
+        <div class="milestone-container shadow-sm">
+            <div class="milestone-scroll-box">
+                <div class="table-responsive">
+                <table class="table table-custom w-100 m-0">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Target</th>
+                            <th>Achieved</th>
+                            <th>Status</th>
+                            <th class="text-right"></th>
+                            <!-- <th class="text-right">Action</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($milestones as $milestone)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td><span class="badge badge-light border">{{ $milestone->msn_type }}</span></td>
+                                <td class="fw-bold">{{ $milestone->msn_desc }}</td>
+                                <td>{{ \Carbon\Carbon::parse($milestone->msn_targetdt)->format('d M') }}</td>
+                                <td class="text-center">
+                                    @if($milestone->msn_achvdt)
+                                        <span class="text-success fw-bold">
+                                            {{ \Carbon\Carbon::parse($milestone->msn_achvdt)->format('d M, Y') }}
+                                        </span>
+                                    @else
+                                        <button class="btn btn-sm btn-outline-primary rounded-circle"
+                                                onclick="openAchieveModal('{{ $milestone->msn_id }}')">
+                                            <i class="fas fa-calendar-check"></i>
+                                        </button>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(strtolower($milestone->msn_status) === 'completed')
+                                        <span class="badge badge-success px-3">Completed</span>
+                                    @else
+                                        <span class="badge badge-warning text-white px-3">{{ $milestone->msn_status }}</span>
+                                    @endif
+                                </td>
+                                <td class="text-right">
+                                    <!-- <a href="{{ route('milestone.edit', $milestone->msn_id) }}" class="text-warning">
+                                        <i class="fas fa-pen"></i>
+                                    </a> -->
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    No milestones defined yet.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-2 col-md-3">
+
+        <div class="sticky-top" style="top:20px;">
+
+            <h6 class="font-weight-bold text-dark mb-3">
+                <i class="fas fa-calendar-alt text-primary mr-2"></i> Key Dates
+            </h6>
+
+            <div class="row gx-2">
+                <div class="col-12 col-md-6">
+                    <div class="date-grid-item {{ $project->prj_rcptdt ? 'done' : '' }}">
+                        <span class="d-title">Received</span>
+                        <span class="d-value">{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('d M y') : '—' }}</span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="date-grid-item {{ $project->prj_assigndt ? 'done' : '' }}">
+                        <span class="d-title">Assigned</span>
+                        <span class="d-value">{{ $project->prj_assigndt ? \Carbon\Carbon::parse($project->prj_assigndt)->format('d M y') : '—' }}</span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="date-grid-item {{ $project->prj_propdt ? 'done' : '' }}">
+                        <span class="d-title">Proposal</span>
+                        <span class="d-value">{{ $project->prj_propdt ? \Carbon\Carbon::parse($project->prj_propdt)->format('d M y') : '—' }}</span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="date-grid-item {{ $project->prj_aprvdt ? 'done' : '' }}">
+                        <span class="d-title">Approved</span>
+                        <span class="d-value">{{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M y') : '—' }}</span>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="date-grid-item active">
+                        <span class="d-title">Project Start</span>
+                        <span class="d-value">{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d M y') : '—' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-3">
+
+                        <div class="d-flex justify-content-between align-items-center mb-2" data-toggle="collapse" data-target="#filesCollapse" aria-expanded="false" style="cursor:pointer;">
+                            <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-folder-open text-primary mr-1"></i> Documents </h6><i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="collapse" id="filesCollapse">
+
+                            @foreach($fixedDocs as $index => $doc)
+                                @php $existingFile = $allAttachments->where('jat_type', $doc)->first(); @endphp
+                                <div class="doc-card shadow-sm" style="{{ $existingFile ? 'border-left-color: #28a745; background-color: #f8fff9;' : '' }}">
+                                    <div class="doc-content"><div class="doc-icon" style="{{ $existingFile ? 'color: #28a745; background-color: #e0fdf4;' : '' }}"><i class="fas {{ $existingFile ? 'fa-check-circle' : 'fa-file-alt' }}"></i></div><div class="doc-title" title="{{ $doc }}">{{ $doc }}</div></div>
+                                    <div class="d-flex align-items-center">
+                                        @if($existingFile)
+                                            <a href="{{ route('attachment.view', $existingFile->jat_id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-circle mr-1"><i class="fas fa-eye"></i></a>
+                                            <a href="{{ route('attachment.delete', $existingFile->jat_id) }}" class="btn btn-sm btn-outline-danger rounded-circle mr-1 text-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
+                                        @else
+                                            <div style="width: 28px; height: 28px;"><form action="{{ route('projects.upload.single', $project->prj_id) }}" method="POST" enctype="multipart/form-data" id="form-{{$index}}">@csrf <input type="hidden" name="doc_type" value="{{ $doc }}">
+                                            <label for="file-{{$index}}" class="btn rounded-circle d-flex align-items-center justify-content-center" style="width:28px; height:28px; cursor:pointer; padding:0; background-color:#007BFF; color:#fff; border:none;"> 
+                                                <i class="fas fa-upload" style="font-size: 0.9rem;"></i>
+                                            </label>
+                                <input type="file" id="file-{{$index}}" name="single_file" class="file-input-hidden" onchange="document.getElementById('form-{{$index}}').submit()"></form></div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                            <div class="doc-card other shadow-sm mt-2" onclick="openOtherDocsModal()"><div class="d-flex align-items-center"><div class="doc-icon other"><i class="fas fa-layer-group"></i></div><div><div class="doc-title" style="color: #6f42c1;">Other Documents</div><small class="text-muted">{{ $otherDocsCount }} Files uploaded</small></div></div><i class="fas fa-chevron-right"></i></div>
+                        </div>
+                    </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+    </div>
+
+
+    <!-- MODALS -->
+    <!-- Achieve Date Modal -->
+    <div class="modal fade glass-modal" id="achieveDateModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-check-circle mr-2"></i>Enter Achieved Date</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <form action="{{ route('milestone.complete') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="msn_id" id="modal_msn_id">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Select Date <span class="text-danger">*</span></label>
+                            <input type="date" name="achieved_date" class="form-control" required max="{{ date('Y-m-d') }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Mark as Completed</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Docs Modal -->
+    <div class="modal fade glass-modal" id="otherDocsModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-copy text-primary mr-2"></i>Other Attachments</h5>
+                    <button class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card card-body bg-light border mb-4">
+                        <h6 class="text-primary font-weight-bold mb-3">Upload New Document</h6>
+                        <form action="{{ route('projects.upload-other', $project->prj_id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="row">
+                                <div class="col-md-5"><input type="text" name="custom_name" class="form-control form-control-sm" placeholder="Document Name" required></div>
+                                <div class="col-md-5"><input type="file" name="doc_file" class="form-control-file form-control-sm" required></div>
+                                <div class="col-md-2"><button type="submit" class="btn btn-success btn-sm btn-block">Upload</button></div>
+                            </div>
+                        </form>
+                    </div>
+                    <h6 class="font-weight-bold text-dark">Existing Files</h6>
+                    <div class="table-responsive">
+                    <table class="table table-bordered table-sm mt-2 bg-white">
+                        <thead class="bg-light"><tr><th>#</th><th>Document Name</th><th>Action</th></tr></thead>
+                        <tbody>
+                            @forelse($allAttachments->whereNotIn('jat_type', $fixedDocs) as $index => $att)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td><i class="fas fa-file-alt text-muted mr-2"></i> <strong>{{ $att->jat_type }}</strong></td>
+                                    <td>
+                                        <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-info px-2">View</a>
+                                        <a href="{{ route('attachment.delete', $att->jat_id) }}" class="btn btn-xs btn-danger px-2" onclick="return confirm('Delete?')">Delete</a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="3" class="text-center text-muted">No additional documents.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee & All Staff Modals (same as before) -->
+    <div class="modal fade" id="employeeDetailModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <img src="" id="empModalImg" class="emp-modal-img shadow-sm">
+                    <h4 id="empModalName" class="font-weight-bold mb-1"></h4>
+                    <p id="empModalRole" class="text-primary mb-4"></p>
+                    <div class="text-left mt-3">
+                        <div class="emp-detail-row"><span class="emp-label">Email</span><span id="empModalEmail" class="text-dark"></span></div>
+                        <div class="emp-detail-row"><span class="emp-label">Phone</span><span id="empModalPhone" class="text-dark"></span></div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-block mt-4" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="allStaffModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">Project Team</h5>
+                    <button class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                    <table class="table table-striped m-0">
+                        <thead class="bg-primary text-white"><tr><th>Image</th><th>Name</th><th>Role</th><th>Contact</th></tr></thead>
+                        <tbody>
+                            @foreach($team as $member)
+                                <tr>
+                                    <td><img src="{{ $member['img'] }}" class="rounded-circle" width="35"></td>
+                                    <td class="font-weight-bold">{{ $member['name'] }}</td>
+                                    <td>{{ $member['role'] }}</td>
+                                    <td>{{ $member['phone'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+</div>
+
+{{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
+@if($head)
+<div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background: #000c1a; border: 2px solid var(--rd-accent); border-radius: 12px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+            <div class="modal-header border-bottom border-dark py-2 px-4 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.03);">
+                <div class="d-flex align-items-center">
+                    <div class="mr-3" style="font-size: 24px; color: var(--rd-accent);"><i class="fas fa-chart-network"></i></div>
+                    <div>
+                        <h5 class="modal-title rajdhani font-weight-bold text-white mb-0" style="letter-spacing: 2px;">FINANCIAL INTELLIGENCE REPORT</h5>
+                        <div class="small text-muted rajdhani">{{ $head->head_name }} | DATED {{ date('d M y') }}</div>
+                    </div>
+                </div>
+                <button type="button" class="close text-white opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
+            </div>
+            
+            <div class="modal-body p-0" style="background: #000c1a;">
+                {{-- Top Summary bar --}}
+                <div class="row no-gutters border-bottom border-dark" style="background: rgba(0,0,0,0.4);">
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">ALLOCATION</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->allocation) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">MTSS SHARE</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->mtss_share) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right border-dark p-3">
+                        <div class="small text-muted rajdhani">RDW SHARE</div>
+                        <div class="h5 mb-0 text-info font-weight-bold rajdhani">{{ number_format($head->rdw_share) }}</div>
+                    </div>
+                    <div class="col-md-3 p-3">
+                        <div class="small text-muted rajdhani">CSRF SHARE</div>
+                        <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->csrf_share) }}</div>
+                    </div>
+                </div>
+
+                <div class="row no-gutters">
+                    {{-- Left Pane: Detailed Metrics Table --}}
+                    <div class="col-xl-4 border-right border-dark p-4" style="background: rgba(0,0,0,0.2);">
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <h6 class="rajdhani text-info font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
+                            <div class="small text-muted rajdhani">FIGURES IN PKR</div>
+                        </div>
+
+                        <div class="fin-table-modern rounded border border-dark overflow-hidden">
+                            <table class="table table-sm table-dark mb-0 rajdhani" style="font-size: 13px;">
+                                <thead style="background: rgba(255,255,255,0.03);">
+                                    <tr class="text-muted">
+                                        <th class="pl-3 border-0">METRIC</th>
+                                        <th class="text-right border-0" style="color: #4da3ff;">PROJECT</th>
+                                        <th class="text-right pr-3 border-0" style="color: #4dff88;">ACTUAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Received</td>
+                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->received) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->received) }}</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Expenditure</td>
+                                         <td class="text-right text-danger">{{ number_format($head->expenditure) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->expenditure) }}</td>
+                                     </tr>
+                                     <tr style="background: rgba(255,255,255,0.01);">
+                                         <td class="pl-3 text-info font-weight-bold">Balance</td>
+                                         <td class="text-right text-info font-weight-bold">{{ number_format($head->balance) }}</td>
+                                         <td class="text-right pr-3 text-muted">--</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Commitments</td>
+                                         <td class="text-right text-warning">{{ number_format($head->commitments) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->commitments) }}</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">In Process</td>
+                                         <td class="text-right text-muted">{{ number_format($head->in_process) }}</td>
+                                         <td class="text-right pr-3 text-muted">0</td>
+                                     </tr>
+                                     <tr style="background: rgba(0,255,100,0.05);">
+                                         <td class="pl-3 font-weight-bold text-success">Available</td>
+                                         <td class="text-right font-weight-bold text-success">{{ number_format($head->available) }}</td>
+                                         <td class="text-right pr-3 text-muted">--</td>
+                                     </tr>
+                                     <tr>
+                                         <td class="pl-3 text-muted">Yet to be Rcvd.</td>
+                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->yet_to_be_received) }}</td>
+                                         <td class="text-right pr-3 text-muted">--</td>
+                                     </tr>
+                                     <tr style="background: rgba(255,255,255,0.03);">
+                                         <td class="pl-3 text-white font-weight-bold">Remaining</td>
+                                         <td class="text-right text-white font-weight-bold">{{ number_format($head->remaining) }}</td>
+                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->remaining) }}</td>
+                                     </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Receivables section --}}
+                        <div class="mt-4 pt-4 border-top border-dark">
+                            <h6 class="rajdhani text-muted mb-3" style="font-size: 12px; letter-spacing: 2px;">RECEIVABLES</h6>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Comp. Milestones</span>
+                                <span class="text-white rajdhani font-weight-bold">{{ number_format($head->receivable_completed) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="text-muted small rajdhani">Current Milestone</span>
+                                <span class="text-white rajdhani font-weight-bold">{{ number_format($head->receivable_current) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mt-3 p-2 rounded" style="background: rgba(23,162,184,0.1); border: 1px solid rgba(23,162,184,0.2);">
+                                <span class="text-info small rajdhani font-weight-bold">Available after Rcv.</span>
+                                <span class="text-info rajdhani font-weight-bold">{{ number_format($head->available_after_receivables) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Right Pane: Visual Analytics & Subheads --}}
+                    <div class="col-xl-8 p-4">
+                        <div class="row">
+                            {{-- Mini Category Charts --}}
+                            @foreach(array_slice($subheads, 0, 3) as $idx => $sh)
+                            <div class="col-md-4 mb-4">
+                                <div class="subhead-mini-card p-3 rounded border border-dark text-center h-100" style="background: rgba(255,255,255,0.01);">
+                                    <div class="d-flex justify-content-center mb-2" style="height: 80px;">
+                                        <canvas id="chartShMini{{ $idx }}"></canvas>
+                                    </div>
+                                    <h6 class="rajdhani font-weight-bold text-info mb-1">{{ $sh['name'] }}</h6>
+                                    <div class="text-white rajdhani" style="font-size: 14px;">{{ number_format($sh['allocation']) }}</div>
+                                    <div class="mt-2 small text-muted rajdhani">UTILIZED: {{ number_format($sh['expenditure']) }}</div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Subhead Detailed Breakdown --}}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="dg-sec-label mb-3 text-info"><i class="fas fa-th-list fa-xs"></i> Category Metrics Breakdown</div>
+                                <div class="table-responsive rounded border border-dark">
+                                    <table class="table table-sm table-dark table-hover mb-0 rajdhani" style="font-size: 12px;">
+                                        <thead style="background: rgba(0,0,0,0.4);">
+                                            <tr class="text-muted small">
+                                                <th class="pl-3">SUBHEAD</th>
+                                                <th class="text-right">EXPENDITURE</th>
+                                                <th class="text-right">COMMITMENTS</th>
+                                                <th class="text-right pr-3">REMAINING</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($subheads as $sh)
+                                            <tr>
+                                                <td class="pl-3 font-weight-bold text-info">{{ $sh['name'] }}</td>
+                                                <td class="text-right">{{ number_format($sh['expenditure']) }}</td>
+                                                <td class="text-right">{{ number_format($sh['commitments']) }}</td>
+                                                <td class="text-right pr-3 font-weight-bold {{ $sh['remaining'] < 0 ? 'text-danger' : 'text-success' }}">
+                                                    {{ number_format($sh['remaining']) }}
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Large Comparison Chart --}}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="p-4 rounded border border-dark" style="background: rgba(0,0,0,0.3); height: 280px;">
+                                    <canvas id="finDetailedChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+@endsection
+
+@section('scripts')
+<script src="{{ asset('plugins/jquery-knob/jquery.knob.min.js') }}"></script>
+<script src="{{ asset('plugins/chartjs4/chart.umd.js') }}"></script>
+<script>
+$(function () {
+    $('.knob').knob({
+        draw: function () {
+            if (this.$.data('skin') == 'tron') {
+                var a = this.angle(this.cv),
+                    sa = this.startAngle,
+                    sat = this.startAngle,
+                    ea = sa + a,
+                    eat = sat + a,
+                    r = true;
+                this.g.lineWidth = this.lineWidth;
+                this.o.cursor && (sat = eat - 0.3) && (eat = eat + 0.3);
+                if (this.o.displayPrevious) {
+                    ea = this.startAngle + this.angle(this.value);
+                    this.o.cursor && (sa = ea - 0.3) && (ea = ea + 0.3);
+                    this.g.beginPath();
+                    this.g.strokeStyle = this.previousColor;
+                    this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false);
+                    this.g.stroke();
+                }
+                this.g.beginPath();
+                this.g.strokeStyle = r ? this.o.fgColor : this.fgColor;
+                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
+                this.g.stroke();
+                this.g.lineWidth = 2;
+                this.g.beginPath();
+                this.g.strokeStyle = this.o.fgColor;
+                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+                this.g.stroke();
+                return false;
+            }
+        }
+    });
+});
+
+function openMilestoneDetail(title, target, achieved, status) {
+    document.getElementById('msTitle').innerText = title;
+    document.getElementById('msTarget').innerText = target;
+    document.getElementById('msAchieved').innerText = achieved;
+    document.getElementById('msStatus').innerText = status;
+    $('#milestoneDetailModal').modal('show');
+}
+
+function openOtherDocsModal() { $('#otherDocsModal').modal('show'); }
+function openEmployeeModal(name, role, img, email, phone) {
+    document.getElementById('empModalName').innerText = name;
+    document.getElementById('empModalRole').innerText = role;
+    document.getElementById('empModalImg').src = img;
+    document.getElementById('empModalEmail').innerText = email;
+    document.getElementById('empModalPhone').innerText = phone;
+    $('#employeeDetailModal').modal('show');
+}
+function openAllStaffModal() { $('#allStaffModal').modal('show'); }
+function openAchieveModal(msnId) {
+    document.getElementById('modal_msn_id').value = msnId;
+    $('#achieveDateModal').modal('show');
+}
+
+function initFinancialIntelligenceCharts() {
+    @if($head)
+    const head = @json($head);
+    const subheads = @json($subheads);
+    
+    const canvas = document.getElementById('finDetailedChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (window.finMainChart) window.finMainChart.destroy();
+        window.finMainChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Received', 'Expenditure', 'Commitments', 'Remaining'],
+                datasets: [{
+                    label: 'PKR Value',
+                    data: [head.received, head.expenditure, head.commitments, head.remaining],
+                    backgroundColor: ['rgba(77, 163, 255, 0.2)', 'rgba(255, 50, 50, 0.2)', 'rgba(243, 156, 18, 0.2)', 'rgba(77, 255, 136, 0.2)'],
+                    borderColor: ['#4da3ff', '#ff3232', '#f39c12', '#4dff88'],
+                    borderWidth: 2, borderRadius: 4, barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                    x: { grid: { display: false }, ticks: { color: '#aaa', font: { weight: 'bold' } } }
+                }
+            }
+        });
+    }
+
+    subheads.slice(0, 3).forEach((sh, idx) => {
+        const shCanvas = document.getElementById(`chartShMini${idx}`);
+        if (shCanvas) {
+            const shCtx = shCanvas.getContext('2d');
+            if (window[`finShChart${idx}`]) window[`finShChart${idx}`].destroy();
+            window[`finShChart${idx}`] = new Chart(shCtx, {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [sh.expenditure + sh.commitments, sh.remaining > 0 ? sh.remaining : 0],
+                        backgroundColor: ['rgba(77, 255, 136, 0.8)', 'rgba(255, 255, 255, 0.05)'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+            });
+        }
+    });
+    @endif
+}
+
+$(document).on('shown.bs.modal', '#financialIntelligenceModal', function () {
+    setTimeout(initFinancialIntelligenceCharts, 300);
+});
+</script>
+@endsection

@@ -1,0 +1,764 @@
+Attribute VB_Name = "Audit"
+Option Compare Database
+Option Explicit
+
+Function RecordBusDataAudit(RecId As String) As Boolean
+Dim F As Form
+Dim c As Control
+Dim db As DAO.Database
+Dim qdf As QueryDef
+Dim intAuditable As Integer
+Dim intAudited As Integer
+
+Set F = Screen.ActiveForm
+Set db = CurrentDb
+Set qdf = db.QueryDefs("aud_busdata_add")
+
+qdf.Parameters("DTG") = GetNow()
+qdf.Parameters("Action") = "Edit"
+qdf.Parameters("UserName") = getVar("varAccUserName")
+qdf.Parameters("EmpName") = getVar("varAccName")
+qdf.Parameters("EmpDesig") = getVar("varRoleDesig")
+qdf.Parameters("FormName") = Screen.ActiveForm.Name
+qdf.Parameters("RecordId") = RecId
+For Each c In F.Controls
+    Select Case c.ControlType
+        Case acTextBox, acComboBox, acListBox, acOptionGroup
+            If Nz(c.OldValue, "x") <> Nz(c.Value, "x") Then
+                qdf.Parameters("ControlName") = c.Name
+                qdf.Parameters("FieldName") = c.ControlSource
+                qdf.Parameters("OldValue") = Nz(c.OldValue, "--Blank--")
+                qdf.Parameters("NewValue") = Nz(c.Value, "--Blank--")
+                qdf.Execute
+                intAuditable = intAuditable + 1
+                intAudited = intAudited + qdf.RecordsAffected
+                End If
+        End Select
+    Next c
+
+If intAuditable = intAudited Then RecordBusDataAudit = True
+
+Set F = Nothing
+Set db = Nothing
+Set qdf = Nothing
+End Function
+
+Function CreateDataRevision(RevObject As String, ObjectId As Variant, UnitId As Long, RevType As Integer, Optional RevRef As String, Optional RevObjectExt As String) As Long
+Dim dbsRev As Database
+Dim rstRev As Recordset
+Dim lngRevId As Long
+
+Set dbsRev = CurrentDb()
+Set rstRev = dbsRev.OpenRecordset("aud_revs", dbOpenDynaset, dbSeeChanges)
+With rstRev
+    .AddNew
+    !rev_date = DateValue(GetNow())
+    !rev_type = RevType
+    !rev_intunt_id = getVar("varUnitID")
+    !rev_obj = RevObject
+    !rev_objid = ObjectId
+    !rev_unt_id = UnitId
+    If RevRef <> "" Then !rev_ref = RevRef
+    If RevObjectExt <> "" Then !rev_objext = RevObjectExt
+    .Update
+    .Bookmark = .LastModified
+    End With
+lngRevId = rstRev!rev_id
+rstRev.Close
+Set rstRev = Nothing
+
+Select Case RevType
+    Case 1, 3: CreateDRComps RevType, lngRevId, RevObject, ObjectId
+    Case 2:    CreateDRData lngRevId
+    End Select
+CreateDataRevision = lngRevId
+End Function
+
+Sub CreateDRComps(DrcRevType As Integer, DrcRevId As Long, DrcObject As String, DrcObjId As Variant)
+Dim dbsDrc As Database
+Dim rstDrc1 As Recordset
+Dim rstDrc2 As Recordset
+Dim strAttrib As String
+Dim lngId1 As Long
+Dim lngId2 As Long
+Dim strObjectData As String
+
+Set dbsDrc = CurrentDb()
+Select Case DrcObject & " - " & DrcRevType
+    Case "Purchase Case - 1"  '*******************************************************
+        'Purchase Case   -----------
+        strObjectData = DrcObject & vbCrLf & CopyRowData("pur_purcases", "pcs_id", DrcObjId)
+        '- Purchase Case Items
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select pci_id From pur_purcaseitems Where pci_pcs_id = " & DrcObjId & " Order By pci_serial", dbOpenSnapshot)
+        If Not rstDrc1.EOF Then strObjectData = strObjectData & vbCrLf & "Purchase Case Items"
+        Do While Not rstDrc1.EOF
+            strObjectData = strObjectData & vbCrLf & CopyRowData("pur_purcaseitems", "pci_id", rstDrc1!pci_id)
+            rstDrc1.MoveNext
+            Loop
+        '- Quotations
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select qte_id From pur_quotes Where qte_pcs_id = " & DrcObjId, dbOpenSnapshot)
+        Do While Not rstDrc1.EOF
+            strObjectData = strObjectData & vbCrLf & "Quotation"
+            strObjectData = strObjectData & vbCrLf & CopyRowData("pur_quotes", "qte_id", rstDrc1!qte_id)
+            Set rstDrc2 = dbsDrc.OpenRecordset("Select qti_id From pur_quoteitems Where qti_qte_id = " & rstDrc1!qte_id & " Order By qti_serial", dbOpenSnapshot)
+            strObjectData = strObjectData & vbCrLf & "Quote Items"
+            Do While Not rstDrc2.EOF
+                strObjectData = strObjectData & vbCrLf & CopyRowData("pur_quoteitems", "qti_id", rstDrc2!qti_id)
+                rstDrc2.MoveNext
+                Loop
+            rstDrc1.MoveNext
+            Loop
+        MakeDRCompEntry DrcRevId, "pur_purcases", DrcObjId, strObjectData, "pcs_rev", 1
+        'Commitments and Payments   ---------
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select pcs_type From pur_purcases Where pcs_id = " & DrcObjId, dbOpenSnapshot)
+        strAttrib = rstDrc1!pcs_type
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select cmt_id From fin_commitments Where cmt_docid = " & DrcObjId & " And cmt_type = '" & strAttrib & "'", dbOpenSnapshot)
+        Do While Not rstDrc1.EOF
+            strObjectData = "Commitment" & vbCrLf & CopyRowData("fin_commitments", "cmt_id", rstDrc1!cmt_id)
+            MakeDRCompEntry DrcRevId, "fin_commitments", rstDrc1!cmt_id, strObjectData, "cmt_del", 2
+            Set rstDrc2 = dbsDrc.OpenRecordset("Select trn_id From fin_transactions Where trn_cmt_id = " & rstDrc1!cmt_id, dbOpenSnapshot)
+            Do While Not rstDrc2.EOF
+                strObjectData = "Payment" & vbCrLf & CopyRowData("fin_transactions", "trn_id", rstDrc2!trn_id)
+                MakeDRCompEntry DrcRevId, "fin_transactions", rstDrc2!trn_id, strObjectData, "trn_del", 2
+                rstDrc2.MoveNext
+                Loop
+            rstDrc1.MoveNext
+            Loop
+        'Receipts   -----------
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select prt_id From pur_purreceipts Where prt_pcs_id = " & DrcObjId, dbOpenSnapshot)
+        Do While Not rstDrc1.EOF
+            strObjectData = "Receipt" & vbCrLf & CopyRowData("pur_purreceipts", "prt_id", rstDrc1!prt_id)
+            Set rstDrc2 = dbsDrc.OpenRecordset("Select pti_id From pur_purreceiptitems Where pti_prt_id = " & rstDrc1!prt_id & " Order By pti_serial", dbOpenSnapshot)
+            If Not rstDrc1.EOF Then strObjectData = strObjectData & vbCrLf & "Receipt Items"
+            Do While Not rstDrc2.EOF
+                strObjectData = strObjectData & vbCrLf & CopyRowData("pur_purreceiptitems", "pti_id", rstDrc2!pti_id)
+                rstDrc2.MoveNext
+                Loop
+            MakeDRCompEntry DrcRevId, "pur_purreceipts", rstDrc1!prt_id, strObjectData, "prt_del", 2
+            rstDrc1.MoveNext
+            Loop
+        'Attachments   -----------
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select pat_id, pat_path From pur_purattachments Where pat_objtype = 'pcs' And pat_objid = " & DrcObjId, dbOpenSnapshot)
+        Do While Not rstDrc1.EOF
+            If Not IsNull(rstDrc1!pat_path) Then
+                strObjectData = "Attachment" & vbCrLf & CopyRowData("pur_purattachments", "pat_id", rstDrc1!pat_id)
+                MakeDRCompEntry DrcRevId, "pur_purattachments", rstDrc1!pat_id, strObjectData, "pat_del", 2
+                End If
+            rstDrc1.MoveNext
+            Loop
+
+    Case "Salary Order - 1"  '*******************************************************
+        'Salary Order   -----------
+        strObjectData = DrcObject & vbCrLf & CopyRowData("fin_salorders", "sor_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "fin_salorders", DrcObjId, strObjectData, "sor_rev", 1
+        'Salary Requisition   -----------
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select sor_srq_id, sor_type From fin_salorders Where sor_id = " & DrcObjId, dbOpenSnapshot)
+        strAttrib = rstDrc1!sor_type
+        strObjectData = "Salary Requisition" & vbCrLf & CopyRowData("hr_salreqs", "srq_id", rstDrc1!sor_srq_id)
+        MakeDRCompEntry DrcRevId, "hr_salreqs", rstDrc1!sor_srq_id, strObjectData, "srq_rev", 2
+        'Commitments and Payments   -----------
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select cmt_id From fin_commitments Where cmt_docid = " & DrcObjId & " And cmt_type = '" & strAttrib & "'", dbOpenSnapshot)
+        Do While Not rstDrc1.EOF
+            strObjectData = "Commitment" & vbCrLf & CopyRowData("fin_commitments", "cmt_id", rstDrc1!cmt_id)
+            MakeDRCompEntry DrcRevId, "fin_commitments", rstDrc1!cmt_id, strObjectData, "cmt_del", 2
+            Set rstDrc2 = dbsDrc.OpenRecordset("Select trn_id From fin_transactions Where trn_cmt_id = " & rstDrc1!cmt_id, dbOpenSnapshot)
+            Do While Not rstDrc2.EOF
+                strObjectData = "Payment" & vbCrLf & CopyRowData("fin_transactions", "trn_id", rstDrc2!trn_id)
+                MakeDRCompEntry DrcRevId, "fin_transactions", rstDrc2!trn_id, strObjectData, "trn_del", 2
+                rstDrc2.MoveNext
+                Loop
+            rstDrc1.MoveNext
+            Loop
+
+    Case "Allocation - 3"   '*******************************************************
+        'Allocation and Shares
+        strObjectData = DrcObject & vbCrLf & CopyRowData("fin_sharesalloc", "sha_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "fin_sharesalloc", DrcObjId, strObjectData, "alc_del", 1
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select * from fin_sharesalloc Where sha_id = " & DrcObjId, dbOpenSnapshot)
+        lngId1 = rstDrc1!sha_ficmt_id
+        lngId2 = rstDrc1!sha_focmt_id
+        'Commitment in
+        strObjectData = "Commitment Alloc" & vbCrLf & CopyRowData("fin_commitments", "cmt_id", lngId1)
+        MakeDRCompEntry DrcRevId, "fin_commitments", lngId1, strObjectData, "cmt_del", 3
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select * from fin_commitments Where cmt_id = " & lngId1, dbOpenSnapshot)
+        lngId1 = rstDrc1!cmt_docid
+        'Commitment out
+        strObjectData = "Commitment MTSS" & vbCrLf & CopyRowData("fin_commitments", "cmt_id", lngId2)
+        MakeDRCompEntry DrcRevId, "fin_commitments", lngId2, strObjectData, "cmt_del", 3
+        Set rstDrc2 = dbsDrc.OpenRecordset("Select * from fin_commitments Where cmt_id = " & lngId2, dbOpenSnapshot)
+        lngId2 = rstDrc2!cmt_docid
+        'Transfer in
+        strObjectData = "Transfer Alloc" & vbCrLf & CopyRowData("fin_transfers", "trf_id", lngId1)
+        MakeDRCompEntry DrcRevId, "fin_transfers", lngId1, strObjectData, "trf_del", 3
+        'Transfer out
+        strObjectData = "Transfer MTSS" & vbCrLf & CopyRowData("fin_transfers", "trf_id", lngId2)
+        MakeDRCompEntry DrcRevId, "fin_transfers", lngId2, strObjectData, "trf_del", 3
+
+    Case "Funding - 3"   '*******************************************************
+        'Funding and Shares
+        strObjectData = DrcObject & vbCrLf & CopyRowData("fin_sharesinstall", "shi_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "fin_sharesinstall", DrcObjId, strObjectData, "fnd_del", 1
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select * from fin_sharesinstall Where shi_id = " & DrcObjId, dbOpenSnapshot)
+        lngId1 = rstDrc1!shi_fitrn_id
+        lngId2 = rstDrc1!shi_fotrn_id
+        'Transfer in
+        strObjectData = "Funding Received" & vbCrLf & CopyRowData("fin_transactions", "trn_id", lngId1)
+        MakeDRCompEntry DrcRevId, "fin_transactions", lngId1, strObjectData, "trn_del", 3
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select * from fin_transactions Where trn_id = " & lngId1, dbOpenSnapshot)
+        'Transfer out
+        strObjectData = "Payment MTSS" & vbCrLf & CopyRowData("fin_transactions", "trn_id", lngId2)
+        MakeDRCompEntry DrcRevId, "fin_commitments", lngId2, strObjectData, "trn_del", 3
+        Set rstDrc2 = dbsDrc.OpenRecordset("Select * from fin_transactions Where trn_id = " & lngId2, dbOpenSnapshot)
+
+    Case "Payment - 3"   '*******************************************************
+        'Payment
+        strObjectData = DrcObject & vbCrLf & CopyRowData("fin_transactions", "trn_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "fin_transactions", DrcObjId, strObjectData, "trn_del", 1
+        'Commitment
+        Set rstDrc1 = dbsDrc.OpenRecordset("Select trn_cmt_id From fin_transactions Where trn_id = " & DrcObjId, dbOpenSnapshot)
+        strObjectData = "Commitment" & vbCrLf & CopyRowData("fin_commitments", "cmt_id", rstDrc1!trn_cmt_id)
+        MakeDRCompEntry DrcRevId, "fin_commitments", rstDrc1!trn_cmt_id, strObjectData, "cmt_rev", 2
+
+    Case "Employee - 1"   '*******************************************************
+        'Employee
+        strObjectData = DrcObject & vbCrLf & CopyRowData("hr_emps", "emp_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "hr_emps", DrcObjId, strObjectData, "emp_rev", 1
+        'Contract
+        strObjectData = DrcObject & vbCrLf & CopyRowData("hr_contracts", "ctr_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "hr_contracts", DrcObjId, strObjectData, "ctr_rev", 2
+
+    Case "Contract - 1"   '*******************************************************
+        'Contract
+        strObjectData = DrcObject & vbCrLf & CopyRowData("hr_contracts", "ctr_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "hr_contracts", DrcObjId, strObjectData, "ctr_del", 1
+
+    Case "Commitment - 1"  '******************************************************
+        strObjectData = DrcObject & vbCrLf & CopyRowData("fin_commitments", "cmt_id", DrcObjId)
+        MakeDRCompEntry DrcRevId, "fin_commitments", DrcObjId, strObjectData, "cmt_rev", 1
+        
+    Case "Task - 1"
+        strObjectData = DrcObject & vbCrLf & CopyRowData("prj_milestones", "msn_idd", DrcObjId)
+        MakeDRCompEntry DrcRevId, "prj_milestones", DrcObjId, strObjectData, "msn_idd", 1
+        
+    End Select
+
+End Sub
+
+Sub MakeDRCompEntry(RevId As Long, TableName As String, rowid As Variant, RowDetail As String, ActionName As String, RevType As Integer)
+Dim dbsComp As Database
+Dim qryComp As QueryDef
+Dim strSql As String
+
+Set dbsComp = CurrentDb()
+RowDetail = Replace(RowDetail, "'", "`")
+RowDetail = Replace(RowDetail, """", "``")
+strSql = "Insert Into aud_revcomps (rvc_rev_id, rvc_table, rvc_rowid, rvc_action, rvc_type, rvc_detail ) " & _
+         "Values (" & RevId & ", '" & TableName & "', '" & rowid & "', '" & ActionName & "', " & RevType & ", '" & RowDetail & "')"
+'Debug.Print strSQL
+Set qryComp = dbsComp.CreateQueryDef("", strSql)
+qryComp.Execute
+End Sub
+
+Sub CreateDRData(DrcRevId As Long)
+Dim wksData As Workspace
+Dim dbsData As Database
+Dim rstData As Recordset
+Dim rstForm As Recordset
+Dim qdfData As QueryDef
+Dim F As Form
+Dim c As Control
+Dim arrData() As String
+Dim strStr As String
+Dim strCommit As String
+Dim strOldValue As String
+Dim strNewValue As String
+Dim strP1Value As String
+Dim strP2Value As String
+Dim n As Integer
+
+'On Error GoTo Error_Part
+
+Set wksData = DBEngine.Workspaces(0)
+wksData.BeginTrans
+strCommit = "Begun"
+
+Set dbsData = CurrentDb()
+Set F = Screen.ActiveForm
+For Each c In F.Controls
+    If Not c.Tag Like "d*" Then GoTo Control_Loop_End
+    arrData = Split(F.Controls(c.Name & "_detail").Value, ",")
+    '***Ascertain n
+    Select Case arrData(0)
+        Case "s"
+            n = 1
+        Case "c"
+            Set rstForm = F.RecordsetClone
+            rstForm.MoveLast
+            n = rstForm.RecordCount
+            rstForm.MoveFirst
+        End Select
+    '*** Populate update query Parameters *** -------------------------------------------------------------
+    Set qdfData = dbsData.QueryDefs("aud_revdata_add")
+    qdfData.Parameters("RevId") = DrcRevId
+    qdfData.Parameters("Attrib") = arrData(1)
+    qdfData.Parameters("Type") = arrData(4)
+    qdfData.Parameters("DataType") = arrData(5)
+    qdfData.Parameters("TableName") = arrData(15)
+    qdfData.Parameters("ColName") = arrData(16)
+    qdfData.Parameters("Conversion") = arrData(18)
+    '*** Get alias, old value new values
+    Do While n > 0
+        strStr = GetValue(arrData(3), F, rstForm, False)
+        qdfData.Parameters("Alias") = arrData(2) & IIf(strStr = "", "", " - " & strStr)
+        strStr = arrData(10)
+        If arrData(11) <> "" Then
+            strP1Value = GetValue(arrData(11), F, rstForm, True)
+            If strP1Value = "" Then GoTo Record_Loop_End
+            strStr = Replace(strStr, "P1", strP1Value)
+            End If
+        If arrData(12) <> "" Then
+            strP2Value = GetValue(arrData(12), F, rstForm, True)
+            If strP2Value = "" Then GoTo Record_Loop_End
+            strStr = Replace(strStr, "P2", strP2Value)
+            End If
+        Set rstData = dbsData.OpenRecordset(strStr, dbOpenSnapshot)
+        Do While Not rstData.EOF
+            Select Case arrData(0)
+                Case "s"
+                    If Nz(c.Value, "") = Nz(F.Controls(c.Name & "_old").Value, "") Then GoTo Record_Loop_End
+                    strOldValue = Nz(F.Controls(c.Name & "_old").Value, "")
+                    strNewValue = Nz(c.Value, "")
+                Case "c"
+                    If Nz(rstForm(arrData(1)), "") = Nz(rstForm(arrData(1) & "_old"), "") Then GoTo Record_Loop_End
+                    strOldValue = Nz(rstForm(arrData(1) & "_old"), "")
+                    strNewValue = Nz(rstForm(arrData(1)), "")
+                End Select
+            'For multiple affected records with variable values, get old and new values for each record
+            If strOldValue Like "(*)" Then strOldValue = AltValue(arrData(1), strOldValue, rstData)
+            If strNewValue Like "(*)" Then strNewValue = AltValue(arrData(1), strNewValue, rstData)
+            'Apply Conversion if required
+            If arrData(6) <> "" Then strOldValue = ApplyConversion(strOldValue, arrData(6), arrData(1))
+            If arrData(7) <> "" Then strNewValue = ApplyConversion(strNewValue, arrData(7), arrData(1))
+            qdfData.Parameters("OldValue") = strOldValue
+            qdfData.Parameters("NewValue") = strNewValue
+            '*** Get RowId
+            qdfData.Parameters("RowId") = GetValue(arrData(17), F, rstData, False)
+            qdfData.Execute
+            rstData.MoveNext
+            Loop
+        
+Record_Loop_End:
+        If arrData(0) = "c" Then rstForm.MoveNext
+        n = n - 1
+        Loop
+        
+Control_Loop_End:
+    Next c
+
+wksData.CommitTrans
+strCommit = "Committed"
+
+Exit Sub
+Error_Part:
+If strCommit = "Begun" Then
+    wksData.Rollback
+    MsgBox "Data Revision cannot be created." & vbCrLf & Err.Description, vbCritical
+    Else
+    MsgBox Err.Description, vbCritical
+    End If
+
+End Sub
+
+Function DecodeType(TypeCode As Integer) As String
+Select Case TypeCode
+    Case 1:    DecodeType = "bool"
+    Case 8:    DecodeType = "date"
+    Case 3:    DecodeType = "int2"
+    Case 4:    DecodeType = "int4"
+    Case 7:    DecodeType = "numeric"
+    Case 20:   DecodeType = "numeric"
+    Case 21:   DecodeType = "numeric"
+    Case 10:   DecodeType = "varchar"
+    Case 23:   DecodeType = "dtg"
+    Case Else: DecodeType = TypeCode
+    End Select
+End Function
+'
+'Function ChangeAttValue(AttribName As String, AttribValue As String, rowid As String) As String
+'Dim dbsChange As Database
+'Dim rstChange As Recordset
+'Dim strValue1 As String
+'Dim strValue2 As String
+'Dim strAttribValue As String
+'
+'strAttribValue = Right(AttribValue, Len(AttribValue) - 2)
+'Set dbsChange = CurrentDb()
+'Select Case AttribName
+'    Case "cmt_amount"
+'        Set rstChange = dbsChange.OpenRecordset("Select * From fin_commitments Where cmt_id = " & ChangeAsPerType(rowid), dbOpenSnapshot)
+'        strValue1 = rstChange!cmt_type
+'        strValue2 = rstChange!cmt_docid
+'        Select Case strValue1
+'            Case "Ps", "Pt", "Rb"
+'                Set rstChange = dbsChange.OpenRecordset("Select * From pur_purcases Where pcs_id = " & ChangeAsPerType(strValue2), dbOpenSnapshot)
+'                Select Case strAttribValue
+'                    Case "Without GST": ChangeAttValue = CStr(rstChange!pcs_midprice)
+'                    Case "With GST": ChangeAttValue = CStr(rstChange!pcs_price)
+'                    End Select
+'            Case Else
+'                    ChangeAttValue = "NC"
+'            End Select
+'    End Select
+'End Function
+
+Function CopyRowData(TableName2 As String, PrimKey2 As String, RecordId2 As Variant) As String
+Dim dbsRec As Database
+Dim rstRec As Recordset
+Dim flds As Fields
+Dim i As Integer
+Dim strDetails As String
+
+Set dbsRec = CurrentDb()
+If IsNumeric(RecordId2) = False Then RecordId2 = "'" & RecordId2 & "'"
+Set rstRec = dbsRec.OpenRecordset("Select * From " & TableName2 & " Where " & PrimKey2 & " = " & RecordId2, dbOpenSnapshot)
+Set flds = rstRec.Fields
+For i = 0 To flds.count - 1
+    strDetails = strDetails & ", " & flds(i).Name & ": " & flds(i).Value
+    Next i
+strDetails = Right(strDetails, Len(strDetails) - 2)
+CopyRowData = strDetails
+End Function
+
+Sub ExecuteDRComps(RevId As Long)
+Dim dbs As Database
+Dim rstExe As Recordset
+Dim rstObj As Recordset
+Dim strActionName As String
+Dim vrtObjId As Variant
+Dim blnCommitDeleted As Boolean
+
+Set dbs = CurrentDb()
+Set rstExe = dbs.OpenRecordset("Select rvc_action,rvc_rowid from aud_revcomps Where rvc_rev_id = " & RevId, dbOpenSnapshot)
+
+Do While Not rstExe.EOF
+    strActionName = rstExe!rvc_action
+    vrtObjId = rstExe!rvc_rowid
+    Select Case strActionName
+        Case "pcs_rev"
+            'Reverse Purchase Case
+            Set rstObj = dbs.OpenRecordset("Select pcs_status, pcs_approvedtg, pcs_closedtg from pur_purcases Where pcs_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Edit
+            rstObj!pcs_status = "Under Revision"
+            rstObj!pcs_approvedtg = Null
+            rstObj!pcs_closedtg = Null
+            rstObj.Update
+            rstObj.Close
+            'Remove Subhead entries if any
+            Set rstObj = dbs.OpenRecordset("Select pcd_pcs_id From pur_purcases_shd Where pcd_pcs_id = " & vrtObjId, dbOpenDynaset)
+                If Not rstObj.EOF Then rstObj.Delete
+                rstObj.Close
+            'Reverse items fulfilment
+            Set rstObj = dbs.OpenRecordset("Select pci_fulfilment from pur_purcaseitems Where pci_pcs_id = " & vrtObjId, dbOpenDynaset)
+            Do While Not rstObj.EOF
+                rstObj.Edit
+                rstObj!pci_fulfilment = Null
+                rstObj.Update
+                rstObj.MoveNext
+                Loop
+                rstObj.Close
+        Case "prt_del"
+            Set rstObj = dbs.OpenRecordset("Select * from pur_purreceipts Where prt_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Delete
+            rstObj.Close
+        Case "sor_rev"
+            Set rstObj = dbs.OpenRecordset("Select sor_status, sor_closedtg From fin_salorders Where sor_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Edit
+            rstObj!sor_status = "Under Revision"
+            rstObj!sor_closedtg = Null
+            rstObj.Update
+            rstObj.Close
+        Case "srq_rev"
+            Set rstObj = dbs.OpenRecordset("Select * From hr_salreqs Where srq_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Edit
+            rstObj!srq_fulfilment = 0
+            rstObj!srq_status = "In Process"
+            rstObj!srq_closedtg = Null
+            rstObj.Update
+            rstObj.Close
+        Case "trf_del"
+            Set rstObj = dbs.OpenRecordset("Select * from fin_transfers Where trf_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Delete
+            rstObj.Close
+        Case "alc_del"
+            Set rstObj = dbs.OpenRecordset("Select * from fin_sharesalloc Where sha_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Delete
+            rstObj.Close
+        Case "fnd_del"
+            Set rstObj = dbs.OpenRecordset("Select * from fin_sharesinstall Where shi_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Delete
+            rstObj.Close
+        Case "cmt_rev"
+            Set rstObj = dbs.OpenRecordset("Select * from fin_commitments Where cmt_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Edit
+            rstObj!cmt_status = "Awaited"
+            rstObj.Update
+            rstObj.Close
+        Case "cmt_del"
+            Set rstObj = dbs.OpenRecordset("Select * from fin_commitments Where cmt_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Delete
+            rstObj.Close
+            blnCommitDeleted = True
+        Case "trn_del"
+            If blnCommitDeleted = False Then    'If commitment is deleted, its transactions are deleted
+                Set rstObj = dbs.OpenRecordset("Select * from fin_transactions Where trn_id = " & vrtObjId, dbOpenDynaset)
+                rstObj.Delete
+                rstObj.Close
+                End If
+        Case "pat_del"
+            Set rstObj = dbs.OpenRecordset("Select * from pur_purattachments Where pat_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Delete
+            rstObj.Close
+        Case "ctr_del"
+            Set rstObj = dbs.OpenRecordset("Select * from hr_contracts Where ctr_id = " & vrtObjId, dbOpenDynaset)
+            rstObj.Delete
+            rstObj.Close
+        Case "msn_idd"
+            Set rstObj = dbs.OpenRecordset("Select * From prj_milestones Where msn_idd = " & vrtObjId, dbOpenDynaset)
+            rstObj.Edit
+            If rstObj!msn_type = "Activity" Then rstObj!msn_comp = 50
+            rstObj!msn_status = "In progress"
+            rstObj.Update
+            rstObj.Close
+        Case Else
+            MsgBox "Error - Some reversals not done. Report to IS Department", vbCritical
+        End Select
+    rstExe.MoveNext
+    Loop
+rstExe.Close
+
+End Sub
+
+Sub ExecuteDRData(RevId As Long)
+Dim dbs As Database
+Dim rstExe As Recordset
+Dim rstObj As Recordset
+Dim strSql As String
+Dim strTableName As String
+Dim strAttribName As String
+Dim strObjPrimKey As String
+Dim strObjId As String
+Dim strNewVal As String
+
+Set dbs = CurrentDb()
+Set rstExe = dbs.OpenRecordset("Select * from aud_revdata Where rvd_rev_id = " & RevId, dbOpenDynaset)
+
+Do While Not rstExe.EOF
+    strTableName = rstExe!rvd_table
+    If strTableName = "(none)" Then GoTo Loop_End
+    strObjPrimKey = rstExe!rvd_colname             'PKeyForTable(strTableName)
+    strObjId = ChangeAsPerType(rstExe!rvd_rowid)
+    strAttribName = rstExe!rvd_attrib
+    If strAttribName Like "*_x*" Then
+        strAttribName = Left(strAttribName, InStr(strAttribName, "_x") - 1)
+        End If
+    strNewVal = Nz(rstExe!rvd_newvalue, "Null")
+    If Not IsNull(rstExe!rvd_conversion) Then strNewVal = ApplyConversion(strNewVal, rstExe!rvd_conversion, strAttribName)
+    strNewVal = ChangeAsPerType(strNewVal)
+    strSql = "UPDATE " & strTableName & " SET " & strAttribName & " = " & strNewVal & _
+             " WHERE " & strObjPrimKey & " = " & strObjId
+    'Debug.Print strSql
+    dbs.Execute strSql
+
+Loop_End:
+    rstExe.MoveNext
+    Loop
+rstExe.Close
+End Sub
+
+'Function PKeyForTable(TableName As String) As String
+'Select Case TableName
+'    Case "cen_heads": PKeyForTable = "hed_id"
+'    Case "hr_emps": PKeyForTable = "emp_id"
+'    Case "hr_contracts": PKeyForTable = "ctr_id"
+'    Case "pur_purcases": PKeyForTable = "pcs_id"
+'    Case "fin_salorders": PKeyForTable = "sor_id"
+'    Case "fin_transfers": PKeyForTable = "trf_id"
+'    Case "fin_commitments": PKeyForTable = "cmt_id"
+'    Case "fin_transactions": PKeyForTable = "trn_id"
+'    Case "fin_sharesalloc": PKeyForTable = "sha_id"
+'    Case "fin_sharesinstall": PKeyForTable = "shi_id"
+'    Case "fin_contractsverif": PKeyForTable = "cvf_ctr_id"
+'    Case "fin_subheads": PKeyForTable = "sbh_id"
+'    End Select
+'End Function
+
+Function EmpIdFromCtrId(CtrId As Long) As String
+Dim dbsCtr As Database
+Dim rstCtr As Recordset
+
+Set dbsCtr = CurrentDb()
+Set rstCtr = dbsCtr.OpenRecordset("Select ctr_num From hr_contracts Where ctr_id =" & CtrId, dbOpenSnapshot)
+EmpIdFromCtrId = rstCtr!ctr_num
+End Function
+
+Function ConcernedForRevision(ObjectType As String) As String
+Select Case ObjectType
+    Case "Purchase Order", "Salary Order", "Purchase Case"
+        ConcernedForRevision = LeadDesigFromUnit(800000)
+    Case "Contract"
+        ConcernedForRevision = LeadDesigFromUnit(820000)
+    End Select
+End Function
+
+Function ApplyConversion(AttribValue As Variant, Operation As String, Optional ByVal AttribName As String) As Variant
+
+If AttribValue = "Null" Or AttribValue = Null Then
+    ApplyConversion = "Null"
+    Exit Function
+    End If
+
+If AttribValue = "" Then
+    ApplyConversion = ""
+    Exit Function
+    End If
+
+If AttribName Like "att_*" Then AttribName = "att"
+
+Select Case Operation
+    Case "n"  'negate
+        ApplyConversion = -1 * AttribValue
+    Case "i"  'insert id / code / name
+        Select Case AttribName
+            Case "emp_hed_id", "ctr_hed_id", "cpn_hed_id"   'Project
+                If IsNumeric(AttribValue) Then
+                    ApplyConversion = ProjectCodeFromId(CLng(AttribValue))
+                    Else
+                    ApplyConversion = ProjectIdFromCode(CStr(AttribValue))
+                    End If
+                    
+            Case "pcs_hed_id", "srq_hed_id", "sor_hed_id"   'Head
+                If IsNumeric(AttribValue) Then
+                    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                    Else
+                    ApplyConversion = HeadIdFromCode(CStr(AttribValue))
+                    End If
+                    
+            Case "emp_unt_id", "ctr_unt_id"                 'Unit
+                If IsNumeric(AttribValue) Then
+                    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                    Else
+                    ApplyConversion = UnitIdFromCode(CStr(AttribValue))
+                    End If
+                    
+            Case "hed_transtype", "sha_transtype", "pcs_transtype", "sor_transtype", "trn_transtype"
+                Select Case AttribValue
+                    Case "Without GST": ApplyConversion = 1
+                    Case "With GST": ApplyConversion = 2
+                    End Select
+            
+            Case "att"
+                Select Case AttribValue
+                    Case "P": ApplyConversion = "Present"
+                    Case "W": ApplyConversion = "Work from home"
+                    Case "T": ApplyConversion = "Ty Duty"
+                    Case "L": ApplyConversion = "Leave"
+                    Case "A": ApplyConversion = "Absent"
+                    Case "U": ApplyConversion = "Unpaid Leave"
+                    Case "N": ApplyConversion = "Not Applicable"
+                    Case "Present":         ApplyConversion = "P"
+                    Case "Work from home":  ApplyConversion = "W"
+                    Case "Ty Duty":         ApplyConversion = "T"
+                    Case "Leave":           ApplyConversion = "L"
+                    Case "Absent":          ApplyConversion = "A"
+                    Case "Unpaid Leave":    ApplyConversion = "U"
+                    Case "Not Applicable":  ApplyConversion = "N"
+                    Case Else:              ApplyConversion = "xxxxx"
+                    End Select
+            End Select
+    End Select
+End Function
+
+Function ChangeAsPerType(InputString As String) As String
+Select Case True
+    Case IsNumeric(InputString): ChangeAsPerType = InputString
+    Case IsDate(InputString):    ChangeAsPerType = "#" & InputString & "#"
+    Case InputString = "":        ChangeAsPerType = ""
+    Case Else:                   ChangeAsPerType = IIf(InputString = "Null", "Null", "'" & InputString & "'")
+    End Select
+End Function
+
+' If the DataContent is not in parenthesis, return it. Otherwise, 3 cases.
+Public Function GetValue(DataContent As String, FormObject As Form, RstObject As Recordset, ToBeChanged As Boolean) As String
+Dim strString As String
+
+strString = ParenContents(DataContent)
+If strString = "" Then
+    GetValue = DataContent
+    GoTo Last_Step
+    End If
+    
+Select Case True
+    Case strString Like "_*":    GetValue = Nz(FormObject.Controls(Right(strString, Len(strString) - 1)), "")
+    Case strString = "none":     GetValue = "(none)"
+    Case Else:                   GetValue = Nz(RstObject(strString), "")
+    End Select
+
+Last_Step:
+If ToBeChanged = True Then GetValue = ChangeAsPerType(GetValue)
+End Function
+
+Function AltValue(AttribName As String, CValue As String, RefData As Recordset) As Variant
+Select Case AttribName & CValue
+    Case "cmt_amount(Without GST)": AltValue = RefData!pcs_midprice
+    Case "cmt_amount(With GST)": AltValue = RefData!pcs_price
+    End Select
+End Function
+
+Public Function AnyChangeOnForm() As Boolean
+Dim rstData As Recordset
+Dim rstForm As Recordset
+Dim F As Form
+Dim c As Control
+Dim arrData() As String
+Dim n As Integer
+
+Set F = Screen.ActiveForm
+For Each c In F.Controls
+    If Not c.Tag Like "d*" Then GoTo Control_Loop_End
+    'Ascertain n
+    arrData = Split(F.Controls(c.Name & "_detail").Value, ",")
+    If arrData(0) = "c" Then
+        Set rstForm = F.RecordsetClone
+        rstForm.MoveLast
+        n = rstForm.RecordCount
+        rstForm.MoveFirst
+        Else
+        n = 1
+        End If
+
+    Do While n > 0
+        Select Case arrData(0)
+            Case "s"
+                If Nz(c.Value, "") <> Nz(F.Controls(c.Name & "_old").Value, "") Then
+                    AnyChangeOnForm = True
+                    GoTo The_End
+                    End If
+            Case "c"
+                If Nz(rstForm(arrData(1)), "") <> Nz(rstForm(CStr(arrData(1) & "_old")), "") Then
+                    AnyChangeOnForm = True
+                    GoTo The_End
+                    End If
+            End Select
+        If arrData(0) = "c" Then rstForm.MoveNext
+        n = n - 1
+        Loop
+Control_Loop_End:
+    Next c
+
+The_End:
+End Function
+
+
+
+
+
