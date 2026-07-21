@@ -23,20 +23,25 @@ class PurchaseFinanceController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $targetStatus = 'With DFinance';
         $pageTitle = 'Director Finance | Budget Hub';
 
-        $pending = Purchase::with(['unit', 'project', 'latestDecision.account'])
-            ->where('pcs_status', $targetStatus)
+        // 1. Pending: Cases at DFinance stage
+        $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+            ->atStage('DFinance')
             ->orderBy('pcs_id', 'desc')
             ->get();
 
         // 2. Action Taken (Cases already processed by this user)
-        $processed = Purchase::with(['unit', 'project', 'latestDecision.account'])
+        $processed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
-            ->where('pcs_status', '!=', $targetStatus) 
+            ->where(function($q) {
+                // Exclude cases currently at DFinance stage
+                $q->whereDoesntHave('currentSubstatus', function($sq) {
+                    $sq->where('pss_stage', 'DFinance');
+                });
+            })
             ->orderBy('pcs_id', 'desc')
             ->get();
 
@@ -63,7 +68,7 @@ class PurchaseFinanceController extends Controller
      */
     public function show($id)
     {
-        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
 
         // Financial Intelligence (Legacy Logic)

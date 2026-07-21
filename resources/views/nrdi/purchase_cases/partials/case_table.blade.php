@@ -1,5 +1,5 @@
 @php
-    $activeStatuses = ['Pending', 'Under Scrutiny', 'Forwarded', 'Draft', 'Submitted', 'With DFinance', 'With MD', 'With DDG', 'With DG'];
+    $activeStatuses = ['Pending', 'Under Scrutiny', 'Under Approval', 'Forwarded', 'Draft', 'Submitted'];
     $processedStatuses = ['Approved', 'Returned', 'Rejected'];
     
     $divPending = $cases->whereIn('pcs_status', $activeStatuses);
@@ -52,7 +52,7 @@
                                     <td class="align-middle">{{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}</td>
                                     <td class="align-middle text-right font-weight-bold">Rs. <span class="case-amount">{{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
                                     <td class="align-middle text-center">
-                                        <span class="badge badge-warning text-dark"><i class="fas fa-hourglass-half mr-1"></i> {{ $p->pcs_status }}</span>
+                                        <span class="badge badge-warning text-dark"><i class="fas fa-hourglass-half mr-1"></i> {{ $p->pcs_status }}{{ $p->current_stage_display ? ' (' . $p->current_stage_display . ')' : '' }}</span>
                                     </td>
                                     <td class="align-middle text-right pr-4">
                                         <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">View</a>

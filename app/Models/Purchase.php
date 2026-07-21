@@ -107,5 +107,56 @@ class Purchase extends Model
     {
         return $this->hasMany(PurNotification::class, 'pnt_pcs_id', 'pcs_id');
     }
+
+    // ── Sub-Status Relationships ──────────────────────────────
+
+    /**
+     * The current routing substatus (which authority holds this case)
+     */
+    public function currentSubstatus()
+    {
+        return $this->hasOne(PurCaseSubstatus::class, 'pss_pcs_id', 'pcs_id')
+                    ->where('pss_is_current', true);
+    }
+
+    /**
+     * Full substatus history (most recent first)
+     */
+    public function substatusHistory()
+    {
+        return $this->hasMany(PurCaseSubstatus::class, 'pss_pcs_id', 'pcs_id')
+                    ->orderBy('pss_id', 'desc');
+    }
+
+    /**
+     * Query scope: filter cases by their current substatus stage.
+     * Usage: Purchase::atStage('DFinance')->get()
+     *        Purchase::atStage(['MD', 'DDG', 'DG'])->get()
+     */
+    public function scopeAtStage($query, $stage)
+    {
+        $stages = is_array($stage) ? $stage : [$stage];
+        return $query->whereHas('currentSubstatus', function ($q) use ($stages) {
+            $q->whereIn('pss_stage', $stages);
+        });
+    }
+
+    /**
+     * Accessor: Get the current stage name (e.g. 'DFinance', 'MD')
+     * Returns null for terminal cases with no current substatus.
+     */
+    public function getCurrentStageAttribute(): ?string
+    {
+        return $this->currentSubstatus?->pss_stage;
+    }
+
+    /**
+     * Accessor: Get human-readable display name for the current stage.
+     * Returns null for terminal cases.
+     */
+    public function getCurrentStageDisplayAttribute(): ?string
+    {
+        return $this->currentSubstatus?->display_name;
+    }
 }
 

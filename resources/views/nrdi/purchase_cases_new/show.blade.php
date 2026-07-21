@@ -27,7 +27,7 @@
     $pctRemaining = $totalBudget > 0 ? max(0, ($balanceAfter / $totalBudget) * 100) : 0;
     
     $service = app(\App\Services\PurchaseApprovalService::class);
-    $currentStatusDisplay = $service->getStatusDisplayName($purchase->pcs_status);
+    $currentStatusDisplay = $purchase->current_stage_display ?? $service->getStatusDisplayName($purchase->pcs_status);
     
     // Variable overrides for cross-role compatibility
     $userArea = strtolower(trim((string)Auth::user()->acc_untarea));
@@ -263,6 +263,15 @@
                                     <div><strong style="color:var(--rd-text3); width: 160px; display:inline-block;"><i class="far fa-calendar-alt text-secondary mr-2"></i>DATE:</strong> {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</div>
                                     <div><strong style="color:var(--rd-text3); width: 160px; display:inline-block;"><i class="fas fa-project-diagram text-secondary mr-2"></i>PROJECT:</strong> <span class="text-white">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></div>
                                     <div><strong style="color:var(--rd-text3); width: 160px; display:inline-block;"><i class="fas fa-building text-secondary mr-2"></i>DIVISION:</strong> <span class="text-white">{{ $purchase->unit?->unt_name ?? $purchase->pcs_unt_id }}</span></div>
+                                    <div>
+                                        <strong style="color:var(--rd-text3); width: 160px; display:inline-block;"><i class="fas fa-info-circle text-secondary mr-2"></i>STATUS:</strong> 
+                                        <span class="badge badge-warning text-dark font-weight-bold px-2 py-1" style="font-size: 11px;">
+                                            {{ $purchase->pcs_status }}
+                                            @if($purchase->current_stage_display)
+                                                — Currently with: {{ $purchase->current_stage_display }}
+                                            @endif
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             

@@ -244,24 +244,27 @@
 
         {{-- ================= STATUS FLOW LOGIC ================= --}}
         @php
+            $currentStage = $purchase->current_stage;
             $workflowSteps = [
-                'Draft', 
-                'Under Scrutiny', 
-                'With DFinance', 
-                'With MD', 
-                'With DDG', 
-                'With DG', 
-                'Approved'
+                'Division' => 'Division',
+                'DFinance' => 'Director Finance',
+                'MD'       => 'MD Office',
+                'DDG'      => 'DDG Office',
+                'DG'       => 'Director General',
+                'Approved' => 'Approved'
             ];
 
-            $activeIndex = array_search($currentStatus, $workflowSteps);
-            if ($activeIndex === false) {
-                // Handle non-standard statuses (like Returned, Rejected)
-                $activeIndex = 0; 
-            }
+            $stageKeys = array_keys($workflowSteps);
+            $activeIndex = array_search($currentStage, $stageKeys);
 
-            $currentLabel = $workflowSteps[$activeIndex];
-            $nextLabel = $workflowSteps[$activeIndex + 1] ?? 'Process Completed';
+            if ($activeIndex === false) {
+                $currentLabel = $purchase->pcs_status;
+                $nextLabel = in_array($purchase->pcs_status, ['Approved', 'Rejected', 'Cancelled']) ? 'Completed' : 'Director Finance';
+            } else {
+                $currentLabel = $workflowSteps[$stageKeys[$activeIndex]];
+                $nextStageKey = $stageKeys[$activeIndex + 1] ?? null;
+                $nextLabel = $nextStageKey ? $workflowSteps[$nextStageKey] : 'Completed';
+            }
         @endphp
 
         {{-- ================= STATUS DISPLAY ================= --}}

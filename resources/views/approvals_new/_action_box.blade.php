@@ -7,21 +7,24 @@
     $nextAuthName = $service->getNextAuthorityName($purchase, $area);
     $returnTargets = $service->getReturnTargets($purchase);
     
-    // Determine the expected status for this user to act
-    $expectedStatus = match($userArea) {
-        'prj', 'rdwprj', 'division' => ['Draft', 'Returned'],
-        'proc' => ['Under Scrutiny'],
-        'fin'  => ['With DFinance'],
-        'rdw'  => ['With MD'],
-        'hqs'  => ['With DDG'],
-        'nrdi' => ['With DG'],
+    // Determine if this user's stage matches the case's current substatus stage
+    $currentStage = $purchase->currentSubstatus?->pss_stage;
+    $expectedStages = match($userArea) {
+        'prj', 'rdwprj', 'division' => ['Division'],
+        'proc' => ['Division'],   // DProc sees Draft/Returned cases (collaborative)
+        'fin'  => ['DFinance'],
+        'rdw'  => ['MD'],
+        'hqs'  => ['DDG'],
+        'nrdi' => ['DG'],
         default => ['None']
     };
 
-    $isCurrentStage = in_array(trim($purchase->pcs_status), $expectedStatus) || ($userArea === 'proc' && in_array(trim($purchase->pcs_status), ['Draft', 'Returned']));
+    $isCurrentStage = in_array($currentStage, $expectedStages) 
+        || ($userArea === 'proc' && in_array(trim($purchase->pcs_status), ['Draft', 'Returned']))
+        || (in_array($userArea, ['prj', 'rdwprj', 'division', 'initiation']) && in_array(trim($purchase->pcs_status), ['Draft', 'Returned']));
     $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division', 'initiation']);
     $isDProcDraft = isset($isDProcDraft) ? $isDProcDraft : ($userArea === 'proc' && in_array(trim($purchase->pcs_status), ['Draft', 'Returned']));
-    $currentStatusDisplay = $service->getStatusDisplayName($purchase->pcs_status);
+    $currentStatusDisplay = $purchase->current_stage_display ?? $service->getStatusDisplayName($purchase->pcs_status);
 
     // Calculate the next numbering for the list
     $liCount = 0;

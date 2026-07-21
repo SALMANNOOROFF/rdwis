@@ -27,20 +27,20 @@ class ProcurementDashboardController extends Controller
         
         // DProc sees cases based on their current status lifecycle
         
-        // 1. Pending Action: Under Scrutiny OR Returned
-        $pending = Purchase::with(['project', 'latestDecision.account'])
+        // 1. Pending Action: Under Scrutiny OR Returned (legacy pcs_status values)
+        $pending = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
             ->whereIn('pcs_status', ['Under Scrutiny', 'Returned'])
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        // 2. Open: Active cases with others (DFinance, MD, DDG, DG)
-        $open = Purchase::with(['project', 'latestDecision.account'])
-            ->whereIn('pcs_status', ['With DFinance', 'With MD', 'With DDG', 'With DG'])
+        // 2. Open: Active cases currently routed to HQ authorities
+        $open = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
+            ->atStage(['DFinance', 'MD', 'DDG', 'DG'])
             ->orderBy('pcs_id', 'desc')
             ->get();
 
         // 3. Close: Cases that are already Approved
-        $closed = Purchase::with(['project', 'latestDecision.account'])
+        $closed = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
             ->where('pcs_status', 'Approved')
             ->orderBy('pcs_id', 'desc')
             ->get();
@@ -62,14 +62,18 @@ class ProcurementDashboardController extends Controller
     }
 
     /**
-     * Directly close/approve a case from the dashboard
+     * Directly close/approve a case from the dashboard.
+     * FIXED: Delegates to PurchaseApprovalService to ensure commitment creation + substatus handling.
      */
-    public function closeCase($id)
+    public function closeCase(Request $request, $id)
     {
         try {
             $purchase = Purchase::findOrFail($id);
-            $purchase->pcs_status = 'Approved';
-            $purchase->save();
+            $this->approvalService->processDecision(
+                $purchase,
+                'approve',
+                $request->input('remarks', 'Closed/Approved from Procurement Dashboard.')
+            );
             
             return redirect()->back()->with('success', 'Case marked as Closed (Approved) successfully.');
         } catch (\Exception $e) {
@@ -82,7 +86,7 @@ class ProcurementDashboardController extends Controller
      */
     public function show($id)
     {
-        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
+        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
 
         // Fetch Live Financials using FinancialIntelligenceService

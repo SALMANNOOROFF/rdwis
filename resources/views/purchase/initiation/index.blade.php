@@ -216,7 +216,7 @@
                                                     <td class="text-right"><span class="case-value">PKR {{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
                                                     <td class="text-center">
                                                         <span class="badge status-badge mb-1" style="background: rgba(var(--rd-{{$b}}-rgb), 0.1); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.2);">
-                                                            <i class="fas fa-{{$i}} mr-1"></i> {{ $s }}
+                                                            <i class="fas fa-{{$i}} mr-1"></i> {{ $p->current_stage_display ?? $s }}
                                                         </span>
                                                         @if($latest)
                                                             <div class="text-xs font-weight-bold text-muted" style="font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px;">

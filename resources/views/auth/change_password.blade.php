@@ -36,12 +36,12 @@
 
                                 <div class="form-group">
                                     <label for="password">New Password</label>
-                                    <input type="password" name="password" id="password" class="form-control" required>
+                                    <input type="password" name="password" id="password" class="form-control" autocomplete="new-password" required>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group mb-4">
                                     <label for="password_confirmation">Confirm Password</label>
-                                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
+                                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" autocomplete="new-password" required>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">

@@ -23,33 +23,47 @@ class FinanceDashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $targetStatus = 'With DFinance';
         $pageTitle = 'Director Finance | Budget Hub';
 
-        // 1. Pending Action: With DFinance
-        $pending = Purchase::with(['project', 'latestDecision.account'])
-            ->where('pcs_status', $targetStatus)
+        // 1. Pending Action: Cases at DFinance stage
+        $pending = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
+            ->atStage('DFinance')
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        // 2. Open: Active cases with other authorities (Under Scrutiny, DProc, MD, DDG, DG)
-        $open = Purchase::with(['project', 'latestDecision.account'])
-            ->whereIn('pcs_status', ['Under Scrutiny', 'Returned', 'With MD', 'With DDG', 'With DG'])
+        // 2. Open: Active cases at other HQ stages
+        $open = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
+            ->atStage(['MD', 'DDG', 'DG'])
             ->orderBy('pcs_id', 'desc')
             ->get();
+
+        // Also include Returned/Draft cases in Open for visibility
+        $openReturned = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
+            ->whereIn('pcs_status', ['Returned'])
+            ->whereHas('decisions', function($q) use ($user) {
+                $q->where('pdec_acc_id', $user->acc_id);
+            })
+            ->orderBy('pcs_id', 'desc')
+            ->get();
+
+        $open = $open->merge($openReturned);
 
         // 3. Closed: Cases that are already Approved
-        $closed = Purchase::with(['project', 'latestDecision.account'])
+        $closed = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
             ->where('pcs_status', 'Approved')
             ->orderBy('pcs_id', 'desc')
             ->get();
 
         // Action Taken tracker (for metrics compatibility)
-        $processed = Purchase::with(['project', 'latestDecision.account'])
+        $processed = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
-            ->where('pcs_status', '!=', $targetStatus) 
+            ->where(function($q) {
+                $q->whereDoesntHave('currentSubstatus', function($sq) {
+                    $sq->where('pss_stage', 'DFinance');
+                });
+            })
             ->orderBy('pcs_id', 'desc')
             ->limit(15)
             ->get();
@@ -72,7 +86,7 @@ class FinanceDashboardController extends Controller
      */
     public function show($id)
     {
-        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
+        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
 
         // Fetch Live Financials

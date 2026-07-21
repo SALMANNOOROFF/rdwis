@@ -136,22 +136,50 @@ class PurchaseInitiationController extends Controller
      */
     public function holdCase($id)
     {
-        $purchase = Purchase::findOrFail($id);
+        $purchase = Purchase::with('currentSubstatus')->findOrFail($id);
         
         // Security check
         if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
             return back()->with('error', 'Unauthorized access.');
         }
 
-        // Only allow if not yet approved/rejected
-        if (in_array(strtolower($purchase->pcs_status), ['approved', 'rejected'])) {
-             return back()->with('error', 'Approved/Rejected cases cannot be held.');
+        // Fix #3: Gate on substatus stage, not pcs_status.
+        // Only allow hold if case is at DFinance (first post-Division stage)
+        $currentStage = $purchase->currentSubstatus?->pss_stage;
+        if ($currentStage !== 'DFinance') {
+            return back()->with('error', 'Case cannot be held — it has already been processed beyond Finance.');
         }
 
-        $purchase->pcs_status = 'Draft';
-        $purchase->save();
+        return DB::transaction(function () use ($purchase, $currentStage) {
+            $purchase->pcs_status = 'Draft';
+            $purchase->save();
 
-        return back()->with('success', 'Case has been pulled back to Draft and is now editable.');
+            // Transition substatus back to Division
+            \App\Models\PurCaseSubstatus::where('pss_pcs_id', $purchase->pcs_id)
+                ->where('pss_is_current', true)
+                ->update(['pss_is_current' => false, 'pss_until' => now()]);
+
+            \App\Models\PurCaseSubstatus::create([
+                'pss_pcs_id'    => $purchase->pcs_id,
+                'pss_stage'     => 'Division',
+                'pss_is_current'=> true,
+                'pss_since'     => now(),
+            ]);
+
+            // Record the hold action in the decision trail
+            DB::table('pur.purdecisions')->insert([
+                'pdec_pcs_id' => $purchase->pcs_id,
+                'pdec_role' => 'Initiator',
+                'pdec_acc_id' => Auth::id(),
+                'pdec_action' => 'hold',
+                'pdec_remarks' => 'Case held by Division for internal review/corrections.',
+                'pdec_from_status' => $currentStage,
+                'pdec_to_status' => 'Division',
+                'created_at' => now()
+            ]);
+
+            return back()->with('success', 'Case has been pulled back to Draft and is now editable.');
+        });
     }
 
     public function save(Request $request, $id)
@@ -460,7 +488,7 @@ class PurchaseInitiationController extends Controller
     {
         $quoteIds = DB::table('pur.quotes')->where('qte_pcs_id', $pcsId)->pluck('qte_id')->toArray();
         if (count($quoteIds) === 0) {
-            DB::table('pur.purcases')->where('pcs_id', $pcsId)->update(['pcs_price' => 0]);
+            DB::table('pur.purcases')->where('pcs_id', $pcsId)->update(['pcs_price' => 0, 'pcs_midprice' => 0]);
             DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcsId)->update(['pci_price' => 0]);
             return;
         }
@@ -477,7 +505,7 @@ class PurchaseInitiationController extends Controller
         $winnerId = (int) key($totals);
         $winnerTotal = (float) ($totals[$winnerId] ?? 0);
 
-        DB::table('pur.purcases')->where('pcs_id', $pcsId)->update(['pcs_price' => $winnerTotal]);
+        DB::table('pur.purcases')->where('pcs_id', $pcsId)->update(['pcs_price' => $winnerTotal, 'pcs_midprice' => $winnerTotal]);
 
         $winnerItems = DB::table('pur.quoteitems')
             ->where('qti_qte_id', $winnerId)

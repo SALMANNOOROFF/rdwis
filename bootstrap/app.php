@@ -31,5 +31,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Database\QueryException $e, \Illuminate\Http\Request $request) {
+            if (!config('app.debug')) {
+                if ($request->is('api/*') || $request->wantsJson()) {
+                    return response()->json(['message' => 'A database error occurred. Please try again later.'], 500);
+                }
+                return back()->with('error', 'A database error occurred. Please try again later.');
+            }
+        });
     })->create();

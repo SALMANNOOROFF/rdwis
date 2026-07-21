@@ -71,6 +71,17 @@ class PurchaseReceiptController extends Controller
         ]);
 
         $purchase = DB::table('pur.purcases')->where('pcs_id', $pcs_id)->firstOrFail();
+
+        // Validation 1: Re-verify case is Approved
+        if ($purchase->pcs_status !== 'Approved') {
+            return back()->with('error', 'Only Approved purchase cases are eligible for goods receipt.');
+        }
+
+        // Validation 2: Block receipt if case is already Fully Received
+        if (($purchase->pcs_fulfillment_status ?? '') === 'Fully Received') {
+            return back()->with('error', 'This purchase case has already been Fully Received.');
+        }
+
         $caseItems = DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcs_id)->get()->keyBy('pci_id');
 
         $hasReceivedQty = false;
@@ -85,7 +96,14 @@ class PurchaseReceiptController extends Controller
             return back()->with('error', 'Please enter at least one positive received quantity.');
         }
 
-        DB::transaction(function () use ($pcs_id, $purchase, $caseItems, $request) {
+        // Whitelist of material pcs_types eligible for inventory asset creation (ina.invats)
+        $materialPcsTypes = [
+            'ps', 'mat', 'civ', 'tran', 'book', 'lic', 'net', 'pub', 'stat',
+            'material', 'civil', 'transport', 'books', 'license', 'internet', 'publishing', 'stationery'
+        ];
+        $isMaterialCase = in_array(strtolower(trim($purchase->pcs_type ?? '')), $materialPcsTypes);
+
+        DB::transaction(function () use ($pcs_id, $purchase, $caseItems, $request, $isMaterialCase) {
             // 1. Create Receipt master record
             $prt_id = DB::table('pur.purreceipts')->insertGetId([
                 'prt_date'   => now()->toDateString(),
@@ -105,6 +123,15 @@ class PurchaseReceiptController extends Controller
                 $item = $caseItems->get($pci_id);
                 if (!$item) continue;
 
+                // Validation 3: Check received quantity does not exceed remaining ordered quantity
+                $orderedQty = (float)($item->pci_qty ?? 0);
+                $alreadyFulfilled = (float)($item->pci_fulfilment ?? 0);
+                $remainingOrdered = max(0, $orderedQty - $alreadyFulfilled);
+
+                if ($receivedQty > $remainingOrdered) {
+                    throw new \Exception("Received quantity ({$receivedQty}) exceeds remaining ordered quantity ({$remainingOrdered}) for item: {$item->pci_desc}");
+                }
+
                 // 2. Insert receipt item
                 DB::table('pur.purreceiptitems')->insert([
                     'pti_prt_id'  => $prt_id,
@@ -116,34 +143,36 @@ class PurchaseReceiptController extends Controller
                 ]);
 
                 // 3. Update item fulfilment count
-                $newFulfilment = ((float)($item->pci_fulfilment ?? 0)) + $receivedQty;
+                $newFulfilment = $alreadyFulfilled + $receivedQty;
                 DB::table('pur.purcaseitems')
                     ->where('pci_id', $pci_id)
                     ->update(['pci_fulfilment' => $newFulfilment]);
 
-                // 4. Populate Inventory Assets (ina.invats & ina.invatcomps)
-                $ias_id = DB::table('ina.invats')->insertGetId([
-                    'ias_pcs_id'    => $pcs_id,
-                    'ias_pci_id'    => $pci_id,
-                    'ias_desc'      => $item->pci_desc,
-                    'ias_qty'       => $receivedQty,
-                    'ias_qtyunit'   => $item->pci_qtyunit,
-                    'ias_unt_id'    => $purchase->pcs_unt_id,
-                    'ias_effhed_id' => $purchase->pcs_effhed_id,
-                    'ias_chargedate'=> now()->toDateString(),
-                    'ias_price'     => $item->pci_price ?? 0,
-                    'ias_type'      => (string)($item->pci_type ?? '1'),
-                    'ias_subtype'   => (string)($item->pci_subtype ?? 'General'),
-                    'ias_dtg'       => now(),
-                ], 'ias_id');
+                // 4. Populate Inventory Assets (ina.invats & ina.invatcomps) ONLY for material cases (Whitelist)
+                if ($isMaterialCase) {
+                    $ias_id = DB::table('ina.invats')->insertGetId([
+                        'ias_pcs_id'    => $pcs_id,
+                        'ias_pci_id'    => $pci_id,
+                        'ias_desc'      => $item->pci_desc,
+                        'ias_qty'       => $receivedQty,
+                        'ias_qtyunit'   => $item->pci_qtyunit,
+                        'ias_unt_id'    => $purchase->pcs_unt_id,
+                        'ias_effhed_id' => $purchase->pcs_effhed_id,
+                        'ias_chargedate'=> now()->toDateString(),
+                        'ias_price'     => $item->pci_price ?? 0,
+                        'ias_type'      => (string)($item->pci_type ?? '1'),
+                        'ias_subtype'   => (string)($item->pci_subtype ?? 'General'),
+                        'ias_dtg'       => now(),
+                    ], 'ias_id');
 
-                DB::table('ina.invatcomps')->insert([
-                    'iac_ias_id'  => $ias_id,
-                    'iac_qty'     => $receivedQty,
-                    'iac_qtyunit' => $item->pci_qtyunit,
-                    'iac_status'  => 'Held', // Store custody (On Charge)
-                    'iac_dtg'     => now(),
-                ]);
+                    DB::table('ina.invatcomps')->insert([
+                        'iac_ias_id'  => $ias_id,
+                        'iac_qty'     => $receivedQty,
+                        'iac_qtyunit' => $item->pci_qtyunit,
+                        'iac_status'  => 'Held', // Store custody (On Charge)
+                        'iac_dtg'     => now(),
+                    ]);
+                }
             }
 
             // 5. Check total fulfillment status for the case

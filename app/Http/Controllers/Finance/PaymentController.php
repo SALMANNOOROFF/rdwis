@@ -92,12 +92,25 @@ class PaymentController extends Controller
         $tax = (float) ($request->tax ?? 0);
         $isComplete = $request->boolean('is_complete');
 
-        DB::transaction(function () use ($cmt_id, $request, $amount, $tax, $isComplete) {
-            $commitment = DB::table('fin.commitments')->where('cmt_id', $cmt_id)->first();
-            if (!$commitment) {
-                throw new \Exception('Commitment record not found.');
-            }
+        // Validation: Ensure total payment request does not exceed remaining commitment balance
+        $commitment = DB::table('fin.commitments')->where('cmt_id', $cmt_id)->first();
+        if (!$commitment) {
+            return back()->with('error', 'Commitment record not found.');
+        }
 
+        $totalPaid = DB::table('fin.transactions')
+            ->where('trn_cmt_id', $cmt_id)
+            ->sum(DB::raw('ABS(trn_amount2)'));
+
+        $commitmentAmount = abs((float)$commitment->cmt_amount);
+        $remainingBalance = max(0, $commitmentAmount - $totalPaid);
+        $totalPaymentRequest = $amount + $tax;
+
+        if ($totalPaymentRequest > $remainingBalance) {
+            return back()->with('error', 'Payment amount (PKR ' . number_format($totalPaymentRequest, 2) . ') exceeds remaining commitment balance (PKR ' . number_format($remainingBalance, 2) . ').');
+        }
+
+        DB::transaction(function () use ($cmt_id, $commitment, $request, $amount, $tax, $isComplete) {
             $purchase = DB::table('pur.purcases')->where('pcs_id', $commitment->cmt_docid)->first();
 
             $lastSeq = DB::table('fin.transactions')

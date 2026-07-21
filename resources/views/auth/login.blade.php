@@ -297,15 +297,15 @@ body::before {
                     </div>
                 @endif
 
-                <form method="post" action="{{ route('login.post') }}">
+                <form method="post" action="{{ route('login.post') }}" autocomplete="off">
                     @csrf
 
                     <div class="form-group">
-                        <input type="text" name="username" class="form-control" placeholder="Username" required>
+                        <input type="text" name="username" class="form-control" placeholder="Username" autocomplete="off" required>
                     </div>
 
                     <div class="form-group password-wrapper">
-                        <input type="password" name="userpass" id="password" class="form-control" placeholder="Password" required>
+                        <input type="password" name="userpass" id="password" class="form-control" placeholder="Password" autocomplete="off" required>
                         <i class="fas fa-eye" onclick="togglePassword()"></i>
                     </div>
 
@@ -327,54 +327,7 @@ body::before {
 
     </div>
 
-<script>
-    function togglePassword() {
-        const pwd = document.getElementById('password');
-        const icon = document.querySelector('.password-wrapper i');
-        
-        if (pwd.type === 'password') {
-            pwd.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            pwd.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
-
-    function showAdminNote() {
-        const note = document.getElementById('adminNote');
-        // Simple fade in effect
-        note.style.display = 'block';
-        note.style.opacity = 0;
-        let opacity = 0;
-        const timer = setInterval(function() {
-            if (opacity >= 1) {
-                clearInterval(timer);
-            }
-            note.style.opacity = opacity;
-            opacity += 0.1;
-        }, 30);
-    }
-</script>
-
-<script>
-(function() {
-    var isFirefox = typeof InstallTrigger !== 'undefined';
-    if (!isFirefox) return;
-    var w = window.innerWidth;
-    var scale = 1;
-    if (w <= 1100) scale = 0.70;
-    else if (w <= 1280) scale = 0.75;
-    else if (w <= 1400) scale = 0.85;
-    if (scale < 1) {
-        document.body.style.transform = 'scale(' + scale + ')';
-        document.body.style.transformOrigin = '0 0';
-        document.body.style.width = (100 / scale) + '%';
-    }
-})();
-</script>
+<script src="{{ asset('js/login-helper.js') }}"></script>
 
 </body>
 </html>

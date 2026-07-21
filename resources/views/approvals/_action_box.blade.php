@@ -7,20 +7,31 @@
     $nextAuthName = $service->getNextAuthorityName($purchase, $area);
     $returnTargets = $service->getReturnTargets($purchase);
     
-    // Determine the expected status for this user to act
-    $expectedStatus = match($userArea) {
-        'prj', 'rdwprj', 'division' => ['Draft', 'Returned'],
-        'proc' => ['Under Scrutiny'],
-        'fin'  => ['With DFinance'],
-        'rdw'  => ['With MD'],
-        'hqs'  => ['With DDG'],
-        'nrdi' => ['With DG'],
+@php
+    $u = Auth::user();
+    $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
+    $service = app(\App\Services\PurchaseApprovalService::class);
+    $area = strtolower(trim($area ?? Auth::user()->acc_untarea));
+    $canApprove = $service->canApprove($area, $purchase->pcs_price);
+    $nextAuthName = $service->getNextAuthorityName($purchase, $area);
+    $returnTargets = $service->getReturnTargets($purchase);
+    
+    // Determine if this user's stage matches the case's current substatus stage
+    $currentStage = $purchase->currentSubstatus?->pss_stage;
+    $expectedStages = match($userArea) {
+        'prj', 'rdwprj', 'division' => ['Division'],
+        'proc' => ['Division'],   // DProc sees Draft/Returned cases (collaborative)
+        'fin'  => ['DFinance'],
+        'rdw'  => ['MD'],
+        'hqs'  => ['DDG'],
+        'nrdi' => ['DG'],
         default => ['None']
     };
 
-    $isCurrentStage = in_array(trim($purchase->pcs_status), $expectedStatus);
+    $isCurrentStage = in_array($currentStage, $expectedStages) 
+        || (in_array($userArea, ['prj', 'rdwprj', 'division', 'initiation']) && in_array(trim($purchase->pcs_status), ['Draft', 'Returned']));
     $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division']);
-    $currentStatusDisplay = $service->getStatusDisplayName($purchase->pcs_status);
+    $currentStatusDisplay = $purchase->current_stage_display ?? $service->getStatusDisplayName($purchase->pcs_status);
 
     // Calculate the next numbering for the list
     $liCount = 0;
@@ -261,7 +272,7 @@
 </script>
 @else
     @if($isInitiator && !in_array(strtolower($purchase->pcs_status), ['approved', 'rejected']))
-        @php $isAtFirstAuthority = (trim($purchase->pcs_status) === 'Under Scrutiny'); @endphp
+        @php $isAtFirstAuthority = ($purchase->currentSubstatus?->pss_stage === 'DFinance'); @endphp
         <div class="card bg-dark border-info mt-2 shadow-sm" style="border-radius: 12px; border: 1px solid rgba(0, 123, 255, 0.3) !important;">
              <div class="card-body py-3 text-center">
                  <div class="mb-2"><i class="fas fa-paper-plane fa-2x text-info opacity-50"></i></div>

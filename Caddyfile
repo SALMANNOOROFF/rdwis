@@ -2,7 +2,32 @@
     auto_https disable_redirects
 }
 
+http://rdwis, http://192.168.1.169 {
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    redir https://{host}{uri} permanent
+}
+
 https://rdwis, https://192.168.1.169 {
     tls internal
-    reverse_proxy 192.168.1.169:8000
+    root * "H:/RDWIS 2.0/RDWIS APP 2.0/public"
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        X-Frame-Options "SAMEORIGIN"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        -Server
+        -X-Powered-By
+    }
+
+    @no_cache {
+        path /manifest.json /service-worker.js
+    }
+    header @no_cache Cache-Control "no-store, must-revalidate"
+
+    php_fastcgi 127.0.0.1:9000
+    file_server
 }

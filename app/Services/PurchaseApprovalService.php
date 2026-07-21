@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Purchase;
 use App\Models\PurDecision;
 use App\Models\PurNotification;
+use App\Models\PurCaseSubstatus;
 use App\Models\CenAccount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -15,39 +16,62 @@ class PurchaseApprovalService
     const THRESHOLD_DDG = 999999;   // 10 Lakh
 
     /**
-     * Define the strict serial order of areas
+     * Forward chain: stage → next stage (area code)
+     * Division skips DProc (DProc is collaborative, not a gate)
      */
-    protected $serialFlow = [
-        'prj'   => 'Proc',  // Division -> DProc
-        'Proc'  => 'fin',   // DProc -> DFinance
-        'fin'   => 'rdw',   // DFinance -> MD
-        'rdw'   => 'Hqs',   // MD -> DDG (if amt >= 4L)
-        'Hqs'   => 'nrdi',  // DDG -> DG (if amt >= 10L)
+    protected $forwardChain = [
+        'Division'  => ['stage' => 'DFinance', 'area' => 'fin'],
+        'DFinance'  => ['stage' => 'MD',       'area' => 'rdw'],
+        'MD'        => ['stage' => 'DDG',      'area' => 'hqs'],   // Only if amount > threshold
+        'DDG'       => ['stage' => 'DG',       'area' => 'nrdi'],  // Only if amount > threshold
     ];
 
-    protected $displayNames = [
-        'Under Scrutiny' => 'Director Procurement',
-        'With DFinance'  => 'Director Finance',
-        'With MD'        => 'MD Office',
-        'With DDG'       => 'DDG Office',
-        'With DG'        => 'Director General',
-        'Returned'       => 'Division (Initiator)'
-    ];
-
+    /**
+     * Return chain: stage → previous stage
+     * Returning from DFinance goes back to Division (sets pcs_status='Returned')
+     */
     protected $returnChain = [
-        'Under Scrutiny' => 'Returned',
-        'With DFinance'  => 'Under Scrutiny',
-        'With MD'        => 'With DFinance',
-        'With DDG'       => 'With MD',
-        'With DG'        => 'With DDG'
+        'DFinance'  => 'Division',
+        'MD'        => 'DFinance',
+        'DDG'       => 'MD',
+        'DG'        => 'DDG',
     ];
 
-    protected $statusToArea = [
-        'Under Scrutiny' => 'Proc',
-        'With DFinance'  => 'fin',
-        'With MD'        => 'rdw',
-        'With DDG'       => 'Hqs',
-        'With DG'        => 'nrdi',
+    /**
+     * Display names for stages (used in UI)
+     */
+    protected $displayNames = [
+        'Division'  => 'Division (Initiator)',
+        'DFinance'  => 'Director Finance',
+        'MD'        => 'MD Office',
+        'DDG'       => 'DDG Office',
+        'DG'        => 'Director General',
+    ];
+
+    /**
+     * Map stage → area code (for notifications)
+     */
+    protected $stageToArea = [
+        'Division'  => 'prj',
+        'DFinance'  => 'fin',
+        'MD'        => 'rdw',
+        'DDG'       => 'hqs',
+        'DG'        => 'nrdi',
+    ];
+
+    /**
+     * Map area code → stage (for resolving current user's stage)
+     */
+    protected $areaToStage = [
+        'prj'       => 'Division',
+        'rdwprj'    => 'Division',
+        'division'  => 'Division',
+        'initiation'=> 'Division',
+        'proc'      => 'DProc',     // Special: collaborative, not in forward chain
+        'fin'       => 'DFinance',
+        'rdw'       => 'MD',
+        'hqs'       => 'DDG',
+        'nrdi'      => 'DG',
     ];
 
     /**
@@ -56,109 +80,150 @@ class PurchaseApprovalService
     public function getNextAuthorityName(Purchase $case, string $currentArea): ?string
     {
         $mapping = $this->resolveForwarding($case, $currentArea);
-        $nextArea = strtolower(trim($mapping['area'] ?? ''));
-        
-        if ($mapping['status'] === 'Approved') return 'Final Approval (Success)';
 
-        return match($nextArea) {
-            'proc' => 'Director Procurement',
-            'fin'  => 'Director Finance',
-            'rdw'  => 'MD Office',
-            'hqs'  => 'DDG Office',
-            'nrdi' => 'Director General',
-            default => null
+        if ($mapping['stage'] === 'Approved') return 'Final Approval (Success)';
+
+        return $this->displayNames[$mapping['stage']] ?? null;
+    }
+
+    /**
+     * Get the display name of a stage or legacy pcs_status
+     */
+    public function getStatusDisplayName(string $statusOrStage): string
+    {
+        // First check if it's a stage name
+        if (isset($this->displayNames[$statusOrStage])) {
+            return $this->displayNames[$statusOrStage];
+        }
+
+        // Fallback for legacy pcs_status values shown in old views
+        return match($statusOrStage) {
+            'Under Scrutiny' => 'Director Procurement',
+            'Under Approval' => 'HQ Processing',
+            'Returned'       => 'Division (Initiator)',
+            default          => $statusOrStage,
         };
     }
 
     /**
-     * Get the display name of a status
-     */
-    public function getStatusDisplayName(string $status): string
-    {
-        return $this->displayNames[$status] ?? $status;
-    }
-
-    /**
-     * Get all possible return targets based on the case's journey
+     * Get all possible return targets based on the case's substatus history.
+     * Uses purcase_substatus (uniform stage names) — NOT purdecisions (fix #4).
      */
     public function getReturnTargets(Purchase $case): array
     {
-        $trailStatuses = $case->decisions()
-            ->orderBy('pdec_id', 'asc')
-            ->pluck('pdec_from_status')
+        // Get all historical stages this case has passed through
+        $historicalStages = PurCaseSubstatus::where('pss_pcs_id', $case->pcs_id)
+            ->orderBy('pss_id', 'asc')
+            ->pluck('pss_stage')
             ->unique()
             ->toArray();
 
+        $currentStage = $case->currentSubstatus?->pss_stage;
         $targets = [];
-        
-        // Always allow returning to Division
-        $targets['Returned'] = $this->displayNames['Returned'];
 
-        foreach ($trailStatuses as $status) {
-            // Exclude current status and Under Scrutiny (Procurement) as a return target
-            if ($status !== $case->pcs_status && $status !== 'Under Scrutiny' && isset($this->displayNames[$status])) {
-                $targets[$status] = $this->displayNames[$status];
+        // Always allow returning to Division
+        $targets['Division'] = $this->displayNames['Division'];
+
+        foreach ($historicalStages as $stage) {
+            // Exclude current stage, and DProc (never a return target)
+            if ($stage !== $currentStage && $stage !== 'Division' && isset($this->displayNames[$stage])) {
+                $targets[$stage] = $this->displayNames[$stage];
             }
         }
-
 
         return $targets;
     }
 
     /**
-     * Process a decision and move the case to the next stage
+     * Process a decision and move the case to the next stage.
+     *
+     * Actions: forward, forward_negative, return, approve, reject/not_approved, dproc_save
      */
-    public function processDecision(Purchase $case, string $action, string $remarks, ?string $targetStatus = null)
+    public function processDecision(Purchase $case, string $action, string $remarks, ?string $targetStage = null)
     {
-        return DB::transaction(function () use ($case, $action, $remarks, $targetStatus) {
+        return DB::transaction(function () use ($case, $action, $remarks, $targetStage) {
             $user = Auth::user();
             $userArea = strtolower(trim($user->acc_untarea));
-            
-            $fromStatus = $case->pcs_status;
-            $toStatus = $fromStatus;
-            $nextArea = null;
+            $currentStage = $case->currentSubstatus?->pss_stage ?? 'Division';
+
+            $fromStage = $currentStage;
+            $toStage = $currentStage;
+            $newPcsStatus = null; // Only set when pcs_status should change
 
             if ($action === 'return') {
-                $toStatus = $targetStatus; // Use the explicitly provided targetStatus
-                // Determine the recipient for the return notification
-                $this->notifyReturn($case, $user, $remarks, $toStatus);
-            } elseif ($action === 'not_approved' || $action === 'reject') { 
-                $toStatus = $this->returnChain[$fromStatus] ?? 'Returned';
-                $this->notifyReturn($case, $user, $remarks, $toStatus);
+                // Return to an explicitly provided target stage
+                $toStage = $targetStage ?? ($this->returnChain[$currentStage] ?? 'Division');
+
+                if ($toStage === 'Division') {
+                    $newPcsStatus = 'Returned';
+                }
+
+                $this->transitionSubstatus($case, $toStage);
+                $this->notifyReturn($case, $user, $remarks, $toStage);
+
+            } elseif ($action === 'not_approved' || $action === 'reject') {
+                // One step back via returnChain (preserving existing behavior)
+                $toStage = $this->returnChain[$currentStage] ?? 'Division';
+
+                if ($toStage === 'Division') {
+                    $newPcsStatus = 'Returned';
+                }
+
+                $this->transitionSubstatus($case, $toStage);
+                $this->notifyReturn($case, $user, $remarks, $toStage);
+
             } elseif ($action === 'approve') {
-                // Verification: Can this user approve this amount?
+                // Terminal approval: verify authorization
                 if ($this->canApprove($userArea, $case->pcs_price)) {
-                    $toStatus = 'Approved';
+                    $newPcsStatus = 'Approved';
+                    $toStage = 'Approved';
+                    $this->closeSubstatus($case); // fix #1: no new row for terminal
                 } else {
                     throw new \Exception("Unauthorized: This role cannot approve this amount.");
                 }
+
             } elseif ($action === 'forward' || $action === 'forward_negative') {
-                $statusMapping = $this->resolveForwarding($case, $userArea);
-                $toStatus = $statusMapping['status'];
-                $nextArea = $statusMapping['area'];
-                $this->notifyNext($case, $user, $nextArea, $remarks);
+                $mapping = $this->resolveForwarding($case, $userArea);
+                $toStage = $mapping['stage'];
+
+                if ($toStage === 'Approved') {
+                    // Forward resolves to approval (within threshold)
+                    $newPcsStatus = 'Approved';
+                    $this->closeSubstatus($case); // fix #1: no new row for terminal
+                } else {
+                    // Move to next stage
+                    if ($case->pcs_status === 'Draft' || $case->pcs_status === 'Returned') {
+                        $newPcsStatus = 'Under Approval'; // First release from Division
+                    }
+                    $this->transitionSubstatus($case, $toStage);
+                    $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? $mapping['area'], $remarks);
+                }
+
             } elseif ($action === 'dproc_save') {
-                $toStatus = $fromStatus; // Keep it in current status (e.g. Draft)
+                // DProc collaborative save: NO substatus change (fix #2), NO pcs_status change
+                $toStage = $currentStage; // stays the same
             }
 
-            // 1. Log Decision
+            // 1. Log Decision (always, for every action)
             PurDecision::create([
-                'pdec_pcs_id' => $case->pcs_id,
-                'pdec_acc_id' => $user->acc_id,
-                'pdec_role' => $user->acc_desigshort ?: $userArea,
-                'pdec_action' => $action,
-                'pdec_from_status' => $fromStatus,
-                'pdec_to_status' => $toStatus,
-                'pdec_remarks' => $remarks,
-                'pdec_amount' => $case->pcs_price,
+                'pdec_pcs_id'      => $case->pcs_id,
+                'pdec_acc_id'      => $user->acc_id,
+                'pdec_role'        => $user->acc_desigshort ?: $userArea,
+                'pdec_action'      => $action,
+                'pdec_from_status' => $fromStage,
+                'pdec_to_status'   => $toStage,
+                'pdec_remarks'     => $remarks,
+                'pdec_amount'      => $case->pcs_price,
             ]);
 
-            // 2. Update Case
-            $case->pcs_status = $toStatus;
-            $case->save();
+            // 2. Update pcs_status (only when it actually changes)
+            if ($newPcsStatus !== null) {
+                $case->pcs_status = $newPcsStatus;
+                $case->save();
+            }
 
-            // 2b. Insert Fund Commitment on Approval
-            if ($toStatus === 'Approved') {
+            // 3. Insert Fund Commitment on Approval (idempotency guarded)
+            if ($newPcsStatus === 'Approved') {
                 $exists = DB::table('fin.commitments')
                     ->where('cmt_docid', $case->pcs_id)
                     ->whereIn('cmt_type', ['Ps', 'Pt', 'Rb'])
@@ -179,7 +244,7 @@ class PurchaseApprovalService
                 }
             }
 
-            // 3. Notify Interested Parties (Feedback Loop)
+            // 4. Notify Interested Parties (Feedback Loop)
             $this->notifyInterestedParties($case, $action, $user, $remarks);
 
             return $case;
@@ -187,11 +252,106 @@ class PurchaseApprovalService
     }
 
     /**
+     * Check if a role is authorized to approve the current case amount
+     */
+    public function canApprove(string $area, float $amount): bool
+    {
+        $area = strtolower($area);
+        if ($area === 'nrdi') return true; // DG can always approve
+        if ($area === 'hqs' && $amount <= self::THRESHOLD_DDG) return true; // DDG < 10L
+        if ($area === 'rdw' && $amount <= self::THRESHOLD_MD) return true; // MD < 4L
+
+        return false;
+    }
+
+    // ── Sub-Status Transition Helpers ─────────────────────────
+
+    /**
+     * Transition substatus: close the current row, open a new one.
+     */
+    protected function transitionSubstatus(Purchase $case, string $newStage): void
+    {
+        // Close current row
+        PurCaseSubstatus::where('pss_pcs_id', $case->pcs_id)
+            ->where('pss_is_current', true)
+            ->update(['pss_is_current' => false, 'pss_until' => now()]);
+
+        // Open new row
+        PurCaseSubstatus::create([
+            'pss_pcs_id'    => $case->pcs_id,
+            'pss_stage'     => $newStage,
+            'pss_is_current'=> true,
+            'pss_since'     => now(),
+        ]);
+    }
+
+    /**
+     * Close substatus without opening a new row (terminal states: Approved, Rejected, etc.)
+     * Fix #1: Terminal states have no current substatus row.
+     */
+    protected function closeSubstatus(Purchase $case): void
+    {
+        PurCaseSubstatus::where('pss_pcs_id', $case->pcs_id)
+            ->where('pss_is_current', true)
+            ->update(['pss_is_current' => false, 'pss_until' => now()]);
+    }
+
+    // ── Forwarding Resolution ─────────────────────────────────
+
+    /**
+     * Resolve where the case goes next when forwarded.
+     * Returns ['stage' => '<stage name or Approved>', 'area' => '<area code>']
+     */
+    protected function resolveForwarding(Purchase $case, string $currentArea)
+    {
+        $currentArea = strtolower(trim($currentArea));
+
+        // Division (prj, rdwprj, etc.) → DFinance
+        if (in_array($currentArea, ['prj', 'rdwprj', 'division', 'initiation'])) {
+            return ['stage' => 'DFinance', 'area' => 'fin'];
+        }
+
+        // DProc → DFinance (collaborative forward)
+        if (str_contains($currentArea, 'proc')) {
+            return ['stage' => 'DFinance', 'area' => 'fin'];
+        }
+
+        // DFinance → MD
+        if (str_contains($currentArea, 'fin')) {
+            return ['stage' => 'MD', 'area' => 'rdw'];
+        }
+
+        // MD → DDG (if >= 4L) or Approve
+        if ($currentArea === 'rdw') {
+            if ($case->pcs_price <= self::THRESHOLD_MD) {
+                return ['stage' => 'Approved', 'area' => null];
+            }
+            return ['stage' => 'DDG', 'area' => 'hqs'];
+        }
+
+        // DDG → DG (if >= 10L) or Approve
+        if ($currentArea === 'hqs') {
+            if ($case->pcs_price <= self::THRESHOLD_DDG) {
+                return ['stage' => 'Approved', 'area' => null];
+            }
+            return ['stage' => 'DG', 'area' => 'nrdi'];
+        }
+
+        // DG forward = Approve (DG is always the end)
+        if ($currentArea === 'nrdi') {
+            return ['stage' => 'Approved', 'area' => null];
+        }
+
+        return ['stage' => $case->currentSubstatus?->pss_stage ?? 'Division', 'area' => null];
+    }
+
+    // ── Notifications ─────────────────────────────────────────
+
+    /**
      * Notify everyone who has a stake in this case about the new action
-    */
+     */
     protected function notifyInterestedParties($case, string $action, $actor, string $remarks)
     {
-        // 1. Get the message based on action
         $actionPast = match($action) {
             'forward' => 'Recommended & Forwarded',
             'forward_negative' => 'Not Recommended but Forwarded',
@@ -204,26 +364,24 @@ class PurchaseApprovalService
             default   => $action
         };
 
-        $message = "Case #{$case->pcs_id} has been {$actionPast} by {$actor->acc_name}. Status: {$case->pcs_status}.";
+        $stageDisplay = $case->current_stage_display ?? $case->pcs_status;
+        $message = "Case #{$case->pcs_id} has been {$actionPast} by {$actor->acc_name}. Status: {$case->pcs_status} — Currently with: {$stageDisplay}.";
         if ($action == 'return' || $action == 'not_approved' || $action == 'reject' || $action == 'hold') $message .= " Reason: {$remarks}";
 
-        // 2. Identify Recipients
-        // a. All previous actors from the decision trail
+        // Identify Recipients
         $previousActorIds = DB::table('pur.purdecisions')
             ->where('pdec_pcs_id', $case->pcs_id)
             ->distinct()
             ->pluck('pdec_acc_id')
             ->toArray();
 
-        // b. All 'prj' (Division) users in the initiating unit
         $initiatorIds = CenAccount::where('acc_unt_id', $case->pcs_unt_id)
             ->where('acc_untarea', 'prj')
             ->pluck('acc_id')
             ->toArray();
 
-        // Combine and filter out the current actor
         $allRecipients = array_unique(array_merge($previousActorIds, $initiatorIds));
-        
+
         foreach ($allRecipients as $recipientId) {
             if ($recipientId == $actor->acc_id) continue;
 
@@ -235,64 +393,6 @@ class PurchaseApprovalService
         }
     }
 
-    /**
-     * Check if a role is authorized to approve the current case amount
-     */
-    public function canApprove(string $area, float $amount): bool
-    {
-        $area = strtolower($area);
-        if ($area === 'nrdi') return true; // DG can always approve
-        if ($area === 'hqs' && $amount <= self::THRESHOLD_DDG) return true; // DDG < 10L
-        if ($area === 'rdw' && $amount <= self::THRESHOLD_MD) return true; // MD < 4L
-        
-        return false;
-    }
-
-    /**
-     * Resolve where the case goes next when forwarded
-     */
-    protected function resolveForwarding(Purchase $case, string $currentArea)
-    {
-        $currentArea = strtolower(trim($currentArea));
-        
-        // Flow: Division forwards directly to Finance
-        if (in_array($currentArea, ['prj', 'rdwprj', 'division', 'initiation'])) {
-            return ['status' => 'With DFinance', 'area' => 'fin'];
-        }
-
-
-        // Forward from Procurement to Finance
-        if (str_contains($currentArea, 'proc')) {
-            return ['status' => 'With DFinance', 'area' => 'fin'];
-        }
-
-        // Forward from Finance to MD
-        if (str_contains($currentArea, 'fin')) {
-            return ['status' => 'With MD', 'area' => 'rdw'];
-        }
-        
-        // Forward from MD to DDG (if >= 4L) or Approve
-        if ($currentArea === 'rdw') {
-            if ($case->pcs_price <= self::THRESHOLD_MD) {
-                 return ['status' => 'Approved', 'area' => null];
-            }
-            return ['status' => 'With DDG', 'area' => 'hqs'];
-        }
-
-        // Forward from DDG to DG (if >= 10L) or Approve
-        if ($currentArea === 'hqs') {
-            if ($case->pcs_price <= self::THRESHOLD_DDG) {
-                 return ['status' => 'Approved', 'area' => null];
-            }
-            return ['status' => 'With DG', 'area' => 'nrdi'];
-        }
-
-        return ['status' => $case->pcs_status, 'area' => null];
-    }
-
-    /**
-     * Notifications
-     */
     protected function notifyNext(Purchase $case, $actor, string $area, string $remarks)
     {
         $recipients = CenAccount::where('acc_untarea', 'ILIKE', $area)->where('acc_status', 'Active')->get();
@@ -305,19 +405,21 @@ class PurchaseApprovalService
         }
     }
 
-    protected function notifyReturn(Purchase $case, $actor, string $remarks, string $toStatus)
+    protected function notifyReturn(Purchase $case, $actor, string $remarks, string $toStage)
     {
         $recipientIds = [];
 
-        if ($toStatus === 'Returned') { // Back to Division
+        if ($toStage === 'Division') {
+            // Back to Division initiator
             $initiator = CenAccount::where('acc_unt_id', $case->pcs_unt_id)
                                    ->where('acc_untarea', 'prj')
                                    ->first();
             if ($initiator) {
                 $recipientIds[] = $initiator->acc_id;
             }
-        } else { // Back to an HQ authority
-            $targetArea = $this->statusToArea[$toStatus] ?? null;
+        } else {
+            // Back to an HQ authority by stage
+            $targetArea = $this->stageToArea[$toStage] ?? null;
             if ($targetArea) {
                 $recipients = CenAccount::where('acc_untarea', 'ILIKE', $targetArea)
                                         ->where('acc_status', 'Active')
@@ -350,7 +452,6 @@ class PurchaseApprovalService
 
     protected function getInitiatorId(Purchase $case)
     {
-        // Assuming the first person in the unit who created the case OR any active prj user in that unit
         $initiator = CenAccount::where('acc_unt_id', $case->pcs_unt_id)
                       ->where('acc_untarea', 'prj')
                       ->first();

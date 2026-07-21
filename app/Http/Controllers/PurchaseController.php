@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
+use App\Models\PurCaseSubstatus;
 use App\Services\PurchaseApprovalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -116,23 +117,18 @@ class PurchaseController extends Controller
         $user = Auth::user();
         if (! $user) return redirect()->route('login');
 
-        // Note: For full safety, ensure this case actually belongs to DG's jurisdiction.
         $purchase = Purchase::findOrFail($id);
         $action = $request->input('action');
-        $remarks = $request->input('remarks');
+        $remarks = $request->input('remarks', 'No remarks provided.');
 
-        if ($action == 'approve') {
-            $purchase->pcs_status = 'Approved';
-        } elseif ($action == 'return') {
-            $purchase->pcs_status = 'Returned';
-        } elseif ($action == 'reject') {
-            $purchase->pcs_status = 'Rejected';
+        // Delegate to the approval service (fixes bypass bug — old code set pcs_status directly
+        // without creating commitments or updating substatus)
+        try {
+            $this->approvalService->processDecision($purchase, $action, $remarks);
+            return redirect()->route('nrdi.purchase_cases.index')->with('success', 'Case has been processed successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error: ' . $e->getMessage());
         }
-
-        // Save DG remarks somewhere (e.g. into a history table). For now just onto the case remarks or handle later.
-        $purchase->save();
-
-        return redirect()->route('nrdi.purchase_cases.index')->with('success', 'Case has been ' . $purchase->pcs_status);
     }
 
     /**
@@ -258,7 +254,16 @@ class PurchaseController extends Controller
             }
             
             $pcs->pcs_price = $totalPrice;
+            $pcs->pcs_midprice = $totalPrice;
             $pcs->save();
+
+            // Create initial substatus row: case starts at Division (fix #1)
+            PurCaseSubstatus::create([
+                'pss_pcs_id'    => $pcs->pcs_id,
+                'pss_stage'     => 'Division',
+                'pss_is_current'=> true,
+                'pss_since'     => now(),
+            ]);
 
             $itemIds = [];
             if (!empty($itemsInput)) {
@@ -453,21 +458,36 @@ class PurchaseController extends Controller
      */
     public function holdCase($id)
     {
-        $purchase = Purchase::findOrFail($id);
+        $purchase = Purchase::with('currentSubstatus')->findOrFail($id);
         
         // Authorization: Only initiator can hold their own case
         if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
             return back()->with('error', 'Unauthorized access.');
         }
 
-        // Only allow holding if it's currently with DProc (Initiator -> DProc flow)
-        if ($purchase->pcs_status != 'Under Scrutiny') {
-            return back()->with('error', 'Case cannot be held as it has already been processed by HQ.');
+        // Fix #3: Gate on substatus stage, not pcs_status.
+        // Only allow hold if case is at DFinance (first post-Division stage)
+        // — once it passes beyond Finance, it cannot be pulled back.
+        $currentStage = $purchase->currentSubstatus?->pss_stage;
+        if ($currentStage !== 'DFinance') {
+            return back()->with('error', 'Case cannot be held — it has already been processed beyond Finance.');
         }
 
-        return DB::transaction(function () use ($purchase) {
+        return DB::transaction(function () use ($purchase, $currentStage) {
             $purchase->pcs_status = 'Draft';
             $purchase->save();
+
+            // Transition substatus back to Division
+            PurCaseSubstatus::where('pss_pcs_id', $purchase->pcs_id)
+                ->where('pss_is_current', true)
+                ->update(['pss_is_current' => false, 'pss_until' => now()]);
+
+            PurCaseSubstatus::create([
+                'pss_pcs_id'    => $purchase->pcs_id,
+                'pss_stage'     => 'Division',
+                'pss_is_current'=> true,
+                'pss_since'     => now(),
+            ]);
 
             // Record the "Hold" action in the trail
             DB::table('pur.purdecisions')->insert([
@@ -476,8 +496,8 @@ class PurchaseController extends Controller
                 'pdec_acc_id' => Auth::id(),
                 'pdec_action' => 'hold',
                 'pdec_remarks' => 'Case held by Division for internal review/corrections.',
-                'pdec_from_status' => 'Under Scrutiny',
-                'pdec_to_status' => 'Draft',
+                'pdec_from_status' => $currentStage,
+                'pdec_to_status' => 'Division',
                 'created_at' => now()
             ]);
 
@@ -500,6 +520,7 @@ class PurchaseController extends Controller
         }
 
         $purchase->pcs_price = $selectedQuote->qte_price;
+        $purchase->pcs_midprice = $selectedQuote->qte_price;
         $purchase->save();
 
         return response()->json([

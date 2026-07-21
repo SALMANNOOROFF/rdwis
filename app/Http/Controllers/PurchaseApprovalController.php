@@ -25,13 +25,13 @@ class PurchaseApprovalController extends Controller
         $user = Auth::user();
         $area = strtolower(trim($user->acc_untarea));
         
-        // Define which statuses to show on each dashboard
-        $statusMap = [
-            'proc' => ['Under Scrutiny'],
-            'fin'  => ['With DFinance'],
-            'rdw'  => ['With MD'],
-            'hqs'  => ['With DDG'],
-            'nrdi' => ['With DG'],
+        // Define which substatus stages to show on each dashboard
+        $stageMap = [
+            'proc' => ['DFinance'],    // DProc sees cases at DFinance (for collaboration view)
+            'fin'  => ['DFinance'],
+            'rdw'  => ['MD'],
+            'hqs'  => ['DDG'],
+            'nrdi' => ['DG'],
         ];
 
         // Title Mapping
@@ -43,21 +43,26 @@ class PurchaseApprovalController extends Controller
             'nrdi' => 'DG Approval Dashboard',
         ];
 
-        $targetStatuses = $statusMap[$area] ?? [];
+        $targetStages = $stageMap[$area] ?? [];
         $pageTitle = $titleMap[$area] ?? 'Purchase Scrutiny Hub';
 
-        // 1. Pending Queue (Cases currently at this user's level)
-        $purchases = Purchase::with(['project', 'latestDecision.account'])
-            ->whereIn('pcs_status', $targetStatuses)
+        // 1. Pending Queue (Cases currently at this user's stage)
+        $purchases = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
+            ->atStage($targetStages)
             ->orderBy('pcs_id', 'desc')
             ->get();
 
         // 2. Action Taken (Cases already processed by this user)
-        $processed = Purchase::with(['project', 'latestDecision.account'])
+        $processed = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
-            ->whereNotIn('pcs_status', $targetStatuses) 
+            ->where(function($q) use ($targetStages) {
+                // Exclude cases currently at this user's stage
+                $q->whereDoesntHave('currentSubstatus', function($sq) use ($targetStages) {
+                    $sq->whereIn('pss_stage', $targetStages);
+                });
+            })
             ->orderBy('pcs_id', 'desc')
             ->limit(15)
             ->get();
@@ -97,7 +102,7 @@ class PurchaseApprovalController extends Controller
         $user = Auth::user();
         $area = strtolower(trim($user->acc_untarea));
         
-        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
+        $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
 
         // Financial Intelligence (Legacy Logic)
@@ -146,7 +151,7 @@ class PurchaseApprovalController extends Controller
                 ->get();
         }
 
-        $currentAuthority = $this->approvalService->getStatusDisplayName($purchase->pcs_status);
+        $currentAuthority = $purchase->current_stage_display ?? $this->approvalService->getStatusDisplayName($purchase->pcs_status);
         $nextAuthority = $this->approvalService->getNextAuthorityName($purchase, $area);
 
         return view('nrdi.purchase_cases.show', compact(
@@ -174,7 +179,7 @@ class PurchaseApprovalController extends Controller
                 $case = $purchase, 
                 $action = $request->action, 
                 $remarks = $remarks, 
-                $targetStatus = $request->target_status
+                $targetStage = $request->target_status
             );
 
             $user = Auth::user();

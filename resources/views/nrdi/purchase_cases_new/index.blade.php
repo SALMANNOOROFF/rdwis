@@ -155,7 +155,7 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="status-pill rajdhani">
-                                        <i class="fas {{ $statusIcon }}"></i> {{ strtoupper($p->pcs_status) }}
+                                        <i class="fas {{ $statusIcon }}"></i> {{ strtoupper($p->current_stage_display ?? $p->pcs_status) }}
                                     </span>
                                 </td>
                             </tr>
@@ -210,7 +210,7 @@
                                 </td>
                                 <td class="text-right">
                                     <span class="badge badge-dark px-2 py-1 rajdhani" style="font-size: 10px; border: 1px solid rgba(255,255,255,0.05);">
-                                        {{ strtoupper(str_replace('With ', '', $p->pcs_status)) }}
+                                        {{ strtoupper($p->current_stage_display ?? $p->pcs_status) }}
                                     </span>
                                 </td>
                                 <td class="text-center">

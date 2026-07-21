@@ -150,7 +150,7 @@
                 $pctRemaining = $totalBudget > 0 ? max(0, ($balanceAfter / $totalBudget) * 100) : 0;
                 
                 $service = app(\App\Services\PurchaseApprovalService::class);
-                $currentStatusDisplay = $service->getStatusDisplayName($purchase->pcs_status);
+                $currentStatusDisplay = $purchase->current_stage_display ? ($purchase->pcs_status . ' — Currently with: ' . $purchase->current_stage_display) : $service->getStatusDisplayName($purchase->pcs_status);
                 
                 // Variable overrides for cross-role compatibility
                 $isInitiator = in_array(strtolower(trim((string)Auth::user()->acc_untarea)), ['prj', 'rdwprj', 'division']);
