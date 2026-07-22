@@ -2,12 +2,23 @@
     auto_https disable_redirects
 }
 
-http://rdwis, http://192.168.1.169 {
-    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    redir https://{host}{uri} permanent
+http://rdwis:8000, http://192.168.1.169:8000, http://localhost:8000 {
+    # Serve the root certificate directly via HTTP so clients can download it easily
+    # without running into SSL verification errors before the certificate is trusted.
+    @cert {
+        path /caddy-root.crt
+    }
+    handle @cert {
+        root * "H:/RDWIS 2.0/RDWIS APP 2.0/public"
+        file_server
+    }
+    handle {
+        header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        redir https://{http.request.hostonly}:8443{uri} permanent
+    }
 }
 
-https://rdwis, https://192.168.1.169 {
+https://rdwis:8443, https://192.168.1.169:8443, https://localhost:8443 {
     tls internal
     root * "H:/RDWIS 2.0/RDWIS APP 2.0/public"
 
@@ -16,7 +27,7 @@ https://rdwis, https://192.168.1.169 {
         X-Content-Type-Options "nosniff"
         X-XSS-Protection "1; mode=block"
         X-Frame-Options "SAMEORIGIN"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';"
         Referrer-Policy "strict-origin-when-cross-origin"
         Permissions-Policy "geolocation=(), microphone=(), camera=()"
         -Server

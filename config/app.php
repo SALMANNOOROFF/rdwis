@@ -99,6 +99,8 @@ return [
 
     'key' => env('APP_KEY'),
 
+    'allowed_ips' => env('ALLOWED_IPS', ''),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

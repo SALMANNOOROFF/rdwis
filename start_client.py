@@ -18,18 +18,30 @@ import urllib.request
 
 # =================== CONFIGURATION =======================
 LOCAL_DOMAIN = "rdwis"
-SERVER_PHP_PORT = 8000
+SERVER_HTTP_PORT = 8000  # Port where Caddy serves HTTP (downloads certificate)
+SERVER_HTTPS_PORT = 8443 # Port where Caddy serves HTTPS (main application)
 # ==========================================================
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOCAL_CERT_PATH = os.path.join(SCRIPT_DIR, "caddy-root.crt")
 HOSTS_FILE = r"C:\Windows\System32\drivers\etc\hosts"
 
-CHROME_PATHS = [
-    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-    os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
-]
+BROWSER_PATHS = {
+    "chrome": [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
+    ],
+    "edge": [
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Edge\Application\msedge.exe"),
+    ],
+    "ie": [
+        r"C:\Program Files\Internet Explorer\iexplore.exe",
+        r"C:\Program Files (x86)\Internet Explorer\iexplore.exe",
+    ]
+}
 
 
 # ----------------------------------------------------------
@@ -61,27 +73,35 @@ def run_as_admin():
     sys.exit(0)
 
 
-def find_chrome():
-    """Find Chrome on this PC."""
-    for path in CHROME_PATHS:
+def find_browser():
+    """Find the best available browser (Chrome -> Edge -> Internet Explorer)."""
+    for path in BROWSER_PATHS["chrome"]:
         if os.path.isfile(path):
-            return path
-    return None
+            return "Chrome", path
+    for path in BROWSER_PATHS["edge"]:
+        if os.path.isfile(path):
+            return "Edge", path
+    for path in BROWSER_PATHS["ie"]:
+        if os.path.isfile(path):
+            return "Internet Explorer", path
+    return None, None
 
 
-def open_chrome(url):
-    """Open Chrome automatically."""
-    chrome = find_chrome()
-    if chrome:
-        print(f"[>>] Opening Chrome: {url}")
+def open_browser(url):
+    """Open the best available browser automatically."""
+    name, path = find_browser()
+    if path:
+        print(f"[>>] Opening {name}: {url}")
+        # IE doesn't support the --new-window flag
+        args = [path, url] if name == "Internet Explorer" else [path, "--new-window", url]
         subprocess.Popen(
-            [chrome, "--new-window", url],
+            args,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        print("[OK] Chrome opened!")
+        print(f"[OK] {name} opened!")
     else:
-        print("[>>] Chrome not found, opening default browser...")
+        print("[>>] No primary browser found, opening default browser...")
         try:
             os.startfile(url)
             print("[OK] Browser opened!")
@@ -157,16 +177,20 @@ def add_domain_to_hosts(ip):
 
 def download_certificate(server_ip):
     """Download Caddy's root CA certificate from the server."""
-    url = f"http://{server_ip}:{SERVER_PHP_PORT}/caddy-root.crt"
+    url = f"http://{server_ip}:{SERVER_HTTP_PORT}/caddy-root.crt"
     print(f"[>>] Downloading certificate from: {url}")
     try:
-        urllib.request.urlretrieve(url, LOCAL_CERT_PATH)
+        import ssl
+        context = ssl._create_unverified_context()
+        with urllib.request.urlopen(url, context=context, timeout=15) as response:
+            with open(LOCAL_CERT_PATH, "wb") as f:
+                f.write(response.read())
         print("[OK] Certificate downloaded successfully!")
         return True
     except Exception as e:
-        print(f"[FAIL] Could not connect to server at {server_ip}:{SERVER_PHP_PORT}")
+        print(f"[FAIL] Could not connect to server at {server_ip}:{SERVER_HTTP_PORT}")
         print("       1. Make sure start_server.py is running on the host server PC.")
-        print("       2. Check if host PC Firewall is blocking port 8000/443.")
+        print(f"       2. Check if host PC Firewall is blocking port {SERVER_HTTP_PORT}/{SERVER_HTTPS_PORT}.")
         print(f"       Debug info: {e}")
         return False
 
@@ -228,6 +252,15 @@ def main():
         input("\nPress Enter to exit...")
         sys.exit(1)
 
+    # Sanitize IP address in case user typed http://..., https://, trailing slashes, or port suffixes
+    if "://" in server_ip:
+        server_ip = server_ip.split("://")[1]
+    if "/" in server_ip:
+        server_ip = server_ip.split("/")[0]
+    if ":" in server_ip:
+        server_ip = server_ip.split(":")[0]
+    server_ip = server_ip.strip()
+
     print()
 
     # Step 2: Download SSL Certificate
@@ -249,9 +282,9 @@ def main():
     print()
 
     # Step 5: Launch browser
-    url = f"https://{LOCAL_DOMAIN}"
+    url = f"https://{LOCAL_DOMAIN}:{SERVER_HTTPS_PORT}"
     print(f"[>>] Launching RDWIS domain...")
-    open_chrome(url)
+    open_browser(url)
     print()
 
     print("=" * 55)

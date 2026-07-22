@@ -10,7 +10,8 @@ class RestrictNetworkAccess
 {
     public function handle(Request $request, Closure $next)
     {
-        $allowedIps = array_map('trim', explode(',', (string) env('ALLOWED_IPS', '')));
+        $allowedIpsRaw = config('app.allowed_ips', '');
+        $allowedIps = array_filter(array_map('trim', explode(',', (string) $allowedIpsRaw)));
         $clientIp = $request->ip();
 
         // Allow localhost/loopback by default

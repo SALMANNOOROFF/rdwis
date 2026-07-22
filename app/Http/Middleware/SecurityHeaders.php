@@ -18,8 +18,27 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
         $response->headers->set(
             'Content-Security-Policy',
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;"
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';"
         );
+
+        // Modify XSRF-TOKEN cookie to expire on close (session cookie) so scanners don't flag it as a permanent cookie.
+        foreach ($response->headers->getCookies() as $cookie) {
+            if ($cookie->getName() === 'XSRF-TOKEN') {
+                $response->headers->setCookie(
+                    new \Symfony\Component\HttpFoundation\Cookie(
+                        $cookie->getName(),
+                        $cookie->getValue(),
+                        0, // 0 means expire on browser close
+                        $cookie->getPath(),
+                        $cookie->getDomain(),
+                        $cookie->isSecure(),
+                        $cookie->isHttpOnly(),
+                        $cookie->isRaw(),
+                        $cookie->getSameSite()
+                    )
+                );
+            }
+        }
 
         // Strict-Transport-Security (HSTS) - uncomment and adjust if using HTTPS
         // $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
