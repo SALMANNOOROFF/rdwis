@@ -1,9 +1,2 @@
 User-agent: *
-Disallow: /admin/
-Disallow: /login/
-Disallow: /training/
-Disallow: /fin/
-Disallow: /sord/
-Disallow: /nrdi/
-Disallow: /hr/
-Disallow: /division/
+Disallow: /

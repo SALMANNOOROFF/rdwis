@@ -18,9 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Apply IP whitelist globally
         $middleware->prependToGroup('web', RestrictNetworkAccess::class);
+        $middleware->prependToGroup('web', SecurityHeaders::class);
         
         $middleware->web(append: [
-            SecurityHeaders::class,
             \App\Http\Middleware\DataHorizonMiddleware::class,
         ]);
         $middleware->trustProxies(at: '*');
