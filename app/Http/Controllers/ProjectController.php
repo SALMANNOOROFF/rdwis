@@ -21,8 +21,7 @@ class ProjectController extends Controller
     $user = Auth::user();
     if (!$user) return redirect()->route('login');
     
-    // --- FIX: 'with(\'document\')' add kiya hai taake status dashboard par dikhe ---
-    $query = Project::where('prj_unt_id', $user->acc_unt_id);
+    $query = Project::where('prj_unt_id', $user->acc_unt_id)->with('milestones');
     if (\Illuminate\Support\Facades\Schema::hasTable('doc.documents')) {
         $query->with('document');
     }
@@ -33,6 +32,18 @@ class ProjectController extends Controller
     }
 
     $projects = $query->orderBy('prj_id', 'desc')->get();
+    
+    // Fetch live financial expenditures
+    $finService = app(\App\Services\FinancialIntelligenceService::class);
+    foreach ($projects as $project) {
+        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $project->prj_id)->first();
+        $spent = 0;
+        if ($headRecord) {
+            $headStatus = $finService->getHeadStatus($headRecord->hed_id);
+            $spent = $headStatus->expenditure ?? 0;
+        }
+        $project->setAttribute('spent', $spent);
+    }
     
     return view('projects.viewprojects', compact('projects'));
 }

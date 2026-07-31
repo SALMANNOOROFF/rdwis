@@ -92,7 +92,7 @@
                                     $timePercentage = 0;
                                     if ($startDate && $endDate && $status != 'closed') {
                                         $totalDays = $startDate->diffInDays($endDate);
-                                        $daysPassed = $startDate->diffInDays($today);
+                                        $daysPassed = $startDate->diffInDays($today, false);
                                         if ($totalDays > 0 && $today->greaterThan($startDate)) {
                                             $timePercentage = ($daysPassed / $totalDays) * 100;
                                         }
@@ -102,8 +102,13 @@
                                     }
                                     
                                     $budget = $project->prj_propcost > 0 ? $project->prj_propcost : 0;
-                                    $spent = 0; 
+                                    $spent = $project->spent ?? 0; 
                                     $spentPercentage = ($budget > 0) ? ($spent / $budget) * 100 : 0;
+
+                                    // Milestone counts
+                                    $totalMs = $project->milestones ? $project->milestones->count() : 0;
+                                    $completedMs = $project->milestones ? $project->milestones->where('msn_status', 'Completed')->count() : 0;
+                                    $msPercentage = $totalMs > 0 ? ($completedMs / $totalMs) * 100 : 0;
                                     
                                     // Status Color Class
                                     $statusClass = 'text-secondary';
@@ -147,22 +152,29 @@
                                     {{-- 3. TIMELINE --}}
                                     <td class="align-middle p-2">
                                         <div class="d-flex justify-content-between text-muted text-xs mb-1">
-                                            <span>{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d-M-Y') : 'N/A' }}</span>
-                                            <span class="text-info font-weight-bold">{{ round($timePercentage) }}%</span>
+                                            <span>S: <b>{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d M Y') : 'N/A' }}</b></span>
+                                            <span>E: <b>{{ $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt)->format('d M Y') : 'N/A' }}</b></span>
                                         </div>
-                                        <div class="progress progress-xs rounded-pill" style="height: 4px;">
-                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ $timePercentage }}%"></div>
+                                        <div class="progress progress-xs rounded-pill mb-1" style="height: 4px;" title="Milestone Progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $msPercentage }}%"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between text-xs">
+                                            <span>Milestones ({{ $completedMs }}/{{ $totalMs }}):</span>
+                                            <span class="text-success font-weight-bold">{{ round($msPercentage) }}%</span>
                                         </div>
                                     </td>
 
                                     {{-- 4. FINANCIALS --}}
                                     <td class="align-middle p-2">
-                                        <div class="d-flex justify-content-between text-dark text-xs mb-1">
-                                            <span class="font-weight-bold">{{ number_format($project->prj_propcost / 1000000, 2) }} M</span>
-                                            <span class="text-success font-weight-bold">{{ round($spentPercentage) }}%</span>
+                                        <div class="d-flex justify-content-between text-muted text-xs mb-1">
+                                            <span>Spent: <b>{{ number_format($spent / 1000000, 2) }} M</b></span>
+                                            <span>Budget: <b>{{ number_format($budget / 1000000, 2) }} M</b></span>
                                         </div>
-                                        <div class="progress progress-xs rounded-pill" style="height: 4px;">
+                                        <div class="progress progress-xs rounded-pill mb-1" style="height: 4px;">
                                             <div class="progress-bar bg-success" role="progressbar" style="width: {{ $spentPercentage }}%"></div>
+                                        </div>
+                                        <div class="text-right text-xs">
+                                            <span class="text-success font-weight-bold">{{ round($spentPercentage, 1) }}% Utilized</span>
                                         </div>
                                     </td>
 

@@ -48,8 +48,11 @@
 
         /* --- OVERALL STEPS WIZARD --- */
         .steps-container {
-            position: relative; display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 35px; margin-top: 35px; padding: 0 10px;
+            position: relative;
+            height: 60px;
+            margin: 45px 40px;
+            width: calc(100% - 80px);
+            padding: 0;
         }
         .steps-track {
             position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: var(--rd-border);
@@ -57,7 +60,8 @@
         }
         .steps-fill { height: 100%; background: var(--rd-success); transition: width 0.4s ease; border-radius: 2px; }
         .step-item {
-            position: relative; z-index: 2; width: 32px; height: 32px;
+            position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 3;
+            width: 32px; height: 32px;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .step-dot {
@@ -114,14 +118,14 @@
         .table-custom tbody td { padding: 10px 15px; vertical-align: middle; color: var(--rd-text2); font-size: 0.85rem; border-bottom: 1px solid var(--rd-border); }
 
         /* --- FINANCE KNobs --- */
-        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center; }
+        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
         .finance-box {
-            width: 120px; height: 140px; background: var(--rd-surface); border-radius: 14px; padding: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+            width: 90px; height: 110px; background: var(--rd-surface); border-radius: 10px; padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; flex-direction: column;
             align-items: center; justify-content: center;
         }
-        .finance-box canvas { width: 90px; height: 90px; }
-        .finance-title { margin-top: 10px; font-size: 11px; font-weight: 800; color: var(--rd-text3); text-transform: uppercase; letter-spacing: 0.5px; }
+        .finance-box canvas { width: 65px; height: 65px; }
+        .finance-title { margin-top: 5px; font-size: 9px; font-weight: 800; color: var(--rd-text3); text-transform: uppercase; letter-spacing: 0.5px; }
 
       
         /* --- MODAL --- */
@@ -160,20 +164,29 @@
             }
         }
 
-        // Progress calculation
-        $overallPercent = $totalMilestones > 0 ? ($completedMilestones / max(1, $totalMilestones)) * 100 : 0;
-        $overallPercent = round(max(0, min(100, $overallPercent)), 1);
-
+        // Project Date Boundaries
         $firstMs  = $milestones->first();
         $lastMs   = $milestones->last();
         $prjStart = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : ($firstMs ? \Carbon\Carbon::parse($firstMs->msn_targetdt) : $today);
-        $prjEnd   = $lastMs ? \Carbon\Carbon::parse($lastMs->msn_targetdt) : $today;
+        $prjEnd   = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : ($lastMs ? \Carbon\Carbon::parse($lastMs->msn_targetdt) : $today);
         if ($prjEnd->lt($prjStart)) $prjEnd = $prjStart->copy()->addDay();
 
         $totalDaysSpan   = $prjStart->diffInDays($prjEnd) ?: 1;
         $daysPassedTotal = $prjStart->diffInDays($today, false);
         $overallTimePercent = round(($daysPassedTotal / $totalDaysSpan) * 100, 1);
         $overallTimePercent = max(0, min(100, $overallTimePercent));
+
+        // Progress calculation based on latest completed milestone
+        $latestCompletedMs = $milestones->where('msn_status', 'Completed')->last();
+        $overallPercent = 0;
+        if ($completedMilestones === $totalMilestones && $totalMilestones > 0) {
+            $overallPercent = 100;
+        } elseif ($latestCompletedMs) {
+            $latestTargetDate = \Carbon\Carbon::parse($latestCompletedMs->msn_targetdt);
+            $overallPercent = ($prjStart->diffInDays($latestTargetDate, false) / $totalDaysSpan) * 100;
+            $overallPercent = max(0, min(100, $overallPercent));
+        }
+        $overallPercent = round($overallPercent, 1);
 
         // Dummy team data (replace with real relation if available)
         $team = [
@@ -269,13 +282,13 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <span class="d-block text-muted text-uppercase small fw-bold">Total Budget</span>
-                            <span class="d-block text-white fw-bold fs-5">
+                            <span class="d-block text-white fw-bold" style="font-size: 1.05rem;">
                                 Rs. {{ number_format($project->prj_propcost / 1_000_000, 2) }} M
                             </span>
                         </div>
                         <div>
                             <span class="d-block text-muted text-uppercase small fw-bold">Total Spent</span>
-                            <span class="d-block text-danger fw-bold fs-5">
+                            <span class="d-block text-danger fw-bold" style="font-size: 1.05rem;">
                                 Rs. {{ number_format(($totalSpent ?? 0) / 1_000_000, 2) }} M
                             </span>
                         </div>
@@ -285,12 +298,12 @@
                         <div class="finance-bars-wrap">
                             <div class="finance-box">
                                 <input type="text" class="knob" value="30" data-skin="tron" data-thickness="0.2"
-                                       data-width="90" data-height="90" data-fgColor="#FC7A58" data-readonly="true">
+                                       data-width="65" data-height="65" data-fgColor="#FC7A58" data-readonly="true">
                                 <div class="finance-title mt-2">Equip</div>
                             </div>
                             <div class="finance-box">
                                 <input type="text" class="knob" value="50" data-skin="tron" data-thickness="0.2"
-                                       data-width="90" data-height="90" data-fgColor="#42e695" data-readonly="true">
+                                       data-width="65" data-height="65" data-fgColor="#42e695" data-readonly="true">
                                 <div class="finance-title mt-2">HR</div>
                             </div>
                         </div>
@@ -319,7 +332,10 @@
     <style>
 /* ===== START & END RED SQUARES ===== */
 .edge-box {
-    width: 44px;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
     height: 44px;
     background: var(--rd-danger);
     color: #fff;
@@ -335,31 +351,46 @@
 
 /* ===== DIAMOND MILESTONE ===== */
 .step-dot {
-    width: 30px;
-    height: 30px;
-    transform: rotate(45deg);
+    width: 26px;
+    height: 26px;
     border-radius: 4px;
+    border: 2px solid #ffc107;
+    background: transparent;
+    transform: rotate(0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffc107;
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
 
 .step-dot * {
-    transform: rotate(-45deg);
+    transform: rotate(0deg);
+    transition: all 0.3s ease;
 }
 
 .step-item.completed .step-dot {
     background: var(--rd-success);
     border-color: var(--rd-success);
+    color: #fff;
+    transform: rotate(45deg);
+}
+
+.step-item.completed .step-dot * {
+    transform: rotate(-45deg);
 }
 
 .step-item.active .step-dot {
-    background: var(--rd-accent);
     border-color: var(--rd-accent);
+    color: var(--rd-accent);
 }
 
-/* ===== TODAY BUBBLE WITH FLAG ===== */
+/* ===== TODAY BUBBLE WITH GLOW CURSOR ===== */
 .today-bubble {
     position: absolute;
     top: -45px;
-    background: var(--rd-danger);
+    background: var(--rd-accent);
     color: #fff;
     padding: 5px 10px;
     border-radius: 14px;
@@ -368,13 +399,28 @@
     white-space: nowrap;
 }
 
-.today-flag {
+.today-glow {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--rd-accent);
+    box-shadow: 0 0 0 rgba(79, 140, 255, 0.4);
+    animation: pulse-accent 1.5s infinite;
     position: absolute;
-    top: -20px;
+    top: 0;
     left: 50%;
-    transform: translateX(-50%);
-    color: var(--rd-danger);
-    font-size: 14px;
+    transform: translate(-50%, -50%);
+}
+@keyframes pulse-accent {
+    0% {
+        box-shadow: 0 0 0 0 rgba(79, 140, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(79, 140, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(79, 140, 255, 0);
+    }
 }
 
 /* ===== ACHIEVED DATE UNDER DIAMOND ===== */
@@ -456,16 +502,15 @@
     </div>
 
     {{-- START BOX --}}
-    <div class="edge-box">
+    <div class="edge-box" style="left: 0;">
         START
         <small>{{ $prjStart->format('d M Y') }}</small>
-
     </div>
 
     {{-- TODAY MARKER --}}
-    <div style="position:absolute; left:{{ $overallTimePercent }}%; top:50%; transform:translateX(-50%);">
+    <div style="position:absolute; left:{{ $overallTimePercent }}%; top:50%; transform:translate(-50%, -50%); z-index: 5;">
         <div class="today-bubble">{{ $today->format('d M Y') }}</div>
-        <div class="today-flag"><i class="fas fa-flag"></i></div>
+        <div class="today-glow"></div>
     </div>
 
    {{-- MILESTONES --}}
@@ -483,27 +528,27 @@
 
         $isLate = $achievedDate && $achievedDate->gt($targetDate);
 
+        // Date-based milestone position on timeline track
+        $daysFromStart = $prjStart->diffInDays($targetDate, false);
+        $milestonePercent = ($daysFromStart / max(1, $totalDaysSpan)) * 100;
+        $milestonePercent = max(0, min(100, $milestonePercent));
+
         if ($achievedDate) {
-          // milestone ka percent on progress bar
-        $milestoneIndex = $loop->index;
-        $milestonePercent = ($milestoneIndex / max(1, $totalMilestones - 1)) * 100;
+            // achieved vs target difference
+            $diffDays = $targetDate->diffInDays($achievedDate, false);
 
-        // achieved vs target difference
-        $diffDays = $achievedDate->diffInDays($targetDate, false);
+            // 1 day = kitna percent shift kare
+            $oneDayPercent = 100 / max(1, $totalDaysSpan);
 
-        // 1 day = kitna percent shift kare
-        $oneDayPercent = 100 / max(1, $totalDaysSpan);
+            // final achieved position
+            $achievedPercent = $milestonePercent + ($diffDays * $oneDayPercent);
 
-        // final achieved position
-        $achievedPercent = $milestonePercent + ($diffDays * $oneDayPercent);
-
-        // clamp 0–100
-        $achievedPercent = max(0, min(100, $achievedPercent));
-
+            // clamp 0–100
+            $achievedPercent = max(0, min(100, $achievedPercent));
         }
     @endphp
 
-    <div class="step-item {{ $stepClass }}"
+    <div class="step-item {{ $stepClass }}" style="left: {{ $milestonePercent }}%;"
      onclick="openMilestoneDetail(
         'MS-{{ $loop->iteration }}',
         '{{ $targetDate->format('d M Y') }}',
@@ -529,33 +574,24 @@
         </div>
     </div>
 
-    {{-- ACHIEVED FLAG (ON PROGRESS LINE) --}}
+    {{-- ACHIEVED FLAG --}}
    @if($achievedDate)
     <div class="achieved-marker {{ $isLate ? 'late' : 'ontime' }}"
-         style="left: {{ $achievedPercent }}%;">
+         style="left: {{ $achievedPercent }}%; position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 6;">
          
         <i class="fas fa-flag"></i>
-
-        {{-- 🔹 MILESTONE LABEL --}}
-        <div class="achieved-ms">
-            MS-{{ $loop->iteration }}
-        </div>
-
-        {{-- 🔹 ACHIEVED DATE --}}
-        <div class="achieved-date">
-            {{ $achievedDate->format('d M Y') }}
-        </div>
+        <div class="achieved-ms">MS-{{ $loop->iteration }}</div>
+        <div class="achieved-date">{{ $achievedDate->format('d M Y') }}</div>
     </div>
-@endif
+   @endif
 
 @endforeach
 
 
     {{-- END BOX --}}
-    <div class="edge-box">
+    <div class="edge-box" style="left: 100%;">
         END
         <small>{{ $edc ? $edc->format('d M Y') : $prjEnd->format('d M Y') }}</small>
-
     </div>
 
 </div>
@@ -612,7 +648,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td><span class="badge badge-light border">{{ $milestone->msn_type }}</span></td>
                                 <td class="fw-bold">{{ $milestone->msn_desc }}</td>
-                                <td>{{ \Carbon\Carbon::parse($milestone->msn_targetdt)->format('d M') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($milestone->msn_targetdt)->format('d M, Y') }}</td>
                                 <td class="text-center">
                                     @if($milestone->msn_achvdt)
                                         <span class="text-success fw-bold">
