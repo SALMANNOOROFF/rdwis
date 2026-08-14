@@ -254,20 +254,24 @@ class DashboardController extends Controller
             $employeesTotal = (int) DB::table('cen.heads as h')
                 ->leftJoin('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
                 ->where('h.hed_prj_id', $selectedProject['id'])
+                ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current'])
                 ->count('e.emp_id');
 
             $employeesHired = (int) DB::table('cen.heads as h')
                 ->leftJoin('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
                 ->where('h.hed_prj_id', $selectedProject['id'])
+                ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current'])
                 ->where('e.emp_joindt', '>=', now()->subYear()->toDateString())
                 ->count('e.emp_id');
         } else {
             $employeesTotal = (int) DB::table('hr.emps')
                 ->whereIn('emp_unt_id', $selectedUnitIds)
+                ->whereRaw('LOWER(emp_status) IN (?, ?)', ['active', 'current'])
                 ->count();
 
             $employeesHired = (int) DB::table('hr.emps')
                 ->whereIn('emp_unt_id', $selectedUnitIds)
+                ->whereRaw('LOWER(emp_status) IN (?, ?)', ['active', 'current'])
                 ->where('emp_joindt', '>=', now()->subYear()->toDateString())
                 ->count();
         }
@@ -339,6 +343,7 @@ class DashboardController extends Controller
             ->join('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
             ->whereIn('e.emp_unt_id', $selectedUnitIds)
             ->where('u.unt_type', 'Division')
+            ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current'])
             ->select('u.unt_namesh as division', DB::raw('COUNT(*) as cnt'))
             ->groupBy('u.unt_namesh')
             ->orderByDesc('cnt')
@@ -522,7 +527,10 @@ class DashboardController extends Controller
 
         $employeesByProject = DB::table('cen.heads as h')
             ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
-            ->leftJoin('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('hr.emps as e', function($join) {
+                $join->on('e.emp_hed_id', '=', 'h.hed_id')
+                     ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current']);
+            })
             ->whereIn('p.prj_unt_id', $selectedUnitIds)
             ->select('p.prj_id', DB::raw('COUNT(e.emp_id) as emp_count'))
             ->groupBy('p.prj_id')
@@ -694,7 +702,10 @@ class DashboardController extends Controller
 
         // 5. Employees per Project (heads within range)
         $employeeStats = DB::table('cen.heads as h')
-            ->leftJoin('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('hr.emps as e', function($join) {
+                $join->on('e.emp_hed_id', '=', 'h.hed_id')
+                     ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current']);
+            })
             ->select('h.hed_code', DB::raw('COUNT(e.emp_id) as emp_count'))
             ->whereBetween('h.hed_unt_id', [$lower, $upper])
             ->groupBy('h.hed_id', 'h.hed_code')
@@ -824,7 +835,8 @@ class DashboardController extends Controller
             ->join('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
             ->join('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
             ->select('e.emp_name', 'e.emp_title as emp_joinrank', 'h.hed_name', 'u.unt_namesh as unit_name')
-            ->whereBetween('h.hed_unt_id', [$lower, $upper]);
+            ->whereBetween('h.hed_unt_id', [$lower, $upper])
+            ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current']);
 
         // If Mode S (My Dept), filter out divisions explicitly as requested
         if ($mode === 's') {

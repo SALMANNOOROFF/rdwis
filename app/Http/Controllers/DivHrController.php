@@ -377,4 +377,293 @@ class DivHrController extends Controller
 
         return view('divhr.initiate-contract');
     }
+
+    // ====================================================
+    // HR REPORTS (Unified Single Page - like Finance Reports)
+    // ====================================================
+
+    private function getEmployeeBaseQuery($unitId = 'All')
+    {
+        $user = Auth::user();
+
+        $query = Employee::query()
+            ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'hr.emps.emp_unt_id')
+            ->leftJoin('hr.empsexta as ea', 'ea.empexta_emp_id', '=', 'hr.emps.emp_id')
+            ->leftJoin('hr.empsextb as eb', 'eb.empextb_emp_id', '=', 'hr.emps.emp_id')
+            ->select(
+                'hr.emps.*',
+                'h.hed_code',
+                'u.unt_name',
+                'ea.emp_discip', 'ea.emp_qualif', 'ea.emp_spec',
+                'ea.emp_paddress', 'ea.emp_dob', 'ea.emp_marital',
+                'ea.emp_ntnlty', 'ea.emp_pob', 'ea.emp_taddress',
+                'ea.emp_mobile', 'ea.emp_landline', 'ea.emp_gender',
+                'ea.emp_mobile2', 'ea.emp_email', 'ea.emp_father',
+                'ea.emp_father_cnic', 'ea.emp_ntnlty_other',
+                'eb.emp_nokname', 'eb.emp_nokrelation', 'eb.emp_nokcnic',
+                'eb.emp_emername', 'eb.emp_emerrelation', 'eb.emp_emermobile',
+                'eb.emp_idmark', 'eb.emp_height', 'eb.emp_caste',
+                'eb.emp_religion', 'eb.emp_sect', 'eb.emp_police', 'eb.emp_political'
+            );
+
+        if ($unitId && $unitId !== 'All') {
+            $query->where('emp_unt_id', $unitId);
+        }
+
+        return $query->orderBy('emp_name', 'asc');
+    }
+
+    public function hrReportsIndex()
+    {
+        $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        $units = DB::table('cen.units')
+            ->where('unt_type', 'Division')
+            ->orderBy('unt_name')
+            ->get(['unt_id', 'unt_name']);
+
+        return view('divhr.reports', compact('units'));
+    }
+
+    public function hrReportsData(Request $request)
+    {
+        $type = $request->query('type');
+        $status = $request->query('status', 'Current');
+        $unitId = $request->query('unit_id', 'All');
+
+        $q = $this->getEmployeeBaseQuery($unitId);
+
+        if ($status === 'Current') {
+            $q->whereRaw("LOWER(emp_status) IN ('active','current')");
+        } elseif ($status === 'Previous') {
+            $q->whereRaw("LOWER(emp_status) NOT IN ('active','current')");
+        }
+
+        $employees = $q->get();
+        $empIds = $employees->pluck('emp_id')->toArray();
+
+        $data = [];
+
+        // Helper to fetch latest contracts for employees without date restrictions
+        $getLatestContracts = function() use ($empIds) {
+            return DB::table('hr.contracts as c')
+                ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+                ->whereIn('c.ctr_num', $empIds)
+                ->select('c.*', 'ch.hed_code as ctr_hed_code')
+                ->orderBy('c.ctr_enddt', 'desc')
+                ->get()
+                ->unique('ctr_num')
+                ->keyBy('ctr_num');
+        };
+
+        switch ($type) {
+            case 'incomplete_data':
+                $requiredFields = [
+                    'emp_cnic' => 'CNIC', 'emp_joindt' => 'Join Date', 'emp_dob' => 'Date of Birth',
+                    'emp_mobile' => 'Mobile', 'emp_email' => 'Email', 'emp_father' => 'Father Name',
+                    'emp_paddress' => 'Permanent Address', 'emp_taddress' => 'Temporary Address',
+                    'emp_gender' => 'Gender', 'emp_marital' => 'Marital Status', 'emp_ntnlty' => 'Nationality',
+                    'emp_pob' => 'Place of Birth', 'emp_discip' => 'Discipline',
+                    'emp_nokname' => 'Next of Kin', 'emp_nokcnic' => 'NOK CNIC',
+                    'emp_emername' => 'Emergency Contact', 'emp_emermobile' => 'Emergency Mobile',
+                ];
+                foreach ($employees as $emp) {
+                    $missing = [];
+                    foreach ($requiredFields as $f => $l) {
+                        $v = $emp->$f ?? null;
+                        if (is_null($v) || trim((string)$v) === '' || trim((string)$v) === 'N/A') $missing[] = $l;
+                    }
+                    if (count($missing) > 0) {
+                        $data[] = [
+                            'emp_name' => $emp->emp_name,
+                            'emp_id' => $emp->emp_id,
+                            'emp_status' => in_array(strtolower($emp->emp_status ?? ''), ['active','current']) ? 'Current' : 'Previous',
+                            'emp_joindt' => $emp->emp_joindt,
+                            'missing_count' => count($missing),
+                            'missing_fields' => implode(', ', $missing),
+                        ];
+                    }
+                }
+                usort($data, fn($a, $b) => $b['missing_count'] - $a['missing_count']);
+                break;
+
+            case 'grades':
+                $contracts = $getLatestContracts();
+
+                foreach ($employees as $emp) {
+                    $ctr = $contracts->get($emp->emp_id);
+                    $data[] = [
+                        'emp_name' => $emp->emp_name,
+                        'emp_id' => $emp->emp_id,
+                        'emp_status' => in_array(strtolower($emp->emp_status ?? ''), ['active','current']) ? 'Current' : 'Previous',
+                        'emp_joindt' => $emp->emp_joindt,
+                        'grade' => $ctr->ctr_grade ?? '—',
+                        'salary' => $ctr && $ctr->ctr_salary ? number_format($ctr->ctr_salary) : '—',
+                        'job_title' => $ctr->ctr_jobtitle ?? '—',
+                        'ctr_start' => $ctr ? $ctr->ctr_startdt : null,
+                        'ctr_end' => $ctr ? $ctr->ctr_enddt : null,
+                        'head_code' => $ctr->ctr_hed_code ?? ($emp->hed_code ?? '—'),
+                    ];
+                }
+                break;
+
+            case 'qualifications':
+                $qualifications = DB::table('hr.qualifs')
+                    ->whereIn('qlf_emp_id', $empIds)
+                    ->orderBy('qlf_emp_id')->orderBy('qlf_enddt', 'desc')
+                    ->get()->groupBy('qlf_emp_id');
+
+                foreach ($employees as $emp) {
+                    $qlfs = $qualifications->get($emp->emp_id, collect());
+                    $qlfList = [];
+                    foreach ($qlfs as $q) {
+                        $qlfList[] = [
+                            'qlf_type' => $q->qlf_type ?? '—',
+                            'qlf_name' => $q->qlf_name ?? '—',
+                            'qlf_inst' => $q->qlf_inst ?? '—',
+                            'qlf_duration' => ($q->qlf_duration ?? '—') . ' ' . ($q->qlf_unit ?? ''),
+                            'qlf_grade' => $q->qlf_grade ?? '—',
+                            'qlf_enddt' => $q->qlf_enddt ?? null,
+                        ];
+                    }
+
+                    $data[] = [
+                        'emp_name' => $emp->emp_name,
+                        'emp_id' => $emp->emp_id,
+                        'emp_status' => in_array(strtolower($emp->emp_status ?? ''), ['active','current']) ? 'Current' : 'Previous',
+                        'emp_joindt' => $emp->emp_joindt,
+                        'total_qualifs' => count($qlfList),
+                        'qualifications_list' => $qlfList,
+                    ];
+                }
+                break;
+
+            case 'current_employees':
+                $contracts = $getLatestContracts();
+
+                foreach ($employees as $emp) {
+                    $ctr = $contracts->get($emp->emp_id);
+                    $data[] = [
+                        'emp_name' => $emp->emp_name,
+                        'emp_id' => $emp->emp_id,
+                        'emp_cnic' => $emp->emp_cnic,
+                        'emp_status' => in_array(strtolower($emp->emp_status ?? ''), ['active','current']) ? 'Current' : 'Previous',
+                        'emp_joindt' => $emp->emp_joindt,
+                        'emp_lastdt' => $emp->emp_lastdt,
+                        'grade' => $ctr->ctr_grade ?? '—',
+                        'salary' => $ctr && $ctr->ctr_salary ? number_format($ctr->ctr_salary) : '—',
+                        'ctr_start' => $ctr ? $ctr->ctr_startdt : null,
+                        'ctr_end' => $ctr ? $ctr->ctr_enddt : null,
+                        'job_title' => $ctr->ctr_jobtitle ?? '—',
+                        'head_code' => $ctr->ctr_hed_code ?? ($emp->hed_code ?? '—'),
+                        'unit' => $emp->unt_name ?? '—',
+                    ];
+                }
+                break;
+
+            case 'retired_servicemen':
+                $lastContracts = $getLatestContracts();
+
+                foreach ($employees as $emp) {
+                    $ctr = $lastContracts->get($emp->emp_id);
+                    $data[] = [
+                        'emp_name' => $emp->emp_name,
+                        'emp_id' => $emp->emp_id,
+                        'emp_status' => ucfirst($emp->emp_status ?? '—'),
+                        'emp_joindt' => $emp->emp_joindt,
+                        'emp_lastdt' => $emp->emp_lastdt,
+                        'last_grade' => $ctr->ctr_grade ?? '—',
+                        'last_salary' => $ctr && $ctr->ctr_salary ? number_format($ctr->ctr_salary) : '—',
+                        'job_title' => $ctr->ctr_jobtitle ?? '—',
+                        'ctr_start' => $ctr ? $ctr->ctr_startdt : null,
+                        'ctr_end' => $ctr ? $ctr->ctr_enddt : null,
+                        'remarks' => $emp->emp_remarks ?? '—',
+                    ];
+                }
+                break;
+
+            case 'mobphones':
+                foreach ($employees as $emp) {
+                    $data[] = [
+                        'emp_name' => $emp->emp_name,
+                        'emp_id' => $emp->emp_id,
+                        'emp_status' => in_array(strtolower($emp->emp_status ?? ''), ['active','current']) ? 'Current' : 'Previous',
+                        'emp_joindt' => $emp->emp_joindt,
+                        'mobile1' => $emp->emp_mobile ?? '—',
+                        'mobile2' => $emp->emp_mobile2 ?? '—',
+                        'landline' => $emp->emp_landline ?? '—',
+                        'email' => $emp->emp_email ?? '—',
+                    ];
+                }
+                break;
+
+            case 'custom':
+                $allContracts = DB::table('hr.contracts as c')
+                    ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+                    ->whereIn('c.ctr_num', $empIds)
+                    ->select('c.*', 'ch.hed_code as ctr_hed_code')
+                    ->orderBy('c.ctr_num')->orderBy('c.ctr_startdt', 'asc')
+                    ->get();
+
+                $contractsByEmp = [];
+                foreach ($allContracts as $ctr) {
+                    $contractsByEmp[$ctr->ctr_num][] = $ctr;
+                }
+
+                foreach ($contractsByEmp as $empId => &$ctrs) {
+                    $prev = null;
+                    foreach ($ctrs as &$c) {
+                        if ($prev && $prev->ctr_salary > 0) {
+                            $c->pct = round((($c->ctr_salary - $prev->ctr_salary) / $prev->ctr_salary) * 100, 1);
+                        } else {
+                            $c->pct = null;
+                        }
+                        $prev = $c;
+                    }
+                }
+                unset($ctrs, $c);
+
+                foreach ($employees as $emp) {
+                    $ctrs = $contractsByEmp[$emp->emp_id] ?? [];
+                    $totalCtrs = count($ctrs);
+                    $latestCtr = !empty($ctrs) ? end($ctrs) : null;
+
+                    $ctrList = [];
+                    foreach ($ctrs as $ci => $c) {
+                        $ctrList[] = [
+                            'no' => ($ci + 1) . ' of ' . $totalCtrs,
+                            'grade' => $c->ctr_grade ?? '—',
+                            'salary' => $c->ctr_salary ? number_format($c->ctr_salary) : '—',
+                            'pct_increase' => $c->pct !== null ? ($c->pct >= 0 ? '+' : '') . $c->pct . '%' : '—',
+                            'ctr_start' => $c->ctr_startdt,
+                            'ctr_end' => $c->ctr_enddt,
+                            'ctr_jobtitle' => $c->ctr_jobtitle ?? '—',
+                            'head_code' => $c->ctr_hed_code ?? '—',
+                        ];
+                    }
+
+                    $data[] = [
+                        'emp_name' => $emp->emp_name,
+                        'emp_id' => $emp->emp_id,
+                        'emp_cnic' => $emp->emp_cnic,
+                        'emp_status' => in_array(strtolower($emp->emp_status ?? ''), ['active','current']) ? 'Current' : 'Previous',
+                        'emp_joindt' => $emp->emp_joindt,
+                        'emp_lastdt' => $emp->emp_lastdt,
+                        'unit' => $emp->unt_name ?? '—',
+                        'total_contracts' => $totalCtrs,
+                        'current_grade' => $latestCtr ? ($latestCtr->ctr_grade ?? '—') : '—',
+                        'current_salary' => $latestCtr && $latestCtr->ctr_salary ? number_format($latestCtr->ctr_salary) : '—',
+                        'contracts_history' => $ctrList,
+                    ];
+                }
+                break;
+
+            default:
+                return response()->json(['data' => [], 'error' => 'Unknown report type'], 400);
+        }
+
+        return response()->json(['data' => $data, 'count' => count($data)]);
+    }
 }

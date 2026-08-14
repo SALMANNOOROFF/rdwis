@@ -163,8 +163,8 @@ Route::middleware('auth')->group(function () {
                 ->name('division.contract-cases.release');
         });
 
-        // --- HR CONTRACT CASE ROUTES ---
-        Route::prefix('hr')->middleware('area:hr')->group(function () {
+        // --- HR CONTRACT CASE ROUTES & REPORTS ---
+        Route::prefix('hr')->middleware('area:hr,prj,rdwprj,hqs,rdw,nrdi,it')->group(function () {
             Route::get('/contract-cases', [\App\Http\Controllers\HR\ContractCaseController::class, 'index'])
                 ->name('hr.contract-cases.index');
             Route::get('/contract-cases/{id}', [\App\Http\Controllers\HR\ContractCaseController::class, 'show'])
@@ -175,6 +175,10 @@ Route::middleware('auth')->group(function () {
                 ->name('hr.contract-cases.return');
             Route::post('/contract-cases/{id}/fulfill', [\App\Http\Controllers\HR\ContractCaseController::class, 'fulfill'])
                 ->name('hr.contract-cases.fulfill');
+
+            // HR Reports (Single Page like Finance Reports)
+            Route::get('/reports', [DivHrController::class, 'hrReportsIndex'])->name('hr.reports.index');
+            Route::get('/reports/data', [DivHrController::class, 'hrReportsData'])->name('hr.reports.data');
         });
 
         // --- FINANCE CONTRACT CASE ROUTES ---
@@ -473,12 +477,17 @@ Route::middleware('auth')->group(function () {
     // ====================================================
     Route::prefix('fin')
         ->name('fin.')
-        ->middleware(['area:fin'])
+        ->middleware(['area:fin,prj,rdwprj,hqs,rdw,nrdi,it'])
         ->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'finDashboard'])->name('dashboard');
             Route::get('/payments', [\App\Http\Controllers\Finance\PaymentController::class, 'index'])->name('payments.index');
             Route::get('/payments/{cmt_id}', [\App\Http\Controllers\Finance\PaymentController::class, 'show'])->name('payments.show');
             Route::post('/payments/{cmt_id}/transaction', [\App\Http\Controllers\Finance\PaymentController::class, 'storeTransaction'])->name('payments.store_transaction');
+            
+            // Finance Reports
+            Route::get('/reports', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'index'])->name('reports.index');
+            Route::get('/reports/data', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'getReportData'])->name('reports.data');
+            Route::get('/reports/export', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'exportExcel'])->name('reports.export');
         });
 
     // Unified Group for High-Level Approvals (DProc, DFin, MD, DDG, DG)

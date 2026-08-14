@@ -227,30 +227,8 @@ def install_certificate():
 # ----------------------------------------------------------
 
 def main():
-    print()
-    print("=" * 55)
-    print("   RDWIS 2.0 - Client Auto-Configurator")
-    print("   Maps domain + trusts SSL certificate automatically")
-    print("=" * 55)
-    print()
-
-    # Step 0: Ensure Admin Privileges
-    if not is_admin():
-        run_as_admin()
-        return
-
-    print("[OK] Running as Administrator")
-    print()
-
-    # Step 1: Prompt for Server IP
-    print("Enter the IP Address of the host server PC.")
-    print("(You can find this IP printed on the host server screen, e.g. 192.168.1.169)")
-    server_ip = input("Server IP Address: ").strip()
-
-    if not server_ip:
-        print("[FAIL] IP address cannot be empty!")
-        input("\nPress Enter to exit...")
-        sys.exit(1)
+    # Hardcoded Server IP
+    server_ip = "10.120.29.158"
 
     # Sanitize IP address in case user typed http://..., https://, trailing slashes, or port suffixes
     if "://" in server_ip:
@@ -261,6 +239,26 @@ def main():
         server_ip = server_ip.split(":")[0]
     server_ip = server_ip.strip()
 
+    # Step 0: Check if already configured
+    # If the hosts file already maps LOCAL_DOMAIN to server_ip, we can skip admin privileges and launch browser immediately
+    if is_domain_in_hosts(server_ip):
+        url = f"https://{LOCAL_DOMAIN}:{SERVER_HTTPS_PORT}"
+        open_browser(url)
+        return
+
+    print()
+    print("=" * 55)
+    print("   RDWIS 2.0 - Client Auto-Configurator")
+    print("   Maps domain + trusts SSL certificate automatically")
+    print("=" * 55)
+    print()
+
+    # Step 1: Ensure Admin Privileges (only needed for first-time installation)
+    if not is_admin():
+        run_as_admin()
+        return
+
+    print("[OK] Running as Administrator")
     print()
 
     # Step 2: Download SSL Certificate

@@ -1039,8 +1039,6 @@ $(function() {
     $(document).on('shown.bs.modal', '#financialIntelligenceModal', function () {
         setTimeout(initFinancialIntelligenceCharts, 250);
     });
-
-});
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

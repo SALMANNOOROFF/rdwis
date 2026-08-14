@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
     <!-- SweetAlert2 -->
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.all.min.js') }}"></script>
@@ -482,6 +484,26 @@
               </ul>
           </li>
 
+          <!-- Dedicated REPORTS Dropdown for Division -->
+          <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-chart-line text-cyan"></i>
+                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('fin.reports.index') }}" class="nav-link {{ Request::routeIs('fin.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-coins nav-icon text-warning"></i><p>Finance Reports</p>
+                      </a>
+                  </li>
+              </ul>
+          </li>
+
       @elseif(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['nrdi', 'proc', 'fin', 'rdw', 'hqs']))
           <li class="nav-header">COMMAND VIEW</li>
 
@@ -569,6 +591,28 @@
           </li>
           @endif
 
+          <!-- Dedicated REPORTS Dropdown for HQ / Finance / Procurement -->
+          <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-chart-line text-cyan"></i>
+                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview">
+                  @if(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) !== 'fin')
+                  <li class="nav-item">
+                      <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                      </a>
+                  </li>
+                  @endif
+                  <li class="nav-item">
+                      <a href="{{ route('fin.reports.index') }}" class="nav-link {{ Request::routeIs('fin.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-coins nav-icon text-warning"></i><p>Finance Reports</p>
+                      </a>
+                  </li>
+              </ul>
+          </li>
+
       @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
           <li class="nav-header">SYSTEM ADMIN</li>
 
@@ -593,6 +637,26 @@
               </a>
           </li>
 
+          <!-- Dedicated REPORTS Dropdown for IT -->
+          <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-chart-line text-cyan"></i>
+                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('fin.reports.index') }}" class="nav-link {{ Request::routeIs('fin.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-coins nav-icon text-warning"></i><p>Finance Reports</p>
+                      </a>
+                  </li>
+              </ul>
+          </li>
+
           @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'hr')
           <li class="nav-header">HUMAN RESOURCES</li>
 
@@ -604,11 +668,34 @@
           </li>
 
           <li class="nav-item">
+              <a href="{{ route('divhr.employelist') }}" class="nav-link {{ Request::routeIs('divhr.employelist') || Request::routeIs('divhr.employeedetail') ? 'active' : '' }}">
+                  <i class="fas fa-user-check nav-icon"></i>
+                  <p>Employees</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
               <a href="{{ route('nrdi.contract_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases_new.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-file-signature"></i>
                   <p>Contract Cases</p>
               </a>
           </li>
+
+          <!-- Dedicated REPORTS Dropdown for HR Role -->
+          <li class="nav-item {{ Request::routeIs('hr.reports.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-chart-line text-cyan"></i>
+                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                      </a>
+                  </li>
+              </ul>
+          </li>
+
 
           {{-- ========================================================= --}}
           {{-- CASE 3: UNKNOWN / NO ACCESS --}}
@@ -658,6 +745,7 @@
   <script src="{{ asset('dist/js/adminlte.js') }}"></script>
   <script src="{{ asset('dist/js/demo.js') }}"></script>
   <script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
+  <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 
 
 
@@ -693,15 +781,20 @@
         }
 
         function clearDebug() {
-            document.getElementById('debugLog').innerHTML = '';
-            document.getElementById('debugBadge').style.display = 'none';
-            document.getElementById('debugBadge').innerText = '0';
+            const log = document.getElementById('debugLog');
+            const badge = document.getElementById('debugBadge');
+            if (log) log.innerHTML = '';
+            if (badge) {
+                badge.style.display = 'none';
+                badge.innerText = '0';
+            }
         }
 
         function logToDebug(msg, type = 'ERROR') {
             const log = document.getElementById('debugLog');
             const badge = document.getElementById('debugBadge');
-            if (log.innerText.includes('Monitoring')) log.innerHTML = '';
+            if (!log) return;
+            if (log.innerText && log.innerText.includes('Monitoring')) log.innerHTML = '';
             const entry = document.createElement('div');
             entry.style.marginBottom = '5px';
             entry.style.padding = '4px';
@@ -709,8 +802,11 @@
             const time = new Date().toLocaleTimeString();
             entry.innerHTML = `<span style="color:#666;">[${time}]</span> <span style="color:${type==='ERROR'?'#ff3e3e':'#28a745'}; font-weight:bold;">${type}:</span> ${msg}`;
             log.prepend(entry);
-            badge.style.display = 'inline-block';
-            badge.innerText = parseInt(badge.innerText) + 1;
+            
+            if (badge) {
+                badge.style.display = 'inline-block';
+                badge.innerText = parseInt(badge.innerText || '0') + 1;
+            }
             document.querySelector('#rdwisDebugConsole button').style.background = '#dc3545';
         }
 
@@ -731,7 +827,9 @@
             if (typeof $.fn.select2 === 'undefined') logToDebug('Select2 missing.');
             // Initialize Select2 globally for any modal that opens
             $(document).on('shown.bs.modal', function() {
-                $('.select2').select2({ width: '100%', theme: 'bootstrap4' });
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $('.select2').select2({ width: '100%', theme: 'bootstrap4' });
+                }
             });
         });
     </script>
