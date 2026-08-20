@@ -109,7 +109,7 @@
                 <div class="meta-item"><span class="meta-label">Initiated by:</span> {{ $purchase->unit?->unt_name }}</div>
             </div>
             <div>
-                <div class="meta-item"><span class="meta-label">Head:</span> {{ $purchase->project?->prj_code ?? 'N/A' }}</div>
+                <div class="meta-item"><span class="meta-label">Head:</span> {{ $purchase->head_display }}</div>
             </div>
         </div>
 

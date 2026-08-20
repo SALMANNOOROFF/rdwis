@@ -29,6 +29,7 @@ class PurCaseSubstatus extends Model
      */
     const STAGE_DISPLAY_NAMES = [
         'Division'  => 'Division (Initiator)',
+        'DProc'     => 'Director Procurement',
         'DFinance'  => 'Director Finance',
         'MD'        => 'MD Office',
         'DDG'       => 'DDG Office',
@@ -40,6 +41,7 @@ class PurCaseSubstatus extends Model
      */
     const STAGE_TO_AREA = [
         'Division'  => 'prj',
+        'DProc'     => 'proc',
         'DFinance'  => 'fin',
         'MD'        => 'rdw',
         'DDG'       => 'hqs',
@@ -51,6 +53,8 @@ class PurCaseSubstatus extends Model
      */
     const AREA_TO_STAGE = [
         'prj'  => 'Division',
+        'proc' => 'DProc',
+        'prc'  => 'DProc',
         'fin'  => 'DFinance',
         'rdw'  => 'MD',
         'hqs'  => 'DDG',

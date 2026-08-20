@@ -146,7 +146,7 @@
                 // Variable overrides for cross-role compatibility
                 $isInitiator = in_array(strtolower(trim((string)Auth::user()->acc_untarea)), ['prj', 'rdwprj', 'division']);
                 $canEdit = $isInitiator && in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
-                $backRoute = $isInitiator ? route('purchase.initiation.index') : route('nrdi.purchase_cases.index');
+                $backRoute = $isInitiator ? route('purchase.initiation.index') : (Route::has('nrdi.purchase_cases_new.index') ? route('nrdi.purchase_cases_new.index') : route('nrdi.purchase_cases.index'));
             @endphp
 
             {{-- Page Header --}}

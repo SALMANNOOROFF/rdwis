@@ -39,6 +39,11 @@ class PurchaseReceiptController extends Controller
      */
     public function create($pcs_id)
     {
+        $user = auth()->user();
+        if ($user && in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true)) {
+            return redirect()->route('inventory.assets.index')->with('error', 'Director Procurement has view-only access to Inventory and Assets.');
+        }
+
         $purchase = DB::table('pur.purcases as p')
             ->leftJoin('cen.heads as h', 'p.pcs_hed_id', '=', 'h.hed_id')
             ->leftJoin('cen.units as u', 'p.pcs_unt_id', '=', 'u.unt_id')
@@ -65,6 +70,11 @@ class PurchaseReceiptController extends Controller
      */
     public function store(Request $request, $pcs_id)
     {
+        $user = auth()->user();
+        if ($user && in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true)) {
+            return back()->with('error', 'Director Procurement is not authorized to create goods receipts.');
+        }
+
         $request->validate([
             'items' => 'required|array',
             'items.*.received_qty' => 'nullable|numeric|min:0',
@@ -351,6 +361,11 @@ class PurchaseReceiptController extends Controller
      */
     public function updateAssetStatus(Request $request, $iac_id)
     {
+        $user = auth()->user();
+        if ($user && in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true)) {
+            return back()->with('error', 'Director Procurement is not authorized to perform status transitions.');
+        }
+
         $request->validate([
             'iac_status'   => 'required|string|in:Untagged,Tagged,Held,Issued to User,Installed,Consumed,Written Off',
             'iac_person'   => 'nullable|string',

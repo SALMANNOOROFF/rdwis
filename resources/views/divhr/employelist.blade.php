@@ -10,7 +10,7 @@
                     <div class="d-flex align-items-center flex-wrap" style="gap: 15px;">
                         <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem; font-family: 'Rajdhani', sans-serif;">
                             <i class="fas fa-users mr-1"></i> Division Employees
-                            @if(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'fin')
+                            @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs']))
                                 @if($mode === 's')
                                     <span class="badge badge-info ml-2" style="font-size: 0.7rem; vertical-align: middle;">Dept Only</span>
                                 @else
@@ -23,7 +23,7 @@
                         </a>
                     </div>
                     <div class="ml-sm-auto d-flex align-items-center flex-wrap" style="gap: 10px;">
-                        @if(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'fin')
+                        @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs']))
                         <div class="btn-group btn-group-sm shadow-sm" role="group">
                             <a href="{{ route('divhr.employelist', ['mode' => 'm', 'status'=>request('status','Current')]) }}" 
                                class="btn {{ $mode === 'm' ? 'btn-danger font-weight-bold' : 'btn-outline-danger' }}" style="{{ $mode === 'm' ? '' : 'background: var(--rd-surface2);' }}">

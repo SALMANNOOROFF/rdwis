@@ -832,6 +832,7 @@
 
     // Compile dynamic AJAX query string
     function compileQueryString() {
+        const reportType = $('#report-type').val() || '';
         const divisionId = $('#division-dropdown').val();
         const projectId = $('#project-dropdown').val();
         const category = $('#category-dropdown').val();
@@ -856,6 +857,19 @@
 
     // AJAX Report Generation
     $('#btn-generate').click(function() {
+        const reportType = $('#report-type').val();
+        if (!reportType) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Report Type Selected',
+                text: 'Please select a report type first.',
+                background: '#121a22',
+                color: '#fff',
+                confirmButtonColor: '#00BFFF'
+            });
+            return;
+        }
+
         const selectedCols = getSelectedColumns();
         if (selectedCols.length === 0) {
             Swal.fire({
@@ -951,6 +965,19 @@
 
     // Export report trigger
     $('#btn-export').click(function() {
+        const reportType = $('#report-type').val();
+        if (!reportType) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Report Type Selected',
+                text: 'Please select a report type first.',
+                background: '#121a22',
+                color: '#fff',
+                confirmButtonColor: '#00BFFF'
+            });
+            return;
+        }
+
         const selectedCols = getSelectedColumns();
         if (selectedCols.length === 0) {
             Swal.fire({

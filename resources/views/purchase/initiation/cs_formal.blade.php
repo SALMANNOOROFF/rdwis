@@ -103,6 +103,33 @@
             </thead>
             <tbody>
                 @foreach($purchase->quotes as $idx => $q)
+                @php
+                    $frmId = $q->qte_frm_id ?: ($q->firm?->frm_id ?? null);
+                    $firmRow = $frmId ? DB::table('frm.firmz')->where('frm_id', $frmId)->first() : null;
+                    $office = $frmId ? DB::table('frm.offices')->where('off_xfrm_id', $frmId)->first() : null;
+                    $person = $frmId ? DB::table('frm.persons')->where('per_xfrm_id', $frmId)->first() : null;
+                    $contacts = $frmId ? DB::table('frm.info')->where('inf_xmsc_id', $frmId)->get() : collect();
+
+                    $addr = $office?->off_address 
+                        ? ($office->off_address . (!empty($office->off_city) ? ', ' . $office->off_city : '')) 
+                        : ($firmRow?->frm_notes ?: ($q->firm?->frm_address ?? 'N/A'));
+                    $ntn = $firmRow?->frm_ntn ?: ($q->firm?->frm_ntn ?? '-');
+                    $gst = $firmRow?->frm_gst ?: ($q->firm?->frm_gst ?? '-');
+                    
+                    $phoneContact = $contacts->first(function($c) {
+                        return in_array(strtolower($c->inf_type ?? ''), ['phone', 'mobile', 'tel', 'cell', 'landline']);
+                    });
+                    $emailContact = $contacts->first(function($c) {
+                        return in_array(strtolower($c->inf_type ?? ''), ['email', 'mail', 'e-mail']);
+                    });
+
+                    $phone = $phoneContact?->inf_value ?: ($q->firm?->frm_contact ?? ($person?->per_name ?? 'N/A'));
+                    $email = $emailContact?->inf_value ?: ($q->firm?->frm_email ?? 'N/A');
+                    
+                    $dealer = $person?->per_name 
+                        ? ($person->per_name . (!empty($person->per_desig) ? ' (' . $person->per_desig . ')' : '')) 
+                        : ($firmRow?->frm_entity ?? '-');
+                @endphp
                 <tr>
                     <td style="text-align: center;">{{ $idx + 1 }}</td>
                     <td style="font-weight: bold;">M/s {{ strtoupper($q->firm->frm_name ?? $q->qte_firmname) }}</td>
@@ -111,12 +138,18 @@
                         {{ $q->qte_refno ?? 'N/A' }}
                     </td>
                     <td style="text-align: right; font-weight: bold;">
-                        {{ number_format($q->qte_price) }}
+                        {{ number_format($q->qte_price, 2) }}
                     </td>
-                    <td>{{ $q->firm->frm_address ?? 'N/A' }}</td>
-                    <td>{{ $q->firm->frm_ntn ?? '-' }}</td>
-                    <td>{{ $q->firm->frm_contact ?? 'N/A' }}</td>
-                    <td style="text-align: center;">-</td>
+                    <td>{{ $addr }}</td>
+                    <td>
+                        <div><strong>NTN:</strong> {{ $ntn }}</div>
+                        <div><strong>STRN:</strong> {{ $gst }}</div>
+                    </td>
+                    <td>
+                        <div><strong>Tel:</strong> {{ $phone }}</div>
+                        <div><strong>Email:</strong> {{ $email }}</div>
+                    </td>
+                    <td style="text-align: center;">{{ $dealer }}</td>
                     <td style="text-align: center;">{{ $q->qte_techaccept ? 'Accepted' : 'Rejected' }}</td>
                 </tr>
                 @endforeach

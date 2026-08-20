@@ -10,13 +10,41 @@ class RestrictNetworkAccess
 {
     public function handle(Request $request, Closure $next)
     {
-        $allowedIpsRaw = config('app.allowed_ips', '');
-        $allowedIps = array_filter(array_map('trim', explode(',', (string) $allowedIpsRaw)));
+        // 1. Get IPs from config/allowed_ips.php (Sole Configuration Source)
+        $ipsConfigFile = config('allowed_ips', []);
+        
+        if (isset($ipsConfigFile['allowed']) || isset($ipsConfigFile['blocked'])) {
+            $allowedIps = $ipsConfigFile['allowed'] ?? [];
+            $blockedIps = $ipsConfigFile['blocked'] ?? [];
+        } else {
+            $allowedIps = is_array($ipsConfigFile) ? $ipsConfigFile : [];
+            $blockedIps = [];
+        }
+        
+        $allowedIps = array_unique(array_filter($allowedIps));
+        $blockedIps = array_unique(array_filter($blockedIps));
+        
         $clientIp = $request->ip();
 
         // Allow localhost/loopback by default
         if (in_array($clientIp, ['127.0.0.1', '::1', 'localhost'], true)) {
             return $next($request);
+        }
+
+        // Check if IP is explicitly blocked
+        if (! empty($blockedIps)) {
+            foreach ($blockedIps as $blockedPattern) {
+                if ($this->ipMatches($clientIp, $blockedPattern)) {
+                    Log::warning('Blocked access attempt from explicitly blocked IP', [
+                        'ip' => $clientIp,
+                        'url' => $request->fullUrl(),
+                        'user_agent' => $request->userAgent(),
+                        'timestamp' => now(),
+                    ]);
+                    
+                    abort(403, 'Access denied: Your IP address has been explicitly blocked.');
+                }
+            }
         }
 
         if (! empty($allowedIps)) {
@@ -36,7 +64,7 @@ class RestrictNetworkAccess
                     'timestamp' => now(),
                 ]);
                 
-                abort(403, 'Access denied: Your IP address is not authorized to access this application.');
+                abort(403, "Access denied: Your IP address ({$clientIp}) is not authorized to access this application. (Please add {$clientIp} to config/allowed_ips.php)");
             }
         }
 

@@ -98,7 +98,7 @@ class FinanceReportsController extends Controller
     {
         try {
             $type = $request->query('type');
-            $limit = (int)$request->query('limit', 10);
+            $limit = $request->filled('limit') ? (int)$request->query('limit') : null;
             
             $data = $this->queryReport($request, $limit);
             

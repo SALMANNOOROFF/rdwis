@@ -18,7 +18,7 @@ class DataHorizonMiddleware
             $user = Auth::user();
 
             // Default to 's' (Organization Mode/Global) for Oversight Roles, 'm' (Module Mode/Unit) for others
-            $hqRoles = ['fin', 'proc', 'rdw', 'hqs', 'nrdi'];
+            $hqRoles = ['fin', 'proc', 'prc', 'rdw', 'hqs', 'nrdi'];
             $defaultMode = in_array(strtolower(trim($user->acc_untarea)), $hqRoles) ? 's' : 'm';
 
             // Intercept URL mode parameter or default

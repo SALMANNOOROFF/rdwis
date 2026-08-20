@@ -16,11 +16,14 @@ class DivHrController extends Controller
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
-        // Determine Mode - Only 'fin' (Finance) users can toggle global 'm' mode. Others are forced to 's' (Section/My Dept).
+        // Determine Mode with Session Persistence
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
-        $mode = $request->query('mode', 's');
-        if ($area !== 'fin') {
-            $mode = 's';
+        if ($request->has('mode')) {
+            $mode = $request->query('mode') === 's' ? 's' : 'm';
+            session(['hr_mode' => $mode]);
+        } else {
+            $defaultMode = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs']) ? 'm' : 's';
+            $mode = session('hr_mode', $defaultMode);
         }
 
         if ($mode === 's') {
@@ -28,8 +31,8 @@ class DivHrController extends Controller
             $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
             $varModeStr = 'approver-s';
         } else {
-            $lower = $user->acc_lowerm;
-            $upper = $user->acc_upperm;
+            $lower = 0;
+            $upper = 99999999;
             $varModeStr = 'approver-m';
         }
         $userAuth = (string) ($user->acc_auth ?? 'viewer');
@@ -259,12 +262,34 @@ class DivHrController extends Controller
 
     public function attendance(Request $request)
     {
+        $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        
+        // Mode handling with Session Persistence
+        if ($request->has('mode')) {
+            $mode = $request->query('mode') === 's' ? 's' : 'm';
+            session(['hr_mode' => $mode]);
+        } else {
+            $defaultMode = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs']) ? 'm' : 's';
+            $mode = session('hr_mode', $defaultMode);
+        }
+
+        if ($mode === 's') {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+        } else {
+            $lower = 0;
+            $upper = 99999999;
+        }
+
         $monthStr = $request->input('month', Carbon::now()->format('Y-m'));
         $first = Carbon::parse($monthStr.'-01')->startOfMonth();
         $last = $first->copy()->endOfMonth();
         $days = (int) $first->daysInMonth;
-        $unitId = Auth::user() ? (Auth::user()->acc_unt_id ?? (Auth::user()->unit->unt_id ?? null)) : null;
-        // Pull all division employees and LEFT JOIN latest attendance row overlapping the month
+
+        // Pull active employees bounded by mode
         $rows = collect(DB::select("
             SELECT e.emp_id, e.emp_name, 
                    a.att_id, a.att_emp_id, a.att_empnamecomp, a.att_unt_id,
@@ -282,9 +307,10 @@ class DivHrController extends Controller
                 ORDER BY a.att_startdt DESC, a.att_id DESC
                 LIMIT 1
             ) a ON TRUE
-            WHERE e.emp_unt_id = COALESCE(?::int, e.emp_unt_id)
+            WHERE e.emp_unt_id BETWEEN ? AND ?
+              AND LOWER(e.emp_status) IN ('active', 'current')
             ORDER BY e.emp_name ASC
-        ", [$last->toDateString(), $first->toDateString(), $unitId]));
+        ", [$last->toDateString(), $first->toDateString(), $lower, $upper]));
 
         $data = $rows->map(function($r) use ($days) {
             $vals = [];
@@ -310,6 +336,7 @@ class DivHrController extends Controller
             $weekdays[$d] = $first->copy()->addDays($d-1)->format('D');
         }
         return view('divhr.attendance', [
+            'mode' => $mode,
             'month' => $first->format('Y-m'),
             'first' => $first->toDateString(),
             'last' => $last->toDateString(),
@@ -414,26 +441,61 @@ class DivHrController extends Controller
         return $query->orderBy('emp_name', 'asc');
     }
 
-    public function hrReportsIndex()
+    public function hrReportsIndex(Request $request)
     {
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
-        $units = DB::table('cen.units')
-            ->where('unt_type', 'Division')
-            ->orderBy('unt_name')
-            ->get(['unt_id', 'unt_name']);
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        if ($request->has('mode')) {
+            $mode = $request->query('mode') === 's' ? 's' : 'm';
+            session(['hr_mode' => $mode]);
+        } else {
+            $defaultMode = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs']) ? 'm' : 's';
+            $mode = session('hr_mode', $defaultMode);
+        }
 
-        return view('divhr.reports', compact('units'));
+        if ($mode === 's') {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $units = DB::table('cen.units')
+                ->whereBetween('unt_id', [$lower, $upper])
+                ->orderBy('unt_name')
+                ->get(['unt_id', 'unt_name']);
+        } else {
+            $units = DB::table('cen.units')
+                ->where('unt_type', 'Division')
+                ->orderBy('unt_name')
+                ->get(['unt_id', 'unt_name']);
+        }
+
+        return view('divhr.reports', compact('units', 'mode'));
     }
 
     public function hrReportsData(Request $request)
     {
+        $user = Auth::user();
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+
+        if ($request->has('mode')) {
+            $mode = $request->query('mode') === 's' ? 's' : 'm';
+            session(['hr_mode' => $mode]);
+        } else {
+            $defaultMode = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs']) ? 'm' : 's';
+            $mode = session('hr_mode', $defaultMode);
+        }
+
         $type = $request->query('type');
         $status = $request->query('status', 'Current');
         $unitId = $request->query('unit_id', 'All');
 
         $q = $this->getEmployeeBaseQuery($unitId);
+
+        if ($mode === 's' && ($unitId === 'All' || empty($unitId)) && $user) {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $q->whereBetween('hr.emps.emp_unt_id', [$lower, $upper]);
+        }
 
         if ($status === 'Current') {
             $q->whereRaw("LOWER(emp_status) IN ('active','current')");

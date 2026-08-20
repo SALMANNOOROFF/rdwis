@@ -17,12 +17,27 @@
     <div class="container-fluid px-4">
         {{-- Header --}}
         <div class="row align-items-center mb-4">
-            <div class="col-md-7">
-                <span class="badge badge-primary px-3 py-1 mb-2 rajdhani" style="font-size: 10px; background: rgba(0,123,255,0.1); color: #007bff; border: 1px solid rgba(0,123,255,0.2);">HR OPERATIONS AUTHORITY</span>
+            <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="badge badge-primary px-3 py-1 rajdhani" style="font-size: 10px; background: rgba(0,123,255,0.1); color: #007bff; border: 1px solid rgba(0,123,255,0.2);">HR OPERATIONS AUTHORITY</span>
+                    @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs']))
+                    <div class="btn-group btn-group-sm shadow-sm ml-2" role="group">
+                        <a href="{{ route('hr.contract-cases.index', ['mode' => 'm']) }}" 
+                           class="btn {{ ($mode ?? 'm') === 'm' ? 'btn-danger font-weight-bold' : 'btn-outline-danger' }}" style="{{ ($mode ?? 'm') === 'm' ? '' : 'background: var(--rd-surface2);' }}">
+                            <i class="fas fa-globe mr-1"></i> ALL DEPT
+                        </a>
+                        <a href="{{ route('hr.contract-cases.index', ['mode' => 's']) }}" 
+                           class="btn {{ ($mode ?? 'm') === 's' ? 'btn-info font-weight-bold' : 'btn-outline-info' }}"
+                           style="{{ ($mode ?? 'm') === 's' ? 'background-color: #17a2b8; border-color: #17a2b8; color: white;' : 'background: var(--rd-surface2); border-color: #17a2b8;' }}">
+                            <i class="fas fa-sitemap mr-1"></i> MY DEPT
+                        </a>
+                    </div>
+                    @endif
+                </div>
                 <h1 class="font-weight-bold text-white rajdhani m-0" style="font-size: 2.2rem;">HR Contract Dashboard</h1>
                 <p class="text-muted mb-0 small">Candidate scrutiny, grading, and contract duration validation.</p>
             </div>
-            <div class="col-md-5 text-right">
+            <div class="col-md-6 text-right">
                 <div class="d-inline-block metric-card p-3 text-left mr-2" style="border-right: 4px solid #007bff;">
                     <div class="metric-label">Total Salary Volume</div>
                     <div class="metric-value" style="color: #007bff;">PKR {{ number_format($actionReqCases->sum('ctc_newsalary')) }}</div>

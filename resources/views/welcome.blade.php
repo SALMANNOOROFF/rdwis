@@ -504,49 +504,95 @@
               </ul>
           </li>
 
-      @elseif(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['nrdi', 'proc', 'fin', 'rdw', 'hqs']))
-          <li class="nav-header">COMMAND VIEW</li>
+      {{-- ========================================================= --}}
+      {{-- CASE 3: HR USER (Area: 'hr') --}}
+      {{-- ========================================================= --}}
+      @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'hr')
+          <li class="nav-header text-info rajdhani font-weight-bold" style="letter-spacing: 1px;">HR DIRECTORATE</li>
 
           <li class="nav-item">
-              @php
-                  $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
-                  $dashRoute = 'nrdi.dashboard';
-                  if ($area === 'fin') {
-                      $dashRoute = 'fin.dashboard';
-                  } elseif ($area === 'proc') {
-                      $dashRoute = 'nrdi.procurement.purchase_cases.index';
-                  }
-              @endphp
-              <a href="{{ route($dashRoute) }}" class="nav-link {{ Request::routeIs($dashRoute) ? 'active' : '' }}">
+              <a href="{{ route('hr.dashboard') }}" class="nav-link {{ Request::routeIs('hr.dashboard') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p>Dashboard</p>
               </a>
           </li>
 
           <li class="nav-item">
+              <a href="{{ route('divhr.employelist') }}" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-users"></i>
+                  <p>Employees Directory</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('divhr.attendance') }}" class="nav-link {{ Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-calendar-check text-success"></i>
+                  <p>Attendance</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('hr.contract-cases.index') }}" class="nav-link {{ Request::routeIs('hr.contract-cases.*') || Request::routeIs('divhr.contract.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-file-signature text-warning"></i>
+                  <p>Contract Cases</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-chart-pie text-cyan"></i>
+                  <p>HR Reports</p>
+              </a>
+          </li>
+
+      @elseif(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['nrdi', 'proc', 'prc', 'fin', 'rdw', 'hqs']))
+          @php
+              $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
+              $isProc = in_array($area, ['proc', 'prc'], true);
+          @endphp
+          <li class="nav-header">{{ $isProc ? 'PROCUREMENT DIRECTORATE' : 'COMMAND VIEW' }}</li>
+
+          <li class="nav-item">
+              @php
+                  $dashRoute = 'nrdi.dashboard';
+                  if ($area === 'fin') {
+                      $dashRoute = 'fin.dashboard';
+                  } elseif ($isProc) {
+                      $dashRoute = 'nrdi.procurement.purchase_cases.index';
+                  }
+              @endphp
+              <a href="{{ route($dashRoute) }}" class="nav-link {{ Request::routeIs($dashRoute) ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-tachometer-alt text-primary"></i>
+                  <p>Dashboard</p>
+              </a>
+          </li>
+
+          @if(!$isProc)
+          <li class="nav-item">
               <a href="{{ route('nrdi.projects.index') }}" class="nav-link {{ Request::routeIs('nrdi.projects.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-folder-open"></i>
                   <p>Projects</p>
               </a>
           </li> 
+          @endif
 
           <li class="nav-item">
               @php
-                  $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
                   $purchaseRoute = 'nrdi.purchase_cases_new.index';
-                  if($area === 'proc') $purchaseRoute = 'nrdi.purchase_cases_new.procurement.index';
+                  if($isProc) $purchaseRoute = 'nrdi.purchase_cases_new.procurement.index';
                   if($area === 'fin') $purchaseRoute = 'nrdi.purchase_cases_new.finance.index';
               @endphp
-              <a href="{{ route($purchaseRoute) }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases_new.*') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-shopping-cart"></i>
-                  <p>Purchase Case</p>
+              <a href="{{ route($purchaseRoute) }}" class="nav-link {{ Request::routeIs($purchaseRoute) || Request::routeIs('nrdi.purchase_cases_new.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-shopping-cart text-info"></i>
+                  <p>Purchase Cases</p>
               </a>
           </li>
 
+          @if(!$isProc)
           <li class="nav-item">
               <a href="{{ route('nrdi.contract_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases_new.*') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-file-signature"></i>
-                  <p>Contract Case</p>
+                  <i class="nav-icon fas fa-file-signature text-warning"></i>
+                  <p>Contract Cases</p>
               </a>
           </li>
 
@@ -558,12 +604,10 @@
               <ul class="nav nav-treeview">
                   <li class="nav-item">
                       @php
-                          $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
                           $route = 'nrdi.purchase_cases.index';
-                          if($area === 'proc') $route = 'nrdi.procurement.purchase_cases.index';
                           if($area === 'fin') $route = 'nrdi.finance.purchase_cases.index';
                       @endphp
-                      <a href="{{ route($route) }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases.*') || Request::routeIs('nrdi.procurement.*') || Request::routeIs('nrdi.finance.*') ? 'active' : '' }}">
+                      <a href="{{ route($route) }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases.*') || Request::routeIs('nrdi.finance.*') ? 'active' : '' }}">
                           <i class="fas fa-shopping-cart nav-icon"></i><p>Purchase Cases</p>
                       </a>
                   </li>
@@ -574,12 +618,32 @@
                   </li>
               </ul>
           </li>
+          @endif
 
           <li class="nav-item">
               <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-boxes text-info"></i>
+                  <i class="nav-icon fas fa-boxes text-success"></i>
                   <p>INVENTORY & ASSETS</p>
               </a>
+          </li>
+
+          <li class="nav-item {{ Request::routeIs('nrdi.firms.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('nrdi.firms.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-building text-cyan"></i>
+                  <p>SUPPLIERS & FIRMS <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('nrdi.firms.index') }}" class="nav-link {{ Request::routeIs('nrdi.firms.index') ? 'active' : '' }}">
+                          <i class="fas fa-search nav-icon text-info"></i><p>Search Firms</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('nrdi.firms.list') }}" class="nav-link {{ Request::routeIs('nrdi.firms.list') ? 'active' : '' }}">
+                          <i class="fas fa-list-ul nav-icon text-success"></i><p>List of Firms</p>
+                      </a>
+                  </li>
+              </ul>
           </li>
 
           @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'nrdi', 'hqs']) || session('impersonated_by_god'))
@@ -591,7 +655,23 @@
           </li>
           @endif
 
-          <!-- Dedicated REPORTS Dropdown for HQ / Finance / Procurement -->
+          @if($isProc)
+          <!-- Dedicated REPORTS Dropdown for Procurement -->
+          <li class="nav-item {{ Request::routeIs('nrdi.procurement.reports.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('nrdi.procurement.reports.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-chart-line text-cyan"></i>
+                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+              </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('nrdi.procurement.reports.index') }}" class="nav-link {{ Request::routeIs('nrdi.procurement.reports.*') ? 'active' : '' }}">
+                          <i class="fas fa-boxes nav-icon text-info"></i><p>Inventory & Asset Reports</p>
+                      </a>
+                  </li>
+              </ul>
+          </li>
+          @else
+          <!-- Dedicated REPORTS Dropdown for HQ / Finance -->
           <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-chart-line text-cyan"></i>
@@ -612,6 +692,7 @@
                   </li>
               </ul>
           </li>
+          @endif
 
       @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
           <li class="nav-header">SYSTEM ADMIN</li>
@@ -743,8 +824,6 @@
   <script src="{{ asset('plugins/summernote/summernote-bs4.min.js') }}"></script>
   <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
   <script src="{{ asset('dist/js/adminlte.js') }}"></script>
-  <script src="{{ asset('dist/js/demo.js') }}"></script>
-  <script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
   <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
 
 

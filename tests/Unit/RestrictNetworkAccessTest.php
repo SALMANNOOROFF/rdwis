@@ -140,4 +140,27 @@ class RestrictNetworkAccessTest extends TestCase
         $this->expectException(HttpException::class);
         $middleware->handle($req2, $next);
     }
+
+    public function test_blocks_explicitly_blocked_ip()
+    {
+        $middleware = new RestrictNetworkAccess();
+        $next = function ($req) {
+            return response('OK');
+        };
+
+        Config::set('allowed_ips.allowed', ['10.120.29.1-10.120.29.200']);
+        Config::set('allowed_ips.blocked', ['10.120.29.50']);
+
+        // Allowed IP
+        $req1 = Request::create('/', 'GET');
+        $req1->server->set('REMOTE_ADDR', '10.120.29.10');
+        $this->assertEquals('OK', $middleware->handle($req1, $next)->getContent());
+
+        // Blocked IP within the range
+        $req2 = Request::create('/', 'GET');
+        $req2->server->set('REMOTE_ADDR', '10.120.29.50');
+
+        $this->expectException(HttpException::class);
+        $middleware->handle($req2, $next);
+    }
 }

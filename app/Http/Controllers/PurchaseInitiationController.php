@@ -68,7 +68,7 @@ class PurchaseInitiationController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc');
+        $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc') || str_contains(strtolower(trim($user->acc_untarea)), 'prc');
         
         $query = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account']);
         
@@ -186,7 +186,7 @@ class PurchaseInitiationController extends Controller
     {
         $op = (string) $request->input('op', '');
         $rules = [
-            'op' => 'required|in:save_title,save_remarks,add_files,add_item,delete_item,add_quote,delete_quote',
+            'op' => 'required|in:save_title,save_remarks,add_files,add_item,edit_item,delete_item,add_quote,delete_quote,upload_quote_file',
         ];
 
         if ($op === 'save_title') {
@@ -199,22 +199,29 @@ class PurchaseInitiationController extends Controller
         } elseif ($op === 'add_item') {
             $rules['item_desc'] = 'required|string|max:2000';
             $rules['item_qty'] = 'required|numeric|min:0.0001';
+        } elseif ($op === 'edit_item') {
+            $rules['pci_id'] = 'required|integer';
+            $rules['item_desc'] = 'required|string|max:2000';
+            $rules['item_qty'] = 'required|numeric|min:0.0001';
         } elseif ($op === 'delete_item') {
             $rules['pci_id'] = 'required|integer';
         } elseif ($op === 'add_quote') {
             $rules['firm_name'] = 'required|string|max:255';
             $rules['item_prices'] = 'array';
             $rules['item_prices.*'] = 'numeric|min:0';
+            $rules['quote_file'] = 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:15360';
         } elseif ($op === 'delete_quote') {
             $rules['qte_id'] = 'required|integer';
+        } elseif ($op === 'upload_quote_file') {
+            $rules['qte_id'] = 'required|integer';
+            $rules['quote_file'] = 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:15360';
         }
 
         $request->validate($rules);
 
         $user = Auth::user();
-        $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc');
+        $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc') || str_contains(strtolower(trim($user->acc_untarea)), 'prc');
 
-        
         $query = Purchase::query();
         if ($isDProc) {
             $lower = $user->acc_lowerm;
@@ -227,7 +234,7 @@ class PurchaseInitiationController extends Controller
         $purchase = $query->findOrFail($id);
 
         $status = strtolower(trim((string) $purchase->pcs_status));
-        if (!in_array($status, ['draft', 'returned'])) {
+        if (!in_array($status, ['draft', 'returned']) && !$isDProc) {
             return $this->respond($request, (int) $purchase->pcs_id, false, 'Case cannot be edited in current status.');
         }
 
@@ -268,13 +275,14 @@ class PurchaseInitiationController extends Controller
                 $nextSerial = $maxSerial + 1;
                 $desc = trim((string) $request->input('item_desc'));
                 $qty = (float) $request->input('item_qty');
+                $unit = trim((string) $request->input('item_qtyunit', 'num')) ?: 'num';
 
                 $pciId = DB::table('pur.purcaseitems')->insertGetId([
                     'pci_pcs_id' => $purchase->pcs_id,
                     'pci_serial' => $nextSerial,
                     'pci_desc' => $desc,
                     'pci_qty' => $qty,
-                    'pci_qtyunit' => 'num',
+                    'pci_qtyunit' => $unit,
                     'pci_price' => 0,
                     'pci_type' => 1,
                     'pci_subtype' => 1,
@@ -289,13 +297,50 @@ class PurchaseInitiationController extends Controller
                         'qti_qty' => $qty,
                         'qti_serial' => $nextSerial,
                         'qti_desc' => $desc,
-                        'qti_qtyunit' => 'num',
+                        'qti_qtyunit' => $unit,
                         'qti_pcsdesc' => $desc,
                     ]);
                 }
 
                 $this->recalcCasePricing($purchase->pcs_id);
                 return ['ok' => true, 'message' => 'Item added.', 'pcsId' => (int) $purchase->pcs_id];
+            }
+
+            if ($op === 'edit_item') {
+                $pciId = (int) $request->input('pci_id');
+                $desc = trim((string) $request->input('item_desc'));
+                $qty = (float) $request->input('item_qty');
+                $unit = trim((string) $request->input('item_qtyunit', 'num')) ?: 'num';
+
+                $item = DB::table('pur.purcaseitems')
+                    ->where('pci_pcs_id', $purchase->pcs_id)
+                    ->where('pci_id', $pciId)
+                    ->first();
+
+                if (!$item) {
+                    return ['ok' => false, 'message' => 'Item not found.', 'pcsId' => (int) $purchase->pcs_id];
+                }
+
+                DB::table('pur.purcaseitems')
+                    ->where('pci_pcs_id', $purchase->pcs_id)
+                    ->where('pci_id', $pciId)
+                    ->update([
+                        'pci_desc' => $desc,
+                        'pci_qty' => $qty,
+                        'pci_qtyunit' => $unit
+                    ]);
+
+                DB::table('pur.quoteitems')
+                    ->where('qti_pci_id', $pciId)
+                    ->update([
+                        'qti_desc' => $desc,
+                        'qti_qty' => $qty,
+                        'qti_qtyunit' => $unit,
+                        'qti_pcsdesc' => $desc
+                    ]);
+
+                $this->recalcCasePricing($purchase->pcs_id);
+                return ['ok' => true, 'message' => 'Item updated successfully.', 'pcsId' => (int) $purchase->pcs_id];
             }
 
             if ($op === 'delete_item') {
@@ -325,14 +370,18 @@ class PurchaseInitiationController extends Controller
                 }
                 $qteDate = $request->input('qte_date') ?: $purchase->pcs_date;
                 
-                // Nested items from the new glassmorphism modal OR flat array from old view
+                // Tax parameters
+                $taxType = strtoupper(trim((string) $request->input('tax_type', 'GST')));
+                $taxPercent = (float) $request->input('tax_percent', 18);
+
+                // Nested items from the modal OR flat array
                 $inputItems = (array) $request->input('items', []);
                 $flatItemPrices = (array) $request->input('item_prices', []);
                 
                 // Fetch case items to ensure consistency
                 $caseItems = DB::table('pur.purcaseitems')->where('pci_pcs_id', $purchase->pcs_id)->get();
                 
-                $total = 0.0;
+                $subtotal = 0.0;
                 foreach ($caseItems as $it) {
                     $price = 0.0;
                     if (isset($inputItems[$it->pci_id]['price'])) {
@@ -340,8 +389,11 @@ class PurchaseInitiationController extends Controller
                     } elseif (isset($flatItemPrices[$it->pci_id])) {
                         $price = (float) $flatItemPrices[$it->pci_id];
                     }
-                    $total += ($price * (float)$it->pci_qty);
+                    $subtotal += ($price * (float)$it->pci_qty);
                 }
+
+                $taxAmount = $subtotal * ($taxPercent / 100);
+                $total = $subtotal + $taxAmount;
 
                 // Identify Firm
                 if (!$firmId && $firmName) {
@@ -353,26 +405,61 @@ class PurchaseInitiationController extends Controller
                 }
 
                 if ($qteId) {
-                    // Update existing
+                    // Update existing quote
                     DB::table('pur.quotes')->where('qte_id', $qteId)->update([
                         'qte_frm_id' => $firmId,
                         'qte_firmname' => $firmName,
                         'qte_price' => $total,
+                        'qte_intprice' => $subtotal,
+                        'qte_inttax' => $taxAmount,
+                        'qte_midprice' => $total,
+                        'qte_midtax' => $taxAmount,
                         'qte_num' => $qteNum,
                         'qte_date' => $qteDate,
                     ]);
                     DB::table('pur.quoteitems')->where('qti_qte_id', $qteId)->delete();
                 } else {
-                    // Insert new
+                    // Insert new quote
                     $qteId = DB::table('pur.quotes')->insertGetId([
                         'qte_pcs_id' => $purchase->pcs_id,
                         'qte_frm_id' => $firmId,
                         'qte_firmname' => $firmName,
                         'qte_price' => $total,
+                        'qte_intprice' => $subtotal,
+                        'qte_inttax' => $taxAmount,
+                        'qte_midprice' => $total,
+                        'qte_midtax' => $taxAmount,
                         'qte_num' => $qteNum,
                         'qte_date' => $qteDate,
                         'qte_techaccept' => true,
                     ], 'qte_id');
+                }
+
+                // Handle Scanned Quote Document Upload
+                if ($request->hasFile('quote_file')) {
+                    $qFile = $request->file('quote_file');
+                    if ($qFile && $qFile->isValid()) {
+                        $unitName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_namesh') 
+                            ?: (DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name') ?: ('div-' . $purchase->pcs_unt_id));
+                        $divSlug = Str::slug($unitName) ?: ('div-' . $purchase->pcs_unt_id);
+                        $ext = strtolower($qFile->getClientOriginalExtension() ?: 'pdf');
+                        $base = Str::slug($firmName) ?: ('qte-' . $qteId);
+                        $filename = 'quote-' . $purchase->pcs_id . '-' . $qteId . '-' . $base . '-' . now()->format('YmdHis') . '.' . $ext;
+                        $stored = $qFile->storeAs("purchase/quotes/{$divSlug}/{$purchase->pcs_id}", $filename, 'public');
+
+                        // Remove existing attachment for this quote
+                        DB::table('pur.purattachments')
+                            ->where('pat_objtype', 'qte')
+                            ->where('pat_objid', $qteId)
+                            ->delete();
+
+                        DB::table('pur.purattachments')->insert([
+                            'pat_objtype' => 'qte',
+                            'pat_objid' => $qteId,
+                            'pat_type' => 'Quotation Document',
+                            'pat_path' => $stored,
+                        ]);
+                    }
                 }
 
                 foreach ($caseItems as $it) {
@@ -400,12 +487,49 @@ class PurchaseInitiationController extends Controller
                 return ['ok' => true, 'message' => 'Quotation saved successfully.', 'pcsId' => (int) $purchase->pcs_id];
             }
 
+            if ($op === 'upload_quote_file') {
+                $qteId = (int) $request->input('qte_id');
+                $quote = DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->where('qte_id', $qteId)->first();
+                if (!$quote) {
+                    return ['ok' => false, 'message' => 'Quotation not found.', 'pcsId' => (int) $purchase->pcs_id];
+                }
+
+                if ($request->hasFile('quote_file')) {
+                    $qFile = $request->file('quote_file');
+                    if ($qFile && $qFile->isValid()) {
+                        $unitName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_namesh') 
+                            ?: (DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name') ?: ('div-' . $purchase->pcs_unt_id));
+                        $divSlug = Str::slug($unitName) ?: ('div-' . $purchase->pcs_unt_id);
+                        $ext = strtolower($qFile->getClientOriginalExtension() ?: 'pdf');
+                        $base = Str::slug($quote->qte_firmname) ?: ('qte-' . $qteId);
+                        $filename = 'quote-' . $purchase->pcs_id . '-' . $qteId . '-' . $base . '-' . now()->format('YmdHis') . '.' . $ext;
+                        $stored = $qFile->storeAs("purchase/quotes/{$divSlug}/{$purchase->pcs_id}", $filename, 'public');
+
+                        DB::table('pur.purattachments')
+                            ->where('pat_objtype', 'qte')
+                            ->where('pat_objid', $qteId)
+                            ->delete();
+
+                        DB::table('pur.purattachments')->insert([
+                            'pat_objtype' => 'qte',
+                            'pat_objid' => $qteId,
+                            'pat_type' => 'Quotation Document',
+                            'pat_path' => $stored,
+                        ]);
+
+                        return ['ok' => true, 'message' => 'Quotation document uploaded successfully.', 'pcsId' => (int) $purchase->pcs_id];
+                    }
+                }
+                return ['ok' => false, 'message' => 'Invalid document file.', 'pcsId' => (int) $purchase->pcs_id];
+            }
+
             if ($op === 'delete_quote') {
                 $qteId = (int) $request->input('qte_id');
                 $quote = DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->where('qte_id', $qteId)->first();
                 if (!$quote) {
                     return ['ok' => false, 'message' => 'Quotation not found.', 'pcsId' => (int) $purchase->pcs_id];
                 }
+                DB::table('pur.purattachments')->where('pat_objtype', 'qte')->where('pat_objid', $qteId)->delete();
                 DB::table('pur.quoteitems')->where('qti_qte_id', $qteId)->delete();
                 DB::table('pur.quotes')->where('qte_id', $qteId)->delete();
                 $this->recalcCasePricing($purchase->pcs_id);
@@ -445,12 +569,27 @@ class PurchaseInitiationController extends Controller
             'pci_price' => (float) ($i->pci_price ?? 0),
         ])->values();
 
-        $quotes = $purchase->quotes->values()->map(fn($q) => [
-            'qte_id' => (int) $q->qte_id,
-            'qte_num' => (int) ($q->qte_num ?? 0),
-            'firm_name' => (string) ($q->firm?->frm_name ?? $q->qte_firmname),
-            'qte_price' => (float) ($q->qte_price ?? 0),
-        ])->values();
+        $quoteAttachments = DB::table('pur.purattachments')
+            ->where('pat_objtype', 'qte')
+            ->whereIn('pat_objid', $purchase->quotes->pluck('qte_id')->toArray())
+            ->get()
+            ->keyBy('pat_objid');
+
+        $quotes = $purchase->quotes->values()->map(function($q) use ($quoteAttachments) {
+            $att = $quoteAttachments->get($q->qte_id);
+            $filePath = $att ? (string) $att->pat_path : null;
+            $fileName = $filePath ? basename(str_replace('\\', '/', $filePath)) : null;
+            return [
+                'qte_id' => (int) $q->qte_id,
+                'qte_num' => (int) ($q->qte_num ?? 0),
+                'firm_name' => (string) ($q->firm?->frm_name ?? $q->qte_firmname),
+                'qte_price' => (float) ($q->qte_price ?? 0),
+                'qte_subtotal' => (float) ($q->qte_intprice ?? 0),
+                'qte_tax' => (float) ($q->qte_inttax ?? 0),
+                'attachment_path' => $filePath,
+                'attachment_name' => $fileName ?? 'Quote Document',
+            ];
+        })->values();
 
         $quoteIds = $quotes->pluck('qte_id')->toArray();
         $quoteItems = [];
@@ -469,7 +608,7 @@ class PurchaseInitiationController extends Controller
         $attachments = $purchase->attachments->values()->map(fn($a) => [
             'pat_id' => (int) $a->pat_id,
             'pat_path' => (string) $a->pat_path,
-            'pat_filename' => (string) ($a->pat_filename ?? ''),
+            'pat_filename' => basename(str_replace('\\', '/', (string)($a->pat_path ?? ''))),
         ])->values();
 
         return [

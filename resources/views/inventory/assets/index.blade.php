@@ -266,6 +266,9 @@
     </div>
 
     <!-- Data Table -->
+    @php
+        $isProc = in_array(strtolower(trim(Auth::user()->acc_untarea ?? '')), ['proc', 'prc'], true);
+    @endphp
     <div class="card card-cyber p-4 mb-4">
         <div class="table-responsive">
             <table class="table table-cyber mb-0">
@@ -280,7 +283,9 @@
                         <th>Total Value</th>
                         <th>Status</th>
                         <th>Custodian / Location</th>
-                        <th>Actions</th>
+                        @if(!$isProc)
+                            <th>Actions</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -303,7 +308,13 @@
                                 <div class="font-weight-bold text-white mb-1">{{ $a->ias_desc }}</div>
                                 <div class="small text-muted">
                                     @if(!empty($a->ias_pcs_id))
-                                        Case <a href="{{ route('purchase.receipts.create', $a->ias_pcs_id) }}" class="text-info font-weight-bold">#{{ $a->ias_pcs_id }}</a>: {{ \Illuminate\Support\Str::limit($a->pcs_title ?? 'N/A', 30) }}
+                                        Case 
+                                        @if(!$isProc)
+                                            <a href="{{ route('purchase.receipts.create', $a->ias_pcs_id) }}" class="text-info font-weight-bold">#{{ $a->ias_pcs_id }}</a>
+                                        @else
+                                            <span class="text-info font-weight-bold">#{{ $a->ias_pcs_id }}</span>
+                                        @endif
+                                        : {{ \Illuminate\Support\Str::limit($a->pcs_title ?? 'N/A', 30) }}
                                     @else
                                         Direct Entry
                                     @endif
@@ -334,15 +345,17 @@
                                 <div class="small text-white font-weight-bold">{{ $a->iac_person ?? 'Store Custody' }}</div>
                                 <div class="small text-muted"><i class="fas fa-map-marker-alt text-danger mr-1"></i>{{ $a->iac_location ?? 'Main Warehouse' }}</div>
                             </td>
+                            @if(!$isProc)
                             <td>
                                 <button type="button" class="btn btn-sm btn-outline-info" data-toggle="modal" data-target="#updateModal{{ $a->iac_id }}">
                                     Transition
                                 </button>
                             </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">
+                            <td colspan="{{ $isProc ? '9' : '10' }}" class="text-center py-4 text-muted">
                                 No inventory items or assets found matching the selected filters.
                             </td>
                         </tr>
@@ -356,6 +369,7 @@
         </div>
     </div>
 
+    @if(!$isProc)
     <!-- Modals Section -->
     @foreach($assets as $a)
         <div class="modal fade" id="updateModal{{ $a->iac_id }}" tabindex="-1" role="dialog" aria-hidden="true">
@@ -413,7 +427,7 @@
                     </form>
                 </div>
             </div>
-        </div>
     @endforeach
+    @endif
 </div>
 @endsection

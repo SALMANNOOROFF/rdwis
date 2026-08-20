@@ -24,6 +24,7 @@ class PurchaseApprovalController extends Controller
     {
         $user = Auth::user();
         $area = strtolower(trim($user->acc_untarea));
+        if (in_array($area, ['proc', 'prc'], true)) $area = 'proc';
         
         // Define which substatus stages to show on each dashboard
         $stageMap = [
@@ -101,6 +102,7 @@ class PurchaseApprovalController extends Controller
 
         $user = Auth::user();
         $area = strtolower(trim($user->acc_untarea));
+        if (in_array($area, ['proc', 'prc'], true)) $area = 'proc';
         
         $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
@@ -166,7 +168,7 @@ class PurchaseApprovalController extends Controller
     public function action(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:forward,forward_negative,return,approve,reject',
+            'action' => 'required|in:forward,forward_negative,return,approve,reject,save_draft,dproc_save',
             'remarks' => 'nullable|string',
             'target_status' => 'nullable|string',
         ]);
@@ -182,13 +184,17 @@ class PurchaseApprovalController extends Controller
                 $targetStage = $request->target_status
             );
 
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Remarks saved successfully!']);
+            }
+
             $user = Auth::user();
             $area = strtolower(trim($user?->acc_untarea ?? ''));
 
             // Intelligent Redirection:
             // If the user processed a case in the "New" system or belongs to those roles, 
             // keep them in the New system dashboard.
-            if ($area === 'proc') {
+            if (in_array($area, ['proc', 'prc'], true)) {
                 return redirect()->route('nrdi.purchase_cases_new.procurement.index')->with('success', 'Case processed successfully!');
             } elseif ($area === 'fin') {
                 return redirect()->route('nrdi.purchase_cases_new.finance.index')->with('success', 'Budget review completed!');
@@ -197,6 +203,9 @@ class PurchaseApprovalController extends Controller
             // Fallback for others (MD, DDG, DG)
             return redirect()->route('nrdi.purchase_cases.index')->with('success', 'Action completed successfully!');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
             return back()->with('error', 'Error: ' . $e->getMessage());
         }
     }

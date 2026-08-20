@@ -854,4 +854,106 @@ class DashboardController extends Controller
             'totalHeadCount', 'employeesList'
         ));
     }
+
+    public function hrDashboard(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        // Determine Mode ('m' = All Dept / Global, 's' = My Dept / Section) with Session Persistence
+        if ($request->has('mode')) {
+            $mode = $request->query('mode') === 's' ? 's' : 'm';
+            session(['hr_mode' => $mode]);
+        } else {
+            $mode = session('hr_mode', 'm');
+        }
+
+        if ($mode === 's') {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+        } else {
+            $lower = $user->acc_lowerm ?? 0;
+            $upper = $user->acc_upperm ?? 99999999;
+            if ($lower == 0 && $upper == 0) {
+                $lower = 0;
+                $upper = 99999999;
+            }
+        }
+
+        // 1. Employee Key Metrics (Bounded by mode lower/upper)
+        $allEmployees = Employee::query()
+            ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('cen.units as u', 'hr.emps.emp_unt_id', '=', 'u.unt_id')
+            ->whereBetween('hr.emps.emp_unt_id', [$lower, $upper])
+            ->select('hr.emps.*', 'h.hed_code', 'u.unt_name', 'u.unt_namesh')
+            ->get();
+
+        $activeEmployees = $allEmployees->filter(function($e) {
+            return in_array(strtolower($e->emp_status ?? ''), ['active', 'current']);
+        });
+        $activeCount = $activeEmployees->count();
+        $previousCount = $allEmployees->count() - $activeCount;
+        $totalEmployees = $allEmployees->count();
+
+        // 2. Unit/Division Breakdown
+        $unitBreakdown = DB::table('hr.emps as e')
+            ->join('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
+            ->whereBetween('e.emp_unt_id', [$lower, $upper])
+            ->select(
+                'u.unt_id',
+                'u.unt_name',
+                'u.unt_namesh',
+                DB::raw("COUNT(CASE WHEN LOWER(e.emp_status) IN ('active', 'current') THEN 1 END) as active_count"),
+                DB::raw("COUNT(*) as total_count")
+            )
+            ->groupBy('u.unt_id', 'u.unt_name', 'u.unt_namesh')
+            ->orderBy('active_count', 'desc')
+            ->get();
+
+        // 3. Contracts Overview
+        $totalContracts = DB::table('hr.contracts as c')
+            ->join('hr.emps as e', 'e.emp_id', '=', 'c.ctr_num')
+            ->whereBetween('e.emp_unt_id', [$lower, $upper])
+            ->count();
+
+        $now = now();
+        $expiringContracts = DB::table('hr.contracts as c')
+            ->join('hr.emps as e', 'e.emp_id', '=', 'c.ctr_num')
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
+            ->whereBetween('e.emp_unt_id', [$lower, $upper])
+            ->where('c.ctr_enddt', '>=', $now->copy()->subDays(15))
+            ->where('c.ctr_enddt', '<=', $now->copy()->addDays(90))
+            ->select('c.*', 'e.emp_name', 'u.unt_namesh as unit_name')
+            ->orderBy('c.ctr_enddt', 'asc')
+            ->take(10)
+            ->get();
+
+        // 4. Contract Cases (Pipeline)
+        $contractCases = \App\Models\HrCtrCase::query()
+            ->orderBy('ctc_id', 'desc')
+            ->take(10)
+            ->get();
+
+        $pendingCasesCount = \App\Models\HrCtrCase::where('ctc_status', 'Under HR Scrutiny')->count();
+        $inApprovalCasesCount = \App\Models\HrCtrCase::whereIn('ctc_status', ['Under Finance Scrutiny', 'Under Approval'])->count();
+        $approvedCasesCount = \App\Models\HrCtrCase::where('ctc_status', 'Approved')->count();
+
+        // 5. Recent Joiners (Last 8 Employees)
+        $recentEmployees = $activeEmployees->sortByDesc('emp_joindt')->take(8);
+
+        return view('hr.dashboard', compact(
+            'mode',
+            'activeCount',
+            'previousCount',
+            'totalEmployees',
+            'unitBreakdown',
+            'totalContracts',
+            'expiringContracts',
+            'contractCases',
+            'pendingCasesCount',
+            'inApprovalCasesCount',
+            'approvedCasesCount',
+            'recentEmployees'
+        ));
+    }
 }

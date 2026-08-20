@@ -121,9 +121,24 @@
 <div class="content-wrapper px-4 pt-3">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-        <h2 class="font-weight-bold text-white rajdhani m-0" style="font-family: 'Rajdhani', sans-serif;">
-            <i class="fas fa-chart-bar mr-2 text-info"></i>HR Reports Center
-        </h2>
+        <div class="d-flex align-items-center flex-wrap" style="gap: 15px;">
+            <h2 class="font-weight-bold text-white rajdhani m-0" style="font-family: 'Rajdhani', sans-serif;">
+                <i class="fas fa-chart-bar mr-2 text-info"></i>HR Reports Center
+            </h2>
+            @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs']))
+            <div class="btn-group btn-group-sm shadow-sm" role="group">
+                <a href="{{ route('hr.reports.index', ['mode' => 'm']) }}" 
+                   class="btn {{ ($mode ?? 'm') === 'm' ? 'btn-danger font-weight-bold' : 'btn-outline-danger' }}" style="{{ ($mode ?? 'm') === 'm' ? '' : 'background: var(--rd-surface2);' }}">
+                    <i class="fas fa-globe mr-1"></i> ALL DEPT
+                </a>
+                <a href="{{ route('hr.reports.index', ['mode' => 's']) }}" 
+                   class="btn {{ ($mode ?? 'm') === 's' ? 'btn-info font-weight-bold' : 'btn-outline-info' }}"
+                   style="{{ ($mode ?? 'm') === 's' ? 'background-color: #17a2b8; border-color: #17a2b8; color: white;' : 'background: var(--rd-surface2); border-color: #17a2b8;' }}">
+                    <i class="fas fa-sitemap mr-1"></i> MY DEPT
+                </a>
+            </div>
+            @endif
+        </div>
         
         <div id="loader" class="dashboard-loader" style="display: none;">
             <i class="fas fa-spinner fa-spin mr-1"></i> QUERYING DATABASE...

@@ -45,6 +45,40 @@ class Purchase extends Model
     }
 
     /**
+     * Get the head or project name/code associated with this purchase case
+     */
+    public function getHeadDisplayAttribute()
+    {
+        $headId = $this->pcs_hed_id ?: $this->pcs_effhed_id;
+        if (!$headId) {
+            return !empty($this->pcs_sudohed) ? $this->pcs_sudohed : 'N/A';
+        }
+
+        // 1. Try cen.heads
+        $headRec = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $headId)->first();
+        if ($headRec) {
+            if (!empty($headRec->hed_code) && $headRec->hed_code !== '000' && $headRec->hed_name === 'xxx') {
+                return $headRec->hed_code;
+            } elseif (!empty($headRec->hed_name) && $headRec->hed_name !== 'xxx') {
+                return $headRec->hed_name . (!empty($headRec->hed_code) && $headRec->hed_code !== '000' ? " ({$headRec->hed_code})" : '');
+            } elseif (!empty($headRec->hed_code) && $headRec->hed_code !== '000') {
+                return $headRec->hed_code;
+            } else {
+                return $headRec->hed_name ?: ('Head #' . $headId);
+            }
+        }
+
+        // 2. Try prj.projects
+        $prj = \Illuminate\Support\Facades\DB::table('prj.projects')->where('prj_id', $headId)->first();
+        if ($prj) {
+            return $prj->prj_code ?: ($prj->prj_title ?: ('Project #' . $headId));
+        }
+
+        // 3. Fallback to sudohed or Head #ID
+        return !empty($this->pcs_sudohed) ? $this->pcs_sudohed : ('Head #' . $headId);
+    }
+
+    /**
      * Purchase items
      */
     public function items()
@@ -106,6 +140,14 @@ class Purchase extends Model
     public function notifications()
     {
         return $this->hasMany(PurNotification::class, 'pnt_pcs_id', 'pcs_id');
+    }
+
+    /**
+     * Relationship: Saved IT / RFQ Letter & Annex custom data
+     */
+    public function itLetter()
+    {
+        return $this->hasOne(PurItLetter::class, 'pit_pcs_id', 'pcs_id');
     }
 
     // ── Sub-Status Relationships ──────────────────────────────

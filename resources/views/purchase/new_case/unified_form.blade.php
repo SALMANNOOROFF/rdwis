@@ -172,7 +172,7 @@
           <span class="badge-draft">DRAFT MODE</span>
         </div>
         
-        <form class="soft-form" id="unifiedPurchaseForm" action="{{ route('purchase.store') }}" method="POST" onsubmit="return handleFormSubmit(event)">
+        <form class="soft-form" id="unifiedPurchaseForm" action="{{ route('purchase.store') }}" method="POST" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
           @csrf
           <input type="hidden" name="pcs_type" value="{{ $type }}">
           
@@ -278,46 +278,6 @@
                   </div>
                 </div>
 
-                {{-- Quotation Grid --}}
-                <div class="soft-group mt-3">
-                  <div class="section-title"><i class="fas fa-balance-scale"></i> Firm Quotations</div>
-                  <div class="d-flex align-items-end gap-2 mb-2">
-                    <div style="flex:1;">
-                      <label class="soft-label">Select Firm to Add</label>
-                      <select id="firmSelector" class="soft-select">
-                        <option value="" disabled selected>-- Choose a Firm --</option>
-                        @foreach($firms ?? [] as $f)
-                          <option value="{{ $f->frm_id }}" data-name="{{ $f->frm_name }}">{{ $f->frm_name }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                    <button type="button" class="btn-add-row" onclick="addFirmColumn()" style="height:32px;">
-                      <i class="fas fa-plus"></i> ADD FIRM
-                    </button>
-                  </div>
-                  <div style="overflow-x:auto; border:1px solid var(--rd-border); border-radius:8px;">
-                    <table id="quotationTable" style="width:100%; border-collapse:collapse; font-size:12px;">
-                      <thead>
-                        <tr style="background:var(--rd-surface2); border-bottom:1px solid var(--rd-border);">
-                          <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; min-width:40px;">S.No</th>
-                          <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; min-width:180px;">Item</th>
-                          <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; text-align:center; min-width:60px;">Qty</th>
-                          {{-- Firm columns will be dynamically added here --}}
-                        </tr>
-                      </thead>
-                      <tbody id="quotationBody">
-                        {{-- Rows populated by JS --}}
-                      </tbody>
-                      <tfoot>
-                        <tr style="border-top:2px solid var(--rd-border); background:rgba(255,255,255,0.02);">
-                          <td colspan="3" style="padding:8px 10px; font-weight:800; color:var(--rd-text1); text-align:right; font-family:'Rajdhani',sans-serif; font-size:13px;">TOTAL →</td>
-                          {{-- Firm total cells added dynamically --}}
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                  <p class="text-muted mt-1 mb-0" style="font-size:10px;"><i class="fas fa-info-circle mr-1"></i> The lowest-priced firm will be auto-selected as the winning quote.</p>
-                </div>
               @endif
             </div>
 
@@ -356,6 +316,71 @@
               @endif
             </div>
           </div>
+          
+          {{-- Quotation Grid Moved Here for Full Width --}}
+          @if(!in_array($type, ['tada', 'transport']))
+            <div class="soft-group mt-4 mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                <div class="section-title mb-0"><i class="fas fa-balance-scale"></i> Firm Quotations</div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center">
+                        <label class="soft-label mb-0 mr-2" style="font-size:10px; text-transform:uppercase;">TAX TYPE:</label>
+                        <select name="tax_type" id="newCaseTaxType" class="soft-select" style="width:75px; height:28px; font-size:11px; padding:2px 6px;" onchange="calculateQuotationTotals()">
+                            <option value="GST">GST</option>
+                            <option value="SST">SST</option>
+                        </select>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <label class="soft-label mb-0 mr-2" style="font-size:10px; text-transform:uppercase;">TAX %:</label>
+                        <input type="number" name="tax_percent" id="newCaseTaxPercent" class="soft-input" value="18" min="0" max="100" style="width:60px; height:28px; font-size:11px; padding:2px 6px; text-align:center;" oninput="calculateQuotationTotals()">
+                    </div>
+                </div>
+              </div>
+              <div class="d-flex align-items-end gap-2 mb-2">
+                <div style="flex:1;">
+                  <label class="soft-label">Select Firm to Add</label>
+                  <select id="firmSelector" class="soft-select">
+                    <option value="" disabled selected>-- Choose a Firm --</option>
+                    @foreach($firms ?? [] as $f)
+                      @if($f->frm_id > 0 && !str_contains($f->frm_name, '< Select'))
+                        <option value="{{ $f->frm_id }}" data-name="{{ $f->frm_name }}">{{ $f->frm_name }}</option>
+                      @endif
+                    @endforeach
+                  </select>
+                </div>
+                <button type="button" class="btn-add-row" onclick="addFirmColumn()" style="height:32px;">
+                  <i class="fas fa-plus"></i> ADD FIRM
+                </button>
+              </div>
+              <div style="overflow-x:auto; border:1px solid var(--rd-border); border-radius:8px;">
+                <table id="quotationTable" style="width:100%; border-collapse:collapse; font-size:12px;">
+                  <thead>
+                    <tr style="background:var(--rd-surface2); border-bottom:1px solid var(--rd-border);">
+                      <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; min-width:40px;">S.No</th>
+                      <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; min-width:180px;">Item</th>
+                      <th style="padding:8px 10px; color:var(--rd-text3); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; text-align:center; min-width:60px;">Qty</th>
+                      {{-- Firm columns will be dynamically added here --}}
+                    </tr>
+                  </thead>
+                  <tbody id="quotationBody">
+                    {{-- Rows populated by JS --}}
+                  </tbody>
+                  <tfoot id="quotationFoot">
+                    <tr style="border-top:2px solid var(--rd-border); background:rgba(255,255,255,0.02);">
+                      <td colspan="3" style="padding:6px 10px; font-size:11px; color:var(--rd-text3); text-align:right;">SUB TOTAL</td>
+                    </tr>
+                    <tr style="background:rgba(255,255,255,0.01);">
+                      <td colspan="3" style="padding:6px 10px; font-size:11px; color:var(--rd-text3); text-align:right;" id="taxRowLabel">TAX (18%)</td>
+                    </tr>
+                    <tr style="border-top:1px solid var(--rd-border); background:rgba(0,123,255,0.05);">
+                      <td colspan="3" style="padding:8px 10px; font-weight:800; color:var(--rd-text1); text-align:right; font-family:'Rajdhani',sans-serif; font-size:13px;">TOTAL (PKR)</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <p class="text-muted mt-1 mb-0" style="font-size:10px;"><i class="fas fa-info-circle mr-1"></i> The lowest-priced firm will be auto-selected as the winning quote.</p>
+            </div>
+          @endif
           
           <!-- FORM ACTIONS -->
           <div class="form-actions-footer">
@@ -581,23 +606,78 @@
       while (headerRow.children.length > 3) headerRow.removeChild(headerRow.lastChild);
       firms.forEach(f => {
           const th = document.createElement('th');
-          th.style.cssText = 'padding:6px 8px; color:var(--rd-accent); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; text-align:center; min-width:120px; white-space:nowrap;';
-          th.innerHTML = `${f.name} <button type="button" onclick="removeFirm('${f.id}')" style="background:none;border:none;color:var(--rd-danger);font-size:10px;cursor:pointer;margin-left:4px;"><i class="fas fa-times-circle"></i></button>`;
+          th.style.cssText = 'padding:6px 8px; color:var(--rd-accent); font-size:9px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; text-align:center; min-width:140px; white-space:nowrap;';
+          th.innerHTML = `
+              <div class="d-flex align-items-center justify-content-center gap-1">
+                  <span>${f.name}</span>
+                  <button type="button" onclick="removeFirm('${f.id}')" style="background:none;border:none;color:var(--rd-danger);font-size:10px;cursor:pointer;" title="Remove Firm"><i class="fas fa-times-circle"></i></button>
+              </div>
+              <div class="mt-1">
+                  <label for="qfile_${f.id}" class="badge badge-dark p-1" style="cursor:pointer; font-size:8px; border:1px solid rgba(255,255,255,0.15); font-weight:normal;" id="qfile_lbl_${f.id}" title="Attach Quote Scan">
+                      <i class="fas fa-paperclip mr-1"></i> <span id="qfile_txt_${f.id}">Attach Quote</span>
+                  </label>
+                  <input type="file" id="qfile_${f.id}" name="quote_files[${f.id}]" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt" onchange="handleQuoteFileSelect(this, '${f.id}')">
+              </div>
+          `;
           headerRow.appendChild(th);
       });
       // Rebuild body
       rebuildQuotationBody();
       // Rebuild footer
-      const footerRow = document.querySelector('#quotationTable tfoot tr');
-      while (footerRow.children.length > 1) footerRow.removeChild(footerRow.lastChild);
-      firms.forEach(f => {
-          const td = document.createElement('td');
-          td.style.cssText = 'padding:8px 10px; text-align:center; font-family:"Rajdhani",sans-serif; font-size:14px; font-weight:800; color:var(--rd-info);';
-          td.id = `firm-total-${f.id}`;
-          td.textContent = '0';
-          footerRow.appendChild(td);
-      });
+      const foot = document.getElementById('quotationFoot');
+      if (foot) {
+          const rows = foot.querySelectorAll('tr');
+          // Row 0: Sub Total, Row 1: Tax, Row 2: Total
+          rows.forEach(r => {
+              while (r.children.length > 1) r.removeChild(r.lastChild);
+          });
+
+          firms.forEach(f => {
+              // Subtotal cell
+              const tdSub = document.createElement('td');
+              tdSub.style.cssText = 'padding:6px 8px; text-align:center; font-size:11px; color:var(--rd-text2);';
+              tdSub.id = `firm-subtotal-${f.id}`;
+              tdSub.textContent = '0';
+              rows[0].appendChild(tdSub);
+
+              // Tax cell
+              const tdTax = document.createElement('td');
+              tdTax.style.cssText = 'padding:6px 8px; text-align:center; font-size:11px; color:var(--rd-text3);';
+              tdTax.id = `firm-tax-${f.id}`;
+              tdTax.textContent = '0';
+              rows[1].appendChild(tdTax);
+
+              // Total cell
+              const tdTot = document.createElement('td');
+              tdTot.style.cssText = 'padding:8px 10px; text-align:center; font-family:"Rajdhani",sans-serif; font-size:14px; font-weight:800; color:var(--rd-info);';
+              tdTot.id = `firm-total-${f.id}`;
+              tdTot.textContent = '0';
+              rows[2].appendChild(tdTot);
+          });
+      }
       calculateQuotationTotals();
+  }
+
+  function handleQuoteFileSelect(input, firmId) {
+      const lbl = document.getElementById(`qfile_txt_${firmId}`);
+      const badge = document.getElementById(`qfile_lbl_${firmId}`);
+      if (input.files && input.files[0]) {
+          const name = input.files[0].name;
+          const shortName = name.length > 12 ? name.substring(0, 10) + '..' : name;
+          if (lbl) lbl.textContent = shortName;
+          if (badge) {
+              badge.classList.remove('badge-dark');
+              badge.classList.add('badge-success');
+              badge.title = name;
+          }
+          fireToast(`Document attached for firm`, 'success');
+      } else {
+          if (lbl) lbl.textContent = 'Attach Quote';
+          if (badge) {
+              badge.classList.remove('badge-success');
+              badge.classList.add('badge-dark');
+          }
+      }
   }
 
   function rebuildQuotationBody() {
@@ -623,20 +703,61 @@
   }
 
   function calculateQuotationTotals() {
+      const taxType = document.getElementById('newCaseTaxType')?.value || 'GST';
+      const taxPercent = parseFloat(document.getElementById('newCaseTaxPercent')?.value || 0);
+
+      const taxLabel = document.getElementById('taxRowLabel');
+      if (taxLabel) taxLabel.textContent = `TAX (${taxType} ${taxPercent}%)`;
+
+      const items = getItems();
       let lowestTotal = Infinity;
+      let winningFirmId = null;
+
       firms.forEach(f => {
-          let total = 0;
-          document.querySelectorAll(`input[data-firm="${f.id}"]`).forEach(inp => {
-              total += parseFloat(inp.value) || 0;
+          let subtotal = 0;
+          items.forEach((item) => {
+              const inp = document.querySelector(`input[name="quotations[${f.id}][${item.idx}]"]`);
+              const unitPrice = parseFloat(inp?.value) || 0;
+              const qty = parseFloat(item.qty) || 1;
+              subtotal += (unitPrice * qty);
           });
-          const el = document.getElementById(`firm-total-${f.id}`);
-          if (el) el.textContent = total.toLocaleString();
-          if (total > 0 && total < lowestTotal) lowestTotal = total;
+
+          const tax = subtotal * (taxPercent / 100);
+          const total = subtotal + tax;
+
+          const elSub = document.getElementById(`firm-subtotal-${f.id}`);
+          if (elSub) elSub.textContent = subtotal.toLocaleString(undefined, {maximumFractionDigits: 2});
+
+          const elTax = document.getElementById(`firm-tax-${f.id}`);
+          if (elTax) elTax.textContent = tax.toLocaleString(undefined, {maximumFractionDigits: 2});
+
+          const elTot = document.getElementById(`firm-total-${f.id}`);
+          if (elTot) elTot.textContent = total.toLocaleString(undefined, {maximumFractionDigits: 2});
+
+          if (total > 0 && total < lowestTotal) {
+              lowestTotal = total;
+              winningFirmId = f.id;
+          }
       });
+
+      // Highlight winner
+      firms.forEach(f => {
+          const elTot = document.getElementById(`firm-total-${f.id}`);
+          if (elTot) {
+              if (winningFirmId && f.id == winningFirmId) {
+                  elTot.style.color = '#10b981';
+                  elTot.style.background = 'rgba(16, 185, 129, 0.15)';
+              } else {
+                  elTot.style.color = 'var(--rd-info)';
+                  elTot.style.background = 'transparent';
+              }
+          }
+      });
+
       // Update the financial summary
       const displayTotal = lowestTotal === Infinity ? 0 : lowestTotal;
       const liveDisplay = document.getElementById('live-total-display');
-      if (liveDisplay) liveDisplay.textContent = 'PKR ' + displayTotal.toLocaleString();
+      if (liveDisplay) liveDisplay.textContent = 'PKR ' + displayTotal.toLocaleString(undefined, {maximumFractionDigits: 2});
   }
 
   // Sync quotation grid when item desc/qty changes

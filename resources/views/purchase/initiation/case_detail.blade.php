@@ -101,21 +101,34 @@
         </div>
 
         @php
-            $winnerQuote = $purchase->quotes->sortBy('qte_price')->first();
-            $price = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
-            $gstRate = 0.18; // Standard 18% if not explicitly stored
-            $gst = $price * $gstRate;
-            $total = $price + $gst;
+            $winnerQuote = $purchase->quotes->sortBy(function($q) {
+                return (float)($q->qte_midprice ?: ($q->qte_price + ($q->qte_inttax ?? $q->qte_midtax ?? 0)));
+            })->first();
+
+            if ($winnerQuote) {
+                $basePrice = (float)($winnerQuote->qte_intprice ?: $winnerQuote->qte_price);
+                $tax = (float)($winnerQuote->qte_inttax ?: ($winnerQuote->qte_midtax ?: 0));
+                $taxType = strtoupper($winnerQuote->qte_taxtype ?? ($winnerQuote->qte_quotetype ?? 'GST'));
+                $sst = str_contains($taxType, 'SST') ? $tax : 0;
+                $gst = !str_contains($taxType, 'SST') ? $tax : 0;
+                $total = $basePrice + $sst + $gst;
+            } else {
+                $basePrice = (float)($purchase->pcs_intprice ?: $purchase->pcs_price);
+                $tax = (float)($purchase->pcs_inttax ?: ($purchase->pcs_midtax ?: 0));
+                $sst = 0;
+                $gst = $tax;
+                $total = $basePrice + $tax;
+            }
         @endphp
 
         <div class="meta-grid">
             <div class="meta-item"><span class="meta-label">Title:</span> <span class="meta-value">{{ $purchase->pcs_title }}</span></div>
             <div class="meta-item"><span class="meta-label"></span> <span class="meta-value"></span></div>
-            <div class="meta-item"><span class="meta-label">Price:</span> <span class="meta-value text-right">{{ number_format($price, 2) }}</span></div>
+            <div class="meta-item"><span class="meta-label">Price:</span> <span class="meta-value text-right">{{ number_format($basePrice, 2) }}</span></div>
             
             <div class="meta-item"><span class="meta-label">Minute:</span> <span class="meta-value">{{ $purchase->pcs_minute }}</span></div>
-            <div class="meta-item"><span class="meta-label">Head:</span> <span class="meta-value">({{ $purchase->project?->prj_code ?? 'N/A' }})</span></div>
-            <div class="meta-item"><span class="meta-label">SST:</span> <span class="meta-value text-right">0.00</span></div>
+            <div class="meta-item"><span class="meta-label">Head:</span> <span class="meta-value">({{ $purchase->project?->prj_code ?? ($purchase->head?->hed_name ?? 'N/A') }})</span></div>
+            <div class="meta-item"><span class="meta-label">SST:</span> <span class="meta-value text-right">{{ number_format($sst, 2) }}</span></div>
             
             <div class="meta-item"><span class="meta-label">Date:</span> <span class="meta-value">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M y') }}</span></div>
             <div class="meta-item"><span class="meta-label"></span> <span class="meta-value"></span></div>

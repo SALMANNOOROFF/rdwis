@@ -1,15 +1,7 @@
 @php
     $u = Auth::user();
     $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
-    $service = app(\App\Services\PurchaseApprovalService::class);
-    $area = strtolower(trim($area ?? Auth::user()->acc_untarea));
-    $canApprove = $service->canApprove($area, $purchase->pcs_price);
-    $nextAuthName = $service->getNextAuthorityName($purchase, $area);
-    $returnTargets = $service->getReturnTargets($purchase);
-    
-@php
-    $u = Auth::user();
-    $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
+    if (in_array($userArea, ['proc', 'prc'], true)) $userArea = 'proc';
     $service = app(\App\Services\PurchaseApprovalService::class);
     $area = strtolower(trim($area ?? Auth::user()->acc_untarea));
     $canApprove = $service->canApprove($area, $purchase->pcs_price);
@@ -33,16 +25,40 @@
     $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division']);
     $currentStatusDisplay = $purchase->current_stage_display ?? $service->getStatusDisplayName($purchase->pcs_status);
 
-    // Calculate the next numbering for the list
+    // Calculate the next numbering for the list:
+    // Main minute sheet ends at paragraph 4.
     $liCount = 0;
     foreach($purchase->decisions as $dec) {
+        if ($dec->pdec_action === 'save_draft') continue;
         if (strpos($dec->pdec_remarks, '<li') !== false) {
             $liCount += substr_count($dec->pdec_remarks, '<li');
         } else if (!empty(trim(strip_tags($dec->pdec_remarks)))) {
             $liCount += 1;
         }
     }
-    $nextRemarkNumber = $liCount + 1;
+    $nextRemarkNumber = 4 + $liCount + 1;
+
+    // Fetch existing draft for this user if any (rendered in textarea as 1. 2. for user ease)
+    $myDraftDecision = $purchase->decisions->where('pdec_acc_id', $u->acc_id)->where('pdec_action', 'save_draft')->first();
+    $existingDraftRaw = '';
+    if ($myDraftDecision && !empty($myDraftDecision->pdec_remarks)) {
+        $clean = preg_replace('/<\/?(ol|ul)>/', '', $myDraftDecision->pdec_remarks);
+        preg_match_all('/<li>(.*?)<\/li>/is', $clean, $matches);
+        if (!empty($matches[1])) {
+            $lines = [];
+            $curNum = 1;
+            foreach ($matches[1] as $lineContent) {
+                $lines[] = $curNum . ". " . trim(strip_tags($lineContent));
+                $curNum++;
+            }
+            $existingDraftRaw = implode("\n", $lines);
+        } else {
+            $existingDraftRaw = trim(strip_tags($myDraftDecision->pdec_remarks));
+            if (!preg_match('/^\d+\./', $existingDraftRaw)) {
+                $existingDraftRaw = "1. " . $existingDraftRaw;
+            }
+        }
+    }
 @endphp
 
 @if($isCurrentStage)
@@ -51,6 +67,14 @@
         <div class="font-weight-bold rajdhani text-white" style="font-size: 13px;">
             <i class="fas fa-user-circle text-accent mr-1"></i> {{ $u->acc_name }} 
             <span class="text-muted small ml-1" style="font-weight: 500;">({{ strtoupper($userArea) }})</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span id="saveDraftStatus" class="small text-muted font-italic" style="font-size: 11px;">
+                @if($myDraftDecision) <span class="text-info"><i class="fas fa-check-circle mr-1"></i>Draft saved</span> @endif
+            </span>
+            <button type="button" id="btnSaveRemarks" onclick="saveRemarksDraft()" class="btn btn-xs btn-outline-info rajdhani font-weight-bold px-3 py-1" style="border-radius: 4px; font-size: 11px; letter-spacing: 0.5px; transition: all 0.3s ease;">
+                <i class="fas fa-save mr-1"></i> SAVE REMARKS
+            </button>
         </div>
     </div>
 
@@ -61,7 +85,7 @@
         <input type="hidden" name="remarks" id="remarksHiddenInput">
 
         <div class="mb-2">
-            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks here..." style="background: rgba(255,255,255,0.03); color: #fff; font-family: 'Arial', sans-serif; font-size: 11pt; min-height: 60px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 10px; outline: none; box-shadow: none; resize: vertical;"></textarea>
+            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks here..." style="background: rgba(255,255,255,0.03); color: #fff; font-family: 'Arial', sans-serif; font-size: 11pt; min-height: 70px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 8px 10px; outline: none; box-shadow: none; resize: vertical;">{{ $existingDraftRaw }}</textarea>
         </div>
 
         <div class="d-flex" style="gap: 10px; width: 100%;">
@@ -142,19 +166,42 @@
 .dg-btn-return { background: rgba(220,53,69,0.05); color: #dc3545; border-color: rgba(220,53,69,0.3); }
 .dg-btn-return:hover:not(:disabled) { background: #dc3545; color: #fff; }
 .dg-btn-return:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-glow-pulse {
+    background: linear-gradient(135deg, #00d2ff, #007bff) !important;
+    color: #fff !important;
+    border-color: #00d2ff !important;
+    box-shadow: 0 0 12px rgba(0, 210, 255, 0.8), 0 0 20px rgba(0, 123, 255, 0.5) !important;
+    animation: glowPulse 1.4s infinite alternate ease-in-out;
+}
+@keyframes glowPulse {
+    0% { box-shadow: 0 0 4px rgba(0, 210, 255, 0.4); transform: scale(1); }
+    100% { box-shadow: 0 0 16px rgba(0, 210, 255, 0.95); transform: scale(1.03); }
+}
 </style>
 
 <script>
     const nextNumOld = {{ $nextRemarkNumber }};
     const inlineRemarksOld = document.getElementById('inlineRemarks');
     const btnReturn = document.getElementById('btnReturn');
+    const btnSaveRemarks = document.getElementById('btnSaveRemarks');
+    const saveDraftStatus = document.getElementById('saveDraftStatus');
 
-    let localParaCounterOld = nextNumOld;
+    let lastSavedRemarks = inlineRemarksOld.value.trim();
 
-    // Auto-initialize with numbering on first focus
+    function getNextLocalNumber() {
+        const matches = inlineRemarksOld.value.match(/^\d+(?=\.)/gm);
+        if (matches && matches.length > 0) {
+            return Math.max(...matches.map(Number)) + 1;
+        }
+        return 2;
+    }
+
+    // Auto-initialize with numbering 1. on first focus if empty
     inlineRemarksOld.addEventListener('focus', function() {
         if (this.value.trim() === '') {
-            this.value = localParaCounterOld + ". ";
+            this.value = "1. ";
+            updateGlowState();
         }
     });
 
@@ -174,12 +221,13 @@
         if (e.key === 'Enter') {
             e.preventDefault();
             if (currentLine.trim().length > (match ? match[0].trim().length : 0)) {
-                localParaCounterOld++;
-                const newNumber = "\n" + localParaCounterOld + ". ";
+                const nextNumLocal = getNextLocalNumber();
+                const newNumber = "\n" + nextNumLocal + ". ";
                 const before = text.substring(0, selectionStart);
                 const after = text.substring(selectionStart);
                 this.value = before + newNumber + after;
                 this.selectionStart = this.selectionEnd = before.length + newNumber.length;
+                updateGlowState();
             }
         }
         if (e.key === 'Backspace' && match && selectionStart === lineStart + match[0].length) {
@@ -187,9 +235,32 @@
         }
     });
 
+    function updateGlowState() {
+        const currentVal = inlineRemarksOld.value.trim();
+        const prefix = "1. ";
+        const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== "1.";
+        const isModified = currentVal !== lastSavedRemarks;
+
+        if (hasContent && isModified) {
+            btnSaveRemarks.classList.add('btn-glow-pulse');
+            btnSaveRemarks.disabled = false;
+            saveDraftStatus.innerHTML = '<span class="text-warning"><i class="fas fa-circle fa-xs mr-1"></i>Unsaved remarks</span>';
+        } else {
+            btnSaveRemarks.classList.remove('btn-glow-pulse');
+            if (!hasContent) {
+                btnSaveRemarks.disabled = true;
+                saveDraftStatus.innerHTML = '';
+            } else if (!isModified && lastSavedRemarks.length > 0) {
+                saveDraftStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks saved</span>';
+            }
+        }
+
+        if (btnReturn) btnReturn.disabled = !hasContent;
+    }
+
     inlineRemarksOld.addEventListener('input', function() {
-        const prefix = nextNumOld + ". ";
-        if (!this.value.startsWith(prefix)) {
+        const prefix = "1. ";
+        if (!this.value.startsWith(prefix) && this.value.trim() !== '') {
             const currentVal = this.value;
             if (currentVal.length < prefix.length) {
                 this.value = prefix;
@@ -198,8 +269,76 @@
             }
             this.selectionStart = this.selectionEnd = prefix.length;
         }
-        if (btnReturn) btnReturn.disabled = (this.value.trim().length <= prefix.trim().length);
+        updateGlowState();
     });
+
+    function buildRemarksHtml() {
+        let remarks = inlineRemarksOld.value.trim();
+        let lines = remarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let cleanedLines = lines.map(line => line.replace(/^\d+\.\s*/, '').trim()).filter(l => l.length > 0);
+        if (cleanedLines.length === 0) return '';
+        let liItems = cleanedLines.map(line => `<li>${line}</li>`).join('');
+        return `<ol start="${nextNumOld}">${liItems}</ol>`;
+    }
+
+    function saveRemarksDraft() {
+        const finalHtml = buildRemarksHtml();
+        if (!finalHtml) {
+            Swal.fire({ title: 'Empty Remarks', text: 'Please type some remarks first before saving.', icon: 'warning', background: '#001226', color: '#fff' });
+            return;
+        }
+
+        const originalBtnHtml = btnSaveRemarks.innerHTML;
+        btnSaveRemarks.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> SAVING...';
+        btnSaveRemarks.disabled = true;
+
+        const form = document.getElementById('authorityActionForm');
+        const actionUrl = form.getAttribute('action');
+        const formData = new FormData();
+        formData.append('_token', '{{ csrf_token() }}');
+        formData.append('action', 'save_draft');
+        formData.append('remarks', finalHtml);
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            btnSaveRemarks.innerHTML = originalBtnHtml;
+            if (data.success) {
+                lastSavedRemarks = inlineRemarksOld.value.trim();
+                btnSaveRemarks.classList.remove('btn-glow-pulse');
+                saveDraftStatus.innerHTML = '<span class="text-success font-weight-bold"><i class="fas fa-check-circle mr-1"></i>Saved to Minute Sheet</span>';
+                
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    background: '#001226',
+                    color: '#fff'
+                });
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Remarks saved! Check Minute View.'
+                });
+            } else {
+                btnSaveRemarks.disabled = false;
+                Swal.fire({ title: 'Error', text: data.message || 'Could not save remarks.', icon: 'error', background: '#001226', color: '#fff' });
+            }
+        })
+        .catch(err => {
+            btnSaveRemarks.innerHTML = originalBtnHtml;
+            btnSaveRemarks.disabled = false;
+            console.error(err);
+            Swal.fire({ title: 'Error', text: 'Network or server error while saving.', icon: 'error', background: '#001226', color: '#fff' });
+        });
+    }
 
     function confirmReturn(targetStatus, targetName) {
         let remarks = inlineRemarksOld.value.trim();

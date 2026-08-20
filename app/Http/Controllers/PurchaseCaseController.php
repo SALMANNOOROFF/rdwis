@@ -24,6 +24,7 @@ class PurchaseCaseController extends Controller
     {
         $user = Auth::user();
         $area = strtolower(trim($user->acc_untarea));
+        if (in_array($area, ['proc', 'prc'], true)) $area = 'proc';
         
         // Define which substatus stages to show on each dashboard
         $stageMap = [
@@ -46,15 +47,38 @@ class PurchaseCaseController extends Controller
         $targetStages = $stageMap[$area] ?? [];
         $pageTitle = $titleMap[$area] ?? 'Purchase Scrutiny Hub';
 
+        $procTypes = [
+            'ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'
+        ];
+        $excludedTypes = [
+            'tada', 't.a/d.a', 'ta/da', 'civ', 'civil', 'book', 'books', 
+            'stat', 'stationery', 'lic', 'license', 'licen', 'net', 'internet', 
+            'pub', 'publishing', 'tran', 'transport', 'trn', 'training', 'pt'
+        ];
+
         // 1. Pending Queue
         $pendingQuery = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus']);
 
         if ($area === 'proc') {
-            // DProc: query by pcs_status (Draft/Returned) within jurisdiction
+            // DProc: ONLY material / equipment (PS) cases floated by division where DProc has not yet saved quotes/remarks
             $lower = $user->acc_lowerm;
             $upper = $user->acc_upperm;
             $pendingQuery->whereBetween('pcs_unt_id', [$lower, $upper])
-                         ->whereIn('pcs_status', ['Draft', 'Returned', 'Under Scrutiny']);
+                         ->where(function($q) use ($procTypes, $excludedTypes) {
+                             $q->whereIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
+                               ->whereNotIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
+                         })
+                         ->where(function($q) {
+                             $q->where(function($sub) {
+                                 $sub->whereIn('pcs_status', ['Draft', 'Returned'])
+                                     ->whereHas('decisions', function($d) {
+                                         $d->where('pdec_action', 'float_to_proc');
+                                     })
+                                     ->whereDoesntHave('decisions', function($d) {
+                                         $d->where('pdec_action', 'dproc_save');
+                                     });
+                             })->orWhere('pcs_status', 'Under Scrutiny');
+                         });
         } else {
             // All other roles: query by substatus stage
             $pendingQuery->atStage($targetStages);
@@ -63,33 +87,49 @@ class PurchaseCaseController extends Controller
         $pending = $pendingQuery->orderBy('pcs_id', 'desc')->get();
 
         // 2. Action Taken (Cases already processed by this user)
-        $processed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
-            ->whereHas('decisions', function($q) use ($user) {
-                $q->where('pdec_acc_id', $user->acc_id);
-            })
-            ->orderBy('pcs_id', 'desc')
-            ->get();
+        $processedQuery = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+            ->where(function($q) use ($user, $area) {
+                $q->whereHas('decisions', function($d) use ($user) {
+                    $d->where('pdec_acc_id', $user->acc_id);
+                });
+                if ($area === 'proc') {
+                    $q->orWhereHas('decisions', function($d) {
+                        $d->where('pdec_action', 'dproc_save');
+                    });
+                }
+            });
 
-        // Filter out cases currently pending at this user's stage
         if ($area === 'proc') {
-            $pendingIds = $pending->pluck('pcs_id')->toArray();
-            $processed = $processed->whereNotIn('pcs_id', $pendingIds);
-        } else {
-            $processed = $processed->filter(function($p) use ($targetStages) {
-                return !in_array($p->current_stage, $targetStages);
+            $processedQuery->where(function($q) use ($procTypes, $excludedTypes) {
+                $q->whereIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
+                  ->whereNotIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
             });
         }
+
+        $processed = $processedQuery->orderBy('pcs_id', 'desc')->get();
+
+        // Filter out cases currently pending at this user's stage
+        $pendingIds = $pending->pluck('pcs_id')->toArray();
+        $processed = $processed->whereNotIn('pcs_id', $pendingIds);
 
         // Split processed into Open and Closed
         if ($area === 'proc') {
             // For DProc, Open means participated but not yet final
             $open = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
                 ->whereBetween('pcs_unt_id', [$user->acc_lowerm, $user->acc_upperm])
+                ->where(function($q) use ($procTypes, $excludedTypes) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
+                      ->whereNotIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
+                })
                 ->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled', 'Draft', 'Returned', 'Under Scrutiny'])
                 ->whereHas('decisions', function($q) { $q->where('pdec_action', 'dproc_save'); })
                 ->orderBy('pcs_id', 'desc')->get();
             
             $closed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+                ->where(function($q) use ($procTypes, $excludedTypes) {
+                    $q->whereIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
+                      ->whereNotIn(DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
+                })
                 ->whereHas('decisions', function($q) use ($user) { $q->where('pdec_acc_id', $user->acc_id); })
                 ->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled'])
                 ->orderBy('pcs_id', 'desc')->get();
@@ -98,6 +138,8 @@ class PurchaseCaseController extends Controller
             $closed = $processed->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
         }
 
+        $actionTaken = $processed;
+        $actionTakenCount = $processed->count();
 
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
         $detailsRouteName = 'nrdi.purchase_cases_new.show';
@@ -109,8 +151,8 @@ class PurchaseCaseController extends Controller
         $closedCount = $closed->count();
 
         return view('nrdi.purchase_cases_new.index', compact(
-            'pending', 'open', 'closed', 'unitNameMap', 'area', 'pageTitle', 
-            'detailsRouteName', 'totalVolume', 'caseCount', 'openCount', 'closedCount'
+            'pending', 'open', 'closed', 'actionTaken', 'unitNameMap', 'area', 'pageTitle', 
+            'detailsRouteName', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'actionTakenCount'
         ));
     }
 
@@ -127,6 +169,7 @@ class PurchaseCaseController extends Controller
 
         $user = Auth::user();
         $area = strtolower(trim($user->acc_untarea));
+        if (in_array($area, ['proc', 'prc'], true)) $area = 'proc';
         
         $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
@@ -208,7 +251,7 @@ class PurchaseCaseController extends Controller
     public function action(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:forward,forward_negative,return,approve,reject,dproc_save',
+            'action' => 'required|in:forward,forward_negative,return,approve,reject,save_draft,dproc_save',
             'remarks' => 'nullable|string',
             'target_status' => 'nullable|string',
         ]);
@@ -223,8 +266,16 @@ class PurchaseCaseController extends Controller
                 $remarks = $remarks, 
                 $targetStage = $request->target_status
             );
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Remarks saved successfully!']);
+            }
+
             return redirect()->route('nrdi.purchase_cases_new.index')->with('success', 'Action completed successfully!');
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
             return back()->with('error', 'Error: ' . $e->getMessage());
         }
     }

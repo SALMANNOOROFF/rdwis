@@ -77,13 +77,13 @@ Route::middleware('auth')->group(function () {
             $area = strtolower(trim((string) ($u?->acc_untarea ?? '')));
 
             return match ($area) {
-                'hr' => redirect()->route('nrdi.dashboard'), // HR lands on NRDI Dashboard
+                'hr' => redirect()->route('hr.dashboard'), // HR lands on dedicated HR Dashboard
                 'fin' => redirect()->route('fin.dashboard'), // High-level Fin lands on Finance Dashboard
                 'it' => redirect()->route('admin.dashboard'),
                 'nrdi' => redirect()->route('nrdi.dashboard'),
                 'rdw' => redirect()->route('nrdi.dashboard'), // MD lands on HQ Dashboard
                 'hqs' => redirect()->route('nrdi.dashboard'), // DDG lands on HQ Dashboard
-                'proc' => redirect()->route('nrdi.procurement.purchase_cases.index'), // DProc lands on Procurement Scrutiny Hub
+                'proc', 'prc' => redirect()->route('nrdi.procurement.purchase_cases.index'), // DProc lands on Procurement Scrutiny Hub
                 default => redirect()->route('dashboard'),
             };
         });
@@ -100,7 +100,11 @@ Route::middleware('auth')->group(function () {
             ->name('sord.dashboard')
             ->middleware('area:rdwprj,rdw');
 
-        Route::prefix('nrdi')->middleware('area:nrdi,rdw,hqs,proc,fin,hr')->name('nrdi.')->group(function () {
+        Route::get('/hr/dashboard', [\App\Http\Controllers\DashboardController::class, 'hrDashboard'])
+            ->name('hr.dashboard')
+            ->middleware('area:hr,nrdi,hqs,rdw');
+
+        Route::prefix('nrdi')->middleware('area:nrdi,rdw,hqs,proc,prc,fin,hr')->name('nrdi.')->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboard'])->name('dashboard');
             Route::get('/dashboard-data', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboardData'])->name('dashboard.data');
             Route::get('/contract-cases', [\App\Http\Controllers\DashboardController::class, 'contractCases'])->name('contract_cases.index');
@@ -115,6 +119,19 @@ Route::middleware('auth')->group(function () {
                 Route::get('/dashboard', [\App\Http\Controllers\ProcurementDashboardController::class, 'index'])->name('purchase_cases.index');
                 Route::get('/case/{id}', [\App\Http\Controllers\ProcurementDashboardController::class, 'show'])->name('purchase_cases.show');
                 Route::post('/case/{id}/close', [\App\Http\Controllers\ProcurementDashboardController::class, 'closeCase'])->name('purchase_cases.close');
+                
+                // Dedicated Procurement Reports (Custom Inventory & Assets, Purchase Cases by Firms, etc.)
+                Route::get('/reports', [\App\Http\Controllers\ProcurementReportsController::class, 'index'])->name('reports.index');
+                Route::get('/reports/data', [\App\Http\Controllers\ProcurementReportsController::class, 'getReportData'])->name('reports.data');
+                Route::get('/reports/export', [\App\Http\Controllers\ProcurementReportsController::class, 'exportExcel'])->name('reports.export');
+            });
+
+            // Firms Search and Directory Routes
+            Route::prefix('firms')->name('firms.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\FirmController::class, 'index'])->name('index');
+                Route::get('/list', [\App\Http\Controllers\FirmController::class, 'list'])->name('list');
+                Route::get('/data', [\App\Http\Controllers\FirmController::class, 'searchData'])->name('data');
+                Route::get('/{id}', [\App\Http\Controllers\FirmController::class, 'show'])->name('show');
             });
 
             // Director Finance Specialized Routes
@@ -140,6 +157,12 @@ Route::middleware('auth')->group(function () {
                 // Wildcard routes must come last
                 Route::get('/{id}', [\App\Http\Controllers\PurchaseCaseController::class, 'show'])->name('show');
                 Route::post('/{id}/action', [\App\Http\Controllers\PurchaseCaseController::class, 'action'])->name('action');
+                // Common Scrutiny Reports (Accessible by all modules)
+                Route::get('/case/{id}/case-detail', [\App\Http\Controllers\PurchaseController::class, 'caseDetail']);
+                Route::get('/case/{id}/market-research', [\App\Http\Controllers\PurchaseController::class, 'marketResearch']);
+                Route::get('/case/{id}/cs-formal', [\App\Http\Controllers\PurchaseController::class, 'csFormal']);
+                Route::get('/case/{id}/it-annex', [\App\Http\Controllers\PurchaseController::class, 'itAnnex']);
+                Route::post('/case/{id}/it-letter/save', [\App\Http\Controllers\PurchaseController::class, 'saveItLetter']);
             });
 
             Route::get('/contract-cases-new', [\App\Http\Controllers\ContractCaseController::class, 'index'])->name('contract_cases_new.index');
@@ -326,7 +349,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase/case/{id}/case-detail', [PurchaseController::class, 'caseDetail'])->name('purchase.case_detail');
         Route::get('/purchase/case/{id}/market-research', [PurchaseController::class, 'marketResearch'])->name('purchase.market_research');
         Route::get('/purchase/case/{id}/cs-formal', [PurchaseController::class, 'csFormal'])->name('purchase.cs_formal');
+        Route::get('/purchase/case/{id}/it-annex', [PurchaseController::class, 'itAnnex'])->name('purchase.it_annex');
+        Route::post('/purchase/case/{id}/it-letter/save', [PurchaseController::class, 'saveItLetter'])->name('purchase.it_letter.save');
         Route::get('/print-minute', function () { return view('purchase.new_case.print_minute'); })->name('purchase.new_case.print_minute');
+        Route::get('/purchase/quote-attachment/{id}/view', [PurchaseController::class, 'viewQuoteAttachment'])->name('purchase.quote_attachment.view');
+        Route::get('/purchase/quote-attachment/{id}/download', [PurchaseController::class, 'downloadQuoteAttachment'])->name('purchase.quote_attachment.download');
+        Route::get('/purchase/quote-attachment/{id}/diagnose', [PurchaseController::class, 'diagnoseQuoteAttachment'])->name('purchase.quote_attachment.diagnose');
         Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])
             ->name('quotes.store')
             ->middleware('approver');
@@ -491,7 +519,7 @@ Route::middleware('auth')->group(function () {
         });
 
     // Unified Group for High-Level Approvals (DProc, DFin, MD, DDG, DG)
-    Route::middleware(['area:proc,fin,rdw,hqs,nrdi'])->group(function () {
+    Route::middleware(['area:proc,prc,fin,rdw,hqs,nrdi'])->group(function () {
         Route::get('/approvals/dashboard', [\App\Http\Controllers\PurchaseApprovalController::class, 'dashboard'])->name('approvals.dashboard');
         Route::get('/approvals/show/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'show'])->name('approvals.show');
         Route::post('/approvals/action/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'action'])->name('approvals.action');
@@ -503,3 +531,40 @@ Route::middleware('auth')->group(function () {
 
     }); // End force password change
 }); // End Auth
+
+// Direct Storage File Serving Route (Handles previews, streaming, and cross-network requests)
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        $altPath = public_path('storage/' . $path);
+        if (file_exists($altPath) && !is_dir($altPath)) {
+            $fullPath = $altPath;
+        } else {
+            abort(404, 'Requested document not found.');
+        }
+    }
+
+    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'pdf' => 'application/pdf',
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'doc' => 'application/msword',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'xls' => 'application/vnd.ms-excel',
+        'txt' => 'text/plain',
+    ];
+    $mime = $mimeTypes[$ext] ?? (mime_content_type($fullPath) ?: 'application/octet-stream');
+
+    return response()->file($fullPath, [
+        'Content-Type' => $mime,
+        'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
+        'X-Frame-Options' => 'SAMEORIGIN',
+        'Access-Control-Allow-Origin' => '*',
+    ]);
+})->where('path', '.*')->name('storage.serve');
+

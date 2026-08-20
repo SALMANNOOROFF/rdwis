@@ -9,17 +9,34 @@ use Illuminate\Support\Facades\Auth;
 
 class ContractCaseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $cases = HrCtrCase::whereNotIn('ctc_status', ['Draft', 'Returned'])
-            ->orderBy('ctc_id', 'desc')
-            ->get();
+        $user = Auth::user();
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+
+        if ($request->has('mode')) {
+            $mode = $request->query('mode') === 's' ? 's' : 'm';
+            session(['hr_mode' => $mode]);
+        } else {
+            $defaultMode = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs']) ? 'm' : 's';
+            $mode = session('hr_mode', $defaultMode);
+        }
+
+        $query = HrCtrCase::whereNotIn('ctc_status', ['Draft', 'Returned']);
+
+        if ($mode === 's' && $user) {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $query->whereBetween('ctc_divisionid', [$lower, $upper]);
+        }
+
+        $cases = $query->orderBy('ctc_id', 'desc')->get();
 
         $actionReqCases = $cases->where('ctc_status', 'Under HR Scrutiny');
         $initiatedCases = $cases->whereIn('ctc_status', ['Under Finance Scrutiny', 'Under Approval']);
         $completedCases = $cases->whereIn('ctc_status', ['Approved', 'Rejected', 'Closed']);
 
-        return view('hr.contract-cases.index', compact('cases', 'actionReqCases', 'initiatedCases', 'completedCases'));
+        return view('hr.contract-cases.index', compact('cases', 'actionReqCases', 'initiatedCases', 'completedCases', 'mode'));
     }
 
     public function show($id)

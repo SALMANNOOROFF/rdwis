@@ -42,6 +42,7 @@ class PurchaseApprovalService
      */
     protected $displayNames = [
         'Division'  => 'Division (Initiator)',
+        'DProc'     => 'Director Procurement',
         'DFinance'  => 'Director Finance',
         'MD'        => 'MD Office',
         'DDG'       => 'DDG Office',
@@ -53,6 +54,7 @@ class PurchaseApprovalService
      */
     protected $stageToArea = [
         'Division'  => 'prj',
+        'DProc'     => 'proc',
         'DFinance'  => 'fin',
         'MD'        => 'rdw',
         'DDG'       => 'hqs',
@@ -68,6 +70,7 @@ class PurchaseApprovalService
         'division'  => 'Division',
         'initiation'=> 'Division',
         'proc'      => 'DProc',     // Special: collaborative, not in forward chain
+        'prc'       => 'DProc',
         'fin'       => 'DFinance',
         'rdw'       => 'MD',
         'hqs'       => 'DDG',
@@ -199,10 +202,36 @@ class PurchaseApprovalService
                     $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? $mapping['area'], $remarks);
                 }
 
+            } elseif ($action === 'float_to_proc' || $action === 'reshare_to_proc') {
+                // Division floats/reshares case to Procurement Dept for quotation collection/correction
+                // Remove previous dproc_save so case becomes pending for DProc again
+                PurDecision::where('pdec_pcs_id', $case->pcs_id)
+                    ->where('pdec_action', 'dproc_save')
+                    ->delete();
+
+                $toStage = 'DProc';
+                $this->transitionSubstatus($case, 'DProc');
+                $defaultNote = $action === 'reshare_to_proc' ? 'Case reshared to Procurement Department for quotation correction.' : 'Case floated to Procurement Department for quotation collection.';
+                $this->notifyNext($case, $user, 'proc', $remarks ?: $defaultNote);
+                // pcs_status remains 'Draft' (newPcsStatus remains null)
+
             } elseif ($action === 'dproc_save') {
-                // DProc collaborative save: NO substatus change (fix #2), NO pcs_status change
-                $toStage = $currentStage; // stays the same
+                // DProc saves quotes & scrutiny remarks, handing action back to Division
+                $toStage = 'Division';
+                $this->transitionSubstatus($case, 'Division');
+                $this->notifyNext($case, $user, 'prj', $remarks ?: 'Quotes and scrutiny remarks saved by Director Procurement.');
+                // pcs_status remains 'Draft'
+
+            } elseif ($action === 'save_draft') {
+                // Draft remarks save: NO substatus change, NO pcs_status change
+                $toStage = $currentStage;
             }
+
+            // Always delete any existing draft decision for this user on this case before logging
+            PurDecision::where('pdec_pcs_id', $case->pcs_id)
+                ->where('pdec_acc_id', $user->acc_id)
+                ->where('pdec_action', 'save_draft')
+                ->delete();
 
             // 1. Log Decision (always, for every action)
             PurDecision::create([
@@ -216,8 +245,8 @@ class PurchaseApprovalService
                 'pdec_amount'      => $case->pcs_price,
             ]);
 
-            // 2. Update pcs_status (only when it actually changes)
-            if ($newPcsStatus !== null) {
+            // 2. Update pcs_status (only when it actually changes and not draft)
+            if ($newPcsStatus !== null && $action !== 'save_draft') {
                 $case->pcs_status = $newPcsStatus;
                 $case->save();
             }
@@ -244,8 +273,10 @@ class PurchaseApprovalService
                 }
             }
 
-            // 4. Notify Interested Parties (Feedback Loop)
-            $this->notifyInterestedParties($case, $action, $user, $remarks);
+            // 4. Notify Interested Parties (Feedback Loop) - only for real decisions
+            if ($action !== 'save_draft') {
+                $this->notifyInterestedParties($case, $action, $user, $remarks);
+            }
 
             return $case;
         });
@@ -312,7 +343,7 @@ class PurchaseApprovalService
         }
 
         // DProc → DFinance (collaborative forward)
-        if (str_contains($currentArea, 'proc')) {
+        if (str_contains($currentArea, 'proc') || $currentArea === 'prc') {
             return ['stage' => 'DFinance', 'area' => 'fin'];
         }
 
@@ -360,7 +391,8 @@ class PurchaseApprovalService
             'not_approved' => 'Not Recommended',
             'reject'  => 'Rejected & Closed',
             'hold'    => 'Reverted',
-            'dproc_save' => 'Updated with Quotations',
+            'float_to_proc' => 'Floated to Procurement Department',
+            'dproc_save' => 'Updated with Quotes & Remarks by Procurement',
             default   => $action
         };
 

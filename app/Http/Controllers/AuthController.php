@@ -116,9 +116,10 @@ class AuthController extends Controller
         $area = strtolower(trim((string) ($user?->acc_untarea ?? '')));
 
         return match ($area) {
-            'hr'     => route('divhr.employelist'),
-            'fin'    => route('nrdi.dashboard'), // Finance also lands on HQ Dashboard
-            'nrdi', 'rdw', 'hqs', 'proc' => route('nrdi.dashboard'),
+            'hr'     => route('hr.dashboard'),
+            'fin'    => route('fin.dashboard'), // Finance lands on Finance Dashboard
+            'proc', 'prc' => route('nrdi.procurement.purchase_cases.index'), // DProc lands on Procurement Dashboard
+            'nrdi', 'rdw', 'hqs' => route('nrdi.dashboard'),
             'prj'    => route('dashboard'),
             'rdwprj', 'prjrdw' => route('sord.dashboard'),
             'it'     => route('admin.dashboard'),

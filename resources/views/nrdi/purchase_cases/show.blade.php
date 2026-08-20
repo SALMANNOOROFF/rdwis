@@ -537,13 +537,13 @@
 
                 <div class="row no-gutters">
                     {{-- Left Pane: Detailed Metrics Table --}}
-                    <div class="col-xl-4 border-right border-dark p-4" style="background: rgba(0,0,0,0.2);">
+                    <div class="col-xl-5 border-right border-dark p-4" style="background: rgba(0,0,0,0.2);">
                         <div class="d-flex justify-content-between align-items-end mb-3">
                             <h6 class="rajdhani text-info font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
                             <div class="small text-muted rajdhani">FIGURES IN PKR</div>
                         </div>
 
-                        <div class="fin-table-modern rounded border border-dark overflow-hidden">
+                        <div class="fin-table-modern table-responsive rounded border border-dark overflow-auto">
                             <table class="table table-sm table-dark mb-0 rajdhani" style="font-size: 13px;">
                                 <thead style="background: rgba(255,255,255,0.03);">
                                     <tr class="text-muted">
@@ -642,7 +642,7 @@
                     </div>
 
                     {{-- Right Pane: Visual Analytics & Subheads --}}
-                    <div class="col-xl-8 p-4">
+                    <div class="col-xl-7 p-4">
                         <div class="row">
                             {{-- Mini Category Charts --}}
                             @foreach(array_slice($subheads ?? [], 0, 3) as $idx => $sh)

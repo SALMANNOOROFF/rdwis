@@ -30,12 +30,12 @@ class CheckArea
 
         // DG / NRDI Mapping (Full Access)
         if ($userArea === 'nrdi') {
-            $userAreas = ['nrdi', 'prj', 'hr', 'fin', 'rdw', 'rdwprj', 'prjrdw', 'proc', 'hqs'];
+            $userAreas = ['nrdi', 'prj', 'hr', 'fin', 'rdw', 'rdwprj', 'prjrdw', 'proc', 'prc', 'hqs'];
         }
 
-        // Procurement Department Mapping
-        if ($userArea === 'proc') {
-            $userAreas = ['proc', 'prj'];
+        // Procurement Department Mapping (both proc and prc)
+        if (in_array($userArea, ['proc', 'prc'], true)) {
+            $userAreas = ['proc', 'prc', 'prj'];
         }
 
         // Finance Department Mapping
@@ -46,6 +46,11 @@ class CheckArea
         // HQs / DDG Mapping
         if ($userArea === 'hqs') {
             $userAreas = ['hqs', 'prj', 'rdw'];
+        }
+
+        // HR Department Mapping
+        if ($userArea === 'hr') {
+            $userAreas = ['hr', 'prj'];
         }
 
         foreach ($areas as $area) {
