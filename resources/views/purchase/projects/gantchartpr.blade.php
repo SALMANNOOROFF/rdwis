@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -14,7 +14,7 @@
 
         /* Header - Professional Admin Blue */
         .gantt-header-top {
-            background-color: #007bff; 
+            background-color: var(--rd-primary-600); 
             background-image: linear-gradient(180deg, #007bff 0%, #0069d9 100%);
             color: white;
             padding: 20px;
@@ -92,8 +92,8 @@
         }
         .milestone-diamond:hover { transform: rotate(45deg) scale(1.2); cursor: pointer; }
         
-        .diamond-completed { background-color: #007bff; border: 2px solid #0056b3; }
-        .diamond-pending { background-color: #fff; border: 2px solid #007bff; }
+        .diamond-completed { background-color: var(--rd-primary-600); border: 2px solid #0056b3; }
+        .diamond-pending { background-color: #fff; border: 2px solid var(--rd-primary-600); }
 
         .activity-bar {
             height: 14px;
@@ -102,8 +102,8 @@
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .bar-completed { background-color: #007bff; }
-        .bar-remaining { border: 2px solid #007bff; background: #fff; }
+        .bar-completed { background-color: var(--rd-primary-600); }
+        .bar-remaining { border: 2px solid var(--rd-primary-600); background: #fff; }
 
         /* Footer Legend - Clean Admin Style */
         .gantt-footer-legend {

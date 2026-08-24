@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -82,7 +82,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #007bff;
+            background: var(--rd-primary-600);
             color: white;
             border: none;
             padding: 10px 20px;

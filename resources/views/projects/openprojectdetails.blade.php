@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 <div class="content-wrapper pt-3 {{ ($readOnly ?? false) ? 'command-view' : '' }}">
     <style>
@@ -421,15 +421,15 @@
 }
 
 .step-item.active .step-dot {
-    border-color: #007bff;
-    color: #007bff;
+    border-color: var(--rd-primary-600);
+    color: var(--rd-primary-600);
 }
 
 /* ===== TODAY BUBBLE WITH GLOW CURSOR ===== */
 .today-bubble {
     position: absolute;
     top: -45px;
-    background: #007bff;
+    background: var(--rd-primary-600);
     color: #fff;
     padding: 5px 10px;
     border-radius: 14px;
@@ -442,7 +442,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #007bff;
+    background: var(--rd-primary-600);
     box-shadow: 0 0 0 rgba(0, 123, 255, 0.4);
     animation: pulse-blue 1.5s infinite;
     position: absolute;
@@ -801,7 +801,7 @@
                                             <a href="{{ route('attachment.delete', $existingFile->jat_id) }}" class="btn btn-sm btn-outline-danger rounded-circle mr-1 text-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
                                         @else
                                             <div style="width: 28px; height: 28px;"><form action="{{ route('projects.upload.single', $project->prj_id) }}" method="POST" enctype="multipart/form-data" id="form-{{$index}}">@csrf <input type="hidden" name="doc_type" value="{{ $doc }}">
-                                            <label for="file-{{$index}}" class="btn rounded-circle d-flex align-items-center justify-content-center" style="width:28px; height:28px; cursor:pointer; padding:0; background-color:#007BFF; color:#fff; border:none;"> 
+                                            <label for="file-{{$index}}" class="btn rounded-circle d-flex align-items-center justify-content-center" style="width:28px; height:28px; cursor:pointer; padding:0; background-color: var(--rd-primary-600); color:#fff; border:none;"> 
                                                 <i class="fas fa-upload" style="font-size: 0.9rem;"></i>
                                             </label>
                                 <input type="file" id="file-{{$index}}" name="single_file" class="file-input-hidden" onchange="document.getElementById('form-{{$index}}').submit()"></form></div>
@@ -957,8 +957,8 @@
 @if($head)
 <div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content" style="background: #000c1a; border: 2px solid var(--rd-accent); border-radius: 12px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
-            <div class="modal-header border-bottom border-dark py-2 px-4 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.03);">
+        <div class="modal-content" style="background: var(--rd-surface); border: 2px solid var(--rd-primary-600); border-radius: 12px; overflow: hidden; box-shadow: var(--rd-shadow-lg);">
+            <div class="modal-header border-bottom border-dark py-2 px-4 d-flex align-items-center justify-content-between" style="background: var(--rd-neutral-50);">
                 <div class="d-flex align-items-center">
                     <div class="mr-3" style="font-size: 24px; color: var(--rd-accent);"><i class="fas fa-chart-network"></i></div>
                     <div>
@@ -969,9 +969,9 @@
                 <button type="button" class="close text-white opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
             </div>
             
-            <div class="modal-body p-0" style="background: #000c1a;">
+            <div class="modal-body p-0" style="background: var(--rd-surface);">
                 {{-- Top Summary bar --}}
-                <div class="row no-gutters border-bottom border-dark" style="background: rgba(0,0,0,0.4);">
+                <div class="row no-gutters border-bottom border-dark" style="background: var(--rd-neutral-200);">
                     <div class="col-md-3 border-right border-dark p-3">
                         <div class="small text-muted rajdhani">ALLOCATION</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->allocation) }}</div>
@@ -998,7 +998,7 @@
 
                 <div class="row no-gutters">
                     {{-- Left Pane: Detailed Metrics Table --}}
-                    <div class="col-xl-5 border-right border-dark p-4" style="background: rgba(0,0,0,0.2);">
+                    <div class="col-xl-5 border-right border-dark p-4" style="background: var(--rd-neutral-200);">
                         <div class="d-flex justify-content-between align-items-end mb-3">
                             <h6 class="rajdhani text-info font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
                             <div class="small text-muted rajdhani">FIGURES IN PKR</div>
@@ -1006,7 +1006,7 @@
 
                         <div class="fin-table-modern table-responsive rounded border border-dark overflow-auto">
                             <table class="table table-sm table-dark mb-0 rajdhani" style="font-size: 13px;">
-                                <thead style="background: rgba(255,255,255,0.03);">
+                                <thead style="background: var(--rd-neutral-50);">
                                     <tr class="text-muted">
                                         <th class="pl-3 border-0">METRIC</th>
                                         <th class="text-right border-0" style="color: #4da3ff;">PROJECT</th>
@@ -1033,7 +1033,7 @@
                                          <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_expenditure ?? 0) }}</td>
                                          @endif
                                      </tr>
-                                     <tr style="background: rgba(255,255,255,0.01);">
+                                     <tr style="background: var(--rd-neutral-50);">
                                          <td class="pl-3 text-info font-weight-bold">Balance</td>
                                          <td class="text-right text-info font-weight-bold">{{ number_format($head->pcc_balance ?? 0) }}</td>
                                          <td class="text-right text-info font-weight-bold">{{ number_format($head->cf_balance ?? 0) }}</td>
@@ -1073,7 +1073,7 @@
                                          <td class="text-right pr-3 text-muted">--</td>
                                          @endif
                                      </tr>
-                                     <tr style="background: rgba(255,255,255,0.03);">
+                                     <tr style="background: var(--rd-neutral-50);">
                                          <td class="pl-3 text-white font-weight-bold">Remaining</td>
                                          <td class="text-right text-white font-weight-bold">{{ number_format($head->pcc_can_be_spent ?? 0) }}</td>
                                          <td class="text-right text-white font-weight-bold">{{ number_format($head->cf_can_be_spent ?? 0) }}</td>
@@ -1128,7 +1128,7 @@
                             {{-- Mini Category Charts --}}
                             @foreach(array_slice($subheads, 0, 3) as $idx => $sh)
                             <div class="col-md-4 mb-4">
-                                <div class="subhead-mini-card p-3 rounded border border-dark text-center h-100" style="background: rgba(255,255,255,0.01);">
+                                <div class="subhead-mini-card p-3 rounded border border-dark text-center h-100" style="background: var(--rd-neutral-50);">
                                     <div class="d-flex justify-content-center mb-2" style="height: 80px;">
                                         <canvas id="chartShMini{{ $idx }}"></canvas>
                                     </div>
@@ -1146,7 +1146,7 @@
                                 <div class="dg-sec-label mb-3 text-info"><i class="fas fa-th-list fa-xs"></i> Category Metrics Breakdown</div>
                                 <div class="table-responsive rounded border border-dark">
                                     <table class="table table-sm table-dark table-hover mb-0 rajdhani" style="font-size: 12px;">
-                                        <thead style="background: rgba(0,0,0,0.4);">
+                                        <thead style="background: var(--rd-neutral-200);">
                                             <tr class="text-muted small">
                                                 <th class="pl-3">SUBHEAD</th>
                                                 <th class="text-right">EXPENDITURE</th>
@@ -1174,7 +1174,7 @@
                         {{-- Large Comparison Chart --}}
                         <div class="row">
                             <div class="col-12">
-                                <div class="p-4 rounded border border-dark" style="background: rgba(0,0,0,0.3); height: 280px;">
+                                <div class="p-4 rounded border border-dark" style="background: var(--rd-neutral-200); height: 280px;">
                                     <canvas id="finDetailedChart"></canvas>
                                 </div>
                             </div>

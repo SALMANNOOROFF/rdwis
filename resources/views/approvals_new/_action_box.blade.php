@@ -1,4 +1,4 @@
-@php
+﻿@php
     $u = Auth::user();
     $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
     if (in_array($userArea, ['proc', 'prc'], true)) $userArea = 'proc';
@@ -122,7 +122,7 @@
                     <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-undo mr-1"></i> RETURN
                     </button>
-                    <div class="dropdown-menu dropdown-menu-right bg-white border shadow-lg mt-2" style="min-width: 200px; border-radius: 8px; padding: 6px 0; border-color: #cbd5e1 !important;">
+                    <div class="dropdown-menu dropdown-menu-right bg-white border shadow-lg mt-2" style="min-width: 200px; border-radius: 8px; padding: 6px 0; border-color: var(--rd-text1) !important;">
                         <h6 class="dropdown-header text-warning rajdhani mb-1" style="font-size: 11px; letter-spacing: 0.5px; font-weight: 700;">SELECT RETURN TARGET:</h6>
                         @foreach($returnTargets as $status => $name)
                             <a class="dropdown-item text-dark py-2 d-flex align-items-center" href="javascript:void(0)" onclick="confirmReturn('{{ $status }}', '{{ $name }}')">
@@ -202,7 +202,7 @@
                             <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-undo mr-1"></i> RETURN
                             </button>
-                            <div class="dropdown-menu dropdown-menu-right bg-white border shadow-lg mt-2" style="min-width: 200px; border-radius: 8px; padding: 6px 0; border-color: #cbd5e1 !important;">
+                            <div class="dropdown-menu dropdown-menu-right bg-white border shadow-lg mt-2" style="min-width: 200px; border-radius: 8px; padding: 6px 0; border-color: var(--rd-text1) !important;">
                                 <h6 class="dropdown-header text-warning rajdhani mb-1" style="font-size: 11px; letter-spacing: 0.5px; font-weight: 700;">SELECT RETURN TARGET:</h6>
                                 @foreach($returnTargets as $status => $name)
                                     <a class="dropdown-item text-dark py-2 d-flex align-items-center" href="javascript:void(0)" onclick="confirmReturn('{{ $status }}', '{{ $name }}')">
@@ -238,8 +238,8 @@
 .dg-btn-success:hover:not(:disabled) { background: #15803d !important; }
 .dg-btn-success:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.dg-btn-info { background: #2563eb !important; color: #ffffff !important; }
-.dg-btn-info:hover:not(:disabled) { background: #1d4ed8 !important; }
+.dg-btn-info { background: var(--rd-primary-700) !important; color: #ffffff !important; }
+.dg-btn-info:hover:not(:disabled) { background: var(--rd-primary-600) !important; }
 
 .dg-btn-danger { background: #dc2626 !important; color: #ffffff !important; }
 .dg-btn-danger:hover:not(:disabled) { background: #b91c1c !important; }

@@ -167,13 +167,6 @@
 
 @section('scripts')
 <style>
-    :root {
-        --rd-surface: #1e1e2d;
-        --rd-accent: #007bff;
-        --rd-accent-rgb: 0, 123, 255;
-        --rd-text1: #ffffff;
-        --rd-text2: #a2a3b7;
-    }
     .extra-small { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
     .text-accent { color: var(--rd-accent); }
 </style>

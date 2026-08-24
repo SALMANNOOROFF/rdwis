@@ -1,16 +1,16 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-.fin-page { font-family: 'Inter', sans-serif; background: #080b0f; min-height: 100vh; color: #cbd5e0; }
+.fin-page { font-family: 'Inter', sans-serif; background: var(--rd-bg); min-height: 100vh; color: var(--rd-text1); }
 .rajdhani { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
-.metric-card { background: #0d1218; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; transition: transform 0.2s; }
-.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #8a96a3; }
+.metric-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 12px; transition: transform 0.2s; }
+.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--rd-text3); }
 .metric-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: #fff; line-height: 1; margin-top: 5px; }
-.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #8a96a3; background: #0f161e; border: none !important; padding: 14px; }
-.dg-case-table td { padding: 14px; color: #cbd5e0; vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.08); }
-.dg-case-table tr:hover { background: rgba(255,255,255,0.02); }
+.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--rd-text3); background: var(--rd-surface3); border: none !important; padding: 14px; }
+.dg-case-table td { padding: 14px; color: var(--rd-text1); vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.08); }
+.dg-case-table tr:hover { background: var(--rd-neutral-50); }
 </style>
 
 <div class="content-wrapper fin-page pt-4">
@@ -36,7 +36,7 @@
 
         {{-- Finance Queue --}}
         <div class="metric-card overflow-hidden">
-            <div class="p-3 bg-dark d-flex justify-content-between align-items-center" style="background: #0f161e !important;">
+            <div class="p-3 bg-dark d-flex justify-content-between align-items-center" style="background: var(--rd-surface3) !important;">
                 <h6 class="m-0 rajdhani text-white font-weight-bold"><i class="fas fa-file-invoice-dollar mr-2 text-success"></i> BUDGET REVIEW QUEUE</h6>
                 <div class="text-muted small rajdhani">TOTAL CASES: <span class="text-white">{{ $caseCount }}</span></div>
             </div>
@@ -55,7 +55,7 @@
                     <tbody>
                         @forelse($purchases as $p)
                         <tr>
-                            <td class="pl-4"><span class="badge badge-dark text-muted" style="border: 1px solid rgba(255,255,255,0.05);">PC-{{ $p->pcs_id }}</span></td>
+                            <td class="pl-4"><span class="badge badge-dark text-muted" style="border: 1px solid var(--rd-border);">PC-{{ $p->pcs_id }}</span></td>
                             <td class="font-weight-bold text-white">{{ $unitNameMap[$p->pcs_unt_id] ?? 'HQ Unit' }}</td>
                             <td>
                                 <div class="text-white small font-weight-bold">{{ Str::limit($p->pcs_title, 45) }}</div>

@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
 .report-hub {
     font-family: 'Inter', sans-serif;
-    background: #080b0f !important;
+    background: var(--rd-bg) !important;
     min-height: 100vh;
-    color: #cbd5e0;
+    color: var(--rd-text1);
     padding-top: 20px;
     padding-bottom: 50px;
 }
@@ -19,7 +19,7 @@
 }
 
 .card-cyber {
-    background: rgba(18, 26, 34, 0.85);
+    background: var(--rd-surface);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
@@ -27,11 +27,11 @@
 }
 
 .report-pill {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--rd-neutral-50);
+    border: 1px solid var(--rd-border);
     border-radius: 8px;
     padding: 9px 16px;
-    color: #94a3b8;
+    color: var(--rd-text3);
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
     font-size: 13px;
@@ -58,26 +58,26 @@
 }
 
 .form-control-cyber {
-    background: rgba(10, 15, 22, 0.9);
+    background: var(--rd-surface);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #fff;
     border-radius: 8px;
     font-size: 13px;
 }
 .form-control-cyber:focus {
-    background: rgba(10, 15, 22, 1);
+    background: var(--rd-surface);
     border-color: #00BFFF;
     color: #fff;
     box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
 }
 
 .col-checkbox-label {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--rd-neutral-50);
+    border: 1px solid var(--rd-border);
     border-radius: 6px;
     padding: 4px 10px;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--rd-text3);
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease;
@@ -103,7 +103,7 @@
 }
 
 .table-cyber th {
-    background: rgba(18, 26, 34, 0.95) !important;
+    background: var(--rd-surface) !important;
     border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
     color: #67e8f9 !important;
     font-family: 'Rajdhani', sans-serif;
@@ -122,7 +122,7 @@
     white-space: nowrap;
 }
 .table-cyber tr:hover {
-    background: rgba(255, 255, 255, 0.02) !important;
+    background: var(--rd-neutral-50) !important;
 }
 
 .btn-export {
@@ -158,7 +158,7 @@
                     <i class="fas fa-file-excel mr-1"></i> EXCEL GENERATION ENGINE
                 </span>
             </div>
-            <h2 class="font-weight-bold text-white rajdhani m-0" style="font-size: 2rem;">
+            <h2 class="font-weight-bold text-dark rajdhani m-0" style="font-size: 2rem;">
                 <i class="fas fa-boxes mr-2 text-info"></i>Procurement & Inventory Reports Hub
             </h2>
             <p class="text-muted m-0 small">Create custom inventory/asset reports across all divisions with selectable columns and dynamic procurement audit reports.</p>
@@ -291,7 +291,7 @@
         {{-- Custom Column Picker (For Custom Inventory & Assets Report) --}}
         <div class="mt-4 pt-3 border-top border-secondary" id="columnSelectorSection">
             <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                <div class="rajdhani font-weight-bold text-white" style="font-size: 14px;">
+                <div class="rajdhani font-weight-bold text-dark" style="font-size: 14px;">
                     <i class="fas fa-columns text-cyan mr-2"></i>CUSTOM COLUMN SELECTOR:
                 </div>
                 <div>
@@ -315,7 +315,7 @@
     <div class="card-cyber p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h4 class="rajdhani font-weight-bold text-white m-0" id="previewTitle">
+                <h4 class="rajdhani font-weight-bold text-dark m-0" id="previewTitle">
                     Custom Inventory & Assets Report Preview
                 </h4>
                 <div class="small text-muted" id="previewSummary">Loading live records...</div>

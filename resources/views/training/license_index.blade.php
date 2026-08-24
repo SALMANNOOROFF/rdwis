@@ -25,14 +25,14 @@
             {{-- Search & Filters --}}
             <div class="row mb-4">
                 <div class="col-md-12">
-                    <div class="d-flex bg-dark p-2 border border-secondary" style="border-radius: 12px; background: rgba(0,0,0,0.2) !important;">
+                    <div class="d-flex bg-white p-2 border border-secondary" style="border-radius: 12px; background: var(--rd-neutral-200) !important;">
                         <div class="input-group input-group-sm mr-2" style="max-width: 300px;">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-transparent border-0 text-muted"><i class="fas fa-search"></i></span>
                             </div>
-                            <input type="text" class="form-control bg-transparent border-0 text-white" placeholder="Search licences...">
+                            <input type="text" class="form-control bg-transparent border-0 text-dark" placeholder="Search licences...">
                         </div>
-                        <select class="form-control form-control-sm bg-dark border-secondary text-white mr-2" style="width: 150px;">
+                        <select class="form-control form-control-sm bg-white border-secondary text-dark mr-2" style="width: 150px;">
                             <option>All Departments</option>
                             <option>IT</option>
                             <option>HR</option>
@@ -44,12 +44,12 @@
             </div>
 
             {{-- Licence List (Compact) --}}
-            <div class="card shadow-sm border-0" style="background:var(--rd-surface); border-radius:12px; border: 1px solid rgba(255,255,255,0.05) !important;">
+            <div class="card shadow-sm border-0" style="background:var(--rd-surface); border-radius:12px; border: 1px solid var(--rd-border) !important;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0 text-white" style="border-collapse: separate; border-spacing: 0;">
+                        <table class="table table-hover mb-0 text-dark" style="border-collapse: separate; border-spacing: 0;">
                             <thead>
-                                <tr class="extra-small text-uppercase tracking-wider text-muted" style="background: rgba(0,0,0,0.2);">
+                                <tr class="extra-small text-uppercase tracking-wider text-muted" style="background: var(--rd-neutral-200);">
                                     <th class="py-3 pl-4 border-0" style="width: 50px;">#</th>
                                     <th class="py-3 border-0">Product / Tool</th>
                                     <th class="py-3 border-0">Department</th>
@@ -66,18 +66,18 @@
                                                 <i class="{{ $license['icon'] }}"></i>
                                             </div>
                                         </td>
-                                        <td class="py-3 border-top border-secondary align-middle text-white">
+                                        <td class="py-3 align-middle text-dark">
                                             <div class="font-weight-bold mb-0" style="font-size: 0.95rem;">{{ $license['product'] }}</div>
                                             <div class="extra-small text-muted text-uppercase" style="font-size: 0.6rem;">ID: LIC-00{{ $license['id'] }}</div>
                                         </td>
-                                        <td class="py-3 border-top border-secondary align-middle">
-                                            <span class="badge badge-dark border border-secondary extra-small px-2 py-1" style="color:var(--rd-text2)">{{ $license['department'] }}</span>
+                                        <td class="py-3 align-middle">
+                                            <span class="badge extra-small px-2 py-1" style="background: var(--rd-neutral-200); color: var(--rd-text1); border: 1px solid var(--rd-border2); font-weight: 600;">{{ $license['department'] }}</span>
                                         </td>
-                                        <td class="py-3 border-top border-secondary align-middle">
+                                        <td class="py-3 align-middle">
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-grow-1 mr-3">
                                                     @php $percent = ($license['available'] / $license['total_seats']) * 100; @endphp
-                                                    <div class="progress" style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px;">
+                                                    <div class="progress" style="height: 4px; background: var(--rd-neutral-50); border-radius: 2px;">
                                                         <div class="progress-bar {{ $percent > 20 ? 'bg-success' : 'bg-danger' }}" role="progressbar" style="width: {{ $percent }}%"></div>
                                                     </div>
                                                 </div>
@@ -87,7 +87,7 @@
                                             </div>
                                         </td>
                                         <td class="py-3 border-top border-secondary align-middle">
-                                            <div class="font-weight-bold text-white small">{{ \Carbon\Carbon::parse($license['expiry'])->format('M d, Y') }}</div>
+                                            <div class="font-weight-bold text-dark small">{{ \Carbon\Carbon::parse($license['expiry'])->format('M d, Y') }}</div>
                                             <div class="extra-small text-muted" style="font-size: 0.6rem;">Renewal Due</div>
                                         </td>
                                         <td class="py-3 pr-4 border-top border-secondary align-middle text-right">
@@ -109,19 +109,19 @@
 {{-- Request Modal --}}
 <div class="modal fade" id="requestModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg" style="background: #1a1a27; border-radius: 20px;">
+        <div class="modal-content border-0 shadow-lg" style="background: var(--rd-surface); border-radius: 20px;">
             <div class="modal-header border-0 text-center d-block pt-4">
                 <div class="icon-circle mb-3 bg-info-soft mx-auto" style="width:60px; height:60px; background:rgba(23,162,184,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center;">
                     <i class="fas fa-key text-info fa-2x"></i>
                 </div>
-                <h4 class="modal-title font-weight-bold w-100 text-white" id="modalLicName">Adobe Creative Cloud</h4>
+                <h4 class="modal-title font-weight-bold w-100 text-dark" id="modalLicName">Adobe Creative Cloud</h4>
                 <p class="text-muted small mt-2">Requesting access from holding department</p>
             </div>
             <div class="modal-body px-4 pb-4">
                 <div id="requestForm">
                     <div class="form-group">
                         <label class="extra-small text-uppercase text-muted">Reason for Access</label>
-                        <textarea class="form-control bg-dark border-secondary text-white" rows="3" placeholder="Explain why you need this licence..."></textarea>
+                        <textarea class="form-control bg-white border-secondary text-dark" rows="3" placeholder="Explain why you need this licence..."></textarea>
                     </div>
                     <button type="button" id="submitRequest" class="btn btn-info btn-block py-2 font-weight-bold" style="border-radius:10px;">
                         Send Request Now
@@ -131,11 +131,11 @@
                     <div class="alert alert-success bg-success-soft border-0 mb-4" style="background:rgba(40,167,69,0.1); color:#28a745;">
                         <i class="fas fa-check-circle mr-2"></i> Request Approved! Credentials Shared.
                     </div>
-                    <div class="card bg-dark border-secondary p-3 mb-3 text-left">
+                    <div class="card bg-white border-secondary p-3 mb-3 text-left">
                         <div class="extra-small text-muted mb-2">SHARED CREDENTIALS</div>
                         <div class="mb-2">
                             <label class="extra-small text-muted mb-0">USER ID</label>
-                            <div class="text-white font-weight-bold" id="simUser">rdwis_user_782</div>
+                            <div class="text-dark font-weight-bold" id="simUser">rdwis_user_782</div>
                         </div>
                         <div>
                             <label class="extra-small text-muted mb-0">PASSWORD</label>
@@ -155,18 +155,13 @@
 
 @section('scripts')
 <style>
-    :root {
-        --rd-surface: #1e1e2d;
-        --rd-text1: #ffffff;
-        --rd-text2: #a2a3b7;
-    }
     .extra-small { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
     .licence-card:hover { 
         transform: translateY(-8px);
         box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important;
         border: 1px solid rgba(var(--rd-info-rgb), 0.3) !important;
     }
-    .licence-card { border: 1px solid rgba(255,255,255,0.05) !important; }
+    .licence-card { border: 1px solid var(--rd-border) !important; }
     .animated { animation-duration: 0.5s; }
 </style>
 

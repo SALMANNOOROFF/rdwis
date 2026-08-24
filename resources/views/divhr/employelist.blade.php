@@ -31,7 +31,7 @@
                             </a>
                             <a href="{{ route('divhr.employelist', ['mode' => 's', 'status'=>request('status','Current')]) }}" 
                                class="btn {{ $mode === 's' ? 'btn-info font-weight-bold' : 'btn-outline-info' }}"
-                               style="{{ $mode === 's' ? 'background-color: #17a2b8; border-color: #17a2b8; color: white;' : 'background: var(--rd-surface2); border-color: #17a2b8;' }}">
+                               style="{{ $mode === 's' ? 'background-color: var(--rd-primary-500); border-color: var(--rd-primary-500); color: white;' : 'background: var(--rd-surface2); border-color: var(--rd-primary-500);' }}">
                                 <i class="fas fa-sitemap mr-1"></i> My Dept
                             </a>
                         </div>
@@ -73,7 +73,7 @@
                     <div class="rd-table-responsive" style="max-height: 75vh; overflow-y: auto;">
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="employeesTable">
                             @php $st = request('status','Current'); @endphp
-                            <thead class="bg-dark text-muted sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2) !important; border-bottom: 2px solid var(--rd-border);">
+                            <thead class="bg-white text-muted sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2) !important; border-bottom: 2px solid var(--rd-border);">
                                 <tr>
                                     <th class="text-center p-2 col-eye" style="width: 20px; color: var(--rd-text2);"><i class="fas fa-eye"></i></th>
                                     <th class="p-2" style="width: 30%; color: var(--rd-text2);">Name</th>
@@ -106,7 +106,7 @@
                                         </a>
                                     </td>
                                     <td class="align-middle p-2 text-truncate">
-                                        <span class="font-weight-bold" style="font-size: 1rem; color: #fff;">{{ $emp->emp_name }}</span>
+                                        <span class="font-weight-bold" style="font-size: 1rem; color: var(--rd-text1);">{{ $emp->emp_name }}</span>
                                     </td>
                                     <td class="align-middle p-2">
                                         <span class="font-weight-bold" style="color: var(--rd-text2);">{{ $emp->emp_id }}</span>

@@ -66,18 +66,32 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #007bff;
-            color: white;
+            background: #5F7858;
+            color: #ffffff;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 22px;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+            transition: all 0.2s ease;
+            z-index: 99999;
+        }
+        .print-btn:hover {
+            background: #465941;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
         }
     </style>
 </head>
 <body>
 
-    <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Statement</button>
+    <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Formal Statement</button>
 
     <div class="container">
         <div class="main-title">

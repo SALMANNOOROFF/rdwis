@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -221,7 +221,7 @@
             right: 2rem;
             padding: 1rem 2rem;
             border-radius: 12px;
-            background: #1e293b;
+            background: var(--rd-surface);
             color: white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             display: flex;

@@ -7,7 +7,7 @@
 
     <!-- PWA Setup -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#4f8cff">
+    <meta name="theme-color" content="#5F7858">
     <link rel="apple-touch-icon" href="{{ asset('images/icons/icon-192.png') }}">
 
     <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/jqvmap/jqvmap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/rdwis-dark.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
@@ -47,7 +48,7 @@
 
         @media (max-width: 991.98px) {
             .main-sidebar {
-                box-shadow: 0 0 15px rgba(0,0,0,0.5) !important;
+                box-shadow: 0 0 15px rgba(41,40,36,0.3) !important;
             }
         }
 
@@ -83,6 +84,44 @@
 
         .user-panel .info small {
             display: block;
+        }
+
+        /* Frosted Glass Preloader Overlay */
+        .preloader {
+            background: rgba(247, 245, 240, 0.45) !important;
+            background-color: rgba(247, 245, 240, 0.45) !important;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: opacity 0.35s ease, visibility 0.35s ease, height 0.3s ease !important;
+        }
+
+        .preloader.preloader-hidden,
+        .preloader[style*="height: 0"],
+        .preloader[style*="height:0"],
+        .preloader[style*="display: none"],
+        .preloader[style*="display:none"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            z-index: -1 !important;
+        }
+
+        .preloader img,
+        .preloader .animation__shake,
+        .preloader .animation__wobble {
+            filter: drop-shadow(0 12px 30px rgba(41, 40, 36, 0.18)) !important;
+            animation: preloaderPulse 1.8s ease-in-out infinite alternate !important;
+            max-width: 180px !important;
+            height: auto !important;
+        }
+
+        @keyframes preloaderPulse {
+            0% { transform: translateY(0px) scale(0.97); opacity: 0.9; }
+            100% { transform: translateY(-6px) scale(1.02); opacity: 1; }
         }
     </style>
   </head>
@@ -126,58 +165,52 @@
         </li>
       </ul>
 
-      <ul class="navbar-nav ml-auto">
+      <ul class="navbar-nav ml-auto align-items-center" style="gap: 8px;">
         
-        <li class="nav-item">
-          <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-            <i class="fas fa-search"></i>
-          </a>
-          <div class="navbar-search-block">
-            <form class="form-inline">
-              <div class="input-group input-group-sm">
-                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-                <div class="input-group-append">
-                  <button class="btn btn-navbar" type="submit">
-                    <i class="fas fa-search"></i>
-                  </button>
-                  <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </li>
-
         {{-- Dynamic Purchase Notifications --}}
         <li class="nav-item dropdown" id="notif-bell-container">
-          <a class="nav-link" data-toggle="dropdown" href="#" id="pnt-bell">
-            <i class="far fa-bell"></i>
-            <span class="badge badge-warning navbar-badge d-none" id="pnt-count">0</span>
+          <a class="nav-link position-relative d-flex align-items-center justify-content-center pnt-bell-btn" data-toggle="dropdown" href="#" id="pnt-bell" title="Notifications" style="width: 36px; height: 36px; border-radius: 50%; background: var(--rd-neutral-100); border: 1px solid var(--rd-border); color: var(--rd-text1); transition: all 0.2s;">
+            <i class="far fa-bell" style="font-size: 15px;"></i>
+            <span class="badge badge-danger navbar-badge d-none" id="pnt-count" style="font-size: 10px; font-weight: 700; top: -4px; right: -4px; padding: 2px 6px; border-radius: 10px; box-shadow: 0 2px 6px rgba(220,53,69,0.35); border: 1.5px solid #fff;">0</span>
           </a>
-          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="pnt-dropdown">
-            <span class="dropdown-item dropdown-header" id="pnt-header">Notifications</span>
-            <div class="dropdown-divider"></div>
-            <div id="pnt-list">
-              <!-- Dynamically populated -->
-              <div class="dropdown-item text-center text-muted">No new notifications</div>
+          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right notif-dropdown-custom shadow-lg p-0" id="pnt-dropdown" style="min-width: 350px; max-width: 400px; border-radius: 12px; border: 1px solid var(--rd-border); overflow: hidden; background: var(--rd-surface);">
+            <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom" style="background: var(--rd-neutral-50);">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-bell mr-2" style="color: var(--rd-primary-600); font-size: 13px;"></i>
+                <span class="font-weight-bold" style="font-size: 13px; color: var(--rd-text1);">Notifications</span>
+              </div>
+              <span class="badge badge-pill text-xs px-2 py-1" id="pnt-badge-header" style="background: var(--rd-primary-100); color: var(--rd-primary-800); border: 1px solid var(--rd-primary-300); font-size: 10.5px;">0 New</span>
             </div>
-            <div class="dropdown-divider"></div>
-            <a href="javascript:void(0)" class="dropdown-item dropdown-footer" id="pnt-mark-all">Mark all as read</a>
+            
+            <div id="pnt-list" class="p-1" style="max-height: 320px; overflow-y: auto;">
+              <!-- Dynamically populated -->
+              <div class="p-4 text-center text-muted" style="font-size: 13px;">
+                <i class="far fa-bell-slash fa-2x mb-2 d-block text-muted opacity-50"></i>
+                No new notifications
+              </div>
+            </div>
+            
+            <div class="border-top p-2 text-center" style="background: var(--rd-neutral-50);">
+              <a href="javascript:void(0)" class="btn btn-sm btn-link text-decoration-none font-weight-bold p-0" id="pnt-mark-all" style="color: var(--rd-primary-700); font-size: 12px;">
+                <i class="fas fa-check-double mr-1"></i> Mark all as read
+              </a>
+            </div>
           </div>
         </li>
         
         <li class="nav-item">
-          <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-            <i class="fas fa-expand-arrows-alt"></i>
+          <a class="nav-link d-flex align-items-center justify-content-center" data-widget="fullscreen" href="#" role="button" title="Full Screen" style="width: 36px; height: 36px; border-radius: 50%; background: var(--rd-neutral-100); border: 1px solid var(--rd-border); color: var(--rd-text1); transition: all 0.2s;">
+            <i class="fas fa-expand-arrows-alt" style="font-size: 13px;"></i>
           </a>
         </li>
 
+        {{-- Enhanced Red Logout Button with Confirmation --}}
         <li class="nav-item">
-          <form action="{{ route('logout') }}" method="POST" class="d-inline">
+          <form id="global-logout-form" action="{{ route('logout') }}" method="POST" class="d-inline m-0">
               @csrf
-              <button type="submit" class="nav-link btn btn-link text-danger">
-                  <i class="fas fa-sign-out-alt"></i>
+              <button type="button" class="btn btn-danger btn-sm font-weight-bold d-flex align-items-center shadow-sm px-3 ml-1" onclick="handleLogoutClick(event)" style="border-radius: 20px; height: 34px; gap: 7px; font-size: 12.5px; background: #dc3545 !important; border-color: #dc3545 !important; color: #ffffff !important; box-shadow: 0 3px 8px rgba(220,53,69,0.3) !important; transition: all 0.2s ease;">
+                  <i class="fas fa-sign-out-alt" style="font-size: 12px;"></i>
+                  <span>Logout</span>
               </button>
           </form>
         </li>
@@ -839,10 +872,10 @@
     {{-- RDWIS OFFLINE DEBUG CONSOLE (FOR AIR-GAPPED TROUBLESHOOTING) --}}
     {{-- ========================================================= --}}
     <div id="rdwisDebugConsole" style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; font-family: monospace;">
-        <button onclick="toggleDebug()" style="background: #ff3e3e; color: #fff; border: none; padding: 5px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 11px;">
+        <button onclick="toggleDebug()" style="background: #ff3e3e; color: #fff; border: none; padding: 5px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: var(--rd-shadow-md); font-size: 11px;">
             <i class="fas fa-bug mr-1"></i> DEBUG CONSOLE <span id="debugBadge" class="badge badge-light ml-1" style="display:none;">0</span>
         </button>
-        <div id="debugContent" style="display: none; width: 450px; height: 350px; background: #1a1a1a; color: #00ff00; border: 2px solid #ff3e3e; border-radius: 8px; margin-top: 10px; overflow: hidden; font-size: 11px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-direction: column;">
+        <div id="debugContent" style="display: none; width: 450px; height: 350px; background: var(--rd-surface); color: #00ff00; border: 2px solid #ff3e3e; border-radius: 8px; margin-top: 10px; overflow: hidden; font-size: 11px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); flex-direction: column;">
             <div class="d-flex justify-content-between p-2 border-bottom border-secondary bg-dark">
                 <span class="font-weight-bold text-danger">RDWIS SYSTEM LOG</span>
                 <span class="text-muted cursor-pointer" onclick="clearDebug()">CLEAR</span>
@@ -911,6 +944,49 @@
                 }
             });
         });
+
+        // Enhanced Logout Confirmation Handler
+        function handleLogoutClick(e) {
+            e.preventDefault();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Confirm Sign Out',
+                    text: 'Are you sure you want to sign out from RDWIS?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#77736B',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt mr-1"></i> Yes, Logout',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true,
+                    focusCancel: true,
+                    background: 'var(--rd-surface)',
+                    color: 'var(--rd-text1)',
+                    customClass: {
+                        popup: 'shadow-lg border'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Signing Out...',
+                            text: 'Please wait while your session is terminated.',
+                            icon: 'info',
+                            showConfirmButton: false,
+                            timer: 900,
+                            background: 'var(--rd-surface)',
+                            color: 'var(--rd-text1)'
+                        });
+                        setTimeout(function() {
+                            document.getElementById('global-logout-form').submit();
+                        }, 700);
+                    }
+                });
+            } else {
+                if (confirm('Are you sure you want to log out of RDWIS?')) {
+                    document.getElementById('global-logout-form').submit();
+                }
+            }
+        }
     </script>
 
     {{-- Firefox zoom fallback --}}
@@ -939,6 +1015,34 @@
                 });
             });
         }
+    </script>
+    <!-- Preloader Auto-dismiss and complete cleanup -->
+    <script>
+        (function() {
+            function removePreloader() {
+                var preloader = document.querySelector('.preloader');
+                if (preloader) {
+                    preloader.style.opacity = '0';
+                    preloader.style.backdropFilter = 'none';
+                    preloader.style.webkitBackdropFilter = 'none';
+                    preloader.style.pointerEvents = 'none';
+                    setTimeout(function() {
+                        if (preloader && preloader.parentNode) {
+                            preloader.parentNode.removeChild(preloader);
+                        }
+                    }, 350);
+                }
+            }
+            if (document.readyState === 'complete') {
+                setTimeout(removePreloader, 100);
+            } else {
+                window.addEventListener('load', function() {
+                    setTimeout(removePreloader, 150);
+                });
+            }
+            // Absolute fallback after 1s
+            setTimeout(removePreloader, 1000);
+        })();
     </script>
     @include('pwa.install-banner')
   </body>

@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -7,9 +7,9 @@
     /* Global Command Theme overrides */
     .command-dashboard {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
+        background: var(--rd-bg) !important;
         min-height: 100vh;
-        color: #cbd5e0;
+        color: var(--rd-text1);
         padding-top: 15px;
     }
 
@@ -19,7 +19,7 @@
 
     /* Glassmorphism & Cyber Theme Card */
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -65,38 +65,38 @@
 
     /* Pill Navigation */
     .pill-nav {
-        background: rgba(18, 26, 34, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: var(--rd-neutral-200) !important;
+        border: 1px solid var(--rd-border) !important;
         border-radius: 30px;
-        padding: 6px 12px;
+        padding: 5px 8px;
         display: inline-flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 4px;
     }
 
     .pill-btn {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: rgba(229, 229, 229, 0.7);
+        background: var(--rd-surface) !important;
+        border: 1px solid var(--rd-border2) !important;
+        color: var(--rd-text2) !important;
         padding: 5px 16px;
         border-radius: 20px;
         font-size: 12px;
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.25s ease;
+        transition: all 0.2s ease;
     }
 
     .pill-btn:hover:not(.active) {
-        color: #fff;
-        border-color: rgba(0, 191, 255, 0.3);
+        background: var(--rd-neutral-200) !important;
+        color: var(--rd-text1) !important;
     }
 
     .pill-btn.active {
-        border-color: rgba(0, 191, 255, 0.7);
-        color: #00BFFF;
-        background: #060a0e;
-        box-shadow: 0 0 12px rgba(0, 191, 255, 0.15);
-        font-weight: 600;
+        border-color: var(--rd-primary-600) !important;
+        color: var(--rd-primary-700) !important;
+        background: var(--rd-primary-100) !important;
+        box-shadow: var(--rd-shadow-sm);
+        font-weight: 700;
     }
 
     /* Chips */
@@ -106,15 +106,17 @@
         border-radius: 20px;
         font-weight: 600;
         letter-spacing: 0.5px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--rd-surface) !important;
+        border: 1px solid var(--rd-border2) !important;
+        color: var(--rd-text2) !important;
         transition: all 0.2s;
     }
 
     .chip-active {
-        border-color: rgba(0, 191, 255, 0.4);
-        background: rgba(0, 191, 255, 0.1);
-        color: #00BFFF;
-        box-shadow: 0 0 10px rgba(0, 191, 255, 0.1);
+        border-color: var(--rd-primary-600) !important;
+        background: var(--rd-primary-100) !important;
+        color: var(--rd-primary-700) !important;
+        box-shadow: var(--rd-shadow-sm);
     }
 
     .chip-btn {
@@ -138,19 +140,19 @@
         border: 1px solid transparent;
     }
     .badge-completed {
-        background: rgba(34, 197, 94, 0.15);
-        color: #4ade80;
-        border-color: rgba(34, 197, 94, 0.2);
+        background: var(--rd-success-soft) !important;
+        color: var(--rd-success-dark) !important;
+        border-color: var(--rd-success-100) !important;
     }
     .badge-ongoing {
-        background: rgba(0, 191, 255, 0.12);
-        color: #67e8f9;
-        border-color: rgba(0, 191, 255, 0.2);
+        background: var(--rd-info-soft) !important;
+        color: var(--rd-info-dark) !important;
+        border-color: var(--rd-info-100) !important;
     }
     .badge-delayed {
-        background: rgba(248, 113, 113, 0.15);
-        color: #fca5a5;
-        border-color: rgba(248, 113, 113, 0.2);
+        background: var(--rd-danger-soft) !important;
+        color: var(--rd-danger-dark) !important;
+        border-color: var(--rd-danger-100) !important;
     }
 
     /* Sidebar List */
@@ -162,13 +164,13 @@
         width: 4px;
     }
     .sidebar-list::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--rd-border2);
         border-radius: 4px;
     }
 
     .list-item {
-        background: rgba(18, 26, 34, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        background: var(--rd-surface) !important;
+        border: 1px solid var(--rd-border) !important;
         border-radius: 10px;
         padding: 10px 14px;
         display: flex;
@@ -177,10 +179,11 @@
         gap: 10px;
         transition: all 0.2s ease;
         text-decoration: none !important;
+        color: var(--rd-text1) !important;
     }
     .list-item:hover {
-        background: rgba(18, 26, 34, 0.95);
-        border-color: rgba(0, 191, 255, 0.25);
+        background: var(--rd-neutral-50) !important;
+        border-color: var(--rd-border2) !important;
     }
 
     /* Loader */
@@ -189,8 +192,8 @@
         top: 24px;
         right: 24px;
         font-size: 12px;
-        color: #00BFFF;
-        font-weight: 500;
+        color: var(--rd-primary-600);
+        font-weight: 600;
         letter-spacing: 0.5px;
         display: none;
     }
@@ -199,27 +202,28 @@
     .kpi-title {
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        color: rgba(229, 229, 229, 0.6);
-        font-weight: 600;
+        letter-spacing: 1.5px;
+        color: var(--rd-text3) !important;
+        font-weight: 700;
     }
     .kpi-value {
         font-size: 24px;
         font-weight: 700;
-        color: #fff;
+        color: var(--rd-text1) !important;
         margin-top: 6px;
         font-family: 'Rajdhani', sans-serif;
     }
     .kpi-sub {
         font-size: 11px;
-        color: rgba(229, 229, 229, 0.45);
+        color: var(--rd-text4) !important;
         margin-top: 4px;
+        font-weight: 500;
     }
 </style>
 
 <div class="content-wrapper command-dashboard px-4">
     <div class="position-relative">
-        <h2 class="font-weight-bold text-white rajdhani mb-4">
+        <h2 class="font-weight-bold text-dark rajdhani mb-4">
             <i class="fas fa-satellite mr-2 text-info"></i>Command Operations Center
         </h2>
         <div class="dashboard-loader" id="loader">
@@ -291,7 +295,7 @@
             <!-- 1. Main Budget Timeline Card -->
             <div class="card-cyber px-4 py-3 mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="font-weight-bold text-white text-sm">Budget vs Utilization Trends</span>
+                    <span class="font-weight-bold text-dark text-sm">Budget vs Utilization Trends</span>
                     <div class="btn-group btn-group-sm">
                         <button class="btn btn-outline-info active btn-xs px-3" id="mode-btn-monthly" onclick="setMode('monthly')">Monthly</button>
                         <button class="btn btn-outline-info btn-xs px-3" id="mode-btn-quarterly" onclick="setMode('quarterly')">Quarterly</button>
@@ -306,7 +310,7 @@
             <div class="row mb-4">
                 <div class="col-md-4 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
-                        <span class="font-weight-bold text-white text-xs mb-3 d-block">Project Status Lifecycle</span>
+                        <span class="font-weight-bold text-dark text-xs mb-3 d-block">Project Status Lifecycle</span>
                         <div style="height: 180px; position: relative;">
                             <canvas id="projectStatusChart"></canvas>
                         </div>
@@ -315,7 +319,7 @@
                 <div class="col-md-4 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="font-weight-bold text-white text-xs">Personnel Alignments</span>
+                            <span class="font-weight-bold text-dark text-xs">Personnel Alignments</span>
                             <span class="text-xs text-muted" id="hr-kpi-sub">0 total</span>
                         </div>
                         <div style="height: 180px; position: relative;">
@@ -325,7 +329,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
-                        <span class="font-weight-bold text-white text-xs mb-3 d-block">Project Staff Headcounts (Top)</span>
+                        <span class="font-weight-bold text-dark text-xs mb-3 d-block">Project Staff Headcounts (Top)</span>
                         <div style="height: 180px; position: relative;">
                             <canvas id="employeesPerProjectChart"></canvas>
                         </div>
@@ -338,7 +342,7 @@
                 <div class="col-md-6 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="font-weight-bold text-white text-xs">Purchase Scrutiny (Divisional)</span>
+                            <span class="font-weight-bold text-dark text-xs">Purchase Scrutiny (Divisional)</span>
                             <span class="text-xs text-muted" id="purchase-kpi-sub">0 cases</span>
                         </div>
                         <div class="row">
@@ -353,7 +357,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
-                        <span class="font-weight-bold text-white text-xs mb-3 d-block">Project Completion Progress (Top)</span>
+                        <span class="font-weight-bold text-dark text-xs mb-3 d-block">Project Completion Progress (Top)</span>
                         <div style="height: 160px; position: relative;">
                             <canvas id="projectProgressChart"></canvas>
                         </div>
@@ -365,7 +369,7 @@
             <div class="row mb-4 d-none" id="comparisons-row">
                 <div class="col-md-4 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
-                        <span class="font-weight-bold text-white text-xs mb-3 d-block">Divisions Budget Comparison</span>
+                        <span class="font-weight-bold text-dark text-xs mb-3 d-block">Divisions Budget Comparison</span>
                         <div style="height: 240px; position: relative;">
                             <canvas id="budgetVsUtilPerDivChart"></canvas>
                         </div>
@@ -373,7 +377,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
-                        <span class="font-weight-bold text-white text-xs mb-3 d-block">Divisions Personnel Load</span>
+                        <span class="font-weight-bold text-dark text-xs mb-3 d-block">Divisions Personnel Load</span>
                         <div style="height: 240px; position: relative;">
                             <canvas id="employeesPerDivChart"></canvas>
                         </div>
@@ -381,7 +385,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <div class="card-cyber px-4 py-3 h-100">
-                        <span class="font-weight-bold text-white text-xs mb-3 d-block">Divisions Active Projects</span>
+                        <span class="font-weight-bold text-dark text-xs mb-3 d-block">Divisions Active Projects</span>
                         <div style="height: 240px; position: relative;">
                             <canvas id="projectsPerDivChart"></canvas>
                         </div>
@@ -394,10 +398,10 @@
         <div class="col-xl-3 col-lg-4 mb-4">
             <div class="card-cyber px-3 py-3 h-100 d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="font-weight-bold text-white text-sm">Projects Log</span>
+                    <span class="font-weight-bold text-dark text-sm">Projects Log</span>
                     <div class="position-relative">
                         <input type="text" id="project-search" placeholder="Search..." 
-                               class="form-control form-control-sm bg-dark text-white border-secondary" 
+                               class="form-control form-control-sm bg-white text-dark border-secondary" 
                                style="width: 110px; border-radius: 12px; font-size: 11px;">
                     </div>
                 </div>

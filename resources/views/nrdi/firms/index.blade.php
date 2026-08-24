@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
 .firms-hub {
     font-family: 'Inter', sans-serif;
-    background: #080b0f !important;
+    background: var(--rd-bg) !important;
     min-height: 100vh;
-    color: #cbd5e0;
+    color: var(--rd-text1);
     padding-top: 20px;
     padding-bottom: 50px;
 }
@@ -20,7 +20,7 @@
 
 /* Glassmorphism Cyber Card */
 .card-cyber {
-    background: rgba(18, 26, 34, 0.85);
+    background: var(--rd-surface);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
@@ -33,7 +33,7 @@
     padding: 14px 18px !important;
     margin-bottom: 12px !important;
     border-radius: 8px;
-    background: rgba(10, 15, 22, 0.6);
+    background: var(--rd-surface);
 }
 
 .search-legend {
@@ -70,13 +70,13 @@
     font-family: 'Rajdhani', sans-serif;
     font-size: 12px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--rd-text3);
     margin-bottom: 3px;
 }
 
 /* Buttons matching Reference Layout */
 .btn-find {
-    background: #0284c7;
+    background: var(--rd-primary-600);
     border: 1px solid #38bdf8;
     color: #fff;
     font-family: 'Rajdhani', sans-serif;
@@ -90,7 +90,7 @@
 }
 
 .btn-find:hover {
-    background: #0369a1;
+    background: var(--rd-primary-700);
     box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
     color: #fff;
 }
@@ -109,13 +109,13 @@
 }
 
 .btn-view-firms:hover {
-    background: #00BFFF;
+    background: var(--rd-primary-500);
     color: #fff;
     box-shadow: 0 0 12px rgba(0, 191, 255, 0.3);
 }
 
 .btn-reset {
-    color: #94a3b8;
+    color: var(--rd-text3);
     font-family: 'Rajdhani', sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -132,7 +132,7 @@
 
 /* Data Table */
 .table-cyber th {
-    background: rgba(18, 26, 34, 0.95) !important;
+    background: var(--rd-surface) !important;
     border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
     color: #67e8f9 !important;
     font-family: 'Rajdhani', sans-serif;
@@ -151,7 +151,7 @@
 }
 
 .table-cyber tr:hover {
-    background: rgba(255, 255, 255, 0.02) !important;
+    background: var(--rd-neutral-50) !important;
 }
 </style>
 
@@ -167,7 +167,7 @@
                     <i class="fas fa-check-circle mr-1"></i> ADVANCED SEARCH & VERIFICATION
                 </span>
             </div>
-            <h2 class="font-weight-bold text-white rajdhani m-0" style="font-size: 2rem;">
+            <h2 class="font-weight-bold text-dark rajdhani m-0" style="font-size: 2rem;">
                 <i class="fas fa-search-location mr-2 text-cyan"></i>Suppliers & Registered Firms Directory
             </h2>
             <p class="text-muted m-0 small">Query vendors, offices, key personnel, technical facilities, specializations, and award history.</p>
@@ -188,7 +188,7 @@
         <div class="row">
             {{-- Left Box: Category / Scope Selector & View Firms Button --}}
             <div class="col-lg-3 col-md-4 mb-3">
-                <div class="h-100 p-3 rounded" style="background: rgba(10, 15, 22, 0.6); border: 1px solid rgba(255, 255, 255, 0.12);">
+                <div class="h-100 p-3 rounded" style="background: var(--rd-surface); border: 1px solid rgba(255, 255, 255, 0.12);">
                     <div class="form-group mb-3">
                         <label class="field-label text-cyan font-weight-bold">Firms Scope</label>
                         <select id="leftStatusFilter" class="form-control form-control-cyber">
@@ -311,7 +311,7 @@
                         <div class="col-md-8 col-sm-6 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2 pt-3">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="chkAnyPart" checked>
-                                <label class="form-check-label small text-white rajdhani font-weight-bold" for="chkAnyPart" style="cursor: pointer;">
+                                <label class="form-check-label small text-dark rajdhani font-weight-bold" for="chkAnyPart" style="cursor: pointer;">
                                     Any part of text
                                 </label>
                             </div>
@@ -334,7 +334,7 @@
     {{-- Results Table (Hidden initially until user performs search) --}}
     <div class="card-cyber p-4" id="searchResultsSection" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="rajdhani font-weight-bold text-white m-0">
+            <h4 class="rajdhani font-weight-bold text-dark m-0">
                 <i class="fas fa-list text-info mr-2"></i>Search Results
             </h4>
             <span class="badge badge-secondary rajdhani px-3 py-2" id="resultsCountBadge" style="font-size: 13px;">0 Firms Found</span>
@@ -372,10 +372,10 @@
 {{-- Firm Full Profile / Dossier Modal --}}
 <div class="modal fade" id="firmDossierModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-        <div class="modal-content bg-dark border border-secondary text-white">
+        <div class="modal-content bg-white border border-secondary text-dark">
             <div class="modal-header border-secondary">
                 <h5 class="modal-title rajdhani font-weight-bold" id="dossierModalTitle">Firm Profile & Dossier</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -487,16 +487,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td class="rajdhani text-info font-weight-bold">#${f.frm_id}</td>
                     <td>
-                        <div class="font-weight-bold text-white mb-0" style="font-size: 14px;">${f.frm_name}</div>
+                        <div class="font-weight-bold text-dark mb-0" style="font-size: 14px;">${f.frm_name}</div>
                         <div class="small text-muted">${f.frm_notes ? f.frm_notes.substring(0, 40) + '...' : ''}</div>
                     </td>
                     <td>
-                        <div class="text-white">${f.frm_entity}</div>
+                        <div class="text-dark">${f.frm_entity}</div>
                         <div class="small text-muted">${f.frm_type}</div>
                     </td>
                     <td>
-                        <div class="small text-muted">NTN: <strong class="text-white">${f.frm_ntn}</strong></div>
-                        <div class="small text-muted">GST: <strong class="text-white">${f.frm_gst}</strong></div>
+                        <div class="small text-muted">NTN: <strong class="text-dark">${f.frm_ntn}</strong></div>
+                        <div class="small text-muted">GST: <strong class="text-dark">${f.frm_gst}</strong></div>
                     </td>
                     <td class="text-center"><span class="badge badge-dark">${f.offices_count}</span></td>
                     <td class="text-center"><span class="badge badge-dark">${f.persons_count}</span></td>
@@ -542,14 +542,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('dossierModalTitle').innerText = `${f.frm_name} - Dossier Profile`;
 
                     let officesHtml = (res.offices || []).map(o => `
-                        <div class="p-2 mb-2 rounded bg-dark border border-secondary">
+                        <div class="p-2 mb-2 rounded bg-white border border-secondary">
                             <strong>${o.off_name || 'Office'}</strong> (${o.off_city || 'City'})
                             <div class="small text-muted">${o.off_address || 'No address'}</div>
                         </div>
                     `).join('') || '<div class="text-muted small">No offices recorded.</div>';
 
                     let personsHtml = (res.persons || []).map(p => `
-                        <div class="p-2 mb-2 rounded bg-dark border border-secondary">
+                        <div class="p-2 mb-2 rounded bg-white border border-secondary">
                             <strong>${p.per_title || ''} ${p.per_name}</strong> - <span class="text-info">${p.per_desig || 'Personnel'}</span>
                             <div class="small text-muted">Dept: ${p.per_dept || 'N/A'} | Expertise: ${p.per_exprt || 'N/A'}</div>
                         </div>
@@ -582,10 +582,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     modalBody.innerHTML = `
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h3 class="rajdhani text-white font-weight-bold m-0">${f.frm_name}</h3>
+                                <h3 class="rajdhani text-dark font-weight-bold m-0">${f.frm_name}</h3>
                                 <div class="text-muted small">Entity: ${f.frm_entity || 'N/A'} | Type: ${f.frm_type || 'N/A'}</div>
                                 <div class="mt-2 text-muted small">
-                                    NTN: <strong class="text-white">${f.frm_ntn || 'N/A'}</strong> | GST: <strong class="text-white">${f.frm_gst || 'N/A'}</strong>
+                                    NTN: <strong class="text-dark">${f.frm_ntn || 'N/A'}</strong> | GST: <strong class="text-dark">${f.frm_gst || 'N/A'}</strong>
                                 </div>
                             </div>
                             <div class="col-md-6 text-md-right">

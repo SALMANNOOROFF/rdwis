@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 
 <style>
@@ -76,13 +76,13 @@
   }
 
   .sinc-nav-btn.primary {
-    background: #3b82f6;
+    background: var(--rd-primary-600);
     color: #fff;
-    border-color: #3b82f6;
+    border-color: var(--rd-primary-600);
     box-shadow: 0 2px 8px rgba(59,130,246,.25);
   }
 
-  .sinc-nav-btn.primary:hover { background: #2563eb; color: #fff; text-decoration: none; }
+  .sinc-nav-btn.primary:hover { background: var(--rd-primary-700); color: #fff; text-decoration: none; }
 
   .sinc-nav-btn.outline {
     background: var(--rd-surface);
@@ -90,7 +90,7 @@
     border-color: var(--rd-border);
   }
 
-  .sinc-nav-btn.outline:hover { border-color: #3b82f6; color: #3b82f6; text-decoration: none; }
+  .sinc-nav-btn.outline:hover { border-color: var(--rd-primary-600); color: var(--rd-primary-600); text-decoration: none; }
 
   /* ══════════════════════════════════════════
      3-PANEL LAYOUT
@@ -159,7 +159,7 @@
     gap: 7px;
   }
 
-  .panel-head-title i { color: #3b82f6; }
+  .panel-head-title i { color: var(--rd-primary-600); }
 
   .panel-body {
     flex: 1;
@@ -192,7 +192,7 @@
     transition: border-color .15s ease;
   }
 
-  .search-box:focus-within { border-color: #3b82f6; background: var(--rd-surface); }
+  .search-box:focus-within { border-color: var(--rd-primary-600); background: var(--rd-surface); }
 
   .search-box input {
     flex: 1;
@@ -205,11 +205,11 @@
     outline: none;
   }
 
-  .search-box input::placeholder { color: #94a3b8; }
+  .search-box input::placeholder { color: var(--rd-text3); }
 
   .search-box button {
     border: none;
-    background: #3b82f6;
+    background: var(--rd-primary-600);
     color: #fff;
     padding: 0 14px;
     height: 38px;
@@ -220,7 +220,7 @@
     transition: background .15s ease;
   }
 
-  .search-box button:hover { background: #2563eb; }
+  .search-box button:hover { background: var(--rd-primary-700); }
 
   /* Item rows */
   .inv-item {
@@ -290,7 +290,7 @@
     white-space: nowrap;
   }
 
-  .btn-quick-add:hover { background: #3b82f6; color: #fff; }
+  .btn-quick-add:hover { background: var(--rd-primary-600); color: #fff; }
 
   /* ══════════════════════════════════════════
      CENTER PANEL — ITEM CONFIG
@@ -337,7 +337,7 @@
   .selected-item-placeholder {
     font-size: .84rem;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--rd-text3);
   }
 
   .selected-stock-badge {
@@ -390,7 +390,7 @@
     background: var(--rd-surface);
   }
 
-  .cfg-input::placeholder { color: #94a3b8; font-weight: 400; }
+  .cfg-input::placeholder { color: var(--rd-text3); font-weight: 400; }
 
   .cfg-input[readonly] {
     background: var(--rd-surface3);
@@ -403,7 +403,7 @@
     width: 100%;
     height: 48px;
     border-radius: 12px;
-    background: #3b82f6;
+    background: var(--rd-primary-600);
     color: #fff;
     border: none;
     font-family: 'DM Sans', sans-serif;
@@ -487,7 +487,7 @@
 
   .qi-qty-label {
     font-size: .7rem;
-    color: #94a3b8;
+    color: var(--rd-text3);
     font-weight: 500;
   }
 
@@ -507,7 +507,7 @@
     transition: border-color .12s ease;
   }
 
-  .qi-price-input:focus { border-color: #3b82f6; background: var(--rd-surface); }
+  .qi-price-input:focus { border-color: var(--rd-primary-600); background: var(--rd-surface); }
 
   .qi-line-total {
     font-size: .82rem;
@@ -526,7 +526,7 @@
     justify-content: center;
     height: 100%;
     min-height: 180px;
-    color: #cbd5e1;
+    color: var(--rd-text1);
     gap: 8px;
     padding: 32px;
     text-align: center;
@@ -537,7 +537,7 @@
 
   /* Grand Total Bar (blue bar at bottom like SINC) */
   .grand-total-bar {
-    background: #3b82f6;
+    background: var(--rd-primary-600);
     padding: 16px 20px;
     flex-shrink: 0;
     display: flex;
@@ -614,7 +614,7 @@
 
   .modal-title { font-weight: 800 !important; font-size: 1rem !important; color: var(--rd-text1) !important; }
 
-  .modal-header .close { color: #94a3b8; opacity: 1; }
+  .modal-header .close { color: var(--rd-text3); opacity: 1; }
 
   .modal-body { padding: 18px 22px !important; }
 
@@ -627,7 +627,7 @@
     height: auto;
   }
 
-  .modal-body .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+  .modal-body .form-control:focus { border-color: var(--rd-primary-600); box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
 
   .modal-footer { border-top: 1.5px solid var(--rd-border2) !important; padding: 14px 22px !important; }
 
@@ -777,7 +777,7 @@
         <div class="panel-head-title">
           <i class="fas fa-shopping-cart"></i> Purchase Queue
         </div>
-        <span id="queue-count" style="font-size:.7rem;font-weight:700;color:#94a3b8">0 items</span>
+        <span id="queue-count" style="font-size:.7rem;font-weight:700;color: var(--rd-text3)">0 items</span>
       </div>
 
       <!-- Queue list -->
@@ -815,7 +815,7 @@
   <div class="modal-dialog modal-dialog-centered" style="max-width:400px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="fas fa-plus-circle mr-2" style="color:#3b82f6"></i>Add Custom Item</h5>
+        <h5 class="modal-title"><i class="fas fa-plus-circle mr-2" style="color: var(--rd-primary-600)"></i>Add Custom Item</h5>
         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
       </div>
       <form method="post" action="{{ route('purnew.item.create') }}" id="form-add-item">
@@ -846,7 +846,7 @@
   <div class="modal-dialog modal-dialog-centered" style="max-width:450px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="fas fa-layer-group mr-2" style="color:#3b82f6"></i>Confirm Group Name</h5>
+        <h5 class="modal-title"><i class="fas fa-layer-group mr-2" style="color: var(--rd-primary-600)"></i>Confirm Group Name</h5>
         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
       </div>
       <div class="modal-body">

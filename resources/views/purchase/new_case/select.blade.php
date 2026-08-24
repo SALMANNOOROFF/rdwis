@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 <div class="content-wrapper">
 <div class="purchase-wrapper">
@@ -74,7 +74,7 @@
 
   /* ─── COLOR ACCENT STRIPS ─── */
   /* ROW 1: Material, Outsourcing, Civil → ALL BLUE */
-  .glass-card.accent-blue::after  { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+  .glass-card.accent-blue::after  { background: linear-gradient(135deg, var(--rd-primary-600), var(--rd-primary-500)); }
 
   /* ROW 2: Training + TA/DA → AMBER/YELLOW */
   .glass-card.accent-amber::after { background: linear-gradient(135deg, #f59e0b, #f97316); }
@@ -263,15 +263,15 @@
   }
 
   .modal-sq-btn.btn-primary {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-    box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+    background: linear-gradient(135deg, var(--rd-primary-600), var(--rd-primary-700)) !important;
+    box-shadow: 0 8px 24px rgba(95,120,88,0.25);
     color: #fff !important;
   }
 
   .modal-sq-btn.btn-outline-primary {
     background: rgba(59,130,246,0.08) !important;
-    border: 2px solid rgba(59,130,246,0.3) !important;
-    color: #3b82f6 !important;
+    border: 2px solid rgba(95,120,88,0.25) !important;
+    color: var(--rd-primary-600) !important;
     box-shadow: 0 4px 12px rgba(59,130,246,0.10);
   }
 
@@ -281,12 +281,12 @@
 
   .modal-sq-btn.btn-outline-primary:hover {
     background: rgba(59,130,246,0.14) !important;
-    box-shadow: 0 8px 20px rgba(59,130,246,0.15);
+    box-shadow: 0 8px 20px rgba(95,120,88,0.15);
   }
 
   /* close button */
   .modal-header .close {
-    color: #64748b;
+    color: var(--rd-text3);
     opacity: 1;
     font-size: 1.4rem;
   }
@@ -322,7 +322,7 @@
           <div class="card-icon-wrap icon-blue"><i class="fas fa-cubes"></i></div>
           <div class="gc-title">Material / Equipment</div>
           <div class="gc-sub">Items, equipment and supplies</div>
-          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> Create RFQ &nbsp;•&nbsp; Group RFQs</span>
+          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color: var(--rd-primary-600)"></i> Create RFQ &nbsp;•&nbsp; Group RFQs</span>
         </div>
       </div>
 
@@ -332,7 +332,7 @@
           <div class="card-icon-wrap icon-blue"><i class="fas fa-user-tie"></i></div>
           <div class="gc-title">Outsourcing</div>
           <div class="gc-sub">External services procurement</div>
-          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> Services &nbsp;•&nbsp; Consultancy</span>
+          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color: var(--rd-primary-600)"></i> Services &nbsp;•&nbsp; Consultancy</span>
         </div>
       </div>
 
@@ -355,7 +355,7 @@
           <div class="card-icon-wrap icon-blue"><i class="fas fa-hard-hat"></i></div>
           <div class="gc-title">Civil Works / Upfit</div>
           <div class="gc-sub">Civil works and facility upfit</div>
-          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> BOQs &nbsp;•&nbsp; Work Orders</span>
+          <span class="gc-chip"><i class="fas fa-circle" style="font-size:.4rem;color: var(--rd-primary-600)"></i> BOQs &nbsp;•&nbsp; Work Orders</span>
         </div>
       </div>
 

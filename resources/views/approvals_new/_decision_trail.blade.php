@@ -1,14 +1,14 @@
-<style>
-.trail-scroll-container { max-height: 350px; overflow-y: auto; padding-right: 5px; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; background: rgba(0,0,0,0.1); }
+﻿<style>
+.trail-scroll-container { max-height: 350px; overflow-y: auto; padding-right: 5px; border: 1px solid var(--rd-border); border-radius: 8px; background: rgba(0,0,0,0.1); }
 .trail-scroll-container::-webkit-scrollbar { width: 4px; }
 .trail-scroll-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 .trail-item { position: relative; padding-left: 20px; margin-bottom: 15px; border-left: 1px dashed rgba(255,255,255,0.15); margin-left: 10px; }
-.trail-dot { position: absolute; left: -6px; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: #007bff; border: 2px solid #080b0f; z-index: 2; }
+.trail-dot { position: absolute; left: -6px; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--rd-primary-600); border: 2px solid #080b0f; z-index: 2; }
 .trail-dot.bg-success { background: #28a745; }
 .trail-dot.bg-danger { background: #dc3545; }
 .trail-dot.bg-warning { background: #f39c12; }
-.comment-box { background: rgba(255,255,255,0.04); border-radius: 6px; padding: 10px; margin-top: 6px; border-left: 3px solid rgba(255,255,255,0.1); display: block; }
-.trail-role { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; color: #8a96a3; display: block; letter-spacing: 0.5px; }
+.comment-box { background: var(--rd-neutral-50); border-radius: 6px; padding: 10px; margin-top: 6px; border-left: 3px solid rgba(255,255,255,0.1); display: block; }
+.trail-role { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; color: var(--rd-text3); display: block; letter-spacing: 0.5px; }
 .trail-action { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #fff; line-height: 1.2; }
 </style>
 

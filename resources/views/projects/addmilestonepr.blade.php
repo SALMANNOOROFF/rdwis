@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -89,8 +89,8 @@
             margin-left: 10px;
         }
 
-        .btn-primary { background-color: #007BFF; border-color: #17a2b8; color: white; }
-        .btn-primary:hover { background-color: #007BFF; border-color: #117a8b; }
+        .btn-primary { background-color: var(--rd-primary-600); border-color: var(--rd-primary-500); color: white; }
+        .btn-primary:hover { background-color: var(--rd-primary-600); border-color: #117a8b; }
        
         .btn-default { background-color: #f8f9fa; border-color: #ddd; color: #444; }
         .btn-default:hover { background-color: #e2e6ea; }

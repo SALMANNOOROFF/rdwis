@@ -1,11 +1,10 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
     /* Premium Dark Theme */
-    .dark-contract-wrapper {
-        background-color: #12141a;
-        color: #e2e8f0;
+    .dark-contract-wrapper { background-color: var(--rd-bg);
+        color: var(--rd-text1);
         font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         min-height: calc(100vh - 60px);
         padding: 2rem;
@@ -15,13 +14,13 @@
         font-size: 1.5rem;
         font-weight: 800;
         letter-spacing: 0.5px;
-        color: #ffffff;
+        color: var(--rd-text1);
     }
 
     .dark-contract-wrapper .btn-back {
         background: transparent;
-        border: 1px solid #2d3748;
-        color: #a0aec0;
+        border: 1px solid var(--rd-border);
+        color: var(--rd-text3);
         font-weight: 500;
         border-radius: 6px;
         padding: 0.4rem 1rem;
@@ -35,19 +34,19 @@
 
     .premium-card {
         background-color: #161b22;
-        border: 1px solid #2d3748;
+        border: 1px solid var(--rd-border);
         border-radius: 10px;
         overflow: hidden;
         margin-bottom: 2rem;
     }
     
     .premium-card-header {
-        background-color: #1a1d24;
+        background-color: var(--rd-surface);
         padding: 1.2rem 1.5rem;
         border-bottom: 1px solid #2d3748;
         font-size: 0.95rem;
         font-weight: 700;
-        color: #f8fafc;
+        color: var(--rd-text1);
         letter-spacing: 0.5px;
     }
 
@@ -74,15 +73,15 @@
     }
     .data-label {
         font-weight: 600;
-        color: #94a3b8;
+        color: var(--rd-text3);
     }
     .data-value {
-        color: #e2e8f0;
+        color: var(--rd-text1);
     }
 
     .btn-action-primary {
-        background: #3b82f6;
-        color: #ffffff;
+        background: var(--rd-primary-600);
+        color: var(--rd-text1);
         border: none;
         border-radius: 6px;
         padding: 0.8rem 1rem;
@@ -91,7 +90,7 @@
         margin-bottom: 0.5rem;
         transition: background 0.2s;
     }
-    .btn-action-primary:hover { background: #2563eb; }
+    .btn-action-primary:hover { background: var(--rd-primary-700); }
 
     .btn-action-danger {
         background: transparent;
@@ -110,7 +109,7 @@
 
     .btn-action-success {
         background: #10b981;
-        color: #ffffff;
+        color: var(--rd-text1);
         border: none;
         border-radius: 6px;
         padding: 0.8rem 1rem;
@@ -123,7 +122,7 @@
 
     .status-badge {
         background-color: rgba(71, 85, 105, 0.2);
-        color: #94a3b8;
+        color: var(--rd-text3);
         padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.75rem;
@@ -137,8 +136,8 @@
         width: 100%;
     }
     .small-dark-table th {
-        background: #1a1d24;
-        color: #94a3b8;
+        background: var(--rd-surface);
+        color: var(--rd-text3);
         padding: 0.8rem;
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -146,13 +145,13 @@
     }
     .small-dark-table td {
         padding: 0.8rem;
-        color: #e2e8f0;
+        color: var(--rd-text1);
         border-bottom: 1px solid #2d3748;
         font-size: 0.85rem;
     }
 </style>
 
-<div class="content-wrapper" style="background-color: #12141a;">
+<div class="content-wrapper" style="background-color: var(--rd-surface);">
     <section class="content">
         <div class="dark-contract-wrapper">
             
@@ -244,7 +243,7 @@
                                         <td style="font-weight: 700; color: #60a5fa;">{{ $st->total }}</td>
                                     </tr>
                                     @empty
-                                    <tr><td colspan="2" style="color: #64748b;">No active employees found</td></tr>
+                                    <tr><td colspan="2" style="color: var(--rd-text3);">No active employees found</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -262,7 +261,7 @@
                             @else
                                 <div class="text-center">
                                     <i class="fas fa-lock fa-2x mb-2 text-secondary"></i>
-                                    <p style="color: #94a3b8; font-size: 0.9rem;">No pending actions for HR at this stage.</p>
+                                    <p style="color: var(--rd-text3); font-size: 0.9rem;">No pending actions for HR at this stage.</p>
                                 </div>
                             @endif
                         </div>
@@ -288,7 +287,7 @@ $(document).ready(function() {
             text: msg,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#3b82f6',
+            confirmButtonColor: '#5F7858',
             cancelButtonColor: '#4a5568'
         }).then((result) => {
             if(result.isConfirmed) {

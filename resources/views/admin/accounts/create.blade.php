@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper" style="background:#f7f8fc; min-height:100vh;">
@@ -36,7 +36,7 @@
 
                 {{-- Card Header --}}
                 <div class="card-header d-flex align-items-center py-3 px-4"
-                     style="background:#0a1628; border-bottom:2px solid #c9a84c;">
+                     style="background: var(--rd-surface); border-bottom: 2px solid var(--rd-primary-600);">
                     <div class="mr-3" style="width:34px; height:34px; background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                         <i class="fas fa-user-plus" style="color:#c9a84c; font-size:13px;"></i>
                     </div>
@@ -94,7 +94,7 @@
                                         Authorization <span style="color:#c9a84c;">*</span>
                                     </label>
                                     <div class="d-flex" style="gap:8px; flex-wrap:wrap;">
-                                        @foreach(['viewer' => '#6b7280', 'editor' => '#2563eb', 'approver' => '#16a34a'] as $lvl => $color)
+                                        @foreach(['viewer' => '#6b7280', 'editor' => 'var(--rd-primary-600)', 'approver' => '#16a34a'] as $lvl => $color)
                                         <div>
                                             <input type="radio" name="auth_level" id="auth_{{ $lvl }}" value="{{ $lvl }}"
                                                    class="d-none auth-radio"
@@ -171,7 +171,7 @@
                             Fields marked <strong style="color:#c9a84c;">*</strong> are required.
                         </small>
                         <button type="submit" class="btn px-4"
-                                style="background:#0a1628; color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:600; height:36px; border-bottom:2px solid #c9a84c; transition:all .18s;">
+                                style="background: var(--rd-surface); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:600; height:36px; border-bottom: 2px solid var(--rd-primary-600); transition:all .18s;">
                             <i class="fas fa-save mr-1" style="color:#c9a84c;"></i> Create Account
                         </button>
                     </div>

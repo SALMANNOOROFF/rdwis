@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="{{ asset('plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('plugins/jqvmap/jqvmap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
   <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
   <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
   <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
@@ -37,78 +38,23 @@
       </li>
     </ul>
 
-    <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav ml-auto align-items-center" style="gap: 8px;">
+      
       <li class="nav-item">
-        <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-          <i class="fas fa-search"></i>
+        <a class="nav-link d-flex align-items-center justify-content-center" data-widget="fullscreen" href="#" role="button" title="Full Screen" style="width: 36px; height: 36px; border-radius: 50%; background: var(--rd-neutral-100); border: 1px solid var(--rd-border); color: var(--rd-text1); transition: all 0.2s;">
+          <i class="fas fa-expand-arrows-alt" style="font-size: 13px;"></i>
         </a>
-        <div class="navbar-search-block">
-          <form class="form-inline">
-            <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-              <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                  <i class="fas fa-search"></i>
-                </button>
-                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
       </li>
 
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-comments"></i>
-          <span class="badge badge-danger navbar-badge">3</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <a href="#" class="dropdown-item">
-            <div class="media">
-              <img src="{{ asset('dist/img/user1-128x128.jpg') }}" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Brad Diesel
-                  <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">Call me whenever you can...</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-        </div>
-      </li>
-      
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        </div>
-      </li>
-      
+      {{-- Enhanced Red Logout Button --}}
       <li class="nav-item">
-        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-          <i class="fas fa-expand-arrows-alt"></i>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-widget="control-sidebar" data-controlsidebar-slide="true" href="#" role="button">
-          <i class="fas fa-th-large"></i>
-        </a>
+        <form id="global-logout-form-pur" action="{{ route('logout') }}" method="POST" class="d-inline m-0">
+            @csrf
+            <button type="submit" class="btn btn-danger btn-sm font-weight-bold d-flex align-items-center shadow-sm px-3 ml-1" style="border-radius: 20px; height: 34px; gap: 7px; font-size: 12.5px; background: #dc3545 !important; border-color: #dc3545 !important; color: #ffffff !important; box-shadow: 0 3px 8px rgba(220,53,69,0.3) !important;">
+                <i class="fas fa-sign-out-alt" style="font-size: 12px;"></i>
+                <span>Logout</span>
+            </button>
+        </form>
       </li>
     </ul>
   </nav>
@@ -321,7 +267,33 @@
         document.body.style.width = (100 / scale) + '%';
     }
 })();
+<!-- Preloader Auto-dismiss and complete cleanup -->
+<script>
+    (function() {
+        function removePreloader() {
+            var preloader = document.querySelector('.preloader');
+            if (preloader) {
+                preloader.style.opacity = '0';
+                preloader.style.backdropFilter = 'none';
+                preloader.style.webkitBackdropFilter = 'none';
+                preloader.style.pointerEvents = 'none';
+                setTimeout(function() {
+                    if (preloader && preloader.parentNode) {
+                        preloader.parentNode.removeChild(preloader);
+                    }
+                }, 350);
+            }
+        }
+        if (document.readyState === 'complete') {
+            setTimeout(removePreloader, 100);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(removePreloader, 150);
+            });
+        }
+        // Absolute fallback after 1s
+        setTimeout(removePreloader, 1000);
+    })();
 </script>
-
 </body>
 </html>

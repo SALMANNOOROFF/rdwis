@@ -70,12 +70,12 @@
             z-index: 2; font-size: 12px; color: #adb5bd; flex-shrink: 0; margin-right: 15px;
         }
         .stepper-item.completed .stepper-icon { background-color: #28a745; border-color: #28a745; color: #fff; }
-        .stepper-item.active .stepper-icon { background-color: #007bff; border-color: #007bff; color: #fff; animation: pulse-blue 2s infinite; }
+        .stepper-item.active .stepper-icon { background-color: var(--rd-primary-600); border-color: var(--rd-primary-600); color: #fff; animation: pulse-blue 2s infinite; }
 
         .stepper-label { font-size: 12px; font-weight: 700; color: #6c757d; line-height: 1.2; margin-bottom: 4px; }
         .stepper-date { font-size: 10px; color: #999; background: #f8f9fa; padding: 2px 8px; border-radius: 10px; }
         .stepper-item.completed .stepper-label { color: #28a745; }
-        .stepper-item.active .stepper-label { color: #007bff; }
+        .stepper-item.active .stepper-label { color: var(--rd-primary-600); }
 
         @keyframes pulse-blue {
             0% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4); }
@@ -191,7 +191,7 @@
     font-weight: 700;
 }
 
-.current-box { color: #007bff; }
+.current-box { color: var(--rd-primary-600); }
 .next-box { color: #6c757d; }
 
 .flow-arrow {
@@ -356,7 +356,7 @@
                                     <div class="col-6"><label>GST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($purchase->pcs_midtax ?? 0, 2) }}" readonly></div>
                                     <div class="col-6"><label>SST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($purchase->pcs_inttax ?? 0, 2) }}" readonly></div>
                                     <div class="col-6 mt-2"><label>Sub Total</label><input type="text" class="form-control text-right" value="{{ number_format($purchase->pcs_midprice ?? 0, 2) }}" readonly></div>
-                                    <div class="col-6 mt-2"><label>Final Total</label><input type="text" class="form-control text-right font-weight-bold text-primary" value="{{ number_format($purchase->pcs_price ?? 0, 2) }}" readonly style="background-color:#eef3ff;"></div>
+                                    <div class="col-6 mt-2"><label>Final Total</label><input type="text" class="form-control text-right font-weight-bold text-primary" value="{{ number_format($purchase->live_value ?? ($purchase->pcs_price ?? 0), 2) }}" readonly style="background-color:#eef3ff;"></div>
                                 </div>
                             </div>
                         </div>
@@ -674,7 +674,7 @@
         border-right: 0.5px solid rgba(0, 123, 255, 0.2) !important;
     }
     .bg-l1-header {
-        background-color: #007bff !important;
+        background-color: var(--rd-primary-600) !important;
     }
     /* Description cell wrap fix */
     .item-description-cell {

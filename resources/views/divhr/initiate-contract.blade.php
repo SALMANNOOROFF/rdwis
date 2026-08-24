@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 <div class="content-wrapper">
 <div class="contract-wrapper">
@@ -75,7 +75,7 @@
   }
 
   /* ─── COLOR ACCENT STRIPS ─── */
-  .glass-card.accent-blue::after   { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+  .glass-card.accent-blue::after   { background: linear-gradient(135deg, var(--rd-primary-600), var(--rd-primary-500)); }
   .glass-card.accent-amber::after  { background: linear-gradient(135deg, #f59e0b, #f97316); }
   .glass-card.accent-green::after  { background: linear-gradient(135deg, #10b981, #059669); }
   .glass-card.accent-red::after    { background: linear-gradient(135deg, #ef4444, #f43f5e); }
@@ -110,7 +110,7 @@
   }
 
   /* Icon wrapper colors */
-  .icon-blue   { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+  .icon-blue   { background: rgba(95,120,88,0.10); color: var(--rd-primary-600); }
   .icon-amber  { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
   .icon-green  { background: rgba(16, 185, 129, 0.1); color: #10b981; }
   .icon-red    { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
@@ -192,7 +192,7 @@
             </div>
           </div>
           <span class="gc-chip">
-            <i class="fas fa-circle" style="font-size:.4rem;color:#3b82f6"></i> Initiate Case &nbsp;•&nbsp; New Hiring
+            <i class="fas fa-circle" style="font-size:.4rem;color: var(--rd-primary-600)"></i> Initiate Case &nbsp;•&nbsp; New Hiring
           </span>
         </a>
       </div>

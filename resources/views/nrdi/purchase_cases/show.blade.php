@@ -7,7 +7,7 @@
 /* ===== SCOPED to .dg-page ===== */
 .dg-page { font-family:'Inter',sans-serif; }
 .text-gold { color: #f39c12 !important; }
-.bg-navy { background-color: #001f3f !important; }
+.bg-navy { background-color: var(--rd-surface3) !important; }
 .border-gold { border-top: 3px solid #f39c12 !important; }
 .border-left-gold { border-left: 5px solid #f39c12 !important; }
 
@@ -48,7 +48,7 @@
 .dg-fin-label { font-size:8px; letter-spacing:.6px; text-transform:uppercase; color:var(--rd-text3); margin-bottom:2px; font-weight:600; }
 .dg-fin-value { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; }
 
-.dg-prog-wrap { position:relative; height:12px; background:rgba(255,255,255,0.04); border-radius:20px; overflow:hidden; margin-bottom:4px; border:1px solid var(--rd-border); }
+.dg-prog-wrap { position:relative; height:12px; background: var(--rd-neutral-50); border-radius:20px; overflow:hidden; margin-bottom:4px; border:1px solid var(--rd-border); }
 .dg-prog-utilized { position:absolute; left:0; top:0; height:100%; background:var(--rd-text3); border-radius:20px 0 0 20px; width:0; transition:width 1s cubic-bezier(.4,0,.2,1) .2s; }
 .dg-prog-utilized.anim { width:var(--pw); }
 .dg-prog-case {
@@ -113,20 +113,20 @@
 .dg-tl-actor { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; color:var(--rd-text1); }
 .dg-tl-time { font-size:10px; color:var(--rd-text3); }
 .dg-tl-badge { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; margin:3px 0; letter-spacing:.5px; }
-.dg-tl-comment { font-size:11px; color:var(--rd-text2); font-style:italic; border-left:2px solid; padding:4px 8px; border-radius:0 4px 4px 0; margin-top:4px; line-height:1.5; background:rgba(255,255,255,0.03); }
+.dg-tl-comment { font-size:11px; color:var(--rd-text2); font-style:italic; border-left:2px solid; padding:4px 8px; border-radius:0 4px 4px 0; margin-top:4px; line-height:1.5; background: var(--rd-neutral-50); }
 
 /* Financial Report Styles */
-.fin-card-glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
-.fin-card-glass:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.fin-card-glass { background: var(--rd-neutral-50); border: 1px solid var(--rd-border); transition: all 0.3s; }
+.fin-card-glass:hover { background: var(--rd-neutral-50); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
 .border-accent { border-color: rgba(243,156,18,0.3) !important; }
-.bg-navy-darker { background: #000c1a !important; }
+.bg-navy-darker { background: var(--rd-neutral-200) !important; }
 .subhead-list-wrap::-webkit-scrollbar { width: 4px; }
 .subhead-list-wrap::-webkit-scrollbar-thumb { background: var(--rd-accent); border-radius: 10px; }
 .fin-table-modern thead th { letter-spacing: 1px; font-weight: 600; }
 .fin-table-modern tbody td { border-top: 1px solid rgba(255,255,255,0.03); }
 
 /* Custom for Initiation */
-.edit-input { background: #001226 !important; border: 1px solid var(--rd-accent) !important; color: #fff !important; font-size: 1.5rem !important; font-weight: bold !important; padding: 5px 15px !important; border-radius: 8px !important; }
+.edit-input { background: var(--rd-surface) !important; border: 1px solid var(--rd-accent) !important; color: #fff !important; font-size: 1.5rem !important; font-weight: bold !important; padding: 5px 15px !important; border-radius: 8px !important; }
 </style>
 
 <div class="content-wrapper dg-page">
@@ -138,7 +138,7 @@
                 $winnerQuote  = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->first() : null;
                 $sortedQ      = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->values() : collect([]);
 
-                $caseValue      = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
+                $caseValue      = (float)($purchase->live_value ?? ($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0)));
                 
                 // Live Financials from $head (Project)
                 $totalBudget    = (float)($head->prj_aprvcost ?? 0); 
@@ -181,8 +181,8 @@
                         <a href="{{ route('purchase.case_detail', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-info rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(23,162,184,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="fas fa-list-alt mr-1"></i> CASE DETAIL
                         </a>
-                        <a href="{{ route('purchase.market_research', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-success rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(40,167,69,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <i class="fas fa-search mr-1"></i> MARKET RESEARCH
+                        <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-success rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(40,167,69,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
                         </a>
                         <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(0,123,255,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="fas fa-file-alt mr-1"></i> MINUTE VIEW
@@ -201,7 +201,7 @@
                             <button type="submit" class="btn btn-primary btn-xs rajdhani font-weight-bold px-3 py-1">SAVE TITLE</button>
                         </form>
                     @else
-                        <span style="font-size:14px; color:#fff; font-weight:700;">Title:</span>&nbsp;<span style="font-size:14px; color:#fff;">{{ $purchase->pcs_title }}</span>
+                        <span style="font-size:14px; color:var(--rd-text1); font-weight:700;">Title:</span>&nbsp;<span style="font-size:14px; color:#fff;">{{ $purchase->pcs_title }}</span>
                     @endif
                 </div>
             </div>
@@ -317,7 +317,7 @@
                                     </div>
                                     {{-- Expandable Remarks --}}
                                     @if($hasRemarks)
-                                    <div id="remarks-{{$decision->pdec_id}}" style="display: none; padding: 8px 12px; margin-top: 6px; margin-left: 22px; font-size: 12px; color: var(--rd-text1); line-height: 1.6; background: rgba(255,255,255,0.02); border-left: 2px solid {{$color}}; border-radius: 0 4px 4px 0;">
+                                    <div id="remarks-{{$decision->pdec_id}}" style="display: none; padding: 8px 12px; margin-top: 6px; margin-left: 22px; font-size: 12px; color: var(--rd-text1); line-height: 1.6; background: var(--rd-neutral-50); border-left: 2px solid {{$color}}; border-radius: 0 4px 4px 0;">
                                         {!! $decision->pdec_remarks !!}
                                     </div>
                                     @endif
@@ -398,7 +398,6 @@
                                 @if($sortedQ->count() > 3)
                                     <span class="text-muted mr-1" style="font-size: 10px; font-weight: 500;">(+{{ $sortedQ->count() - 3 }} more quotes)</span>
                                 @endif
-                                <button class="dg-cs-btn" data-toggle="modal" data-target="#detailedCSModal"><i class="fas fa-file-alt mr-1"></i> Comparative Statement</button>
                                 @if($canEdit)
                                     <button class="btn btn-outline-light btn-xs rajdhani" data-toggle="modal" data-target="#addQuotationModal"><i class="fas fa-plus"></i></button>
                                 @endif
@@ -411,7 +410,7 @@
                                     $isWinner = ($qi === 0);
                                     $isActive = ((float)$q->qte_price === (float)$purchase->pcs_price);
                                 @endphp
-                                <div style="background: rgba(255,255,255,0.02); border: 1px solid {{ $isActive ? 'var(--rd-success)' : 'rgba(255,255,255,0.08)' }}; border-radius: 6px; padding: 8px; position:relative;">
+                                <div style="background: var(--rd-neutral-50); border: 1px solid {{ $isActive ? 'var(--rd-success)' : 'rgba(255,255,255,0.08)' }}; border-radius: 6px; padding: 8px; position:relative;">
                                     @if($isActive)
                                         <div style="position:absolute; top:-6px; right:-6px; background:var(--rd-success); color:#fff; font-size:8px; font-weight:bold; padding:2px 6px; border-radius:8px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">SELECTED</div>
                                     @endif
@@ -421,7 +420,7 @@
                                     <div style="font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; color: {{ $isActive ? 'var(--rd-success)' : 'var(--rd-text1)' }}; margin-bottom: 4px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $q->firm?->frm_name ?? $q->qte_firmname }}">
                                         {{ $q->firm?->frm_name ?? $q->qte_firmname }}
                                     </div>
-                                    <div style="font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 800; color: #fff;">
+                                    <div style="font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 800; color: var(--rd-text1);">
                                         PKR {{ number_format($q->qte_price) }}
                                     </div>
                                 </div>
@@ -478,7 +477,7 @@
                         </div>
                         <div class="p-3">
                             @forelse($purchase->attachments as $file)
-                                <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                                <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border);">
                                     <i class="far fa-file-pdf text-danger mr-2" style="font-size: 16px;"></i>
                                     <div class="flex-grow-1 overflow-hidden">
                                         <div class="small font-weight-bold text-white text-nowrap" style="overflow: hidden; text-overflow: ellipsis; font-size: 11px;">{{ $file->pat_filename }}</div>
@@ -502,8 +501,8 @@
 {{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
 <div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content" style="background: #000c1a; border: 2px solid var(--rd-accent); border-radius: 12px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
-            <div class="modal-header border-bottom border-dark py-2 px-4 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.03);">
+        <div class="modal-content" style="background: var(--rd-surface); border: 2px solid var(--rd-primary-600); border-radius: 12px; overflow: hidden; box-shadow: var(--rd-shadow-lg);">
+            <div class="modal-header border-bottom border-dark py-2 px-4 d-flex align-items-center justify-content-between" style="background: var(--rd-neutral-50);">
                 <div class="d-flex align-items-center">
                     <div class="mr-3" style="font-size: 24px; color: var(--rd-accent);"><i class="fas fa-chart-network"></i></div>
                     <div>
@@ -514,9 +513,9 @@
                 <button type="button" class="close text-white opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
             </div>
             
-            <div class="modal-body p-0" style="background: #000c1a;">
+            <div class="modal-body p-0" style="background: var(--rd-surface);">
                 {{-- Top Summary bar --}}
-                <div class="row no-gutters border-bottom border-dark" style="background: rgba(0,0,0,0.4);">
+                <div class="row no-gutters border-bottom border-dark" style="background: var(--rd-neutral-200);">
                     <div class="col-md-3 border-right border-dark p-3">
                         <div class="small text-muted rajdhani">ALLOCATION</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->allocation ?? 0) }}</div>
@@ -537,7 +536,7 @@
 
                 <div class="row no-gutters">
                     {{-- Left Pane: Detailed Metrics Table --}}
-                    <div class="col-xl-5 border-right border-dark p-4" style="background: rgba(0,0,0,0.2);">
+                    <div class="col-xl-5 border-right border-dark p-4" style="background: var(--rd-neutral-200);">
                         <div class="d-flex justify-content-between align-items-end mb-3">
                             <h6 class="rajdhani text-info font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
                             <div class="small text-muted rajdhani">FIGURES IN PKR</div>
@@ -545,7 +544,7 @@
 
                         <div class="fin-table-modern table-responsive rounded border border-dark overflow-auto">
                             <table class="table table-sm table-dark mb-0 rajdhani" style="font-size: 13px;">
-                                <thead style="background: rgba(255,255,255,0.03);">
+                                <thead style="background: var(--rd-neutral-50);">
                                     <tr class="text-muted">
                                         <th class="pl-3 border-0">METRIC</th>
                                         <th class="text-right border-0" style="color: #4da3ff;">PROJECT</th>
@@ -566,7 +565,7 @@
                                         <td class="text-right text-danger">{{ number_format($head->cf_expenditure ?? 0) }}</td>
                                         <td class="text-right pr-3" style="color: #4dff88;">{{ number_format($head->prj_expenditure ?? 0) }}</td>
                                     </tr>
-                                    <tr style="background: rgba(255,255,255,0.01);">
+                                    <tr style="background: var(--rd-neutral-50);">
                                         <td class="pl-3 text-info font-weight-bold">Balance</td>
                                         <td class="text-right text-info font-weight-bold">{{ number_format($head->pcc_balance ?? 0) }}</td>
                                         <td class="text-right text-info font-weight-bold">{{ number_format($head->cf_balance ?? 0) }}</td>
@@ -647,7 +646,7 @@
                             {{-- Mini Category Charts --}}
                             @foreach(array_slice($subheads ?? [], 0, 3) as $idx => $sh)
                             <div class="col-md-4 mb-4">
-                                <div class="subhead-mini-card p-3 rounded border border-dark text-center h-100" style="background: rgba(255,255,255,0.01);">
+                                <div class="subhead-mini-card p-3 rounded border border-dark text-center h-100" style="background: var(--rd-neutral-50);">
                                     <div class="d-flex justify-content-center mb-2" style="height: 80px;">
                                         <canvas id="chartShMini{{ $idx }}"></canvas>
                                     </div>
@@ -665,7 +664,7 @@
                                 <div class="dg-sec-label mb-3"><i class="fas fa-th-list fa-xs"></i> Category Metrics Breakdown</div>
                                 <div class="table-responsive rounded border border-dark">
                                     <table class="table table-sm table-dark table-hover mb-0 rajdhani" style="font-size: 12px;">
-                                        <thead style="background: rgba(0,0,0,0.4);">
+                                        <thead style="background: var(--rd-neutral-200);">
                                             <tr class="text-muted small">
                                                 <th class="pl-3">SUBHEAD</th>
                                                 <th class="text-right">EXPENDITURE</th>
@@ -695,7 +694,7 @@
                         {{-- Large Comparison Chart --}}
                         <div class="row">
                             <div class="col-lg-8">
-                                <div class="p-4 rounded border border-dark" style="background: rgba(0,0,0,0.3); height: 300px;">
+                                <div class="p-4 rounded border border-dark" style="background: var(--rd-neutral-200); height: 300px;">
                                     <canvas id="finDetailedChart"></canvas>
                                 </div>
                             </div>
@@ -712,7 +711,7 @@
                 </div>
             </div>
             
-            <div class="modal-footer border-top border-dark py-2 px-4 d-flex justify-content-between" style="background: rgba(0,0,0,0.3);">
+            <div class="modal-footer border-top border-dark py-2 px-4 d-flex justify-content-between" style="background: var(--rd-neutral-200);">
                 <div class="small text-muted rajdhani"><i class="fas fa-shield-check text-success mr-1"></i> RDWIS FINANCIAL AUDIT ENGINE ACTIVE</div>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-outline-info btn-xs rajdhani font-weight-bold px-4" onclick="initFinancialIntelligenceCharts()">

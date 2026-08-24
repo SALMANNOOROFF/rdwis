@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 @php
@@ -73,17 +73,17 @@
                 {{-- Left Column: Main Details --}}
                 <div class="col-md-8">
                     {{-- 1. Employee Info --}}
-                    <div class="card bg-dark border-0 mb-4" style="border-radius:12px; border-top: 4px solid var(--rd-accent) !important;">
+                    <div class="card bg-white border-0 mb-4" style="border-radius:12px; border-top: 4px solid var(--rd-accent) !important;">
                         <div class="card-body">
                             <h6 class="text-uppercase small font-weight-bold mb-3" style="color:var(--rd-accent);">Personnel Information</h6>
                             <div class="row">
                                 <div class="col-md-6 mb-2">
                                     <div class="text-muted small">Employee Name</div>
-                                    <div class="font-weight-bold text-white h5">{{ $t->employee_name }}</div>
+                                    <div class="font-weight-bold text-dark h5">{{ $t->employee_name }}</div>
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <div class="text-muted small">Department / Designation</div>
-                                    <div class="text-white">{{ $t->department }} · <span class="text-info">{{ $t->designation }}</span></div>
+                                    <div class="text-dark">{{ $t->department }} · <span class="text-info">{{ $t->designation }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -96,22 +96,22 @@
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <div class="text-muted small text-uppercase font-weight-bold">Training Title</div>
-                                    <div class="h4 text-white font-weight-bold">{{ $t->title }}</div>
+                                    <div class="h4 text-dark font-weight-bold">{{ $t->title }}</div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-muted small">Training Type</div>
-                                    <div class="text-white bg-dark d-inline-block px-2 py-1 rounded small border border-secondary mt-1">
+                                    <div class="text-dark bg-white d-inline-block px-2 py-1 rounded small border border-secondary mt-1">
                                         <i class="fas fa-{{ $t->type == 'inland' ? 'plane' : ($t->type == 'inhouse' ? 'building' : 'globe') }} mr-1 text-info"></i>
                                         {{ ucfirst($t->type) }} Training
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-muted small">Institute / Platform</div>
-                                    <div class="text-white">{{ $t->institute }}</div>
+                                    <div class="text-dark">{{ $t->institute }}</div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-muted small">Duration</div>
-                                    <div class="text-white">{{ $t->start_date }} — {{ $t->end_date }} ({{ $t->duration }})</div>
+                                    <div class="text-dark">{{ $t->start_date }} — {{ $t->end_date }} ({{ $t->duration }})</div>
                                 </div>
                             </div>
 
@@ -120,19 +120,19 @@
                             <div class="row mt-2">
                                 <div class="col-md-4 mb-2">
                                     <div class="text-muted small">City / Location</div>
-                                    <div class="text-white">{{ $t->city }}</div>
+                                    <div class="text-dark">{{ $t->city }}</div>
                                 </div>
                                 <div class="col-md-8 mb-2">
                                     <div class="text-muted small">Venue</div>
-                                    <div class="text-white">{{ $t->venue }}</div>
+                                    <div class="text-dark">{{ $t->venue }}</div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-muted small">Travel Mode</div>
-                                    <div class="text-white">{{ $t->travel_mode }}</div>
+                                    <div class="text-dark">{{ $t->travel_mode }}</div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-muted small">Distance (One Way)</div>
-                                    <div class="text-white">{{ $t->distance }} KM</div>
+                                    <div class="text-dark">{{ $t->distance }} KM</div>
                                 </div>
                             </div>
                             @elseif($t->type == 'inhouse')
@@ -140,15 +140,15 @@
                             <div class="row mt-2">
                                 <div class="col-md-4 mb-2">
                                     <div class="text-muted small">Trainer</div>
-                                    <div class="text-white">{{ $t->trainer }}</div>
+                                    <div class="text-dark">{{ $t->trainer }}</div>
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <div class="text-muted small">Location / Hall</div>
-                                    <div class="text-white">{{ $t->hall }}</div>
+                                    <div class="text-dark">{{ $t->hall }}</div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="text-muted small">Expected Participants</div>
-                                    <div class="text-white">{{ $t->num_participants }}</div>
+                                    <div class="text-dark">{{ $t->num_participants }}</div>
                                 </div>
                             </div>
                             @else
@@ -156,7 +156,7 @@
                             <div class="row mt-2">
                                 <div class="col-md-4 mb-2">
                                     <div class="text-muted small">Platform</div>
-                                    <div class="text-white">{{ $t->platform }}</div>
+                                    <div class="text-dark">{{ $t->platform }}</div>
                                 </div>
                                 <div class="col-md-8 mb-2">
                                     <div class="text-muted small">Course Link</div>
@@ -174,25 +174,25 @@
                     {{-- TA/DA Financial Summary --}}
                     @if($t->type == 'inland')
                     <div class="card shadow-sm border-0 mb-4" style="background:var(--rd-surface); border-radius:12px; overflow:hidden;">
-                        <div class="card-header bg-dark border-0">
+                        <div class="card-header bg-white border-0">
                             <h6 class="mb-0 font-weight-bold text-uppercase small text-info"><i class="fas fa-coins mr-2"></i>Financial Claim (TA/DA) Summary</h6>
                         </div>
                         <div class="card-body p-0">
                             <table class="table table-borderless m-0" style="color:var(--rd-text2);">
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                     <td class="pl-4 py-3">Daily Allowance ({{ $t->num_days }} Days @ PKR {{ number_format($t->da_rate) }})</td>
-                                    <td class="text-right pr-4 text-white font-weight-bold">PKR {{ number_format($t->total_da) }}</td>
+                                    <td class="text-right pr-4 text-dark font-weight-bold">PKR {{ number_format($t->total_da) }}</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                     <td class="pl-4 py-3">Travel Cost ({{ $t->travel_mode }})</td>
-                                    <td class="text-right pr-4 text-white font-weight-bold">PKR {{ number_format($t->travel_cost) }}</td>
+                                    <td class="text-right pr-4 text-dark font-weight-bold">PKR {{ number_format($t->travel_cost) }}</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                     <td class="pl-4 py-3">Hotel / Accommodation Cost</td>
-                                    <td class="text-right pr-4 text-white font-weight-bold">PKR {{ number_format($t->hotel_cost) }}</td>
+                                    <td class="text-right pr-4 text-dark font-weight-bold">PKR {{ number_format($t->hotel_cost) }}</td>
                                 </tr>
-                                <tr class="bg-dark" style="border-top: 1px solid var(--rd-accent) !important;">
-                                    <td class="pl-4 py-4 h5 font-weight-bold text-white mb-0">Total Estimated Claim</td>
+                                <tr class="bg-white" style="border-top: 1px solid var(--rd-accent) !important;">
+                                    <td class="pl-4 py-4 h5 font-weight-bold text-dark mb-0">Total Estimated Claim</td>
                                     <td class="text-right pr-4 py-4 h4 font-weight-bold" style="color:var(--rd-accent);">PKR {{ number_format($t->total_claim) }}</td>
                                 </tr>
                             </table>
@@ -209,11 +209,11 @@
                             <h6 class="text-uppercase small font-weight-bold mb-3" style="color:var(--rd-text3);">Case Summary</h6>
                             <div class="mb-3">
                                 <div class="text-muted small">Purpose / Objective</div>
-                                <div class="text-white">{{ $t->purpose }}</div>
+                                <div class="text-dark">{{ $t->purpose }}</div>
                             </div>
                             <div class="mb-0">
                                 <div class="text-muted small">Remarks</div>
-                                <div class="text-white p-2 rounded mt-1" style="background:rgba(255,255,255,0.03); border-left:3px solid var(--rd-text3);">
+                                <div class="text-dark p-2 rounded mt-1" style="background: var(--rd-neutral-50); border-left:3px solid var(--rd-text3);">
                                     {{ $t->remarks }}
                                 </div>
                             </div>
@@ -227,7 +227,7 @@
                             <div class="d-flex align-items-center p-3 rounded" style="background:var(--rd-background); border:1px dashed var(--rd-border);">
                                 <i class="fas fa-file-pdf fa-2x text-danger mr-3"></i>
                                 <div class="flex-grow-1 overflow-hidden">
-                                    <div class="text-white text-truncate font-weight-bold small">training_invite_v2.pdf</div>
+                                    <div class="text-dark text-truncate font-weight-bold small">training_invite_v2.pdf</div>
                                     <div class="text-muted extra-small">2.4 MB · Application Form</div>
                                 </div>
                                 <a href="#" class="btn btn-xs btn-outline-info ml-2"><i class="fas fa-download"></i></a>
@@ -241,7 +241,7 @@
                             <h6 class="text-uppercase small font-weight-bold mb-3" style="color:var(--rd-accent);">Approval Actions</h6>
                             <button class="btn btn-success btn-block font-weight-bold py-2 mb-2 shadow-sm"><i class="fas fa-check-circle mr-2"></i> Approve Case</button>
                             <button class="btn btn-outline-danger btn-block font-weight-bold py-2 mb-3"><i class="fas fa-times-circle mr-2"></i> Reject / Return</button>
-                            <textarea class="form-control bg-dark border-secondary text-white small" rows="2" placeholder="Approval remarks..."></textarea>
+                            <textarea class="form-control bg-white border-secondary text-dark small" rows="2" placeholder="Approval remarks..."></textarea>
                         </div>
                     </div>
                 </div>

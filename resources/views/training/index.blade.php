@@ -24,9 +24,9 @@
             <div class="card shadow-sm border-0" style="background:var(--rd-surface); border-radius:12px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0 text-white">
+                        <table class="table table-hover mb-0 text-dark">
                             <thead>
-                                <tr class="extra-small text-uppercase tracking-wider text-muted" style="background: rgba(0,0,0,0.2);">
+                                <tr class="extra-small text-uppercase tracking-wider text-muted" style="background: var(--rd-neutral-200);">
                                     <th class="py-3 pl-4 border-0">ID</th>
                                     <th class="py-3 border-0">Type</th>
                                     <th class="py-3 border-0">Topic / Purpose</th>
@@ -60,9 +60,6 @@
 
 @section('scripts')
 <style>
-    :root {
-        --rd-surface: #1e1e2d;
-    }
     .extra-small { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; }
 </style>
 @endsection

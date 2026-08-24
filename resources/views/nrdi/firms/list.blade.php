@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
 .firms-list-page {
     font-family: 'Inter', sans-serif;
-    background: #080b0f !important;
+    background: var(--rd-bg) !important;
     min-height: 100vh;
-    color: #cbd5e0;
+    color: var(--rd-text1);
     padding-top: 20px;
     padding-bottom: 50px;
 }
@@ -19,7 +19,7 @@
 }
 
 .card-cyber {
-    background: rgba(18, 26, 34, 0.85);
+    background: var(--rd-surface);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
@@ -30,11 +30,11 @@
     border-left: 4px solid #00BFFF;
     padding: 14px 18px;
     border-radius: 8px;
-    background: rgba(10, 15, 22, 0.6);
+    background: var(--rd-surface);
 }
 
 .form-control-cyber {
-    background: rgba(10, 15, 22, 0.9);
+    background: var(--rd-surface);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #fff;
     border-radius: 8px;
@@ -48,7 +48,7 @@
 }
 
 .table-cyber th {
-    background: rgba(18, 26, 34, 0.95) !important;
+    background: var(--rd-surface) !important;
     border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
     color: #67e8f9 !important;
     font-family: 'Rajdhani', sans-serif;
@@ -66,18 +66,18 @@
     font-size: 13px;
 }
 .table-cyber tr:hover {
-    background: rgba(255, 255, 255, 0.02) !important;
+    background: var(--rd-neutral-50) !important;
 }
 
 .pill-filter {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--rd-neutral-50);
+    border: 1px solid var(--rd-border);
     border-radius: 20px;
     padding: 5px 14px;
     font-family: 'Rajdhani', sans-serif;
     font-size: 12px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--rd-text3);
     cursor: pointer;
     transition: all 0.2s ease;
     text-decoration: none !important;
@@ -101,7 +101,7 @@
                     <i class="fas fa-list-ul mr-1"></i> ALL REGISTERED FIRMS
                 </span>
             </div>
-            <h2 class="font-weight-bold text-white rajdhani m-0" style="font-size: 2rem;">
+            <h2 class="font-weight-bold text-dark rajdhani m-0" style="font-size: 2rem;">
                 <i class="fas fa-store mr-2 text-cyan"></i>Registered Suppliers & Firms Directory
             </h2>
             <p class="text-muted m-0 small">Complete list of registered firms, awarded procurement case history, and vendor performance intelligence.</p>
@@ -125,7 +125,7 @@
                     <span class="rajdhani text-muted font-weight-bold text-uppercase small">Total Registered</span>
                     <i class="fas fa-building text-info"></i>
                 </div>
-                <div class="rajdhani font-weight-bold text-white" style="font-size: 26px;">{{ $totalFirms }}</div>
+                <div class="rajdhani font-weight-bold text-dark" style="font-size: 26px;">{{ $totalFirms }}</div>
             </div>
         </div>
 
@@ -145,7 +145,7 @@
                     <span class="rajdhani text-muted font-weight-bold text-uppercase small">Awarded Cases</span>
                     <i class="fas fa-shopping-bag text-primary"></i>
                 </div>
-                <div class="rajdhani font-weight-bold text-white" style="font-size: 26px;">{{ $awardedFirmsCount }} <span class="small text-muted" style="font-size: 13px;">firms</span></div>
+                <div class="rajdhani font-weight-bold text-dark" style="font-size: 26px;">{{ $awardedFirmsCount }} <span class="small text-muted" style="font-size: 13px;">firms</span></div>
             </div>
         </div>
 
@@ -182,7 +182,7 @@
     {{-- Complete List Table --}}
     <div class="card-cyber p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="rajdhani font-weight-bold text-white m-0">
+            <h4 class="rajdhani font-weight-bold text-dark m-0">
                 <i class="fas fa-table text-info mr-2"></i>Firms Master Roster
             </h4>
             <span class="badge badge-info rajdhani px-3 py-2" id="visibleFirmsCount" style="font-size: 13px;">{{ $totalFirms }} Firms</span>
@@ -217,7 +217,7 @@
                         data-awarded="{{ $f->approved_cases_count > 0 ? '1' : '0' }}">
                         <td class="rajdhani text-info font-weight-bold">#{{ $f->frm_id }}</td>
                         <td>
-                            <div class="font-weight-bold text-white" style="font-size: 14px;">{{ $f->frm_name }}</div>
+                            <div class="font-weight-bold text-dark" style="font-size: 14px;">{{ $f->frm_name }}</div>
                             @if(!empty($f->frm_notes))
                                 <div class="small text-muted">{{ \Illuminate\Support\Str::limit($f->frm_notes, 40) }}</div>
                             @endif
@@ -227,11 +227,11 @@
                             <div class="small text-muted mt-1">{{ $f->frm_type }}</div>
                         </td>
                         <td>
-                            <div class="small text-muted">NTN: <strong class="text-white">{{ $f->frm_ntn }}</strong></div>
-                            <div class="small text-muted">GST: <strong class="text-white">{{ $f->frm_gst }}</strong></div>
+                            <div class="small text-muted">NTN: <strong class="text-dark">{{ $f->frm_ntn }}</strong></div>
+                            <div class="small text-muted">GST: <strong class="text-dark">{{ $f->frm_gst }}</strong></div>
                         </td>
                         <td>
-                            <div class="text-white"><i class="fas fa-map-marker-alt text-danger mr-1"></i>{{ $f->main_city }}</div>
+                            <div class="text-dark"><i class="fas fa-map-marker-alt text-danger mr-1"></i>{{ $f->main_city }}</div>
                             <div class="small text-muted">{{ $f->offices_count }} Office(s) | {{ $f->persons_count }} Contact(s)</div>
                         </td>
                         <td class="text-center">
@@ -270,10 +270,10 @@
 {{-- Firm Full Profile / Dossier Modal --}}
 <div class="modal fade" id="firmDossierModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-        <div class="modal-content bg-dark border border-secondary text-white">
+        <div class="modal-content bg-white border border-secondary text-dark">
             <div class="modal-header border-secondary">
                 <h5 class="modal-title rajdhani font-weight-bold" id="dossierModalTitle">Firm Profile & Dossier</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -373,14 +373,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('dossierModalTitle').innerText = `${f.frm_name} - Dossier Profile`;
 
                     let officesHtml = (res.offices || []).map(o => `
-                        <div class="p-2 mb-2 rounded bg-dark border border-secondary">
+                        <div class="p-2 mb-2 rounded bg-white border border-secondary">
                             <strong>${o.off_name || 'Office'}</strong> (${o.off_city || 'City'})
                             <div class="small text-muted">${o.off_address || 'No address specified'}</div>
                         </div>
                     `).join('') || '<div class="text-muted small">No offices recorded.</div>';
 
                     let personsHtml = (res.persons || []).map(p => `
-                        <div class="p-2 mb-2 rounded bg-dark border border-secondary">
+                        <div class="p-2 mb-2 rounded bg-white border border-secondary">
                             <strong>${p.per_title || ''} ${p.per_name}</strong> - <span class="text-info">${p.per_desig || 'Personnel'}</span>
                             <div class="small text-muted">Dept: ${p.per_dept || 'N/A'} | Expertise: ${p.per_exprt || 'N/A'}</div>
                         </div>
@@ -413,10 +413,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     modalBody.innerHTML = `
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h3 class="rajdhani text-white font-weight-bold m-0">${f.frm_name}</h3>
+                                <h3 class="rajdhani text-dark font-weight-bold m-0">${f.frm_name}</h3>
                                 <div class="text-muted small">Entity: ${f.frm_entity || 'N/A'} | Type: ${f.frm_type || 'N/A'}</div>
                                 <div class="mt-2 text-muted small">
-                                    NTN: <strong class="text-white">${f.frm_ntn || 'N/A'}</strong> | GST: <strong class="text-white">${f.frm_gst || 'N/A'}</strong>
+                                    NTN: <strong class="text-dark">${f.frm_ntn || 'N/A'}</strong> | GST: <strong class="text-dark">${f.frm_gst || 'N/A'}</strong>
                                 </div>
                             </div>
                             <div class="col-md-6 text-md-right">

@@ -1,16 +1,16 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-.proc-page { font-family: 'Inter', sans-serif; background: #080b0f; min-height: 100vh; color: #cbd5e0; }
+.proc-page { font-family: 'Inter', sans-serif; background: var(--rd-bg); min-height: 100vh; color: var(--rd-text1); }
 .rajdhani { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
-.metric-card { background: #0d1218; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; transition: transform 0.2s; }
-.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #8a96a3; }
+.metric-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 12px; transition: transform 0.2s; }
+.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--rd-text3); }
 .metric-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: #fff; line-height: 1; margin-top: 5px; }
-.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #8a96a3; background: #0f161e; border: none !important; padding: 14px; }
-.dg-case-table td { padding: 14px; color: #cbd5e0; vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.08); }
-.dg-case-table tr:hover { background: rgba(255,255,255,0.02); }
+.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--rd-text3); background: var(--rd-surface3); border: none !important; padding: 14px; }
+.dg-case-table td { padding: 14px; color: var(--rd-text1); vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.08); }
+.dg-case-table tr:hover { background: var(--rd-neutral-50); }
 </style>
 
 <div class="content-wrapper proc-page pt-4">
@@ -38,7 +38,7 @@
         <div class="metric-card mb-5 overflow-hidden shadow-lg" style="border-top: 5px solid var(--rd-primary);">
             <div class="p-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(to right, #0f172a, #101c3d) !important;">
                 <h6 class="m-0 rajdhani text-white font-weight-bold"><i class="fas fa-inbox mr-2 text-primary"></i> INCOMING SCRUTINY QUEUE</h6>
-                <div class="badge badge-dark rajdhani px-4 py-2" style="font-size: 10px; border: 1px solid rgba(255,255,255,0.05);">PENDING: {{ $caseCount }}</div>
+                <div class="badge badge-dark rajdhani px-4 py-2" style="font-size: 10px; border: 1px solid var(--rd-border);">PENDING: {{ $caseCount }}</div>
             </div>
             <div class="table-responsive">
                 <table class="table dg-case-table mb-0">
@@ -89,14 +89,14 @@
 
         {{-- Action Taken Table (Processed Cases) --}}
         <div class="metric-card overflow-hidden shadow-lg mt-5" style="border-top: 5px solid #64748b; opacity: 0.9;">
-            <div class="p-3 d-flex justify-content-between align-items-center" style="background: #0f161e !important;">
+            <div class="p-3 d-flex justify-content-between align-items-center" style="background: var(--rd-surface3) !important;">
                 <h6 class="m-0 rajdhani text-white font-weight-bold"><i class="fas fa-history mr-2 text-muted"></i> ACTION TAKEN (RECENTLY PROCESSED)</h6>
                 <div class="small text-muted rajdhani">LAST 10 CASES</div>
             </div>
             <div class="table-responsive">
                 <table class="table dg-case-table mb-0">
                     <thead>
-                        <tr style="background: #0d1218;">
+                        <tr style="background: var(--rd-surface);">
                             <th class="pl-4">ID</th>
                             <th>Initiator</th>
                             <th>Case Title</th>
@@ -115,7 +115,7 @@
                             </td>
                             <td class="text-right">
                                 @php $lastDec = $p->latestDecision; @endphp
-                                <span class="badge badge-dark px-2 py-1 rajdhani" style="font-size: 9px; border: 1px solid rgba(255,255,255,0.05);">
+                                <span class="badge badge-dark px-2 py-1 rajdhani" style="font-size: 9px; border: 1px solid var(--rd-border);">
                                     {{ strtoupper($lastDec->pdec_action ?? 'N/A') }}
                                 </span>
                             </td>
@@ -123,7 +123,7 @@
                                 <span class="small font-weight-bold text-{{ strpos($p->pcs_status, 'Rejected') !== false ? 'danger' : 'success' }}">{{ $p->pcs_status }}</span>
                             </td>
                             <td class="text-right pr-4">
-                                <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-outline-light btn-xs rajdhani" style="border: 1px solid rgba(255,255,255,0.1);">VIEW LOG</a>
+                                <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-outline-light btn-xs rajdhani" style="border: 1px solid var(--rd-border);">VIEW LOG</a>
                             </td>
                         </tr>
                         @empty

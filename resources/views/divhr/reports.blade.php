@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -17,7 +17,7 @@
         font-weight: 700;
     }
     .form-control-cyber {
-        background-color: rgba(8, 11, 15, 0.8) !important;
+        background-color: var(--rd-neutral-50) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         color: #fff !important;
         border-radius: 8px !important;
@@ -40,35 +40,46 @@
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
         transition: all 0.2s ease;
     }
-    .btn-cyber-primary:hover {
-        background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
-        color: #fff;
-        transform: translateY(-1px);
-    }
-    .btn-cyber-secondary {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        color: #fff;
+    .btn-cyber-primary {
+        background: var(--rd-primary-600) !important;
+        color: #fff !important;
         border: none;
         padding: 8px 24px;
         border-radius: 20px;
         font-weight: 600;
         font-size: 13px;
-        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        box-shadow: var(--rd-shadow-sm);
+        transition: all 0.2s ease;
+    }
+    .btn-cyber-primary:hover {
+        background: var(--rd-primary-700) !important;
+        color: #fff !important;
+        transform: translateY(-1px);
+    }
+    .btn-cyber-secondary {
+        background: var(--rd-success) !important;
+        color: #fff !important;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+        box-shadow: var(--rd-shadow-sm);
         transition: all 0.2s ease;
     }
     .btn-cyber-secondary:hover {
-        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
-        color: #fff;
+        background: var(--rd-success-dark) !important;
+        color: #fff !important;
         transform: translateY(-1px);
     }
     .columns-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 10px;
-        background: rgba(8, 11, 15, 0.5);
+        background: var(--rd-neutral-50) !important;
         padding: 14px;
         border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--rd-border) !important;
         max-height: 180px;
         overflow-y: auto;
     }
@@ -78,24 +89,24 @@
         gap: 8px;
         cursor: pointer;
         font-size: 12px;
-        color: #cbd5e1;
+        color: var(--rd-text1) !important;
         margin: 0;
         user-select: none;
     }
     .checkbox-option input[type="checkbox"] {
-        accent-color: #67e8f9;
+        accent-color: var(--rd-primary-600) !important;
         cursor: pointer;
         width: 15px;
         height: 15px;
     }
     .table-cyber {
         font-size: 12.5px;
-        color: #e2e8f0;
+        color: var(--rd-text1);
     }
     .table-cyber thead th {
-        background-color: #0f172a !important;
-        color: #67e8f9 !important;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+        background-color: var(--rd-surface3) !important;
+        color: var(--rd-text2) !important;
+        border-bottom: 2px solid var(--rd-border) !important;
         font-weight: 700;
         text-transform: uppercase;
         font-size: 11px;
@@ -104,11 +115,12 @@
     }
     .table-cyber tbody td {
         padding: 10px 12px;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-top: 1px solid var(--rd-border);
         vertical-align: middle;
+        color: var(--rd-text1) !important;
     }
     .table-cyber tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.03) !important;
+        background-color: var(--rd-neutral-50) !important;
     }
     .dashboard-loader {
         font-size: 12px;
@@ -122,7 +134,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
         <div class="d-flex align-items-center flex-wrap" style="gap: 15px;">
-            <h2 class="font-weight-bold text-white rajdhani m-0" style="font-family: 'Rajdhani', sans-serif;">
+            <h2 class="font-weight-bold text-dark rajdhani m-0" style="font-family: 'Rajdhani', sans-serif;">
                 <i class="fas fa-chart-bar mr-2 text-info"></i>HR Reports Center
             </h2>
             @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs']))
@@ -133,7 +145,7 @@
                 </a>
                 <a href="{{ route('hr.reports.index', ['mode' => 's']) }}" 
                    class="btn {{ ($mode ?? 'm') === 's' ? 'btn-info font-weight-bold' : 'btn-outline-info' }}"
-                   style="{{ ($mode ?? 'm') === 's' ? 'background-color: #17a2b8; border-color: #17a2b8; color: white;' : 'background: var(--rd-surface2); border-color: #17a2b8;' }}">
+                   style="{{ ($mode ?? 'm') === 's' ? 'background-color: var(--rd-primary-500); border-color: var(--rd-primary-500); color: white;' : 'background: var(--rd-surface2); border-color: var(--rd-primary-500);' }}">
                     <i class="fas fa-sitemap mr-1"></i> MY DEPT
                 </a>
             </div>
@@ -218,13 +230,13 @@
     <!-- Output View Card -->
     <div class="card-cyber p-4 mb-5">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <span class="font-weight-bold text-white text-sm">
+            <span class="font-weight-bold text-dark text-sm">
                 <i class="fas fa-list mr-2 text-cyan"></i> Generated Report Output
             </span>
             <span class="text-muted text-xs" id="records-counter">0 records loaded</span>
         </div>
 
-        <div class="rd-table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;">
+        <div class="rd-table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid var(--rd-border); border-radius: 8px;">
             <div id="table-placeholder" class="text-center py-5 text-muted">
                 <i class="fas fa-table mb-3 text-cyan" style="font-size: 3rem;"></i><br>
                 Select a Report Type above and click "Generate Report" to view results.
@@ -469,7 +481,7 @@
 
                 // Formatters
                 if (colKey === 'emp_name') {
-                    val = `<strong class="text-white">${val}</strong>`;
+                    val = `<strong class="text-dark">${val}</strong>`;
                 } else if (colKey === 'emp_status') {
                     const isCurr = val === 'Current';
                     val = `<span class="badge ${isCurr ? 'badge-success' : 'badge-danger'}">${val}</span>`;
@@ -489,7 +501,7 @@
                     val = `<span class="badge" style="border: 1px solid rgba(103,232,249,0.4); color: #67e8f9; background: rgba(103,232,249,0.1); border-radius: 10px; font-size: 0.78rem; padding: 4px 8px;">${val}</span>`;
                 } else if (colKey === 'contracts_history') {
                     if (Array.isArray(val) && val.length > 0) {
-                        let html = '<table class="table table-sm text-nowrap mb-0" style="background: rgba(8,11,15,0.6); border: 1px solid rgba(255,255,255,0.08); font-size: 0.8rem; border-radius: 6px;">';
+                        let html = '<table class="table table-sm text-nowrap mb-0" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border); font-size: 0.8rem; border-radius: 6px;">';
                         html += '<thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #67e8f9;"><th style="padding:4px 8px;">Contract Record</th><th style="padding:4px 8px;">Grade</th><th style="padding:4px 8px;">Salary</th><th style="padding:4px 8px;">% Inc.</th><th style="padding:4px 8px;">Start Date</th><th style="padding:4px 8px;">End Date</th><th style="padding:4px 8px;">Job Title</th><th style="padding:4px 8px;">Head</th></tr></thead><tbody>';
                         val.forEach(c => {
                             const pctColor = c.pct_increase.startsWith('+') ? '#22c55e' : (c.pct_increase.startsWith('-') ? '#f87171' : '#94a3b8');
@@ -501,7 +513,7 @@
                                 <td style="padding:4px 8px;">${c.ctr_start || '—'}</td>
                                 <td style="padding:4px 8px;">${c.ctr_end || '—'}</td>
                                 <td style="padding:4px 8px;">${c.ctr_jobtitle}</td>
-                                <td style="padding:4px 8px; color: #94a3b8;">${c.head_code}</td>
+                                <td style="padding:4px 8px; color: var(--rd-text3);">${c.head_code}</td>
                             </tr>`;
                         });
                         html += '</tbody></table>';
@@ -511,13 +523,13 @@
                     }
                 } else if (colKey === 'qualifications_list') {
                     if (Array.isArray(val) && val.length > 0) {
-                        let html = '<table class="table table-sm text-nowrap mb-0" style="background: rgba(8,11,15,0.6); border: 1px solid rgba(255,255,255,0.08); font-size: 0.8rem; border-radius: 6px;">';
+                        let html = '<table class="table table-sm text-nowrap mb-0" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border); font-size: 0.8rem; border-radius: 6px;">';
                         html += '<thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #67e8f9;"><th style="padding:4px 8px;">Type</th><th style="padding:4px 8px;">Title / Degree</th><th style="padding:4px 8px;">Institution</th><th style="padding:4px 8px;">Duration</th><th style="padding:4px 8px;">Grade</th><th style="padding:4px 8px;">End Date</th></tr></thead><tbody>';
                         val.forEach(q => {
-                            const typeBg = (q.qlf_type || '').toLowerCase() === 'degree' ? 'background: rgba(59,130,246,0.2); color: #60a5fa;' : ((q.qlf_type || '').toLowerCase() === 'course' ? 'background: rgba(34,197,94,0.2); color: #22c55e;' : 'background: rgba(168,85,247,0.2); color: #a855f7;');
+                            const typeBg = (q.qlf_type || '').toLowerCase() === 'degree' ? 'background: rgba(95,120,88,0.18); color: #60a5fa;' : ((q.qlf_type || '').toLowerCase() === 'course' ? 'background: rgba(34,197,94,0.2); color: #22c55e;' : 'background: rgba(168,85,247,0.2); color: #a855f7;');
                             html += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
                                 <td style="padding:4px 8px;"><span class="badge" style="${typeBg}">${q.qlf_type}</span></td>
-                                <td style="padding:4px 8px; font-weight: 700; color: #fff;">${q.qlf_name}</td>
+                                <td style="padding:4px 8px; font-weight: 700; color: var(--rd-text1);">${q.qlf_name}</td>
                                 <td style="padding:4px 8px;">${q.qlf_inst}</td>
                                 <td style="padding:4px 8px;">${q.qlf_duration}</td>
                                 <td style="padding:4px 8px; color: #22c55e;">${q.qlf_grade}</td>

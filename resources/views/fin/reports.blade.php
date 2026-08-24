@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
     .finance-hub {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
+        background: var(--rd-bg) !important;
         min-height: 100vh;
-        color: #cbd5e0;
+        color: var(--rd-text1);
         padding-top: 15px;
     }
 
@@ -19,7 +19,7 @@
 
     /* Premium Cyber/Glass Panels */
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -36,8 +36,8 @@
 
     /* Form Controls */
     .form-control-cyber {
-        background: rgba(8, 11, 15, 0.8) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: var(--rd-neutral-50) !important;
+        border: 1px solid var(--rd-border) !important;
         color: #fff !important;
         border-radius: 8px !important;
         height: 38px !important;
@@ -52,10 +52,10 @@
     /* Table Design */
     .table-cyber {
         background: transparent;
-        color: #cbd5e0;
+        color: var(--rd-text1);
     }
     .table-cyber th {
-        background: rgba(18, 26, 34, 0.95) !important;
+        background: var(--rd-surface) !important;
         border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
         color: #67e8f9 !important;
         font-family: 'Rajdhani', sans-serif;
@@ -72,7 +72,7 @@
         font-size: 13px;
     }
     .table-cyber tr:hover {
-        background: rgba(255, 255, 255, 0.02) !important;
+        background: var(--rd-neutral-50) !important;
     }
 
     /* Columns Selection Grid */
@@ -80,9 +80,9 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 10px 15px;
-        background: rgba(8, 11, 15, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 10px;
+        background: var(--rd-neutral-50) !important;
+        border: 1px solid var(--rd-border) !important;
+        border-radius: 8px;
         padding: 18px;
     }
     .checkbox-option {
@@ -91,15 +91,15 @@
         gap: 10px;
         cursor: pointer;
         font-size: 13px;
-        color: #cbd5e0;
+        color: var(--rd-text1) !important;
         margin: 0;
         transition: color 0.15s ease;
     }
     .checkbox-option:hover {
-        color: #fff;
+        color: var(--rd-primary-700) !important;
     }
     .checkbox-option input[type="checkbox"] {
-        accent-color: #00BFFF;
+        accent-color: var(--rd-primary-600) !important;
         cursor: pointer;
         width: 16px;
         height: 16px;
@@ -107,9 +107,9 @@
 
     /* Buttons */
     .btn-cyber-primary {
-        background: rgba(0, 191, 255, 0.1);
-        border: 1px solid rgba(0, 191, 255, 0.4);
-        color: #00BFFF;
+        background: var(--rd-primary-600) !important;
+        border: 1px solid var(--rd-primary-700) !important;
+        color: #fff !important;
         font-weight: 600;
         font-size: 13px;
         border-radius: 20px;
@@ -122,15 +122,15 @@
         gap: 8px;
     }
     .btn-cyber-primary:hover {
-        background: rgba(0, 191, 255, 0.25);
-        box-shadow: 0 0 15px rgba(0, 191, 255, 0.25);
-        color: #fff;
+        background: var(--rd-primary-700) !important;
+        box-shadow: var(--rd-shadow-md);
+        color: #fff !important;
     }
 
     .btn-cyber-secondary {
-        background: rgba(34, 197, 94, 0.1);
-        border: 1px solid rgba(34, 197, 94, 0.4);
-        color: #22c55e;
+        background: var(--rd-success) !important;
+        border: 1px solid var(--rd-success-dark) !important;
+        color: #fff !important;
         font-weight: 600;
         font-size: 13px;
         border-radius: 20px;
@@ -143,9 +143,9 @@
         gap: 8px;
     }
     .btn-cyber-secondary:hover {
-        background: rgba(34, 197, 94, 0.25);
-        box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
-        color: #fff;
+        background: var(--rd-success-dark) !important;
+        box-shadow: var(--rd-shadow-md);
+        color: #fff !important;
     }
 
     /* Loader */
@@ -158,8 +158,8 @@
 
     /* Custom Select2 Cyber Dark Theme Overrides */
     .select2-container--bootstrap4 .select2-selection {
-        background-color: rgba(8, 11, 15, 0.8) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background-color: var(--rd-neutral-50) !important;
+        border: 1px solid var(--rd-border) !important;
         color: #fff !important;
         border-radius: 8px !important;
         min-height: 38px !important;
@@ -185,9 +185,9 @@
         background: transparent !important;
     }
     .select2-dropdown {
-        background-color: #121a22 !important;
+        background-color: var(--rd-surface) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        color: #cbd5e0 !important;
+        color: var(--rd-text1) !important;
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5) !important;
         z-index: 9999 !important;
     }
@@ -208,7 +208,7 @@
 <div class="content-wrapper finance-hub px-4">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <h2 class="font-weight-bold text-white rajdhani m-0">
+        <h2 class="font-weight-bold text-dark rajdhani m-0">
             <i class="fas fa-chart-line mr-2 text-info"></i>Finance Reports Center
         </h2>
         
@@ -355,13 +355,13 @@
     <!-- Output View Card -->
     <div class="card-cyber p-4 mb-5">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <span class="font-weight-bold text-white text-sm">
+            <span class="font-weight-bold text-dark text-sm">
                 <i class="fas fa-list mr-2 text-cyan"></i> Generated Report Output
             </span>
             <span class="text-muted text-xs" id="records-counter">0 records loaded</span>
         </div>
 
-        <div class="rd-table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;">
+        <div class="rd-table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid var(--rd-border); border-radius: 8px;">
             <div id="table-placeholder" class="text-center py-5 text-muted">
                 <i class="fas fa-table mb-3 text-cyan" style="font-size: 3rem;"></i><br>
                 Configure the filters above and click "Generate Report" to view results.

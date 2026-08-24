@@ -7,7 +7,7 @@
 /* ===== SCOPED to .dg-page ===== */
 .dg-page { font-family:'Inter',sans-serif; }
 .text-gold { color: #f39c12 !important; }
-.bg-navy { background-color: #001f3f !important; }
+.bg-navy { background-color: var(--rd-surface3) !important; }
 .border-gold { border-top: 3px solid #f39c12 !important; }
 .border-left-gold { border-left: 5px solid #f39c12 !important; }
 
@@ -48,7 +48,7 @@
 .dg-fin-label { font-size:8px; letter-spacing:.6px; text-transform:uppercase; color:var(--rd-text3); margin-bottom:2px; font-weight:600; }
 .dg-fin-value { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; }
 
-.dg-prog-wrap { position:relative; height:12px; background:rgba(255,255,255,0.04); border-radius:20px; overflow:hidden; margin-bottom:4px; border:1px solid var(--rd-border); }
+.dg-prog-wrap { position:relative; height:12px; background: var(--rd-neutral-50); border-radius:20px; overflow:hidden; margin-bottom:4px; border:1px solid var(--rd-border); }
 .dg-prog-utilized { position:absolute; left:0; top:0; height:100%; background:var(--rd-text3); border-radius:20px 0 0 20px; width:0; transition:width 1s cubic-bezier(.4,0,.2,1) .2s; }
 .dg-prog-utilized.anim { width:var(--pw); }
 .dg-prog-case {
@@ -113,10 +113,10 @@
 .dg-tl-actor { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; color:var(--rd-text1); }
 .dg-tl-time { font-size:10px; color:var(--rd-text3); }
 .dg-tl-badge { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; margin:3px 0; letter-spacing:.5px; }
-.dg-tl-comment { font-size:11px; color:var(--rd-text2); font-style:italic; border-left:2px solid; padding:4px 8px; border-radius:0 4px 4px 0; margin-top:4px; line-height:1.5; background:rgba(255,255,255,0.03); }
+.dg-tl-comment { font-size:11px; color:var(--rd-text2); font-style:italic; border-left:2px solid; padding:4px 8px; border-radius:0 4px 4px 0; margin-top:4px; line-height:1.5; background: var(--rd-neutral-50); }
 
 /* Custom for Initiation */
-.edit-input { background: #001226 !important; border: 1px solid var(--rd-accent) !important; color: #fff !important; font-size: 1.5rem !important; font-weight: bold !important; padding: 5px 15px !important; border-radius: 8px !important; }
+.edit-input { background: var(--rd-surface) !important; border: 1px solid var(--rd-accent) !important; color: #fff !important; font-size: 1.5rem !important; font-weight: bold !important; padding: 5px 15px !important; border-radius: 8px !important; }
 </style>
 
 <div class="content-wrapper dg-page">
@@ -128,7 +128,7 @@
                 $winnerQuote  = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->first() : null;
                 $sortedQ      = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->values() : collect([]);
 
-                $caseValue      = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
+                $caseValue      = (float)($purchase->live_value ?? ($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0)));
                 
                 // Live Financials from $head (Project)
                 $totalBudget    = (float)($head->prj_aprvcost ?? 0); 
@@ -157,9 +157,9 @@
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
                         <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-calendar-alt mr-1" style="color:var(--rd-accent);"></i> {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span>
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
-                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-project-diagram mr-1" style="color:var(--rd-accent);"></i> <span class="text-white font-weight-bold">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></span>
+                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-project-diagram mr-1" style="color:var(--rd-accent);"></i> <span class="text-dark font-weight-bold">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></span>
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
-                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-building mr-1" style="color:var(--rd-accent);"></i> <span class="text-white font-weight-bold">{{ $purchase->unit?->unt_name ?? $purchase->pcs_unt_id }}</span></span>
+                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-building mr-1" style="color:var(--rd-accent);"></i> <span class="text-dark font-weight-bold">{{ $purchase->unit?->unt_name ?? $purchase->pcs_unt_id }}</span></span>
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
                         <span style="color:var(--rd-text2); font-size:15px;"><i class="fas fa-money-bill-wave mr-1" style="color:var(--rd-accent);"></i> <span style="color:var(--rd-info); font-weight:900; font-family:'Rajdhani',sans-serif; font-size:20px;">PKR {{ number_format($caseValue) }}</span></span>
                         <span class="dg-status-badge ml-2" style="background: {{ $purchase->pcs_status == 'Approved' ? 'rgba(40,167,69,0.2)' : ($purchase->pcs_status == 'Returned' ? 'rgba(255,193,7,0.2)' : 'rgba(0,123,255,0.2)') }}; color: {{ $purchase->pcs_status == 'Approved' ? '#28a745' : ($purchase->pcs_status == 'Returned' ? '#ffc107' : '#007bff') }}; border-color: transparent;">
@@ -179,7 +179,7 @@
                             <button type="submit" class="btn btn-primary btn-xs rajdhani font-weight-bold px-3 py-1">SAVE TITLE</button>
                         </form>
                     @else
-                        <span style="font-size:14px; color:#fff; font-weight:700;">Title:</span>&nbsp;<span style="font-size:14px; color:#fff;">{{ $purchase->pcs_title }}</span>
+                        <span style="font-size:14px; color:var(--rd-text1); font-weight:700;">Title:</span>&nbsp;<span style="font-size:14px; color:#fff;">{{ $purchase->pcs_title }}</span>
                     @endif
                 </div>
             </div>
@@ -218,7 +218,7 @@
                                     <button class="btn btn-xs btn-outline-light dropdown-toggle py-0 px-2" style="font-size:10px; border-radius:10px; color: var(--rd-accent); border-color: var(--rd-accent);" type="button" data-toggle="dropdown">
                                         <i class="fas fa-history"></i> History
                                     </button>
-                                    <div class="dropdown-menu dropdown-menu-left bg-dark border-secondary shadow" style="max-height: 300px; width: 280px; overflow-y:auto; font-size:11px; padding: 0;">
+                                    <div class="dropdown-menu dropdown-menu-left bg-white border-secondary shadow" style="max-height: 300px; width: 280px; overflow-y:auto; font-size:11px; padding: 0;">
                                         <div class="bg-navy py-2 px-3 border-bottom border-secondary">
                                             <span class="rajdhani font-weight-bold text-accent" style="font-size: 12px; letter-spacing: 0.5px;">DECISION TRAIL</span>
                                         </div>
@@ -234,13 +234,13 @@
                                                 
                                                 $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
                                             @endphp
-                                            <a class="dropdown-item text-white border-bottom border-secondary py-2" href="#" onclick="scrollToUserComment('user-comment-{{$decision->pdec_id}}'); return false;" style="white-space: normal;">
+                                            <a class="dropdown-item text-dark border-bottom border-secondary py-2" href="#" onclick="scrollToUserComment('user-comment-{{$decision->pdec_id}}'); return false;" style="white-space: normal;">
                                                 <div class="d-flex justify-content-between mb-1">
                                                     <span class="font-weight-bold" style="color: var(--rd-{{$color}}); font-size: 11px;">{{ $decision->account->acc_name }}</span>
                                                     <span class="text-muted" style="font-size: 9px;">{{ \Carbon\Carbon::parse($decision->created_at)->format('d M, H:i') }}</span>
                                                 </div>
                                                 <div class="small text-muted" style="line-height: 1.3;">
-                                                    <span class="text-white font-weight-bold">{{ $actionVerb }}</span> 
+                                                    <span class="text-dark font-weight-bold">{{ $actionVerb }}</span> 
                                                     @if($act !== 'hold' && $act !== 'approve')
                                                         to <span class="text-accent">{{ $toStatusDisplay }}</span>
                                                     @endif
@@ -270,7 +270,7 @@
                                 @endphp
                                 <div class="mb-4" id="user-comment-{{$decision->pdec_id}}">
                                     <div class="d-flex align-items-center justify-content-between mb-1 border-bottom border-secondary pb-1" style="border-bottom-style: dashed !important;">
-                                        <div class="font-weight-bold rajdhani text-white" style="font-size: 14px;">
+                                        <div class="font-weight-bold rajdhani text-dark" style="font-size: 14px;">
                                             <i class="fas fa-user-circle text-accent mr-1"></i> {{ $decision->account->acc_name }} 
                                             <span class="text-muted small ml-1" style="font-weight: 500;">({{ strtoupper($decision->pdec_role) }})</span>
                                             <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 10px; color: var(--rd-{{$color}}); letter-spacing: 0.5px;">
@@ -350,7 +350,7 @@
                                 <tbody>
                                     @forelse($purchase->quotes->sortBy('qte_price') as $q)
                                     <tr>
-                                        <td class="pl-4 font-weight-bold text-white">{{ $q->firm->frm_name ?? $q->qte_firmname }}</td>
+                                        <td class="pl-4 font-weight-bold text-dark">{{ $q->firm->frm_name ?? $q->qte_firmname }}</td>
                                         <td class="text-center text-muted" style="font-size: 10px;">{{ \Carbon\Carbon::parse($q->qte_date ?? $purchase->pcs_date)->format('d M y') }}</td>
                                         <td class="text-right font-weight-bold text-primary">Rs. {{ number_format($q->qte_price) }}</td>
                                         <td class="text-center"><span class="badge {{ $loop->first ? 'badge-success' : 'badge-secondary' }} px-3">L{{ $loop->iteration }}</span></td>
@@ -402,10 +402,10 @@
                         </div>
                         <div class="p-3">
                             @forelse($purchase->attachments as $file)
-                                <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                                <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border);">
                                     <i class="far fa-file-pdf text-danger mr-3" style="font-size: 20px;"></i>
                                     <div class="flex-grow-1 overflow-hidden">
-                                        <div class="small font-weight-bold text-white text-nowrap" style="overflow: hidden; text-overflow: ellipsis;">{{ $file->pat_filename }}</div>
+                                        <div class="small font-weight-bold text-dark text-nowrap" style="overflow: hidden; text-overflow: ellipsis;">{{ $file->pat_filename }}</div>
                                         <div class="text-xs text-muted">{{ \Carbon\Carbon::parse($file->created_at)->format('d M, Y') }}</div>
                                     </div>
                                     <a href="{{ url('storage/'.$file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary ml-2"><i class="fas fa-download"></i></a>

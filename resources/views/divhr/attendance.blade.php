@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 <div class="content-wrapper p-3">
   <div class="container-fluid">
@@ -13,7 +13,7 @@
             </a>
             <a href="{{ route('divhr.attendance', ['mode' => 's', 'month' => $month]) }}" 
                class="btn {{ $mode === 's' ? 'btn-info font-weight-bold' : 'btn-outline-info' }}"
-               style="{{ $mode === 's' ? 'background-color: #17a2b8; border-color: #17a2b8; color: white;' : 'background: var(--rd-surface2); border-color: #17a2b8;' }}">
+               style="{{ $mode === 's' ? 'background-color: var(--rd-primary-500); border-color: var(--rd-primary-500); color: white;' : 'background: var(--rd-surface2); border-color: var(--rd-primary-500);' }}">
                 <i class="fas fa-sitemap mr-1"></i> MY DEPT
             </a>
         </div>
@@ -40,7 +40,7 @@
 @for($d=1;$d<=$days;$d++)
               <th class="text-center" style="width:32px">{{ $d }}</th>
 @endfor
-              <th style="width:90px; color: #fff;" class="text-center">%</th>
+              <th style="width:90px; color: var(--rd-text1);" class="text-center">%</th>
             </tr>
             <tr>
               <th></th>

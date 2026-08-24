@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 
 <div class="content-wrapper p-0">
@@ -68,8 +68,8 @@
   }
 
   .sinc-back-btn:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
+    border-color: var(--rd-primary-600);
+    color: var(--rd-primary-600);
     text-decoration: none;
   }
 
@@ -124,7 +124,7 @@
     background: var(--rd-surface);
   }
 
-  .save-bar .rfq-input::placeholder { color: #94a3b8; font-weight: 500; }
+  .save-bar .rfq-input::placeholder { color: var(--rd-text3); font-weight: 500; }
 
   .btn-save {
     display: inline-flex;

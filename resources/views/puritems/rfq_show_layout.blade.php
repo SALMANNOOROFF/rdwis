@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 
 <div class="content-wrapper p-0">
@@ -68,7 +68,7 @@
     white-space: nowrap;
   }
 
-  .sinc-back-btn:hover { border-color: #3b82f6; color: #3b82f6; text-decoration: none; }
+  .sinc-back-btn:hover { border-color: var(--rd-primary-600); color: var(--rd-primary-600); text-decoration: none; }
 
   /* ── Info strip ── */
   .info-strip {
@@ -234,7 +234,7 @@
   .empty-row td {
     text-align: center;
     padding: 40px 20px !important;
-    color: #94a3b8;
+    color: var(--rd-text3);
     font-size: .84rem;
     font-weight: 600;
   }
@@ -285,7 +285,7 @@
   <div>
     <div class="sinc-page-title">
       <span class="title-icon"><i class="fas fa-file-invoice-dollar"></i></span>
-      RFQ &nbsp;<span style="color:#94a3b8;font-weight:600">#{{ $rfq->rfq_id }}</span>
+      RFQ &nbsp;<span style="color: var(--rd-text3);font-weight:600">#{{ $rfq->rfq_id }}</span>
     </div>
     <div class="sinc-page-sub">Request for Quotation — item details and pricing</div>
   </div>
@@ -349,7 +349,7 @@
         @empty
         <tr class="empty-row">
           <td colspan="3">
-            <i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;color:#e2e8f0"></i>
+            <i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;color: var(--rd-text1)"></i>
             No items found in this RFQ
           </td>
         </tr>

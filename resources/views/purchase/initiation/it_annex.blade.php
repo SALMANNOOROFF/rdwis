@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -32,7 +32,7 @@
             top: 0;
             left: 0;
             right: 0;
-            background: #0f1c2e;
+            background: var(--rd-surface2);
             color: #fff;
             padding: 10px 24px;
             display: flex;
@@ -123,15 +123,15 @@
             background: #059669;
         }
         .btn-print {
-            background: #2563eb;
+            background: var(--rd-primary-700);
             color: #fff;
         }
         .btn-print:hover {
-            background: #1d4ed8;
+            background: var(--rd-primary-600);
         }
         .btn-reset {
             background: rgba(255, 255, 255, 0.12);
-            color: #e2e8f0;
+            color: var(--rd-text1);
             border: 1px solid rgba(255, 255, 255, 0.25);
         }
         .btn-reset:hover {
@@ -169,7 +169,7 @@
             bottom: 24px;
             right: 24px;
             padding: 12px 20px;
-            background: #1e293b;
+            background: var(--rd-surface);
             color: #fff;
             border-radius: 6px;
             font-size: 13px;
@@ -197,13 +197,13 @@
             transition: background-color 0.15s, box-shadow 0.15s;
         }
         body:not(.printing) [contenteditable="true"]:hover {
-            background-color: #f8fafc;
+            background-color: var(--rd-text1);
             box-shadow: 0 0 0 1px #cbd5e1;
             border-radius: 2px;
         }
         body:not(.printing) [contenteditable="true"]:focus {
-            background-color: #f8fafc;
-            box-shadow: 0 0 0 2px #2563eb;
+            background-color: var(--rd-text1);
+            box-shadow: 0 0 0 2px var(--rd-primary-700);
             border-radius: 2px;
         }
 
@@ -395,7 +395,7 @@
         .btn-firm-act:hover {
             background: #e2e8f0;
             color: #0f172a;
-            border-color: #94a3b8;
+            border-color: var(--rd-text3);
         }
         .btn-firm-act.btn-add-all {
             background: #f0fdf4;
@@ -524,15 +524,15 @@
             transition: border-color 0.15s, box-shadow 0.15s;
         }
         .firm-search-input-wrap input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: var(--rd-primary-700);
+            box-shadow: 0 0 0 3px rgba(95,120,88,0.15);
         }
         .btn-clear-search {
             position: absolute;
             right: 8px;
             background: none;
             border: none;
-            color: #94a3b8;
+            color: var(--rd-text3);
             cursor: pointer;
             padding: 2px 4px;
             font-size: 12px;
@@ -571,7 +571,7 @@
             z-index: 2;
         }
         .btn-dropdown-add-all {
-            background: #2563eb;
+            background: var(--rd-primary-700);
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -585,7 +585,7 @@
             transition: background 0.15s;
         }
         .btn-dropdown-add-all:hover {
-            background: #1d4ed8;
+            background: var(--rd-primary-600);
         }
         .firm-res-item {
             padding: 10px 14px;
@@ -648,7 +648,7 @@
             border: 1px solid #86efac;
         }
         .firm-res-details {
-            color: #64748b;
+            color: var(--rd-text3);
             font-size: 11px;
             display: flex;
             align-items: center;
@@ -823,7 +823,7 @@
             </a>
             <div class="top-bar-title">
                 <span>Case #{{ $purchase->pcs_id }}</span>
-                <span style="color: #94a3b8; font-weight: normal; font-size: 13px;">— Request for Quotation & IT Annex</span>
+                <span style="color: var(--rd-text3); font-weight: normal; font-size: 13px;">— Request for Quotation & IT Annex</span>
                 <span class="save-indicator" id="saveIndicator">
                     <i class="fas fa-check-circle"></i> Saved
                 </span>
@@ -966,7 +966,7 @@
 
                 <!-- FIRM SEARCH BAR (SCREEN ONLY) -->
                 <div class="firm-search-bar no-print">
-                    <i class="fas fa-search" style="color: #64748b; font-size: 13px;"></i>
+                    <i class="fas fa-search" style="color: var(--rd-text3); font-size: 13px;"></i>
                     <div class="firm-search-input-wrap">
                         <input type="text" 
                                id="firmSearchInput" 
@@ -1217,14 +1217,14 @@
                     <div class="firm-dropdown-header">
                         <span>No matching firms found</span>
                     </div>
-                    <div style="padding: 16px; color: #64748b; text-align:center; font-size:12px;">
+                    <div style="padding: 16px; color: var(--rd-text3); text-align:center; font-size:12px;">
                         No firms found matching "<b>${escapeHtml(query)}</b>" in system database.
                     </div>
                 `;
             } else {
                 let html = `
                     <div class="firm-dropdown-header">
-                        <span><i class="fas fa-building" style="color: #2563eb; margin-right: 4px;"></i> Showing <b>${filtered.length}</b> ${filtered.length === firmsDirectory.length ? 'total system' : 'matching'} firms</span>
+                        <span><i class="fas fa-building" style="color: var(--rd-primary-700); margin-right: 4px;"></i> Showing <b>${filtered.length}</b> ${filtered.length === firmsDirectory.length ? 'total system' : 'matching'} firms</span>
                         <button type="button" class="btn-dropdown-add-all" onclick="addAllFilteredFirms()">
                             <i class="fas fa-plus-circle"></i> Add All (${filtered.length})
                         </button>
@@ -1247,7 +1247,7 @@
                         badgesHtml += `<span class="badge-tag badge-ntn">NTN: ${escapeHtml(f.ntn)}</span>`;
                     }
 
-                    const addrDisplay = f.address ? escapeHtml(f.address) : '<span style="color:#94a3b8; font-style:italic;">Address not registered</span>';
+                    const addrDisplay = f.address ? escapeHtml(f.address) : '<span style="color: var(--rd-text3); font-style:italic;">Address not registered</span>';
                     const telDisplay = f.tel ? `<span><i class="fas fa-phone-alt" style="font-size:10px;"></i> ${escapeHtml(f.tel)}</span>` : '';
 
                     html += `
@@ -1295,7 +1295,7 @@
             if (existing) {
                 showToast(`${firm.name} is already in the list.`);
                 existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                existing.style.outline = '2px solid #2563eb';
+                existing.style.outline = '2px solid var(--rd-primary-700)';
                 setTimeout(() => { existing.style.outline = 'none'; }, 1500);
                 document.getElementById('firmDropdownResults').style.display = 'none';
                 return;

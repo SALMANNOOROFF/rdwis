@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,8 +6,8 @@
 
     .asset-hub {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
-        color: #cbd5e0;
+        background: var(--rd-bg) !important;
+        color: var(--rd-text1);
         padding-top: 15px;
         padding-bottom: 40px;
     }
@@ -18,7 +18,7 @@
     }
 
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -37,15 +37,15 @@
         border-left-color: #06b6d4;
     }
     .stat-card.inv-off {
-        border-left-color: #8b5cf6;
+        border-left-color: var(--rd-primary-600);
     }
 
     .table-cyber {
         background: transparent;
-        color: #cbd5e0;
+        color: var(--rd-text1);
     }
     .table-cyber th {
-        background: rgba(18, 26, 34, 0.95) !important;
+        background: var(--rd-surface) !important;
         border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
         color: #67e8f9 !important;
         font-family: 'Rajdhani', sans-serif;
@@ -62,18 +62,18 @@
         font-size: 13px;
     }
     .table-cyber tr:hover {
-        background: rgba(255, 255, 255, 0.02) !important;
+        background: var(--rd-neutral-50) !important;
     }
 
     .form-control-cyber {
-        background: rgba(10, 15, 22, 0.9);
+        background: var(--rd-surface);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: #fff;
         border-radius: 8px;
         font-size: 13px;
     }
     .form-control-cyber:focus {
-        background: rgba(10, 15, 22, 1);
+        background: var(--rd-surface);
         border-color: #38bdf8;
         color: #fff;
     }
@@ -86,12 +86,12 @@
     }
 
     .pagination .page-item .page-link {
-        background: rgba(18, 26, 34, 0.9);
+        background: var(--rd-surface);
         border-color: rgba(255, 255, 255, 0.1);
-        color: #cbd5e0;
+        color: var(--rd-text1);
     }
     .pagination .page-item.active .page-link {
-        background: #0284c7;
+        background: var(--rd-primary-600);
         border-color: #0284c7;
         color: #fff;
     }
@@ -101,7 +101,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="text-white rajdhani font-weight-bold mb-1">Inventory & Assets Master</h2>
+            <h2 class="text-dark rajdhani font-weight-bold mb-1">Inventory & Assets Master</h2>
             <p class="text-muted small mb-0">
                 @if($isDivision)
                     Showing inventory & assets strictly for <strong>{{ Auth::user()->acc_untname ?? 'Your Division' }}</strong>.
@@ -129,7 +129,7 @@
             <div class="card card-cyber stat-card assets-on p-3 mb-2">
                 <span class="text-success small text-uppercase rajdhani font-weight-bold"><i class="fas fa-microchip mr-1"></i> Assets (On Charge)</span>
                 <div class="d-flex justify-content-between align-items-baseline mt-2">
-                    <h3 class="text-white rajdhani font-weight-bold mb-0">{{ number_format($assetsOnCharge->total_count ?? 0) }}</h3>
+                    <h3 class="text-dark rajdhani font-weight-bold mb-0">{{ number_format($assetsOnCharge->total_count ?? 0) }}</h3>
                     <span class="text-success font-weight-bold rajdhani" style="font-size: 14px;">PKR {{ number_format($assetsOnCharge->total_value ?? 0) }}</span>
                 </div>
                 <small class="text-muted mt-1">Durable Equipment in Store</small>
@@ -139,7 +139,7 @@
             <div class="card card-cyber stat-card assets-off p-3 mb-2">
                 <span class="text-warning small text-uppercase rajdhani font-weight-bold"><i class="fas fa-user-check mr-1"></i> Assets (Off Charge)</span>
                 <div class="d-flex justify-content-between align-items-baseline mt-2">
-                    <h3 class="text-white rajdhani font-weight-bold mb-0">{{ number_format($assetsOffCharge->total_count ?? 0) }}</h3>
+                    <h3 class="text-dark rajdhani font-weight-bold mb-0">{{ number_format($assetsOffCharge->total_count ?? 0) }}</h3>
                     <span class="text-warning font-weight-bold rajdhani" style="font-size: 14px;">PKR {{ number_format($assetsOffCharge->total_value ?? 0) }}</span>
                 </div>
                 <small class="text-muted mt-1">Issued / Installed Equipment</small>
@@ -149,7 +149,7 @@
             <div class="card card-cyber stat-card inv-on p-3 mb-2">
                 <span class="text-info small text-uppercase rajdhani font-weight-bold"><i class="fas fa-warehouse mr-1"></i> Inventory (On Charge)</span>
                 <div class="d-flex justify-content-between align-items-baseline mt-2">
-                    <h3 class="text-white rajdhani font-weight-bold mb-0">{{ number_format($invOnCharge->total_count ?? 0) }}</h3>
+                    <h3 class="text-dark rajdhani font-weight-bold mb-0">{{ number_format($invOnCharge->total_count ?? 0) }}</h3>
                     <span class="text-info font-weight-bold rajdhani" style="font-size: 14px;">PKR {{ number_format($invOnCharge->total_value ?? 0) }}</span>
                 </div>
                 <small class="text-muted mt-1">Consumables / Stock in Hand</small>
@@ -159,7 +159,7 @@
             <div class="card card-cyber stat-card inv-off p-3 mb-2">
                 <span class="text-purple small text-uppercase rajdhani font-weight-bold" style="color: #c084fc;"><i class="fas fa-dolly mr-1"></i> Inventory (Off Charge)</span>
                 <div class="d-flex justify-content-between align-items-baseline mt-2">
-                    <h3 class="text-white rajdhani font-weight-bold mb-0">{{ number_format($invOffCharge->total_count ?? 0) }}</h3>
+                    <h3 class="text-dark rajdhani font-weight-bold mb-0">{{ number_format($invOffCharge->total_count ?? 0) }}</h3>
                     <span class="font-weight-bold rajdhani" style="font-size: 14px; color: #c084fc;">PKR {{ number_format($invOffCharge->total_value ?? 0) }}</span>
                 </div>
                 <small class="text-muted mt-1">Consumed Materials</small>
@@ -186,7 +186,7 @@
             <i class="fas fa-warehouse mr-1"></i> Inventory (On Charge)
         </a>
         <a href="{{ route('inventory.assets.index', array_merge(request()->except(['category', 'group', 'page']), ['category' => 'Inventory', 'group' => 'OffCharge'])) }}" 
-           class="btn btn-sm pill-link {{ $category === 'Inventory' && $statusGroup === 'OffCharge' ? 'btn-secondary text-white' : 'btn-outline-secondary' }} mr-2">
+           class="btn btn-sm pill-link {{ $category === 'Inventory' && $statusGroup === 'OffCharge' ? 'btn-secondary text-dark' : 'btn-outline-secondary' }} mr-2">
             <i class="fas fa-dolly mr-1"></i> Inventory (Off Charge)
         </a>
     </div>
@@ -202,7 +202,7 @@
                 <div class="col-md-4 mb-2">
                     <label class="text-muted small font-weight-bold mb-1">Division / Unit</label>
                     @if($isDivision)
-                        <div class="form-control form-control-cyber d-flex align-items-center bg-dark text-info font-weight-bold">
+                        <div class="form-control form-control-cyber d-flex align-items-center bg-white text-info font-weight-bold">
                             <i class="fas fa-building mr-2 text-muted"></i> {{ Auth::user()->acc_untname ?? 'Your Division' }}
                         </div>
                     @else
@@ -305,7 +305,7 @@
                                 <div class="small text-muted">{{ $a->ias_subtype ?? 'General' }}</div>
                             </td>
                             <td>
-                                <div class="font-weight-bold text-white mb-1">{{ $a->ias_desc }}</div>
+                                <div class="font-weight-bold text-dark mb-1">{{ $a->ias_desc }}</div>
                                 <div class="small text-muted">
                                     @if(!empty($a->ias_pcs_id))
                                         Case 
@@ -325,7 +325,7 @@
                                 <div class="small text-muted">{{ \Illuminate\Support\Str::limit($a->hed_name ?? '', 20) }}</div>
                             </td>
                             <td>
-                                <strong class="text-white">{{ $a->unt_namesh ?? 'N/A' }}</strong>
+                                <strong class="text-dark">{{ $a->unt_namesh ?? 'N/A' }}</strong>
                             </td>
                             <td>
                                 <div>{{ $a->iac_qty }} {{ $a->iac_qtyunit }}</div>
@@ -342,7 +342,7 @@
                                 @endif
                             </td>
                             <td>
-                                <div class="small text-white font-weight-bold">{{ $a->iac_person ?? 'Store Custody' }}</div>
+                                <div class="small text-dark font-weight-bold">{{ $a->iac_person ?? 'Store Custody' }}</div>
                                 <div class="small text-muted"><i class="fas fa-map-marker-alt text-danger mr-1"></i>{{ $a->iac_location ?? 'Main Warehouse' }}</div>
                             </td>
                             @if(!$isProc)
@@ -374,10 +374,10 @@
     @foreach($assets as $a)
         <div class="modal fade" id="updateModal{{ $a->iac_id }}" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content bg-dark border border-secondary text-white">
+                <div class="modal-content bg-white border border-secondary text-dark">
                     <div class="modal-header border-secondary">
                         <h5 class="modal-title rajdhani font-weight-bold">Item #{{ $a->iac_id }} Status Transition</h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -385,7 +385,7 @@
                         @csrf
                         <div class="modal-body">
                             <div class="mb-3 text-muted small">
-                                Item: <strong class="text-white">{{ $a->ias_desc }}</strong> | Qty: <strong class="text-white">{{ $a->iac_qty }} {{ $a->iac_qtyunit }}</strong>
+                                Item: <strong class="text-dark">{{ $a->ias_desc }}</strong> | Qty: <strong class="text-dark">{{ $a->iac_qty }} {{ $a->iac_qtyunit }}</strong>
                             </div>
 
                             <div class="form-group mb-3">

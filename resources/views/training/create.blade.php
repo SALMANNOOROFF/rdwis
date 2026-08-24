@@ -1,13 +1,13 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
-<div class="content-wrapper" style="background: #080a12; min-height: 100vh; font-family: 'Outfit', sans-serif; color: #cbd5e1;">
-    <div class="content-header py-1" style="background: rgba(13,15,26,0.95); border-bottom: 1px solid #1e2235; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px);">
+<div class="content-wrapper" style="background: var(--rd-bg); min-height: 100vh; font-family: 'Outfit', sans-serif; color: var(--rd-text1);">
+    <div class="content-header py-1" style="background: var(--rd-neutral-50); border-bottom: 1px solid var(--rd-border); position: sticky; top: 0; z-index: 100; box-shadow: var(--rd-shadow-sm);">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold" style="color: #fff; letter-spacing: -0.8px; font-size: 1.05rem;">
+                <h6 class="m-0 font-weight-bold" style="color: var(--rd-text1); letter-spacing: -0.8px; font-size: 1.05rem;">
                     <span class="uc-dot"></span>
-                    <i class="fas fa-microchip mr-2" style="color: #3b82f6;"></i> Raise Training Case
+                    <i class="fas fa-microchip mr-2" style="color: var(--rd-primary-600);"></i> Raise Training Case
                 </h6>
                 <div class="d-flex align-items-center" style="gap: 8px;">
                     <span class="uc-badge-mode">MODE: PROCUREMENT</span>
@@ -378,16 +378,16 @@
     @import url('/css/fonts.css');
 
     :root {
-        --uc-bg:      #080a12;
-        --uc-card:    #0e1120;
-        --uc-card2:   #111425;
-        --uc-border:  #1e2235;
-        --uc-border2: #252840;
-        --uc-accent:  #3b82f6;
-        --uc-accent2: #2563eb;
-        --uc-text:    #cbd5e1;
-        --uc-muted:   #475569;
-        --uc-label:   #64748b;
+        --uc-bg:      var(--rd-bg);
+        --uc-card:    var(--rd-surface);
+        --uc-card2:   var(--rd-surface2);
+        --uc-border:  var(--rd-border);
+        --uc-border2: var(--rd-border2);
+        --uc-accent:  var(--rd-primary-600);
+        --uc-accent2: var(--rd-primary-700);
+        --uc-text:    var(--rd-text1);
+        --uc-muted:   var(--rd-text3);
+        --uc-label:   var(--rd-text2);
     }
 
     /* ── CARD ───────────────────────────────────── */
@@ -398,13 +398,13 @@
         overflow: hidden;
     }
     .uc-card-header {
-        background: linear-gradient(90deg, #0d1024, #111425);
+        background: var(--rd-surface3);
         border-bottom: 1px solid var(--uc-border);
         padding: 6px 10px;
         font-weight: 900;
         font-size: 8.5px;
         letter-spacing: 1px;
-        color: #64748b;
+        color: var(--rd-text1);
         display: flex;
         align-items: center;
         gap: 8px;
@@ -436,11 +436,11 @@
     .uc-input {
         width: 100%;
         height: 28px;
-        background: #080b14 !important;
+        background: var(--rd-bg) !important;
         border: 1px solid var(--uc-border2) !important;
         border-radius: 3px;
         padding: 0 7px;
-        color: #e2e8f0 !important;
+        color: var(--rd-text1) !important;
         font-size: 10.5px;
         font-weight: 500;
         font-family: 'Outfit', sans-serif;
@@ -455,7 +455,7 @@
     .uc-input-accent { border-color: rgba(59,130,246,0.4) !important; }
     .uc-input-warn   { border-color: rgba(245,158,11,0.4) !important; }
     .uc-input-readonly {
-        background: #06080f !important;
+        background: var(--rd-bg) !important;
         border-color: transparent !important;
         color: #38bdf8 !important;
         font-weight: 700;
@@ -474,7 +474,7 @@
         border-radius: 3px;
     }
     .uc-close-btn {
-        background: #0e1120;
+        background: var(--rd-surface2);
         border: 1px solid #1e2235;
         color: #475569;
         font-size: 9px;
@@ -486,7 +486,7 @@
     .uc-close-btn:hover { border-color: #ef4444; color: #ef4444; }
 
     .uc-active-badge {
-        background: rgba(59,130,246,0.15);
+        background: rgba(95,120,88,0.15);
         border: 1px solid rgba(59,130,246,0.35);
         color: #60a5fa;
         font-size: 7.5px;
@@ -550,8 +550,8 @@
 
     /* ── TOTAL BOX ───────────────────────────────── */
     .uc-total-box {
-        background: linear-gradient(135deg, #1d3a6b, #1e3a8a);
-        border: 1px solid rgba(59,130,246,0.3);
+        background: linear-gradient(135deg, var(--rd-primary-900), var(--rd-primary-800));
+        border: 1px solid rgba(95,120,88,0.25);
         padding: 12px 14px;
         border-radius: 5px;
         display: flex;
@@ -562,7 +562,7 @@
     .uc-total-val {
         font-size: 18px;
         font-weight: 900;
-        color: #93c5fd;
+        color: var(--rd-primary-100);
         letter-spacing: -0.5px;
     }
 
@@ -588,14 +588,14 @@
         gap: 6px;
         flex: 1;
     }
-    .uc-info-card i { color: #3b82f6; font-size: 10px; }
+    .uc-info-card i { color: var(--rd-primary-600); font-size: 10px; }
 
     /* ── PLATFORM CHIPS ──────────────────────────── */
     .uc-platform-chips { display: flex; gap: 5px; flex-wrap: wrap; }
     .uc-chip {
         background: rgba(59,130,246,0.08);
-        border: 1px solid rgba(59,130,246,0.2);
-        color: #3b82f6;
+        border: 1px solid rgba(95,120,88,0.18);
+        color: var(--rd-primary-600);
         font-size: 8px;
         font-weight: 700;
         padding: 3px 8px;
@@ -619,7 +619,7 @@
         letter-spacing: 0.8px;
         cursor: pointer;
         transition: all 0.2s;
-        box-shadow: 0 4px 12px rgba(59,130,246,0.2);
+        box-shadow: 0 4px 12px rgba(95,120,88,0.18);
         font-family: 'Outfit', sans-serif;
     }
     .uc-submit-btn:hover {
@@ -655,7 +655,7 @@
     /* ── SCROLLBAR ───────────────────────────────── */
     #ultra_content::-webkit-scrollbar { width: 3px; }
     #ultra_content::-webkit-scrollbar-track { background: transparent; }
-    #ultra_content::-webkit-scrollbar-thumb { background: #1e2235; border-radius: 3px; }
+    #ultra_content::-webkit-scrollbar-thumb { background: var(--rd-surface); border-radius: 3px; }
 </style>
 
 @endsection

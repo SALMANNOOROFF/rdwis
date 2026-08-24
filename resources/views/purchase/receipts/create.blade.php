@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
     .receipt-hub {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
+        background: var(--rd-bg) !important;
         min-height: 100vh;
-        color: #cbd5e0;
+        color: var(--rd-text1);
         padding-top: 15px;
     }
 
@@ -18,7 +18,7 @@
     }
 
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -26,10 +26,10 @@
 
     .table-cyber {
         background: transparent;
-        color: #cbd5e0;
+        color: var(--rd-text1);
     }
     .table-cyber th {
-        background: rgba(18, 26, 34, 0.95) !important;
+        background: var(--rd-surface) !important;
         border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
         color: #67e8f9 !important;
         font-family: 'Rajdhani', sans-serif;
@@ -45,7 +45,7 @@
     }
 
     .form-control-cyber {
-        background: rgba(10, 15, 22, 0.9);
+        background: var(--rd-surface);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: #fff;
         border-radius: 8px;
@@ -53,7 +53,7 @@
         width: 100px;
     }
     .form-control-cyber:focus {
-        background: rgba(10, 15, 22, 1);
+        background: var(--rd-surface);
         border-color: #22c55e;
         color: #fff;
         box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);

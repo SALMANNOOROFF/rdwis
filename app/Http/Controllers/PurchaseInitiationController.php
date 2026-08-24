@@ -19,7 +19,7 @@ class PurchaseInitiationController extends Controller
         $unitId = $user->acc_unt_id;
 
         // Fetch all cases initiated by this unit with rich context
-        $purchases = Purchase::with(['project', 'latestDecision.account'])
+        $purchases = Purchase::with(['project', 'latestDecision.account', 'items', 'quotes.firm'])
             ->where('pcs_unt_id', $unitId)
             ->orderBy('pcs_id', 'desc')
             ->get();
@@ -627,16 +627,46 @@ class PurchaseInitiationController extends Controller
     {
         $quoteIds = DB::table('pur.quotes')->where('qte_pcs_id', $pcsId)->pluck('qte_id')->toArray();
         if (count($quoteIds) === 0) {
-            DB::table('pur.purcases')->where('pcs_id', $pcsId)->update(['pcs_price' => 0, 'pcs_midprice' => 0]);
-            DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcsId)->update(['pci_price' => 0]);
+            $items = DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcsId)->get();
+            $itemsTotal = 0;
+            foreach ($items as $it) {
+                $qty = (float)($it->pci_qty ?? 1);
+                $rate = (float)($it->pci_price ?: ($it->pci_rate ?: ($it->pci_estcost ?: ($it->pci_estprice ?? 0))));
+                $itemsTotal += ($rate > 0 ? $rate * ($it->pci_price ? 1 : $qty) : 0);
+            }
+            DB::table('pur.purcases')->where('pcs_id', $pcsId)->update([
+                'pcs_price' => $itemsTotal,
+                'pcs_midprice' => $itemsTotal,
+                'pcs_intprice' => $itemsTotal
+            ]);
             return;
         }
 
         $totals = [];
+        $subtotals = [];
+        $taxes = [];
         foreach ($quoteIds as $qteId) {
-            $sum = (float) (DB::table('pur.quoteitems')->where('qti_qte_id', $qteId)->sum('qti_price') ?? 0);
-            DB::table('pur.quotes')->where('qte_id', $qteId)->update(['qte_price' => $sum]);
-            $totals[$qteId] = $sum;
+            $quote = DB::table('pur.quotes')->where('qte_id', $qteId)->first();
+            $items = DB::table('pur.quoteitems')->where('qti_qte_id', $qteId)->get();
+            $sub = 0;
+            foreach ($items as $qi) {
+                $qty = (float)($qi->qti_qty ?? 1);
+                $unitPrice = (float)($qi->qti_price ?? 0);
+                $sub += ($unitPrice * $qty);
+            }
+            
+            $taxPercent = (float)($quote->qte_taxpercent ?? ($quote->qte_tax ?? 18));
+            $taxAmount = $sub * ($taxPercent / 100);
+            $grandTotal = $sub + $taxAmount;
+
+            DB::table('pur.quotes')->where('qte_id', $qteId)->update([
+                'qte_price' => $grandTotal,
+                'qte_intprice' => $sub,
+                'qte_inttax' => $taxAmount
+            ]);
+            $totals[$qteId] = $grandTotal;
+            $subtotals[$qteId] = $sub;
+            $taxes[$qteId] = $taxAmount;
         }
 
         asort($totals);
@@ -644,11 +674,17 @@ class PurchaseInitiationController extends Controller
         $winnerId = (int) key($totals);
         $winnerTotal = (float) ($totals[$winnerId] ?? 0);
 
-        DB::table('pur.purcases')->where('pcs_id', $pcsId)->update(['pcs_price' => $winnerTotal, 'pcs_midprice' => $winnerTotal]);
+        DB::table('pur.purcases')->where('pcs_id', $pcsId)->update([
+            'pcs_price' => $winnerTotal,
+            'pcs_midprice' => $winnerTotal,
+            'pcs_intprice' => (float)($subtotals[$winnerId] ?? $winnerTotal),
+            'pcs_inttax' => (float)($taxes[$winnerId] ?? 0),
+            'pcs_midtax' => (float)($taxes[$winnerId] ?? 0),
+        ]);
 
         $winnerItems = DB::table('pur.quoteitems')
             ->where('qti_qte_id', $winnerId)
-            ->get(['qti_pci_id', 'qti_price']);
+            ->get(['qti_pci_id', 'qti_price', 'qti_qty']);
 
         $map = [];
         foreach ($winnerItems as $row) {

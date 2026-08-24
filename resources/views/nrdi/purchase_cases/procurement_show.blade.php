@@ -1,12 +1,12 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-.dg-page { font-family: 'Inter', sans-serif; background: #080b0f; min-height: 100vh; color: #cbd5e0; }
+.dg-page { font-family: 'Inter', sans-serif; background: var(--rd-bg); min-height: 100vh; color: var(--rd-text1); }
 .rajdhani { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
 .text-gold { color: #f39c12 !important; }
-.bg-navy { background-color: #001f3f !important; }
+.bg-navy { background-color: var(--rd-surface3) !important; }
 .border-gold { border-top: 3px solid #f39c12 !important; }
 .border-left-gold { border-left: 5px solid #f39c12 !important; }
 
@@ -20,8 +20,8 @@
 .dg-sec-label { font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.8px; color:var(--rd-accent); text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
 .dg-sec-label::before { content:''; width:3px; height:12px; background:var(--rd-accent); border-radius:2px; display:inline-block; }
 
-.glass-card { background: #0d1218; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
-.card-title-bar { background: #0f161e; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 12px 12px 0 0; }
+.glass-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 12px; }
+.card-title-bar { background: var(--rd-surface3); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 12px 12px 0 0; }
 </style>
 
 <div class="content-wrapper dg-page pt-3">
@@ -69,7 +69,7 @@
                     <div class="card-title-bar d-flex justify-content-between align-items-center">
                         <span class="rajdhani text-white"><i class="fas fa-chart-line mr-2 text-primary"></i> Budget Verification Profile</span>
                         @if(isset($head))
-                            <span class="small rajdhani" style="color: #64748b;">CURRENT LEDGER BALANCE: <span class="text-success font-weight-bold ml-1" style="font-size: 14px;">PKR {{ number_format($head->hed_balance) }}</span></span>
+                            <span class="small rajdhani" style="color: var(--rd-text3);">CURRENT LEDGER BALANCE: <span class="text-success font-weight-bold ml-1" style="font-size: 14px;">PKR {{ number_format($head->hed_balance) }}</span></span>
                         @endif
                     </div>
                     <div class="card-body p-4">
@@ -104,7 +104,7 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table mb-0 dg-case-table" style="background: transparent;">
-                            <thead style="background: rgba(255,255,255,0.02);">
+                            <thead style="background: var(--rd-neutral-50);">
                                 <tr>
                                     <th class="pl-4 py-3" style="width: 50px;">#</th>
                                     <th class="py-3">Description of Item</th>
@@ -152,7 +152,7 @@
                         <div class="card-title-bar"><span class="rajdhani text-white"><i class="fas fa-paperclip mr-2 text-primary"></i> Substantiating Documents</span></div>
                         <div class="p-3">
                             @forelse($purchase->attachments as $file)
-                                <div class="d-flex align-items-center mb-2 p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                                <div class="d-flex align-items-center mb-2 p-3 rounded" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border);">
                                     <div class="mr-3 text-danger"><i class="fas fa-file-pdf fa-2x"></i></div>
                                     <div class="flex-grow-1 overflow-hidden">
                                         <div class="small font-weight-bold text-white mb-0" title="{{ $file->pat_filename }}">{{ Str::limit($file->pat_filename, 25) }}</div>

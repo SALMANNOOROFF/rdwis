@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper pt-3">
@@ -13,7 +13,7 @@
         /* Toggle Switch Style */
         .toggle-container { display: flex; background: var(--rd-surface2); border-radius: 25px; padding: 4px; width: fit-content; margin: 0 auto; }
         .toggle-btn { padding: 8px 25px; border-radius: 25px; border: none; background: transparent; font-weight: 600; color: var(--rd-text3); cursor: pointer; transition: all 0.3s; }
-        .toggle-btn.active { background: var(--rd-accent); color: white; box-shadow: 0 2px 5px rgba(0,123,255,0.3); }
+        .toggle-btn.active { background: var(--rd-accent); color: white; box-shadow: 0 2px 5px rgba(95,120,88,0.25); }
 
         .table-custom thead th { background: var(--rd-surface2); color: var(--rd-text2); border-bottom: 2px solid var(--rd-border); }
     </style>

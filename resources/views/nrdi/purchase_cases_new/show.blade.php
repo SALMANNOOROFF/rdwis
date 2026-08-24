@@ -5,7 +5,7 @@
     $winnerQuote  = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->first() : null;
     $sortedQ      = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->values() : collect([]);
 
-    $caseValue      = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
+    $caseValue      = (float)($purchase->live_value ?? ($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0)));
     
     // Image terminologies implementation (Legacy Logic)
     $finReceived    = (float)($head->received ?? 0);
@@ -61,7 +61,7 @@
 /* ===== SCOPED to .dg-page ===== */
 .dg-page { font-family:'Inter',sans-serif; }
 .text-gold { color: #f39c12 !important; }
-.bg-navy { background-color: #001f3f !important; }
+.bg-navy { background-color: var(--rd-surface3) !important; }
 .border-gold { border-top: 3px solid #f39c12 !important; }
 .border-left-gold { border-left: 5px solid #f39c12 !important; }
 
@@ -105,16 +105,17 @@
 }
 .btn-hdr-case-detail:hover {
     background: #17a2b8 !important;
-    border-color: #17a2b8 !important;
+    border-color: var(--rd-primary-500) !important;
     color: #ffffff !important;
     box-shadow: 0 3px 8px rgba(23, 162, 184, 0.4) !important;
 }
-.btn-hdr-market-res {
+.btn-hdr-comparative-stmt {
     border: 1px solid rgba(40, 167, 69, 0.5) !important;
     background: rgba(40, 167, 69, 0.08) !important;
     color: #28a745 !important;
+    cursor: pointer;
 }
-.btn-hdr-market-res:hover {
+.btn-hdr-comparative-stmt:hover {
     background: #28a745 !important;
     border-color: #28a745 !important;
     color: #ffffff !important;
@@ -150,7 +151,7 @@
 .dg-fin-label { font-size:8px; letter-spacing:.6px; text-transform:uppercase; color:var(--rd-text3); margin-bottom:2px; font-weight:600; }
 .dg-fin-value { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; }
 
-.dg-prog-wrap { position:relative; height:12px; background:rgba(255,255,255,0.04); border-radius:20px; overflow:hidden; margin-bottom:4px; border:1px solid var(--rd-border); }
+.dg-prog-wrap { position:relative; height:12px; background: var(--rd-neutral-50); border-radius:20px; overflow:hidden; margin-bottom:4px; border:1px solid var(--rd-border); }
 .dg-prog-utilized { position:absolute; left:0; top:0; height:100%; background:var(--rd-text3); border-radius:20px 0 0 20px; width:0; transition:width 1s cubic-bezier(.4,0,.2,1) .2s; }
 .dg-prog-utilized.anim { width:var(--pw); }
 .dg-prog-case {
@@ -215,7 +216,7 @@
 .dg-tl-actor { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; color:var(--rd-text1); }
 .dg-tl-time { font-size:10px; color:var(--rd-text3); }
 .dg-tl-badge { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; margin:3px 0; letter-spacing:.5px; }
-.dg-tl-comment { font-size:11px; color:var(--rd-text2); font-style:italic; border-left:2px solid; padding:4px 8px; border-radius:0 4px 4px 0; margin-top:4px; line-height:1.5; background:rgba(255,255,255,0.03); }
+.dg-tl-comment { font-size:11px; color:var(--rd-text2); font-style:italic; border-left:2px solid; padding:4px 8px; border-radius:0 4px 4px 0; margin-top:4px; line-height:1.5; background: var(--rd-neutral-50); }
 
 /* Custom for Initiation */
 .edit-input { background: #ffffff !important; border: 1px solid var(--rd-accent) !important; color: #0f172a !important; font-size: 1.5rem !important; font-weight: bold !important; padding: 5px 15px !important; border-radius: 8px !important; }
@@ -243,9 +244,9 @@
 #pcMultiQuoteTable { border: 1px solid var(--rd-border2) !important; background: #ffffff; table-layout: fixed; border-collapse: separate; border-spacing: 0; width: auto; }
 #pcMultiQuoteTable th, #pcMultiQuoteTable td { border: 1px solid var(--rd-border) !important; font-size: 12px; vertical-align: middle; padding: 6px 10px; color: var(--rd-text1); overflow: hidden; text-overflow: ellipsis; }
 #pcMultiQuoteTable thead th { border-bottom: 2px solid var(--rd-accent) !important; background: var(--rd-surface2); color: var(--rd-text1); font-weight: 700; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 20; }
-#pcMultiQuoteBody tr:hover td { background-color: #f8fafc; }
+#pcMultiQuoteBody tr:hover td { background-color: var(--rd-text1); }
 .pc-price-input { border: 1px solid var(--rd-border2) !important; height: 30px !important; font-size: 13px !important; font-weight: 700 !important; color: var(--rd-accent) !important; padding: 2px 8px !important; width: 100% !important; border-radius: 4px !important; text-align: center; background: #ffffff; transition: all 0.2s; }
-.pc-price-input:focus { border-color: var(--rd-accent) !important; box-shadow: 0 0 0 2px rgba(37,99,235,0.15) !important; background: #ffffff !important; outline: none; }
+.pc-price-input:focus { border-color: var(--rd-accent) !important; box-shadow: 0 0 0 2px rgba(95,120,88,0.15) !important; background: #ffffff !important; outline: none; }
 .pc-price-input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--rd-surface2) !important; border-color: var(--rd-border) !important; }
 .pc-vendor-name-input { font-size: 12px !important; font-weight: 700 !important; height: 28px !important; border: 1px solid var(--rd-border2) !important; border-radius: 4px !important; background: #ffffff !important; color: var(--rd-text1) !important; width: 100% !important; }
 .pc-col-winner { background: rgba(22, 163, 74, 0.08) !important; }
@@ -345,8 +346,8 @@
                                 <i class="fas fa-file-signature mr-1"></i> IT / RFQ LETTER & ANNEX
                             </a>
                             @endif
-                            <a href="{{ route('purchase.market_research', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-market-res rajdhani">
-                                <i class="fas fa-search mr-1"></i> MARKET RESEARCH
+                            <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-comparative-stmt rajdhani">
+                                <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
                             </a>
                             <a href="{{ $backRoute }}" class="dg-back-btn" style="padding: 6px 15px; font-size: 12px;">
                                 <i class="fas fa-arrow-left mr-1"></i> Back
@@ -440,7 +441,7 @@
                                     <div class="text-danger font-weight-bold text-right">{{ number_format($finExpenditure) }}</div>
                                     
                                     <div class="text-muted small font-weight-bold">BALANCE</div>
-                                    <div class="text-primary font-weight-bold text-right" style="color: #2563eb !important;">{{ number_format($finBalance) }}</div>
+                                    <div class="text-primary font-weight-bold text-right" style="color: var(--rd-primary-700) !important;">{{ number_format($finBalance) }}</div>
                                     
                                     <div class="text-muted small font-weight-bold">COMMITMENTS</div>
                                     <div class="text-warning font-weight-bold text-right" style="color: #d97706 !important;">{{ number_format($finCommitments) }}</div>
@@ -448,8 +449,8 @@
                                     <div class="text-muted small font-weight-bold">IN PROCESS</div>
                                     <div class="text-muted text-right">{{ number_format($finInProcess) }}</div>
                                     
-                                    <div class="text-success font-weight-bold small border-top pt-1" style="border-color: #cbd5e1 !important;">AVAILABLE</div>
-                                    <div class="text-success font-weight-bold text-right border-top pt-1" style="border-color: #cbd5e1 !important; color: #16a34a !important;">{{ number_format($finAvailable) }}</div>
+                                    <div class="text-success font-weight-bold small border-top pt-1" style="border-color: var(--rd-text1) !important;">AVAILABLE</div>
+                                    <div class="text-success font-weight-bold text-right border-top pt-1" style="border-color: var(--rd-text1) !important; color: #16a34a !important;">{{ number_format($finAvailable) }}</div>
                                     
                                     <div class="text-warning font-weight-bold small" style="font-size: 11px; color: #d97706 !important;">CAN BE SPENT</div>
                                     <div class="text-warning font-weight-bold text-right" style="font-size: 13px; color: #d97706 !important;">{{ number_format($finCanBeSpent) }}</div>
@@ -476,8 +477,8 @@
                                     <div class="text-muted small" style="font-size: 11px;">GST</div>
                                     <div class="text-dark font-weight-bold text-right" id="pcSummaryGst" style="font-size: 12px; color: #0f172a !important;">{{ number_format($initGst, 2) }}</div>
                                     
-                                    <div class="text-success font-weight-bold small border-top pt-1" style="font-size: 11px; border-color: #cbd5e1 !important; color: #16a34a !important;">TOTAL</div>
-                                    <div class="text-success font-weight-bold text-right border-top pt-1" id="pcSummaryTotal" style="font-size: 15px; border-color: #cbd5e1 !important; color: #16a34a !important;">{{ number_format($initTot, 2) }}</div>
+                                    <div class="text-success font-weight-bold small border-top pt-1" style="font-size: 11px; border-color: var(--rd-text1) !important; color: #16a34a !important;">TOTAL</div>
+                                    <div class="text-success font-weight-bold text-right border-top pt-1" id="pcSummaryTotal" style="font-size: 15px; border-color: var(--rd-text1) !important; color: #16a34a !important;">{{ number_format($initTot, 2) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -510,7 +511,7 @@
                             </div>
                             @if($canEdit)
                                 <div class="edit-only mt-3 p-3 rounded" id="pcInlineItemEditor" style="display:none; background: #f8fafc; border: 1.5px solid #93c5fd; box-shadow: 0 4px 12px rgba(37,99,235,0.08);">
-                                    <div class="d-flex align-items-center mb-2" style="color: #2563eb; font-size: 11px; font-weight: 700; letter-spacing: 0.8px;">
+                                    <div class="d-flex align-items-center mb-2" style="color: var(--rd-primary-700); font-size: 11px; font-weight: 700; letter-spacing: 0.8px;">
                                         <i class="fas fa-plus-circle mr-1 text-primary"></i> ADD NEW ITEM TO CASE
                                     </div>
                                     <form id="pcAddItemForm" class="d-flex align-items-center" style="gap:10px; margin:0;">
@@ -537,8 +538,6 @@
                                 @if($canAddQuotes)
                                     <button type="button" class="pc-plus-btn" data-toggle="modal" data-target="#pcAddQuoteModal" title="Add Quotation"><i class="fas fa-plus"></i></button>
                                 @endif
-
-                                    <button class="dg-cs-btn" data-toggle="modal" data-target="#detailedCSModal"><i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT</button>
                                 </div>
                             </div>
                                 <div class="table-responsive" style="border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; overflow: hidden;">
@@ -975,7 +974,7 @@
                                 <thead style="background: var(--rd-surface2);">
                                     <tr class="text-muted">
                                         <th class="pl-3 border-0">METRIC</th>
-                                        <th class="text-right border-0" style="color: #2563eb;">PROJECT</th>
+                                        <th class="text-right border-0" style="color: var(--rd-primary-700);">PROJECT</th>
                                         <th class="text-right border-0" style="color: #d97706;">CSRF</th>
                                         <th class="text-right pr-3 border-0" style="color: #16a34a;">ACTUAL</th>
                                     </tr>
@@ -983,7 +982,7 @@
                                 <tbody>
                                     <tr>
                                         <td class="pl-3 text-muted">Received</td>
-                                        <td class="text-right" style="color: #2563eb;">{{ number_format($head->pcc_received ?? 0) }}</td>
+                                        <td class="text-right" style="color: var(--rd-primary-700);">{{ number_format($head->pcc_received ?? 0) }}</td>
                                         <td class="text-right" style="color: #d97706;">{{ number_format($head->cf_received ?? 0) }}</td>
                                         <td class="text-right pr-3 text-muted">--</td>
                                     </tr>
@@ -1155,10 +1154,10 @@
 </div>
 
 <style>
-    .fin-card-glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
-    .fin-card-glass:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+    .fin-card-glass { background: var(--rd-neutral-50); border: 1px solid var(--rd-border); transition: all 0.3s; }
+    .fin-card-glass:hover { background: var(--rd-neutral-50); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
     .border-accent { border-color: rgba(243,156,18,0.3) !important; }
-    .bg-navy-darker { background: #000c1a !important; }
+    .bg-navy-darker { background: var(--rd-neutral-200) !important; }
     .subhead-list-wrap::-webkit-scrollbar { width: 4px; }
     .subhead-list-wrap::-webkit-scrollbar-thumb { background: var(--rd-accent); border-radius: 10px; }
 </style>
@@ -1166,7 +1165,7 @@
 </div>
 
 <style>
-.chart-container-box { background: rgba(0,0,0,0.3) !important; transition: all 0.3s; }
+.chart-container-box { background: var(--rd-neutral-200) !important; transition: all 0.3s; }
 .chart-container-box:hover { border-color: var(--rd-accent) !important; background: rgba(23,162,184,0.02) !important; }
 </style>
 
@@ -1471,11 +1470,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td class="pl-3 ${td1}">${idx + 1}</td>
                     <td class="${td2}" style="color: ${isWinner ? '#166534' : '#0f172a'} !important;">
                         ${(q.firm_name ?? '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}
-                        ${isBaseQuote ? '<span class="text-muted small font-weight-bold ml-1" style="font-size:10px; color: #64748b !important;">(Base Quote)</span>' : ''}
+                        ${isBaseQuote ? '<span class="text-muted small font-weight-bold ml-1" style="font-size:10px; color: var(--rd-text3) !important;">(Base Quote)</span>' : ''}
                     </td>
                     <td class="text-right pr-3 font-weight-bold ${td3}">
                         <div style="color: ${isWinner ? '#166534' : '#0f172a'} !important;">Rs. ${fmt(quoteTotal)}</div>
-                        ${bPrice > 0 && taxAmt > 0 ? `<div style="font-size:10px; font-weight:normal; color: #64748b;">Base: ${fmt(bPrice)} | Tax: ${fmt(taxAmt)}</div>` : ''}
+                        ${bPrice > 0 && taxAmt > 0 ? `<div style="font-size:10px; font-weight:normal; color: var(--rd-text3);">Base: ${fmt(bPrice)} | Tax: ${fmt(taxAmt)}</div>` : ''}
                     </td>
                     <td class="text-center">
                         ${q.attachment_path ? `
@@ -1573,7 +1572,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </button>
                     </div>
                     <div class="mt-1 d-flex align-items-center justify-content-center">
-                        <label class="badge ${v.file || v.existing_file_path ? 'badge-success' : 'badge-dark'} p-1 mb-0" style="cursor:pointer; font-size:9px; font-weight:normal; border:1px solid rgba(255,255,255,0.15);" title="${v.file ? v.file.name : (v.existing_file_name || 'Attach Quote Document')}">
+                        <label class="badge ${v.file || v.existing_file_path ? 'badge-success' : 'badge-dark'} p-1 mb-0" style="cursor:pointer; font-size:9px; font-weight:normal; border: 1px solid var(--rd-border);" title="${v.file ? v.file.name : (v.existing_file_name || 'Attach Quote Document')}">
                             <i class="fas fa-paperclip mr-1"></i>
                             <span>${v.file ? (v.file.name.length > 12 ? v.file.name.substring(0,10)+'..' : v.file.name) : (v.existing_file_name ? (v.existing_file_name.length > 12 ? v.existing_file_name.substring(0,10)+'..' : v.existing_file_name) : 'Attach Document')}</span>
                             <input type="file" class="pc-modal-quote-file-input" data-idx="${idx}" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt">
@@ -1586,7 +1585,7 @@ document.addEventListener('DOMContentLoaded', function() {
         body.innerHTML = items.map((it) => `
             <tr>
                 <td class="pc-item-sticky">
-                    <div style="font-size:12px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${(it.pci_desc ?? '').replaceAll('<','&lt;').replaceAll('>','&gt;')}</div>
+                    <div style="font-size:12px; font-weight:700; color:var(--rd-text1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${(it.pci_desc ?? '').replaceAll('<','&lt;').replaceAll('>','&gt;')}</div>
                     <div style="font-size:11px; color:#888;">Quantity: ${fmt(it.pci_qty)} ${(it.pci_qtyunit ?? '')}</div>
                 </td>
                 ${modalVendors.map((v, idx) => `
@@ -1743,7 +1742,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const head = `
             <table class="cs-table table-bordered" style="border-color: rgba(255,255,255,0.05) !important;">
                 <thead>
-                    <tr style="background: rgba(255,255,255,0.03);">
+                    <tr style="background: var(--rd-neutral-50);">
                         <th class="cs-sticky-1 text-muted text-center" style="font-size: 10px; border-bottom: 2px solid var(--rd-accent);">#</th>
                         <th class="cs-sticky-2 text-left text-muted" style="font-size: 10px; border-bottom: 2px solid var(--rd-accent);">DESCRIPTION / ITEMS SPECIFICATION</th>
                         <th class="cs-sticky-3 text-center text-muted" style="font-size: 10px; border-bottom: 2px solid var(--rd-accent);">QTY</th>
@@ -1772,16 +1771,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const body = items.map((it) => {
             const row = `
                 <tr>
-                    <td class="cs-sticky-1 text-center text-muted small" style="background: rgba(0,0,0,0.2) !important;">${it.pci_serial ?? ''}</td>
-                    <td class="cs-sticky-2 text-white" style="font-weight: 500; background: rgba(0,0,0,0.2) !important;">${String(it.pci_desc || '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</td>
-                    <td class="cs-sticky-3 text-center text-white" style="font-weight: 600; background: rgba(0,0,0,0.2) !important;">${fmt(it.pci_qty)}</td>
+                    <td class="cs-sticky-1 text-center text-muted small" style="background: var(--rd-neutral-200) !important;">${it.pci_serial ?? ''}</td>
+                    <td class="cs-sticky-2 text-dark" style="font-weight: 500; background: var(--rd-neutral-200) !important;">${String(it.pci_desc || '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</td>
+                    <td class="cs-sticky-3 text-center text-dark" style="font-weight: 600; background: var(--rd-neutral-200) !important;">${fmt(it.pci_qty)}</td>
                     ${quotes.map((q, idx) => {
                         const price = Number((qi[String(q.qte_id)] || {})[String(it.pci_id)] || 0);
                         const isBest = price > 0 && price === (winnerByItem[it.pci_id] || -1);
                         return `
                             <td class="text-center ${idx === 0 ? 'col-l1' : ''}" style="border-right: 1px solid rgba(255,255,255,0.05);">
                                 ${price > 0
-                                    ? `<div class="price-val ${isBest ? 'text-success' : 'text-white'}" style="font-size: 14px; font-weight: 700;">${fmt(price)}</div>${isBest ? `<span class="badge badge-success" style="font-size: 8px; padding: 1px 4px;">Min</span>` : ''}`
+                                    ? `<div class="price-val ${isBest ? 'text-success' : 'text-dark'}" style="font-size: 14px; font-weight: 700;">${fmt(price)}</div>${isBest ? `<span class="badge badge-success" style="font-size: 8px; padding: 1px 4px;">Min</span>` : ''}`
                                     : `<span class="text-muted small">N/A</span>`
                                 }
                             </td>
@@ -1796,13 +1795,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const foot = `
                 </tbody>
                 <tfoot style="border-top: 2px solid var(--rd-accent);">
-                    <tr style="background: rgba(255,255,255,0.03);">
-                        <td colspan="3" class="cs-sticky-1-3 text-right pr-4 text-accent-clean" style="font-size: 14px; background: rgba(0,0,0,0.4) !important; font-weight: 800;">
+                    <tr style="background: var(--rd-neutral-50);">
+                        <td colspan="3" class="cs-sticky-1-3 text-right pr-4 text-accent-clean" style="font-size: 14px; background: var(--rd-neutral-200) !important; font-weight: 800;">
                             GRAND TOTAL (PKR)
                         </td>
                         ${totals.map((t, idx) => `
-                            <td class="text-center py-3 ${idx === 0 ? 'col-l1' : ''}" style="border-right: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2) !important;">
-                                <div class="rajdhani ${idx === 0 ? 'text-success' : 'text-white'}" style="font-size: 20px; font-weight: 800; text-shadow: 0 0 10px rgba(0,0,0,0.5);">
+                            <td class="text-center py-3 ${idx === 0 ? 'col-l1' : ''}" style="border-right: 1px solid rgba(255,255,255,0.05); background: var(--rd-neutral-200) !important;">
+                                <div class="rajdhani ${idx === 0 ? 'text-success' : 'text-dark'}" style="font-size: 20px; font-weight: 800; text-shadow: 0 0 10px rgba(0,0,0,0.5);">
                                     ${t}
                                 </div>
                             </td>
@@ -1943,12 +1942,12 @@ document.addEventListener('DOMContentLoaded', function() {
             tr.innerHTML = `
                 <td class="pl-3 text-warning font-weight-bold"><i class="fas fa-pencil-alt"></i></td>
                 <td>
-                    <input type="text" class="form-control form-control-sm pc-inline-desc-input" value="${desc.replaceAll('"', '&quot;')}" style="background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--rd-accent); font-size:12px;" required>
+                    <input type="text" class="form-control form-control-sm pc-inline-desc-input" value="${desc.replaceAll('"', '&quot;')}" style="background: var(--rd-neutral-200); color:#fff; border:1px solid var(--rd-accent); font-size:12px;" required>
                 </td>
                 <td class="text-center">
                     <div class="d-flex align-items-center justify-content-center" style="gap:4px;">
-                        <input type="number" step="0.01" class="form-control form-control-sm pc-inline-qty-input text-center" value="${qty}" style="width:65px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid var(--rd-accent); font-size:12px;" required>
-                        <input type="text" class="form-control form-control-sm pc-inline-unit-input text-center" value="${unit.replaceAll('"', '&quot;')}" style="width:45px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(255,255,255,0.2); font-size:11px;">
+                        <input type="number" step="0.01" class="form-control form-control-sm pc-inline-qty-input text-center" value="${qty}" style="width:65px; background: var(--rd-neutral-200); color:#fff; border:1px solid var(--rd-accent); font-size:12px;" required>
+                        <input type="text" class="form-control form-control-sm pc-inline-unit-input text-center" value="${unit.replaceAll('"', '&quot;')}" style="width:45px; background: var(--rd-neutral-200); color:#fff; border:1px solid rgba(255,255,255,0.2); font-size:11px;">
                     </div>
                 </td>
                 <td class="text-right pr-3 font-weight-bold text-muted">—</td>
@@ -2046,7 +2045,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-file-code mr-1"></i> Raw JSON Report
                     </a>
                 </div>
-                <div class="pc-diag-render-area" style="display:none; background: #070b14; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px; margin-top: 12px;"></div>
+                <div class="pc-diag-render-area" style="display:none; background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 6px; padding: 14px; margin-top: 12px;"></div>
             </div>
         `;
     }
@@ -2066,8 +2065,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="fas fa-search mr-1"></i> DIAGNOSTIC BREAKDOWN (OFFLINE LOG)
                 </div>
                 <div class="row small mb-2">
-                    <div class="col-md-6 text-muted">Client IP: <span class="text-white font-weight-bold">${data.client_ip || 'Unknown'}</span></div>
-                    <div class="col-md-6 text-muted">User: <span class="text-white font-weight-bold">${data.user?.name || 'N/A'} (${data.user?.area || 'N/A'})</span></div>
+                    <div class="col-md-6 text-muted">Client IP: <span class="text-dark font-weight-bold">${data.client_ip || 'Unknown'}</span></div>
+                    <div class="col-md-6 text-muted">User: <span class="text-dark font-weight-bold">${data.user?.name || 'N/A'} (${data.user?.area || 'N/A'})</span></div>
                 </div>
                 <div class="row small mb-3">
                     <div class="col-md-6 text-muted">DB Record Found: <span class="${data.attachment_record ? 'text-success font-weight-bold' : 'text-danger font-weight-bold'}">${data.attachment_record ? 'YES (ID: ' + data.attachment_record.pat_id + ')' : 'NO (Missing in purattachments)'}</span></div>
@@ -2076,7 +2075,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="small font-weight-bold text-warning mb-1">Tested File Paths on Server:</div>
                 <ul class="list-unstyled mb-0" style="font-family: monospace; font-size: 11px;">
                     ${(data.tested_paths || []).map(p => `
-                        <li class="p-1 mb-1 rounded d-flex justify-content-between align-items-center" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                        <li class="p-1 mb-1 rounded d-flex justify-content-between align-items-center" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border);">
                             <span style="word-break:break-all;" class="${p.exists ? 'text-success' : 'text-muted'}">${p.path}</span>
                             <span class="badge ${p.exists ? 'badge-success' : 'badge-secondary'} ml-2">${p.exists ? 'EXISTS (' + p.size + ' B)' : 'NOT FOUND'}</span>
                         </li>
@@ -2249,7 +2248,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 const text = await res.text();
                 if (docContent) {
-                    docContent.innerHTML = `<pre style="font-family: monospace; font-size: 13px; color: #fff; background: #0f172a; padding: 20px; border-radius: 6px; white-space: pre-wrap; word-break: break-all;">${text.replaceAll('<','&lt;').replaceAll('>','&gt;')}</pre>`;
+                    docContent.innerHTML = `<pre style="font-family: monospace; font-size: 13px; color: #fff; background: var(--rd-surface); padding: 20px; border-radius: 6px; white-space: pre-wrap; word-break: break-all;">${text.replaceAll('<','&lt;').replaceAll('>','&gt;')}</pre>`;
                 }
                 if (docWrap) docWrap.style.display = 'flex';
             } catch (err) {

@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -203,11 +203,7 @@
 
 @section('scripts')
 <style>
-    :root {
-        --rd-surface: #1e1e2d;
-        --rd-text1: #ffffff;
-        --rd-text2: #a2a3b7;
-    }
+    
     .extra-small { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; display: block; }
     .form-control-sm { border-radius: 6px; }
     .bg-dark { background-color: rgba(0,0,0,0.2) !important; }

@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
     .finance-hub {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
+        background: var(--rd-bg) !important;
         min-height: 100vh;
-        color: #cbd5e0;
+        color: var(--rd-text1);
         padding-top: 15px;
     }
 
@@ -19,7 +19,7 @@
 
     /* Premium Cyber/Glass Panels */
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -66,57 +66,58 @@
     .kpi-title {
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        color: rgba(229, 229, 229, 0.6);
-        font-weight: 600;
+        letter-spacing: 1.5px;
+        color: var(--rd-text3) !important;
+        font-weight: 700;
     }
     .kpi-value {
         font-size: 24px;
         font-weight: 700;
-        color: #fff;
+        color: var(--rd-text1) !important;
         margin-top: 6px;
         font-family: 'Rajdhani', sans-serif;
     }
     .kpi-sub {
         font-size: 11px;
-        color: rgba(229, 229, 229, 0.45);
+        color: var(--rd-text4) !important;
         margin-top: 4px;
+        font-weight: 500;
     }
 
     /* Pill Navigation */
     .pill-nav {
-        background: rgba(18, 26, 34, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: var(--rd-neutral-200) !important;
+        border: 1px solid var(--rd-border) !important;
         border-radius: 30px;
-        padding: 6px 12px;
+        padding: 5px 8px;
         display: inline-flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 4px;
     }
 
     .pill-btn {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: rgba(229, 229, 229, 0.7);
+        background: var(--rd-surface) !important;
+        border: 1px solid var(--rd-border2) !important;
+        color: var(--rd-text2) !important;
         padding: 5px 16px;
         border-radius: 20px;
         font-size: 12px;
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.25s ease;
+        transition: all 0.2s ease;
     }
 
     .pill-btn:hover:not(.active) {
-        color: #fff;
-        border-color: rgba(0, 191, 255, 0.3);
+        background: var(--rd-neutral-200) !important;
+        color: var(--rd-text1) !important;
     }
 
     .pill-btn.active {
-        border-color: rgba(0, 191, 255, 0.7);
-        color: #00BFFF;
-        background: #060a0e;
-        box-shadow: 0 0 12px rgba(0, 191, 255, 0.15);
-        font-weight: 600;
+        border-color: var(--rd-primary-600) !important;
+        color: var(--rd-primary-700) !important;
+        background: var(--rd-primary-100) !important;
+        box-shadow: var(--rd-shadow-sm);
+        font-weight: 700;
     }
 
     /* Chips */
@@ -126,7 +127,9 @@
         border-radius: 20px;
         font-weight: 600;
         letter-spacing: 0.5px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--rd-surface) !important;
+        border: 1px solid var(--rd-border2) !important;
+        color: var(--rd-text2) !important;
         transition: all 0.2s;
     }
 
@@ -164,10 +167,10 @@
     /* Dark Table design */
     .table-cyber {
         background: transparent;
-        color: #cbd5e0;
+        color: var(--rd-text1);
     }
     .table-cyber th {
-        background: rgba(18, 26, 34, 0.95) !important;
+        background: var(--rd-surface) !important;
         border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
         color: #67e8f9 !important;
         font-family: 'Rajdhani', sans-serif;
@@ -184,13 +187,13 @@
         font-size: 13px;
     }
     .table-cyber tr:hover {
-        background: rgba(255, 255, 255, 0.02) !important;
+        background: var(--rd-neutral-50) !important;
     }
 
     .btn-toggle-active {
         border-color: rgba(0, 191, 255, 0.7) !important;
         color: #00BFFF !important;
-        background: #060a0e !important;
+        background: var(--rd-bg) !important;
         box-shadow: 0 0 10px rgba(0, 191, 255, 0.1) !important;
         font-weight: 600 !important;
     }
@@ -200,7 +203,7 @@
     <!-- Header -->
     <div class="position-relative">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-            <h2 class="font-weight-bold text-white rajdhani m-0">
+            <h2 class="font-weight-bold text-dark rajdhani m-0">
                 <i class="fas fa-wallet mr-2 text-info"></i>Finance Operations Dashboard
             </h2>
             
@@ -230,7 +233,7 @@
                 <label class="kpi-title d-block mb-2" style="font-size: 11px;">
                     <i class="fas fa-sitemap mr-1 text-cyan"></i> Filter by Division
                 </label>
-                <select id="division-dropdown" class="form-control form-control-sm bg-dark text-white border-secondary" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1px solid rgba(255,255,255,0.08);">
+                <select id="division-dropdown" class="form-control form-control-sm bg-white text-dark border-secondary" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1px solid var(--rd-border);">
                     <option value="all">All Divisions</option>
                 </select>
             </div>
@@ -238,7 +241,7 @@
                 <label class="kpi-title d-block mb-2" style="font-size: 11px;">
                     <i class="fas fa-project-diagram mr-1 text-cyan"></i> Filter by Project
                 </label>
-                <select id="project-dropdown" class="form-control form-control-sm bg-dark text-white border-secondary" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1px solid rgba(255,255,255,0.08);">
+                <select id="project-dropdown" class="form-control form-control-sm bg-white text-dark border-secondary" style="border-radius: 8px; height: 38px; font-size: 13px; border: 1px solid var(--rd-border);">
                     <option value="">All Projects</option>
                 </select>
             </div>
@@ -286,7 +289,7 @@
     <div class="row mb-4">
         <div class="col-lg-6 mb-3">
             <div class="card-cyber px-4 py-3 h-100">
-                <span class="font-weight-bold text-white text-xs mb-3 d-block">Budget Allocation & Usage</span>
+                <span class="font-weight-bold text-dark text-xs mb-3 d-block">Budget Allocation & Usage</span>
                 <div style="height: 250px; position: relative;">
                     <canvas id="financeDonutChart"></canvas>
                 </div>
@@ -294,7 +297,7 @@
         </div>
         <div class="col-lg-6 mb-3">
             <div class="card-cyber px-4 py-3 h-100">
-                <span class="font-weight-bold text-white text-xs mb-3 d-block">Project Wise Approved Budgets</span>
+                <span class="font-weight-bold text-dark text-xs mb-3 d-block">Project Wise Approved Budgets</span>
                 <div style="height: 250px; position: relative;">
                     <canvas id="projectsBudgetBarChart"></canvas>
                 </div>
@@ -307,13 +310,13 @@
         <div class="col-12">
             <div class="card-cyber px-3 py-3">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                    <span class="font-weight-bold text-white text-sm">
+                    <span class="font-weight-bold text-dark text-sm">
                         <i class="fas fa-users-cog mr-2 text-cyan"></i>Personnel Headcount Mappings
                         <span class="badge badge-info ml-2" id="personnel-filtered-badge">Active</span>
                     </span>
                     <span class="text-muted text-xs" id="personnel-loaded-count">0 active records loaded</span>
                 </div>
-                <div class="rd-table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;">
+                <div class="rd-table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--rd-border); border-radius: 8px;">
                     <table class="table table-hover table-cyber text-nowrap m-0" id="personnel-table">
                         <thead class="sticky-top">
                             <tr>
@@ -326,7 +329,7 @@
                         <tbody>
                             @forelse($employeesList as $emp)
                             <tr class="emp-row" data-unit="{{ $emp->unit_name }}" data-head="{{ $emp->hed_name }}">
-                                <td class="font-weight-bold text-white">
+                                <td class="font-weight-bold text-dark">
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-user-tie text-muted mr-3" style="font-size: 1.2rem; color: #67e8f9 !important;"></i>
                                         {{ $emp->emp_name }}
@@ -334,7 +337,7 @@
                                 </td>
                                 <td>{{ $emp->emp_joinrank ?: 'N/A' }}</td>
                                 <td class="text-muted">{{ $emp->hed_name }}</td>
-                                <td><span class="badge border px-2.5 py-1 text-white border-secondary emp-unit-badge" style="background: rgba(18,26,34,0.6);">{{ $emp->unit_name }}</span></td>
+                                <td><span class="badge border px-2.5 py-1 text-dark border-secondary emp-unit-badge" style="background: var(--rd-surface);">{{ $emp->unit_name }}</span></td>
                             </tr>
                             @empty
                             <tr>

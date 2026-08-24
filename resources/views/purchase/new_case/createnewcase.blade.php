@@ -4,10 +4,10 @@
 
 <style>
     :root {
-        --primary-color: #4e73df;
-        --secondary-color: #858796;
-        --success-color: #1cc88a;
-        --bg-light: #f8f9fc;
+        --primary-color: var(--rd-primary-600);
+        --secondary-color: var(--rd-text3);
+        --success-color: var(--rd-success);
+        --bg-light: var(--rd-bg);
     }
 
     .content-wrapper { background-color: var(--bg-light); padding: 20px; }

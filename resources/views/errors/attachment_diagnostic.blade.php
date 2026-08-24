@@ -5,23 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quote Attachment Diagnostics | RDWIS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <style>
-        :root {
-            --rd-bg: #090e1a;
-            --rd-surface: #10182b;
-            --rd-surface2: #19253d;
-            --rd-border: rgba(255,255,255,0.08);
-            --rd-accent: #f39c12;
-            --rd-danger: #e74c3c;
-            --rd-success: #2ecc71;
-            --rd-info: #00b4d8;
-        }
         body {
             margin: 0;
             padding: 24px;
             background: var(--rd-bg);
-            color: #e2e8f0;
+            color: var(--rd-text1);
             font-family: 'Inter', sans-serif;
             font-size: 13px;
         }
@@ -78,7 +68,7 @@
             padding: 4px 0;
             border-bottom: 1px solid rgba(255,255,255,0.04);
         }
-        .diag-meta-label { color: #94a3b8; }
+        .diag-meta-label { color: var(--rd-text3); }
         .diag-meta-val { font-weight: 600; color: #fff; font-family: 'Fira Code', monospace; }
         .path-list {
             list-style: none;
@@ -89,7 +79,7 @@
             gap: 8px;
         }
         .path-item {
-            background: #0b1120;
+            background: var(--rd-surface2);
             border: 1px solid var(--rd-border);
             border-radius: 6px;
             padding: 8px 12px;

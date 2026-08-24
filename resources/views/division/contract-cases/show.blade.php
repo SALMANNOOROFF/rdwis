@@ -1,11 +1,10 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
     /* Premium Dark Theme */
-    .dark-contract-wrapper {
-        background-color: #12141a;
-        color: #e2e8f0;
+    .dark-contract-wrapper { background-color: var(--rd-bg);
+        color: var(--rd-text1);
         font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         min-height: calc(100vh - 60px);
         padding: 2rem;
@@ -15,13 +14,13 @@
         font-size: 1.5rem;
         font-weight: 800;
         letter-spacing: 0.5px;
-        color: #ffffff;
+        color: var(--rd-text1);
     }
 
     .dark-contract-wrapper .btn-back {
         background: transparent;
-        border: 1px solid #2d3748;
-        color: #a0aec0;
+        border: 1px solid var(--rd-border);
+        color: var(--rd-text3);
         font-weight: 500;
         border-radius: 6px;
         padding: 0.4rem 1rem;
@@ -36,26 +35,26 @@
     /* Cards */
     .premium-card {
         background-color: #161b22;
-        border: 1px solid #2d3748;
+        border: 1px solid var(--rd-border);
         border-radius: 10px;
         overflow: hidden;
         margin-bottom: 2rem;
     }
     
     .premium-card-header {
-        background-color: #1a1d24;
+        background-color: var(--rd-surface);
         padding: 1.2rem 1.5rem;
         border-bottom: 1px solid #2d3748;
         font-size: 0.95rem;
         font-weight: 700;
-        color: #f8fafc;
+        color: var(--rd-text1);
         letter-spacing: 0.5px;
     }
 
     /* Release Card specific */
     .release-card {
-        border-color: #3b82f6;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+        border-color: var(--rd-primary-600);
+        box-shadow: 0 4px 15px rgba(95,120,88,0.10);
     }
 
     /* Grid Table Data */
@@ -79,10 +78,10 @@
     
     .data-label {
         font-weight: 600;
-        color: #94a3b8;
+        color: var(--rd-text3);
     }
     .data-value {
-        color: #e2e8f0;
+        color: var(--rd-text1);
     }
 
     /* Full width row override */
@@ -93,7 +92,7 @@
     /* Form elements */
     .dark-label {
         font-size: 0.8rem;
-        color: #a0aec0;
+        color: var(--rd-text3);
         margin-bottom: 0.4rem;
         display: block;
     }
@@ -101,9 +100,9 @@
         color: #e53e3e;
     }
     .dark-input {
-        background-color: #0f1219;
-        border: 1px solid #1f2937;
-        color: #f8fafc;
+        background-color: var(--rd-surface);
+        border: 1.5px solid var(--rd-border2);
+        color: var(--rd-text1);
         border-radius: 6px;
         padding: 0.8rem 1rem;
         width: 100%;
@@ -112,7 +111,7 @@
     }
     .dark-input:focus {
         outline: none;
-        border-color: #3b82f6;
+        border-color: var(--rd-primary-600);
     }
     .dark-input::placeholder {
         color: #4a5568;
@@ -120,7 +119,7 @@
 
     .btn-release {
         background: #60a5fa;
-        color: #ffffff;
+        color: var(--rd-text1);
         border: none;
         border-radius: 6px;
         padding: 0.8rem 1rem;
@@ -130,12 +129,12 @@
         transition: background 0.2s;
     }
     .btn-release:hover {
-        background: #3b82f6;
+        background: var(--rd-primary-600);
     }
 
     .status-badge {
         background-color: rgba(71, 85, 105, 0.2);
-        color: #94a3b8;
+        color: var(--rd-text3);
         padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.75rem;
@@ -145,7 +144,7 @@
     }
 </style>
 
-<div class="content-wrapper" style="background-color: #12141a;">
+<div class="content-wrapper" style="background-color: var(--rd-surface);">
     <section class="content">
         <div class="dark-contract-wrapper">
             
@@ -246,7 +245,7 @@
                             <div class="premium-card-header">Case Progress</div>
                             <div class="p-4 text-center">
                                 <i class="fas fa-lock fa-2x mb-3 text-secondary"></i>
-                                <p style="color: #a0aec0; font-size: 0.9rem;">
+                                <p style="color: var(--rd-text3); font-size: 0.9rem;">
                                     This case has been forwarded and is currently marked as:<br>
                                     <span class="status-badge mt-2 d-inline-block">{{ $case->ctc_status }}</span>
                                 </p>

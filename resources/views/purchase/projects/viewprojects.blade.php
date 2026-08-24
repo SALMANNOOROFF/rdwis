@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -358,7 +358,7 @@
         transition: all 0.3s ease;
         border-left: 5px solid transparent; 
     }
-    .project-card[data-status="open"] { border-left-color: #007bff; }
+    .project-card[data-status="open"] { border-left-color: var(--rd-primary-600); }
     .project-card[data-status="closed"] { border-left-color: #28a745; }
 
     .project-card:hover {
@@ -370,7 +370,7 @@
     .timeline-wrapper { display: flex; justify-content: space-between; position: relative; }
     .timeline-item { text-align: center; flex: 1; position: relative; z-index: 2; }
     .progress-segment { height: 8px; border-radius: 4px; margin-bottom: 8px; background-color: #e9ecef; transition: background-color 0.3s; }
-    .progress-segment.bg-primary { background-color: #007bff !important; }
+    .progress-segment.bg-primary { background-color: var(--rd-primary-600) !important; }
     .progress-segment.bg-success { background-color: #28a745 !important; }
     .meta-text { font-weight: 700; font-size: 0.85rem; color: #495057; }
     .meta-date { font-size: 0.75rem; color: #adb5bd; margin-top: 4px; }
@@ -379,13 +379,13 @@
     .dropdown-menu::-webkit-scrollbar { width: 6px; }
     .dropdown-menu::-webkit-scrollbar-track { background: #f1f1f1; }
     .dropdown-menu::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-    .dropdown-menu::-webkit-scrollbar-thumb:hover { background: #007BFF; }
+    .dropdown-menu::-webkit-scrollbar-thumb:hover { background: var(--rd-primary-600); }
 
     /* Button Group Active State Override */
     .btn-group .btn.active {
-        background-color: #007BFF !important;
+        background-color: var(--rd-primary-600) !important;
         color: #fff !important;
-        border-color: #007BFF !important;
+        border-color: var(--rd-primary-600) !important;
     }
 </style>
 @endsection

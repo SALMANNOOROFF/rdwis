@@ -1,15 +1,15 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-.case-page { font-family: 'Inter', sans-serif; background: #080b0f; min-height: 100vh; color: #cbd5e0; }
+.case-page { font-family: 'Inter', sans-serif; background: var(--rd-bg); min-height: 100vh; color: var(--rd-text1); }
 .rajdhani { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
-.glass-card { background: #0d1218; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
-.card-title-bar { background: #0f161e; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 12px 12px 0 0; }
-.rd-table th { font-family: 'Rajdhani', sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #8a96a3; background: #0f161e; }
-.rd-table td { font-size: 12px; vertical-align: middle; color: #cbd5e0; border-bottom: 1px solid rgba(255,255,255,0.03); padding: 8px 12px; }
-.label-sm { font-family: 'Rajdhani', sans-serif; font-size: 10px; color: #8a96a3; pointer-events: none; }
+.glass-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 12px; }
+.card-title-bar { background: var(--rd-surface3); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 12px 12px 0 0; }
+.rd-table th { font-family: 'Rajdhani', sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--rd-text3); background: var(--rd-surface3); }
+.rd-table td { font-size: 12px; vertical-align: middle; color: var(--rd-text1); border-bottom: 1px solid rgba(255,255,255,0.03); padding: 8px 12px; }
+.label-sm { font-family: 'Rajdhani', sans-serif; font-size: 10px; color: var(--rd-text3); pointer-events: none; }
 .value-sm { color: #fff; font-weight: 600; font-size: 13px; }
 </style>
 
@@ -21,7 +21,7 @@
                 <div class="col-md-8">
                     <div class="d-flex align-items-center mb-1">
                         <span class="badge badge-success px-3 py-1 mb-2 rajdhani" style="font-size: 10px; background: rgba(40,167,69,0.1); color: #28a745;">FINANCIAL REVIEW PHASE</span>
-                        <span class="badge badge-dark text-muted ml-2 mb-2" style="font-size: 10px; border: 1px solid rgba(255,255,255,0.05);">REF: #{{ $purchase->pcs_id }}</span>
+                        <span class="badge badge-dark text-muted ml-2 mb-2" style="font-size: 10px; border: 1px solid var(--rd-border);">REF: #{{ $purchase->pcs_id }}</span>
                     </div>
                     <h2 class="font-weight-bold text-white rajdhani mt-1 mb-1" style="font-size: 1.8rem;">{{ $purchase->pcs_title }}</h2>
                     <div class="text-muted small">
@@ -122,7 +122,7 @@
                     <div class="card-title-bar"><span class="rajdhani text-white"><i class="fas fa-paperclip mr-2 text-success"></i> Supporting Documents</span></div>
                     <div class="p-3">
                         @forelse($purchase->attachments as $file)
-                            <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border);">
                                 <i class="far fa-file-pdf text-danger mr-3" style="font-size: 20px;"></i>
                                 <div class="flex-grow-1 overflow-hidden"><div class="small font-weight-bold text-white">{{ $file->pat_filename }}</div></div>
                                 <a href="{{ url('storage/'.$file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-success ml-2"><i class="fas fa-download"></i></a>

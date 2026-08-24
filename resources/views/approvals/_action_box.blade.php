@@ -1,4 +1,4 @@
-@php
+﻿@php
     $u = Auth::user();
     $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
     if (in_array($userArea, ['proc', 'prc'], true)) $userArea = 'proc';
@@ -85,7 +85,7 @@
         <input type="hidden" name="remarks" id="remarksHiddenInput">
 
         <div class="mb-2">
-            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks here..." style="background: rgba(255,255,255,0.03); color: #fff; font-family: 'Arial', sans-serif; font-size: 11pt; min-height: 70px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 8px 10px; outline: none; box-shadow: none; resize: vertical;">{{ $existingDraftRaw }}</textarea>
+            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks here..." style="background: var(--rd-neutral-50); color: #fff; font-family: 'Arial', sans-serif; font-size: 11pt; min-height: 70px; border: 1px solid var(--rd-border); border-radius: 6px; padding: 8px 10px; outline: none; box-shadow: none; resize: vertical;">{{ $existingDraftRaw }}</textarea>
         </div>
 
         <div class="d-flex" style="gap: 10px; width: 100%;">
@@ -157,8 +157,8 @@
 .dg-btn-success { background: rgba(40,167,69,0.1); color: #28a745; border-color: #28a745; }
 .dg-btn-success:hover { background: #28a745; color: #fff; }
 
-.dg-btn-info { background: rgba(0,123,255,0.1); color: #007bff; border-color: #007bff; }
-.dg-btn-info:hover { background: #007bff; color: #fff; }
+.dg-btn-info { background: rgba(0,123,255,0.1); color: var(--rd-primary-600); border-color: var(--rd-primary-600); }
+.dg-btn-info:hover { background: var(--rd-primary-600); color: #fff; }
 
 .dg-btn-danger { background: rgba(220,53,69,0.1); color: #dc3545; border-color: #dc3545; }
 .dg-btn-danger:hover { background: #dc3545; color: #fff; }
@@ -412,7 +412,7 @@
 @else
     @if($isInitiator && !in_array(strtolower($purchase->pcs_status), ['approved', 'rejected']))
         @php $isAtFirstAuthority = ($purchase->currentSubstatus?->pss_stage === 'DFinance'); @endphp
-        <div class="card bg-dark border-info mt-2 shadow-sm" style="border-radius: 12px; border: 1px solid rgba(0, 123, 255, 0.3) !important;">
+        <div class="card bg-dark border-info mt-2 shadow-sm" style="border-radius: 12px; border: 1px solid rgba(95,120,88,0.25) !important;">
              <div class="card-body py-3 text-center">
                  <div class="mb-2"><i class="fas fa-paper-plane fa-2x text-info opacity-50"></i></div>
                  <h5 class="text-white rajdhani font-weight-bold mb-1" style="letter-spacing: 0.5px; font-size: 1.1rem;">Case Released to HQ</h5>

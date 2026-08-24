@@ -50,7 +50,7 @@
                                         <small class="text-muted case-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</small>
                                     </td>
                                     <td class="align-middle">{{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}</td>
-                                    <td class="align-middle text-right font-weight-bold">Rs. <span class="case-amount">{{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
+                                    <td class="align-middle text-right font-weight-bold">Rs. <span class="case-amount">{{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
                                     <td class="align-middle text-center">
                                         <span class="badge badge-warning text-dark"><i class="fas fa-hourglass-half mr-1"></i> {{ $p->pcs_status }}{{ $p->current_stage_display ? ' (' . $p->current_stage_display . ')' : '' }}</span>
                                     </td>
@@ -101,7 +101,7 @@
                                         <small class="text-muted case-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</small>
                                     </td>
                                     <td class="align-middle">{{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}</td>
-                                    <td class="align-middle text-right font-weight-bold">Rs. <span class="case-amount">{{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
+                                    <td class="align-middle text-right font-weight-bold">Rs. <span class="case-amount">{{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
                                     <td class="align-middle text-center">
                                         <span class="badge badge-{{ $statusColor }} text-white">{{ $p->pcs_status }}</span>
                                     </td>

@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,8 +6,8 @@
 
     .receipt-hub {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
-        color: #cbd5e0;
+        background: var(--rd-bg) !important;
+        color: var(--rd-text1);
         padding-top: 15px;
         padding-bottom: 40px;
     }
@@ -18,7 +18,7 @@
     }
 
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -26,10 +26,10 @@
 
     .table-cyber {
         background: transparent;
-        color: #cbd5e0;
+        color: var(--rd-text1);
     }
     .table-cyber th {
-        background: rgba(18, 26, 34, 0.95) !important;
+        background: var(--rd-surface) !important;
         border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
         color: #67e8f9 !important;
         font-family: 'Rajdhani', sans-serif;
@@ -46,7 +46,7 @@
         font-size: 13px;
     }
     .table-cyber tr:hover {
-        background: rgba(255, 255, 255, 0.02) !important;
+        background: var(--rd-neutral-50) !important;
     }
 
     .btn-cyber {
@@ -67,7 +67,7 @@
 <div class="content-wrapper receipt-hub px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="text-white rajdhani font-weight-bold mb-1">Goods & Item Receipts</h2>
+            <h2 class="text-dark rajdhani font-weight-bold mb-1">Goods & Item Receipts</h2>
             <p class="text-muted small mb-0">Track and receive materials/services for approved purchase cases.</p>
         </div>
         <div class="d-flex gap-2">
@@ -103,7 +103,7 @@
                         <tr>
                             <td class="rajdhani text-info font-weight-bold">#{{ $p->pcs_id }}</td>
                             <td>
-                                <div class="font-weight-bold text-white mb-1">{{ $p->pcs_title ?? 'N/A' }}</div>
+                                <div class="font-weight-bold text-dark mb-1">{{ $p->pcs_title ?? 'N/A' }}</div>
                                 <span class="text-muted small">Type: {{ $p->pcs_type }} | Approved Date: {{ $p->pcs_approvedtg ?? 'N/A' }}</span>
                             </td>
                             <td class="font-weight-bold">{{ $p->hed_code ?? 'N/A' }}</td>

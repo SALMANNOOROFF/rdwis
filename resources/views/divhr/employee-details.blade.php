@@ -83,10 +83,10 @@
       height: 120px;
       border-radius: 50%;
       background: conic-gradient(
-        var(--rd-accent) 0 50%,      /* annual */
-        #3b82f6 50% 57.5%,  /* sick */
-        #60a5fa 57.5% 62.5%,/* casual */
-        var(--rd-surface3) 62.5% 100%  /* remaining */
+        var(--rd-primary-600) 0 50%,      /* annual */
+        var(--rd-primary-400) 50% 57.5%,  /* sick */
+        var(--rd-primary-200) 57.5% 62.5%,/* casual */
+        var(--rd-neutral-300) 62.5% 100%  /* remaining */
       );
       position: relative;
     }
@@ -208,7 +208,7 @@
             <h3 class="font-bold text-text1 text-sm">Leave Utilization</h3>
           </div>
           <div class="flex flex-col items-center">
-            <div style="width:70px;height:70px;border-radius:50%;background:conic-gradient(var(--rd-accent) 0 50%,#3b82f6 50% 57.5%,#60a5fa 57.5% 62.5%,var(--rd-surface3) 62.5% 100%);position:relative;" class="relative mb-3">
+            <div style="width:70px;height:70px;border-radius:50%;background:conic-gradient(var(--rd-primary-600) 0 50%,var(--rd-primary-400) 50% 57.5%,var(--rd-primary-200) 57.5% 62.5%,var(--rd-neutral-300) 62.5% 100%);position:relative;" class="relative mb-3">
               <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-text1">25/40d</span>
             </div>
             <div class="flex flex-wrap justify-center gap-x-2 gap-y-1 text-[9px] text-text2">

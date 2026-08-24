@@ -1,25 +1,8 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
-
-  :root {
-    --rd-surface: #1e1e2d;
-    --rd-surface2: #2b2b40;
-    --rd-border: #323248;
-    --rd-border2: #3f4254;
-    --rd-accent: #0095e8;
-    --rd-accent-soft: rgba(0, 149, 232, 0.1);
-    --rd-text1: #ffffff;
-    --rd-text2: #a2a3b7;
-    --rd-text3: #7e8299;
-    --rd-bg: #151521;
-    --rd-success: #50cd89;
-    --rd-success-soft: rgba(80, 205, 137, 0.1);
-    --rd-danger: #f1416c;
-    --rd-danger-soft: rgba(241, 65, 108, 0.1);
-  }
 
   .sinc-page {
     display: flex;
@@ -224,7 +207,7 @@
 
       <!-- Center: Config -->
       <div class="panel">
-        <div class="panel-head" style="background:#1b1b28">
+        <div class="panel-head" style="background: var(--rd-surface)">
           <div class="panel-head-title"><i class="fas fa-cog"></i> Configuration</div>
         </div>
         <div class="panel-body d-flex align-items-center justify-content-center">

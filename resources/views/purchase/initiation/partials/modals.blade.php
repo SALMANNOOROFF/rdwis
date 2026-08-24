@@ -154,8 +154,7 @@
                 <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn btn-outline-success rajdhani font-weight-bold px-4">
                     <i class="fas fa-file-invoice mr-2"></i> VIEW FORMAL STATEMENT
                 </a>
-                <button type="button" class="btn btn-secondary rajdhani font-weight-bold" data-dismiss="modal">CLOSE REVIEW</button>
-                <button type="button" class="btn btn-primary rajdhani font-weight-bold px-4" onclick="window.print()"><i class="fas fa-print mr-2"></i> PRINT STATEMENT</button>
+                <button type="button" class="btn btn-secondary rajdhani font-weight-bold px-4" data-dismiss="modal">CLOSE REVIEW</button>
             </div>
         </div>
     </div>

@@ -79,6 +79,63 @@ class Purchase extends Model
     }
 
     /**
+     * Accessor: Get dynamic live case value (Lowest Quote -> Selected Quote -> Items Total -> Recorded Estimate)
+     */
+    public function getLiveValueAttribute(): float
+    {
+        // 1. If explicit pcs_price > 0, return it
+        if ((float)($this->pcs_price ?? 0) > 0) {
+            return (float)$this->pcs_price;
+        }
+
+        // 2. If quotes exist, calculate lowest/winning quote price
+        if ($this->relationLoaded('quotes') || $this->quotes()->exists()) {
+            $winnerQuote = $this->quotes->sortBy(function($q) {
+                return (float)($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0)));
+            })->first();
+
+            if ($winnerQuote) {
+                $qPrice = (float)($winnerQuote->qte_price ?: ($winnerQuote->qte_midprice ?: ($winnerQuote->qte_intprice ?? 0)));
+                if ($qPrice > 0) {
+                    return $qPrice;
+                }
+            }
+        }
+
+        // 3. If items exist, calculate sum of items
+        if ($this->relationLoaded('items') || $this->items()->exists()) {
+            $itemsTotal = (float) $this->items->sum(function($item) {
+                $qty = (float)($item->pci_qty ?? 1);
+                $rate = (float)($item->pci_price ?: ($item->pci_rate ?: ($item->pci_estcost ?: ($item->pci_estprice ?? 0))));
+                return ($rate > 0) ? ($rate * ($item->pci_price ? 1 : $qty)) : 0;
+            });
+            if ($itemsTotal > 0) {
+                return $itemsTotal;
+            }
+        }
+
+        // 4. Fallbacks
+        if ((float)($this->pcs_intprice ?? 0) > 0) return (float)$this->pcs_intprice;
+        if ((float)($this->pcs_midprice ?? 0) > 0) return (float)$this->pcs_midprice;
+        if ((float)($this->pcs_estprice ?? 0) > 0) return (float)$this->pcs_estprice;
+
+        return 0.0;
+    }
+
+    /**
+     * Accessor: Get winning / lowest quote
+     */
+    public function getWinningQuoteAttribute()
+    {
+        if (!$this->relationLoaded('quotes') && !$this->quotes()->exists()) {
+            return null;
+        }
+        return $this->quotes->sortBy(function($q) {
+            return (float)($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0)));
+        })->first();
+    }
+
+    /**
      * Purchase items
      */
     public function items()

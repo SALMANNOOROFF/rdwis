@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -16,13 +16,13 @@
 
 /* Tabs Logic */
 .hub-tabs { border-bottom: 1px solid var(--rd-border); margin-bottom: 20px; }
-.hub-tab-link { padding: 12px 24px; color: #64748b; font-weight: 600; font-size: 13px; text-decoration: none !important; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; background: transparent; border-top: none; border-left: none; border-right: none; }
+.hub-tab-link { padding: 12px 24px; color: var(--rd-text3); font-weight: 600; font-size: 13px; text-decoration: none !important; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; background: transparent; border-top: none; border-left: none; border-right: none; }
 .hub-tab-link:hover { color: var(--rd-accent); }
 .hub-tab-link.active { color: var(--rd-accent); border-bottom-color: var(--rd-accent); font-weight: 700; }
 
 /* Table Styling */
 .hub-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
-.hub-table th { font-family: 'Rajdhani', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: #64748b; padding: 10px 16px; font-weight: 700; border: none !important; }
+.hub-table th { font-family: 'Rajdhani', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--rd-text3); padding: 10px 16px; font-weight: 700; border: none !important; }
 .hub-row { background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; }
 .hub-row:hover { background: #f8fafc; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
 .hub-row td { padding: 14px 16px; border-top: 1px solid var(--rd-border) !important; border-bottom: 1px solid var(--rd-border) !important; vertical-align: middle; }
@@ -31,13 +31,13 @@
 
 /* Type & Status Badges */
 .type-badge { width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: #fff; text-transform: uppercase; }
-.type-ps { background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.25); }
-.type-pt { background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.25); }
+.type-ps { background: rgba(37, 99, 235, 0.1); color: var(--rd-primary-700); border: 1px solid rgba(37, 99, 235, 0.25); }
+.type-pt { background: rgba(37, 99, 235, 0.1); color: var(--rd-primary-700); border: 1px solid rgba(37, 99, 235, 0.25); }
 .status-pill { background: rgba(245, 158, 11, 0.1); color: #b45309; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid rgba(245, 158, 11, 0.25); display: inline-flex; align-items: center; gap: 4px; }
 .status-pill i { font-size: 10px; }
 
 .text-amount { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: #0f172a; }
-.text-ref { font-size: 11px; color: #64748b; font-weight: 500; }
+.text-ref { font-size: 11px; color: var(--rd-text3); font-weight: 500; }
 .nav-arrow { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--rd-accent); background: var(--rd-accent-soft); border: 1px solid var(--rd-border2); transition: all 0.2s; text-decoration: none !important; }
 .nav-arrow:hover { background: var(--rd-accent); color: #fff; transform: scale(1.08); }
 
@@ -342,7 +342,7 @@
                                     <div class="text-amount rajdhani">Rs. {{ number_format($p->pcs_price) }}</div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="status-pill rajdhani" style="color: #2563eb; border-color: rgba(37, 99, 235, 0.4); background: rgba(37, 99, 235, 0.08);">
+                                    <span class="status-pill rajdhani" style="color: var(--rd-primary-700); border-color: rgba(37, 99, 235, 0.4); background: rgba(37, 99, 235, 0.08);">
                                         <i class="fas fa-check-circle text-primary"></i> {{ strtoupper($p->current_stage_display ?? $p->pcs_status) }}
                                     </span>
                                 </td>

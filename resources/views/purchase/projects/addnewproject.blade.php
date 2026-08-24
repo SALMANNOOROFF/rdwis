@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -35,7 +35,7 @@
         }
         .form-control:focus {
             border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+            box-shadow: 0 0 0 0.2rem rgba(95,120,88,0.15);
         }
         .action-btns {
             background-color: #f8f9fa;

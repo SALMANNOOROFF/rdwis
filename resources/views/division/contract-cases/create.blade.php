@@ -11,9 +11,8 @@
 
 <style>
     /* Custom Dark Theme specifically for this page */
-    .dark-contract-wrapper {
-        background-color: #12141a;
-        color: #e2e8f0;
+    .dark-contract-wrapper { background-color: var(--rd-bg);
+        color: var(--rd-text1);
         font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         min-height: calc(100vh - 60px);
         padding: 2rem;
@@ -23,14 +22,14 @@
         font-size: 1.5rem;
         font-weight: 800;
         letter-spacing: 0.5px;
-        color: #ffffff;
+        color: var(--rd-text1);
         text-transform: uppercase;
     }
 
     .dark-contract-wrapper .btn-back {
         background: transparent;
-        border: 1px solid #2d3748;
-        color: #a0aec0;
+        border: 1px solid var(--rd-border);
+        color: var(--rd-text3);
         font-weight: 500;
         border-radius: 6px;
         padding: 0.4rem 1rem;
@@ -42,8 +41,8 @@
     }
 
     .main-form-container {
-        background-color: #1a1d24;
-        border: 1px solid #2d3748;
+        background-color: var(--rd-surface);
+        border: 1px solid var(--rd-border);
         border-radius: 12px;
         padding: 2rem;
         margin-top: 2rem;
@@ -52,7 +51,7 @@
     .section-title {
         font-size: 0.85rem;
         font-weight: 700;
-        color: #718096;
+        color: var(--rd-text2);
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-bottom: 1.5rem;
@@ -62,9 +61,9 @@
     }
 
     .dark-input {
-        background-color: #0f1219; /* Very deep dark matching screenshot */
-        border: 1px solid #1f2937; /* Faint gray-blue border */
-        color: #f8fafc;
+        background-color: var(--rd-surface); /* Very deep dark matching screenshot */
+        border: 1.5px solid var(--rd-border2); /* Faint gray-blue border */
+        color: var(--rd-text1);
         border-radius: 6px;
         padding: 0.6rem 1rem;
         width: 100%;
@@ -73,8 +72,8 @@
     }
     .dark-input:focus {
         outline: none;
-        border-color: #3b82f6; /* Modern blue highlight */
-        background-color: #0f1219;
+        border-color: var(--rd-primary-600); /* Modern blue highlight */
+        background-color: var(--rd-surface);
         color: #fff;
     }
     
@@ -84,7 +83,7 @@
 
     .dark-label {
         font-size: 0.8rem;
-        color: #a0aec0;
+        color: var(--rd-text3);
         margin-bottom: 0.4rem;
         display: block;
     }
@@ -95,8 +94,8 @@
 
     /* Financial Setup Value Box */
     .estimated-value-box {
-        background-color: #121826;
-        border: 1px solid #1a202c;
+        background-color: var(--rd-neutral-50);
+        border: 1px solid var(--rd-border);
         border-radius: 8px;
         padding: 1.5rem;
         text-align: center;
@@ -104,7 +103,7 @@
     }
     .estimated-value-title {
         font-size: 0.75rem;
-        color: #a0aec0;
+        color: var(--rd-text3);
         font-weight: 700;
         letter-spacing: 1px;
         text-transform: uppercase;
@@ -112,13 +111,13 @@
     .estimated-value-amount {
         font-size: 1.8rem;
         font-weight: 800;
-        color: #ffffff;
+        color: var(--rd-text1);
         margin-top: 0.5rem;
     }
 
     /* Project Selection Cards */
     .project-card {
-        border: 1px solid #2d3748;
+        border: 1px solid var(--rd-border);
         border-radius: 8px;
         padding: 1.5rem;
         margin-bottom: 1rem;
@@ -139,7 +138,7 @@
     }
     .dark-table th {
         font-size: 0.75rem;
-        color: #718096;
+        color: var(--rd-text2);
         font-weight: 600;
         text-transform: uppercase;
         padding-bottom: 0.5rem;
@@ -157,14 +156,14 @@
     .file-upload-wrapper {
         display: flex;
         align-items: center;
-        background-color: #12141a;
-        border: 1px solid #2d3748;
+        background-color: var(--rd-surface);
+        border: 1px solid var(--rd-border);
         border-radius: 6px;
         overflow: hidden;
     }
     .file-upload-button {
         background-color: #2d3748;
-        color: #e2e8f0;
+        color: var(--rd-text1);
         border: none;
         padding: 0.6rem 1rem;
         font-size: 0.85rem;
@@ -173,7 +172,7 @@
     .file-upload-text {
         padding-left: 1rem;
         font-size: 0.85rem;
-        color: #a0aec0;
+        color: var(--rd-text3);
     }
 
     /* Action Buttons */
@@ -189,7 +188,7 @@
     .btn-discard {
         background: transparent;
         border: 1px solid #4a5568;
-        color: #a0aec0;
+        color: var(--rd-text3);
         padding: 0.6rem 1.5rem;
         border-radius: 6px;
         font-weight: 600;
@@ -197,7 +196,7 @@
     .btn-save-draft {
         background: #3182ce;
         border: none;
-        color: #ffffff;
+        color: var(--rd-text1);
         padding: 0.6rem 2rem;
         border-radius: 6px;
         font-weight: 600;
@@ -228,10 +227,10 @@
         display: flex;
     }
     .input-group-dark .prefix {
-        background: #1f2937;
-        border: 1px solid #1f2937;
+        background: var(--rd-neutral-200);
+        border: 1.5px solid var(--rd-border2);
         border-right: none;
-        color: #94a3b8;
+        color: var(--rd-text3);
         padding: 0.6rem 1rem;
         border-radius: 6px 0 0 6px;
         font-weight: 600;
@@ -243,19 +242,19 @@
 
     /* Select2 Dark Theme Overrides */
     .select2-container--bootstrap4 .select2-selection {
-        background-color: #12141a !important;
+        background-color: var(--rd-surface) !important;
         border: 1px solid #2d3748 !important;
-        color: #e2e8f0 !important;
+        color: var(--rd-text1) !important;
     }
     .select2-container--bootstrap4 .select2-selection__rendered {
-        color: #e2e8f0 !important;
+        color: var(--rd-text1) !important;
     }
     .select2-dropdown {
-        background-color: #1a1d24 !important;
+        background-color: var(--rd-surface) !important;
         border: 1px solid #2d3748 !important;
     }
     .select2-results__option {
-        color: #e2e8f0 !important;
+        color: var(--rd-text1) !important;
     }
     .select2-results__option--highlighted {
         background-color: #3182ce !important;
@@ -294,7 +293,7 @@
         margin-bottom: 1rem;
     }
     .project-selection-header label {
-        color: #e2e8f0;
+        color: var(--rd-text1);
         font-weight: 600;
         font-size: 0.9rem;
         margin: 0;
@@ -302,7 +301,7 @@
     }
 </style>
 
-<div class="content-wrapper" style="background-color: #12141a;">
+<div class="content-wrapper" style="background-color: var(--rd-surface);">
     <section class="content">
         <div class="dark-contract-wrapper">
             <!-- Header -->
@@ -363,7 +362,7 @@
                     <div class="row mb-4">
                         <div class="col-6">
                             <label class="dark-label">Division</label>
-                            <input type="text" class="dark-input" value="{{ $divisionName }}" readonly style="background: #1a1d24; border-color: #2d3748; color: #94a3b8;">
+                            <input type="text" class="dark-input" value="{{ $divisionName }}" readonly style="background: var(--rd-surface); border-color: #2d3748; color: var(--rd-text3);">
                         </div>
                         <div class="col-6">
                             <label class="dark-label">Employment Type <span class="required-asterisk">*</span></label>
@@ -604,7 +603,7 @@ $(document).ready(function() {
             const key = current.getFullYear() + '-' + String(current.getMonth() + 1).padStart(2, '0');
             const newRow = $(`
                 <tr>
-                    <td class="font-weight-bold" style="color: #e2e8f0;">${label}</td>
+                    <td class="font-weight-bold" style="color: var(--rd-text1);">${label}</td>
                     <td>
                         <select name="monthly_project[${key}]" class="dark-input select2-dynamic">
                             ${projOptionsHtml}

@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -15,7 +15,7 @@
             border-bottom: 2px solid #007bff;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            color: #007bff;
+            color: var(--rd-primary-600);
             font-weight: bold;
             font-size: 1.5rem;
         }
@@ -47,7 +47,7 @@
         }
         label { font-size: 13px; font-weight: 600; color: #555; }
         .form-control-sm { border-radius: 0; border: 1px solid #ccc; }
-        .text-blue { color: #007bff; }
+        .text-blue { color: var(--rd-primary-600); }
     </style>
 
     <div class="minute-sheet">

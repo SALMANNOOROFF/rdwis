@@ -1,0 +1,967 @@
+/**
+ * ============================================================
+ *  RDWIS MASTER THEME SYSTEM (theme.css)
+ *  Style: Warm neutral foundation + white surfaces + dark warm
+ *         typography + restrained sage accent.
+ *  Enterprise Grade · Light · High-Contrast · Calm · Professional
+ * ============================================================
+ */
+
+/* ============================================================
+   1. DESIGN TOKENS & CSS VARIABLES
+   ============================================================ */
+:root {
+  /* ── 1. Warm Neutral Scale (70-80% of UI) ── */
+  --rd-neutral-50:   #FAF9F6;  /* Page / background highlight, hover rows */
+  --rd-neutral-100:  #F7F5F0;  /* Main app background */
+  --rd-neutral-200:  #F1EEE8;  /* Secondary surfaces, table headers */
+  --rd-neutral-300:  #E8E4DC;  /* Hover/subtle backgrounds, borders */
+  --rd-neutral-400:  #DED9D0;  /* Borders, dividers, input borders */
+  --rd-neutral-500:  #B9B3A9;  /* Disabled/subtle UI */
+  --rd-neutral-600:  #918B82;  /* Placeholder text */
+  --rd-neutral-700:  #77736B;  /* Secondary text, helper text */
+  --rd-neutral-800:  #4B4944;  /* Strong secondary text, labels */
+  --rd-neutral-900:  #292824;  /* Primary text (never pure black) */
+
+  /* ── 2. Primary Accent — Muted Sage (5-10% of UI) ── */
+  --rd-primary-50:   #F1F4EE;
+  --rd-primary-100:  #E2E9DD;
+  --rd-primary-200:  #CBD8C4;
+  --rd-primary-300:  #B0C4A7;
+  --rd-primary-400:  #8FA887;
+  --rd-primary-500:  #718C69;
+  --rd-primary-600:  #5F7858;  /* Main button / link color */
+  --rd-primary-700:  #4E6449;  /* Hover state */
+  --rd-primary-800:  #40523C;
+  --rd-primary-900:  #344332;
+
+  /* ── 3. Surfaces ── */
+  --rd-bg:           #F7F5F0;  /* Page background */
+  --rd-surface:      #FFFFFF;  /* Primary surface: cards, panels, modals */
+  --rd-surface2:     #F1EEE8;  /* Secondary surface */
+  --rd-surface3:     #F7F5F0;  /* Card header, table header */
+  --rd-surface4:     #FFFFFF;  /* Dropdowns, tooltips */
+  --rd-sidebar-bg:   #F7F5F0;  /* Sidebar background */
+
+  /* ── 4. Borders ── */
+  --rd-border:       #E8E4DC;  /* Standard border */
+  --rd-border2:      #DED9D0;  /* Input / subtle border */
+  --rd-border3:      #B9B3A9;  /* Strong border */
+
+  /* ── 5. Semantic Colors ── */
+  /* Success */
+  --rd-success:      #628566;
+  --rd-success-dark: #48664C;
+  --rd-success-soft: #F0F6F0;
+  --rd-success-100:  #DDEBDD;
+
+  /* Warning */
+  --rd-warning:      #B18A3C;
+  --rd-warning-dark: #806426;
+  --rd-warning-soft: #FBF6E9;
+  --rd-warning-100:  #F4E8C5;
+
+  /* Error / Danger */
+  --rd-danger:       #B96860;
+  --rd-danger-dark:  #8E4943;
+  --rd-danger-soft:  #FBF1F0;
+  --rd-danger-100:   #F1D9D6;
+
+  /* Info */
+  --rd-info:         #648397;
+  --rd-info-dark:    #4A6475;
+  --rd-info-soft:    #F0F4F7;
+  --rd-info-100:     #DDE7ED;
+
+  /* ── 6. Typography ── */
+  --rd-text1:  #292824;  /* Primary text (high contrast dark warm) */
+  --rd-text2:  #4B4944;  /* Strong secondary, labels */
+  --rd-text3:  #77736B;  /* Helper / secondary text */
+  --rd-text4:  #918B82;  /* Placeholder text */
+
+  /* ── 7. Shadows ── */
+  --rd-shadow-sm:  0 1px 2px rgba(41,40,36,0.05);
+  --rd-shadow-md:  0 4px 12px rgba(41,40,36,0.08);
+  --rd-shadow-lg:  0 10px 30px rgba(41,40,36,0.10);
+
+  /* ── 8. Radii ── */
+  --rd-radius-sm:  6px;   /* Inputs, buttons, controls */
+  --rd-radius-md:  8px;   /* Cards */
+  --rd-radius-lg:  10px;  /* Modals */
+  --rd-radius-xl:  12px;  /* Large containers */
+
+  /* ── 9. Backward-Compatibility Aliases ── */
+  --rd-accent:       var(--rd-primary-600);
+  --rd-accent-dark:  var(--rd-primary-700);
+  --rd-accent-mid:   var(--rd-primary-500);
+  --rd-accent-soft:  var(--rd-primary-50);
+  --rd-accent-glow:  rgba(95,120,88,0.20);
+  --rd-purple:       var(--rd-primary-600);
+  --rd-purple-dark:  var(--rd-primary-700);
+  --rd-purple-soft:  var(--rd-primary-50);
+  --rd-cream:        var(--rd-neutral-50);
+  --rd-cream2:       var(--rd-neutral-200);
+}
+
+
+/* ============================================================
+   2. BASE, BODY & GLOBAL TEXT FIX
+   ============================================================ */
+html,
+body,
+.wrapper,
+.content-wrapper {
+  background-color: var(--rd-bg) !important;
+  color: var(--rd-text1) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Universal Anti-Invisible Text Guard: Force dark text on light surfaces */
+.text-white:not(.btn):not(.badge):not(.bg-primary):not(.bg-success):not(.bg-danger):not(.bg-info):not(.bg-dark):not(.bg-secondary):not(.alert):not(.badge-primary):not(.badge-success):not(.badge-danger):not(.badge-warning):not(.badge-info):not(.bg-sage):not(.btn-primary):not(.btn-success):not(.btn-danger):not(.btn-info) {
+  color: var(--rd-text1) !important;
+}
+
+a {
+  color: var(--rd-primary-600);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+a:hover {
+  color: var(--rd-primary-700);
+}
+
+hr {
+  border-color: var(--rd-border) !important;
+}
+
+::selection {
+  background: var(--rd-primary-100);
+  color: var(--rd-primary-800);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--rd-neutral-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--rd-neutral-400);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rd-neutral-500);
+}
+
+
+/* ============================================================
+   3. TOP NAVBAR
+   ============================================================ */
+.main-header.navbar,
+.navbar.navbar-expand,
+.navbar-white {
+  background-color: var(--rd-neutral-50) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  box-shadow: var(--rd-shadow-sm) !important;
+}
+
+.main-header .nav-link,
+.main-header .navbar-nav .nav-link {
+  color: var(--rd-text1) !important;
+  font-weight: 600;
+}
+.main-header .nav-link:hover {
+  color: var(--rd-primary-600) !important;
+}
+
+.main-header [data-widget="pushmenu"] {
+  color: var(--rd-text1) !important;
+}
+
+.main-header .form-control-navbar {
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  color: var(--rd-text1) !important;
+  border-radius: var(--rd-radius-sm);
+}
+.main-header .form-control-navbar:focus {
+  background-color: var(--rd-surface) !important;
+  border-color: var(--rd-primary-500) !important;
+  box-shadow: 0 0 0 3px rgba(113,140,105,0.18) !important;
+}
+
+
+/* ============================================================
+   4. SIDEBAR & BRAND HEADER
+   ============================================================ */
+.main-sidebar,
+.main-sidebar.sidebar-dark-primary,
+.main-sidebar.sidebar-light-primary {
+  background-color: var(--rd-sidebar-bg) !important;
+  border-right: 1px solid var(--rd-border) !important;
+  box-shadow: 2px 0 10px rgba(41,40,36,0.04) !important;
+}
+
+/* Brand Link — "RDWIS" Logo & Title (Fixed Dark & Crisp) */
+.brand-link,
+.main-sidebar .brand-link,
+.main-sidebar.sidebar-dark-primary .brand-link,
+.main-sidebar.sidebar-light-primary .brand-link,
+.sidebar-dark-primary .brand-link,
+.sidebar-light-primary .brand-link {
+  background-color: var(--rd-neutral-50) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.brand-link .brand-text,
+.main-sidebar .brand-link .brand-text,
+.main-sidebar.sidebar-dark-primary .brand-link .brand-text,
+.main-sidebar.sidebar-light-primary .brand-link .brand-text,
+.sidebar-dark-primary .brand-link .brand-text,
+.sidebar-light-primary .brand-link .brand-text {
+  color: var(--rd-text1) !important;
+  font-weight: 700 !important;
+  font-size: 1.15rem !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Sidebar User Info */
+.sidebar .user-panel,
+.main-sidebar .user-panel {
+  border-bottom: 1px solid var(--rd-border) !important;
+  padding: 12px 14px;
+  background-color: var(--rd-neutral-50) !important;
+}
+.sidebar .user-panel .info a,
+.main-sidebar .user-panel .info a,
+.sidebar-dark-primary .user-panel .info a {
+  color: var(--rd-text1) !important;
+  font-weight: 700;
+  font-size: 13px;
+}
+.sidebar .user-panel .info small,
+.main-sidebar .user-panel .info small,
+.sidebar-dark-primary .user-panel .info small {
+  color: var(--rd-text3) !important;
+  font-weight: 500;
+}
+
+/* Sidebar Navigation Items */
+.nav-sidebar .nav-header {
+  color: var(--rd-text4) !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase !important;
+  padding: 14px 16px 4px !important;
+  border-top: 1px solid var(--rd-border) !important;
+}
+
+.nav-sidebar > .nav-item > .nav-link,
+.nav-sidebar .nav-treeview > .nav-item > .nav-link {
+  color: var(--rd-text2) !important;
+  font-weight: 500;
+  border-radius: var(--rd-radius-sm);
+  margin: 1px 8px;
+  padding: 8px 12px;
+  transition: all 0.15s ease;
+}
+
+.nav-sidebar > .nav-item > .nav-link:hover,
+.nav-sidebar .nav-treeview > .nav-item > .nav-link:hover {
+  background-color: var(--rd-neutral-200) !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Active Nav Link: Soft Sage background + Sage text + Sage Left Accent */
+.nav-sidebar > .nav-item > .nav-link.active,
+.nav-sidebar .nav-treeview > .nav-item > .nav-link.active {
+  background-color: var(--rd-primary-100) !important;
+  color: var(--rd-primary-700) !important;
+  font-weight: 700 !important;
+  border-left: 3px solid var(--rd-primary-600) !important;
+}
+
+.nav-sidebar .nav-icon {
+  color: var(--rd-text3) !important;
+  margin-right: 8px;
+  width: 1.1em;
+  text-align: center;
+}
+.nav-sidebar .nav-link.active .nav-icon {
+  color: var(--rd-primary-600) !important;
+}
+.nav-sidebar .nav-link:hover .nav-icon {
+  color: var(--rd-text1) !important;
+}
+
+.nav-sidebar .nav-treeview {
+  background-color: rgba(113,140,105,0.03) !important;
+}
+
+
+/* ============================================================
+   5. CARDS, PANELS, STAT CARDS & CYBER CONTAINERS
+   ============================================================ */
+.card,
+.glass-card,
+.dg-box,
+.dg-panel-r,
+.card-cyber,
+.metric-card,
+.stat-card {
+  background-color: var(--rd-surface) !important;
+  background: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: var(--rd-radius-md) !important;
+  box-shadow: var(--rd-shadow-sm) !important;
+  color: var(--rd-text1) !important;
+  margin-bottom: 16px;
+}
+
+.card:hover,
+.metric-card:hover,
+.stat-card:hover,
+.card-cyber:hover {
+  border-color: var(--rd-border2) !important;
+  box-shadow: var(--rd-shadow-md) !important;
+}
+
+.card-header,
+.dg-box-hdr,
+.dg-panel-r-hdr {
+  background-color: var(--rd-surface3) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+  padding: 10px 16px !important;
+  font-weight: 700;
+}
+.card-header .card-title {
+  color: var(--rd-text1) !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+}
+.card-body {
+  background-color: var(--rd-surface) !important;
+  color: var(--rd-text1) !important;
+  padding: 16px !important;
+}
+.card-footer {
+  background-color: var(--rd-surface3) !important;
+  border-top: 1px solid var(--rd-border) !important;
+  color: var(--rd-text2) !important;
+  padding: 10px 16px !important;
+}
+
+
+/* ============================================================
+   6. KPI METRICS & STAT TYPOGRAPHY
+   ============================================================ */
+.kpi-title,
+.metric-label {
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  color: var(--rd-text3) !important;
+  font-weight: 700 !important;
+  font-family: 'Rajdhani', sans-serif !important;
+}
+
+.kpi-value,
+.metric-value {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: var(--rd-text1) !important;
+  margin-top: 4px !important;
+  line-height: 1.2 !important;
+  font-family: 'Rajdhani', sans-serif !important;
+}
+
+.kpi-sub {
+  font-size: 11px !important;
+  color: var(--rd-text4) !important;
+  margin-top: 4px !important;
+  font-weight: 500 !important;
+}
+
+
+/* ============================================================
+   7. TABLES (STANDARD, CYBER & DATATABLES)
+   ============================================================ */
+.table,
+.rd-table,
+.dataTable,
+.dg-items-table,
+.dg-case-table,
+.table-cyber {
+  color: var(--rd-text1) !important;
+  border-collapse: separate;
+  width: 100%;
+}
+
+.table th,
+.rd-table th,
+.dg-items-table th,
+.table thead th,
+.dg-case-table th,
+.table-cyber th {
+  background-color: var(--rd-surface3) !important;
+  background: var(--rd-surface3) !important;
+  color: var(--rd-text2) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  border-top: none !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  padding: 10px 12px !important;
+}
+
+.table td,
+.rd-table td,
+.dg-items-table td,
+.dg-case-table td,
+.table-cyber td {
+  border-top: 1px solid var(--rd-border) !important;
+  border-bottom: none !important;
+  color: var(--rd-text1) !important;
+  padding: 10px 12px !important;
+  vertical-align: middle !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) td {
+  background-color: var(--rd-neutral-50) !important;
+}
+
+.table-hover tbody tr:hover td,
+.table tbody tr:hover td,
+.dg-case-table tr:hover td,
+.table-cyber tr:hover td {
+  background-color: var(--rd-neutral-50) !important;
+}
+
+.table tbody tr.selected td,
+.table tbody tr.active td {
+  background-color: var(--rd-primary-50) !important;
+}
+
+
+/* ============================================================
+   8. FORM CONTROLS, INPUTS, SELECT2 & CHECKBOX GRIDS
+   ============================================================ */
+.form-control,
+.form-control-sm,
+.form-control-cyber,
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="password"],
+textarea,
+select.form-control {
+  background-color: var(--rd-surface) !important;
+  border: 1.5px solid var(--rd-border2) !important;
+  color: var(--rd-text1) !important;
+  border-radius: var(--rd-radius-sm) !important;
+  font-size: 13px !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus,
+.form-control-cyber:focus,
+textarea:focus,
+select.form-control:focus {
+  background-color: var(--rd-surface) !important;
+  border-color: var(--rd-primary-500) !important;
+  box-shadow: 0 0 0 3px rgba(113,140,105,0.18) !important;
+  color: var(--rd-text1) !important;
+  outline: none !important;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+  background-color: var(--rd-neutral-200) !important;
+  color: var(--rd-text3) !important;
+  border-color: var(--rd-neutral-300) !important;
+}
+
+label,
+.form-label,
+.field-label {
+  color: var(--rd-text2) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  margin-bottom: 4px;
+}
+
+/* Custom Columns Selector Grid (Screenshot 2 Fix) */
+.columns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px 15px;
+  background: var(--rd-neutral-50) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: var(--rd-radius-md) !important;
+  padding: 18px !important;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--rd-text1) !important;
+  margin: 0;
+  font-weight: 500;
+}
+.checkbox-option input[type="checkbox"] {
+  accent-color: var(--rd-primary-600) !important;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+.checkbox-option:hover {
+  color: var(--rd-primary-700) !important;
+}
+
+.col-checkbox-label {
+  background: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  color: var(--rd-text2) !important;
+}
+.col-checkbox-label:hover {
+  background: var(--rd-neutral-200) !important;
+  color: var(--rd-text1) !important;
+}
+
+/* Search Fieldset & Legend */
+.search-fieldset,
+.kpi-box {
+  background-color: var(--rd-neutral-50) !important;
+  background: var(--rd-neutral-50) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: var(--rd-radius-md) !important;
+}
+.search-legend {
+  color: var(--rd-primary-700) !important;
+  font-weight: 700 !important;
+}
+
+
+/* ============================================================
+   9. BUTTONS
+   ============================================================ */
+.btn-primary,
+.btn-find,
+.btn-cyber-primary {
+  background-color: var(--rd-primary-600) !important;
+  background: var(--rd-primary-600) !important;
+  border-color: var(--rd-primary-700) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: var(--rd-shadow-sm);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-primary:hover,
+.btn-find:hover,
+.btn-cyber-primary:hover {
+  background-color: var(--rd-primary-700) !important;
+  background: var(--rd-primary-700) !important;
+  border-color: var(--rd-primary-800) !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary {
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  color: var(--rd-text2) !important;
+  font-weight: 600 !important;
+}
+.btn-secondary:hover {
+  background-color: var(--rd-neutral-200) !important;
+  border-color: var(--rd-border3) !important;
+  color: var(--rd-text1) !important;
+}
+
+.btn-success,
+.btn-cyber-secondary {
+  background-color: var(--rd-success) !important;
+  background: var(--rd-success) !important;
+  border-color: var(--rd-success-dark) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+.btn-success:hover,
+.btn-cyber-secondary:hover {
+  background-color: var(--rd-success-dark) !important;
+  color: #ffffff !important;
+}
+
+.btn-warning {
+  background-color: var(--rd-warning) !important;
+  border-color: var(--rd-warning-dark) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+.btn-danger {
+  background-color: var(--rd-danger) !important;
+  border-color: var(--rd-danger-dark) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Outline Buttons */
+.btn-outline-primary {
+  color: var(--rd-primary-600) !important;
+  border-color: var(--rd-primary-600) !important;
+  background-color: var(--rd-surface) !important;
+  font-weight: 600 !important;
+}
+.btn-outline-primary:hover {
+  background-color: var(--rd-primary-600) !important;
+  color: #ffffff !important;
+}
+
+
+/* ============================================================
+   9.1 BADGES & CHIPS (Warm Neutral & High-Contrast System)
+   ============================================================ */
+.badge {
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+  border-radius: 4px;
+}
+
+.badge-dark,
+.badge.badge-dark {
+  background-color: var(--rd-neutral-200) !important;
+  color: var(--rd-text1) !important;
+  border: 1px solid var(--rd-border2) !important;
+}
+
+.badge-secondary,
+.badge.badge-secondary {
+  background-color: var(--rd-neutral-100) !important;
+  color: var(--rd-text2) !important;
+  border: 1px solid var(--rd-border) !important;
+}
+
+.badge-light,
+.badge.badge-light {
+  background-color: var(--rd-surface) !important;
+  color: var(--rd-text1) !important;
+  border: 1px solid var(--rd-border) !important;
+}
+
+.badge-primary,
+.badge.badge-primary {
+  background-color: var(--rd-primary-100) !important;
+  color: var(--rd-primary-800) !important;
+  border: 1px solid var(--rd-primary-300) !important;
+}
+
+.badge-success,
+.badge.badge-success {
+  background-color: var(--rd-success-soft) !important;
+  color: var(--rd-success-dark) !important;
+  border: 1px solid var(--rd-success-100) !important;
+}
+
+.badge-danger,
+.badge.badge-danger {
+  background-color: var(--rd-danger-soft) !important;
+  color: var(--rd-danger-dark) !important;
+  border: 1px solid var(--rd-danger-100) !important;
+}
+
+.badge-warning,
+.badge.badge-warning {
+  background-color: var(--rd-warning-soft) !important;
+  color: var(--rd-warning-dark) !important;
+  border: 1px solid var(--rd-warning-100) !important;
+}
+
+.badge-info,
+.badge.badge-info {
+  background-color: var(--rd-info-soft) !important;
+  color: var(--rd-info-dark) !important;
+  border: 1px solid var(--rd-info-100) !important;
+}
+
+
+
+/* ============================================================
+   10. PILL NAVIGATIONS, CHIPS, TABS & LIST ITEMS
+   ============================================================ */
+.pill-nav {
+  background: var(--rd-neutral-200) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: 30px !important;
+  padding: 5px 8px !important;
+  display: inline-flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+.pill-btn,
+.pill-filter,
+.report-pill,
+.hub-tab-btn {
+  background: var(--rd-surface) !important;
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  color: var(--rd-text2) !important;
+  padding: 5px 16px !important;
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.pill-btn:hover,
+.pill-filter:hover,
+.report-pill:hover,
+.hub-tab-btn:hover {
+  background: var(--rd-neutral-200) !important;
+  color: var(--rd-text1) !important;
+}
+
+.pill-btn.active,
+.pill-filter.active,
+.report-pill.active,
+.hub-tab-btn.active {
+  background: var(--rd-primary-100) !important;
+  background-color: var(--rd-primary-100) !important;
+  border-color: var(--rd-primary-600) !important;
+  color: var(--rd-primary-700) !important;
+  font-weight: 700 !important;
+}
+
+.chip-code {
+  background: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  color: var(--rd-text2) !important;
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.chip-active {
+  background: var(--rd-primary-100) !important;
+  border-color: var(--rd-primary-600) !important;
+  color: var(--rd-primary-700) !important;
+}
+
+/* Sidebar & Dashboard List Items */
+.list-item {
+  background: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border) !important;
+  border-radius: var(--rd-radius-sm) !important;
+  color: var(--rd-text1) !important;
+  padding: 10px 14px !important;
+  transition: all 0.15s ease !important;
+  text-decoration: none !important;
+}
+.list-item:hover {
+  background: var(--rd-neutral-50) !important;
+  border-color: var(--rd-border2) !important;
+}
+
+
+/* ============================================================
+   11. BADGES, ALERTS & SWEETALERT2
+   ============================================================ */
+.badge {
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.badge-primary   { background-color: var(--rd-primary-600) !important; color: #ffffff !important; }
+.badge-success   { background-color: var(--rd-success) !important;     color: #ffffff !important; }
+.badge-warning   { background-color: var(--rd-warning) !important;     color: #ffffff !important; }
+.badge-danger    { background-color: var(--rd-danger) !important;      color: #ffffff !important; }
+.badge-info      { background-color: var(--rd-info) !important;        color: #ffffff !important; }
+.badge-secondary { background-color: var(--rd-neutral-300) !important; color: var(--rd-text2) !important; border: 1px solid var(--rd-border2); }
+
+.modal-content {
+  background-color: var(--rd-surface) !important;
+  border: 1px solid var(--rd-border2) !important;
+  border-radius: var(--rd-radius-lg) !important;
+  box-shadow: var(--rd-shadow-lg) !important;
+  color: var(--rd-text1) !important;
+}
+.modal-header {
+  background-color: var(--rd-surface) !important;
+  border-bottom: 1px solid var(--rd-border) !important;
+  color: var(--rd-text1) !important;
+}
+.modal-title {
+  color: var(--rd-text1) !important;
+  font-weight: 700 !important;
+  border-left: 3px solid var(--rd-primary-600);
+  padding-left: 10px;
+}
+.modal-body {
+  background-color: var(--rd-surface) !important;
+  color: var(--rd-text1) !important;
+}
+.modal-footer {
+  background-color: var(--rd-surface3) !important;
+  border-top: 1px solid var(--rd-border) !important;
+}
+
+.swal2-popup {
+  background: var(--rd-surface) !important;
+  color: var(--rd-text1) !important;
+  border: 1px solid var(--rd-border2) !important;
+  box-shadow: var(--rd-shadow-lg) !important;
+  border-radius: var(--rd-radius-lg) !important;
+}
+.swal2-title {
+  color: var(--rd-text1) !important;
+  font-weight: 700 !important;
+}
+.swal2-content,
+.swal2-html-container {
+  color: var(--rd-text2) !important;
+}
+
+
+/* ============================================================
+   12. UNIVERSAL HUB & PAGE WRAPPER COVERS
+   ============================================================ */
+.hub-page,
+.dg-page,
+.proc-page,
+.scrutiny-hub,
+.case-page,
+.fin-page,
+.firms-hub,
+.firms-list-page,
+.report-hub,
+.receipt-hub,
+.hr-hub,
+.asset-hub,
+.finance-hub,
+.sinc-page,
+.purchase-wrapper {
+  background-color: var(--rd-bg) !important;
+  background: var(--rd-bg) !important;
+  color: var(--rd-text1) !important;
+}
+
+.main-footer {
+  background-color: var(--rd-surface) !important;
+  border-top: 1px solid var(--rd-border) !important;
+  color: var(--rd-text3) !important;
+  font-size: 12px;
+  padding: 10px 16px !important;
+}
+
+
+/* ============================================================
+   13. BLURRY GLASS PRELOADER (Frosted Glass Overlay + Logo)
+   ============================================================ */
+.preloader {
+  background: rgba(247, 245, 240, 0.45) !important;
+  background-color: rgba(247, 245, 240, 0.45) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: opacity 0.35s ease, visibility 0.35s ease, height 0.3s ease !important;
+}
+
+.preloader.preloader-hidden,
+.preloader[style*="height: 0"],
+.preloader[style*="height:0"],
+.preloader[style*="display: none"],
+.preloader[style*="display:none"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  z-index: -1 !important;
+}
+
+.preloader img,
+.preloader .animation__shake,
+.preloader .animation__wobble {
+  filter: drop-shadow(0 12px 30px rgba(41, 40, 36, 0.18)) !important;
+  animation: preloaderPulse 1.8s ease-in-out infinite alternate !important;
+  max-width: 180px !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+@keyframes preloaderPulse {
+  0% {
+    transform: translateY(0px) scale(0.97);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-6px) scale(1.02);
+    opacity: 1;
+  }
+}
+
+
+/* ============================================================
+   14. NOTIFICATION DROPDOWN & TOP-OF-SCREEN POPUP
+   ============================================================ */
+.notif-dropdown-custom {
+  box-shadow: 0 12px 35px rgba(41, 40, 36, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--rd-border) !important;
+}
+
+.notif-item-enhanced:hover {
+  background-color: var(--rd-neutral-50) !important;
+}
+
+.notif-item-enhanced:active {
+  background-color: var(--rd-neutral-200) !important;
+}
+
+.pnt-bell-btn:hover {
+  background-color: var(--rd-neutral-200) !important;
+}
+
+.notif-bell-ring {
+  animation: notifBellSwing 1.5s ease infinite;
+  transform-origin: top center;
+}
+
+@keyframes notifBellSwing {
+  0%, 100% { transform: rotate(0deg); }
+  20%, 60% { transform: rotate(15deg); }
+  40%, 80% { transform: rotate(-15deg); }
+}
+
+.rdwis-top-toast {
+  animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInDown {
+  0% {
+    transform: translateX(-50%) translateY(-120%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+

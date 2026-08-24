@@ -1,19 +1,19 @@
-@extends('welcome')
+﻿@extends('welcome')
 @section('content')
 
 @php
     $themes = [
-        'material'    => ['icon' => 'fa-boxes', 'color' => '#3b82f6'],
-        'consultancy' => ['icon' => 'fa-user-tie', 'color' => '#8b5cf6'],
-        'services'    => ['icon' => 'fa-handshake', 'color' => '#0ea5e9'],
-        'civil'       => ['icon' => 'fa-building', 'color' => '#f59e0b'],
-        'training'    => ['icon' => 'fa-graduation-cap', 'color' => '#10b981'],
-        'tada'        => ['icon' => 'fa-plane-departure', 'color' => '#6366f1'],
-        'transport'   => ['icon' => 'fa-truck', 'color' => '#ef4444'],
-        'books'       => ['icon' => 'fa-book', 'color' => '#d946ef'],
-        'license'     => ['icon' => 'fa-key', 'color' => '#14b8a6'],
-        'internet'    => ['icon' => 'fa-wifi', 'color' => '#3b82f6'],
-        'publishing'  => ['icon' => 'fa-print', 'color' => '#8b5cf6'],
+        'material'    => ['icon' => 'fa-boxes', 'color' => '#5F7858'],
+        'consultancy' => ['icon' => 'fa-user-tie', 'color' => '#5F7858'],
+        'works'       => ['icon' => 'fa-hard-hat', 'color' => '#f59e0b'],
+        'services'    => ['icon' => 'fa-cogs', 'color' => '#10b981'],
+        'petty'       => ['icon' => 'fa-receipt', 'color' => '#ec4899'],
+        'printing'    => ['icon' => 'fa-print', 'color' => '#6366f1'],
+        'repair'      => ['icon' => 'fa-wrench', 'color' => '#ef4444'],
+        'medical'     => ['icon' => 'fa-notes-medical', 'color' => '#14b8a6'],
+        'stationary'  => ['icon' => 'fa-pen-nib', 'color' => '#84cc16'],
+        'internet'    => ['icon' => 'fa-wifi', 'color' => '#5F7858'],
+        'publishing'  => ['icon' => 'fa-print', 'color' => '#5F7858'],
         'stationery'  => ['icon' => 'fa-pencil-alt', 'color' => '#64748b'],
     ];
     $theme = $themes[$type] ?? ['icon' => 'fa-file-alt', 'color' => '#64748b'];
@@ -24,7 +24,7 @@
     <div class="sinc-wrapper" style="min-height:100vh;background:var(--rd-bg);font-family:'DM Sans',sans-serif;padding:12px 24px 32px">
       <style>
         .sinc-card { background:var(--rd-surface); border:1px solid var(--rd-border); border-radius:12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); overflow:hidden; }
-        .sinc-card-head { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-bottom:1px solid var(--rd-border2); background:rgba(255,255,255,0.02); }
+        .sinc-card-head { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-bottom:1px solid var(--rd-border2); background: var(--rd-neutral-50); }
         .sinc-card-title { font-size:0.9rem; font-weight:800; color:var(--rd-text1); display:flex; align-items:center; gap:8px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
         
         .soft-form { padding:20px; }
@@ -69,8 +69,8 @@
           .dyn-row { grid-template-columns: 1fr !important; position: relative; padding-bottom: 45px; }
           .btn-rm-row { position: absolute; bottom: 10px; right: 10px; width: calc(100% - 20px) !important; }
         }
-        .dyn-row:focus-within { border-color:var(--rd-accent); background: rgba(0,0,0,0.2); }
-        .btn-add-row { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:6px; background:rgba(255,255,255,0.05); color:var(--rd-text2); font-weight:700; font-size:0.65rem; border:1px solid var(--rd-border); cursor:pointer; transition:all 0.2s; margin-top:6px; }
+        .dyn-row:focus-within { border-color:var(--rd-accent); background: var(--rd-neutral-200); }
+        .btn-add-row { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:6px; background: var(--rd-neutral-50); color:var(--rd-text2); font-weight:700; font-size:0.65rem; border:1px solid var(--rd-border); cursor:pointer; transition:all 0.2s; margin-top:6px; }
         .btn-add-row:hover { background:var(--rd-accent-soft); color:var(--rd-accent); border-color:var(--rd-accent); }
         .btn-rm-row { width:32px; height:32px; border-radius:6px; border:1px solid var(--rd-border); background:rgba(220,53,69,0.05); color:var(--rd-danger); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; }
         .btn-rm-row:hover { background:var(--rd-danger); color:#fff; }
@@ -82,7 +82,7 @@
         .side-box { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
         .side-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; color: var(--rd-accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         
-        .stats-card { background: rgba(0,0,0,0.2); border: 1px solid var(--rd-border2); border-radius: 10px; padding: 12px; text-align: center; }
+        .stats-card { background: var(--rd-neutral-200); border: 1px solid var(--rd-border2); border-radius: 10px; padding: 12px; text-align: center; }
         .stats-val { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--rd-info); line-height: 1; }
         .stats-lbl { font-size: 9px; color: var(--rd-text3); text-transform: uppercase; margin-top: 4px; font-weight: 700; }
 
@@ -98,7 +98,7 @@
         .sinc-popup-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
         .btn-action-main { height: 42px; border-radius: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; font-size: 0.85rem; cursor: pointer; }
-        .btn-draft { background: rgba(255,255,255,0.05); color: var(--rd-text1); border: 1.5px solid var(--rd-border2); padding: 0 20px; }
+        .btn-draft { background: var(--rd-neutral-50); color: var(--rd-text1); border: 1.5px solid var(--rd-border2); padding: 0 20px; }
         .btn-draft:hover { background: rgba(255,255,255,0.1); border-color: <?= $theme['color'] ?>; color: <?= $theme['color'] ?>; }
         
         .btn-release { background: linear-gradient(135deg, <?= $theme['color'] ?>, <?= $theme['color'] ?>cc); color: #fff; border: none; padding: 0 28px; box-shadow: 0 4px 12px <?= $theme['color'] ?>40; }
@@ -188,7 +188,7 @@
                 <div class="soft-group">
                   <label class="soft-label">Minute Number</label>
                   <input type="number" name="pcs_minute" id="pcs_minute" class="soft-input" placeholder="e.g. 1" required>
-                  <div id="minute-hint" style="font-size:0.6rem;color:#3b82f6;margin-top:2px;font-weight:600"></div>
+                  <div id="minute-hint" style="font-size:0.6rem;color: var(--rd-primary-600);margin-top:2px;font-weight:600"></div>
                 </div>
                 <div class="soft-group">
                   <label class="soft-label">Project / Budget Head</label>
@@ -366,10 +366,10 @@
                     {{-- Rows populated by JS --}}
                   </tbody>
                   <tfoot id="quotationFoot">
-                    <tr style="border-top:2px solid var(--rd-border); background:rgba(255,255,255,0.02);">
+                    <tr style="border-top:2px solid var(--rd-border); background: var(--rd-neutral-50);">
                       <td colspan="3" style="padding:6px 10px; font-size:11px; color:var(--rd-text3); text-align:right;">SUB TOTAL</td>
                     </tr>
-                    <tr style="background:rgba(255,255,255,0.01);">
+                    <tr style="background: var(--rd-neutral-50);">
                       <td colspan="3" style="padding:6px 10px; font-size:11px; color:var(--rd-text3); text-align:right;" id="taxRowLabel">TAX (18%)</td>
                     </tr>
                     <tr style="border-top:1px solid var(--rd-border); background:rgba(0,123,255,0.05);">
@@ -407,7 +407,7 @@
     {{-- Confirmation Modal for Direct Release --}}
     <div class="sinc-popup-overlay" id="releaseDirectModal">
         <div class="sinc-popup-box" style="max-width: 450px;">
-            <div class="sinc-popup-icon" style="background: rgba(0, 123, 255, 0.1); color: #007bff;"><i class="fas fa-paper-plane"></i></div>
+            <div class="sinc-popup-icon" style="background: rgba(0, 123, 255, 0.1); color: var(--rd-primary-600);"><i class="fas fa-paper-plane"></i></div>
             <div class="sinc-popup-title" style="font-size: 1.2rem;">Forward to Director Procurement</div>
             <div class="sinc-popup-text text-left mb-0">
                 You are forwarding this case to **Director Procurement** (Technical Scrutiny Unit) for formal review.
@@ -416,7 +416,7 @@
                     <label class="small font-weight-bold text-muted text-uppercase mb-0">Initiation Remarks (Optional)</label>
                     <span class="badge badge-dark ml-2" style="font-size: 8px; opacity: 0.5;">OPTIONAL</span>
                 </div>
-                <textarea id="directRemarksInput" class="soft-input w-100 mb-3 p-3" rows="3" placeholder="Enter context or specific justification (optional)..." style="background: rgba(0,0,0,0.2); border: 1px solid var(--rd-border); border-radius:12px; color:white; font-size: 0.9rem;"></textarea>
+                <textarea id="directRemarksInput" class="soft-input w-100 mb-3 p-3" rows="3" placeholder="Enter context or specific justification (optional)..." style="background: var(--rd-neutral-200); border: 1px solid var(--rd-border); border-radius:12px; color:white; font-size: 0.9rem;"></textarea>
                 
                 <div class="alert alert-info border-0 p-3 mb-4" style="background: rgba(0, 123, 255, 0.05); border-radius: 12px; border: 1px solid rgba(0,123,255,0.1) !important;">
                     <i class="fas fa-shield-alt mr-2 text-primary"></i>
@@ -613,7 +613,7 @@
                   <button type="button" onclick="removeFirm('${f.id}')" style="background:none;border:none;color:var(--rd-danger);font-size:10px;cursor:pointer;" title="Remove Firm"><i class="fas fa-times-circle"></i></button>
               </div>
               <div class="mt-1">
-                  <label for="qfile_${f.id}" class="badge badge-dark p-1" style="cursor:pointer; font-size:8px; border:1px solid rgba(255,255,255,0.15); font-weight:normal;" id="qfile_lbl_${f.id}" title="Attach Quote Scan">
+                  <label for="qfile_${f.id}" class="badge badge-dark p-1" style="cursor:pointer; font-size:8px; border: 1px solid var(--rd-border); font-weight:normal;" id="qfile_lbl_${f.id}" title="Attach Quote Scan">
                       <i class="fas fa-paperclip mr-1"></i> <span id="qfile_txt_${f.id}">Attach Quote</span>
                   </label>
                   <input type="file" id="qfile_${f.id}" name="quote_files[${f.id}]" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt" onchange="handleQuoteFileSelect(this, '${f.id}')">

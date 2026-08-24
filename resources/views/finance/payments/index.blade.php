@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,8 +6,8 @@
 
     .finance-hub {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
-        color: #cbd5e0;
+        background: var(--rd-bg) !important;
+        color: var(--rd-text1);
         padding-top: 15px;
         padding-bottom: 40px;
     }
@@ -18,7 +18,7 @@
     }
 
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -27,10 +27,10 @@
 
     .table-cyber {
         background: transparent;
-        color: #cbd5e0;
+        color: var(--rd-text1);
     }
     .table-cyber th {
-        background: rgba(18, 26, 34, 0.95) !important;
+        background: var(--rd-surface) !important;
         border-bottom: 2px solid rgba(255, 255, 255, 0.08) !important;
         color: #67e8f9 !important;
         font-family: 'Rajdhani', sans-serif;
@@ -47,7 +47,7 @@
         font-size: 13px;
     }
     .table-cyber tr:hover {
-        background: rgba(255, 255, 255, 0.02) !important;
+        background: var(--rd-neutral-50) !important;
     }
 
     .btn-cyber {

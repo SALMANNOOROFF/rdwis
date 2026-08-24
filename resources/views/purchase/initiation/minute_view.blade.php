@@ -146,8 +146,17 @@
         $headStatus = (array) $rawHeadStatus;
         $subheads = isset($subheads) && !empty($subheads) ? $subheads : $finService->getSubheadBreakdown($purchase->pcs_hed_id);
 
-        $winnerQuote = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy('qte_price')->first() : null;
-        $caseValue = (float)($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0));
+        $winnerQuote = count($purchase->quotes) > 0 ? $purchase->quotes->sortBy(function($q) {
+            return (float)($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0)));
+        })->first() : null;
+        
+        $itemsTotal = $purchase->items->sum(function($item) {
+            $qty = (float)($item->pci_qty ?? 1);
+            $rate = (float)($item->pci_price ?: ($item->pci_rate ?: ($item->pci_estcost ?: ($item->pci_estprice ?? 0))));
+            return ($rate > 0) ? ($rate * ($item->pci_price ? 1 : $qty)) : 0;
+        });
+
+        $caseValue = (float)($purchase->live_value ?? ($purchase->pcs_price ?: ($winnerQuote?->qte_price ?: ($itemsTotal ?: 0))));
         
         $projectName = $headStatus['head_name'] ?? ($purchase->project?->prj_title ?? 'Project');
         $projectCode = $headStatus['head_code'] ?? ($purchase->project?->prj_code ?? 'N/A');
@@ -203,11 +212,17 @@
                     </thead>
                     <tbody>
                         @forelse($purchase->items as $idx => $item)
+                        @php
+                            $itemPrice = (float)($item->pci_price ?: (($item->pci_rate ? $item->pci_rate * ($item->pci_qty ?: 1) : 0) ?: ($item->pci_estcost ?: ($item->pci_estprice ?? 0))));
+                            if ($itemPrice <= 0 && $caseValue > 0 && $purchase->items->count() === 1) {
+                                $itemPrice = $caseValue;
+                            }
+                        @endphp
                         <tr>
                             <td class="text-center">{{ $idx + 1 }}</td>
                             <td>{{ $item->pci_desc }}</td>
                             <td class="text-center">{{ $item->pci_qty }} {{ $item->pci_qtyunit }}</td>
-                            <td class="text-right">{{ number_format($item->pci_price) }}</td>
+                            <td class="text-right">{{ number_format($itemPrice) }}</td>
                         </tr>
                         @empty
                         <tr>

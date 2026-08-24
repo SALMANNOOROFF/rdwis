@@ -3,20 +3,19 @@
 @section('content')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-:root { --rd-text-primary: #007bff; --rd-text-warning: #f39c12; --rd-text-success: #28a745; --rd-surface: #0d1218; --rd-border: rgba(255,255,255,0.08); }
-.hub-page { font-family: 'Inter', sans-serif; background: #080b0f; min-height: 100vh; }
+.hub-page { font-family: 'Inter', sans-serif; background: var(--rd-bg) !important; min-height: 100vh; }
 .hub-header { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
-.metric-card { background: #0d1218; border: 1px solid var(--rd-border); border-radius: 12px; transition: transform 0.2s; }
-.metric-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.15); }
-.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #8a96a3; }
-.metric-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: #fff; line-height: 1; margin-top: 5px; }
-.hub-tab-btn { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.8px; border-radius: 30px !important; padding: 10px 24px !important; transition: all 0.2s; margin-right: 10px; border: 1px solid var(--rd-border) !important; background: transparent !important; color: #8a96a3 !important; }
-.hub-tab-btn.active { background: var(--rd-text-primary) !important; color: #fff !important; border-color: var(--rd-text-primary) !important; box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3); }
-.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #8a96a3; background: #0f161e; border: none !important; padding: 14px; }
-.dg-case-table td { padding: 14px; color: #cbd5e0; vertical-align: middle; border-top: 1px solid var(--rd-border); border-bottom: none; }
-.dg-case-table tr:hover { background: rgba(255,255,255,0.02); }
-.case-title { font-weight: 600; color: #fff; font-size: 14px; }
-.case-value { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: var(--rd-text-primary); }
+.metric-card { background: var(--rd-surface) !important; border: 1px solid var(--rd-border) !important; border-radius: 8px; transition: transform 0.2s; }
+.metric-card:hover { transform: translateY(-3px); border-color: var(--rd-border2); box-shadow: var(--rd-shadow-md); }
+.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--rd-text3) !important; }
+.metric-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--rd-text1) !important; line-height: 1; margin-top: 5px; }
+.hub-tab-btn { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.8px; border-radius: 30px !important; padding: 10px 24px !important; transition: all 0.2s; margin-right: 10px; border: 1px solid var(--rd-border2) !important; background: var(--rd-surface) !important; color: var(--rd-text2) !important; }
+.hub-tab-btn.active { background: var(--rd-primary-600) !important; color: #fff !important; border-color: var(--rd-primary-600) !important; box-shadow: 0 4px 15px rgba(95,120,88,0.25); }
+.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--rd-text2); background: var(--rd-surface3) !important; border: none !important; padding: 14px; }
+.dg-case-table td { padding: 14px; color: var(--rd-text1); vertical-align: middle; border-top: 1px solid var(--rd-border); border-bottom: none; }
+.dg-case-table tr:hover { background: var(--rd-neutral-50); }
+.case-title { font-weight: 600; color: var(--rd-text1); font-size: 14px; }
+.case-value { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: var(--rd-primary-600); }
 .status-badge { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; padding: 4px 12px; border-radius: 6px; }
 </style>
 
@@ -27,7 +26,7 @@
                 <div class="col-md-7">
                     <div class="hub-header">
                         <span class="badge badge-primary px-3 py-1 mb-2" style="font-size: 10px; letter-spacing: 1px;">DIVISION OPERATIONS</span>
-                        <h1 class="m-0 font-weight-bold text-white" style="font-size: 2.2rem;">Contract Case Hub</h1>
+                        <h1 class="m-0 font-weight-bold text-dark" style="font-size: 2.2rem;">Contract Case Hub</h1>
                         <p class="text-muted mb-0" style="font-size: 14px; opacity: 0.7;">Central specialized portal for creating and tracking contract workflows.</p>
                     </div>
                 </div>
@@ -39,7 +38,7 @@
                     <a href="{{ route('division.contract-cases.create', ['type' => 'Hg']) }}" class="text-decoration-none">
                         <div class="metric-card p-3 text-center" style="border-top: 3px solid #007bff;">
                             <i class="fas fa-user-plus fa-2x mb-2 text-primary"></i>
-                            <h6 class="font-weight-bold text-white mb-0 rajdhani">New Hiring</h6>
+                            <h6 class="font-weight-bold text-dark mb-0 rajdhani">New Hiring</h6>
                             <small class="text-muted">Fresh Candidate</small>
                         </div>
                     </a>
@@ -48,7 +47,7 @@
                     <a href="{{ route('division.contract-cases.create', ['type' => 'Ce']) }}" class="text-decoration-none">
                         <div class="metric-card p-3 text-center" style="border-top: 3px solid #28a745;">
                             <i class="fas fa-user-clock fa-2x mb-2 text-success"></i>
-                            <h6 class="font-weight-bold text-white mb-0 rajdhani">Extension</h6>
+                            <h6 class="font-weight-bold text-dark mb-0 rajdhani">Extension</h6>
                             <small class="text-muted">Same Terms</small>
                         </div>
                     </a>
@@ -57,7 +56,7 @@
                     <a href="{{ route('division.contract-cases.create', ['type' => 'Cr']) }}" class="text-decoration-none">
                         <div class="metric-card p-3 text-center" style="border-top: 3px solid #f39c12;">
                             <i class="fas fa-sync-alt fa-2x mb-2 text-warning"></i>
-                            <h6 class="font-weight-bold text-white mb-0 rajdhani">Renewal</h6>
+                            <h6 class="font-weight-bold text-dark mb-0 rajdhani">Renewal</h6>
                             <small class="text-muted">New Terms</small>
                         </div>
                     </a>
@@ -66,7 +65,7 @@
                     <a href="{{ route('division.contract-cases.create', ['type' => 'Rh']) }}" class="text-decoration-none">
                         <div class="metric-card p-3 text-center" style="border-top: 3px solid #17a2b8;">
                             <i class="fas fa-undo fa-2x mb-2 text-info"></i>
-                            <h6 class="font-weight-bold text-white mb-0 rajdhani">Rehiring</h6>
+                            <h6 class="font-weight-bold text-dark mb-0 rajdhani">Rehiring</h6>
                             <small class="text-muted">Past Employee</small>
                         </div>
                     </a>
@@ -141,7 +140,7 @@
                                         </table>
                                     </div>
                                 @else
-                                    <div class="text-center py-5" style="background: rgba(255,255,255,0.01);">
+                                    <div class="text-center py-5" style="background: var(--rd-neutral-50);">
                                         <h6 class="text-muted font-weight-bold">Queue Empty</h6>
                                     </div>
                                 @endif
@@ -179,7 +178,7 @@
                                                         </span>
                                                     </td>
                                                     <td class="text-right pr-4">
-                                                        <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-primary btn-sm rounded-lg px-3 hub-header" style="font-size: 11px; border: 1px solid rgba(0, 123, 255, 0.3);">
+                                                        <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-primary btn-sm rounded-lg px-3 hub-header" style="font-size: 11px; border: 1px solid rgba(95,120,88,0.25);">
                                                             <i class="fas fa-search-plus mr-1"></i> VIEW TRAIL
                                                         </a>
                                                     </td>

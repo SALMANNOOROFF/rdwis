@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
 .proc-dashboard {
     font-family: 'Inter', sans-serif;
-    background: #080b0f !important;
+    background: var(--rd-bg) !important;
     min-height: 100vh;
-    color: #cbd5e0;
+    color: var(--rd-text1);
     padding-top: 20px;
     padding-bottom: 50px;
 }
@@ -20,7 +20,7 @@
 
 /* Glassmorphism & Cyber Cards */
 .card-cyber {
-    background: rgba(18, 26, 34, 0.85);
+    background: var(--rd-surface);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
@@ -52,7 +52,7 @@
 
 .kpi-sub {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--rd-text3);
     margin-top: 4px;
 }
 
@@ -83,9 +83,9 @@
 }
 
 .btn-cyber-secondary {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--rd-neutral-50);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #cbd5e0;
+    color: var(--rd-text1);
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
     font-size: 12px;

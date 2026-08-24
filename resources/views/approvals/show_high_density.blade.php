@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper bg-dark text-white">
@@ -147,7 +147,7 @@
 </div>
 
 <style>
-.bg-navy { background-color: #001f3f !important; }
+.bg-navy { background-color: var(--rd-surface3) !important; }
 .border-left-gold { border-left: 5px solid #f39c12 !important; }
 .border-gold { border-top: 3px solid #f39c12 !important; }
 </style>

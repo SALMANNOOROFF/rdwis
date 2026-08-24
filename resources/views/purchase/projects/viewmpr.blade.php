@@ -5,9 +5,9 @@
     <style>
         /* Main Theme Colors */
         :root {
-            --admin-blue: #007bff;
-            --admin-dark: #343a40;
-            --light-bg: #f4f6f9;
+            --admin-blue: var(--rd-primary-600);
+            --admin-dark: var(--rd-text1);
+            --light-bg: var(--rd-bg);
         }
 
         .mpr-detail-card {
@@ -97,7 +97,7 @@
 
         /* Buttons Styling */
         .btn-blue-sm { background: var(--admin-blue); color: #fff; border: none; padding: 4px 12px; border-radius: 3px; font-size: 0.8rem; }
-        .btn-blue-sm:hover { background: #0056b3; color: #fff; }
+        .btn-blue-sm:hover { background: var(--rd-primary-700); color: #fff; }
 
         .btn-group-top .btn { margin-left: 5px; font-weight: 600; font-size: 0.8rem; }
     </style>

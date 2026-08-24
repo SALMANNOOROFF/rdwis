@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper pt-3">
@@ -73,8 +73,8 @@
         .timeline-steps { display: flex; justify-content: space-around; position: relative; padding: 20px 0; background: #ffffff; border-radius: 8px; border: 1px solid #ebedf2; }
         .timeline-steps::before { content: ''; position: absolute; top: 50%; left: 10%; right: 10%; height: 2px; background: #e9ecef; z-index: 1; }
         .t-step { position: relative; z-index: 2; text-align: center; }
-        .t-icon { width: 35px; height: 35px; background: #fff; border: 2px solid #007bff; border-radius: 50%; line-height: 31px; margin: 0 auto 8px; color: #007bff; transition: all 0.3s; }
-        .t-step.active .t-icon { background: #007bff; color: #fff; }
+        .t-icon { width: 35px; height: 35px; background: #fff; border: 2px solid var(--rd-primary-600); border-radius: 50%; line-height: 31px; margin: 0 auto 8px; color: var(--rd-primary-600); transition: all 0.3s; }
+        .t-step.active .t-icon { background: var(--rd-primary-600); color: #fff; }
         .t-step.edc .t-icon { border-color: #dc3545; color: #dc3545; }
         .t-label { font-size: 11px; font-weight: 700; color: #495057; display: block; }
         .t-date { font-size: 10px; color: #868e96; }

@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <style>
@@ -6,9 +6,9 @@
 
     .hr-hub {
         font-family: 'Inter', sans-serif;
-        background: #080b0f !important;
+        background: var(--rd-bg) !important;
         min-height: 100vh;
-        color: #cbd5e0;
+        color: var(--rd-text1);
         padding-top: 15px;
     }
 
@@ -19,7 +19,7 @@
 
     /* Cyber Glass Panels */
     .card-cyber {
-        background: rgba(18, 26, 34, 0.85);
+        background: var(--rd-surface);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 14px;
@@ -85,9 +85,9 @@
 
     /* Quick Action Buttons */
     .btn-quick {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: #e2e8f0;
+        background: var(--rd-neutral-50);
+        border: 1px solid var(--rd-border);
+        color: var(--rd-text1);
         border-radius: 8px;
         padding: 8px 14px;
         font-size: 0.85rem;
@@ -110,7 +110,7 @@
     .table-cyber {
         width: 100%;
         margin-bottom: 0;
-        color: #e2e8f0;
+        color: var(--rd-text1);
     }
     .table-cyber thead th {
         background: rgba(0, 0, 0, 0.35);
@@ -148,15 +148,15 @@
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 {{-- Mode Switcher (All Dept vs My Dept) --}}
-                <div class="btn-group btn-group-sm shadow-sm mr-2" role="group" style="border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; overflow: hidden;">
+                <div class="btn-group btn-group-sm shadow-sm mr-2" role="group" style="border: 1px solid var(--rd-border); border-radius: 8px; overflow: hidden;">
                     <a href="{{ route('hr.dashboard', ['mode' => 'm']) }}" 
                        class="btn font-weight-bold rajdhani px-3 py-1" 
-                       style="{{ $mode === 'm' ? 'background: linear-gradient(135deg, #00d2ff, #007bff); color: #fff; box-shadow: 0 0 10px rgba(0,210,255,0.4);' : 'background: rgba(255,255,255,0.03); color: #a0aec0;' }}">
+                       style="{{ $mode === 'm' ? 'background: linear-gradient(135deg, #00d2ff, #007bff); color: #fff; box-shadow: 0 0 10px rgba(0,210,255,0.4);' : 'background: var(--rd-neutral-50); color: #a0aec0;' }}">
                         <i class="fas fa-globe mr-1"></i> ALL DEPT
                     </a>
                     <a href="{{ route('hr.dashboard', ['mode' => 's']) }}" 
                        class="btn font-weight-bold rajdhani px-3 py-1" 
-                       style="{{ $mode === 's' ? 'background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 0 10px rgba(16,185,129,0.4);' : 'background: rgba(255,255,255,0.03); color: #a0aec0;' }}">
+                       style="{{ $mode === 's' ? 'background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 0 10px rgba(16,185,129,0.4);' : 'background: var(--rd-neutral-50); color: #a0aec0;' }}">
                         <i class="fas fa-sitemap mr-1"></i> MY DEPT
                     </a>
                 </div>
@@ -339,7 +339,7 @@
                                         <div class="small text-muted">ID: {{ $emp->emp_id }}</div>
                                     </td>
                                     <td>
-                                        <span class="badge badge-dark" style="background: rgba(255,255,255,0.08); color: #cbd5e0;">
+                                        <span class="badge badge-dark" style="background: rgba(255,255,255,0.08); color: var(--rd-text1);">
                                             {{ $emp->unt_namesh ?? ($emp->unt_name ?? '—') }}
                                         </span>
                                     </td>

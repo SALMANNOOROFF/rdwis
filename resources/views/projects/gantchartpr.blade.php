@@ -1,4 +1,4 @@
-@extends('welcome')
+﻿@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -93,7 +93,7 @@
         .milestone-diamond:hover { transform: rotate(45deg) scale(1.2); cursor: pointer; }
         
         .diamond-completed { background-color: var(--rd-accent); border: 2px solid var(--rd-accent-dark); }
-        .diamond-pending { background-color: var(--rd-surface); border: 2px solid var(--rd-accent); }
+        .diamond-pending { background-color: var(--rd-surface); border: 2px solid var(--rd-primary-600); }
 
         .activity-bar {
             height: 14px;
@@ -103,7 +103,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
         .bar-completed { background-color: var(--rd-accent); }
-        .bar-remaining { border: 2px solid var(--rd-accent); background: var(--rd-surface); }
+        .bar-remaining { border: 2px solid var(--rd-primary-600); background: var(--rd-surface); }
 
         /* Footer Legend - Clean Admin Style */
         .gantt-footer-legend {

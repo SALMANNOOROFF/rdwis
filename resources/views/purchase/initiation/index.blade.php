@@ -3,20 +3,19 @@
 @section('content')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-:root { --rd-text-primary: #007bff; --rd-text-warning: #f39c12; --rd-text-success: #28a745; --rd-surface: #0d1218; --rd-border: rgba(255,255,255,0.08); }
-.hub-page { font-family: 'Inter', sans-serif; background: #080b0f; min-height: 100vh; }
+.hub-page { font-family: 'Inter', sans-serif; background: var(--rd-bg) !important; min-height: 100vh; }
 .hub-header { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
-.metric-card { background: #0d1218; border: 1px solid var(--rd-border); border-radius: 12px; transition: transform 0.2s; }
-.metric-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.15); }
-.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #8a96a3; }
-.metric-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: #fff; line-height: 1; margin-top: 5px; }
-.hub-tab-btn { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.8px; border-radius: 30px !important; padding: 10px 24px !important; transition: all 0.2s; margin-right: 10px; border: 1px solid var(--rd-border) !important; background: transparent !important; color: #8a96a3 !important; }
-.hub-tab-btn.active { background: var(--rd-text-primary) !important; color: #fff !important; border-color: var(--rd-text-primary) !important; box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3); }
-.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #8a96a3; background: #0f161e; border: none !important; padding: 14px; }
-.dg-case-table td { padding: 14px; color: #cbd5e0; vertical-align: middle; border-top: 1px solid var(--rd-border); border-bottom: none; }
-.dg-case-table tr:hover { background: rgba(255,255,255,0.02); }
-.case-title { font-weight: 600; color: #fff; font-size: 14px; }
-.case-value { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: var(--rd-text-primary); }
+.metric-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; transition: transform 0.2s; }
+.metric-card:hover { transform: translateY(-3px); border-color: var(--rd-border2); box-shadow: var(--rd-shadow-md); }
+.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--rd-text3); }
+.metric-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--rd-text1); line-height: 1; margin-top: 5px; }
+.hub-tab-btn { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.8px; border-radius: 30px !important; padding: 10px 24px !important; transition: all 0.2s; margin-right: 10px; border: 1px solid var(--rd-border2) !important; background: var(--rd-surface) !important; color: var(--rd-text3) !important; }
+.hub-tab-btn.active { background: var(--rd-primary-600) !important; color: #fff !important; border-color: var(--rd-primary-600) !important; box-shadow: 0 4px 15px rgba(95,120,88,0.25); }
+.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--rd-text3); background: var(--rd-surface3) !important; border: none !important; padding: 14px; }
+.dg-case-table td { padding: 14px; color: var(--rd-text1); vertical-align: middle; border-top: 1px solid var(--rd-border); border-bottom: none; }
+.dg-case-table tr:hover { background: var(--rd-neutral-50); }
+.case-title { font-weight: 600; color: var(--rd-text1); font-size: 14px; }
+.case-value { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: var(--rd-primary-600); }
 .status-badge { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; padding: 4px 12px; border-radius: 6px; }
 
 .pulse-red {
@@ -42,7 +41,7 @@
                 <div class="col-md-7">
                     <div class="hub-header">
                         <span class="badge badge-primary px-3 py-1 mb-2" style="font-size: 10px; letter-spacing: 1px;">DIVISION OPERATIONS</span>
-                        <h1 class="m-0 font-weight-bold text-white" style="font-size: 2.2rem;">PC Initiation Hub</h1>
+                        <h1 class="m-0 font-weight-bold" style="font-size: 2.2rem; color: var(--rd-text1);">PC Initiation Hub</h1>
                         <p class="text-muted mb-0" style="font-size: 14px; opacity: 0.7;">Central specialized portal for creating and tracking procurement workflows.</p>
                     </div>
                 </div>
@@ -60,14 +59,14 @@
             
             {{-- Financial Pulse Summary (Simplified Text View) --}}
             @if($finSummary)
-            <div class="mb-4 p-3 rounded d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+            <div class="mb-4 p-3 rounded d-flex align-items-center justify-content-between" style="background: var(--rd-surface); border: 1px solid var(--rd-border);">
                 <div class="d-flex align-items-center gap-4 rajdhani">
-                    <div class="mr-4"><i class="fas fa-wallet text-info mr-2"></i> <span class="text-muted small">RECEIVED:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['received']) }}</span></div>
-                    <div class="mr-4"><i class="fas fa-money-bill-wave text-danger mr-2"></i> <span class="text-muted small">EXPENDITURE:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['expenditure']) }}</span></div>
-                    <div class="mr-4"><i class="fas fa-balance-scale text-white mr-2"></i> <span class="text-muted small">BALANCE:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['balance']) }}</span></div>
-                    <div class="mr-4"><i class="fas fa-handshake text-warning mr-2"></i> <span class="text-muted small">COMMITMENTS:</span> <span class="text-white font-weight-bold ml-1">{{ number_format($finSummary['commitments']) }}</span></div>
+                    <div class="mr-4"><i class="fas fa-wallet text-info mr-2"></i> <span class="text-muted small">RECEIVED:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['received']) }}</span></div>
+                    <div class="mr-4"><i class="fas fa-money-bill-wave text-danger mr-2"></i> <span class="text-muted small">EXPENDITURE:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['expenditure']) }}</span></div>
+                    <div class="mr-4"><i class="fas fa-balance-scale mr-2" style="color: var(--rd-text2);"></i> <span class="text-muted small">BALANCE:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['balance']) }}</span></div>
+                    <div class="mr-4"><i class="fas fa-handshake text-warning mr-2"></i> <span class="text-muted small">COMMITMENTS:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['commitments']) }}</span></div>
                 </div>
-                <div class="rajdhani px-4 py-1 rounded" style="background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.2);">
+                <div class="rajdhani px-4 py-1 rounded" style="background: var(--rd-success-soft); border: 1px solid var(--rd-success-100);">
                     <span class="text-success small font-weight-bold">AVAILABLE:</span> 
                     <span class="text-success font-weight-bold ml-2" style="font-size: 16px;">Rs. {{ number_format($finSummary['available']) }}</span>
                 </div>
@@ -84,21 +83,21 @@
                 <div class="col-md-3">
                     <div class="metric-card p-4">
                         <div class="metric-label">Open</div>
-                        <div class="metric-value" style="color: var(--rd-text-primary);">{{ $initiatedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Active</span></div>
+                        <div class="metric-value" style="color: var(--rd-primary-600);">{{ $initiatedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Active</span></div>
                         <div class="mt-1 small text-muted font-weight-bold"><i class="fas fa-university mr-1"></i> Moving through HQ</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card p-4">
                         <div class="metric-label">Action Required</div>
-                        <div class="metric-value" style="color: var(--rd-text-warning);">{{ $actionReqCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Pending</span></div>
+                        <div class="metric-value" style="color: var(--rd-warning);">{{ $actionReqCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Pending</span></div>
                         <div class="mt-1 small text-warning font-weight-bold"><i class="fas fa-undo-alt mr-1"></i> Drafts / Returns</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="metric-card p-4">
                         <div class="metric-label">Close</div>
-                        <div class="metric-value" style="color: var(--rd-text-success);">{{ $completedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Finalized</span></div>
+                        <div class="metric-value" style="color: var(--rd-success);">{{ $completedCases->count() }} <span style="font-size: 14px; opacity: 0.5;">Finalized</span></div>
                         <div class="mt-1 small text-success font-weight-bold"><i class="fas fa-check-double mr-1"></i> Success / Rejected</div>
                     </div>
                 </div>
@@ -159,7 +158,7 @@
                                                         </div>
                                                         <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'General Ops' }}</div>
                                                     </td>
-                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
+                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
                                                     <td class="text-center">
                                                         <span class="badge status-badge bg-warning-soft text-warning" style="background: rgba(243,156,18,0.1); border: 1px solid rgba(243,156,18,0.2);">
                                                             <i class="fas fa-pen-nib mr-1"></i> {{ $p->pcs_status }}
@@ -176,7 +175,7 @@
                                         </table>
                                     </div>
                                 @else
-                                    <div class="text-center py-5" style="background: rgba(255,255,255,0.01);">
+                                    <div class="text-center py-5" style="background: var(--rd-neutral-50);">
                                         <div class="display-4 text-muted mb-3" style="opacity: 0.2;"><i class="fas fa-clipboard-check"></i></div>
                                         <h6 class="text-muted font-weight-bold">Queue Empty</h6>
                                         <p class="text-muted small">No cases currently require your action.</p>
@@ -213,7 +212,7 @@
                                                         <div class="case-title">{{ Str::limit($p->pcs_title, 50) }}</div>
                                                         <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'HQ Procurement' }}</div>
                                                     </td>
-                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
+                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
                                                     <td class="text-center">
                                                         <span class="badge status-badge mb-1" style="background: rgba(var(--rd-{{$b}}-rgb), 0.1); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.2);">
                                                             <i class="fas fa-{{$i}} mr-1"></i> {{ $p->current_stage_display ?? $s }}
@@ -225,7 +224,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="text-right pr-4">
-                                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-outline-primary btn-sm rounded-lg px-3 hub-header" style="font-size: 11px; border: 1px solid rgba(0, 123, 255, 0.3);">
+                                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-outline-primary btn-sm rounded-lg px-3 hub-header" style="font-size: 11px;">
                                                             <i class="fas fa-search-plus mr-1"></i> VIEW TRAIL
                                                         </a>
                                                     </td>
@@ -269,7 +268,7 @@
                                                     <td>
                                                         <div class="case-title text-muted">{{ Str::limit($p->pcs_title, 50) }}</div>
                                                     </td>
-                                                    <td class="text-right"><span class="case-value text-muted">PKR {{ number_format((float) ($p->pcs_price ?? 0)) }}</span></td>
+                                                    <td class="text-right"><span class="case-value text-muted">PKR {{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
                                                     <td class="text-center">
                                                         <span class="badge status-badge" style="background: rgba(var(--rd-{{$b}}-rgb), 0.1); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.2);">
                                                             <i class="fas fa-{{$i}} mr-1"></i> {{ strtoupper($s) }}
