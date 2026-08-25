@@ -398,6 +398,13 @@
               </a>
           </li>
 
+          <li class="nav-item">
+              <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
+                  <i class="fas fa-chart-pie nav-icon text-warning"></i>
+                  <p>FINANCING OF PROJECTS</p>
+              </a>
+          </li>
+
 {{-- Hiding Old Purchase System as requested --}}
           {{-- 
           <li class="nav-item">

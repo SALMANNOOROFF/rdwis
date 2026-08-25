@@ -283,6 +283,13 @@ Route::middleware('auth')->group(function () {
             ->name('projects.store-milestone')
             ->middleware('approver');
         Route::get('/project/{id}/spendings', [ProjectController::class, 'projectSpendings'])->name('projects.spendings');
+
+        // --- FINANCE OF PROJECT (Division-level head status with Pcc/CSRF drill-down) ---
+        Route::get('/finance-of-project', [\App\Http\Controllers\Division\FinanceOfProjectController::class, 'index'])
+            ->name('division.finance-of-project.index');
+        Route::get('/finance-of-project/{head_id}/{scope}/{figure}/{subhead?}', [\App\Http\Controllers\Division\FinanceOfProjectController::class, 'drillDown'])
+            ->name('division.finance-of-project.drilldown');
+
         Route::get('/milestone/{id}/edit', [ProjectController::class, 'editMilestone'])->name('milestone.edit');
         Route::post('/milestone/{id}/update', [ProjectController::class, 'updateMilestone'])->name('milestone.update');
         Route::get('/milestone/{id}/delete', [ProjectController::class, 'deleteMilestone'])->name('milestone.delete');
