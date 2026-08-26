@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+@php
+    $canEdit = $canEditIt ?? false;
+@endphp
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -831,12 +834,18 @@
         </div>
 
         <div class="top-bar-actions">
+            @if($canEdit)
             <button type="button" class="action-btn btn-reset" onclick="resetDefaults()" title="Reset to standard naval template text">
                 <i class="fas fa-undo"></i> Reset Template
             </button>
             <button type="button" class="action-btn btn-save" id="btnSaveDoc" onclick="saveDocument()">
                 <i class="fas fa-save"></i> Save Document
             </button>
+            @else
+            <span class="badge px-3 py-1.5 rajdhani" style="background: rgba(255,255,255,0.12); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); font-size: 11px; letter-spacing: 0.5px;">
+                <i class="fas fa-eye mr-1"></i> READ-ONLY VIEW
+            </span>
+            @endif
             <button type="button" class="action-btn btn-print" onclick="window.print()">
                 <i class="fas fa-print"></i> Print Document
             </button>
@@ -871,10 +880,10 @@
                 <div class="header-meta-row">
                     <div class="meta-col-left">
                         <div class="meta-item">
-                            R&D/Projects/Proc/<span contenteditable="true" id="ref_no_suffix" oninput="syncRefSuffix(this.innerText)">{{ $refSuffix }}</span>
+                            R&D/Projects/Proc/<span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="ref_no_suffix" oninput="syncRefSuffix(this.innerText)">{{ $refSuffix }}</span>
                         </div>
                         <div class="meta-item">
-                            <span contenteditable="true" id="see_distribution" oninput="markUnsaved()">{{ $seeDistribution ?? 'See distribution' }}</span>
+                            <span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="see_distribution" oninput="markUnsaved()">{{ $seeDistribution ?? 'See distribution' }}</span>
                         </div>
                     </div>
 
@@ -883,7 +892,7 @@
                             Ph (off): 021-48503038
                         </div>
                         <div class="meta-item">
-                            <span contenteditable="true" id="letter_date" oninput="syncDate(this.innerText)">{{ $letterDate }}</span>
+                            <span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="letter_date" oninput="syncDate(this.innerText)">{{ $letterDate }}</span>
                         </div>
                     </div>
                 </div>
@@ -891,15 +900,15 @@
 
             <!-- SUBJECT -->
             <div class="letter-subject">
-                <u><span contenteditable="true" id="subject">{{ $subject }}</span></u>
+                <u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="subject">{{ $subject }}</span></u>
             </div>
 
             <!-- BODY PARAGRAPHS -->
             <div class="letter-body" id="letterParagraphs">
                 @foreach($paragraphs as $pIndex => $pText)
                 <div class="para-wrapper">
-                    <div class="editable-para" contenteditable="true" oninput="markUnsaved()">{{ $pText }}</div>
-                    @if($pIndex > 0)
+                    <div class="editable-para" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $pText }}</div>
+                    @if($canEdit && $pIndex > 0)
                     <button type="button" class="btn-del-para no-print" onclick="removeParagraph(this)" title="Delete Paragraph">
                         <i class="fas fa-times"></i>
                     </button>
@@ -908,19 +917,21 @@
                 @endforeach
             </div>
 
+            @if($canEdit)
             <!-- ADD PARAGRAPH BUTTON (SCREEN ONLY) -->
             <div class="no-print" style="margin-top: 2px; margin-bottom: 18px;">
                 <button type="button" class="btn-add-para" onclick="addParagraph()">
                     <i class="fas fa-plus"></i> Add Paragraph
                 </button>
             </div>
+            @endif
 
             <!-- SIGNATORY -->
             <div class="signatory-wrapper">
                 <div class="signatory-box">
-                    <div class="sig-name" contenteditable="true" id="signatory_name" oninput="markUnsaved()">{{ $signatoryName }}</div>
-                    <div class="sig-rank" contenteditable="true" id="signatory_rank" oninput="markUnsaved()">{{ $signatoryRank }}</div>
-                    <div class="sig-dept" contenteditable="true" id="signatory_dept" oninput="markUnsaved()">{{ $signatoryDept }}</div>
+                    <div class="sig-name" contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="signatory_name" oninput="markUnsaved()">{{ $signatoryName }}</div>
+                    <div class="sig-rank" contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="signatory_rank" oninput="markUnsaved()">{{ $signatoryRank }}</div>
+                    <div class="sig-dept" contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="signatory_dept" oninput="markUnsaved()">{{ $signatoryDept }}</div>
                 </div>
             </div>
 
@@ -932,6 +943,7 @@
                         <span class="firm-count-pill no-print" id="firmCountBadge">{{ count($selectedFirms) }} Firms</span>
                     </div>
 
+                    @if($canEdit)
                     <div class="dist-actions no-print">
                         <button type="button" class="btn-firm-act btn-add-all" onclick="addAllSystemFirms()" title="Add all registered firms from database into this distribution list">
                             <i class="fas fa-database"></i> Add All System Firms ({{ count($firmsDirectory) }})
@@ -946,6 +958,7 @@
                             <i class="fas fa-columns"></i> <span id="layoutToggleText">2-Col Grid</span>
                         </button>
                     </div>
+                    @endif
                 </div>
 
                 <!-- FIRM LIST -->
@@ -953,17 +966,20 @@
                     @foreach($selectedFirms as $f)
                     <div class="firm-entry" data-id="{{ $f['id'] ?? '' }}">
                         <div class="firm-hdr">
-                            <span class="f-name" contenteditable="true" oninput="markUnsaved()">{{ $f['name'] }}</span>
+                            <span class="f-name" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $f['name'] }}</span>
+                            @if($canEdit)
                             <button type="button" class="btn-del-firm no-print" onclick="removeFirm(this)" title="Remove Firm">
                                 <i class="fas fa-times"></i>
                             </button>
+                            @endif
                         </div>
-                        <span class="f-addr" contenteditable="true" oninput="markUnsaved()">{{ $f['address'] ?: 'Karachi, Pakistan' }}</span>
-                        <span class="f-tel" contenteditable="true" oninput="markUnsaved()">Tel: {{ $f['tel'] ?: 'N/A' }}</span>
+                        <span class="f-addr" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $f['address'] ?: 'Karachi, Pakistan' }}</span>
+                        <span class="f-tel" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">Tel: {{ $f['tel'] ?: 'N/A' }}</span>
                     </div>
                     @endforeach
                 </div>
 
+                @if($canEdit)
                 <!-- FIRM SEARCH BAR (SCREEN ONLY) -->
                 <div class="firm-search-bar no-print">
                     <i class="fas fa-search" style="color: var(--rd-text3); font-size: 13px;"></i>
@@ -982,6 +998,7 @@
                         <!-- Filled by JS -->
                     </div>
                 </div>
+                @endif
             </div>
 
         </div>
@@ -993,8 +1010,8 @@
             <!-- ANNEX TOP RIGHT -->
             <div class="it-annex-header">
                 <div class="annex-line"><u>ANNEX A</u></div>
-                <div class="annex-line"><u>TO IT NO R&D/Projects/Proc/<span id="annex_ref_suffix" contenteditable="true" oninput="syncRefSuffixFromAnnex(this.innerText)">{{ $refSuffix }}</span></u></div>
-                <div class="annex-line"><u>Dated : <span id="annex_date" contenteditable="true" oninput="syncDateFromAnnex(this.innerText)">{{ $letterDate }}</span></u></div>
+                <div class="annex-line"><u>TO IT NO R&D/Projects/Proc/<span id="annex_ref_suffix" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="syncRefSuffixFromAnnex(this.innerText)">{{ $refSuffix }}</span></u></div>
+                <div class="annex-line"><u>Dated : <span id="annex_date" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="syncDateFromAnnex(this.innerText)">{{ $letterDate }}</span></u></div>
             </div>
 
             <!-- TITLE -->
@@ -1002,12 +1019,14 @@
                 <u>LIST OF REQUIRED ITEMS</u>
             </div>
 
+            @if($canEdit)
             <!-- ADD ROW BUTTON (SCREEN ONLY) -->
             <div class="no-print" style="margin-bottom: 8px; display: flex; justify-content: flex-end;">
                 <button type="button" class="btn-add-table-row" onclick="addAnnexRow()">
                     <i class="fas fa-plus"></i> Add Item Row
                 </button>
             </div>
+            @endif
 
             <!-- ANNEX ITEMS TABLE (3 COLUMNS: S No, Item / specification, Qty) -->
             <table class="annex-table" id="annexItemsTable">
@@ -1016,31 +1035,37 @@
                         <th style="width: 55px;">S No</th>
                         <th class="t-left">Item / specification</th>
                         <th style="width: 100px;">Qty</th>
+                        @if($canEdit)
                         <th style="width: 35px;" class="col-act no-print"></th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody id="annexItemsBody">
                     @forelse($annexItems as $idx => $item)
                     <tr>
                         <td class="t-center item-serial">{{ $item['serial'] ?? ($idx + 1) }}</td>
-                        <td class="t-left item-desc" contenteditable="true" oninput="markUnsaved()">{{ $item['desc'] ?? '' }}</td>
-                        <td class="t-center item-qty" contenteditable="true" oninput="markUnsaved()">{{ $item['qty'] ?? '01 Nos' }}</td>
+                        <td class="t-left item-desc" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $item['desc'] ?? '' }}</td>
+                        <td class="t-center item-qty" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $item['qty'] ?? '01 Nos' }}</td>
+                        @if($canEdit)
                         <td class="t-center col-act no-print">
                             <button type="button" class="btn-del-row" onclick="deleteAnnexRow(this)" title="Delete Row">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
                         <td class="t-center item-serial">1</td>
-                        <td class="t-left item-desc" contenteditable="true" oninput="markUnsaved()">{{ $purchase->pcs_title }}</td>
-                        <td class="t-center item-qty" contenteditable="true" oninput="markUnsaved()">01 x Nos</td>
+                        <td class="t-left item-desc" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $purchase->pcs_title }}</td>
+                        <td class="t-center item-qty" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">01 x Nos</td>
+                        @if($canEdit)
                         <td class="t-center col-act no-print">
                             <button type="button" class="btn-del-row" onclick="deleteAnnexRow(this)" title="Delete Row">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>
+                        @endif
                     </tr>
                     @endforelse
                 </tbody>

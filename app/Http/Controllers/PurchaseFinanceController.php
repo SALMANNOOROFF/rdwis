@@ -25,41 +25,52 @@ class PurchaseFinanceController extends Controller
         $user = Auth::user();
         $pageTitle = 'Director Finance | Budget Hub';
 
-        // 1. Pending: Cases at DFinance stage
+        // 1. Pending: Cases currently at DFinance stage
         $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
             ->atStage('DFinance')
+            ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
             ->orderBy('pcs_id', 'desc')
             ->get();
 
+        $pendingIds = $pending->pluck('pcs_id')->toArray();
+
         // 2. Action Taken (Cases already processed by this user)
-        $processed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+        $actionTaken = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
-            ->where(function($q) {
-                // Exclude cases currently at DFinance stage
-                $q->whereDoesntHave('currentSubstatus', function($sq) {
-                    $sq->where('pss_stage', 'DFinance');
-                });
-            })
+            ->whereNotIn('pcs_id', $pendingIds)
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        // Split processed into Open and Closed
-        $open = $processed->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
-        $closed = $processed->whereIn('pcs_status', ['Approved', 'Rejected', 'Cancelled']);
+        // 3. Open: Active cases forwarded to HQ approval chain (MD, DDG, DG, Approved)
+        $open = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+            ->whereNotIn('pcs_status', ['Draft', 'Returned', 'Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->whereNotIn('pcs_id', $pendingIds)
+            ->orderBy('pcs_id', 'desc')
+            ->get();
+
+        // 4. Closed: Finalized cases (Fulfilled / Partially Fulfilled / Completed / Cancelled / Rejected)
+        $closed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+            ->whereIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->orderBy('pcs_id', 'desc')
+            ->limit(50)
+            ->get();
 
         // Metrics for Finance
         $totalVolume = $pending->sum('pcs_price');
         $caseCount = $pending->count();
         $openCount = $open->count();
         $closedCount = $closed->count();
+        $actionTakenCount = $actionTaken->count();
         
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
         $detailsRouteName = 'nrdi.purchase_cases_new.finance.show';
+        $area = 'fin';
 
         return view('nrdi.purchase_cases_new.index', compact(
-            'pending', 'open', 'closed', 'pageTitle', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'unitNameMap', 'detailsRouteName'
+            'pending', 'open', 'closed', 'actionTaken', 'pageTitle', 'totalVolume', 'caseCount', 
+            'openCount', 'closedCount', 'actionTakenCount', 'unitNameMap', 'detailsRouteName', 'area'
         ));
     }
 
@@ -78,7 +89,7 @@ class PurchaseFinanceController extends Controller
         $head = $fin;
         
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
-        $canApprove = $this->approvalService->canApprove('fin', $purchase->pcs_price);
+        $canApprove = $this->approvalService->canApprove('fin', (float)($purchase->pcs_price ?? 0), $purchase);
         $pageTitle = 'DFin Review: ' . $purchase->pcs_title;
         $area = 'fin';
 

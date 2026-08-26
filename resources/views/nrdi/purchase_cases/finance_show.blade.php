@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -125,7 +125,7 @@
                             <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border);">
                                 <i class="far fa-file-pdf text-danger mr-3" style="font-size: 20px;"></i>
                                 <div class="flex-grow-1 overflow-hidden"><div class="small font-weight-bold text-white">{{ $file->pat_filename }}</div></div>
-                                <a href="{{ url('storage/'.$file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-success ml-2"><i class="fas fa-download"></i></a>
+                                <a href="{{ \App\Facades\FileStorage::url($file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-success ml-2"><i class="fas fa-download"></i></a>
                             </div>
                         @empty
                             <div class="text-center py-3 text-muted small">No attachments uploaded.</div>

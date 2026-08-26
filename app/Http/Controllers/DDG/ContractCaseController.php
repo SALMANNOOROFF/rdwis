@@ -1,0 +1,125 @@
+<?php
+
+namespace App\Http\Controllers\DDG;
+
+use App\Http\Controllers\Controller;
+use App\Models\HrCtrCase;
+use App\Services\ContractCaseApprovalService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class ContractCaseController extends Controller
+{
+    protected ContractCaseApprovalService $approvalService;
+
+    public function __construct(ContractCaseApprovalService $approvalService)
+    {
+        $this->approvalService = $approvalService;
+    }
+
+    public function index()
+    {
+        $cases = HrCtrCase::with(['casePlans.project', 'currentSubstatus', 'employee', 'previousContract', 'newContract'])
+            ->whereNotIn('ctc_status', ['Draft'])
+            ->orderBy('ctc_id', 'desc')
+            ->get();
+
+        // 1. Action Required: Cases currently held by DDG
+        $actionReqCases = $cases->filter(function ($c) {
+            $stage = $c->current_stage;
+            return $stage === 'DDG' && !in_array($c->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
+        });
+
+        // 2. Open / In Pipeline: Cases forwarded to DG or Approved
+        $initiatedCases = $cases->filter(function ($c) {
+            $stage = $c->current_stage;
+            return in_array($stage, ['DG', 'Approved'])
+                && !in_array($c->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
+        });
+
+        // 3. Completed: Finalized cases
+        $completedCases = $cases->filter(function ($c) {
+            $stage = $c->current_stage;
+            return in_array($stage, ['Fulfilled', 'Not Approved', 'Cancelled'])
+                || in_array($c->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
+        });
+
+        $pageTitle = 'DDG Approval Portal';
+        return view('md.contract-cases.index', compact('cases', 'actionReqCases', 'initiatedCases', 'completedCases', 'pageTitle'));
+    }
+
+    public function show($id)
+    {
+        $case = HrCtrCase::with([
+            'casePlans.project',
+            'attachments',
+            'remarksHistory',
+            'currentSubstatus',
+            'previousContract',
+            'newContract',
+            'employee',
+            'unit'
+        ])->findOrFail($id);
+
+        $authorityRole = 'DDG';
+        return view('md.contract-cases.show', compact('case', 'authorityRole'));
+    }
+
+    public function approve($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $user = Auth::user();
+        $remarks = $request->input('remarks', 'Approved by Deputy Director General (DDG).');
+
+        $this->approvalService->approve($case, $user, $request->all(), $remarks);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contract Case approved by DDG successfully.'
+        ]);
+    }
+
+    public function forward($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $user = Auth::user();
+        $remarks = $request->input('remarks', 'Forwarded to DG for final approval.');
+
+        $nextStage = $this->approvalService->forward($case, $user, $remarks, 'DG');
+
+        return response()->json([
+            'success' => true,
+            'message' => "Case forwarded to {$nextStage} successfully.",
+            'next_stage' => $nextStage
+        ]);
+    }
+
+    public function return($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $user = Auth::user();
+        $remarks = $request->input('remarks', 'Returned by DDG.');
+        $targetStage = $request->input('target_stage', 'MD');
+
+        $destStage = $this->approvalService->return($case, $user, $remarks, $targetStage);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Case returned to {$destStage}."
+        ]);
+    }
+
+    public function reject($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $user = Auth::user();
+        $remarks = $request->input('remarks', 'Case rejected by DDG.');
+
+        $this->approvalService->reject($case, $user, $remarks);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Case marked as Not Approved.'
+        ]);
+    }
+}

@@ -9,12 +9,12 @@
                 <div class="col-12 d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
                     <div class="d-flex align-items-center flex-wrap" style="gap: 15px;">
                         <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem; font-family: 'Rajdhani', sans-serif;">
-                            <i class="fas fa-users mr-1"></i> Division Employees
-                            @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs']))
+                            <i class="fas fa-user-tie mr-1"></i> Hired Employees
+                            @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc']))
                                 @if($mode === 's')
                                     <span class="badge badge-info ml-2" style="font-size: 0.7rem; vertical-align: middle;">Dept Only</span>
                                 @else
-                                    <span class="badge badge-danger ml-2" style="font-size: 0.7rem; vertical-align: middle;">All Data</span>
+                                    <span class="badge badge-danger ml-2" style="font-size: 0.7rem; vertical-align: middle;">All Divisions</span>
                                 @endif
                             @endif
                         </h1>
@@ -23,26 +23,27 @@
                         </a>
                     </div>
                     <div class="ml-sm-auto d-flex align-items-center flex-wrap" style="gap: 10px;">
-                        @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs']))
+                        @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc']))
                         <div class="btn-group btn-group-sm shadow-sm" role="group">
                             <a href="{{ route('divhr.employelist', ['mode' => 'm', 'status'=>request('status','Current')]) }}" 
                                class="btn {{ $mode === 'm' ? 'btn-danger font-weight-bold' : 'btn-outline-danger' }}" style="{{ $mode === 'm' ? '' : 'background: var(--rd-surface2);' }}">
-                                <i class="fas fa-globe mr-1"></i> Global
+                                <i class="fas fa-globe mr-1"></i> All Divisions
                             </a>
                             <a href="{{ route('divhr.employelist', ['mode' => 's', 'status'=>request('status','Current')]) }}" 
                                class="btn {{ $mode === 's' ? 'btn-info font-weight-bold' : 'btn-outline-info' }}"
-                               style="{{ $mode === 's' ? 'background-color: var(--rd-primary-500); border-color: var(--rd-primary-500); color: white;' : 'background: var(--rd-surface2); border-color: var(--rd-primary-500);' }}">
+                                style="{{ $mode === 's' ? 'background-color: var(--rd-primary-500); border-color: var(--rd-primary-500); color: white;' : 'background: var(--rd-surface2); border-color: var(--rd-primary-500);' }}">
                                 <i class="fas fa-sitemap mr-1"></i> My Dept
                             </a>
                         </div>
                         @endif
                         <form method="get" action="{{ route('divhr.employelist') }}" class="m-0">
                             <input type="hidden" name="mode" value="{{ $mode }}">
+                            @if(request('unit_id')) <input type="hidden" name="unit_id" value="{{ request('unit_id') }}"> @endif
                             @php $st = request('status','Current'); @endphp
                             <div class="btn-group btn-group-sm shadow-sm">
-                                <a href="{{ route('divhr.employelist',['status'=>'Current','mode'=>$mode,'term'=>request('term')]) }}" class="btn btn-primary {{ $st=='Current'?'active':'secondary' }}" style="{{ $st=='Current' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Current</a>
-                                <a href="{{ route('divhr.employelist',['status'=>'Previous','mode'=>$mode,'term'=>request('term')]) }}" class="btn btn-success {{ $st=='Previous'?'active':'secondary' }}" style="{{ $st=='Previous' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Previous</a>
-                                <a href="{{ route('divhr.employelist',['status'=>'All','mode'=>$mode,'term'=>request('term')]) }}" class="btn btn-warning {{ $st=='All'?'active':'secondary' }}" style="{{ $st=='All' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">All</a>
+                                <a href="{{ route('divhr.employelist',['status'=>'Current','mode'=>$mode,'term'=>request('term'),'unit_id'=>request('unit_id')]) }}" class="btn btn-primary {{ $st=='Current'?'active':'secondary' }}" style="{{ $st=='Current' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Current</a>
+                                <a href="{{ route('divhr.employelist',['status'=>'Previous','mode'=>$mode,'term'=>request('term'),'unit_id'=>request('unit_id')]) }}" class="btn btn-success {{ $st=='Previous'?'active':'secondary' }}" style="{{ $st=='Previous' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">Previous</a>
+                                <a href="{{ route('divhr.employelist',['status'=>'All','mode'=>$mode,'term'=>request('term'),'unit_id'=>request('unit_id')]) }}" class="btn btn-warning {{ $st=='All'?'active':'secondary' }}" style="{{ $st=='All' ? '' : 'background: var(--rd-surface2); color: var(--rd-text2); border-color: var(--rd-border);' }}">All</a>
                             </div>
                         </form>
                     </div>
@@ -51,12 +52,27 @@
             <div class="card card-outline card-primary shadow-sm mb-2">
                 <div class="card-body py-2">
                     <form method="get" action="{{ route('divhr.employelist') }}">
+                        <input type="hidden" name="mode" value="{{ $mode }}">
+                        <input type="hidden" name="status" value="{{ request('status','Current') }}">
                         <div class="row align-items-end">
-                            <div class="col-md-4 mb-1">
-                                <label class="small text-muted mb-0">Search</label>
+                            <div class="{{ !empty($isGlobalHrViewer) ? 'col-md-4' : 'col-md-5' }} mb-1">
+                                <label class="small text-muted mb-0 font-weight-bold">Search Employees</label>
                                 <input type="text" name="term" value="{{ request('term') }}" class="form-control form-control-sm" placeholder="Name or ID..." onkeyup="applyEmpFilters()">
                             </div>
-                            <div class="col-md-8 mb-1 text-right">
+                            @if(!empty($isGlobalHrViewer) && !empty($divisions))
+                            <div class="col-md-4 mb-1">
+                                <label class="small text-muted mb-0 font-weight-bold"><i class="fas fa-sitemap mr-1 text-primary"></i> Filter Division / Unit</label>
+                                <select name="unit_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                                    <option value="all" {{ request('unit_id', 'all') == 'all' ? 'selected' : '' }}>— All Divisions & Units —</option>
+                                    @foreach($divisions as $div)
+                                        <option value="{{ $div->unt_id }}" {{ request('unit_id') == $div->unt_id ? 'selected' : '' }}>
+                                            {{ $div->unt_name }} @if(!empty($div->unt_namesh)) ({{ $div->unt_namesh }}) @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @endif
+                            <div class="{{ !empty($isGlobalHrViewer) ? 'col-md-4' : 'col-md-7' }} mb-1 text-right">
                                 <span class="text-muted" id="emp-count" style="font-size:.95rem"></span>
                             </div>
                         </div>
@@ -93,8 +109,20 @@
                                     $status = in_array($raw,['active','current']) ? 'Current' : 'Previous';
                                     $join = $emp->emp_joindt ? \Carbon\Carbon::parse($emp->emp_joindt) : null;
                                     $last = $emp->emp_lastdt ? \Carbon\Carbon::parse($emp->emp_lastdt) : null;
-                                    $headCode = $emp->hed_code ?? null;
+                                    $latestCtr = $latestContracts[$emp->emp_id] ?? null;
+                                    $headCode = $latestCtr?->hed_code ?: ($emp->hed_code ?? null);
                                     $headDisplay = $headCode ?: ($emp->emp_title ?: ($emp->emp_hed_id ? '#'.$emp->emp_hed_id : '—'));
+                                    $contractJob = $latestCtr?->ctr_jobtitle ?: ($emp->emp_desig ?: '');
+                                    $ctrEnd = $latestCtr?->ctr_enddt ? \Carbon\Carbon::parse($latestCtr->ctr_enddt) : null;
+                                    $isExpiringSoon = false;
+                                    $daysRemaining = null;
+                                    if ($status === 'Current' && $ctrEnd) {
+                                        $now = \Carbon\Carbon::today();
+                                        $daysRemaining = (int) $now->diffInDays($ctrEnd, false);
+                                        if ($daysRemaining <= 45) {
+                                            $isExpiringSoon = true;
+                                        }
+                                    }
                                 @endphp
                                 <tr class="employee-row"
                                     data-name="{{ strtolower($emp->emp_name) }}"
@@ -106,7 +134,42 @@
                                         </a>
                                     </td>
                                     <td class="align-middle p-2 text-truncate">
-                                        <span class="font-weight-bold" style="font-size: 1rem; color: var(--rd-text1);">{{ $emp->emp_name }}</span>
+                                        <div class="d-flex align-items-center">
+                                            <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="mr-2 flex-shrink-0">
+                                                <img src="{{ \App\Facades\FileStorage::url($emp->emp_photodest) ?: asset('dist/img/avatar.png') }}"
+                                                     onerror="this.onerror=null; this.src='{{ asset('dist/img/avatar.png') }}';"
+                                                     alt="{{ $emp->emp_name }}"
+                                                     class="rounded-circle border shadow-sm"
+                                                     style="width: 32px; height: 32px; object-fit: cover;">
+                                            </a>
+                                            <div>
+                                                <div class="d-flex align-items-center flex-wrap">
+                                                    <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="font-weight-bold text-decoration-none" style="font-size: 0.95rem; color: var(--rd-text1);">
+                                                        {{ $emp->emp_name }}
+                                                    </a>
+                                                    @if(!empty($isGlobalHrViewer) && (!empty($emp->unt_namesh) || !empty($emp->unt_name)))
+                                                        <span class="badge badge-light border text-secondary ml-1 font-weight-bold" style="font-size: 10px;">
+                                                            {{ $emp->unt_namesh ?: $emp->unt_name }}
+                                                        </span>
+                                                    @endif
+                                                    @if($isExpiringSoon)
+                                                        @if($daysRemaining < 0)
+                                                            <span class="badge badge-blinking-red ml-2" title="Contract expired on {{ $ctrEnd->format('d-M-Y') }}">
+                                                                <i class="fas fa-exclamation-triangle mr-1"></i> Contract Expired
+                                                            </span>
+                                                        @elseif($daysRemaining == 0)
+                                                            <span class="badge badge-blinking-red ml-2" title="Contract expires today!">
+                                                                <i class="fas fa-exclamation-triangle mr-1"></i> Expires Today
+                                                            </span>
+                                                        @else
+                                                            <span class="badge badge-blinking-red ml-2" title="Contract expires in {{ $daysRemaining }} days on {{ $ctrEnd->format('d-M-Y') }}">
+                                                                <i class="fas fa-exclamation-triangle mr-1"></i> Expiring ({{ $daysRemaining }}d)
+                                                            </span>
+                                                        @endif
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="align-middle p-2">
                                         <span class="font-weight-bold" style="color: var(--rd-text2);">{{ $emp->emp_id }}</span>
@@ -120,7 +183,10 @@
                                       </td>
                                     @endif
                                     <td class="align-middle p-2">
-                                        <div>{{ $headDisplay }}</div>
+                                        <div class="font-weight-bold" style="color: var(--rd-text1);">{{ $headDisplay }}</div>
+                                        @if(!empty($contractJob))
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">{{ $contractJob }}</small>
+                                        @endif
                                     </td>
                                     <td class="align-middle text-right p-2">
                                         @php $cls = $status==='Current' ? 'text-success font-weight-bold' : 'text-danger font-weight-bold'; @endphp

@@ -1,10 +1,10 @@
-﻿@php
+@php
     $u = Auth::user();
     $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
     if (in_array($userArea, ['proc', 'prc'], true)) $userArea = 'proc';
     $service = app(\App\Services\PurchaseApprovalService::class);
     $area = $area ?? $userArea;
-    $canApprove = $service->canApprove($area, $purchase->pcs_price);
+    $canApprove = $service->canApprove($area, (float)($purchase->pcs_price ?? 0), $purchase);
     $nextAuthName = $service->getNextAuthorityName($purchase, $area);
     $returnTargets = $service->getReturnTargets($purchase);
     
@@ -70,21 +70,18 @@
 
 @if($isCurrentStage)
 <div class="mb-4 pb-3 border-bottom" style="border-bottom: 1px dashed #cbd5e1 !important;">
-    <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="d-flex align-items-center justify-content-between mb-3">
         <div class="font-weight-bold rajdhani text-dark" style="font-size: 14px;">
             <i class="fas fa-user-circle text-primary mr-1"></i> {{ $u->acc_name }} 
             <span class="text-muted small ml-1" style="font-weight: 600;">({{ strtoupper($userArea) }})</span>
             <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 10px; color: var(--rd-accent); letter-spacing: 0.5px;">
-                <i class="fas fa-pen-nib mr-1"></i> WRITING REMARKS...
+                <i class="fas fa-pen-nib mr-1"></i> SCRUTINY & ACTION
             </span>
         </div>
         <div class="d-flex align-items-center gap-2">
             <span id="saveDraftStatus" class="small text-muted font-italic" style="font-size: 11px;">
-                @if($myDraftDecision) <span class="text-success"><i class="fas fa-check-circle mr-1"></i>Draft saved</span> @endif
+                @if($myDraftDecision) <span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks drafted</span> @endif
             </span>
-            <button type="button" id="btnSaveRemarks" onclick="saveRemarksDraft()" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold px-3 py-1" style="border-radius: 4px; font-size: 11px; letter-spacing: 0.5px; transition: all 0.3s ease;">
-                <i class="fas fa-save mr-1"></i> SAVE REMARKS
-            </button>
         </div>
     </div>
 
@@ -95,13 +92,18 @@
         <input type="hidden" name="remarks" id="remarksHiddenInput">
 
         <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="text-dark small rajdhani font-weight-bold"><i class="fas fa-pen-nib mr-1 text-primary"></i> Remarks Box <span class="text-muted font-italic font-weight-normal" style="font-size: 10px;">(Optional for Float/Release)</span></span>
+            <div class="d-flex justify-content-between align-items-center mb-1.5">
+                <span class="text-dark small rajdhani font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">
+                    <i class="fas fa-pen-nib mr-1 text-primary"></i> REMARKS & SCRUTINY NOTES
+                </span>
+                <span class="text-muted font-italic" style="font-size: 10.5px;">
+                    <i class="fas fa-arrows-alt-v mr-0.5"></i> Drag corner to resize
+                </span>
             </div>
-            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 85px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical;">{{ $existingDraftRaw }}</textarea>
+            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;">{{ $existingDraftRaw }}</textarea>
             
             {{-- Quick Comments --}}
-            <div class="mt-2 d-flex flex-wrap gap-2">
+            <div class="mt-2 d-flex flex-wrap" style="gap: 6px;">
                 <span class="badge badge-secondary p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600;">FNA, please.</span>
                 <span class="badge badge-secondary p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600;">Recommended and forwarded.</span>
                 <span class="badge badge-secondary p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600;">For approval please.</span>
@@ -114,9 +116,9 @@
 
         <div class="d-flex" style="gap: 10px; width: 100%;">
             @if($canApprove)
-                {{-- FINAL AUTHORITY (MD < 2L, DDG < 6L, DG) --}}
-                <button type="button" onclick="handleAction('approve')" class="dg-btn-action dg-btn-success flex-grow-1">
-                    <i class="fas fa-check-double mr-1"></i> APPROVE CASE
+                {{-- FINAL APPROVING AUTHORITY (MD <= 4L, DDG <= 10L, DG) --}}
+                <button type="button" onclick="handleAction('approve')" class="dg-btn-action dg-btn-success flex-grow-1" style="font-size: 14px; letter-spacing: 0.5px;">
+                    <i class="fas fa-check-double mr-1.5"></i> APPROVED / APPROVE CASE
                 </button>
                 <div class="btn-group flex-grow-1">
                     <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false">
@@ -135,37 +137,64 @@
             @else
                 {{-- INTERMEDIATE OR INITIATOR --}}
                 @if($isInitiator)
-                    @if($isDraft && !$hasFloated)
-                        {{-- State 1: Division Draft Initial State -> Float to Procurement --}}
-                        <button type="button" onclick="handleAction('float_to_proc')" class="dg-btn-action dg-btn-info w-100 font-weight-bold" style="font-size: 13px; letter-spacing: 0.5px;">
-                            <i class="fas fa-paper-plane mr-1"></i> FLOAT TO PROCUREMENT DEPT
-                        </button>
-                    @elseif($isDraft && $hasFloated && !$hasDProcSaved)
-                        {{-- State 2: Floated to Procurement, waiting for DProc response --}}
-                        <div class="p-3 rounded text-center w-100" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
-                            <div class="font-weight-bold text-primary rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
-                                <i class="fas fa-hourglass-half mr-1"></i> FLOATED TO PROCUREMENT DEPT
-                            </div>
-                            <div class="text-muted" style="font-size: 12px;">
-                                Case is currently with Director Procurement for quotation collection & scrutiny. Once saved by Procurement, the <strong>Release</strong> button will be enabled here.
-                            </div>
-                        </div>
-                    @else
-                        {{-- State 3: DProc has saved (or returned case) -> Division can now RELEASE or RESHARE FOR CORRECTION --}}
+                    @php
+                        $caseType = strtolower(trim((string) ($purchase->pcs_type ?? 'ps')));
+                        $isProcCase = in_array($caseType, ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                    @endphp
+
+                    @if(!$isProcCase)
+                        {{-- Non-PS Cases: Direct release to HQ without Procurement --}}
                         <div class="d-flex flex-column w-100" style="gap: 8px;">
                             <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success w-100 font-weight-bold" style="font-size: 13px; letter-spacing: 0.5px;">
                                 <i class="fas fa-paper-plane mr-1"></i> RELEASE CASE TO HQ
                             </button>
-                            @if($hasFloated && $hasDProcSaved)
-                            <button type="button" onclick="handleAction('reshare_to_proc')" class="btn btn-xs rajdhani font-weight-bold py-2 w-100" style="font-size: 12px; letter-spacing: 0.5px; border-radius: 6px; background: #fef3c7; border: 1.5px solid #f59e0b; color: #b45309;">
-                                <i class="fas fa-undo-alt mr-1"></i> RESHARE TO PROCUREMENT DEPT FOR CORRECTION
-                            </button>
-                            @endif
                         </div>
+                    @else
+                        @if($isDraft && !$hasFloated)
+                            {{-- State 1: Division Draft Initial State -> Float to Procurement --}}
+                            <button type="button" onclick="handleAction('float_to_proc')" class="dg-btn-action dg-btn-info w-100 font-weight-bold" style="font-size: 13px; letter-spacing: 0.5px;">
+                                <i class="fas fa-paper-plane mr-1"></i> FLOAT TO PROCUREMENT DEPT
+                            </button>
+                        @elseif($isDraft && $hasFloated && !$hasDProcSaved)
+                            {{-- State 2: Floated to Procurement, waiting for DProc response --}}
+                            <div class="p-3 rounded text-center w-100" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+                                <div class="font-weight-bold text-primary rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
+                                    <i class="fas fa-hourglass-half mr-1"></i> FLOATED TO PROCUREMENT DEPT
+                                </div>
+                                <div class="text-muted" style="font-size: 12px;">
+                                    Case is currently with Director Procurement for quotation collection & scrutiny. Once saved by Procurement, the <strong>Release</strong> button will be enabled here.
+                                </div>
+                            </div>
+                        @else
+                            {{-- State 3: DProc has saved (or returned case) -> Division can now RELEASE or RESHARE FOR CORRECTION --}}
+                            <div class="d-flex flex-column w-100" style="gap: 8px;">
+                                <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success w-100 font-weight-bold" style="font-size: 13px; letter-spacing: 0.5px;">
+                                    <i class="fas fa-paper-plane mr-1"></i> RELEASE CASE TO HQ
+                                </button>
+                                @if($hasFloated && $hasDProcSaved)
+                                <button type="button" onclick="handleAction('reshare_to_proc')" class="btn btn-xs rajdhani font-weight-bold py-2 w-100" style="font-size: 12px; letter-spacing: 0.5px; border-radius: 6px; background: #fef3c7; border: 1.5px solid #f59e0b; color: #b45309;">
+                                    <i class="fas fa-undo-alt mr-1"></i> RESHARE TO PROCUREMENT DEPT FOR CORRECTION
+                                </button>
+                                @endif
+                            </div>
+                        @endif
                     @endif
                 @else
                     @if($isDProcDraft)
-                        @if(!$hasFloated && $isDraft)
+                        @php
+                            $caseType = strtolower(trim((string) ($purchase->pcs_type ?? 'ps')));
+                            $isProcCase = in_array($caseType, ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                        @endphp
+                        @if(!$isProcCase)
+                            <div class="p-3 rounded text-center w-100" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+                                <div class="font-weight-bold text-muted rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
+                                    <i class="fas fa-info-circle mr-1"></i> NON-PROCUREMENT CASE
+                                </div>
+                                <div class="text-muted small" style="font-size: 12px;">
+                                    This is a non-procurement ({{ strtoupper($caseType) }}) case managed directly by Division and HQ Finance.
+                                </div>
+                            </div>
+                        @elseif(!$hasFloated && $isDraft)
                             <div class="p-3 rounded text-center w-100" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
                                 <div class="font-weight-bold text-warning rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
                                     <i class="fas fa-clock mr-1"></i> AWAITING DIVISION
@@ -177,22 +206,24 @@
                         @elseif($hasDProcSaved && $isDraft)
                             <div class="p-3 rounded text-center w-100" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
                                 <div class="font-weight-bold text-success rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
-                                    <i class="fas fa-check-circle mr-1"></i> QUOTES & REMARKS SAVED
+                                    <i class="fas fa-check-circle mr-1"></i> ACTION TAKEN & SAVED
                                 </div>
                                 <div class="text-muted small" style="font-size: 12px;">
-                                    You have already saved quotations and remarks. Case is awaiting release by Division (locked unless reshared).
+                                    You have finalized quotations and scrutiny remarks. Case is awaiting release by Division (locked unless reshared).
                                 </div>
                             </div>
                         @else
-                            <button type="button" class="btn btn-outline-warning btn-sm font-weight-bold px-3 mr-2" data-toggle="modal" data-target="#pcAddQuoteModal" style="border-radius: 6px;">
-                                <i class="fas fa-plus-circle mr-1"></i> MANAGE QUOTES
-                            </button>
-                            <button type="button" onclick="handleAction('dproc_save')" id="btnForward" class="dg-btn-action dg-btn-info flex-grow-1 font-weight-bold">
-                                <i class="fas fa-save mr-1"></i> SAVE QUOTES & REMARKS
-                            </button>
+                            <div class="d-flex w-100" style="gap: 8px;">
+                                <button type="button" class="btn btn-outline-warning btn-sm font-weight-bold px-3" data-toggle="modal" data-target="#pcAddQuoteModal" style="border-radius: 6px;">
+                                    <i class="fas fa-plus-circle mr-1"></i> MANAGE QUOTES
+                                </button>
+                                <button type="button" onclick="handleAction('dproc_save')" id="btnForward" class="dg-btn-action dg-btn-success flex-grow-1 font-weight-bold">
+                                    <i class="fas fa-check-circle mr-1"></i> FINALIZE & TAKE ACTION
+                                </button>
+                            </div>
                         @endif
                     @else
-                        <button type="button" onclick="handleAction('forward')" id="btnForward" class="dg-btn-action dg-btn-success flex-grow-1" disabled>
+                        <button type="button" onclick="handleAction('forward')" id="btnForward" class="dg-btn-action dg-btn-success flex-grow-1">
                             <div class="d-flex flex-column align-items-center">
                                 <span><i class="fas fa-thumbs-up mr-1"></i> RECOMMEND</span>
                                 @if($nextAuthName)<span style="font-size: 9px; opacity: 0.9; margin-top: 2px;">TO: {{ strtoupper($nextAuthName) }}</span>@endif
@@ -257,9 +288,10 @@
     const btnSaveRemarks = document.getElementById('btnSaveRemarks');
     const saveDraftStatus = document.getElementById('saveDraftStatus');
 
-    let lastSavedRemarks = inlineRemarks.value.trim();
+    let lastSavedRemarks = inlineRemarks ? inlineRemarks.value.trim() : '';
 
     function getNextLocalNumber() {
+        if (!inlineRemarks) return 2;
         const matches = inlineRemarks.value.match(/^\d+(?=\.)/gm);
         if (matches && matches.length > 0) {
             return Math.max(...matches.map(Number)) + 1;
@@ -268,68 +300,74 @@
     }
 
     // Auto-initialize with numbering 1. on first focus if empty
-    inlineRemarks.addEventListener('focus', function() {
-        if (this.value.trim() === '') {
-            this.value = "1. ";
-            updateGlowState();
-        }
-    });
-
-    inlineRemarks.addEventListener('keydown', function(e) {
-        const selectionStart = this.selectionStart;
-        const text = this.value;
-        const lastNewline = text.lastIndexOf('\n', selectionStart - 1);
-        const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
-        const currentLine = text.substring(lineStart, selectionStart);
-        const match = currentLine.match(/^\d+\. /);
-
-        if (match && selectionStart < lineStart + match[0].length) {
-            if (e.key === 'Backspace' || e.key === 'Delete' || (e.key.length === 1 && e.key !== 'Enter')) {
-                e.preventDefault();
-                return;
-            }
-        }
-        
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            if (currentLine.trim().length > (match ? match[0].trim().length : 0)) {
-                const nextNumLocal = getNextLocalNumber();
-                const newNumber = "\n" + nextNumLocal + ". ";
-                const before = text.substring(0, selectionStart);
-                const after = text.substring(selectionStart);
-                this.value = before + newNumber + after;
-                this.selectionStart = this.selectionEnd = before.length + newNumber.length;
+    if (inlineRemarks) {
+        inlineRemarks.addEventListener('focus', function() {
+            if (this.value.trim() === '') {
+                this.value = "1. ";
                 updateGlowState();
             }
-        }
-        
-        if (e.key === 'Backspace' && match && selectionStart === lineStart + match[0].length) {
-            e.preventDefault();
-        }
-    });
+        });
+
+        inlineRemarks.addEventListener('keydown', function(e) {
+            const selectionStart = this.selectionStart;
+            const text = this.value;
+            const lastNewline = text.lastIndexOf('\n', selectionStart - 1);
+            const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+            const currentLine = text.substring(lineStart, selectionStart);
+            const match = currentLine.match(/^\d+\. /);
+
+            if (match && selectionStart < lineStart + match[0].length) {
+                if (e.key === 'Backspace' || e.key === 'Delete' || (e.key.length === 1 && e.key !== 'Enter')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+            
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentLine.trim().length > (match ? match[0].trim().length : 0)) {
+                    const nextNumLocal = getNextLocalNumber();
+                    const newNumber = "\n" + nextNumLocal + ". ";
+                    const before = text.substring(0, selectionStart);
+                    const after = text.substring(selectionStart);
+                    this.value = before + newNumber + after;
+                    this.selectionStart = this.selectionEnd = before.length + newNumber.length;
+                    updateGlowState();
+                }
+            }
+            
+            if (e.key === 'Backspace' && match && selectionStart === lineStart + match[0].length) {
+                e.preventDefault();
+            }
+        });
+    }
 
     function updateGlowState() {
+        if (!inlineRemarks) return;
         const currentVal = inlineRemarks.value.trim();
         const prefix = "1. ";
         const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== "1.";
         const isModified = currentVal !== lastSavedRemarks;
 
-        if (hasContent && isModified) {
-            btnSaveRemarks.classList.add('btn-glow-pulse');
-            btnSaveRemarks.disabled = false;
-            saveDraftStatus.innerHTML = '<span class="text-warning"><i class="fas fa-circle fa-xs mr-1"></i>Unsaved remarks</span>';
-        } else {
-            btnSaveRemarks.classList.remove('btn-glow-pulse');
-            if (!hasContent) {
-                btnSaveRemarks.disabled = true;
-                saveDraftStatus.innerHTML = '';
-            } else if (!isModified && lastSavedRemarks.length > 0) {
-                saveDraftStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks saved</span>';
+        if (btnSaveRemarks) {
+            if (hasContent && isModified) {
+                btnSaveRemarks.classList.add('btn-glow-pulse');
+                btnSaveRemarks.disabled = false;
+                if (saveDraftStatus) saveDraftStatus.innerHTML = '<span class="text-warning"><i class="fas fa-circle fa-xs mr-1"></i>Unsaved remarks</span>';
+            } else {
+                btnSaveRemarks.classList.remove('btn-glow-pulse');
+                if (!hasContent) {
+                    btnSaveRemarks.disabled = true;
+                    if (saveDraftStatus) saveDraftStatus.innerHTML = '';
+                } else if (!isModified && lastSavedRemarks.length > 0) {
+                    if (saveDraftStatus) saveDraftStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks saved</span>';
+                }
             }
         }
 
         if (btnReturn) btnReturn.disabled = !hasContent;
-        if (btnForward) btnForward.disabled = !hasContent;
+        // btnForward is always enabled for one-click action
+        if (btnForward) btnForward.disabled = false;
     }
 
     inlineRemarks.addEventListener('input', function() {

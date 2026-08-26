@@ -788,82 +788,16 @@
 <!-- 7. Modal: Case Attachments -->
 <div class="modal fade" id="caseAttachmentModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-md">
-        <div class="modal-content" style="border-top: 5px solid #007bff;">
-            
-            <div class="modal-header bg-light py-2">
-                <h5 class="modal-title font-weight-bold">
-                    <i class="fas fa-paperclip mr-2 text-primary"></i> Documents
-                </h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-
+        <div class="modal-content" style="border-top: 5px solid #007bff; border-radius: 8px; overflow: hidden;">
             <div class="modal-body p-0">
-                
-                <!-- List of Existing Attachments -->
-                <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
-                    @forelse($purchase->attachments as $file)
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                                @php
-                                    $ext = strtolower(pathinfo($file->pat_path, PATHINFO_EXTENSION));
-                                    $icon = match($ext) {
-                                        'pdf' => 'fa-file-pdf text-danger',
-                                        'jpg', 'jpeg', 'png' => 'fa-file-image text-primary',
-                                        'doc', 'docx' => 'fa-file-word text-info',
-                                        'xls', 'xlsx' => 'fa-file-excel text-success',
-                                        default => 'fa-file text-secondary'
-                                    };
-                                @endphp
-                                <i class="fas {{ $icon }} fa-lg mr-3"></i>
-                                <div>
-                                    <h6 class="mb-0" style="font-size: 13px; font-weight: 600;">
-                                        <a href="{{ asset('storage/' . $file->pat_path) }}" target="_blank" class="text-dark">
-                                            {{ basename($file->pat_path) }}
-                                        </a>
-                                    </h6>
-                                    <small class="text-muted text-uppercase">{{ $file->pat_type }}</small>
-                                </div>
-                            </div>
-                            <a href="{{ asset('storage/' . $file->pat_path) }}" target="_blank" class="btn btn-sm btn-light border">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </div>
-                    @empty
-                        <div class="text-center py-4 text-muted">
-                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-gray-300"></i><br>
-                            No documents uploaded yet.
-                        </div>
-                    @endforelse
-                </div>
-
-                <!-- Upload New Section -->
-<div class="p-3 border-top bg-light">
-    <!-- FORM START -->
-    @if(trim($purchase->pcs_status) === 'Draft')
-        <form action="{{ route('purchase.upload') }}"    method="POST" enctype="multipart/form-data" id="uploadForm">
-            @csrf
-            <input type="hidden" name="pcs_id" value="{{ $purchase->pcs_id }}">
-
-            <div class="border-dashed p-4 text-center bg-white position-relative" 
-                 style="border: 2px dashed #007bff; border-radius: 6px; cursor: pointer; transition: 0.3s;"
-                 onmouseover="this.style.backgroundColor='#f0f8ff'" 
-                 onmouseout="this.style.backgroundColor='white'">
-                
-                <i class="fas fa-plus-circle fa-2x text-primary mb-2"></i>
-                <p class="mb-0 text-dark font-weight-bold small">Click to Upload File</p>
-                <span class="text-muted" style="font-size: 10px;">(PDF, JPG, PNG, DOCX)</span>
-
-                <!-- File Input (Invisible but covers the area) -->
-                <input type="file" name="file" required
-                       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;"
-                       onchange="document.getElementById('uploadForm').submit();">
-            </div>
-        </form>
-    @endif
-    <!-- FORM END -->
-</div>
-
-
+                @include('partials.attachments_widget', [
+                    'module' => 'pur',
+                    'objectId' => $purchase->pcs_id,
+                    'title' => 'Purchase Case Attachments',
+                    'defaultSlots' => ['Quotation Document', 'Market Research Report', 'Financial Status', 'Minute', 'Attachment'],
+                    'attachments' => $purchase->attachments,
+                    'canEdit' => in_array(trim($purchase->pcs_status), ['Draft', 'Returned']),
+                ])
             </div>
         </div>
     </div>

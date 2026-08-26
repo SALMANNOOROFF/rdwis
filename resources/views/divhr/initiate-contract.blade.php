@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 @section('content')
 <div class="content-wrapper">
 <div class="contract-wrapper">
@@ -183,7 +183,7 @@
       
       <!-- Fresh Hiring → BLUE -->
       <div class="col-md-6 mb-4">
-        <a href="#" class="glass-card accent-blue h-100">
+        <a href="{{ route('division.contract-cases.create', ['type' => 'Hg']) }}" class="glass-card accent-blue h-100">
           <div>
             <div class="card-icon-wrap icon-blue"><i class="fas fa-user-plus"></i></div>
             <div class="gc-title">Fresh Hiring</div>
@@ -192,14 +192,14 @@
             </div>
           </div>
           <span class="gc-chip">
-            <i class="fas fa-circle" style="font-size:.4rem;color: var(--rd-primary-600)"></i> Initiate Case &nbsp;•&nbsp; New Hiring
+            <i class="fas fa-circle" style="font-size:.4rem;color: var(--rd-primary-600)"></i> Initiate Case &nbsp;•&nbsp; New Hiring (Hg)
           </span>
         </a>
       </div>
 
       <!-- Contract Extension → AMBER -->
       <div class="col-md-6 mb-4">
-        <a href="#" class="glass-card accent-amber h-100">
+        <a href="{{ route('division.contract-cases.create', ['type' => 'Ce']) }}" class="glass-card accent-amber h-100">
           <div>
             <div class="card-icon-wrap icon-amber"><i class="fas fa-clock"></i></div>
             <div class="gc-title">Contract Extension</div>
@@ -208,7 +208,7 @@
             </div>
           </div>
           <span class="gc-chip">
-            <i class="fas fa-circle" style="font-size:.4rem;color:#f59e0b"></i> Extend &nbsp;•&nbsp; Same Salary & Desig
+            <i class="fas fa-circle" style="font-size:.4rem;color:#f59e0b"></i> Extend &nbsp;•&nbsp; Same Salary & Desig (Ce)
           </span>
         </a>
       </div>
@@ -219,7 +219,7 @@
 
       <!-- Contract Renewal → GREEN -->
       <div class="col-md-6 mb-4">
-        <a href="#" class="glass-card accent-green h-100">
+        <a href="{{ route('division.contract-cases.create', ['type' => 'Cr']) }}" class="glass-card accent-green h-100">
           <div>
             <div class="card-icon-wrap icon-green"><i class="fas fa-award"></i></div>
             <div class="gc-title">Contract Renewal</div>
@@ -228,14 +228,14 @@
             </div>
           </div>
           <span class="gc-chip">
-            <i class="fas fa-circle" style="font-size:.4rem;color:#10b981"></i> Renew &nbsp;•&nbsp; Appraisal / Promotion
+            <i class="fas fa-circle" style="font-size:.4rem;color:#10b981"></i> Renew &nbsp;•&nbsp; Appraisal / Promotion (Cr)
           </span>
         </a>
       </div>
 
       <!-- Rehiring → RED -->
       <div class="col-md-6 mb-4">
-        <a href="#" class="glass-card accent-red h-100">
+        <a href="{{ route('division.contract-cases.create', ['type' => 'Rh']) }}" class="glass-card accent-red h-100">
           <div>
             <div class="card-icon-wrap icon-red"><i class="fas fa-undo-alt"></i></div>
             <div class="gc-title">Rehiring</div>
@@ -244,7 +244,7 @@
             </div>
           </div>
           <span class="gc-chip">
-            <i class="fas fa-circle" style="font-size:.4rem;color:#ef4444"></i> Rehire &nbsp;•&nbsp; Former Employee
+            <i class="fas fa-circle" style="font-size:.4rem;color:#ef4444"></i> Rehire &nbsp;•&nbsp; Former Employee (Rh)
           </span>
         </a>
       </div>

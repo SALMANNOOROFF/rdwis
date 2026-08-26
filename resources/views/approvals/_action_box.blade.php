@@ -1,10 +1,10 @@
-﻿@php
+@php
     $u = Auth::user();
     $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
     if (in_array($userArea, ['proc', 'prc'], true)) $userArea = 'proc';
     $service = app(\App\Services\PurchaseApprovalService::class);
     $area = strtolower(trim($area ?? Auth::user()->acc_untarea));
-    $canApprove = $service->canApprove($area, $purchase->pcs_price);
+    $canApprove = $service->canApprove($area, (float)($purchase->pcs_price ?? 0), $purchase);
     $nextAuthName = $service->getNextAuthorityName($purchase, $area);
     $returnTargets = $service->getReturnTargets($purchase);
     
@@ -90,8 +90,8 @@
 
         <div class="d-flex" style="gap: 10px; width: 100%;">
             @if($canApprove)
-                <button type="button" onclick="handleAction('approve')" class="dg-btn-action dg-btn-success flex-grow-1" style="font-size: 13px; padding: 10px 14px;">
-                    <i class="fas fa-check-double mr-1"></i> APPROVE
+                <button type="button" onclick="handleAction('approve')" class="dg-btn-action dg-btn-success flex-grow-1" style="font-size: 14px; padding: 10px 14px;">
+                    <i class="fas fa-check-double mr-1.5"></i> APPROVED / APPROVE CASE
                 </button>
                 <div class="btn-group flex-grow-1">
                     <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false" style="font-size: 13px; padding: 10px 14px;">
@@ -236,22 +236,25 @@
     });
 
     function updateGlowState() {
+        if (!inlineRemarksOld) return;
         const currentVal = inlineRemarksOld.value.trim();
         const prefix = "1. ";
         const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== "1.";
         const isModified = currentVal !== lastSavedRemarks;
 
-        if (hasContent && isModified) {
-            btnSaveRemarks.classList.add('btn-glow-pulse');
-            btnSaveRemarks.disabled = false;
-            saveDraftStatus.innerHTML = '<span class="text-warning"><i class="fas fa-circle fa-xs mr-1"></i>Unsaved remarks</span>';
-        } else {
-            btnSaveRemarks.classList.remove('btn-glow-pulse');
-            if (!hasContent) {
-                btnSaveRemarks.disabled = true;
-                saveDraftStatus.innerHTML = '';
-            } else if (!isModified && lastSavedRemarks.length > 0) {
-                saveDraftStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks saved</span>';
+        if (btnSaveRemarks) {
+            if (hasContent && isModified) {
+                btnSaveRemarks.classList.add('btn-glow-pulse');
+                btnSaveRemarks.disabled = false;
+                if (saveDraftStatus) saveDraftStatus.innerHTML = '<span class="text-warning"><i class="fas fa-circle fa-xs mr-1"></i>Unsaved remarks</span>';
+            } else {
+                btnSaveRemarks.classList.remove('btn-glow-pulse');
+                if (!hasContent) {
+                    btnSaveRemarks.disabled = true;
+                    if (saveDraftStatus) saveDraftStatus.innerHTML = '';
+                } else if (!isModified && lastSavedRemarks.length > 0) {
+                    if (saveDraftStatus) saveDraftStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks saved</span>';
+                }
             }
         }
 

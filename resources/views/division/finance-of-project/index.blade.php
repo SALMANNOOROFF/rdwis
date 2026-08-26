@@ -253,22 +253,37 @@
                 <small class="text-muted">Division Project Head Status & Financial Intelligence</small>
             </div>
 
-            {{-- Top Right: Project Filter Dropdown --}}
-            <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
-                <label class="mb-0 text-muted font-weight-bold small"><i class="fas fa-filter text-primary mr-1"></i> Select Project:</label>
-                <select class="form-control project-select-box" onchange="window.location.href = this.value">
-                    <option value="{{ route('division.finance-of-project.index', ['tab' => 'overview']) }}" {{ $activeTab === 'overview' ? 'selected' : '' }}>
-                        📋 — All Projects (Overview Table) —
-                    </option>
-                    <optgroup label="Division Projects">
-                        @foreach($heads as $h)
-                            <option value="{{ route('division.finance-of-project.index', ['head_id' => $h->hed_id, 'tab' => ($activeTab === 'overview' ? 'status' : $activeTab)]) }}"
-                                    {{ $selectedHeadId == $h->hed_id && $activeTab !== 'overview' ? 'selected' : '' }}>
-                                {{ $h->hed_code }} — {{ \Illuminate\Support\Str::limit($h->prj_title, 35) }}
-                            </option>
+            {{-- Top Right: Division + Project Filter Dropdowns --}}
+            <div class="d-flex align-items-center flex-wrap" style="gap: 12px;">
+                @if(!empty($isGlobalViewer) && !empty($divisions) && $divisions->count() > 1)
+                <div class="d-flex align-items-center" style="gap: 6px;">
+                    <label class="mb-0 text-muted font-weight-bold small text-nowrap"><i class="fas fa-sitemap text-info mr-1"></i> Division:</label>
+                    <select class="form-control form-control-sm shadow-sm" id="divisionFilter" style="width: 170px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; height: 36px; border: 1.5px solid var(--rd-border); background-color: var(--rd-surface, #fff);">
+                        <option value="all">— All Divisions —</option>
+                        @foreach($divisions as $div)
+                            <option value="{{ $div->unt_id }}">{{ $div->unt_namesh ?: $div->unt_name }}</option>
                         @endforeach
-                    </optgroup>
-                </select>
+                    </select>
+                </div>
+                @endif
+
+                <div class="d-flex align-items-center" style="gap: 6px;">
+                    <label class="mb-0 text-muted font-weight-bold small text-nowrap"><i class="fas fa-filter text-primary mr-1"></i> Project:</label>
+                    <select class="form-control form-control-sm project-select-box shadow-sm" id="projectFilter" onchange="window.location.href = this.value" style="width: auto; min-width: 260px; max-width: 380px; height: 36px;">
+                        <option value="{{ route('division.finance-of-project.index', ['tab' => 'overview']) }}" {{ $activeTab === 'overview' ? 'selected' : '' }}>
+                            📋 — All Projects (Overview Table) —
+                        </option>
+                        <optgroup label="{{ !empty($isGlobalViewer) ? 'All NRDI Projects (Central Master)' : 'Division Projects' }}" id="projectOptgroup">
+                            @foreach($heads as $h)
+                                <option value="{{ route('division.finance-of-project.index', ['head_id' => $h->hed_id, 'tab' => ($activeTab === 'overview' ? 'status' : $activeTab)]) }}"
+                                        data-unt-id="{{ $h->hed_unt_id }}"
+                                        {{ $selectedHeadId == $h->hed_id && $activeTab !== 'overview' ? 'selected' : '' }}>
+                                    {{ $h->hed_code }} @if(!empty($isGlobalViewer) && !empty($h->unt_namesh)) [{{ $h->unt_namesh }}] @endif — {{ \Illuminate\Support\Str::limit($h->prj_title, 35) }}
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -818,7 +833,7 @@
                             <tbody>
                                 <tr>
                                     <td class="text-left font-weight-bold bg-light">Allocation</td>
-                                    <td class="bg-dark text-white font-weight-bold">{{ number_format($finStatus->allocation ?? 0) }}</td>
+                                    <td class="font-weight-bold" style="background: #f1f5f9; color: #0f172a;">{{ number_format($finStatus->allocation ?? 0) }}</td>
                                     <td class="text-danger">{{ number_format($finStatus->mtss_share ?? 0) }}</td>
                                     <td class="text-primary font-weight-bold">{{ number_format($finStatus->rdw_share ?? 0) }}</td>
                                     <td class="text-success">{{ number_format($finStatus->csrf_share ?? 0) }}</td>
@@ -966,6 +981,9 @@
                                            class="font-weight-bold text-primary text-decoration-none">
                                             {{ $prj['head_code'] }}
                                         </a>
+                                        @if(!empty($isGlobalViewer) && !empty($prj['division']))
+                                            <span class="badge badge-light border text-secondary ml-1 font-weight-bold" style="font-size: 10px;">{{ $prj['division'] }}</span>
+                                        @endif
                                         <br>
                                         <small class="text-muted" title="{{ $prj['title'] }}">{{ \Illuminate\Support\Str::limit($prj['title'], 30) }}</small>
                                     </div>
@@ -1185,3 +1203,41 @@ document.addEventListener("DOMContentLoaded", function() {
 @endif
 
 @endsection
+
+@push('scripts')
+<script>
+// Division Filter → Project Dropdown Cascading
+(function() {
+    var divFilter = document.getElementById('divisionFilter');
+    var projectFilter = document.getElementById('projectFilter');
+    if (!divFilter || !projectFilter) return;
+
+    // Store all original project options
+    var optgroup = document.getElementById('projectOptgroup');
+    if (!optgroup) return;
+    var allOptions = Array.from(optgroup.querySelectorAll('option')).map(function(o) {
+        return { el: o.cloneNode(true), untId: o.getAttribute('data-unt-id') };
+    });
+
+    divFilter.addEventListener('change', function() {
+        var selectedDiv = this.value;
+        // Clear optgroup
+        while (optgroup.firstChild) optgroup.removeChild(optgroup.firstChild);
+
+        allOptions.forEach(function(item) {
+            if (selectedDiv === 'all' || item.untId === selectedDiv) {
+                optgroup.appendChild(item.el.cloneNode(true));
+            }
+        });
+
+        // Update optgroup label
+        if (selectedDiv === 'all') {
+            optgroup.label = 'All NRDI Projects (Central Master)';
+        } else {
+            var divText = divFilter.options[divFilter.selectedIndex].text;
+            optgroup.label = 'Projects — ' + divText.trim();
+        }
+    });
+})();
+</script>
+@endpush

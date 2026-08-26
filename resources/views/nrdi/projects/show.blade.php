@@ -1,6 +1,8 @@
 @extends('welcome')
 
 @section('content')
+
+
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid d-flex flex-wrap justify-content-between align-items-center" style="gap:10px;">
@@ -10,7 +12,7 @@
             </a>
         </div>
     </div>
-
+<h1>salman noor</h1>
     <section class="content">
         <div class="container-fluid">
             <div class="card">
@@ -83,7 +85,13 @@
                         <ul class="mb-0">
                             @foreach($project->attachments as $a)
                                 <li style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{{ $a->jat_path }}">
-                                    {{ $a->jat_type }} — {{ $a->jat_path }}
+                                    @if($a->jat_path)
+                                        <a href="{{ \App\Facades\FileStorage::url($a->jat_path) }}" target="_blank" class="text-primary">
+                                            {{ $a->jat_type }} — {{ basename(str_replace('\\', '/', $a->jat_path)) }}
+                                        </a>
+                                    @else
+                                        {{ $a->jat_type }} — <span class="text-muted">No file</span>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>

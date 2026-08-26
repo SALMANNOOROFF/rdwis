@@ -36,8 +36,8 @@
                         <div class="col-md-5 col-12 mb-2">
                              <label class="small text-muted mb-0">Status Filter</label>
                              <div class="btn-group btn-block shadow-sm">
-                                <button class="btn btn-sm btn-outline-primary active filter-btn-main" onclick="setMainFilter('all', this)">All</button>
-                                <button class="btn btn-sm btn-outline-primary filter-btn-main" onclick="setMainFilter('open', this)">Open</button>
+                                <button class="btn btn-sm btn-outline-primary filter-btn-main" onclick="setMainFilter('all', this)">All</button>
+                                <button class="btn btn-sm btn-outline-primary active filter-btn-main" onclick="setMainFilter('open', this)">Open</button>
                                 <button class="btn btn-sm btn-outline-success filter-btn-main" onclick="setMainFilter('closed', this)">Closed</button>
                             </div>
                         </div>
@@ -66,7 +66,9 @@
                             <tbody>
                                 @forelse($projects as $project)
                                 @php
-                                    $status = Str::lower($project->prj_status);
+                                    $rawPrjStatus = strtolower(trim($project->prj_status ?? ''));
+                                    $isClosed = in_array($rawPrjStatus, ['closed', 'completed', 'cancelled']);
+                                    $categoryStatus = $isClosed ? 'closed' : 'open';
                                     
                                     // --- DOCUMENT STATUS CHECK ---
                                     try {
@@ -86,18 +88,20 @@
 
                                     // --- Calculation Logic ---
                                     $today = \Carbon\Carbon::now();
-                                    $startDate = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : null;
-                                    $endDate = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : null;
+                                    $rawStart = $project->prj_startdt ?: ($project->prj_aprvdt ?: ($project->prj_assigndt ?: ($project->prj_propdt ?: $project->prj_rcptdt)));
+                                    $startDate = $rawStart ? \Carbon\Carbon::parse($rawStart) : null;
+                                    $rawEnd = $project->prj_estenddt ?: ($project->prj_enddt ?: null);
+                                    $endDate = $rawEnd ? \Carbon\Carbon::parse($rawEnd) : null;
                                     
                                     $timePercentage = 0;
-                                    if ($startDate && $endDate && $status != 'closed') {
+                                    if ($startDate && $endDate && !$isClosed) {
                                         $totalDays = $startDate->diffInDays($endDate);
                                         $daysPassed = $startDate->diffInDays($today, false);
                                         if ($totalDays > 0 && $today->greaterThan($startDate)) {
-                                            $timePercentage = ($daysPassed / $totalDays) * 100;
+                                             $timePercentage = ($daysPassed / $totalDays) * 100;
                                         }
                                         $timePercentage = min(100, max(0, $timePercentage));
-                                    } elseif ($status == 'closed') {
+                                    } elseif ($isClosed) {
                                         $timePercentage = 100;
                                     }
                                     
@@ -121,7 +125,7 @@
                                 <tr class="project-row" 
                                     data-code="{{ strtolower($project->prj_code) }}"
                                     data-title="{{ strtolower($project->prj_title) }}"
-                                    data-status="{{ $status }}"
+                                    data-status="{{ $categoryStatus }}"
                                     data-docstatus="{{ $docStatus }}" 
                                     data-date="{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') : '' }}">
                                     
@@ -135,28 +139,24 @@
                                     {{-- 2. PROJECT DETAILS (Code + Status on one line, Title below) --}}
                                     <td class="align-middle p-2">
                                         <div class="d-flex align-items-center mb-1">
-                                            <span class="font-weight-bold text-primary mr-2" style="font-size: 1rem;">{{ $project->prj_code }}</span>
-                                            @if($status == 'open')
-                                                <span class="badge badge-success px-2 py-0"><i class="fas fa-circle text-xs mr-1"></i> Open</span>
-                                            @elseif($status == 'closed')
-                                                <span class="badge badge-secondary px-2 py-0"><i class="fas fa-check-circle text-xs mr-1"></i> Closed</span>
-                                            @else
-                                                <span class="badge badge-info px-2 py-0 text-capitalize">{{ $project->prj_status }}</span>
-                                            @endif
+                                            <span class="badge mr-2" style="font-size: 0.8rem; background-color: var(--rd-primary-600) !important; border: 1px solid var(--rd-primary-700) !important; color: #ffffff !important; font-weight: 700; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px;">{{ $project->prj_code }}</span>
+                                            <span class="badge {{ $isClosed ? 'badge-secondary' : 'badge-success' }} text-uppercase" style="font-size: 0.65rem;">
+                                                {{ $project->prj_status }}
+                                            </span>
                                         </div>
-                                        <div class="text-dark small text-truncate" style="max-width: 350px;" title="{{ $project->prj_title }}">
+                                        <div class="font-weight-bold text-dark text-truncate" style="max-width: 300px; font-size: 0.9rem;" title="{{ $project->prj_title }}">
                                             {{ $project->prj_title }}
                                         </div>
                                     </td>
 
-                                    {{-- 3. TIMELINE --}}
+                                    {{-- 3. TIMELINE & MILESTONES --}}
                                     <td class="align-middle p-2">
                                         <div class="d-flex justify-content-between text-muted text-xs mb-1">
-                                            <span>S: <b>{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d M Y') : 'N/A' }}</b></span>
-                                            <span>E: <b>{{ $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt)->format('d M Y') : 'N/A' }}</b></span>
+                                            <span>Start: <b>{{ $startDate ? $startDate->format('d-M-y') : 'N/A' }}</b></span>
+                                            <span>End: <b>{{ $endDate ? $endDate->format('d-M-y') : 'N/A' }}</b></span>
                                         </div>
-                                        <div class="progress progress-xs rounded-pill mb-1" style="height: 4px;" title="Milestone Progress">
-                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $msPercentage }}%"></div>
+                                        <div class="progress progress-xs rounded-pill mb-1" style="height: 4px;">
+                                            <div class="progress-bar {{ $timePercentage > 90 ? 'bg-danger' : 'bg-primary' }}" role="progressbar" style="width: {{ $timePercentage }}%"></div>
                                         </div>
                                         <div class="d-flex justify-content-between text-xs">
                                             <span>Milestones ({{ $completedMs }}/{{ $totalMs }}):</span>
@@ -213,7 +213,7 @@
 </div>
 
 <script>
-    let currentMainStatus = 'all';
+    let currentMainStatus = 'open';
 
     function setMainFilter(status, btn) {
         currentMainStatus = status;
@@ -240,7 +240,7 @@
 
             // Main Status Filter
             if (currentMainStatus !== 'all') {
-                if (currentMainStatus === 'open' && (status === 'closed' || status === 'draft')) show = false;
+                if (currentMainStatus === 'open' && status !== 'open') show = false;
                 else if (currentMainStatus === 'closed' && status !== 'closed') show = false;
             }
 
@@ -255,8 +255,13 @@
             if(show) visibleCount++;
         });
 
-        document.getElementById('page-heading').innerHTML = `<i class="fas fa-folder-open mr-1"></i> All Projects (${visibleCount})`;
+        const label = currentMainStatus === 'open' ? 'Open Projects' : (currentMainStatus === 'closed' ? 'Closed Projects' : 'All Projects');
+        document.getElementById('page-heading').innerHTML = `<i class="fas fa-folder-open mr-1"></i> ${label} (${visibleCount})`;
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        applyFilters();
+    });
 </script>
 
 <style>

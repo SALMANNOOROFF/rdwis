@@ -69,12 +69,25 @@
 
     .contracts-scroll {
       overflow-y: auto;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
     }
 
     .contracts-scroll::-webkit-scrollbar {
-      display: none;
+      width: 6px;
+    }
+
+    .contracts-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .contracts-scroll::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .contracts-scroll::-webkit-scrollbar-thumb:hover {
+      background-color: #94a3b8;
     }
 
     /* leave utilization donut chart */
@@ -115,10 +128,29 @@
         <div
           class="bg-surface border border-border1 rounded-xl p-6 overflow-hidden relative text-center">
           <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
-          <div class="relative mb-4 inline-block">
-            <img alt="{{ $emp->emp_name ?? 'Employee' }}"
-              class="w-20 h-20 rounded-full border-4 border-surface2 shadow-md object-cover"
-              src="{{ $emp->emp_photodest ? asset($emp->emp_photodest) : asset('dist/img/avatar.png') }}" />
+          <div class="relative mb-4 inline-block group">
+            <div class="relative w-36 h-36 mx-auto rounded-2xl overflow-hidden border-4 border-surface2 shadow-lg" style="background: #e2e8f0;">
+              <img alt="{{ $emp->emp_name ?? 'Employee' }}"
+                class="w-full h-full object-cover"
+                src="{{ \App\Facades\FileStorage::url($emp->emp_photodest) ?: asset('dist/img/avatar.png') }}"
+                onerror="this.onerror=null; this.src='{{ asset('dist/img/avatar.png') }}';" />
+              
+              {{-- Hover Overlay to Upload / Change Photo --}}
+              <label for="emp_photo_input" class="absolute inset-0 bg-black bg-opacity-40 text-white flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition duration-200" title="Click to Upload / Change Photo">
+                <i class="fas fa-camera text-xl mb-1"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Upload</span>
+              </label>
+            </div>
+
+            {{-- Small Camera Badge for Immediate Visual Cue --}}
+            <label for="emp_photo_input" class="absolute bottom-[-4px] right-[-4px] bg-primary text-white rounded-full cursor-pointer shadow-md hover:bg-primary-600 transition flex items-center justify-center" title="Click to Upload Photo" style="width: 32px; height: 32px; font-size: 13px; border: 2px solid #ffffff;">
+              <i class="fas fa-camera"></i>
+            </label>
+
+            <form action="{{ route('divhr.employee.upload_photo', $emp->emp_id ?? $id) }}" method="POST" enctype="multipart/form-data" class="hidden" id="emp_photo_form">
+              @csrf
+              <input type="file" id="emp_photo_input" name="photo" accept="image/jpeg,image/png,image/jpg,image/webp" onchange="document.getElementById('emp_photo_form').submit()">
+            </form>
           </div>
           <h2 class="text-lg font-bold text-text1 leading-tight">{{ $emp->emp_name ?? $id }}</h2>
           <p class="text-sm text-text2 mt-1">{{ $emp->emp_title ?? ($emp->emp_rank ?? '') }}</p>
@@ -227,12 +259,22 @@
             </div>
           </div>
         </div>
+
+        {{-- Employee Attachments Widget --}}
+        @include('partials.attachments_widget', [
+            'module' => 'emp',
+            'objectId' => $emp->emp_id ?? $id,
+            'title' => 'Employee Documents',
+            'defaultSlots' => ['Appointment Letter', 'Form', 'CV', 'Minute'],
+            'attachments' => $attachments ?? [],
+            'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
+        ])
       </div>
       <div class="col-span-12 lg:col-span-9 space-y-6">
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
 
           <div 
-            class="xl:col-span-8 bg-surface border border-border1 rounded-xl p-4 h-[385px] flex flex-col overflow-hidden">
+            class="xl:col-span-8 bg-surface border border-border1 rounded-xl p-4 min-h-[385px] flex flex-col">
             <div class="flex items-center gap-2 mb-4">
               <i class="fas fa-file-contract text-primary text-lg mr-1.5"></i>
               <h3 class="font-bold text-text1">Contract Details</h3>
@@ -294,7 +336,7 @@
               <h4 class="text-[10px] text-text3 uppercase tracking-widest mb-3 font-bold">Previous Contracts History
               </h4>
               <div id="contractsWrapper"
-                class="border border-border1 rounded-xl relative contracts-scroll" style="height: 140px;">
+                class="border border-border1 rounded-xl relative contracts-scroll" style="height: 155px; max-height: 155px;">
                 <table class="w-full text-left text-[11px]">
                   <thead
                     class="sticky top-0 z-10 bg-surface2 border-b border-border1">
@@ -343,7 +385,7 @@
               </div>
             </div>
           </div>
-          <div class="xl:col-span-4 h-[385px] flex flex-col overflow-hidden space-y-3">
+          <div class="xl:col-span-4 min-h-[385px] flex flex-col space-y-3">
             <div style="height:240px;"
               class="bg-surface border border-border1 rounded-xl p-3 flex flex-col">
               <div class="flex items-center justify-between mb-3">
@@ -596,45 +638,35 @@
       var wrapper = document.getElementById('contractsWrapper');
       if (!wrapper) return;
       var tbody = wrapper.querySelector('tbody');
-      var thead = wrapper.querySelector('thead');
       var firstRow = tbody ? tbody.querySelector('tr') : null;
-      var rowHeight = firstRow ? firstRow.offsetHeight : 40;
-      var headerHeight = thead ? thead.offsetHeight : 24;
+      var rowHeight = firstRow ? firstRow.offsetHeight : 36;
       var up = document.getElementById('contractScrollUp');
       var down = document.getElementById('contractScrollDown');
       var rowsCount = tbody ? tbody.querySelectorAll('tr').length : 0;
-      if (rowsCount <= 2) {
-        wrapper.style.height = (headerHeight + rowHeight * rowsCount) + 'px';
-        wrapper.style.overflowY = 'hidden';
+      
+      wrapper.style.height = '155px';
+      wrapper.style.maxHeight = '155px';
+      wrapper.style.overflowY = 'auto';
+
+      if (rowsCount <= 3) {
         if (up) up.style.display = 'none';
         if (down) down.style.display = 'none';
       } else {
-        wrapper.style.height = (headerHeight + rowHeight * 2.5) + 'px';
-        wrapper.style.overflowY = 'auto';
-        if (up) up.style.display = '';
-        if (down) down.style.display = '';
-        if (up) up.addEventListener('click', function () { wrapper.scrollBy({ top: -rowHeight, behavior: 'smooth' }); });
-        if (down) down.addEventListener('click', function () { wrapper.scrollBy({ top: rowHeight, behavior: 'smooth' }); });
-      }
-      window.addEventListener('resize', function () {
-        var fr = tbody ? tbody.querySelector('tr') : null;
-        var rh = fr ? fr.offsetHeight : rowHeight;
-        var hh = thead ? thead.offsetHeight : headerHeight;
-        var rCount = tbody ? tbody.querySelectorAll('tr').length : rowsCount;
-        if (rCount <= 2) {
-          wrapper.style.height = (hh + rh * rCount) + 'px';
-          wrapper.style.overflowY = 'hidden';
-          if (up) up.style.display = 'none';
-          if (down) down.style.display = 'none';
-        } else {
-          wrapper.style.height = (hh + rh * 2.5) + 'px';
-          wrapper.style.overflowY = 'auto';
-          if (up) up.style.display = '';
-          if (down) down.style.display = '';
+        if (up) {
+          up.style.display = '';
+          up.onclick = function (e) {
+            e.preventDefault();
+            wrapper.scrollBy({ top: -rowHeight * 2, behavior: 'smooth' });
+          };
         }
-        rowHeight = rh;
-        headerHeight = hh;
-      });
+        if (down) {
+          down.style.display = '';
+          down.onclick = function (e) {
+            e.preventDefault();
+            wrapper.scrollBy({ top: rowHeight * 2, behavior: 'smooth' });
+          };
+        }
+      }
     });
     document.addEventListener('DOMContentLoaded', function () {
       var pWrapper = document.getElementById('projectsWrapper');

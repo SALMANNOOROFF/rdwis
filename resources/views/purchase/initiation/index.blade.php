@@ -158,7 +158,7 @@
                                                         </div>
                                                         <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'General Ops' }}</div>
                                                     </td>
-                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
+                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) $p->display_price) }}</span></td>
                                                     <td class="text-center">
                                                         <span class="badge status-badge bg-warning-soft text-warning" style="background: rgba(243,156,18,0.1); border: 1px solid rgba(243,156,18,0.2);">
                                                             <i class="fas fa-pen-nib mr-1"></i> {{ $p->pcs_status }}
@@ -212,7 +212,7 @@
                                                         <div class="case-title">{{ Str::limit($p->pcs_title, 50) }}</div>
                                                         <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'HQ Procurement' }}</div>
                                                     </td>
-                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
+                                                    <td class="text-right"><span class="case-value">PKR {{ number_format((float) $p->display_price) }}</span></td>
                                                     <td class="text-center">
                                                         <span class="badge status-badge mb-1" style="background: rgba(var(--rd-{{$b}}-rgb), 0.1); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.2);">
                                                             <i class="fas fa-{{$i}} mr-1"></i> {{ $p->current_stage_display ?? $s }}
@@ -268,7 +268,7 @@
                                                     <td>
                                                         <div class="case-title text-muted">{{ Str::limit($p->pcs_title, 50) }}</div>
                                                     </td>
-                                                    <td class="text-right"><span class="case-value text-muted">PKR {{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
+                                                    <td class="text-right"><span class="case-value text-muted">PKR {{ number_format((float) $p->display_price) }}</span></td>
                                                     <td class="text-center">
                                                         <span class="badge status-badge" style="background: rgba(var(--rd-{{$b}}-rgb), 0.1); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.2);">
                                                             <i class="fas fa-{{$i}} mr-1"></i> {{ strtoupper($s) }}

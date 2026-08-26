@@ -23,89 +23,73 @@ class PurchaseProcurementController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $lower = $user->acc_lowerm;
-        $upper = $user->acc_upperm;
+        if (!$user) return redirect()->route('login');
 
-        
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHqOrProc = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin', 'proc', 'prc'], true);
+
+        if ($isHqOrProc) {
+            $lower = 0;
+            $upper = 99999999;
+        } else {
+            [$lower, $upper] = $user->acc_lowers == 0
+                ? [$user->acc_lowerm, $user->acc_upperm]
+                : [$user->acc_lowers, $user->acc_uppers];
+        }
+
         $pageTitle = 'Director Procurement | Collaboration Hub';
-        
-        $procTypes = [
-            'ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'
-        ];
-        $excludedTypes = [
-            'tada', 't.a/d.a', 'ta/da', 'civ', 'civil', 'book', 'books', 
-            'stat', 'stationery', 'lic', 'license', 'licen', 'net', 'internet', 
-            'pub', 'publishing', 'tran', 'transport', 'trn', 'training', 'pt'
-        ];
+        $psTypes = app(\App\Services\PurchaseApprovalService::class)->getAssignedCaseTypes('PS');
 
-        // 1. Pending: Cases floated by divisions to Procurement that DProc has not saved quotes/remarks to yet
+        // 1. Pending: ONLY PS cases floated/reshared by divisions to Procurement that DProc has not finalized yet
         $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
             ->whereBetween('pcs_unt_id', [$lower, $upper])
-            ->where(function($q) use ($procTypes, $excludedTypes) {
-                $q->whereIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
-                  ->whereNotIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
-            })
+            ->whereIn(\Illuminate\Support\Facades\DB::raw("LOWER(TRIM(COALESCE(pcs_type, 'ps')))"), $psTypes)
             ->where(function($q) {
                 $q->where(function($sub) {
-                    $sub->whereIn('pcs_status', ['Draft', 'Returned'])
-                        ->whereHas('decisions', function($d) {
-                            $d->where('pdec_action', 'float_to_proc');
-                        })
-                        ->whereDoesntHave('decisions', function($d) {
-                            $d->where('pdec_action', 'dproc_save');
-                        });
-                })->orWhere('pcs_status', 'Under Scrutiny');
-            })
-            ->orderBy('pcs_id', 'desc')
-            ->get();
-
-        // 2. Open: Cases where DProc HAS collaborated, or cases currently under HQ approval
-        $open = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
-            ->whereBetween('pcs_unt_id', [$lower, $upper])
-            ->where(function($q) use ($procTypes, $excludedTypes) {
-                $q->whereIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
-                  ->whereNotIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
-            })
-            ->whereNotIn('pcs_status', ['Approved', 'Rejected', 'Cancelled'])
-            ->where(function($q) {
-                $q->whereHas('decisions', function($d) {
-                    $d->where('pdec_action', 'dproc_save');
-                })->orWhereNotIn('pcs_status', ['Draft', 'Returned']);
-            })
-            ->orderBy('pcs_id', 'desc')
-            ->get();
-
-        // 3. Closed: Finalized cases processed by this user
-        $closed = Purchase::with(['unit', 'project', 'latestDecision.account'])
-            ->whereBetween('pcs_unt_id', [$lower, $upper])
-            ->where(function($q) use ($procTypes, $excludedTypes) {
-                $q->whereIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
-                  ->whereNotIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
-            })
-            ->whereHas('decisions', function($q) use ($user) {
-                $q->where('pdec_acc_id', $user->acc_id);
-            })
-            ->whereIn('pcs_status', ['Approved', 'Rejected'])
-            ->orderBy('pcs_id', 'desc')
-            ->limit(20)
-            ->get();
-
-        // 4. Action Taken
-        $actionTaken = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
-            ->whereBetween('pcs_unt_id', [$lower, $upper])
-            ->where(function($q) use ($procTypes, $excludedTypes) {
-                $q->whereIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'ps\')))'), $procTypes)
-                  ->whereNotIn(\DB::raw('LOWER(TRIM(COALESCE(pcs_type, \'\')))'), $excludedTypes);
-            })
-            ->where(function($q) use ($user) {
-                $q->whereHas('decisions', function($d) use ($user) {
-                    $d->where('pdec_acc_id', $user->acc_id);
-                })->orWhereHas('decisions', function($d) {
-                    $d->where('pdec_action', 'dproc_save');
+                    $sub->whereHas('decisions', function($d) {
+                        $d->whereIn('pdec_action', ['float_to_proc', 'reshare_to_proc']);
+                    })->whereDoesntHave('decisions', function($d) {
+                        $d->where('pdec_action', 'dproc_save');
+                    });
+                })
+                ->orWhere('pcs_status', 'Under Scrutiny')
+                ->orWhereHas('currentSubstatus', function($s) {
+                    $s->where('pss_stage', 'DProc');
                 });
             })
+            ->whereNotIn('pcs_status', ['Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->orderBy('pcs_id', 'desc')
+            ->get();
+
+        // 2. Action Taken: PS cases finalized by DProc (dproc_save) that are back with Division in Draft awaiting release
+        $actionTaken = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+            ->whereBetween('pcs_unt_id', [$lower, $upper])
+            ->whereIn(\Illuminate\Support\Facades\DB::raw("LOWER(TRIM(COALESCE(pcs_type, 'ps')))"), $psTypes)
+            ->whereHas('decisions', function($d) {
+                $d->where('pdec_action', 'dproc_save');
+            })
+            ->whereIn('pcs_status', ['Draft', 'Returned'])
             ->whereNotIn('pcs_id', $pending->pluck('pcs_id')->toArray())
             ->orderBy('pcs_id', 'desc')
+            ->get();
+
+        // 3. Open: PS cases released to HQ pipeline (Finance, MD, DDG, DG, Approved, Partially Fulfilled)
+        $open = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
+            ->whereBetween('pcs_unt_id', [$lower, $upper])
+            ->whereIn(\Illuminate\Support\Facades\DB::raw("LOWER(TRIM(COALESCE(pcs_type, 'ps')))"), $psTypes)
+            ->whereNotIn('pcs_status', ['Draft', 'Returned', 'Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->whereNotIn('pcs_id', $pending->pluck('pcs_id')->toArray())
+            ->whereNotIn('pcs_id', $actionTaken->pluck('pcs_id')->toArray())
+            ->orderBy('pcs_id', 'desc')
+            ->get();
+
+        // 4. Closed: Truly finalized PS cases (Fulfilled / Completed / Cancelled / Rejected)
+        $closed = Purchase::with(['unit', 'project', 'latestDecision.account'])
+            ->whereBetween('pcs_unt_id', [$lower, $upper])
+            ->whereIn(\Illuminate\Support\Facades\DB::raw("LOWER(TRIM(COALESCE(pcs_type, 'ps')))"), $psTypes)
+            ->whereIn('pcs_status', ['Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->orderBy('pcs_id', 'desc')
+            ->limit(50)
             ->get();
 
         // Metrics
@@ -132,11 +116,21 @@ class PurchaseProcurementController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $lower = $user->acc_lowerm;
-        $upper = $user->acc_upperm;
+        if (!$user) return redirect()->route('login');
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHqOrProc = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin', 'proc', 'prc'], true);
+
+        if ($isHqOrProc) {
+            $lower = 0;
+            $upper = 99999999;
+        } else {
+            [$lower, $upper] = $user->acc_lowers == 0
+                ? [$user->acc_lowerm, $user->acc_upperm]
+                : [$user->acc_lowers, $user->acc_uppers];
+        }
         
         $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account'])
-
             ->whereBetween('pcs_unt_id', [$lower, $upper])
             ->findOrFail($id);
 
@@ -147,7 +141,7 @@ class PurchaseProcurementController extends Controller
         $head = $fin;
         
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
-        $canApprove = $this->approvalService->canApprove('proc', $purchase->pcs_price);
+        $canApprove = $this->approvalService->canApprove('proc', (float)($purchase->pcs_price ?? 0), $purchase);
         $firms = \App\Models\Firm::orderBy('frm_name')->get();
 
         $pageTitle = 'DProc Scrutiny: ' . $purchase->pcs_title;

@@ -353,13 +353,7 @@ class PurchaseController extends Controller
                     if ($request->hasFile("quote_files.{$firmId}")) {
                         $qFile = $request->file("quote_files.{$firmId}");
                         if ($qFile && $qFile->isValid()) {
-                            $unitName = DB::table('cen.units')->where('unt_id', $pcs->pcs_unt_id)->value('unt_namesh') 
-                                ?: (DB::table('cen.units')->where('unt_id', $pcs->pcs_unt_id)->value('unt_name') ?: ('div-' . $pcs->pcs_unt_id));
-                            $divSlug = \Illuminate\Support\Str::slug($unitName) ?: ('div-' . $pcs->pcs_unt_id);
-                            $ext = strtolower($qFile->getClientOriginalExtension() ?: 'pdf');
-                            $base = \Illuminate\Support\Str::slug($firmName) ?: ('qte-' . $qte_id);
-                            $filename = 'quote-' . $pcs->pcs_id . '-' . $qte_id . '-' . $base . '-' . now()->format('YmdHis') . '.' . $ext;
-                            $stored = $qFile->storeAs("purchase/quotes/{$divSlug}/{$pcs->pcs_id}", $filename, 'public');
+                            $stored = app(\App\Services\FileStorageService::class)->store($qFile, 'pur', 'pcs-', (string) $pcs->pcs_id);
 
                             DB::table('pur.purattachments')->insert([
                                 'pat_objtype' => 'qte',
@@ -535,11 +529,17 @@ class PurchaseController extends Controller
             ];
         })->values();
 
-        $savedLetter = $purchase->itLetter;
+        $savedLetter = $purchase->itLetter ?? \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->first();
+
+        $user = Auth::user();
+        $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
+        $isDProc = in_array($userArea, ['proc', 'prc'], true);
+
+        $canEditIt = $isDProc;
 
         // Default letter parameters
         $refNo = $savedLetter?->pit_refno ?: ('R&D/Projects/Proc/' . $purchase->pcs_id);
-        $letterDate = $savedLetter?->pit_date ?: date('d F Y', strtotime($purchase->pcs_date ?: 'now'));
+        $letterDate = $savedLetter?->pit_date ?: date('d F Y');
         $deadlineDate = date('d F Y', strtotime(($purchase->pcs_date ?: 'now') . ' + 14 days'));
         $subject = $savedLetter?->pit_subject ?: 'REQUEST FOR QUOTATION';
 
@@ -647,6 +647,7 @@ class PurchaseController extends Controller
             'purchase',
             'firmsDirectory',
             'savedLetter',
+            'canEditIt',
             'refNo',
             'refSuffix',
             'letterDate',
@@ -662,8 +663,60 @@ class PurchaseController extends Controller
         ));
     }
 
+    public function createItLetter(Request $request, $id)
+    {
+        $user = Auth::user();
+        $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
+        $isDProc = in_array($userArea, ['proc', 'prc'], true);
+        if (!$isDProc) {
+            return response()->json(['success' => false, 'message' => 'Only Procurement Department can raise/create IT.'], 403);
+        }
+
+        $purchase = Purchase::with(['items', 'quotes.firm'])->findOrFail($id);
+
+        $currentDate = now()->format('d F Y');
+        $deadlineDate = now()->addDays(14)->format('d F Y');
+
+        $itemTitle = $purchase->pcs_title ?: 'required items';
+        $defaultPara1 = "1.\tR&D Wing NRDI at PNS JAUHAR is interested for the procurement of " . $itemTitle . ". In this regard, quotation are to be submitted to MD R&D at NRDI by " . $deadlineDate . ".";
+        $defaultPara2 = "2.\tQuotation will be opened on same day at 11:00 hrs in the presence of all participants or their representatives and will be accepted at lowest quotations rate basis. However, It is apprised that MD (R&D) reserves the right to reject/ accept any quotation or invite new quotation without assigning any reason.";
+        $defaultPara3 = "3.\tFollowing terms and condition would apply:\n\n\ta.\tItems are to be delivered within 15 days after issuance of purchase order.\n\tb.\tPayment will be processed / made after delivery and acceptance by user.\n\tc.\tPart Delivery / Partial shall not be entertained.\n\td.\tWarrantee / Guarantee of one year is required.";
+
+        $itLetter = PurItLetter::firstOrCreate(
+            ['pit_pcs_id' => $purchase->pcs_id],
+            [
+                'pit_refno'              => 'R&D/Projects/Proc/' . $purchase->pcs_id,
+                'pit_date'               => $currentDate,
+                'pit_subject'            => 'REQUEST FOR QUOTATION',
+                'pit_distribution_label' => 'See distribution',
+                'pit_para1'              => $defaultPara1,
+                'pit_para2'              => $defaultPara2,
+                'pit_para3'              => $defaultPara3,
+                'pit_paragraphs'         => [$defaultPara1, $defaultPara2, $defaultPara3],
+                'pit_signatory_name'     => 'MUHAMMAD MUDASSIR',
+                'pit_signatory_rank'     => 'Cdr (R) Pakistan Navy',
+                'pit_signatory_dept'     => 'R&D Wing, NRDI',
+                'pit_firms'              => [],
+                'pit_items'              => [],
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'IT Letter created successfully.',
+            'redirect' => route('purchase.it_annex', $purchase->pcs_id),
+        ]);
+    }
+
     public function saveItLetter(Request $request, $id)
     {
+        $user = Auth::user();
+        $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
+        $isDProc = in_array($userArea, ['proc', 'prc'], true);
+        if (!$isDProc) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized. Only Procurement Department can edit and save IT.'], 403);
+        }
+
         $purchase = Purchase::findOrFail($id);
 
         $validated = $request->validate([
@@ -970,5 +1023,31 @@ class PurchaseController extends Controller
             'file_found' => !is_null($matchedPath),
             'allowed_ips_config' => config('allowed_ips', []),
         ];
+    }
+
+    /**
+     * Handle attachment upload for purchase case details modal.
+     */
+    public function uploadAttachment(Request $request)
+    {
+        $request->validate([
+            'pcs_id' => 'required|integer',
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx|max:10240',
+        ]);
+
+        $pcsId = (int) $request->input('pcs_id');
+        $file = $request->file('file');
+        $type = $request->input('type', 'Attachment');
+
+        $path = app(\App\Services\FileStorageService::class)->store($file, 'pur', 'pcs-', (string) $pcsId);
+
+        DB::table('pur.purattachments')->insert([
+            'pat_objtype' => 'pcs',
+            'pat_objid' => $pcsId,
+            'pat_type' => $type,
+            'pat_path' => $path,
+        ]);
+
+        return redirect()->back()->with('success', 'File uploaded successfully.');
     }
 }

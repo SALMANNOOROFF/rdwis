@@ -16,25 +16,56 @@ class PurchaseInitiationController extends Controller
     public function index()
     {
         $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHqOrProc = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin', 'proc', 'prc'], true);
+
+        if ($isHqOrProc) {
+            $lower = 0;
+            $upper = 99999999;
+        } else {
+            [$lower, $upper] = $user->acc_lowers == 0
+                ? [$user->acc_lowerm, $user->acc_upperm]
+                : [$user->acc_lowers, $user->acc_uppers];
+        }
+
         $unitId = $user->acc_unt_id;
 
-        // Fetch all cases initiated by this unit with rich context
-        $purchases = Purchase::with(['project', 'latestDecision.account', 'items', 'quotes.firm'])
-            ->where('pcs_unt_id', $unitId)
+        // Fetch all cases initiated by this unit/division with rich context
+        $purchases = Purchase::with(['project', 'latestDecision.account', 'items', 'quotes.firm', 'decisions'])
+            ->whereBetween('pcs_unt_id', [$lower, $upper])
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        $initiatedCases = $purchases->filter(function($p) {
-            $status = strtolower(trim($p->pcs_status));
-            return !in_array($status, ['draft', 'returned', 'approved', 'rejected']);
-        });
-        
         $actionReqCases = $purchases->filter(function($p) {
-            return in_array(strtolower(trim($p->pcs_status)), ['draft', 'returned']);
+            $status = strtolower(trim($p->pcs_status));
+            if ($status === 'returned') return true;
+            if ($status === 'draft') {
+                $isPs = app(\App\Services\PurchaseApprovalService::class)->isProcurementCase($p->pcs_type);
+                if (!$isPs) return true; // Non-PS draft is always Action Required for Division
+                
+                // For PS cases:
+                $hasFloated = $p->decisions->contains(fn($d) => in_array($d->pdec_action, ['float_to_proc', 'reshare_to_proc']));
+                $hasDProcSaved = $p->decisions->contains(fn($d) => $d->pdec_action === 'dproc_save');
+
+                // If not floated yet, or DProc has saved and returned, it is Action Required for Division
+                if (!$hasFloated || $hasDProcSaved) {
+                    return true;
+                }
+                return false; // Floated and waiting for DProc -> in Open / Pipeline
+            }
+            return false;
+        });
+
+        $initiatedCases = $purchases->filter(function($p) use ($actionReqCases) {
+            $status = strtolower(trim($p->pcs_status));
+            if (in_array($status, ['fulfilled', 'completed', 'cancelled', 'rejected'])) return false;
+            return !$actionReqCases->contains('pcs_id', $p->pcs_id);
         });
 
         $completedCases = $purchases->filter(function($p) {
-            return in_array(strtolower(trim($p->pcs_status)), ['approved', 'rejected']);
+            return in_array(strtolower(trim($p->pcs_status)), ['fulfilled', 'completed', 'cancelled', 'rejected']);
         });
 
         $pageTitle = "PC Initiation Hub";
@@ -42,7 +73,7 @@ class PurchaseInitiationController extends Controller
 
         // Financial Intelligence Summary
         $finService = app(\App\Services\FinancialIntelligenceService::class);
-        $head = DB::table('cen.heads')->where('hed_unt_id', $unitId)->first();
+        $head = DB::table('cen.heads')->where('hed_unt_id', $unitId)->orWhereBetween('hed_unt_id', [$lower, $upper])->first();
         $finSummary = null;
         if ($head) {
             $s = $finService->getHeadStatus($head->hed_id);
@@ -72,14 +103,22 @@ class PurchaseInitiationController extends Controller
         
         $query = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account']);
         
-        if ($isDProc) {
-            $lower = $user->acc_lowerm;
-            $upper = $user->acc_upperm;
-            $query->whereBetween('pcs_unt_id', [$lower, $upper]);
-        } else {
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHqOrProc = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin', 'proc', 'prc'], true);
 
-            $query->where('pcs_unt_id', $user->acc_unt_id);
+        if ($isHqOrProc) {
+            $lower = 0;
+            $upper = 99999999;
+        } else {
+            [$lower, $upper] = $user->acc_lowers == 0
+                ? [$user->acc_lowerm, $user->acc_upperm]
+                : [$user->acc_lowers, $user->acc_uppers];
         }
+
+        $query->where(function($q) use ($user, $lower, $upper) {
+            $q->where('pcs_unt_id', $user->acc_unt_id)
+              ->orWhereBetween('pcs_unt_id', [$lower, $upper]);
+        });
 
 
         $purchase = $query->findOrFail($id);
@@ -255,11 +294,7 @@ class PurchaseInitiationController extends Controller
                 $files = $request->file('attachments', []);
                 foreach ($files as $file) {
                     if (!$file) continue;
-                    $ext = strtolower($file->getClientOriginalExtension() ?: 'file');
-                    $base = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                    $base = Str::slug($base) ?: ('pcs-' . $purchase->pcs_id);
-                    $filename = $base . '-' . now()->format('YmdHis') . '-' . Str::random(6) . '.' . $ext;
-                    $stored = $file->storeAs('purchase', $filename, 'public');
+                    $stored = app(\App\Services\FileStorageService::class)->store($file, 'pur', 'pcs-', (string) $purchase->pcs_id);
                     DB::table('pur.purattachments')->insert([
                         'pat_objtype' => 'pcs',
                         'pat_objid' => $purchase->pcs_id,
@@ -439,19 +474,18 @@ class PurchaseInitiationController extends Controller
                 if ($request->hasFile('quote_file')) {
                     $qFile = $request->file('quote_file');
                     if ($qFile && $qFile->isValid()) {
-                        $unitName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_namesh') 
-                            ?: (DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name') ?: ('div-' . $purchase->pcs_unt_id));
-                        $divSlug = Str::slug($unitName) ?: ('div-' . $purchase->pcs_unt_id);
-                        $ext = strtolower($qFile->getClientOriginalExtension() ?: 'pdf');
-                        $base = Str::slug($firmName) ?: ('qte-' . $qteId);
-                        $filename = 'quote-' . $purchase->pcs_id . '-' . $qteId . '-' . $base . '-' . now()->format('YmdHis') . '.' . $ext;
-                        $stored = $qFile->storeAs("purchase/quotes/{$divSlug}/{$purchase->pcs_id}", $filename, 'public');
-
                         // Remove existing attachment for this quote
-                        DB::table('pur.purattachments')
+                        $existingAtt = DB::table('pur.purattachments')
                             ->where('pat_objtype', 'qte')
                             ->where('pat_objid', $qteId)
-                            ->delete();
+                            ->first();
+
+                        if ($existingAtt && !empty($existingAtt->pat_path)) {
+                            app(\App\Services\FileStorageService::class)->delete($existingAtt->pat_path);
+                            DB::table('pur.purattachments')->where('pat_id', $existingAtt->pat_id)->delete();
+                        }
+
+                        $stored = app(\App\Services\FileStorageService::class)->store($qFile, 'pur', 'pcs-', (string) $purchase->pcs_id);
 
                         DB::table('pur.purattachments')->insert([
                             'pat_objtype' => 'qte',
@@ -497,18 +531,17 @@ class PurchaseInitiationController extends Controller
                 if ($request->hasFile('quote_file')) {
                     $qFile = $request->file('quote_file');
                     if ($qFile && $qFile->isValid()) {
-                        $unitName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_namesh') 
-                            ?: (DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name') ?: ('div-' . $purchase->pcs_unt_id));
-                        $divSlug = Str::slug($unitName) ?: ('div-' . $purchase->pcs_unt_id);
-                        $ext = strtolower($qFile->getClientOriginalExtension() ?: 'pdf');
-                        $base = Str::slug($quote->qte_firmname) ?: ('qte-' . $qteId);
-                        $filename = 'quote-' . $purchase->pcs_id . '-' . $qteId . '-' . $base . '-' . now()->format('YmdHis') . '.' . $ext;
-                        $stored = $qFile->storeAs("purchase/quotes/{$divSlug}/{$purchase->pcs_id}", $filename, 'public');
-
-                        DB::table('pur.purattachments')
+                        $existingAtt = DB::table('pur.purattachments')
                             ->where('pat_objtype', 'qte')
                             ->where('pat_objid', $qteId)
-                            ->delete();
+                            ->first();
+
+                        if ($existingAtt && !empty($existingAtt->pat_path)) {
+                            app(\App\Services\FileStorageService::class)->delete($existingAtt->pat_path);
+                            DB::table('pur.purattachments')->where('pat_id', $existingAtt->pat_id)->delete();
+                        }
+
+                        $stored = app(\App\Services\FileStorageService::class)->store($qFile, 'pur', 'pcs-', (string) $purchase->pcs_id);
 
                         DB::table('pur.purattachments')->insert([
                             'pat_objtype' => 'qte',
@@ -528,6 +561,10 @@ class PurchaseInitiationController extends Controller
                 $quote = DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->where('qte_id', $qteId)->first();
                 if (!$quote) {
                     return ['ok' => false, 'message' => 'Quotation not found.', 'pcsId' => (int) $purchase->pcs_id];
+                }
+                $existingAtt = DB::table('pur.purattachments')->where('pat_objtype', 'qte')->where('pat_objid', $qteId)->first();
+                if ($existingAtt && !empty($existingAtt->pat_path)) {
+                    app(\App\Services\FileStorageService::class)->delete($existingAtt->pat_path);
                 }
                 DB::table('pur.purattachments')->where('pat_objtype', 'qte')->where('pat_objid', $qteId)->delete();
                 DB::table('pur.quoteitems')->where('qti_qte_id', $qteId)->delete();

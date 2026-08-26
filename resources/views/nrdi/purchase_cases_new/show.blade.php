@@ -341,10 +341,30 @@
                             <a href="{{ route('purchase.case_detail', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-case-detail rajdhani">
                                 <i class="fas fa-list-alt mr-1"></i> CASE DETAIL
                             </a>
-                            @if($isDProc || ($area ?? '') === 'proc' || $canEdit || true)
-                            <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
-                                <i class="fas fa-file-signature mr-1"></i> IT / RFQ LETTER & ANNEX
-                            </a>
+                            @php
+                                $hasItLetter = $purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists();
+                                $isPsCase = in_array(strtolower(trim((string)($purchase->pcs_type ?? 'ps'))), ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                            @endphp
+
+                            @if($isDProc)
+                                @if(!$hasItLetter)
+                                    {{-- Procurement user sees button to CREATE IT --}}
+                                    <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn-hdr-action btn-hdr-it-annex rajdhani" style="background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; cursor: pointer;">
+                                        <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
+                                    </button>
+                                @else
+                                    {{-- Procurement user sees button to EDIT/VIEW IT --}}
+                                    <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
+                                        <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
+                                    </a>
+                                @endif
+                            @else
+                                {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER for PS cases --}}
+                                @if($isPsCase || $hasItLetter)
+                                    <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
+                                        <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                                    </a>
+                                @endif
                             @endif
                             <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-comparative-stmt rajdhani">
                                 <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
@@ -356,7 +376,11 @@
                     </div>
                     
                     <div class="p-3" style="flex:1; overflow-y:auto;">
-                        @if($isInitiator && $isDraft)
+                        @php
+                            $caseType = strtolower(trim((string) ($purchase->pcs_type ?? 'ps')));
+                            $isProcCase = in_array($caseType, ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                        @endphp
+                        @if($isInitiator && $isDraft && $isProcCase)
                             @if($hasFloated && !$hasDProcSaved)
                                 <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
                                     <i class="fas fa-paper-plane mr-2 text-primary"></i>
@@ -398,6 +422,65 @@
                                                 — Currently with: {{ $purchase->current_stage_display }}
                                             @endif
                                         </span>
+                                    </div>
+
+                                    {{-- Attached Project Documents Box (Read-Only) --}}
+                                    @php
+                                        $prjId = $purchase->project?->prj_id 
+                                            ?? ($purchase->head?->hed_prj_id ?? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->value('hed_prj_id'));
+                                        
+                                        $projectAttachments = $prjId 
+                                            ? \Illuminate\Support\Facades\DB::table('prj.prjattachments')
+                                                ->where('jat_objid', $prjId)
+                                                ->whereIn('jat_objtype', ['prj', 'Project'])
+                                                ->whereNotNull('jat_path')
+                                                ->where('jat_path', '<>', '')
+                                                ->get()
+                                            : collect();
+                                    @endphp
+                                    <div class="mt-2" style="max-width: 420px;">
+                                        <div class="card border shadow-sm" style="border-radius: 6px; border-color: #cbd5e1 !important; background: #ffffff;">
+                                            <div class="card-header py-1 px-2 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-paperclip text-primary mr-1" style="font-size: 10px;"></i>
+                                                    <span class="font-weight-bold" style="font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Attachments</span>
+                                                    <span class="badge badge-secondary badge-pill ml-1" style="font-size: 9px; padding: 1px 5px;">{{ $projectAttachments->count() }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="p-1" style="font-size: 11px;">
+                                                @if($projectAttachments->count() > 0)
+                                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px 6px;">
+                                                        @foreach($projectAttachments as $pDoc)
+                                                            @php
+                                                                $ext = strtolower(pathinfo($pDoc->jat_path, PATHINFO_EXTENSION));
+                                                                $icon = match($ext) {
+                                                                    'pdf' => 'fa-file-pdf text-danger',
+                                                                    'jpg', 'jpeg', 'png' => 'fa-file-image text-primary',
+                                                                    'doc', 'docx' => 'fa-file-word text-info',
+                                                                    'xls', 'xlsx' => 'fa-file-excel text-success',
+                                                                    default => 'fa-file-alt text-secondary'
+                                                                };
+                                                            @endphp
+                                                            <div class="d-flex justify-content-between align-items-center px-1 py-0.5 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0; min-height: 24px;">
+                                                                <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
+                                                                    <i class="fas {{ $icon }} mr-1 flex-shrink-0" style="font-size: 10px; width: 11px;"></i>
+                                                                    <span class="text-truncate font-weight-bold text-dark" style="font-size: 10px; line-height: 1.1;" title="{{ $pDoc->jat_type }}">
+                                                                        {{ $pDoc->jat_type }}
+                                                                    </span>
+                                                                </div>
+                                                                <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 flex-shrink-0" style="font-size: 9px; line-height: 1.2; border-radius: 3px;" title="View {{ $pDoc->jat_type }}">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <div class="text-center py-1 text-muted" style="font-size: 10px;">
+                                                        <i class="fas fa-folder-open text-muted mr-1"></i> No project documents attached.
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2615,9 +2698,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    $(document).on('shown.bs.modal', '#detailedCSModal', function () {
-        renderCs();
-    });
+    window.promptCreateIt = function(pcsId) {
+        if (confirm('Do you want to create IT / RFQ Letter for this purchase case?')) {
+            fetch(`/purchase/case/${pcsId}/it-letter/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.redirect) {
+                    window.open(data.redirect, '_blank');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error creating IT.');
+                }
+            })
+            .catch(err => {
+                alert('Failed to create IT: ' + err.message);
+            });
+        }
+    };
 
     renderAll();
 });

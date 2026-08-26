@@ -67,7 +67,7 @@ class ProjectController extends Controller
             : [$user->acc_lowers, $user->acc_uppers];
     }
 
-    $closedStatuses = ['Closed', 'Completed'];
+    $closedStatuses = ['Closed', 'Completed', 'Cancelled'];
 
     $query = Project::with('unit')
         ->whereBetween('prj_unt_id', [$lower, $upper]);
@@ -356,25 +356,42 @@ class ProjectController extends Controller
                          ->with('success', 'Project Initiated Successfully!');
     }
 
-    // --- NEW FILE UPLOAD LOGIC ---
+    // --- FILE UPLOAD LOGIC ---
     private function handleUpload($request, $project, $inputName, $docType)
     {
         if ($request->hasFile($inputName)) {
             $file = $request->file($inputName);
             
-            // Folder Name: Standard spelling 'attachments' recommended
-            $folderName = 'attachments/Projects/' . Str::slug($project->prj_code);
-            $extension = $file->getClientOriginalExtension();
-            $fileName = $docType . '.' . $extension; 
+            $prefix = match (strtolower(trim($docType))) {
+                'ppf' => 'ppf-prj-',
+                'urd' => 'urd-prj-',
+                'project proposal', 'ppr' => 'ppr-prj-',
+                'work order', 'wo' => 'wo-prj-',
+                'approval letter', 'approval' => 'apl-prj-',
+                'milestone completion certificate', 'mcc' => 'mcc-prj-',
+                default => 'mx-prj-',
+            };
 
-            $path = $file->storeAs($folderName, $fileName, 'public'); 
+            $path = app(\App\Services\FileStorageService::class)->store(
+                $file,
+                'prj',
+                $prefix,
+                (string) $project->prj_id
+            );
             
-            $att = new PrjAttachment();
-            $att->jat_objid = $project->prj_id;
-            $att->jat_objtype = 'Project';
-            $att->jat_type = $docType; 
+            $att = PrjAttachment::where('jat_objid', $project->prj_id)
+                ->whereIn('jat_objtype', ['prj', 'Project'])
+                ->where('jat_type', $docType)
+                ->first();
+
+            if (!$att) {
+                $att = new PrjAttachment();
+                $att->jat_objid = $project->prj_id;
+                $att->jat_objtype = 'prj';
+                $att->jat_type = $docType;
+            }
+            
             $att->jat_path = $path;
-            
             $att->save();
 
             // LOGGING ADDED HERE
@@ -386,36 +403,7 @@ class ProjectController extends Controller
     public function viewAttachment($id)
     {
         $attachment = PrjAttachment::findOrFail($id);
-        
-        $dbPath = $attachment->jat_path; 
-        
-        // Handling both spellings just in case
-        if (str_contains($dbPath, 'attachements')) {
-             $folderPath = $dbPath; 
-        } else {
-             // Standardize
-             $folderPath = str_replace('attachments', 'attachements', $dbPath); 
-        }
-
-        $fullPath = storage_path('app/public/' . $folderPath);
-        $fullPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $fullPath);
-
-        if (!file_exists($fullPath)) {
-            // Fallback try with correct spelling
-            $altPath = str_replace('attachements', 'attachments', $fullPath);
-            if(file_exists($altPath)){
-                $fullPath = $altPath;
-            } else {
-                return response()->json(['error' => 'File nahi mili.'], 404);
-            }
-        }
-
-        $fileContents = file_get_contents($fullPath);
-        $mimeType = mime_content_type($fullPath);
-
-        return response($fileContents, 200)
-            ->header('Content-Type', $mimeType)
-            ->header('Content-Disposition', 'inline; filename="' . basename($fullPath) . '"');
+        return app(\App\Services\FileStorageService::class)->response($attachment->jat_path);
     }
 
     // --- UPLOAD OTHER DOCUMENT ---
@@ -450,6 +438,9 @@ class ProjectController extends Controller
     public function deleteAttachment($id)
     {
         $attachment = PrjAttachment::findOrFail($id);
+        if (!empty($attachment->jat_path)) {
+            app(\App\Services\FileStorageService::class)->delete($attachment->jat_path);
+        }
         $attachment->delete();
         
         // Log deletion
@@ -505,7 +496,8 @@ class ProjectController extends Controller
             'msn_desc' => 'required',
             'msn_targetdt' => 'required|date',
             'msn_type' => 'required',
-            'msn_status' => 'required'
+            'msn_status' => 'required',
+            'completion_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ]);
 
         $milestone = Milestone::where('msn_id', $id)->firstOrFail();
@@ -514,6 +506,21 @@ class ProjectController extends Controller
         $milestone->msn_targetdt = $request->msn_targetdt;
         $milestone->msn_type = $request->msn_type;
         $milestone->msn_status = $request->msn_status;
+
+        if ($request->hasFile('completion_certificate')) {
+            if (!empty($milestone->msn_cc_path)) {
+                app(\App\Services\FileStorageService::class)->delete($milestone->msn_cc_path);
+            }
+            $targetId = (string) ($milestone->msn_idd ?? $milestone->msn_id);
+            $path = app(\App\Services\FileStorageService::class)->store(
+                $request->file('completion_certificate'),
+                'prj',
+                'mcc-msn-',
+                $targetId
+            );
+            $milestone->msn_cc_path = $path;
+        }
+
         $milestone->save();
 
         // LOGGING ADDED HERE
@@ -522,30 +529,49 @@ class ProjectController extends Controller
         return redirect()->route('projects.show', $milestone->msn_xprj_id)
                          ->with('success', 'Milestone Updated Successfully!');
     }
-// ProjectController.php ke andar add karein
 
-public function markMilestoneComplete(Request $request)
+    public function markMilestoneComplete(Request $request)
     {
         $request->validate([
-            // Fix: Use the Model class instead of the raw string to handle schema correctly
             'msn_id' => ['required', Rule::exists(Milestone::class, 'msn_id')],
-            'achieved_date' => 'required|date'
+            'achieved_date' => 'required|date',
+            'completion_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ]);
 
         $milestone = Milestone::find($request->msn_id);
         if($milestone) {
             $milestone->msn_achvdt = $request->achieved_date;
             $milestone->msn_status = 'Completed'; // Status auto-update
+
+            if ($request->hasFile('completion_certificate')) {
+                if (!empty($milestone->msn_cc_path)) {
+                    app(\App\Services\FileStorageService::class)->delete($milestone->msn_cc_path);
+                }
+                $targetId = (string) ($milestone->msn_idd ?? $milestone->msn_id);
+                $path = app(\App\Services\FileStorageService::class)->store(
+                    $request->file('completion_certificate'),
+                    'prj',
+                    'mcc-msn-',
+                    $targetId
+                );
+                $milestone->msn_cc_path = $path;
+            }
+
             $milestone->save();
         }
 
         return redirect()->back()->with('success', 'Milestone marked as Completed!');
     }
+
     public function deleteMilestone($id)
     {
         $milestone = Milestone::where('msn_id', $id)->firstOrFail();
         $projectId = $milestone->msn_xprj_id;
         $desc = $milestone->msn_desc;
+
+        if (!empty($milestone->msn_cc_path)) {
+            app(\App\Services\FileStorageService::class)->delete($milestone->msn_cc_path);
+        }
         
         $milestone->delete();
 
@@ -581,6 +607,7 @@ public function markMilestoneComplete(Request $request)
         $request->validate([
             'pgh_dtg' => 'required|date',
             'pgh_progress' => 'required|string',
+            'progress_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ]);
 
         $mpr = new PrgHistory();
@@ -600,6 +627,17 @@ public function markMilestoneComplete(Request $request)
         $mpr->pgh_status = 'Submitted';
         $mpr->pgh_underedit = true; 
         $mpr->save();
+
+        if ($request->hasFile('progress_file')) {
+            $path = app(\App\Services\FileStorageService::class)->store(
+                $request->file('progress_file'),
+                'prj',
+                'prg-pgh-',
+                (string) $mpr->pgh_id
+            );
+            $mpr->pgh_path = $path;
+            $mpr->save();
+        }
         
         // Log MPR
         $this->logActivity($id, 'MPR', "Submitted Monthly Progress Report");

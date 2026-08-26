@@ -1,7 +1,9 @@
-﻿@extends('welcome')
+@extends('welcome')
 @section('content')
 <div class="content-wrapper pt-3 {{ ($readOnly ?? false) ? 'command-view' : '' }}">
     <style>
+
+        
         /* --- GLOBAL & UTILS --- */
         .card-primary.card-outline { border-top: 3px solid var(--rd-accent); }
         .bg-light-blue { background-color: var(--rd-bg); }
@@ -34,7 +36,7 @@
         .more-staff-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--rd-surface); color: var(--rd-text2); border: 2px dashed var(--rd-border); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-left: 5px; z-index: 0; }
         
         /* --- DATES & DOCS --- */
-        .date-grid-item { position: relative; padding-left: 10px; margin-bottom: 12px; border-left: 2px solid var(--rd-border); }
+        .date-grid-item { position: relative; padding-left: 10px; margin-bottom: 14px; border-left: 2px solid var(--rd-border); }
         .date-grid-item.active { border-left-color: var(--rd-accent); }
         .date-grid-item.done { border-left-color: var(--rd-success); }
         .d-title { font-size: 0.65rem; font-weight: 700; color: var(--rd-text3); text-transform: uppercase; display: block; line-height: 1; margin-bottom: 3px; }
@@ -51,22 +53,23 @@
         h6[data-toggle="collapse"] i.fa-chevron-down { transition: transform 0.3s ease; }
         h6[data-toggle="collapse"][aria-expanded="true"] i.fa-chevron-down { transform: rotate(180deg); }
 
-        /* --- OVERALL STEPS WIZARD --- */
+        /* --- OVERALL STEPS WIZARD (COMPACT, NO FORCED SCROLL) --- */
         .steps-container {
             position: relative;
-            height: 60px;
-            margin: 45px 40px;
-            width: calc(100% - 80px);
-            min-width: 800px;
+            height: 50px;
+            margin: 48px 16px 64px;
+            width: calc(100% - 32px);
             padding: 0;
         }
         .steps-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 40px;
-            margin-bottom: -20px;
+            overflow: visible;
+            padding-bottom: 0;
+            margin-bottom: 0;
         }
-        @media (max-width: 991.98px) {
+        @media (max-width: 767.98px) {
+            /* Only allow horizontal scroll on genuinely small (mobile) screens */
+            .steps-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .steps-container { min-width: 560px; }
             .steps-wrapper::-webkit-scrollbar { height: 4px; }
             .steps-wrapper::-webkit-scrollbar-thumb { background: var(--rd-border); border-radius: 10px; }
         }
@@ -77,28 +80,28 @@
         .steps-fill { height: 100%; background: var(--rd-success); transition: width 0.4s ease; border-radius: 2px; }
         .step-item {
             position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 3;
-            width: 32px; height: 32px;
+            width: 26px; height: 26px;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .step-dot {
-            width: 32px; height: 32px; border-radius: 50%; background: var(--rd-surface); border: 3px solid var(--rd-border);
-            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.65rem;
+            width: 26px; height: 26px; border-radius: 50%; background: var(--rd-surface); border: 3px solid var(--rd-border);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.6rem;
             color: var(--rd-text3); transition: all 0.3s; position: relative; z-index: 2;
         }
         .step-item.completed .step-dot { background: var(--rd-success); border-color: var(--rd-success); color: #fff; }
         .step-item.active .step-dot { background: var(--rd-accent); border-color: var(--rd-accent); color: #fff; transform: scale(1.2); box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.15); }
         .step-label {
-            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
-            font-size: 0.65rem; font-weight: 700; color: var(--rd-text3); white-space: nowrap;
+            position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+            font-size: 0.6rem; font-weight: 700; color: var(--rd-text3); white-space: nowrap;
         }
         .step-item.active .step-label { color: var(--rd-accent); }
         .step-date {
-            position: absolute; bottom: -30px; width: 100px; left: 50%; margin-left: -50px;
-            text-align: center; font-size: 0.6rem; color: var(--rd-text3); white-space: nowrap; font-weight: 500;
+            position: absolute; bottom: -26px; width: 90px; left: 50%; margin-left: -45px;
+            text-align: center; font-size: 0.58rem; color: var(--rd-text3); white-space: nowrap; font-weight: 500;
         }
         .step-item.active .step-date { color: var(--rd-accent); font-weight: 700; }
         .step-tooltip {
-            display: none; position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%);
+            display: none; position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
             background: var(--rd-surface3); color: var(--rd-text1); padding: 6px 10px; border-radius: 4px;
             font-size: 0.7rem; white-space: nowrap; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
@@ -192,6 +195,19 @@
         $prjEnd   = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : ($lastMs ? \Carbon\Carbon::parse($lastMs->msn_targetdt) : $today);
         if ($prjEnd->lt($prjStart)) $prjEnd = $prjStart->copy()->addDay();
 
+        // If the project has overrun (today, or an achieved milestone date, falls after
+        // the official EDC), stretch the *layout* end date so every marker still has
+        // room to breathe instead of all piling up at the 99-100% mark next to END.
+        // The END box itself always keeps showing the real $edc / $prjEnd date below.
+        $layoutEnd = $milestones->pluck('msn_achvdt')->filter()
+            ->map(fn ($d) => \Carbon\Carbon::parse($d))
+            ->push($prjEnd)
+            ->push($today)
+            ->max();
+        if ($layoutEnd->gt($prjEnd)) {
+            $prjEnd = $layoutEnd->copy()->addDays(15);
+        }
+
         $totalDaysSpan   = $prjStart->diffInDays($prjEnd) ?: 1;
         $daysPassedTotal = $prjStart->diffInDays($today, false);
         $overallTimePercent = round(($daysPassedTotal / $totalDaysSpan) * 100, 1);
@@ -215,6 +231,10 @@
         $fixedDocs = ['PPF', 'Approval Letter', 'URD', 'Work Order'];
         $allAttachments = $project->attachments;
         $otherDocsCount = $allAttachments->whereNotIn('jat_type', $fixedDocs)->count();
+
+        // ---- Milestone track inset so first/last diamonds never sit under START/END boxes ----
+        $trackInsetStart = 9;   // % from left where milestone track begins
+        $trackInsetRange = 82;  // % width available for milestones (9% -> 91%)
     @endphp
 
     <div class="container-fluid">
@@ -227,6 +247,7 @@
                             <span class="font-weight-bolder {{ $edcClass }} small">
                                 <i class="fas fa-flag-checkered mr-1"></i> EDC: {{ $edc ? $edc->format('d M, Y') : 'TBD' }}
                             </span>
+                          
                         </div>
                         <h4 class="text-dark font-weight-bold m-0 text-truncate" title="{{ $project->prj_title }}" style="font-family:'Rajdhani',sans-serif; letter-spacing:0.5px;">
                             {{ $project->prj_title }}
@@ -344,8 +365,7 @@
         <div class="team-section-container">
             @foreach($team as $index => $member)
                 @php
-                    $photo = $member->emp_photodest ? str_replace('\\', '/', $member->emp_photodest) : null;
-                    $img = $photo ? asset($photo) : asset('dist/img/profile-1.jfif');
+                    $img = \App\Facades\FileStorage::url($member->emp_photodest) ?: asset('dist/img/profile-1.jfif');
                     $name = $member->emp_name;
                     $role = $member->emp_title ?: 'Project Staff';
                     $email = $member->emp_email ?: 'N/A';
@@ -373,25 +393,27 @@
 .edge-box {
     position: absolute;
     top: 50%;
-    transform: translate(-50%, -50%);
-    width: 56px;
-    height: 44px;
+    width: 44px;
+    height: 34px;
     background: #dc3545;
     color: #fff;
-    font-size: 0.6rem;
+    font-size: 0.5rem;
     font-weight: 700;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 3;
+    z-index: 4;
 }
+/* Stay fully inside the track (no horizontal bleed past container edges) */
+.edge-box.edge-start { left: 0; transform: translate(0, -50%); }
+.edge-box.edge-end { right: 0; left: auto; transform: translate(0, -50%); }
 
 /* ===== DIAMOND MILESTONE ===== */
 .step-dot {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 4px;
     border: 2px solid #ffc107;
     background: transparent;
@@ -428,12 +450,12 @@
 /* ===== TODAY BUBBLE WITH GLOW CURSOR ===== */
 .today-bubble {
     position: absolute;
-    top: -45px;
+    top: -40px;
     background: var(--rd-primary-600);
     color: #fff;
-    padding: 5px 10px;
+    padding: 4px 9px;
     border-radius: 14px;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -462,7 +484,7 @@
     }
 }
 
-/* ===== ACHIEVED DATE UNDER DIAMOND ===== */
+/* ===== ACHIEVED DATE UNDER DIAMOND (FIXED: no longer overlaps target diamond/date) ===== */
 .achieved-wrap {
     position: absolute;
     bottom: -42px;
@@ -471,7 +493,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 700;
     color: #28a745;
     white-space: nowrap;
@@ -481,23 +503,34 @@
     font-size: 11px;
     color: #28a745;
 
-}.achieved-marker{
+}
+
+.achieved-marker{
     position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
+    top: calc(50% + 36px);
+    transform: translate(-50%, 0);
     z-index: 6;
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+/* Short connector line linking the diamond/target-date to the achieved marker below */
+.achieved-marker::before{
+    content: "";
+    position: absolute;
+    top: -33px;
+    left: 50%;
+    width: 1px;
+    height: 28px;
+    background: currentColor;
+    opacity: 0.3;
 }
 
 .achieved-marker i{
-    font-size: 14px;
-}
-
-.achieved-marker .achieved-ms{
-    font-size: 0.6rem;
-    font-weight: 800;
-    margin-top: 2px;
+    font-size: 10px;
 }
 
 .achieved-marker .achieved-date{
@@ -508,14 +541,12 @@
 
 /* ON TIME / EARLY */
 .achieved-marker.ontime i,
-.achieved-marker.ontime .achieved-ms,
 .achieved-marker.ontime .achieved-date{
     color: #28a745;
 }
 
 /* LATE */
 .achieved-marker.late i,
-.achieved-marker.late .achieved-ms,
 .achieved-marker.late .achieved-date{
     color: #dc3545;
 }
@@ -544,7 +575,7 @@
     </div>
 
     {{-- START BOX --}}
-    <div class="edge-box" style="left: 0;">
+    <div class="edge-box edge-start">
         START
         <small>{{ $prjStart->format('d M Y') }}</small>
     </div>
@@ -570,23 +601,19 @@
 
         $isLate = $achievedDate && $achievedDate->gt($targetDate);
 
-        // Date-based milestone position on timeline track
+        // Date-based milestone position on timeline track, inset so it
+        // never lands exactly under the START/END boxes
         $daysFromStart = $prjStart->diffInDays($targetDate, false);
-        $milestonePercent = ($daysFromStart / max(1, $totalDaysSpan)) * 100;
-        $milestonePercent = max(0, min(100, $milestonePercent));
+        $rawPercent = ($daysFromStart / max(1, $totalDaysSpan)) * 100;
+        $rawPercent = max(0, min(100, $rawPercent));
+        $milestonePercent = $trackInsetStart + ($rawPercent * $trackInsetRange / 100);
 
         if ($achievedDate) {
-            // achieved vs target difference
+            // achieved vs target difference, scaled to the same inset track
             $diffDays = $targetDate->diffInDays($achievedDate, false);
-
-            // 1 day = kitna percent shift kare
-            $oneDayPercent = 100 / max(1, $totalDaysSpan);
-
-            // final achieved position
+            $oneDayPercent = ($trackInsetRange / 100) * (100 / max(1, $totalDaysSpan));
             $achievedPercent = $milestonePercent + ($diffDays * $oneDayPercent);
-
-            // clamp 0–100
-            $achievedPercent = max(0, min(100, $achievedPercent));
+            $achievedPercent = max(1, min(99, $achievedPercent));
         }
     @endphp
 
@@ -604,7 +631,7 @@
         {{-- DIAMOND --}}
         <div class="step-dot">
             @if($stepClass === 'completed')
-                <i class="fas fa-check text-white" style="font-size:0.6rem"></i>
+                <i class="fas fa-check text-white" style="font-size:0.55rem"></i>
             @else
                 {{ $loop->iteration }}
             @endif
@@ -616,14 +643,12 @@
         </div>
     </div>
 
-    {{-- ACHIEVED FLAG --}}
+    {{-- ACHIEVED FLAG (repositioned below target date band, connected via a line, so it no longer overlaps the target diamond/date) --}}
    @if($achievedDate)
     <div class="achieved-marker {{ $isLate ? 'late' : 'ontime' }}"
-         style="left: {{ $achievedPercent }}%; position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 6;">
-         
+         style="left: {{ $achievedPercent }}%;">
         <i class="fas fa-flag"></i>
-        <div class="achieved-ms">MS-{{ $loop->iteration }}</div>
-        <div class="achieved-date">{{ $achievedDate->format('d M Y') }}</div>
+        <span class="achieved-date">{{ $achievedDate->format('d M Y') }}</span>
     </div>
    @endif
 
@@ -631,7 +656,7 @@
 
 
     {{-- END BOX --}}
-    <div class="edge-box" style="left: 100%;">
+    <div class="edge-box edge-end">
         END
         <small>{{ $edc ? $edc->format('d M Y') : $prjEnd->format('d M Y') }}</small>
     </div>
@@ -747,7 +772,7 @@
                 <i class="fas fa-calendar-alt text-primary mr-2"></i> Key Dates
             </h6>
 
-            <div class="row gx-2">
+            <div class="row" style="row-gap: 14px;">
                 <div class="col-12 col-md-6">
                     <div class="date-grid-item {{ $project->prj_rcptdt ? 'done' : '' }}">
                         <span class="d-title">Received</span>
@@ -784,34 +809,17 @@
                 </div>
             </div>
 
-            <hr class="my-3">
+            <hr class="my-4">
 
-                        <div class="d-flex justify-content-between align-items-center mb-2" data-toggle="collapse" data-target="#filesCollapse" aria-expanded="false" style="cursor:pointer;">
-                            <h6 class="font-weight-bold m-0 text-dark"><i class="fas fa-folder-open text-primary mr-1"></i> Documents </h6><i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="collapse" id="filesCollapse">
-
-                            @foreach($fixedDocs as $index => $doc)
-                                @php $existingFile = $allAttachments->where('jat_type', $doc)->first(); @endphp
-                                <div class="doc-card shadow-sm" style="{{ $existingFile ? 'border-left-color: #28a745; background-color: #f8fff9;' : '' }}">
-                                    <div class="doc-content"><div class="doc-icon" style="{{ $existingFile ? 'color: #28a745; background-color: #e0fdf4;' : '' }}"><i class="fas {{ $existingFile ? 'fa-check-circle' : 'fa-file-alt' }}"></i></div><div class="doc-title" title="{{ $doc }}">{{ $doc }}</div></div>
-                                    <div class="d-flex align-items-center">
-                                        @if($existingFile)
-                                            <a href="{{ route('attachment.view', $existingFile->jat_id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-circle mr-1"><i class="fas fa-eye"></i></a>
-                                            <a href="{{ route('attachment.delete', $existingFile->jat_id) }}" class="btn btn-sm btn-outline-danger rounded-circle mr-1 text-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a>
-                                        @else
-                                            <div style="width: 28px; height: 28px;"><form action="{{ route('projects.upload.single', $project->prj_id) }}" method="POST" enctype="multipart/form-data" id="form-{{$index}}">@csrf <input type="hidden" name="doc_type" value="{{ $doc }}">
-                                            <label for="file-{{$index}}" class="btn rounded-circle d-flex align-items-center justify-content-center" style="width:28px; height:28px; cursor:pointer; padding:0; background-color: var(--rd-primary-600); color:#fff; border:none;"> 
-                                                <i class="fas fa-upload" style="font-size: 0.9rem;"></i>
-                                            </label>
-                                <input type="file" id="file-{{$index}}" name="single_file" class="file-input-hidden" onchange="document.getElementById('form-{{$index}}').submit()"></form></div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                            <div class="doc-card other shadow-sm mt-2" onclick="openOtherDocsModal()"><div class="d-flex align-items-center"><div class="doc-icon other"><i class="fas fa-layer-group"></i></div><div><div class="doc-title" style="color: #6f42c1;">Other Documents</div><small class="text-muted">{{ $otherDocsCount }} Files uploaded</small></div></div><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                    </div>
+            <div class="attachments-wrapper" style="padding-top: 4px;">
+                @include('partials.attachments_widget', [
+                    'module' => 'prj',
+                    'objectId' => $project->prj_id,
+                    'title' => 'Attachments',
+                    'defaultSlots' => ['Project Proposal', 'URD', 'Work Order', 'PPF'],
+                    'attachments' => $allAttachments ?? $project->attachments,
+                    'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
+                ])
             </div>
 
         </div>
@@ -927,8 +935,7 @@
                         <tbody>
                             @foreach($team as $member)
                                 @php
-                                    $photo = $member->emp_photodest ? str_replace('\\', '/', $member->emp_photodest) : null;
-                                    $img = $photo ? asset($photo) : asset('dist/img/profile-1.jfif');
+                                    $img = \App\Facades\FileStorage::url($member->emp_photodest) ?: asset('dist/img/profile-1.jfif');
                                     $name = $member->emp_name;
                                     $role = $member->emp_title ?: 'Project Staff';
                                     $phone = $member->emp_mobile ?: 'N/A';

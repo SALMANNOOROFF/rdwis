@@ -40,8 +40,23 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ====================================================
 Route::middleware('auth')->group(function () {
 
-    Route::get('/godmode/takeover/{id}', [\App\Http\Controllers\GodModeController::class, 'impersonate']);
-    Route::get('/godmode/return', [\App\Http\Controllers\GodModeController::class, 'leaveImpersonation']);
+    Route::get('/godmode/takeover/{id}', [\App\Http\Controllers\GodModeController::class, 'impersonate'])->name('godmode.takeover');
+    Route::get('/godmode/return', [\App\Http\Controllers\GodModeController::class, 'leaveImpersonation'])->name('godmode.return');
+    Route::get('/godmode', function() { return view('godmode.index'); })->name('godmode.index');
+
+    // RDWIS Dynamic Settings Routes
+    Route::get('/admin/settings', function() { return redirect()->route('admin.settings.financial'); })->name('admin.settings.index');
+    Route::get('/admin/settings/financial', [\App\Http\Controllers\AdminSettingsController::class, 'financialSettings'])->name('admin.settings.financial');
+    Route::post('/admin/settings/financial', [\App\Http\Controllers\AdminSettingsController::class, 'updateFinancialSettings'])->name('admin.settings.financial.update');
+    
+    Route::get('/admin/settings/workflows', [\App\Http\Controllers\AdminSettingsController::class, 'workflowSettings'])->name('admin.settings.workflows');
+    Route::post('/admin/settings/workflows', [\App\Http\Controllers\AdminSettingsController::class, 'updateWorkflowSettings'])->name('admin.settings.workflows.update');
+    
+    Route::get('/admin/settings/workflows-mpr', [\App\Http\Controllers\AdminSettingsController::class, 'mprWorkflowSettings'])->name('admin.settings.workflows_mpr');
+    Route::post('/admin/settings/workflows-mpr', [\App\Http\Controllers\AdminSettingsController::class, 'updateMprWorkflowSettings'])->name('admin.settings.workflows_mpr.update');
+    
+    Route::get('/admin/settings/workflows-hr', [\App\Http\Controllers\AdminSettingsController::class, 'hrWorkflowSettings'])->name('admin.settings.workflows_hr');
+    Route::post('/admin/settings/workflows-hr', [\App\Http\Controllers\AdminSettingsController::class, 'updateHrWorkflowSettings'])->name('admin.settings.workflows_hr.update');
 
     Route::get('/debug-user', function () {
         $u = Auth::user();
@@ -66,6 +81,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/password/change', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
     Route::post('/password/change', [AuthController::class, 'changePassword'])->name('password.update');
+
+    // Universal Attachment Management Routes
+    Route::post('/universal-attachment/upload', [\App\Http\Controllers\AttachmentController::class, 'upload'])
+        ->name('universal.attachment.upload');
+    Route::get('/universal-attachment/{module}/{id}/view', [\App\Http\Controllers\AttachmentController::class, 'view'])
+        ->name('universal.attachment.view');
+    Route::post('/universal-attachment/{module}/{id}/delete', [\App\Http\Controllers\AttachmentController::class, 'delete'])
+        ->name('universal.attachment.delete');
 
     Route::middleware('force_password_change')->group(function () {
         Route::get('/', function () {
@@ -96,6 +119,25 @@ Route::middleware('auth')->group(function () {
             ->name('dashboard.data.div')
             ->middleware('area:prj,rdwprj');
 
+        // ====================================================
+        // SHARED PURCHASE SCRUTINY, REPORTS & IT/RFQ ROUTES
+        // (Universally accessible by Procurement, Finance, HQ & Division)
+        // ====================================================
+        Route::get('/purchase/case/{id}/minute-view', [PurchaseController::class, 'minuteView'])->name('purchase.minute_view');
+        Route::get('/purchase/case/{id}/case-detail', [PurchaseController::class, 'caseDetail'])->name('purchase.case_detail');
+        Route::get('/purchase/case/{id}/market-research', [PurchaseController::class, 'marketResearch'])->name('purchase.market_research');
+        Route::get('/purchase/case/{id}/cs-formal', [PurchaseController::class, 'csFormal'])->name('purchase.cs_formal');
+        Route::get('/purchase/case/{id}/it-annex', [PurchaseController::class, 'itAnnex'])->name('purchase.it_annex');
+        Route::post('/purchase/case/{id}/it-letter/create', [PurchaseController::class, 'createItLetter'])->name('purchase.it_letter.create');
+        Route::post('/purchase/case/{id}/it-letter/save', [PurchaseController::class, 'saveItLetter'])->name('purchase.it_letter.save');
+        Route::get('/purchase/quote-attachment/{id}/view', [PurchaseController::class, 'viewQuoteAttachment'])->name('purchase.quote_attachment.view');
+        Route::get('/purchase/quote-attachment/{id}/download', [PurchaseController::class, 'downloadQuoteAttachment'])->name('purchase.quote_attachment.download');
+        Route::get('/purchase/quote-attachment/{id}/diagnose', [PurchaseController::class, 'diagnoseQuoteAttachment'])->name('purchase.quote_attachment.diagnose');
+        Route::get('/get-last-minute/{headId}', [PurchaseController::class, 'getLastMinute'])->name('get.last.minute');
+        Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
+        Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
+        Route::get('/print-minute', function () { return view('purchase.new_case.print_minute'); })->name('purchase.new_case.print_minute');
+
         Route::get('/sord/dashboard', [\App\Http\Controllers\DashboardController::class, 'sord'])
             ->name('sord.dashboard')
             ->middleware('area:rdwprj,rdw');
@@ -104,13 +146,42 @@ Route::middleware('auth')->group(function () {
             ->name('hr.dashboard')
             ->middleware('area:hr,nrdi,hqs,rdw');
 
-        Route::prefix('nrdi')->middleware('area:nrdi,rdw,hqs,proc,prc,fin,hr')->name('nrdi.')->group(function () {
+        // HR Modules Under Development (Navy Civilians, PN Officers, PN CPO/Sailors)
+        Route::get('/hr/navy-civilians', function() {
+            return view('hr.under_development', [
+                'title' => 'Navy Civilians',
+                'category' => 'Civilian Personnel Management',
+                'description' => 'Navy Civilians personnel rosters, service records, and civilian establishment listings are currently under active development.'
+            ]);
+        })->name('hr.navy_civilians');
+
+        Route::get('/hr/pn-officers', function() {
+            return view('hr.under_development', [
+                'title' => 'PN Officers',
+                'category' => 'Naval Officers Roster',
+                'description' => 'PN Officers posted strength, ranks, branches, and establishment details module is currently under active development.'
+            ]);
+        })->name('hr.pn_officers');
+
+        Route::get('/hr/pn-sailors', function() {
+            return view('hr.under_development', [
+                'title' => 'PN CPO / Sailors',
+                'category' => 'Naval Sailors & CPOs',
+                'description' => 'PN CPO / Sailors rosters, rates, branches, and postings management module is currently under active development.'
+            ]);
+        })->name('hr.pn_sailors');
+
+        Route::prefix('nrdi')->middleware('area:nrdi,rdw,hqs,proc,prc,fin,hr,prj,rdwprj,it')->name('nrdi.')->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboard'])->name('dashboard');
             Route::get('/dashboard-data', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboardData'])->name('dashboard.data');
-            Route::get('/contract-cases', [\App\Http\Controllers\DashboardController::class, 'contractCases'])->name('contract_cases.index');
+            // Redirect old routes to modern hubs
+            Route::get('/contract-cases', function() {
+                return redirect()->route('nrdi.contract_cases_new.index');
+            })->name('contract_cases.index');
             
-            // Standard HQ Approval Routes (Generic)
-            Route::get('/purchase-cases', [\App\Http\Controllers\PurchaseApprovalController::class, 'dashboard'])->name('purchase_cases.index');
+            Route::get('/purchase-cases', function() {
+                return redirect()->route('nrdi.purchase_cases_new.index');
+            })->name('purchase_cases.index');
             Route::get('/purchase-cases/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'show'])->name('purchase_cases.show');
             Route::post('/purchase-cases/{id}/action', [\App\Http\Controllers\PurchaseApprovalController::class, 'action'])->name('purchase_cases.action');
 
@@ -126,17 +197,22 @@ Route::middleware('auth')->group(function () {
                 Route::get('/reports/export', [\App\Http\Controllers\ProcurementReportsController::class, 'exportExcel'])->name('reports.export');
             });
 
-            // Firms Search and Directory Routes
+            // Firms Search, Registration, and Directory Routes
             Route::prefix('firms')->name('firms.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\FirmController::class, 'index'])->name('index');
+                Route::get('/', function() {
+                    return redirect()->route('nrdi.firms.list');
+                })->name('index');
                 Route::get('/list', [\App\Http\Controllers\FirmController::class, 'list'])->name('list');
+                Route::post('/store', [\App\Http\Controllers\FirmController::class, 'store'])->name('store');
                 Route::get('/data', [\App\Http\Controllers\FirmController::class, 'searchData'])->name('data');
                 Route::get('/{id}', [\App\Http\Controllers\FirmController::class, 'show'])->name('show');
             });
 
             // Director Finance Specialized Routes
             Route::prefix('finance')->name('finance.')->group(function () {
-                Route::get('/purchase-cases', [\App\Http\Controllers\FinanceDashboardController::class, 'index'])->name('purchase_cases.index');
+                Route::get('/purchase-cases', function() {
+                    return redirect()->route('nrdi.purchase_cases_new.finance.index');
+                })->name('purchase_cases.index');
                 Route::get('/case/{id}', [\App\Http\Controllers\FinanceDashboardController::class, 'show'])->name('purchase_cases.show');
             });
 
@@ -178,12 +254,16 @@ Route::middleware('auth')->group(function () {
                 ->name('division.contract-cases.index');
             Route::get('/contract-cases/create', [\App\Http\Controllers\Division\ContractCaseController::class, 'create'])
                 ->name('division.contract-cases.create');
+            Route::get('/contract-cases/employee-contract/{empId}', [\App\Http\Controllers\Division\ContractCaseController::class, 'getEmployeeContractDetails'])
+                ->name('division.contract-cases.employee-contract');
             Route::get('/contract-cases/{id}', [\App\Http\Controllers\Division\ContractCaseController::class, 'show'])
                 ->name('division.contract-cases.show');
             Route::post('/contract-cases', [\App\Http\Controllers\Division\ContractCaseController::class, 'store'])
                 ->name('division.contract-cases.store');
             Route::post('/contract-cases/{id}/release', [\App\Http\Controllers\Division\ContractCaseController::class, 'release'])
                 ->name('division.contract-cases.release');
+            Route::post('/contract-cases/{id}/cancel', [\App\Http\Controllers\Division\ContractCaseController::class, 'cancel'])
+                ->name('division.contract-cases.cancel');
         });
 
         // --- HR CONTRACT CASE ROUTES & REPORTS ---
@@ -198,6 +278,8 @@ Route::middleware('auth')->group(function () {
                 ->name('hr.contract-cases.return');
             Route::post('/contract-cases/{id}/fulfill', [\App\Http\Controllers\HR\ContractCaseController::class, 'fulfill'])
                 ->name('hr.contract-cases.fulfill');
+            Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\HR\ContractCaseController::class, 'reject'])
+                ->name('hr.contract-cases.reject');
 
             // HR Reports (Single Page like Finance Reports)
             Route::get('/reports', [DivHrController::class, 'hrReportsIndex'])->name('hr.reports.index');
@@ -214,6 +296,8 @@ Route::middleware('auth')->group(function () {
                 ->name('finance.contract-cases.forward');
             Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\Finance\ContractCaseController::class, 'return'])
                 ->name('finance.contract-cases.return');
+            Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\Finance\ContractCaseController::class, 'reject'])
+                ->name('finance.contract-cases.reject');
         });
 
         // --- MD CONTRACT CASE ROUTES ---
@@ -224,8 +308,42 @@ Route::middleware('auth')->group(function () {
                 ->name('md.contract-cases.show');
             Route::post('/contract-cases/{id}/approve', [\App\Http\Controllers\MD\ContractCaseController::class, 'approve'])
                 ->name('md.contract-cases.approve');
+            Route::post('/contract-cases/{id}/forward', [\App\Http\Controllers\MD\ContractCaseController::class, 'forward'])
+                ->name('md.contract-cases.forward');
             Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\MD\ContractCaseController::class, 'return'])
                 ->name('md.contract-cases.return');
+            Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\MD\ContractCaseController::class, 'reject'])
+                ->name('md.contract-cases.reject');
+        });
+
+        // --- DDG CONTRACT CASE ROUTES ---
+        Route::prefix('ddg')->middleware('area:hqs')->group(function () {
+            Route::get('/contract-cases', [\App\Http\Controllers\DDG\ContractCaseController::class, 'index'])
+                ->name('ddg.contract-cases.index');
+            Route::get('/contract-cases/{id}', [\App\Http\Controllers\DDG\ContractCaseController::class, 'show'])
+                ->name('ddg.contract-cases.show');
+            Route::post('/contract-cases/{id}/approve', [\App\Http\Controllers\DDG\ContractCaseController::class, 'approve'])
+                ->name('ddg.contract-cases.approve');
+            Route::post('/contract-cases/{id}/forward', [\App\Http\Controllers\DDG\ContractCaseController::class, 'forward'])
+                ->name('ddg.contract-cases.forward');
+            Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\DDG\ContractCaseController::class, 'return'])
+                ->name('ddg.contract-cases.return');
+            Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\DDG\ContractCaseController::class, 'reject'])
+                ->name('ddg.contract-cases.reject');
+        });
+
+        // --- DG CONTRACT CASE ROUTES ---
+        Route::prefix('dg')->middleware('area:nrdi')->group(function () {
+            Route::get('/contract-cases', [\App\Http\Controllers\DG\ContractCaseController::class, 'index'])
+                ->name('dg.contract-cases.index');
+            Route::get('/contract-cases/{id}', [\App\Http\Controllers\DG\ContractCaseController::class, 'show'])
+                ->name('dg.contract-cases.show');
+            Route::post('/contract-cases/{id}/approve', [\App\Http\Controllers\DG\ContractCaseController::class, 'approve'])
+                ->name('dg.contract-cases.approve');
+            Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\DG\ContractCaseController::class, 'return'])
+                ->name('dg.contract-cases.return');
+            Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\DG\ContractCaseController::class, 'reject'])
+                ->name('dg.contract-cases.reject');
         });
 
         Route::group([
@@ -289,6 +407,8 @@ Route::middleware('auth')->group(function () {
             ->name('division.finance-of-project.index');
         Route::get('/finance-of-project/{head_id}/{scope}/{figure}/{subhead?}', [\App\Http\Controllers\Division\FinanceOfProjectController::class, 'drillDown'])
             ->name('division.finance-of-project.drilldown');
+        Route::get('/finance-of-project/ajax/projects-by-division/{unit_id?}', [\App\Http\Controllers\Division\FinanceOfProjectController::class, 'getProjectsByDivision'])
+            ->name('division.finance-of-project.projects-by-division');
 
         Route::get('/milestone/{id}/edit', [ProjectController::class, 'editMilestone'])->name('milestone.edit');
         Route::post('/milestone/{id}/update', [ProjectController::class, 'updateMilestone'])->name('milestone.update');
@@ -349,19 +469,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/training/purchase/store', [TrainingController::class, 'storePurchase'])
             ->name('training.purchase.store')
             ->middleware('approver');
-        Route::get('/get-last-minute/{headId}', [PurchaseController::class, 'getLastMinute'])->name('get.last.minute');
-        Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
-        Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
-        Route::get('/purchase/case/{id}/minute-view', [PurchaseController::class, 'minuteView'])->name('purchase.minute_view');
-        Route::get('/purchase/case/{id}/case-detail', [PurchaseController::class, 'caseDetail'])->name('purchase.case_detail');
-        Route::get('/purchase/case/{id}/market-research', [PurchaseController::class, 'marketResearch'])->name('purchase.market_research');
-        Route::get('/purchase/case/{id}/cs-formal', [PurchaseController::class, 'csFormal'])->name('purchase.cs_formal');
-        Route::get('/purchase/case/{id}/it-annex', [PurchaseController::class, 'itAnnex'])->name('purchase.it_annex');
-        Route::post('/purchase/case/{id}/it-letter/save', [PurchaseController::class, 'saveItLetter'])->name('purchase.it_letter.save');
-        Route::get('/print-minute', function () { return view('purchase.new_case.print_minute'); })->name('purchase.new_case.print_minute');
-        Route::get('/purchase/quote-attachment/{id}/view', [PurchaseController::class, 'viewQuoteAttachment'])->name('purchase.quote_attachment.view');
-        Route::get('/purchase/quote-attachment/{id}/download', [PurchaseController::class, 'downloadQuoteAttachment'])->name('purchase.quote_attachment.download');
-        Route::get('/purchase/quote-attachment/{id}/diagnose', [PurchaseController::class, 'diagnoseQuoteAttachment'])->name('purchase.quote_attachment.diagnose');
         Route::post('/purchase/quote/store', [PurchaseController::class, 'storeQuote'])
             ->name('quotes.store')
             ->middleware('approver');
@@ -424,6 +531,8 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/employee/{id}', [DivHrController::class, 'employeedetail'])
                 ->name('divhr.employeedetail');
+            Route::post('/employee/{id}/photo', [DivHrController::class, 'uploadPhoto'])
+                ->name('divhr.employee.upload_photo');
 
             Route::get('/attendance', [DivHrController::class, 'attendance'])
                 ->name('divhr.attendance');
@@ -525,11 +634,15 @@ Route::middleware('auth')->group(function () {
             Route::get('/reports/export', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'exportExcel'])->name('reports.export');
         });
 
-    // Unified Group for High-Level Approvals (DProc, DFin, MD, DDG, DG)
-    Route::middleware(['area:proc,prc,fin,rdw,hqs,nrdi'])->group(function () {
-        Route::get('/approvals/dashboard', [\App\Http\Controllers\PurchaseApprovalController::class, 'dashboard'])->name('approvals.dashboard');
-        Route::get('/approvals/show/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'show'])->name('approvals.show');
-        Route::post('/approvals/action/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'action'])->name('approvals.action');
+    // Unified Group for Approvals & Scrutiny (Redirect old routes to modern purchase_cases_new hub)
+    Route::middleware(['area:proc,prc,fin,rdw,hqs,nrdi,prj,rdwprj,it'])->group(function () {
+        Route::get('/approvals/dashboard', function() {
+            return redirect()->route('nrdi.purchase_cases_new.index');
+        })->name('approvals.dashboard');
+        Route::get('/approvals/show/{id}', function($id) {
+            return redirect()->route('nrdi.purchase_cases_new.show', $id);
+        })->name('approvals.show');
+        Route::post('/approvals/action/{id}', [\App\Http\Controllers\PurchaseCaseController::class, 'action'])->name('approvals.action');
     });
 
     // Procurement Notifications

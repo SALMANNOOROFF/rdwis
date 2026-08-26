@@ -119,12 +119,64 @@ class FirmController extends Controller
             ];
         });
 
+        $specialities = DB::table('frm.specs')
+            ->whereNotNull('spc_spec')
+            ->where('spc_spec', '!=', '')
+            ->distinct()
+            ->orderBy('spc_spec')
+            ->pluck('spc_spec');
+
+        $defaultFacilities = [
+            'UAVs',
+            'Augmented Reality',
+            'Software',
+            'General Order Supplier',
+            'Importer & Distributer Service',
+            'Manufacturing',
+            'Provision of Transport Facility',
+            'Defence supplier',
+            'Engineers, Contractors, Suppliers',
+            'Reconditioning of Mechanical',
+            'PCBs & Electronics',
+            'Electronics',
+            'Engineering Solution Provider',
+            'Deals in Furniture, Fixture Electric',
+            'Communication Systems',
+            'Embedded Systems',
+            'Hardware & Networking',
+            'Scientific & Lab Equipment',
+            'Civil Works & Construction',
+            'Security & Surveillance Systems'
+        ];
+
+        $dbFacils = DB::table('frm.facils')
+            ->whereNotNull('fcl_facil')
+            ->where('fcl_facil', '!=', '')
+            ->distinct()
+            ->pluck('fcl_facil')
+            ->toArray();
+
+        $facilities = collect(array_unique(array_merge($defaultFacilities, $dbFacils)))->sort()->values();
+
+        $contactTypes = ['Mobile', 'Landline', 'Fax', 'Email', 'Website'];
+
         $totalFirms = $enrichedFirms->count();
         $activeFirms = $enrichedFirms->where('frm_black', false)->count();
         $blacklistedFirms = $enrichedFirms->where('frm_black', true)->count();
         $awardedFirmsCount = $enrichedFirms->where('approved_cases_count', '>', 0)->count();
 
-        return view('nrdi.firms.list', compact('enrichedFirms', 'entities', 'types', 'totalFirms', 'activeFirms', 'blacklistedFirms', 'awardedFirmsCount'));
+        return view('nrdi.firms.list', compact(
+            'enrichedFirms',
+            'entities',
+            'types',
+            'specialities',
+            'facilities',
+            'contactTypes',
+            'totalFirms',
+            'activeFirms',
+            'blacklistedFirms',
+            'awardedFirmsCount'
+        ));
     }
 
     /**
@@ -362,5 +414,189 @@ class FirmController extends Controller
             'projects'     => $projects,
             'cases'        => $cases
         ]);
+    }
+
+    /**
+     * Store a newly created firm with General, Offices, Persons, and Projects.
+     */
+    public function store(Request $request)
+    {
+        $user = auth()->user();
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isAuthorized = in_array($area, ['fin', 'proc', 'prc', 'rdw', 'nrdi']) 
+            || session('impersonated_by_god') 
+            || strtolower($user->acc_username ?? '') === 'superadminrdw';
+
+        if (!$isAuthorized) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized: Only Finance and Procurement Directorate can register new firms.'
+            ], 403);
+        }
+
+        $request->validate([
+            'frm_name' => 'required|string|max:255',
+            'frm_type' => 'nullable|string|max:100',
+            'frm_ntn'  => 'nullable|string|max:100',
+            'frm_gst'  => 'nullable|string|max:100',
+        ]);
+
+        return DB::transaction(function () use ($request) {
+            $blacklisted = $request->input('frm_black') === 'true' || $request->input('frm_black') === '1' || $request->input('frm_black') === true;
+
+            // 1. Insert into frm.firmz
+            $newFrmId = DB::table('frm.firmz')->insertGetId([
+                'frm_name'   => trim($request->frm_name),
+                'frm_entity' => $request->frm_entity ?: 'Company',
+                'frm_type'   => $request->frm_type ?: 'Private company',
+                'frm_group'  => $request->frm_group ?: null,
+                'frm_emp'    => is_numeric($request->frm_emp) ? (int)$request->frm_emp : null,
+                'frm_points' => is_numeric($request->frm_points) ? (int)$request->frm_points : 5,
+                'frm_black'  => $blacklisted,
+                'frm_notes'  => $request->frm_notes ?: null,
+                'frm_ntn'    => $request->frm_ntn ?: null,
+                'frm_gst'    => $request->frm_gst ?: null,
+            ], 'frm_id');
+
+            // 2. Specialities (frm.specs)
+            if ($request->has('specialities') && is_array($request->specialities)) {
+                foreach ($request->specialities as $spec) {
+                    $specTrim = trim((string)$spec);
+                    if (!empty($specTrim)) {
+                        DB::table('frm.specs')->insert([
+                            'spc_xfrm_id' => $newFrmId,
+                            'spc_spec'    => $specTrim,
+                        ]);
+                    }
+                }
+            }
+
+            // 3. Facilities (frm.facils)
+            if ($request->has('facilities') && is_array($request->facilities)) {
+                foreach ($request->facilities as $facil) {
+                    $facilTrim = trim((string)$facil);
+                    if (!empty($facilTrim)) {
+                        DB::table('frm.facils')->insert([
+                            'fcl_xfrm_id' => $newFrmId,
+                            'fcl_facil'   => $facilTrim,
+                        ]);
+                    }
+                }
+            }
+
+            // 4. General Contacts (frm.info)
+            if ($request->has('contacts') && is_array($request->contacts)) {
+                foreach ($request->contacts as $c) {
+                    if (!empty($c['type']) && !empty($c['value'])) {
+                        DB::table('frm.info')->insert([
+                            'inf_xmsc_id'     => $newFrmId,
+                            'inf_xmsc_entity' => 'Firm',
+                            'inf_type'        => trim($c['type']),
+                            'inf_value'       => trim($c['value']),
+                        ]);
+                    }
+                }
+            }
+
+            // 5. Offices (frm.offices)
+            if ($request->has('offices') && is_array($request->offices)) {
+                foreach ($request->offices as $off) {
+                    if (!empty($off['off_city']) || !empty($off['off_address']) || !empty($off['off_type'])) {
+                        $newOffId = DB::table('frm.offices')->insertGetId([
+                            'off_entity'  => 'Office',
+                            'off_xfrm_id' => $newFrmId,
+                            'off_name'    => $off['off_name'] ?? ($off['off_type'] ?? 'Office'),
+                            'off_type'    => $off['off_type'] ?? 'Head Office',
+                            'off_address' => $off['off_address'] ?? null,
+                            'off_city'    => $off['off_city'] ?? null,
+                        ], 'off_id');
+
+                        if (isset($off['contacts']) && is_array($off['contacts'])) {
+                            foreach ($off['contacts'] as $oc) {
+                                if (!empty($oc['type']) && !empty($oc['value'])) {
+                                    DB::table('frm.info')->insert([
+                                        'inf_xmsc_id'     => $newOffId,
+                                        'inf_xmsc_entity' => 'Office',
+                                        'inf_type'        => trim($oc['type']),
+                                        'inf_value'       => trim($oc['value']),
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 6. Persons (frm.persons)
+            if ($request->has('persons') && is_array($request->persons)) {
+                foreach ($request->persons as $per) {
+                    if (!empty($per['per_name'])) {
+                        $newPerId = DB::table('frm.persons')->insertGetId([
+                            'per_entity'  => 'Person',
+                            'per_xfrm_id' => $newFrmId,
+                            'per_title'   => $per['per_title'] ?? 'Mr.',
+                            'per_name'    => trim($per['per_name']),
+                            'per_desig'   => $per['per_desig'] ?? null,
+                            'per_dept'    => $per['per_dept'] ?? null,
+                            'per_exprt'   => $per['per_exprt'] ?? null,
+                        ], 'per_id');
+
+                        if (isset($per['contacts']) && is_array($per['contacts'])) {
+                            foreach ($per['contacts'] as $pc) {
+                                if (!empty($pc['type']) && !empty($pc['value'])) {
+                                    DB::table('frm.info')->insert([
+                                        'inf_xmsc_id'     => $newPerId,
+                                        'inf_xmsc_entity' => 'Person',
+                                        'inf_type'        => trim($pc['type']),
+                                        'inf_value'       => trim($pc['value']),
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 7. Projects (frm.projects)
+            if ($request->has('projects') && is_array($request->projects)) {
+                foreach ($request->projects as $prj) {
+                    if (!empty($prj['prj_name'])) {
+                        DB::table('frm.projects')->insert([
+                            'prj_xfrm_id' => $newFrmId,
+                            'prj_name'    => trim($prj['prj_name']),
+                            'prj_scope'   => $prj['prj_scope'] ?? null,
+                            'prj_awarddt' => !empty($prj['prj_awarddt']) ? $prj['prj_awarddt'] : null,
+                            'prj_status'  => $prj['prj_status'] ?? 'Completed',
+                            'prj_compdt'  => !empty($prj['prj_compdt']) ? $prj['prj_compdt'] : null,
+                            'prj_tech'    => $prj['prj_tech'] ?? null,
+                            'prj_cost'    => is_numeric($prj['prj_cost'] ?? null) ? (int)$prj['prj_cost'] : null,
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Firm "' . $request->frm_name . '" registered successfully!',
+                'firm_id' => $newFrmId,
+                'firm' => [
+                    'frm_id'               => $newFrmId,
+                    'frm_name'             => trim($request->frm_name),
+                    'frm_entity'           => $request->frm_entity ?: 'Company',
+                    'frm_type'             => $request->frm_type ?: 'Private company',
+                    'frm_ntn'              => $request->frm_ntn ?: 'N/A',
+                    'frm_gst'              => $request->frm_gst ?: 'N/A',
+                    'frm_black'            => $blacklisted,
+                    'frm_notes'            => $request->frm_notes ?: '',
+                    'offices_count'        => isset($request->offices) ? count($request->offices) : 0,
+                    'main_city'            => isset($request->offices[0]['off_city']) ? $request->offices[0]['off_city'] : 'N/A',
+                    'persons_count'        => isset($request->persons) ? count($request->persons) : 0,
+                    'cases_count'          => 0,
+                    'approved_cases_count' => 0,
+                    'total_awarded'        => 0,
+                    'quotes_count'         => 0
+                ]
+            ]);
+        });
     }
 }

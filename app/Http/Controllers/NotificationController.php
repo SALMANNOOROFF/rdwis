@@ -22,9 +22,17 @@ class NotificationController extends Controller
             ->take(5)
             ->get();
 
+        $badges = \App\Services\SidebarBadgeService::getBadgesForUser($user);
+
         return response()->json([
             'count' => PurNotification::where('pnt_acc_id', $user->acc_id)->where('pnt_is_read', false)->count(),
-            'notifications' => $notifs
+            'notifications' => $notifs,
+            'badges' => [
+                'purchase_cases' => $badges['pur'],
+                'contract_cases' => $badges['ctr'],
+                'hr'             => $badges['hr'],
+                'hired_emps'     => $badges['hr'],
+            ]
         ]);
     }
 

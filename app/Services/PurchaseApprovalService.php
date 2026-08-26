@@ -17,25 +17,110 @@ class PurchaseApprovalService
 
     /**
      * Forward chain: stage → next stage (area code)
-     * Division skips DProc (DProc is collaborative, not a gate)
+    /**
+     * Get default workflow configuration matrix
      */
-    protected $forwardChain = [
-        'Division'  => ['stage' => 'DFinance', 'area' => 'fin'],
-        'DFinance'  => ['stage' => 'MD',       'area' => 'rdw'],
-        'MD'        => ['stage' => 'DDG',      'area' => 'hqs'],   // Only if amount > threshold
-        'DDG'       => ['stage' => 'DG',       'area' => 'nrdi'],  // Only if amount > threshold
-    ];
+    public function getDefaultWorkflowMatrix(): array
+    {
+        return [
+            'forward_chain' => [
+                'Division' => ['next' => 'DFinance', 'area' => 'fin'],
+                'DProc'    => ['next' => 'Division', 'area' => 'prj'],
+                'DFinance' => ['next' => 'MD',       'area' => 'rdw'],
+                'MD'       => ['next' => 'DDG',      'area' => 'hqs'],
+                'DDG'      => ['next' => 'DG',       'area' => 'nrdi'],
+                'DG'       => ['next' => 'Approved', 'area' => null],
+            ],
+            'return_chain' => [
+                'DFinance' => 'Division',
+                'MD'       => 'DFinance',
+                'DDG'      => 'MD',
+                'DG'       => 'DDG',
+            ],
+            'enabled_stages' => [
+                'Division' => true,
+                'DProc'    => true,
+                'DFinance' => true,
+                'MD'       => true,
+                'DDG'      => true,
+                'DG'       => true,
+            ],
+            'return_policy' => 'historical', // 'historical' = flexible trail, 'previous' = strict predecessor
+        ];
+    }
 
     /**
-     * Return chain: stage → previous stage
-     * Returning from DFinance goes back to Division (sets pcs_status='Returned')
+     * Get dynamic workflow configuration matrix for a specific case type or default
      */
-    protected $returnChain = [
-        'DFinance'  => 'Division',
-        'MD'        => 'DFinance',
-        'DDG'       => 'MD',
-        'DG'        => 'DDG',
-    ];
+    public function getWorkflowMatrix(?string $caseType = null): array
+    {
+        $raw = \App\Models\SystemSetting::get('pur_workflow_matrix', null);
+        $defaults = $this->getDefaultWorkflowMatrix();
+
+        if (empty($raw)) {
+            return $defaults;
+        }
+
+        $decoded = is_string($raw) ? json_decode($raw, true) : $raw;
+        if (!is_array($decoded) || empty($decoded)) {
+            return $defaults;
+        }
+
+        $rawType = strtolower(trim($caseType ?? 'ps'));
+        $typeKey = strtoupper($rawType);
+
+        // 1. Direct match by workflow key (PS, PT, RB, DEFAULT)
+        if (isset($decoded[$typeKey]) && is_array($decoded[$typeKey])) {
+            return array_replace_recursive($defaults, $decoded[$typeKey]);
+        }
+
+        // 2. Match by assigned case categories
+        foreach (['PS', 'PT', 'RB'] as $flowKey) {
+            if (isset($decoded[$flowKey]['assigned_types']) && is_array($decoded[$flowKey]['assigned_types'])) {
+                $assigned = array_map('strtolower', $decoded[$flowKey]['assigned_types']);
+                if (in_array($rawType, $assigned)) {
+                    return array_replace_recursive($defaults, $decoded[$flowKey]);
+                }
+            }
+        }
+
+        // 3. Fallback to PS, then DEFAULT
+        if (isset($decoded['PS']) && is_array($decoded['PS'])) {
+            return array_replace_recursive($defaults, $decoded['PS']);
+        }
+
+        if (isset($decoded['DEFAULT']) && is_array($decoded['DEFAULT'])) {
+            return array_replace_recursive($defaults, $decoded['DEFAULT']);
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Get assigned case types for a specific workflow (PS, PT, RB)
+     */
+    public function getAssignedCaseTypes(string $workflowKey = 'PS'): array
+    {
+        $matrix = $this->getWorkflowMatrix($workflowKey);
+        $assigned = $matrix['assigned_types'] ?? [];
+        if (empty($assigned)) {
+            $assigned = ($workflowKey === 'PS') 
+                ? ['mat', 'lic', 'stat', 'book', 'cons', 'serv'] 
+                : (($workflowKey === 'PT') ? ['stat', 'tran', 'tada', 'mat'] : ['civ', 'serv', 'net', 'lic']);
+        }
+        $assigned[] = strtolower($workflowKey);
+        return array_values(array_unique(array_map('strtolower', (array)$assigned)));
+    }
+
+    /**
+     * Check if a case type is routed to DProc collaborative loop (PS)
+     */
+    public function isProcurementCase(?string $pcsType): bool
+    {
+        $rawType = strtolower(trim((string)($pcsType ?? 'ps')));
+        $psTypes = $this->getAssignedCaseTypes('PS');
+        return in_array($rawType, $psTypes);
+    }
 
     /**
      * Display names for stages (used in UI)
@@ -47,6 +132,7 @@ class PurchaseApprovalService
         'MD'        => 'MD Office',
         'DDG'       => 'DDG Office',
         'DG'        => 'Director General',
+        'Approved'  => 'Final Approval (Success)',
     ];
 
     /**
@@ -59,6 +145,7 @@ class PurchaseApprovalService
         'MD'        => 'rdw',
         'DDG'       => 'hqs',
         'DG'        => 'nrdi',
+        'Approved'  => null,
     ];
 
     /**
@@ -86,7 +173,7 @@ class PurchaseApprovalService
 
         if ($mapping['stage'] === 'Approved') return 'Final Approval (Success)';
 
-        return $this->displayNames[$mapping['stage']] ?? null;
+        return $this->displayNames[$mapping['stage']] ?? $mapping['stage'];
     }
 
     /**
@@ -110,25 +197,33 @@ class PurchaseApprovalService
 
     /**
      * Get all possible return targets based on the case's substatus history.
-     * Uses purcase_substatus (uniform stage names) — NOT purdecisions (fix #4).
      */
     public function getReturnTargets(Purchase $case): array
     {
-        // Get all historical stages this case has passed through
+        $matrix = $this->getWorkflowMatrix($case->pcs_type);
+        $returnPolicy = $matrix['return_policy'] ?? 'historical';
+        $returnChain = $matrix['return_chain'] ?? $this->getDefaultWorkflowMatrix()['return_chain'];
+        $currentStage = $case->currentSubstatus?->pss_stage;
+
+        if ($returnPolicy === 'previous') {
+            $prev = $returnChain[$currentStage] ?? 'Division';
+            return [$prev => $this->displayNames[$prev] ?? $prev];
+        }
+
+        // Default 'historical' mode: Get all historical stages this case has passed through
         $historicalStages = PurCaseSubstatus::where('pss_pcs_id', $case->pcs_id)
             ->orderBy('pss_id', 'asc')
             ->pluck('pss_stage')
             ->unique()
             ->toArray();
 
-        $currentStage = $case->currentSubstatus?->pss_stage;
         $targets = [];
 
         // Always allow returning to Division
         $targets['Division'] = $this->displayNames['Division'];
 
         foreach ($historicalStages as $stage) {
-            // Exclude current stage, and DProc (never a return target)
+            // Exclude current stage, and DProc
             if ($stage !== $currentStage && $stage !== 'Division' && isset($this->displayNames[$stage])) {
                 $targets[$stage] = $this->displayNames[$stage];
             }
@@ -177,7 +272,7 @@ class PurchaseApprovalService
 
             } elseif ($action === 'approve') {
                 // Terminal approval: verify authorization
-                if ($this->canApprove($userArea, $case->pcs_price)) {
+                if ($this->canApprove($userArea, $case->pcs_price, $case)) {
                     $newPcsStatus = 'Approved';
                     $toStage = 'Approved';
                     $this->closeSubstatus($case); // fix #1: no new row for terminal
@@ -282,15 +377,30 @@ class PurchaseApprovalService
         });
     }
 
+    public function getMdThreshold(): float
+    {
+        return (float) \App\Models\SystemSetting::get('pur_md_threshold', 400000);
+    }
+
+    public function getDdgThreshold(): float
+    {
+        return (float) \App\Models\SystemSetting::get('pur_ddg_threshold', 1000000);
+    }
+
     /**
      * Check if a role is authorized to approve the current case amount
      */
-    public function canApprove(string $area, float $amount): bool
+    public function canApprove(string $area, float $amount, ?Purchase $case = null): bool
     {
-        $area = strtolower($area);
+        $area = strtolower(trim($area));
         if ($area === 'nrdi') return true; // DG can always approve
-        if ($area === 'hqs' && $amount <= self::THRESHOLD_DDG) return true; // DDG < 10L
-        if ($area === 'rdw' && $amount <= self::THRESHOLD_MD) return true; // MD < 4L
+
+        $evalPrice = $case ? $case->effective_evaluation_price : $amount;
+        $mdLimit = $this->getMdThreshold();
+        $ddgLimit = $this->getDdgThreshold();
+
+        if ($area === 'hqs' && $evalPrice <= $ddgLimit) return true;
+        if ($area === 'rdw' && $evalPrice <= $mdLimit) return true;
 
         return false;
     }
@@ -336,39 +446,55 @@ class PurchaseApprovalService
     protected function resolveForwarding(Purchase $case, string $currentArea)
     {
         $currentArea = strtolower(trim($currentArea));
+        $evalPrice = $case->effective_evaluation_price;
+        $mdLimit = $this->getMdThreshold();
+        $ddgLimit = $this->getDdgThreshold();
 
-        // Division (prj, rdwprj, etc.) → DFinance
+        $matrix = $this->getWorkflowMatrix($case->pcs_type);
+        $forwardChain = $matrix['forward_chain'] ?? [];
+
+        // 1. Division (prj, rdwprj, etc.)
         if (in_array($currentArea, ['prj', 'rdwprj', 'division', 'initiation'])) {
-            return ['stage' => 'DFinance', 'area' => 'fin'];
+            $next = is_array($forwardChain['Division'] ?? null) ? ($forwardChain['Division']['next'] ?? 'DFinance') : ($forwardChain['Division'] ?? 'DFinance');
+            if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
+            return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'fin'];
         }
 
-        // DProc → DFinance (collaborative forward)
+        // 2. DProc (collaborative forward / finalize)
         if (str_contains($currentArea, 'proc') || $currentArea === 'prc') {
-            return ['stage' => 'DFinance', 'area' => 'fin'];
+            $next = is_array($forwardChain['DProc'] ?? null) ? ($forwardChain['DProc']['next'] ?? 'DFinance') : ($forwardChain['DProc'] ?? 'DFinance');
+            if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
+            return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'fin'];
         }
 
-        // DFinance → MD
+        // 3. DFinance
         if (str_contains($currentArea, 'fin')) {
-            return ['stage' => 'MD', 'area' => 'rdw'];
+            $next = is_array($forwardChain['DFinance'] ?? null) ? ($forwardChain['DFinance']['next'] ?? 'MD') : ($forwardChain['DFinance'] ?? 'MD');
+            if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
+            return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'rdw'];
         }
 
-        // MD → DDG (if >= 4L) or Approve
+        // 4. MD
         if ($currentArea === 'rdw') {
-            if ($case->pcs_price <= self::THRESHOLD_MD) {
+            if ($evalPrice <= $mdLimit) {
                 return ['stage' => 'Approved', 'area' => null];
             }
-            return ['stage' => 'DDG', 'area' => 'hqs'];
+            $next = is_array($forwardChain['MD'] ?? null) ? ($forwardChain['MD']['next'] ?? 'DDG') : ($forwardChain['MD'] ?? 'DDG');
+            if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
+            return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'hqs'];
         }
 
-        // DDG → DG (if >= 10L) or Approve
+        // 5. DDG
         if ($currentArea === 'hqs') {
-            if ($case->pcs_price <= self::THRESHOLD_DDG) {
+            if ($evalPrice <= $ddgLimit) {
                 return ['stage' => 'Approved', 'area' => null];
             }
-            return ['stage' => 'DG', 'area' => 'nrdi'];
+            $next = is_array($forwardChain['DDG'] ?? null) ? ($forwardChain['DDG']['next'] ?? 'DG') : ($forwardChain['DDG'] ?? 'DG');
+            if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
+            return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'nrdi'];
         }
 
-        // DG forward = Approve (DG is always the end)
+        // 6. DG (Terminal)
         if ($currentArea === 'nrdi') {
             return ['stage' => 'Approved', 'area' => null];
         }

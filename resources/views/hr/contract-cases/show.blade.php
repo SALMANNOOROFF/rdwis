@@ -1,9 +1,13 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
 <style>
-    /* Premium Dark Theme */
-    .dark-contract-wrapper { background-color: var(--rd-bg);
+    .dark-contract-wrapper { 
+        background-color: var(--rd-bg);
         color: var(--rd-text1);
         font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         min-height: calc(100vh - 60px);
@@ -55,6 +59,11 @@
         box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
     }
 
+    .fulfill-card {
+        border-color: #059669;
+        background: rgba(5, 150, 105, 0.05);
+    }
+
     .data-grid {
         display: grid;
         grid-template-columns: 1fr 2fr 1fr 2fr;
@@ -79,6 +88,20 @@
         color: var(--rd-text1);
     }
 
+    .dark-input {
+        background-color: var(--rd-surface);
+        border: 1.5px solid var(--rd-border2);
+        color: var(--rd-text1);
+        border-radius: 6px;
+        padding: 0.6rem 1rem;
+        width: 100%;
+        font-size: 0.9rem;
+    }
+    .dark-input:focus {
+        outline: none;
+        border-color: var(--rd-primary-600);
+    }
+
     .btn-action-primary {
         background: var(--rd-primary-600);
         color: var(--rd-text1);
@@ -91,6 +114,18 @@
         transition: background 0.2s;
     }
     .btn-action-primary:hover { background: var(--rd-primary-700); }
+
+    .btn-action-warning {
+        background: #f59e0b;
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+        width: 100%;
+        margin-bottom: 0.5rem;
+        transition: background 0.2s;
+    }
 
     .btn-action-danger {
         background: transparent;
@@ -112,10 +147,11 @@
         color: var(--rd-text1);
         border: none;
         border-radius: 6px;
-        padding: 0.8rem 1rem;
-        font-weight: 700;
+        padding: 0.9rem 1rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
         width: 100%;
-        margin-bottom: 0.5rem;
+        margin-top: 0.5rem;
         transition: background 0.2s;
     }
     .btn-action-success:hover { background: #059669; }
@@ -130,25 +166,6 @@
         text-transform: uppercase;
         border: 1px solid #334155;
     }
-
-    /* Small table */
-    .small-dark-table {
-        width: 100%;
-    }
-    .small-dark-table th {
-        background: var(--rd-surface);
-        color: var(--rd-text3);
-        padding: 0.8rem;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        border-bottom: 1px solid #2d3748;
-    }
-    .small-dark-table td {
-        padding: 0.8rem;
-        color: var(--rd-text1);
-        border-bottom: 1px solid #2d3748;
-        font-size: 0.85rem;
-    }
 </style>
 
 <div class="content-wrapper" style="background-color: var(--rd-surface);">
@@ -156,7 +173,12 @@
         <div class="dark-contract-wrapper">
             
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="header-title">Case Details #{{ $case->ctc_id }} - Scrutiny</h1>
+                <div>
+                    <h1 class="header-title mb-1">Contract Case #{{ $case->ctc_id }} - HR Portal</h1>
+                    <span class="status-badge" style="background: rgba(95,120,88,0.15); color: #60a5fa; border-color: rgba(95,120,88,0.3);">
+                        CURRENT HOLDER: {{ $case->currentSubstatus->display_name ?? $case->ctc_status }}
+                    </span>
+                </div>
                 <a href="{{ route('hr.contract-cases.index') }}" class="btn-back"><i class="fas fa-arrow-left mr-2"></i> Back to Hub</a>
             </div>
 
@@ -164,28 +186,29 @@
                 <!-- Left Column -->
                 <div class="col-md-8">
                     <div class="premium-card">
-                        <div class="premium-card-header">Contract Summary</div>
+                        <div class="premium-card-header d-flex justify-content-between align-items-center">
+                            <span>Contract Summary</span>
+                            <span class="badge badge-secondary px-3 py-1 font-weight-bold">{{ $case->ctc_status }}</span>
+                        </div>
                         
                         <div class="data-grid">
                             <div class="data-grid-item data-label">Type</div>
-                            <div class="data-grid-item data-value">
-                                @if($case->ctc_type == 'Hg') Fresh Hiring
-                                @elseif($case->ctc_type == 'Ce') Extension
-                                @elseif($case->ctc_type == 'Cr') Renewal
-                                @elseif($case->ctc_type == 'Rh') Rehiring
+                            <div class="data-grid-item data-value font-weight-bold text-info">
+                                @if($case->ctc_type == 'Hg') Fresh Hiring (Hg)
+                                @elseif($case->ctc_type == 'Ce') Contract Extension (Ce)
+                                @elseif($case->ctc_type == 'Cr') Contract Renewal (Cr)
+                                @elseif($case->ctc_type == 'Rh') Rehiring (Rh)
                                 @endif
                             </div>
-                            <div class="data-grid-item data-label">Status</div>
-                            <div class="data-grid-item data-value">
-                                <span class="status-badge">{{ $case->ctc_status }}</span>
-                            </div>
+                            <div class="data-grid-item data-label">Division</div>
+                            <div class="data-grid-item data-value">{{ $case->unit->unt_name ?? 'N/A' }}</div>
                         </div>
 
                         <div class="data-grid">
-                            <div class="data-grid-item data-label">Name</div>
+                            <div class="data-grid-item data-label">Candidate Name</div>
                             <div class="data-grid-item data-value">{{ $case->ctc_empnamecomp }}</div>
-                            <div class="data-grid-item data-label">Employee Type</div>
-                            <div class="data-grid-item data-value">{{ $case->ctc_emp_type }}</div>
+                            <div class="data-grid-item data-label">Employee ID</div>
+                            <div class="data-grid-item data-value">{{ $case->ctc_emp_id ?: 'New Candidate' }}</div>
                         </div>
 
                         <div class="data-grid">
@@ -196,10 +219,10 @@
                         </div>
 
                         <div class="data-grid">
-                            <div class="data-grid-item data-label">Salary</div>
-                            <div class="data-grid-item data-value">Rs. {{ number_format($case->ctc_newsalary) }}</div>
-                            <div class="data-grid-item data-label">Probation</div>
-                            <div class="data-grid-item data-value">Standard</div>
+                            <div class="data-grid-item data-label">Proposed Salary</div>
+                            <div class="data-grid-item data-value font-weight-bold text-success">Rs. {{ number_format($case->ctc_newsalary) }} / month</div>
+                            <div class="data-grid-item data-label">Total Case Price</div>
+                            <div class="data-grid-item data-value font-weight-bold" style="color: #60a5fa;">Rs. {{ number_format((float)($case->ctc_price ?? 0)) }}</div>
                         </div>
 
                         <div class="data-grid">
@@ -208,64 +231,154 @@
                             <div class="data-grid-item data-label">End Date</div>
                             <div class="data-grid-item data-value">{{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M Y') : 'N/A' }}</div>
                         </div>
+
+                        @if($case->ctc_newprob > 0)
+                            <div class="data-grid">
+                                <div class="data-grid-item data-label">Probation Period</div>
+                                <div class="data-grid-item data-value">{{ $case->ctc_newprob }} Months</div>
+                                <div class="data-grid-item data-label">Probation Salary</div>
+                                <div class="data-grid-item data-value">Rs. {{ number_format((float)($case->ctc_newprobsal ?: $case->ctc_newsalary)) }}</div>
+                            </div>
+                        @endif
+
+                        @if($case->ctc_terminremarks)
+                            <div class="p-3 border-top border-secondary" style="border-color: #2d3748 !important; background: rgba(245, 158, 11, 0.05);">
+                                <span class="text-warning font-weight-bold d-block mb-1"><i class="fas fa-info-circle mr-1"></i> Extension / Early Termination Remarks:</span>
+                                <p class="text-white mb-0" style="font-size: 0.9rem;">{{ $case->ctc_terminremarks }}</p>
+                            </div>
+                        @endif
                     </div>
 
-                    @php $cv = $case->attachments->where('cat_type', 'CV')->first(); @endphp
-                    @if($cv)
-                    <div class="premium-card">
-                        <div class="premium-card-header">Attached Documents</div>
-                        <div class="p-4 text-center">
-                            <a href="{{ Storage::url($cv->cat_path) }}" target="_blank" style="color: #60a5fa; text-decoration: none;">
-                                <i class="fas fa-file-pdf fa-2x mb-2 d-block"></i>
-                                View Uploaded CV/Document
-                            </a>
+                    <!-- Monthly Plan breakdown -->
+                    @if($case->casePlans->isNotEmpty())
+                        <div class="premium-card">
+                            <div class="premium-card-header">Project Head Allocation Plan</div>
+                            <div class="table-responsive">
+                                <table class="table mb-0 text-white" style="font-size: 0.85rem;">
+                                    <thead>
+                                        <tr style="background: rgba(255,255,255,0.03); color: var(--rd-text3);">
+                                            <th>#</th>
+                                            <th>Month Period</th>
+                                            <th>Project Code & Title</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($case->casePlans as $idx => $cp)
+                                            <tr style="border-top: 1px solid #2d3748;">
+                                                <td>{{ $idx + 1 }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($cp->ccp_startdt)->format('d M Y') }} - {{ \Carbon\Carbon::parse($cp->ccp_enddt)->format('d M Y') }}</td>
+                                                <td>
+                                                    @if($cp->project)
+                                                        <span class="badge badge-primary">{{ $cp->project->prj_code }}</span> {{ $cp->project->prj_title }}
+                                                    @else
+                                                        <span class="text-muted">Core / Non-Project</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
                     @endif
+
+                    @include('partials.attachments_widget', [
+                        'module' => 'ctc',
+                        'objectId' => $case->ctc_id,
+                        'title' => 'Case Attachments',
+                        'defaultSlots' => ['CV', 'Approval', 'Form', 'Minute'],
+                        'attachments' => $case->attachments,
+                        'canEdit' => in_array($case->current_stage, ['HR', 'Approved']),
+                    ])
                 </div>
 
                 <!-- Right Column -->
                 <div class="col-md-4">
-                    <div class="premium-card">
-                        <div class="premium-card-header">Current Strength ({{ $case->unit->unt_name ?? '' }})</div>
-                        <div class="p-0">
-                            <table class="small-dark-table text-center mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Emp Type</th>
-                                        <th>Total Strength</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($strength as $st)
-                                    <tr>
-                                        <td>{{ $st->emp_type }}</td>
-                                        <td style="font-weight: 700; color: #60a5fa;">{{ $st->total }}</td>
-                                    </tr>
-                                    @empty
-                                    <tr><td colspan="2" style="color: var(--rd-text3);">No active employees found</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    @php $stage = $case->current_stage; @endphp
 
-                    <div class="premium-card action-card">
-                        <div class="premium-card-header">HR Actions</div>
-                        <div class="p-4">
-                            @if($case->ctc_status == 'Under HR Scrutiny')
-                                <button class="btn-action-primary btn-action" data-url="{{ route('hr.contract-cases.forward', $case->ctc_id) }}" data-msg="Forward to Finance?"><i class="fas fa-share mr-2"></i> Forward to Finance</button>
-                                <button class="btn-action-danger btn-action" data-url="{{ route('hr.contract-cases.return', $case->ctc_id) }}" data-msg="Return to Division?"><i class="fas fa-undo mr-2"></i> Return to Division</button>
-                            @elseif($case->ctc_status == 'Approved')
-                                <button class="btn-action-success btn-action" data-url="{{ route('hr.contract-cases.fulfill', $case->ctc_id) }}" data-msg="Fulfill Case?"><i class="fas fa-check-circle mr-2"></i> Fulfill Case</button>
-                            @else
-                                <div class="text-center">
-                                    <i class="fas fa-lock fa-2x mb-2 text-secondary"></i>
-                                    <p style="color: var(--rd-text3); font-size: 0.9rem;">No pending actions for HR at this stage.</p>
-                                </div>
-                            @endif
+                    @if($stage === 'HR')
+                        <!-- HR Scrutiny Action Card -->
+                        <div class="premium-card action-card">
+                            <div class="premium-card-header"><i class="fas fa-tasks mr-1"></i> HR Scrutiny Actions</div>
+                            <div class="p-4">
+                                <p class="text-muted text-sm mb-3">Review the case details, verification attachments, and forward to Finance for financial scrutiny or return to Division.</p>
+                                
+                                <button class="btn-action-primary" id="btn-forward-fin"><i class="fas fa-paper-plane mr-2"></i> Forward to Finance</button>
+                                <button class="btn-action-warning" id="btn-return-div"><i class="fas fa-undo mr-2"></i> Return to Division</button>
+                                <button class="btn-action-danger" id="btn-reject-case"><i class="fas fa-times-circle mr-2"></i> Reject Case</button>
+                            </div>
                         </div>
-                    </div>
+                    @elseif($stage === 'Approved' || $case->ctc_status === 'Approved')
+                        <!-- Ready for Fulfillment Card -->
+                        <div class="premium-card fulfill-card">
+                            <div class="premium-card-header bg-success text-white font-weight-bold">
+                                <i class="fas fa-check-double mr-1"></i> Ready for Contract Issuance
+                            </div>
+                            <div class="p-4">
+                                <form id="fulfillmentForm">
+                                    @csrf
+                                    <div class="form-group mb-3">
+                                        <label class="dark-label font-weight-bold text-white">Contract Signing Date <span class="text-danger">*</span></label>
+                                        <input type="date" name="ctc_newsigndt" id="ctc_newsigndt" class="dark-input border-success" value="{{ date('Y-m-d') }}" required>
+                                    </div>
+
+                                    @if(in_array(strtoupper($case->ctc_type), ['CE', 'CR']))
+                                        <div class="form-group mb-3">
+                                            <label class="dark-label font-weight-bold text-white">Extension / Termination Remarks @if($case->ctc_type == 'Ce') <span class="text-danger">*</span> @endif</label>
+                                            <textarea name="ctc_terminremarks" class="dark-input" rows="2" placeholder="Mandatory for Extension" @if($case->ctc_type == 'Ce') required @endif>{{ $case->ctc_terminremarks }}</textarea>
+                                        </div>
+                                    @endif
+
+                                    <button type="submit" class="btn-action-success" id="btn-fulfill-submit">
+                                        <i class="fas fa-file-signature mr-2"></i> FULFILL & ISSUE CONTRACT
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @elseif($case->ctc_status === 'Fulfilled')
+                        <!-- Fulfilled Card -->
+                        <div class="premium-card">
+                            <div class="premium-card-header bg-dark text-success"><i class="fas fa-check-circle mr-1"></i> Case Fulfilled</div>
+                            <div class="p-4 text-center">
+                                <i class="fas fa-stamp fa-3x text-success mb-3"></i>
+                                <h6 class="font-weight-bold text-white">Contract Successfully Issued</h6>
+                                @if($case->ctc_newctr_id)
+                                    <p class="text-muted mb-0">Generated Contract ID: <strong class="text-info">#{{ $case->ctc_newctr_id }}</strong></p>
+                                @endif
+                                <p class="text-muted small mt-1">Closed at: {{ $case->ctc_closedtg ? \Carbon\Carbon::parse($case->ctc_closedtg)->format('d M Y H:i') : 'N/A' }}</p>
+                            </div>
+                        </div>
+                    @else
+                        <!-- In Progress Card -->
+                        <div class="premium-card">
+                            <div class="premium-card-header">Case Workflow Status</div>
+                            <div class="p-4 text-center">
+                                <i class="fas fa-hourglass-half fa-2x mb-3 text-warning"></i>
+                                <p class="text-muted" style="font-size: 0.9rem;">
+                                    Currently held by authority:<br>
+                                    <span class="status-badge mt-2 d-inline-block text-white" style="border-color: #60a5fa;">{{ $case->currentSubstatus->display_name ?? $case->ctc_status }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Workflow Trail History -->
+                    @if($case->remarksHistory->isNotEmpty())
+                        <div class="premium-card">
+                            <div class="premium-card-header"><i class="fas fa-history mr-1"></i> Scrutiny Trail</div>
+                            <div class="p-3" style="max-height: 250px; overflow-y: auto;">
+                                @foreach($case->remarksHistory as $rm)
+                                    <div class="mb-3 pb-2 border-bottom border-secondary" style="border-color: #2d3748 !important; font-size: 0.82rem;">
+                                        <div class="d-flex justify-content-between text-muted">
+                                            <strong>{{ $rm->crr_username }} ({{ $rm->crr_status }})</strong>
+                                            <span>{{ \Carbon\Carbon::parse($rm->crr_dtg)->format('d M H:i') }}</span>
+                                        </div>
+                                        <p class="text-white mt-1 mb-0">{{ $rm->crr_remarks }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -278,31 +391,139 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    $('.btn-action').click(function() {
-        const url = $(this).data('url');
-        const msg = $(this).data('msg');
-
+    // ── Forward to Finance ────────────────────────────────────
+    $('#btn-forward-fin').click(function() {
         Swal.fire({
-            title: 'Confirm Action',
-            text: msg,
-            icon: 'question',
+            title: 'Forward to Finance',
+            input: 'textarea',
+            inputLabel: 'Remarks for Finance Scrutiny (Optional)',
+            inputPlaceholder: 'Enter any notes or observations...',
             showCancelButton: true,
-            confirmButtonColor: '#5F7858',
+            confirmButtonText: 'Forward to Finance',
+            confirmButtonColor: '#3182ce',
             cancelButtonColor: '#4a5568'
         }).then((result) => {
-            if(result.isConfirmed) {
+            if (result.isConfirmed) {
                 $.ajax({
-                    url: url,
+                    url: "{{ route('hr.contract-cases.forward', $case->ctc_id) }}",
                     method: 'POST',
-                    data: { _token: '{{ csrf_token() }}' },
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value || 'Forwarded to Finance for financial scrutiny.'
+                    },
                     success: function(res) {
-                        if(res.success) {
-                            Swal.fire('Success', res.message, 'success').then(() => {
-                                window.location.href = "{{ route('hr.contract-cases.index') }}";
-                            });
-                        }
+                        Swal.fire('Forwarded', res.message, 'success').then(() => {
+                            window.location.href = "{{ route('hr.contract-cases.index') }}";
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to forward case.', 'error');
                     }
                 });
+            }
+        });
+    });
+
+    // ── Return to Division ────────────────────────────────────
+    $('#btn-return-div').click(function() {
+        Swal.fire({
+            title: 'Return to Division',
+            input: 'textarea',
+            inputLabel: 'Reason for Return (Required)',
+            inputPlaceholder: 'Specify required corrections...',
+            inputValidator: (value) => {
+                if (!value) return 'You must provide a reason for return!';
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Return for Revision',
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#4a5568'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('hr.contract-cases.return', $case->ctc_id) }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value
+                    },
+                    success: function(res) {
+                        Swal.fire('Returned', res.message, 'success').then(() => {
+                            window.location.href = "{{ route('hr.contract-cases.index') }}";
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to return case.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // ── Reject Case ───────────────────────────────────────────
+    $('#btn-reject-case').click(function() {
+        Swal.fire({
+            title: 'Reject Contract Case',
+            input: 'textarea',
+            inputLabel: 'Rejection Reason (Required)',
+            inputPlaceholder: 'Specify reasons why this case is not approved...',
+            inputValidator: (value) => {
+                if (!value) return 'Reason for rejection is mandatory!';
+            },
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Reject',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#4a5568'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('hr.contract-cases.reject', $case->ctc_id) }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value
+                    },
+                    success: function(res) {
+                        Swal.fire('Rejected', res.message, 'info').then(() => {
+                            window.location.href = "{{ route('hr.contract-cases.index') }}";
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to reject case.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // ── Fulfill Submit ────────────────────────────────────────
+    $('#fulfillmentForm').submit(function(e) {
+        e.preventDefault();
+        const btn = $('#btn-fulfill-submit');
+        const formData = $(this).serialize();
+
+        btn.attr('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Generating Contract...');
+
+        $.ajax({
+            url: "{{ route('hr.contract-cases.fulfill', $case->ctc_id) }}",
+            method: 'POST',
+            data: formData,
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire({
+                        title: 'Fulfilled!',
+                        text: res.message,
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                }
+            },
+            error: function(err) {
+                const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Fulfillment failed. Check requirements.';
+                Swal.fire('Fulfillment Error', msg, 'error');
+                btn.attr('disabled', false).html('<i class="fas fa-file-signature mr-2"></i> FULFILL & ISSUE CONTRACT');
             }
         });
     });

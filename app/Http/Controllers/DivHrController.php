@@ -18,40 +18,58 @@ class DivHrController extends Controller
 
         // Determine Mode with Session Persistence
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isGlobalHrViewer = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc', 'it'])
+            || session('impersonated_by_god')
+            || strtolower($user->acc_username ?? '') === 'superadminrdw';
+
         if ($request->has('mode')) {
             $mode = $request->query('mode') === 's' ? 's' : 'm';
             session(['hr_mode' => $mode]);
         } else {
-            $defaultMode = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs']) ? 'm' : 's';
+            $defaultMode = $isGlobalHrViewer ? 'm' : 's';
             $mode = session('hr_mode', $defaultMode);
         }
 
-        if ($mode === 's') {
-            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
-            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
-            $varModeStr = 'approver-s';
-        } else {
-            $lower = 0;
-            $upper = 99999999;
-            $varModeStr = 'approver-m';
-        }
         $userAuth = (string) ($user->acc_auth ?? 'viewer');
 
         $q = Employee::query()
             ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
             ->leftJoin('cen.units as u', 'u.unt_id', '=', 'hr.emps.emp_unt_id')
-            ->select('hr.emps.*', 'h.hed_code');
-        
-        $q->whereBetween('emp_unt_id', [$lower, $upper]);
+            ->select('hr.emps.*', 'h.hed_code', 'u.unt_name', 'u.unt_namesh');
 
-        // Check if the logged-in user unit is of type Division
-        $userUnit = DB::table('cen.units')->where('unt_id', $user->acc_unt_id)->first();
-        $isDivisionUser = $userUnit && $userUnit->unt_type === 'Division';
-
-        // If Mode S (My Dept), filter out divisions explicitly, unless the logged-in user is a Division user itself
-        if ($mode === 's' && !$isDivisionUser) {
-            $q->where('u.unt_type', '!=', 'Division');
+        if (!$isGlobalHrViewer) {
+            // For Division users, strictly lock to their division units
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $varModeStr = 'approver-s';
+            $q->whereBetween('emp_unt_id', [$lower, $upper]);
+        } else {
+            // Global view (MD, DDG, DG, HR, Finance, Procurement)
+            if ($mode === 's') {
+                $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+                $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+                $varModeStr = 'approver-s';
+                $q->whereBetween('emp_unt_id', [$lower, $upper]);
+            } else {
+                $lower = 0;
+                $upper = 99999999;
+                $varModeStr = 'approver-m';
+                if ($request->filled('unit_id') && $request->unit_id !== 'all') {
+                    $q->where('emp_unt_id', $request->unit_id);
+                }
+            }
         }
+
+        // Available divisions/units with employees for dropdown filter
+        $divisions = DB::table('cen.units as u')
+            ->whereExists(function($sq) {
+                $sq->select(DB::raw(1))
+                   ->from('hr.emps as e')
+                   ->whereColumn('e.emp_unt_id', 'u.unt_id');
+            })
+            ->select('u.unt_id', 'u.unt_name', 'u.unt_namesh')
+            ->orderBy('u.unt_name')
+            ->get();
 
         if ($request->filled('term')) {
             $t = strtolower($request->term);
@@ -79,8 +97,22 @@ class DivHrController extends Controller
         }
 
         $employees = $q->orderBy('emp_name', 'asc')->get();
+
+        $empIds = $employees->pluck('emp_id')->filter()->toArray();
+        $latestContracts = [];
+        if (!empty($empIds)) {
+            $latestContracts = DB::table('hr.contracts as c')
+                ->leftJoin('cen.heads as ch', 'c.ctr_hed_id', '=', 'ch.hed_id')
+                ->whereIn('c.ctr_num', $empIds)
+                ->select('c.ctr_num', 'c.ctr_jobtitle', 'c.ctr_salary', 'ch.hed_code', 'c.ctr_startdt', 'c.ctr_enddt')
+                ->orderBy('c.ctr_startdt', 'desc')
+                ->orderBy('c.ctr_id', 'desc')
+                ->get()
+                ->groupBy('ctr_num')
+                ->map(fn($group) => $group->first());
+        }
         
-        return view('divhr.employelist', compact('employees','activeCount','previousCount', 'mode', 'lower', 'upper', 'varModeStr', 'userAuth'));
+        return view('divhr.employelist', compact('employees','activeCount','previousCount', 'mode', 'lower', 'upper', 'varModeStr', 'userAuth', 'latestContracts', 'isGlobalHrViewer', 'divisions'));
     }
 
     // Employee detail page (ID from URL)
@@ -98,34 +130,37 @@ class DivHrController extends Controller
             ->leftJoin('cen.units as u', function ($join) {
                 $join->on('u.unt_id', '=', DB::raw('COALESCE(s.srq_effunt_id, e.emp_unt_id)'));
             })
-            ->leftJoin('cen.heads as eh', 'eh.hed_id', '=', 's.srq_effhed_id')
-            ->leftJoin('prj.projects as p', 'p.prj_id', '=', 'eh.hed_prj_id')
-            ->leftJoin('fin.salorders as o', 'o.sor_srq_id', '=', 's.srq_id')
-            ->where('s.srq_emp_id', $id)
-            ->orderBy('s.srq_month', 'desc')
             ->select(
                 's.*',
-                'o.sor_id',
-                'o.sor_status',
-                'o.sor_salary',
-                'o.sor_grosalary',
-                'o.sor_netsalary',
-                'o.sor_effunt_id',
-                'o.sor_effhed_id',
-                'u.unt_name as eff_unit_name',
-                'eh.hed_code as eff_hed_code',
-                'eh.hed_name as eff_hed_name',
-                'p.prj_title as eff_prj_title'
+                'u.unt_name as eff_unit_name'
             )
+            ->where('s.srq_emp_id', $id)
+            ->orderBy('s.srq_month', 'desc')
             ->first();
 
         $subheads = [];
-        if ($base && $base->sor_id) {
-            $subheads = DB::table('fin.salorders_shd')
-                ->where('sod_sor_id', $base->sor_id)
-                ->select('sod_subhead', 'sod_ratio')
-                ->orderBy('sod_subhead')
-                ->get();
+        if ($base) {
+            $salOrder = DB::table('fin.salorders')
+                ->where(function($q) use ($base, $id) {
+                    if (!empty($base->srq_id)) {
+                        $q->where('sor_srq_id', $base->srq_id);
+                    }
+                    $q->orWhere(function($sub) use ($base, $id) {
+                        $sub->where('sor_emp_id', $id)
+                            ->where('sor_month', $base->srq_month);
+                    });
+                })
+                ->orderBy('sor_month', 'desc')
+                ->first();
+
+            $sorId = $salOrder->sor_id ?? ($base->sor_id ?? null);
+            if ($sorId) {
+                $subheads = DB::table('fin.salorders_shd')
+                    ->where('sod_sor_id', $sorId)
+                    ->select('sod_subhead', 'sod_ratio')
+                    ->orderBy('sod_subhead')
+                    ->get();
+            }
         }
 
         $monthRef = $base ? $base->srq_month : Carbon::now()->toDateString();
@@ -140,7 +175,8 @@ class DivHrController extends Controller
         $contractsHistory = DB::table('hr.contracts as c')
             ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
             ->where('c.ctr_num', $id)
-            ->orderBy('c.ctr_startdt', 'asc')
+            ->orderBy('c.ctr_startdt', 'desc')
+            ->orderBy('c.ctr_id', 'desc')
             ->select('c.*', 'ch.hed_code as ctr_hed_code', 'ch.hed_name as ctr_hed_name')
             ->get()
             ->map(function ($row) {
@@ -236,6 +272,8 @@ class DivHrController extends Controller
             $authUnit = DB::table('cen.units')->where('unt_id', Auth::user()->acc_unt_id)->first();
         }
 
+        $attachments = DB::table('hr.empattachments')->where('eat_objid', $id)->get();
+
         return view('divhr.employee-details', compact(
             'id',
             'emp',
@@ -256,8 +294,53 @@ class DivHrController extends Controller
             'certs',
             'vehicles',
             'jobs',
-            'yearsInService'
+            'yearsInService',
+            'attachments'
         ));
+    }
+
+    /**
+     * Upload / update employee photo (hr.emps.emp_photodest).
+     */
+    public function uploadPhoto(Request $request, $id)
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpg,jpeg,png,webp,gif,jfif|max:10240',
+        ]);
+
+        $emp = Employee::withoutGlobalScopes()->where('emp_id', $id)->first();
+        if (!$emp) {
+            $emp = DB::table('hr.emps')->where('emp_id', $id)->first();
+            if (!$emp) {
+                abort(404, 'Employee not found');
+            }
+        }
+
+        $oldPath = $emp->emp_photodest ?? null;
+        if (!empty($oldPath)) {
+            app(\App\Services\FileStorageService::class)->delete($oldPath);
+        }
+
+        // Legacy format: pht-emp-{emp_id}.jpg in hr/photos/
+        $path = app(\App\Services\FileStorageService::class)->store(
+            $request->file('photo'),
+            'hr/photos',
+            'pht-emp-',
+            (string) ($emp->emp_id ?? $id)
+        );
+
+        DB::table('hr.emps')->where('emp_id', $id)->update(['emp_photodest' => $path]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee photo updated successfully.',
+                'path' => $path,
+                'url' => \App\Facades\FileStorage::url($path),
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Employee photo updated successfully.');
     }
 
     public function attendance(Request $request)

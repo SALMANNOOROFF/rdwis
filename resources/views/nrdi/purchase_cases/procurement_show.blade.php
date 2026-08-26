@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -158,7 +158,7 @@
                                         <div class="small font-weight-bold text-white mb-0" title="{{ $file->pat_filename }}">{{ Str::limit($file->pat_filename, 25) }}</div>
                                         <div class="text-muted" style="font-size: 8px;">SIZE: 2.1 MB</div>
                                     </div>
-                                    <a href="{{ url('storage/'.$file->pat_path) }}" target="_blank" class="btn btn-outline-primary btn-xs shadow-inner">VIEW</a>
+                                    <a href="{{ \App\Facades\FileStorage::url($file->pat_path) }}" target="_blank" class="btn btn-outline-primary btn-xs shadow-inner">VIEW</a>
                                 </div>
                             @empty
                                 <div class="text-center py-4 text-muted rajdhani small italic"><i class="fas fa-folder-open mb-2 d-block"></i> No attachments uploaded.</div>

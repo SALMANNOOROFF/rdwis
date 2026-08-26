@@ -78,7 +78,7 @@ $(function() {
         $('#rdwis-top-notif-toast').remove();
 
         const message = escapeHtml(notif.pnt_message || 'New update received');
-        const link = `/approvals/show/${notif.pnt_pcs_id}`;
+        const link = `/nrdi/purchase-cases-new/${notif.pnt_pcs_id}`;
 
         const toastHtml = `
             <div id="rdwis-top-notif-toast" class="rdwis-top-toast" style="
@@ -198,7 +198,7 @@ $(function() {
                     }
 
                     html += `
-                        <a href="/approvals/show/${n.pnt_pcs_id}" class="dropdown-item notif-item-enhanced d-flex align-items-start py-2 px-3 border-bottom text-decoration-none" style="gap: 12px; transition: background 0.15s ease;">
+                        <a href="/nrdi/purchase-cases-new/${n.pnt_pcs_id}" class="dropdown-item notif-item-enhanced d-flex align-items-start py-2 px-3 border-bottom text-decoration-none" style="gap: 12px; transition: background 0.15s ease;">
                             <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1" style="width: 32px; height: 32px; background: var(--rd-primary-50); color: var(--rd-primary-700); border: 1px solid var(--rd-primary-200);">
                                 <i class="fas fa-file-invoice" style="font-size: 13px;"></i>
                             </div>
@@ -236,7 +236,46 @@ $(function() {
                     </div>
                 `);
             }
+
+            // Real-time Sidebar Badges (Parent to Child Blinking Badges)
+            if (res && res.badges) {
+                updateSidebarBadges(res.badges);
+            }
         });
+    }
+
+    function updateSidebarBadges(badges) {
+        if (!badges) return;
+
+        // Purchase Cases Badge
+        const purCount = parseInt(badges.purchase_cases || 0, 10);
+        if (purCount > 0) {
+            $('.badge-pur-parent').text(purCount).removeClass('d-none');
+            $('.badge-pur-child').text(purCount).removeClass('d-none');
+        } else {
+            $('.badge-pur-parent').addClass('d-none');
+            $('.badge-pur-child').addClass('d-none');
+        }
+
+        // Contract Cases Badge
+        const ctrCount = parseInt(badges.contract_cases || 0, 10);
+        if (ctrCount > 0) {
+            $('.badge-ctr-parent').text(ctrCount).removeClass('d-none');
+            $('.badge-ctr-child').text(ctrCount).removeClass('d-none');
+        } else {
+            $('.badge-ctr-parent').addClass('d-none');
+            $('.badge-ctr-child').addClass('d-none');
+        }
+
+        // HR & Hired Employees Badge (Expiring Contracts)
+        const hrCount = parseInt(badges.hr || badges.hired_emps || 0, 10);
+        if (hrCount > 0) {
+            $('.badge-hr-parent').text(hrCount).removeClass('d-none');
+            $('.badge-hr-child').text(hrCount).removeClass('d-none');
+        } else {
+            $('.badge-hr-parent').addClass('d-none');
+            $('.badge-hr-child').addClass('d-none');
+        }
     }
 
     // Mark All As Read

@@ -102,12 +102,13 @@ class Purchase extends Model
             }
         }
 
-        // 3. If items exist, calculate sum of items
+        // 3. If items exist, calculate sum of items (quantity * unit price)
         if ($this->relationLoaded('items') || $this->items()->exists()) {
             $itemsTotal = (float) $this->items->sum(function($item) {
                 $qty = (float)($item->pci_qty ?? 1);
+                if ($qty <= 0) $qty = 1;
                 $rate = (float)($item->pci_price ?: ($item->pci_rate ?: ($item->pci_estcost ?: ($item->pci_estprice ?? 0))));
-                return ($rate > 0) ? ($rate * ($item->pci_price ? 1 : $qty)) : 0;
+                return ($rate > 0) ? ($rate * $qty) : 0;
             });
             if ($itemsTotal > 0) {
                 return $itemsTotal;
@@ -120,6 +121,75 @@ class Purchase extends Model
         if ((float)($this->pcs_estprice ?? 0) > 0) return (float)$this->pcs_estprice;
 
         return 0.0;
+    }
+
+    /**
+     * Accessor: Get price without GST / SST (Base Price)
+     */
+    public function getWithoutGstPriceAttribute(): float
+    {
+        // 1. Quoted / Scrutinized Base Price (pcs_midprice)
+        if ((float)($this->pcs_midprice ?? 0) > 0) {
+            return (float)$this->pcs_midprice;
+        }
+
+        // 2. Lowest Quote Base Price (qte_midprice or qte_intprice)
+        if ($this->relationLoaded('quotes') || $this->quotes()->exists()) {
+            $winnerQuote = $this->quotes->sortBy(function($q) {
+                return (float)($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0)));
+            })->first();
+
+            if ($winnerQuote) {
+                $base = (float)($winnerQuote->qte_midprice ?: ($winnerQuote->qte_intprice ?? 0));
+                if ($base > 0) return $base;
+                $qPrice = (float)($winnerQuote->qte_price ?? 0);
+                $qTax = (float)($winnerQuote->qte_midtax ?: ($winnerQuote->qte_inttax ?? 0));
+                if ($qPrice > 0) {
+                    return max(0, $qPrice - $qTax);
+                }
+            }
+        }
+
+        // 3. Items Total Sum
+        if ($this->relationLoaded('items') || $this->items()->exists()) {
+            $itemsTotal = (float) $this->items->sum(function($item) {
+                $qty = (float)($item->pci_qty ?? 1);
+                if ($qty <= 0) $qty = 1;
+                $rate = (float)($item->pci_price ?: ($item->pci_rate ?: ($item->pci_estcost ?: ($item->pci_estprice ?? 0))));
+                return ($rate > 0) ? ($rate * $qty) : 0;
+            });
+            if ($itemsTotal > 0) {
+                return $itemsTotal;
+            }
+        }
+
+        // 4. Initial Estimated Price (pcs_intprice)
+        if ((float)($this->pcs_intprice ?? 0) > 0) {
+            return (float)$this->pcs_intprice;
+        }
+
+        // 5. Fallback: pcs_price minus any recorded tax
+        $total = (float)($this->pcs_price ?? 0);
+        $tax = (float)($this->pcs_midtax ?: ($this->pcs_inttax ?? 0));
+        return $total > 0 ? max(0, $total - $tax) : $this->live_value;
+    }
+
+    /**
+     * Accessor: Get price used for authority limit evaluation (dynamically based on RDWIS settings)
+     */
+    public function getEffectiveEvaluationPriceAttribute(): float
+    {
+        $basis = \App\Models\SystemSetting::get('pur_threshold_basis', 'without_gst');
+        return ($basis === 'with_gst') ? $this->live_value : $this->without_gst_price;
+    }
+
+    /**
+     * Accessor: Get price displayed in Hub tables / lists (dynamically based on RDWIS settings)
+     */
+    public function getDisplayPriceAttribute(): float
+    {
+        $basis = \App\Models\SystemSetting::get('pur_list_amount_basis', 'without_gst');
+        return ($basis === 'with_gst') ? $this->live_value : $this->without_gst_price;
     }
 
     /**

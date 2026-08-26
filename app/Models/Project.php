@@ -53,7 +53,7 @@ class Project extends Model
     public function attachments()
     {
         return $this->hasMany(PrjAttachment::class, 'jat_objid', 'prj_id')
-                    ->where('jat_objtype', 'Project');
+                    ->whereIn('jat_objtype', ['prj', 'Project']);
     }
 
 

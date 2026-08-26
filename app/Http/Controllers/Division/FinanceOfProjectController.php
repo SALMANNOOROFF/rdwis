@@ -18,28 +18,59 @@ class FinanceOfProjectController extends Controller
     }
 
     /**
-     * Division-level "Finance of Project" hub.
+     * Division-level & Global HQ "Finance of Project" hub.
      */
     public function index(Request $request)
     {
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
-        $unitId = $user->acc_unt_id;
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isGlobalViewer = in_array($area, ['rdw', 'hqs', 'nrdi', 'fin', 'proc', 'prc', 'it'])
+            || session('impersonated_by_god')
+            || strtolower($user->acc_username ?? '') === 'superadminrdw';
 
-        // Fetch all heads belonging to this division
-        $heads = DB::table('cen.heads as h')
+        // Query heads joined with projects and units
+        $headsQuery = DB::table('cen.heads as h')
             ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
-            ->where('h.hed_unt_id', $unitId)
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'h.hed_unt_id')
             ->select(
                 'h.hed_id',
                 'h.hed_prj_id',
                 'h.hed_code',
+                'h.hed_unt_id',
+                'u.unt_namesh',
+                'u.unt_name',
                 'p.prj_title',
                 'p.prj_status',
                 'p.prj_aprvdt'
-            )
-            ->orderBy('h.hed_code')
+            );
+
+        if (!$isGlobalViewer) {
+            // For Division users, scope to their assigned division units
+            [$lower, $upper] = $user->acc_lowers == 0
+                ? [$user->acc_lowerm, $user->acc_upperm]
+                : [$user->acc_lowers, $user->acc_uppers];
+
+            if ($lower > 0 && $upper > 0) {
+                $headsQuery->whereBetween('h.hed_unt_id', [$lower, $upper]);
+            } else {
+                $headsQuery->where('h.hed_unt_id', $user->acc_unt_id);
+            }
+        }
+
+        $heads = $headsQuery->orderBy('h.hed_code')->get();
+
+        // Available divisions for dynamic AJAX / cascading filter
+        $divisions = DB::table('cen.units as u')
+            ->whereExists(function($sq) {
+                $sq->select(DB::raw(1))
+                   ->from('cen.heads as h')
+                   ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+                   ->whereColumn('h.hed_unt_id', 'u.unt_id');
+            })
+            ->select('u.unt_id', 'u.unt_name', 'u.unt_namesh')
+            ->orderBy('u.unt_name')
             ->get();
 
         // Determine selected head and active tab
@@ -50,7 +81,7 @@ class FinanceOfProjectController extends Controller
             $selectedHeadId = $heads->first()->hed_id;
         }
 
-        // 1. Compute overview list for all projects in division
+        // 1. Compute overview list for all projects in division / all NRDI
         $projects = [];
         foreach ($heads as $h) {
             $fin = $this->finService->getHeadStatus($h->hed_id);
@@ -59,6 +90,8 @@ class FinanceOfProjectController extends Controller
                 'head_id'    => $h->hed_id,
                 'prj_id'     => $h->hed_prj_id,
                 'head_code'  => $h->hed_code,
+                'unt_id'     => $h->hed_unt_id,
+                'division'   => $h->unt_namesh ?: ($h->unt_name ?: 'N/A'),
                 'title'      => $h->prj_title,
                 'status'     => $h->prj_status,
 
@@ -162,6 +195,7 @@ class FinanceOfProjectController extends Controller
         return view('division.finance-of-project.index', compact(
             'heads',
             'projects',
+            'divisions',
             'selectedHeadId',
             'selectedHead',
             'finStatus',
@@ -170,8 +204,40 @@ class FinanceOfProjectController extends Controller
             'milestones',
             'installments',
             'transfers',
-            'activeTab'
+            'activeTab',
+            'isGlobalViewer'
         ));
+    }
+
+    /**
+     * AJAX endpoint to fetch projects belonging to a specific division.
+     */
+    public function getProjectsByDivision(Request $request, $unit_id = null)
+    {
+        $user = Auth::user();
+        if (!$user) return response()->json([], 401);
+
+        $query = DB::table('cen.heads as h')
+            ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'h.hed_unt_id')
+            ->select(
+                'h.hed_id',
+                'h.hed_prj_id',
+                'h.hed_code',
+                'h.hed_unt_id',
+                'u.unt_namesh',
+                'u.unt_name',
+                'p.prj_title',
+                'p.prj_status'
+            );
+
+        if ($unit_id && $unit_id !== 'all') {
+            $query->where('h.hed_unt_id', $unit_id);
+        }
+
+        $projects = $query->orderBy('h.hed_code')->get();
+
+        return response()->json($projects);
     }
 
     /**

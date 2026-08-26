@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -170,7 +170,7 @@
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
                                 </td>
                                 <td class="text-right">
-                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->pcs_price) }}</div>
+                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->display_price) }}</div>
                                 </td>
                                 <td class="text-center">
                                     <span class="status-pill rajdhani">
@@ -286,7 +286,7 @@
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
                                 </td>
                                 <td class="text-right">
-                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->pcs_price) }}</div>
+                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->display_price) }}</div>
                                 </td>
                                 <td class="text-center">
                                     <span class="status-pill rajdhani" style="color: {{ $isSuccess ? '#10b981' : '#ef4444' }}; border-color: {{ $isSuccess ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)' }}; background: transparent;">
@@ -339,7 +339,7 @@
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
                                 </td>
                                 <td class="text-right">
-                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->pcs_price) }}</div>
+                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->display_price) }}</div>
                                 </td>
                                 <td class="text-center">
                                     <span class="status-pill rajdhani" style="color: var(--rd-primary-700); border-color: rgba(37, 99, 235, 0.4); background: rgba(37, 99, 235, 0.08);">

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ContractCaseController extends Controller
 {
@@ -24,6 +23,10 @@ class ContractCaseController extends Controller
             return redirect()->route('finance.contract-cases.index');
         } elseif ($area === 'rdw') {
             return redirect()->route('md.contract-cases.index');
+        } elseif ($area === 'hqs') {
+            return redirect()->route('ddg.contract-cases.index');
+        } elseif ($area === 'nrdi') {
+            return redirect()->route('dg.contract-cases.index');
         } else {
             // Default to Division Initiator dashboard
             return redirect()->route('division.contract-cases.index');

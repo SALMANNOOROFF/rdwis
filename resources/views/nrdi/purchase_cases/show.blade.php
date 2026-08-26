@@ -155,7 +155,7 @@
                 // Variable overrides for cross-role compatibility
                 $isInitiator = in_array(strtolower(trim((string)Auth::user()->acc_untarea)), ['prj', 'rdwprj', 'division']);
                 $canEdit = $isInitiator && in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
-                $backRoute = $isInitiator ? route('purchase.initiation.index') : route('nrdi.purchase_cases.index');
+                $backRoute = $isInitiator ? route('purchase.initiation.index') : route('nrdi.purchase_cases_new.index');
             @endphp
 
             {{-- Page Header --}}
@@ -181,6 +181,15 @@
                         <a href="{{ route('purchase.case_detail', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-info rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(23,162,184,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="fas fa-list-alt mr-1"></i> CASE DETAIL
                         </a>
+                        @php
+                            $hasItLetter = $purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists();
+                            $isPsCase = in_array(strtolower(trim((string)($purchase->pcs_type ?? 'ps'))), ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                        @endphp
+                        @if($isPsCase || $hasItLetter)
+                            <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(245,158,11,0.5); color: #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                            </a>
+                        @endif
                         <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-success rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(40,167,69,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
                         </a>
@@ -483,7 +492,7 @@
                                         <div class="small font-weight-bold text-white text-nowrap" style="overflow: hidden; text-overflow: ellipsis; font-size: 11px;">{{ $file->pat_filename }}</div>
                                         <div class="text-muted" style="font-size: 9px;">{{ \Carbon\Carbon::parse($file->created_at)->format('d M, Y') }}</div>
                                     </div>
-                                    <a href="{{ url('storage/'.$file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary ml-1"><i class="fas fa-download"></i></a>
+                                    <a href="{{ \App\Facades\FileStorage::url($file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary ml-1"><i class="fas fa-download"></i></a>
                                 </div>
                             @empty
                                 <div class="text-center py-3 text-muted small">No documents attached.</div>

@@ -25,53 +25,42 @@ class FinanceDashboardController extends Controller
         $user = Auth::user();
         $pageTitle = 'Director Finance | Budget Hub';
 
-        // 1. Pending Action: Cases at DFinance stage
+        // 1. Pending Action: Cases currently at DFinance stage
         $pending = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
             ->atStage('DFinance')
+            ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        // 2. Open: Active cases at other HQ stages
-        $open = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
-            ->atStage(['MD', 'DDG', 'DG'])
-            ->orderBy('pcs_id', 'desc')
-            ->get();
+        $pendingIds = $pending->pluck('pcs_id')->toArray();
 
-        // Also include Returned/Draft cases in Open for visibility
-        $openReturned = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
-            ->whereIn('pcs_status', ['Returned'])
-            ->whereHas('decisions', function($q) use ($user) {
-                $q->where('pdec_acc_id', $user->acc_id);
-            })
-            ->orderBy('pcs_id', 'desc')
-            ->get();
-
-        $open = $open->merge($openReturned);
-
-        // 3. Closed: Cases that are already Approved
-        $closed = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
-            ->where('pcs_status', 'Approved')
-            ->orderBy('pcs_id', 'desc')
-            ->get();
-
-        // Action Taken tracker (for metrics compatibility)
+        // 2. Action Taken tracker (for metrics compatibility)
         $processed = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
             ->whereHas('decisions', function($q) use ($user) {
                 $q->where('pdec_acc_id', $user->acc_id);
             })
-            ->where(function($q) {
-                $q->whereDoesntHave('currentSubstatus', function($sq) {
-                    $sq->where('pss_stage', 'DFinance');
-                });
-            })
+            ->whereNotIn('pcs_id', $pendingIds)
             ->orderBy('pcs_id', 'desc')
-            ->limit(15)
+            ->get();
+
+        // 3. Open: Active cases forwarded to HQ approval chain (MD, DDG, DG, Approved)
+        $open = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
+            ->whereNotIn('pcs_status', ['Draft', 'Returned', 'Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->whereNotIn('pcs_id', $pendingIds)
+            ->orderBy('pcs_id', 'desc')
+            ->get();
+
+        // 4. Closed: Finalized cases (Fulfilled / Partially Fulfilled / Completed / Cancelled / Rejected)
+        $closed = Purchase::with(['project', 'latestDecision.account', 'currentSubstatus'])
+            ->whereIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->orderBy('pcs_id', 'desc')
+            ->limit(50)
             ->get();
 
         // Metrics for Finance
         $totalVolume = $pending->sum('pcs_price') + $open->sum('pcs_price') + $closed->sum('pcs_price');
         $caseCount = $pending->count();
-        $processedCount = $open->count() + $closed->count();
+        $processedCount = $processed->count();
         
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
         $detailsRouteName = 'nrdi.finance.purchase_cases.show';
@@ -100,7 +89,7 @@ class FinanceDashboardController extends Controller
         $head = $project;
 
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
-        $canApprove = $this->approvalService->canApprove('fin', $purchase->pcs_price);
+        $canApprove = $this->approvalService->canApprove('fin', (float)($purchase->pcs_price ?? 0), $purchase);
         $pageTitle = 'DFin Review: ' . $purchase->pcs_title;
         $area = 'fin';
 

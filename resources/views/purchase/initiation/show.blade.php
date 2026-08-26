@@ -393,25 +393,67 @@
                     </div>
 
                     {{-- Attachments --}}
-                    <div class="dg-box">
-                        <div class="dg-box-hdr">
-                            <div class="dg-sec-label" style="margin-bottom:0;"><i class="fas fa-paperclip fa-xs"></i> Related Files</div>
-                            @if($canEdit)
-                                <button class="btn btn-outline-light btn-xs rajdhani" data-toggle="modal" data-target="#caseAttachmentModal"><i class="fas fa-plus"></i></button>
+                    @include('partials.attachments_widget', [
+                        'module' => 'pur',
+                        'objectId' => $purchase->pcs_id,
+                        'title' => 'Case Documents',
+                        'defaultSlots' => ['Quotation Document', 'Market Research Report', 'Financial Status', 'Minute', 'Attachment'],
+                        'attachments' => $purchase->attachments,
+                        'canEdit' => $canEdit,
+                    ])
+
+                    {{-- Associated Project Attachments (Read-Only) --}}
+                    @php
+                        $prjId = $purchase->project?->prj_id 
+                            ?? ($purchase->head?->hed_prj_id ?? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->value('hed_prj_id'));
+                        
+                        $projectAttachments = $prjId 
+                            ? \Illuminate\Support\Facades\DB::table('prj.prjattachments')
+                                ->where('jat_objid', $prjId)
+                                ->whereIn('jat_objtype', ['prj', 'Project'])
+                                ->whereNotNull('jat_path')
+                                ->where('jat_path', '<>', '')
+                                ->get()
+                            : collect();
+                    @endphp
+                    <div class="card border shadow-sm mt-3" style="border-radius: 8px; border-color: var(--rd-border) !important; background: var(--rd-surface);">
+                        <div class="card-header py-2 px-3 d-flex align-items-center justify-content-between" style="background: var(--rd-surface2); border-bottom: 1px solid var(--rd-border);">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-project-diagram text-primary mr-2" style="font-size: 13px;"></i>
+                                <span class="font-weight-bold" style="font-size: 12px; color: var(--rd-text1); text-transform: uppercase; letter-spacing: 0.5px;">Project Attachments</span>
+                                <span class="badge badge-secondary badge-pill ml-2" style="font-size: 10px;">{{ $projectAttachments->count() }}</span>
+                            </div>
+                            @if($prjId)
+                                <span class="badge badge-dark" style="font-size: 10px;">ID: #{{ $prjId }}</span>
                             @endif
                         </div>
-                        <div class="p-3">
-                            @forelse($purchase->attachments as $file)
-                                <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border);">
-                                    <i class="far fa-file-pdf text-danger mr-3" style="font-size: 20px;"></i>
-                                    <div class="flex-grow-1 overflow-hidden">
-                                        <div class="small font-weight-bold text-dark text-nowrap" style="overflow: hidden; text-overflow: ellipsis;">{{ $file->pat_filename }}</div>
-                                        <div class="text-xs text-muted">{{ \Carbon\Carbon::parse($file->created_at)->format('d M, Y') }}</div>
+                        <div class="p-2" style="font-size: 12px; max-height: 160px; overflow-y: auto;">
+                            @forelse($projectAttachments as $pDoc)
+                                @php
+                                    $ext = strtolower(pathinfo($pDoc->jat_path, PATHINFO_EXTENSION));
+                                    $icon = match($ext) {
+                                        'pdf' => 'fa-file-pdf text-danger',
+                                        'jpg', 'jpeg', 'png' => 'fa-file-image text-primary',
+                                        'doc', 'docx' => 'fa-file-word text-info',
+                                        'xls', 'xlsx' => 'fa-file-excel text-success',
+                                        default => 'fa-file-alt text-secondary'
+                                    };
+                                @endphp
+                                <div class="d-flex justify-content-between align-items-center py-1 px-2 mb-1 rounded" style="background: var(--rd-surface2); border: 1px solid var(--rd-border);">
+                                    <div class="d-flex align-items-center overflow-hidden mr-2">
+                                        <i class="fas {{ $icon }} mr-2" style="font-size: 13px; width: 14px;"></i>
+                                        <span class="text-truncate font-weight-bold" style="font-size: 11px; color: var(--rd-text1);" title="{{ $pDoc->jat_type }}">
+                                            {{ $pDoc->jat_type }}
+                                        </span>
                                     </div>
-                                    <a href="{{ url('storage/'.$file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary ml-2"><i class="fas fa-download"></i></a>
+                                    <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 flex-shrink-0" style="font-size: 11px; border-radius: 3px;" title="View Document">
+                                        <i class="fas fa-eye mr-1"></i> View
+                                    </a>
                                 </div>
                             @empty
-                                <div class="text-center py-3 text-muted small">No documents attached.</div>
+                                <div class="text-center py-2 text-muted" style="font-size: 11px;">
+                                    <i class="fas fa-folder-open mr-1"></i> No project documents attached.
+                                </div>
                             @endforelse
                         </div>
                     </div>

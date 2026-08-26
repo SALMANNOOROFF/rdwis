@@ -36,7 +36,7 @@
 
     {{-- 4. Amount --}}
     <td class="text-right">
-        <div class="text-amount">Rs. {{ number_format($p->pcs_price) }}</div>
+        <div class="text-amount">Rs. {{ number_format($p->display_price) }}</div>
     </td>
 
     {{-- 5. Status --}}

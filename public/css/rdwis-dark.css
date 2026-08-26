@@ -335,6 +335,48 @@ hr {
   background-color: rgba(113,140,105,0.03) !important;
 }
 
+/* Sidebar Treeview Dropdown Arrow & Badge Standardized Alignment */
+.nav-sidebar .nav-link {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  padding-right: 28px !important;
+}
+
+.nav-sidebar .nav-link p {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  width: 100% !important;
+  white-space: nowrap !important;
+}
+
+.nav-sidebar .nav-link p > .badge,
+.nav-sidebar .nav-link p > span.badge {
+  margin-left: 6px !important;
+  margin-right: 4px !important;
+  flex-shrink: 0 !important;
+}
+
+.nav-sidebar .nav-link p > .right,
+.nav-sidebar .nav-link > .right {
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+  font-size: 11px !important;
+  color: var(--rd-text3) !important;
+  transition: transform 0.25s ease-in-out !important;
+}
+
+.nav-item.menu-open > .nav-link p > .right,
+.nav-item.menu-open > .nav-link > .right,
+.nav-item.menu-is-opening > .nav-link p > .right,
+.nav-item.menu-is-opening > .nav-link > .right {
+  transform: translateY(-50%) rotate(-90deg) !important;
+}
+
 
 /* ============================================================
    5. CARDS & PANELS

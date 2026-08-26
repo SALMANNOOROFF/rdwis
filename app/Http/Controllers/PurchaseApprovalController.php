@@ -116,7 +116,7 @@ class PurchaseApprovalController extends Controller
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
 
         // Check if user is authorized to approve
-        $canApprove = $this->approvalService->canApprove($area, $purchase->pcs_price);
+        $canApprove = $this->approvalService->canApprove($area, (float)($purchase->pcs_price ?? 0), $purchase);
 
         // Titles for show view
         $titleMap = [
@@ -168,7 +168,7 @@ class PurchaseApprovalController extends Controller
     public function action(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:forward,forward_negative,return,approve,reject,save_draft,dproc_save',
+            'action' => 'required|in:forward,forward_negative,return,approve,reject,save_draft,dproc_save,float_to_proc,reshare_to_proc',
             'remarks' => 'nullable|string',
             'target_status' => 'nullable|string',
         ]);
