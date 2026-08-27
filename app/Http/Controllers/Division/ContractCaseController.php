@@ -321,6 +321,195 @@ class ContractCaseController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        $case = HrCtrCase::with([
+            'casePlans.project',
+            'attachments',
+            'remarksHistory',
+            'currentSubstatus',
+            'previousContract',
+            'employee'
+        ])->findOrFail($id);
+
+        $user = Auth::user();
+        $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
+
+        // Security check: Only editable if currently in Division stage AND status is 'Under Revision' or 'Draft'
+        $currentStage = $case->current_stage;
+        if ($currentStage !== 'Division' && !in_array($case->ctc_status, ['Draft', 'Under Revision'])) {
+            return redirect()->route('division.contract-cases.show', $id)
+                ->with('error', 'This case is currently locked and undergoing scrutiny. It cannot be edited unless returned to Division.');
+        }
+
+        // Division verification
+        if ($divisionId > 0 && $case->ctc_divisionid > 0 && $case->ctc_divisionid != $divisionId) {
+            abort(403, 'Unauthorized access to this contract case.');
+        }
+
+        $division = DB::table('cen.units')->where('unt_id', $case->ctc_divisionid ?: $divisionId)->first();
+        $divisionName = $division ? $division->unt_name : 'Division';
+
+        // Fetch projects for division
+        $projects = DB::table('prj.projects')
+            ->where(function ($q) use ($divisionId, $case) {
+                $div = $case->ctc_divisionid ?: $divisionId;
+                if ($div > 0) {
+                    $q->where('prj_unt_id', $div);
+                }
+            })
+            ->select('prj_id', 'prj_code', 'prj_title')
+            ->orderBy('prj_code')
+            ->get();
+
+        // Get latest return remark (if returned for revision)
+        $latestReturnRemark = $case->remarksHistory->first(function($r) {
+            return in_array($r->crr_status, ['Under Revision', 'Not Approved']);
+        }) ?? $case->remarksHistory->first();
+
+        // Existing monthly plan map
+        $monthlyPlanMap = [];
+        foreach ($case->casePlans as $cp) {
+            $monthKey = Carbon::parse($cp->ccp_startdt)->format('Y-m');
+            $monthlyPlanMap[$monthKey] = $cp->ccp_hed_id;
+        }
+
+        return view('division.contract-cases.edit', compact('case', 'projects', 'divisionName', 'latestReturnRemark', 'monthlyPlanMap'));
+    }
+
+    public function update($id, Request $request)
+    {
+        $case = HrCtrCase::with(['currentSubstatus', 'previousContract'])->findOrFail($id);
+        $user = Auth::user();
+        $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
+
+        // Security check
+        $currentStage = $case->current_stage;
+        if ($currentStage !== 'Division' && !in_array($case->ctc_status, ['Draft', 'Under Revision'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This contract case is currently locked for review and cannot be modified.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'ctc_empnamecomp'   => 'required|string|max:200',
+            'ctc_newjobtitle'   => 'required|string|max:255',
+            'ctc_newgrade'      => 'required|string|max:100',
+            'ctc_emp_type'      => 'required|string|max:50',
+            'ctc_newsalary'     => 'required|numeric|min:0',
+            'ctc_newstartdt'    => 'required|date',
+            'ctc_newenddt'      => 'required|date|after_or_equal:ctc_newstartdt',
+            'ctc_newprob'       => 'nullable|numeric|min:0|max:12',
+            'ctc_newprobsal'    => 'nullable|numeric|min:0',
+            'ctc_jd'            => 'nullable|string',
+            'ctc_cnic'          => 'nullable|string|max:20',
+            'ctc_contact'       => 'nullable|string|max:50',
+            'ctc_terminremarks' => 'nullable|string',
+            'remarks'           => 'nullable|string',
+        ]);
+
+        $type = strtoupper(trim($case->ctc_type));
+
+        // Ce validation: enforce immutable fields server-side
+        if ($type === 'CE') {
+            if (empty(trim((string)($validated['ctc_terminremarks'] ?? '')))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reason for contract extension (ctc_terminremarks) is required for extension cases.'
+                ], 422);
+            }
+
+            // Restore/Enforce locked fields from previous contract / original values
+            if ($case->previousContract) {
+                $validated['ctc_newjobtitle'] = $case->previousContract->ctr_jobtitle;
+                $validated['ctc_newgrade'] = $case->previousContract->ctr_grade;
+                $validated['ctc_newsalary'] = $case->previousContract->ctr_salary;
+                $validated['ctc_newstartdt'] = $case->previousContract->ctr_startdt;
+                $validated['ctc_emp_type'] = $case->previousContract->ctr_type == 2 ? 'Part Time' : 'Full Time';
+            }
+        }
+
+        DB::transaction(function () use ($case, $request, $validated, $user, $divisionId, $type) {
+            $case->ctc_empnamecomp = $validated['ctc_empnamecomp'];
+            $case->ctc_newjobtitle = $validated['ctc_newjobtitle'];
+            $case->ctc_newgrade = $validated['ctc_newgrade'];
+            $case->ctc_emp_type = $validated['ctc_emp_type'];
+            $case->ctc_newsalary = (float)$validated['ctc_newsalary'];
+            $case->ctc_newstartdt = $validated['ctc_newstartdt'];
+            $case->ctc_newenddt = $validated['ctc_newenddt'];
+            $case->ctc_newprob = isset($validated['ctc_newprob']) ? (int)$validated['ctc_newprob'] : 0;
+            $case->ctc_newprobsal = isset($validated['ctc_newprobsal']) ? (float)$validated['ctc_newprobsal'] : null;
+            $case->ctc_terminremarks = $validated['ctc_terminremarks'] ?? $case->ctc_terminremarks;
+            $case->ctc_cnic = $validated['ctc_cnic'] ?? $case->ctc_cnic;
+            $case->ctc_contact = $validated['ctc_contact'] ?? $case->ctc_contact;
+            $case->ctc_remarks = $validated['remarks'] ?? $case->ctc_remarks;
+            $case->ctc_newctrtype = ($validated['ctc_emp_type'] === 'Part Time') ? 2 : 1;
+
+            // Also keep proposed approved columns in sync
+            $case->ctc_approvedstartdt = $case->ctc_newstartdt;
+            $case->ctc_approvedenddt = $case->ctc_newenddt;
+            $case->ctc_approvedgrade = $case->ctc_newgrade;
+            $case->ctc_approvedjobtitle = $case->ctc_newjobtitle;
+            $case->ctc_approvedsalary = $case->ctc_newsalary;
+            $case->ctc_approvedctrtype = $case->ctc_newctrtype;
+            $case->ctc_approvedprob = $case->ctc_newprob;
+            $case->ctc_approvedprobsal = $case->ctc_newprobsal;
+
+            $case->save();
+
+            // Handle new CV Upload if provided
+            if ($request->hasFile('cv_file')) {
+                $path = app(FileStorageService::class)->store(
+                    $request->file('cv_file'),
+                    'hr',
+                    'mx-ctc-',
+                    (string) $case->ctc_id
+                );
+
+                DB::table('hr.ctrcaseattachments')->updateOrInsert(
+                    ['cat_objtype' => 'ctc', 'cat_objid' => $case->ctc_id, 'cat_type' => 'CV'],
+                    ['cat_path' => $path]
+                );
+
+                $case->ctc_cv_path = $path;
+                $case->save();
+            }
+
+            // Regenerate Project Plan Allocations
+            $mode = $request->input('project_mode', 'single');
+            $monthlyMap = null;
+            $singleProjId = null;
+
+            if ($mode === 'single') {
+                $singleProjId = $request->input('ctc_projectcode');
+                $case->ctc_prj_id = $singleProjId ? (int)$singleProjId : null;
+                $case->save();
+            } elseif ($request->has('monthly_project')) {
+                $monthlyMap = $request->input('monthly_project');
+                $case->ctc_prj_id = null;
+                $case->save();
+            }
+
+            $this->pricingService->generatePlans(
+                $case->ctc_id,
+                $case->ctc_newstartdt,
+                $case->ctc_newenddt,
+                $monthlyMap,
+                $singleProjId ? (int)$singleProjId : null
+            );
+
+            // Recalculate price
+            $this->pricingService->calculatePrice($case);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contract case revision saved successfully.',
+            'case_id' => $case->ctc_id
+        ]);
+    }
+
     public function show($id)
     {
         $case = HrCtrCase::with(['casePlans.project', 'attachments', 'remarksHistory', 'currentSubstatus', 'previousContract', 'employee'])

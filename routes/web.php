@@ -258,6 +258,10 @@ Route::middleware('auth')->group(function () {
                 ->name('division.contract-cases.employee-contract');
             Route::get('/contract-cases/{id}', [\App\Http\Controllers\Division\ContractCaseController::class, 'show'])
                 ->name('division.contract-cases.show');
+            Route::get('/contract-cases/{id}/edit', [\App\Http\Controllers\Division\ContractCaseController::class, 'edit'])
+                ->name('division.contract-cases.edit');
+            Route::put('/contract-cases/{id}', [\App\Http\Controllers\Division\ContractCaseController::class, 'update'])
+                ->name('division.contract-cases.update');
             Route::post('/contract-cases', [\App\Http\Controllers\Division\ContractCaseController::class, 'store'])
                 ->name('division.contract-cases.store');
             Route::post('/contract-cases/{id}/release', [\App\Http\Controllers\Division\ContractCaseController::class, 'release'])

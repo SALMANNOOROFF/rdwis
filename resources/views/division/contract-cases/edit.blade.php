@@ -118,6 +118,17 @@
         gap: 6px;
     }
 
+    /* Revision Feedback Notice */
+    .revision-feedback-card {
+        background: #FFFBEB;
+        border: 1.5px solid #FCD34D;
+        border-left: 6px solid #F59E0B;
+        border-radius: 12px;
+        padding: 1.2rem 1.6rem;
+        margin-top: 1.5rem;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+    }
+
     /* Reference Card */
     .reference-box {
         background: #F0F6FF;
@@ -251,8 +262,8 @@
         color: var(--rd-text1);
     }
 
-    .btn-action-save {
-        background: var(--rd-primary-600);
+    .btn-action-update {
+        background: #D97706;
         border: none;
         color: #FFFFFF;
         padding: 0.7rem 2.2rem;
@@ -261,13 +272,13 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 4px 12px rgba(95, 120, 88, 0.25);
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
         transition: all 0.2s;
     }
-    .btn-action-save:hover {
-        background: var(--rd-primary-700);
+    .btn-action-update:hover {
+        background: #B45309;
         transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(95, 120, 88, 0.35);
+        box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
     }
 
     .duration-chip {
@@ -339,35 +350,55 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
                 <div>
                     <h1 class="page-title mb-1">
-                        Initiate @if($type == 'Hg') New Hiring @elseif($type == 'Ce') Contract Extension @elseif($type == 'Cr') Contract Renewal @elseif($type == 'Rh') Rehiring @endif Case
+                        Revise Contract Case #{{ $case->ctc_id }}
                     </h1>
                     <div class="d-flex align-items-center gap-2 mt-1">
-                        <span class="type-pill @if($type == 'Hg') bg-primary text-white @elseif($type == 'Ce') bg-success text-white @elseif($type == 'Cr') bg-warning text-dark @else bg-info text-white @endif">
-                            <i class="fas fa-tag"></i> TYPE: {{ strtoupper($type) }}
+                        <span class="type-pill @if($case->ctc_type == 'Hg') bg-primary text-white @elseif($case->ctc_type == 'Ce') bg-success text-white @elseif($case->ctc_type == 'Cr') bg-warning text-dark @else bg-info text-white @endif">
+                            <i class="fas fa-tag"></i> TYPE: {{ strtoupper($case->ctc_type) }}
                         </span>
-                        <span class="badge badge-light border text-muted px-3 py-1 font-weight-bold ml-2">
-                            DIVISION DRAFT
+                        <span class="badge badge-warning font-weight-bold px-3 py-1 ml-2" style="border-radius: 20px; font-size: 11px;">
+                            <i class="fas fa-undo mr-1"></i> STATUS: {{ $case->ctc_status }}
                         </span>
                     </div>
                 </div>
-                <a href="{{ route('division.contract-cases.index') }}" class="btn-back-link">
-                    <i class="fas fa-arrow-left"></i> Back to Hub
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('division.contract-cases.show', $case->ctc_id) }}" class="btn-back-link mr-2">
+                        <i class="fas fa-eye"></i> View Case
+                    </a>
+                    <a href="{{ route('division.contract-cases.index') }}" class="btn-back-link">
+                        <i class="fas fa-arrow-left"></i> Back to Hub
+                    </a>
+                </div>
             </div>
 
-            <!-- Active Case Warning Container -->
-            <div id="active-case-alert" class="alert alert-danger mt-3 d-none shadow-sm" style="border-radius: 10px; border-left: 5px solid #ef4444;">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                <span id="active-case-message" class="font-weight-600"></span>
-            </div>
+            <!-- Review Feedback / Objection Notice -->
+            @if($latestReturnRemark)
+                <div class="revision-feedback-card">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-circle text-warning fa-2x mr-3 mt-1"></i>
+                        <div>
+                            <h5 class="font-weight-bold text-dark mb-1" style="font-size: 1.05rem;">
+                                Reviewer Feedback from {{ $latestReturnRemark->crr_username }} <span class="badge badge-warning ml-2 font-weight-bold">{{ $latestReturnRemark->crr_status }}</span>
+                            </h5>
+                            <p class="text-dark mb-1 font-weight-500" style="font-size: 0.95rem; line-height: 1.5;">
+                                "{{ $latestReturnRemark->crr_remarks }}"
+                            </p>
+                            <small class="text-muted">
+                                <i class="far fa-clock mr-1"></i> Logged on {{ \Carbon\Carbon::parse($latestReturnRemark->crr_dtg)->format('d M Y, H:i') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <!-- Main Form Card -->
             <div class="form-surface-card">
-                <form id="contract-case-form" enctype="multipart/form-data">
+                <form id="contract-case-edit-form" enctype="multipart/form-data">
                     @csrf
-                    <input type="hidden" name="ctc_type" id="ctc_type" value="{{ $type }}">
-                    <input type="hidden" name="ctc_emp_id" id="ctc_emp_id" value="">
-                    <input type="hidden" name="ctc_ctr_id" id="ctc_ctr_id" value="0">
+                    @method('PUT')
+                    <input type="hidden" name="ctc_type" id="ctc_type" value="{{ $case->ctc_type }}">
+                    <input type="hidden" name="ctc_emp_id" id="ctc_emp_id" value="{{ $case->ctc_emp_id }}">
+                    <input type="hidden" name="ctc_ctr_id" id="ctc_ctr_id" value="{{ $case->ctc_ctr_id }}">
                     
                     <div class="row">
                         <!-- COLUMN 1: CANDIDATE & DESIGNATION -->
@@ -376,53 +407,40 @@
                                 <i class="fas fa-user-tie"></i> Candidate & Designation
                             </div>
 
-                            @if(in_array(strtoupper($type), ['CR', 'CE', 'RH']))
-                                <!-- Employee Selector for Cr/Ce/Rh -->
-                                <div class="form-group mb-4">
-                                    <label class="rd-form-label">Select Active Employee <span class="required-star">*</span></label>
-                                    <select id="emp-selector" class="rd-form-control select2" required style="width: 100%;">
-                                        <option value="">-- Choose Employee --</option>
-                                        @foreach($employees as $emp)
-                                            <option value="{{ $emp->emp_id }}">
-                                                {{ $emp->emp_name }} ({{ $emp->emp_id }}) {{ $emp->emp_rank ? '- '.$emp->emp_rank : '' }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Current Contract Reference Card -->
-                                <div id="current-contract-card" class="reference-box d-none">
+                            @if($case->previousContract)
+                                <!-- Previous Contract Reference Card -->
+                                <div class="reference-box">
                                     <div class="reference-box-title"><i class="fas fa-id-card"></i> Active Contract Reference</div>
                                     <div class="row small">
-                                        <div class="col-6 mb-1"><span class="text-muted">Designation:</span> <strong id="ref-desig" class="text-dark d-block">-</strong></div>
-                                        <div class="col-6 mb-1"><span class="text-muted">Grade:</span> <strong id="ref-grade" class="text-dark d-block">-</strong></div>
-                                        <div class="col-6"><span class="text-muted">Salary:</span> <strong id="ref-salary" class="text-primary font-weight-bold d-block">-</strong></div>
-                                        <div class="col-6"><span class="text-muted">Type:</span> <strong id="ref-type" class="text-dark d-block">-</strong></div>
-                                        <div class="col-12 mt-2 pt-2 border-top border-primary-100"><span class="text-muted">Contract Expiry:</span> <strong id="ref-expiry" class="text-danger font-weight-bold">-</strong></div>
+                                        <div class="col-6 mb-1"><span class="text-muted">Designation:</span> <strong class="text-dark d-block">{{ $case->previousContract->ctr_jobtitle ?? 'N/A' }}</strong></div>
+                                        <div class="col-6 mb-1"><span class="text-muted">Grade:</span> <strong class="text-dark d-block">{{ $case->previousContract->ctr_grade ?? 'N/A' }}</strong></div>
+                                        <div class="col-6"><span class="text-muted">Salary:</span> <strong class="text-primary font-weight-bold d-block">Rs. {{ number_format($case->previousContract->ctr_salary ?? 0) }}</strong></div>
+                                        <div class="col-6"><span class="text-muted">Type:</span> <strong class="text-dark d-block">{{ $case->previousContract->ctr_type == 2 ? 'Part Time' : 'Full Time' }}</strong></div>
+                                        <div class="col-12 mt-2 pt-2 border-top border-primary-100"><span class="text-muted">Contract Expiry:</span> <strong class="text-danger font-weight-bold">{{ $case->previousContract->ctr_termindt ? \Carbon\Carbon::parse($case->previousContract->ctr_termindt)->format('d M Y') : ($case->previousContract->ctr_enddt ? \Carbon\Carbon::parse($case->previousContract->ctr_enddt)->format('d M Y') : 'N/A') }}</strong></div>
                                     </div>
                                 </div>
                             @endif
                             
                             <div class="form-group mb-4">
                                 <label class="rd-form-label">Candidate Full Name <span class="required-star">*</span></label>
-                                <input type="text" name="ctc_empnamecomp" id="ctc_empnamecomp" class="rd-form-control font-weight-bold" required placeholder="Enter full candidate name" @if(in_array(strtoupper($type), ['CR', 'CE'])) readonly @endif>
+                                <input type="text" name="ctc_empnamecomp" id="ctc_empnamecomp" class="rd-form-control font-weight-bold" required value="{{ $case->ctc_empnamecomp }}" @if(in_array(strtoupper($case->ctc_type), ['CR', 'CE'])) readonly @endif>
                             </div>
 
                             <div class="row mb-4">
                                 <div class="col-6">
                                     <label class="rd-form-label">Designation <span class="required-star">*</span></label>
-                                    <input type="text" name="ctc_newjobtitle" id="ctc_newjobtitle" class="rd-form-control" required placeholder="e.g. Research Associate" @if(strtoupper($type) === 'CE') readonly @endif>
+                                    <input type="text" name="ctc_newjobtitle" id="ctc_newjobtitle" class="rd-form-control" required value="{{ $case->ctc_newjobtitle }}" @if(strtoupper($case->ctc_type) === 'CE') readonly @endif>
                                 </div>
                                 <div class="col-6">
                                     <label class="rd-form-label">Grade / Scale <span class="required-star">*</span></label>
-                                    <select name="ctc_newgrade" id="ctc_newgrade" class="rd-form-control" required @if(strtoupper($type) === 'CE') disabled @endif>
+                                    <select name="ctc_newgrade" id="ctc_newgrade" class="rd-form-control" required @if(strtoupper($case->ctc_type) === 'CE') disabled @endif>
                                         <option value="">- Select -</option>
                                         @foreach(['Director', 'Manager', 'PRO', 'SRO', 'RO', 'RA', 'EA', 'PRA', 'SRA', 'JRA', 'SRT', 'RT', 'JRT', 'LA', 'Internee', 'Worker'] as $gr)
-                                            <option value="{{ $gr }}">{{ $gr }}</option>
+                                            <option value="{{ $gr }}" {{ $case->ctc_newgrade == $gr ? 'selected' : '' }}>{{ $gr }}</option>
                                         @endforeach
                                     </select>
-                                    @if(strtoupper($type) === 'CE')
-                                        <input type="hidden" name="ctc_newgrade" id="hidden_ctc_newgrade" value="">
+                                    @if(strtoupper($case->ctc_type) === 'CE')
+                                        <input type="hidden" name="ctc_newgrade" id="hidden_ctc_newgrade" value="{{ $case->ctc_newgrade }}">
                                     @endif
                                 </div>
                             </div>
@@ -434,12 +452,12 @@
                                 </div>
                                 <div class="col-6">
                                     <label class="rd-form-label">Employment Type <span class="required-star">*</span></label>
-                                    <select name="ctc_emp_type" id="ctc_emp_type" class="rd-form-control" required @if(strtoupper($type) === 'CE') disabled @endif>
-                                        <option value="Full Time">Full Time</option>
-                                        <option value="Part Time">Part Time</option>
+                                    <select name="ctc_emp_type" id="ctc_emp_type" class="rd-form-control" required @if(strtoupper($case->ctc_type) === 'CE') disabled @endif>
+                                        <option value="Full Time" {{ $case->ctc_emp_type === 'Full Time' ? 'selected' : '' }}>Full Time</option>
+                                        <option value="Part Time" {{ $case->ctc_emp_type === 'Part Time' ? 'selected' : '' }}>Part Time</option>
                                     </select>
-                                    @if(strtoupper($type) === 'CE')
-                                        <input type="hidden" name="ctc_emp_type" id="hidden_ctc_emp_type" value="Full Time">
+                                    @if(strtoupper($case->ctc_type) === 'CE')
+                                        <input type="hidden" name="ctc_emp_type" id="hidden_ctc_emp_type" value="{{ $case->ctc_emp_type }}">
                                     @endif
                                 </div>
                             </div>
@@ -447,45 +465,45 @@
                             <div class="row mb-4">
                                 <div class="col-6">
                                     <label class="rd-form-label">CNIC</label>
-                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" placeholder="99999-9999999-9">
+                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" value="{{ $case->ctc_cnic }}" placeholder="99999-9999999-9">
                                 </div>
                                 <div class="col-6">
                                     <label class="rd-form-label">Contact Number</label>
-                                    <input type="text" name="ctc_contact" id="ctc_contact" class="rd-form-control" placeholder="03xx-xxxxxxx">
+                                    <input type="text" name="ctc_contact" id="ctc_contact" class="rd-form-control" value="{{ $case->ctc_contact }}" placeholder="03xx-xxxxxxx">
                                 </div>
                             </div>
 
-                            @if(strtoupper($type) === 'CE')
+                            @if(strtoupper($case->ctc_type) === 'CE')
                                 <div class="form-group mb-4">
                                     <label class="rd-form-label text-warning font-weight-bold">
                                         <i class="fas fa-exclamation-triangle mr-1"></i> Extension Reason / Justification <span class="required-star">*</span>
                                     </label>
-                                    <textarea name="ctc_terminremarks" id="ctc_terminremarks" class="rd-form-control border-warning" rows="3" required placeholder="Specify formal reason/justification for contract extension..."></textarea>
+                                    <textarea name="ctc_terminremarks" id="ctc_terminremarks" class="rd-form-control border-warning" rows="3" required placeholder="Specify formal reason/justification for contract extension...">{{ $case->ctc_terminremarks }}</textarea>
                                 </div>
-                            @elseif(strtoupper($type) === 'CR')
-                                <div class="form-group mb-4" id="cr-termin-remarks-group" style="display: none;">
+                            @elseif(strtoupper($case->ctc_type) === 'CR')
+                                <div class="form-group mb-4" id="cr-termin-remarks-group">
                                     <label class="rd-form-label text-warning font-weight-bold">
-                                        <i class="fas fa-clock mr-1"></i> Early Termination / Renewal Date Override Reason <span class="required-star">*</span>
+                                        <i class="fas fa-clock mr-1"></i> Early Termination / Renewal Date Override Reason
                                     </label>
-                                    <textarea name="ctc_terminremarks" id="ctc_terminremarks" class="rd-form-control border-warning" rows="2" placeholder="Required when new start date does not immediately follow previous contract end date..."></textarea>
+                                    <textarea name="ctc_terminremarks" id="ctc_terminremarks" class="rd-form-control border-warning" rows="2" placeholder="Required when new start date does not immediately follow previous contract end date...">{{ $case->ctc_terminremarks }}</textarea>
                                 </div>
                             @endif
 
                             <div class="form-group mb-4">
-                                <label class="rd-form-label">Job Description / Summary @if($type == 'Hg') <span class="required-star">*</span> @endif</label>
-                                <textarea name="ctc_jd" class="rd-form-control" rows="2" @if($type == 'Hg') required @endif placeholder="Summary of responsibilities..."></textarea>
+                                <label class="rd-form-label">Job Description / Summary</label>
+                                <textarea name="ctc_jd" class="rd-form-control" rows="2" placeholder="Summary of responsibilities...">{{ $case->ctc_jd }}</textarea>
                             </div>
 
                             <div class="form-group mb-4">
                                 <label class="rd-form-label">Justification / Notes</label>
-                                <textarea name="remarks" class="rd-form-control" rows="2" placeholder="Additional notes or references..."></textarea>
+                                <textarea name="remarks" class="rd-form-control" rows="2" placeholder="Additional notes or references...">{{ $case->ctc_remarks }}</textarea>
                             </div>
 
                             <div class="form-group">
-                                <label class="rd-form-label">Attach CV / Supporting Documents</label>
+                                <label class="rd-form-label">Attach / Replace CV or Documents</label>
                                 <div class="file-input-box">
                                     <button type="button" class="file-input-btn" onclick="document.getElementById('cv-upload').click()">Browse File</button>
-                                    <span class="file-input-label" id="file-name">No file chosen</span>
+                                    <span class="file-input-label" id="file-name">{{ $case->ctc_cv_path ? basename($case->ctc_cv_path) : 'No new file chosen' }}</span>
                                     <input type="file" id="cv-upload" name="cv_file" class="d-none" accept=".pdf,.doc,.docx" onchange="document.getElementById('file-name').innerText = this.files[0] ? this.files[0].name : 'No file chosen'">
                                 </div>
                             </div>
@@ -501,40 +519,40 @@
                                 <label class="rd-form-label">Monthly Base Salary (PKR) <span class="required-star">*</span></label>
                                 <div class="currency-input-group">
                                     <span class="currency-prefix">Rs.</span>
-                                    <input type="number" name="ctc_newsalary" id="salary-input" class="rd-form-control font-weight-bold text-success" style="font-size: 1.15rem; text-align: right;" required min="0" placeholder="0" @if(strtoupper($type) === 'CE') readonly @endif>
+                                    <input type="number" name="ctc_newsalary" id="salary-input" class="rd-form-control font-weight-bold text-success" style="font-size: 1.15rem; text-align: right;" required min="0" value="{{ (int)$case->ctc_newsalary }}" @if(strtoupper($case->ctc_type) === 'CE') readonly @endif>
                                 </div>
                             </div>
 
                             <div class="row mb-2">
                                 <div class="col-6">
                                     <label class="rd-form-label">Start Date <span class="required-star">*</span></label>
-                                    <input type="date" name="ctc_newstartdt" id="ctc_startdate" class="rd-form-control" required @if(strtoupper($type) === 'CE') readonly @endif>
+                                    <input type="date" name="ctc_newstartdt" id="ctc_startdate" class="rd-form-control" required value="{{ $case->ctc_newstartdt ? \Carbon\Carbon::parse($case->ctc_newstartdt)->format('Y-m-d') : '' }}" @if(strtoupper($case->ctc_type) === 'CE') readonly @endif>
                                 </div>
                                 <div class="col-6">
                                     <label class="rd-form-label">End Date <span class="required-star">*</span></label>
-                                    <input type="date" name="ctc_newenddt" id="ctc_enddate" class="rd-form-control" required>
+                                    <input type="date" name="ctc_newenddt" id="ctc_enddate" class="rd-form-control" required value="{{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('Y-m-d') : '' }}">
                                 </div>
                             </div>
                             <div class="mb-4">
-                                <span class="duration-chip" id="duration-display"><i class="far fa-calendar-alt"></i> Duration: 0 months</span>
+                                <span class="duration-chip" id="duration-display"><i class="far fa-calendar-alt"></i> Duration: Calculating...</span>
                             </div>
 
-                            @if(in_array(strtoupper($type), ['HG', 'RH']))
+                            @if(in_array(strtoupper($case->ctc_type), ['HG', 'RH']))
                                 <div class="row mb-4">
                                     <div class="col-6">
                                         <label class="rd-form-label">Probation (Months)</label>
-                                        <input type="number" name="ctc_newprob" id="prob-months-input" class="rd-form-control" value="3" min="0" max="12">
+                                        <input type="number" name="ctc_newprob" id="prob-months-input" class="rd-form-control" value="{{ $case->ctc_newprob ?? 0 }}" min="0" max="12">
                                     </div>
                                     <div class="col-6">
                                         <label class="rd-form-label">Probation Salary (PKR)</label>
-                                        <input type="number" name="ctc_newprobsal" id="prob-salary-input" class="rd-form-control" placeholder="Optional" min="0">
+                                        <input type="number" name="ctc_newprobsal" id="prob-salary-input" class="rd-form-control" value="{{ $case->ctc_newprobsal }}" placeholder="Optional" min="0">
                                     </div>
                                 </div>
                             @endif
 
                             <div class="value-summary-card">
                                 <div class="value-summary-label">Estimated Contract Value</div>
-                                <div class="value-summary-amount" id="estimated-value">Rs. 0</div>
+                                <div class="value-summary-amount" id="estimated-value">Rs. {{ number_format((float)($case->ctc_price ?? 0)) }}</div>
                                 <small class="text-muted d-block mt-2 font-weight-500">
                                     <i class="fas fa-calculator mr-1"></i> Exact calendar month proration & probation applied
                                 </small>
@@ -547,19 +565,25 @@
                                 <i class="fas fa-project-diagram"></i> Project Budget Allocation
                             </div>
 
+                            @php
+                                $isSingle = empty($monthlyPlanMap) || $case->ctc_prj_id !== null;
+                            @endphp
+
                             <!-- Single Project Card -->
-                            <div class="mode-card active" id="card-single">
+                            <div class="mode-card {{ $isSingle ? 'active' : '' }}" id="card-single">
                                 <div class="d-flex align-items-center mb-2">
-                                    <input type="radio" name="project_mode" value="single" id="mode-single" class="mr-2" checked>
+                                    <input type="radio" name="project_mode" value="single" id="mode-single" class="mr-2" {{ $isSingle ? 'checked' : '' }}>
                                     <label for="mode-single" class="font-weight-bold text-dark mb-0 cursor-pointer">Single Project (Entire Duration)</label>
                                 </div>
-                                <div class="mode-card-body" id="body-single">
+                                <div class="mode-card-body" id="body-single" style="{{ $isSingle ? '' : 'display: none;' }}">
                                     <div class="form-group mb-0 mt-2">
                                         <label class="rd-form-label small">Associated Project</label>
                                         <select name="ctc_projectcode" class="rd-form-control select2" id="single-project-select" style="width: 100%;">
                                             <option value="">Core / Non-Project</option>
                                             @foreach($projects as $proj)
-                                                <option value="{{ $proj->prj_id }}">{{ $proj->prj_code }} - {{ $proj->prj_title }}</option>
+                                                <option value="{{ $proj->prj_id }}" {{ $case->ctc_prj_id == $proj->prj_id ? 'selected' : '' }}>
+                                                    {{ $proj->prj_code }} - {{ $proj->prj_title }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -567,12 +591,12 @@
                             </div>
 
                             <!-- Monthly Project Card -->
-                            <div class="mode-card" id="card-monthly">
+                            <div class="mode-card {{ !$isSingle ? 'active' : '' }}" id="card-monthly">
                                 <div class="d-flex align-items-center mb-2">
-                                    <input type="radio" name="project_mode" value="monthly" id="mode-monthly" class="mr-2">
+                                    <input type="radio" name="project_mode" value="monthly" id="mode-monthly" class="mr-2" {{ !$isSingle ? 'checked' : '' }}>
                                     <label for="mode-monthly" class="font-weight-bold text-dark mb-0 cursor-pointer">Split Project Allocation by Month</label>
                                 </div>
-                                <div class="mode-card-body" id="body-monthly" style="display: none;">
+                                <div class="mode-card-body" id="body-monthly" style="{{ !$isSingle ? '' : 'display: none;' }}">
                                     <label class="rd-form-label small mb-2">Monthly Project Slices</label>
                                     <div style="max-height: 260px; overflow-y: auto; padding-right: 6px;">
                                         <table class="clean-table" id="monthly-project-table">
@@ -596,12 +620,12 @@
                     <!-- Footer Actions -->
                     <div class="actions-footer-bar">
                         <div class="text-muted small font-weight-500">
-                            <i class="fas fa-info-circle text-primary mr-1"></i> Case will be saved as Draft in Division. You can review and release to HR when ready.
+                            <i class="fas fa-info-circle text-warning mr-1"></i> Saving revision updates the terms in Division. You can release back to HR when ready.
                         </div>
                         <div class="d-flex gap-3 align-items-center">
-                            <a href="{{ route('division.contract-cases.index') }}" class="btn-action-cancel mr-2">Discard</a>
-                            <button type="button" class="btn-action-save" id="btn-save-draft">
-                                <i class="fas fa-save"></i> Save Draft
+                            <a href="{{ route('division.contract-cases.show', $case->ctc_id) }}" class="btn-action-cancel mr-2">Cancel</a>
+                            <button type="button" class="btn-action-update" id="btn-update-case">
+                                <i class="fas fa-save"></i> Save Revision
                             </button>
                         </div>
                     </div>
@@ -633,89 +657,7 @@ $(document).ready(function() {
         $('.select2').select2({ theme: 'bootstrap4', width: '100%' });
     }
 
-    let defaultExpectedStart = null;
-
-    // ── Employee Selector AJAX Handler (Cr, Ce, Rh) ───────────
-    $('#emp-selector').on('change', function() {
-        const empId = $(this).val();
-        if (!empId) {
-            $('#current-contract-card').addClass('d-none');
-            $('#active-case-alert').addClass('d-none');
-            $('#btn-save-draft').attr('disabled', false);
-            return;
-        }
-
-        const url = "{{ url('division/contract-cases/employee-contract') }}/" + encodeURIComponent(empId);
-
-        $.ajax({
-            url: url,
-            method: 'GET',
-            success: function(res) {
-                if (res.has_active_case) {
-                    $('#active-case-message').text(res.message);
-                    $('#active-case-alert').removeClass('d-none');
-                    $('#btn-save-draft').attr('disabled', true);
-                    Swal.fire('Active Case In Progress', res.message, 'warning');
-                    return;
-                }
-
-                $('#active-case-alert').addClass('d-none');
-                $('#btn-save-draft').attr('disabled', false);
-
-                if (res.employee) {
-                    $('#ctc_emp_id').val(res.employee.emp_id);
-                    $('#ctc_empnamecomp').val(res.employee.emp_name);
-                    if (res.employee.emp_cnic) {
-                        $('#ctc_cnic').val(res.employee.emp_cnic);
-                    }
-                }
-
-                if (res.last_contract) {
-                    const lc = res.last_contract;
-                    $('#ctc_ctr_id').val(lc.ctr_id);
-
-                    // Show Reference Card
-                    $('#ref-desig').text(lc.ctr_jobtitle || 'N/A');
-                    $('#ref-grade').text(lc.ctr_grade || 'N/A');
-                    $('#ref-salary').text('Rs. ' + Number(lc.ctr_salary || 0).toLocaleString());
-                    $('#ref-type').text(lc.ctr_type || 'Full Time');
-                    $('#ref-expiry').text(lc.effective_enddt || 'N/A');
-                    $('#current-contract-card').removeClass('d-none');
-
-                    const caseType = $('#ctc_type').val().toUpperCase();
-
-                    if (caseType === 'CR') {
-                        // Renewal: Pre-fill editable terms + set default dates
-                        $('#ctc_newjobtitle').val(lc.ctr_jobtitle || '');
-                        $('#ctc_newgrade').val(lc.ctr_grade || '');
-                        $('#salary-input').val(lc.ctr_salary || 0);
-                        $('#ctc_emp_type').val(lc.ctr_type === 'Part Time' ? 'Part Time' : 'Full Time');
-
-                        defaultExpectedStart = lc.suggested_cr_start;
-                        $('#ctc_startdate').val(lc.suggested_cr_start);
-                        $('#ctc_enddate').val(lc.suggested_cr_end);
-
-                    } else if (caseType === 'CE') {
-                        // Extension: Pre-fill and lock terms + set continuation date
-                        $('#ctc_newjobtitle').val(lc.ctr_jobtitle || '');
-                        $('#ctc_newgrade').val(lc.ctr_grade || '');
-                        $('#hidden_ctc_newgrade').val(lc.ctr_grade || '');
-                        $('#salary-input').val(lc.ctr_salary || 0);
-                        $('#ctc_emp_type').val(lc.ctr_type === 'Part Time' ? 'Part Time' : 'Full Time');
-                        $('#hidden_ctc_emp_type').val(lc.ctr_type === 'Part Time' ? 'Part Time' : 'Full Time');
-
-                        $('#ctc_startdate').val(lc.ctr_startdt);
-                        $('#ctc_enddate').val(lc.suggested_ce_end);
-                    }
-
-                    calculateFinancials();
-                }
-            },
-            error: function() {
-                Swal.fire('Error', 'Failed to fetch employee details.', 'error');
-            }
-        });
-    });
+    const initialPlanMap = @json($monthlyPlanMap);
 
     // ── Radio Toggle Logic ────────────────────────────────────
     $('input[name="project_mode"]').change(function() {
@@ -755,18 +697,6 @@ $(document).ready(function() {
                 let durText = months > 0 ? months + ' months ' : '';
                 durText += remainingDays > 0 ? remainingDays + ' days' : '';
                 $('#duration-display').html('<i class="far fa-calendar-alt text-primary"></i> Duration: <strong>' + durText.trim() + '</strong> (' + diffDays + ' days total)');
-
-                // Check Cr Early termination mismatch
-                const caseType = $('#ctc_type').val().toUpperCase();
-                if (caseType === 'CR' && defaultExpectedStart) {
-                    if (startVal !== defaultExpectedStart) {
-                        $('#cr-termin-remarks-group').slideDown(200);
-                        $('#ctc_terminremarks').attr('required', true);
-                    } else {
-                        $('#cr-termin-remarks-group').slideUp(200);
-                        $('#ctc_terminremarks').attr('required', false);
-                    }
-                }
 
                 // Month-by-month proration calculation
                 let totalEstimated = 0;
@@ -826,6 +756,8 @@ $(document).ready(function() {
         while (current <= endMonth) {
             const label = current.toLocaleString('default', { month: 'short', year: 'numeric' });
             const key = current.getFullYear() + '-' + String(current.getMonth() + 1).padStart(2, '0');
+            const selectedHeadId = initialPlanMap && initialPlanMap[key] ? initialPlanMap[key] : '';
+
             const newRow = $(`
                 <tr>
                     <td class="font-weight-bold text-dark">${label}</td>
@@ -836,6 +768,9 @@ $(document).ready(function() {
                     </td>
                 </tr>
             `);
+            if (selectedHeadId) {
+                newRow.find('select').val(selectedHeadId);
+            }
             tbody.append(newRow);
             current.setMonth(current.getMonth() + 1);
         }
@@ -844,9 +779,12 @@ $(document).ready(function() {
         }
     }
 
+    // Initial calculation on page load
+    calculateFinancials();
+
     // ── Save Logic ────────────────────────────────────────────
-    $('#btn-save-draft').click(function() {
-        const form = $('#contract-case-form')[0];
+    $('#btn-update-case').click(function() {
+        const form = $('#contract-case-edit-form')[0];
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
@@ -859,31 +797,31 @@ $(document).ready(function() {
             formData.delete('ctc_projectcode');
         }
 
-        $(this).attr('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Saving Draft...');
+        $(this).attr('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Saving Revision...');
 
         $.ajax({
-            url: '{{ route("division.contract-cases.store") }}',
-            method: 'POST',
+            url: '{{ route("division.contract-cases.update", $case->ctc_id) }}',
+            method: 'POST', // Handled via @method('PUT') inside FormData
             data: formData,
             processData: false,
             contentType: false,
             success: function(res) {
                 if (res.success) {
                     Swal.fire({
-                        title: 'Draft Saved',
+                        title: 'Revision Saved',
                         text: res.message,
                         icon: 'success',
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        window.location.href = '{{ route("division.contract-cases.index") }}';
+                        window.location.href = '{{ route("division.contract-cases.show", $case->ctc_id) }}';
                     });
                 }
             },
             error: function(err) {
-                const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Failed to save case. Please check form inputs.';
+                const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Failed to save revision. Please check form inputs.';
                 Swal.fire('Error', msg, 'error');
-                $('#btn-save-draft').attr('disabled', false).html('<i class="fas fa-save mr-2"></i> Save Draft');
+                $('#btn-update-case').attr('disabled', false).html('<i class="fas fa-save mr-2"></i> Save Revision');
             }
         });
     });

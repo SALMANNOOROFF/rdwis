@@ -1,16 +1,58 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap');
-.fin-page { font-family: 'Inter', sans-serif; background: var(--rd-bg); min-height: 100vh; color: var(--rd-text1); }
-.rajdhani { font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; }
-.metric-card { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 12px; transition: transform 0.2s; }
-.metric-label { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--rd-text3); }
-.metric-value { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: #fff; line-height: 1; margin-top: 5px; }
-.dg-case-table thead th { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--rd-text3); background: var(--rd-surface3); border: none !important; padding: 14px; }
-.dg-case-table td { padding: 14px; color: var(--rd-text1); vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.08); }
-.dg-case-table tr:hover { background: var(--rd-neutral-50); }
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+.fin-page {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    background: var(--rd-bg) !important;
+    min-height: 100vh;
+    color: var(--rd-text1);
+    padding-bottom: 3rem;
+}
+
+.kpi-summary-card {
+    background: #FFFFFF;
+    border: 1.5px solid var(--rd-border);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(41, 40, 36, 0.04);
+}
+.kpi-summary-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--rd-text3);
+}
+.kpi-summary-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--rd-text1);
+    line-height: 1.2;
+    margin-top: 4px;
+}
+
+.clean-data-table thead th {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--rd-text3);
+    background: var(--rd-neutral-50) !important;
+    border: none !important;
+    padding: 14px 16px;
+}
+.clean-data-table td {
+    padding: 14px 16px;
+    color: var(--rd-text1);
+    vertical-align: middle;
+    border-top: 1px solid var(--rd-neutral-200);
+}
+.clean-data-table tr:hover {
+    background: var(--rd-neutral-50);
+}
 </style>
 
 <div class="content-wrapper fin-page pt-4">
@@ -18,30 +60,32 @@
         {{-- Header --}}
         <div class="row align-items-center mb-4">
             <div class="col-md-7">
-                <span class="badge badge-success px-3 py-1 mb-2 rajdhani" style="font-size: 10px; background: rgba(40,167,69,0.1); color: #28a745; border: 1px solid rgba(40,167,69,0.2);">FINANCIAL APPROVAL AUTHORITY</span>
-                <h1 class="font-weight-bold text-dark rajdhani m-0" style="font-size: 2.2rem;">Finance Contract Dashboard</h1>
-                <p class="text-muted mb-0 small">Project-wise financial scrutiny and budget allocation review for contracts.</p>
+                <span class="badge badge-success px-3 py-1 mb-2 font-weight-bold" style="border-radius: 20px; font-size: 10px; letter-spacing: 0.8px;">
+                    FINANCIAL APPROVAL AUTHORITY
+                </span>
+                <h1 class="font-weight-bold text-dark m-0" style="font-size: 2.2rem; letter-spacing: -0.5px;">Finance Contract Dashboard</h1>
+                <p class="text-muted mb-0 font-weight-500" style="font-size: 0.95rem;">Project-wise financial scrutiny and budget allocation review for contracts.</p>
             </div>
             <div class="col-md-5 text-right">
-                <div class="d-inline-block metric-card p-3 text-left mr-2" style="border-right: 4px solid #28a745;">
-                    <div class="metric-label">Impact Volume</div>
-                    <div class="metric-value" style="color: #28a745;">PKR {{ number_format($actionReqCases->sum('ctc_newsalary')) }}</div>
+                <div class="d-inline-block kpi-summary-card text-left mr-2" style="border-left: 4px solid #10B981;">
+                    <div class="kpi-summary-label">Salary Impact Volume</div>
+                    <div class="kpi-summary-value text-success">PKR {{ number_format($actionReqCases->sum('ctc_newsalary')) }}</div>
                 </div>
-                <div class="d-inline-block metric-card p-3 text-left">
-                    <div class="metric-label">Awaiting Review</div>
-                    <div class="metric-value">{{ $actionReqCases->count() }}</div>
+                <div class="d-inline-block kpi-summary-card text-left">
+                    <div class="kpi-summary-label">Awaiting Scrutiny</div>
+                    <div class="kpi-summary-value text-dark">{{ $actionReqCases->count() }} Cases</div>
                 </div>
             </div>
         </div>
 
         {{-- Finance Queue --}}
-        <div class="metric-card overflow-hidden">
-            <div class="p-3 bg-white d-flex justify-content-between align-items-center" style="background: var(--rd-surface3) !important;">
-                <h6 class="m-0 rajdhani text-dark font-weight-bold"><i class="fas fa-file-invoice-dollar mr-2 text-success"></i> BUDGET REVIEW QUEUE</h6>
-                <div class="text-muted small rajdhani">TOTAL PENDING CASES: <span class="text-dark">{{ $actionReqCases->count() }}</span></div>
+        <div class="card border shadow-sm" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
+            <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
+                <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-file-invoice-dollar mr-2 text-success"></i> BUDGET REVIEW QUEUE</h6>
+                <span class="badge badge-success px-3 py-1 font-weight-bold" style="border-radius: 20px;">{{ $actionReqCases->count() }} PENDING</span>
             </div>
             <div class="table-responsive">
-                <table class="table dg-case-table mb-0">
+                <table class="table clean-data-table mb-0">
                     <thead>
                         <tr>
                             <th class="pl-4">Ref #</th>
@@ -49,22 +93,29 @@
                             <th>Contract Case Title</th>
                             <th class="text-right">Project Code</th>
                             <th class="text-right">Proposed Salary</th>
-                            <th class="text-right pr-4">Finance Command</th>
+                            <th class="text-right pr-4">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($actionReqCases as $p)
                         <tr>
-                            <td class="pl-4"><span class="badge badge-dark text-muted" style="border: 1px solid var(--rd-border);">CC-{{ $p->ctc_id }}</span></td>
+                            <td class="pl-4">
+                                <span class="badge badge-light border text-dark font-weight-bold px-2 py-1" style="font-size: 11px;">
+                                    CC-{{ $p->ctc_id }}
+                                </span>
+                            </td>
                             <td class="font-weight-bold text-dark">Division {{ $p->ctc_divisionid }}</td>
                             <td>
-                                <div class="text-dark small font-weight-bold">{{ $p->ctc_empnamecomp }} ({{ $p->ctc_newjobtitle }})</div>
-                                <div class="text-muted" style="font-size: 10px;"><i class="fas fa-user-check mr-1"></i> Scrutinized by HR</div>
+                                <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
+                                <div class="text-muted small">
+                                    <span class="badge badge-primary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
+                                    <i class="fas fa-user-check mr-1"></i> {{ $p->ctc_newjobtitle }} &bull; HR Scrutinized
+                                </div>
                             </td>
                             <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->casePlans->first()->project->prj_code ?? 'Core / Non-Project' }}</td>
-                            <td class="text-right font-weight-bold text-success rajdhani" style="font-size: 16px;">Rs. {{ number_format($p->ctc_newsalary) }}</td>
+                            <td class="text-right font-weight-bold text-success" style="font-size: 1.05rem;">Rs. {{ number_format($p->ctc_newsalary) }}</td>
                             <td class="text-right pr-4">
-                                <a href="{{ route('finance.contract-cases.show', $p->ctc_id) }}" class="btn btn-success btn-sm rounded-pill px-3 rajdhani font-weight-bold" style="font-size: 11px; background: #28a745; border-color: #28a745;">
+                                <a href="{{ route('finance.contract-cases.show', $p->ctc_id) }}" class="btn btn-success btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
                                     <i class="fas fa-check-circle mr-1"></i> REVIEW & MOVE
                                 </a>
                             </td>
@@ -73,7 +124,7 @@
                         <tr>
                             <td colspan="6" class="text-center py-5">
                                 <i class="fas fa-shield-alt text-muted mb-3" style="font-size: 40px; opacity: 0.3;"></i>
-                                <h6 class="text-muted">No cases currently with Finance.</h6>
+                                <h6 class="text-muted font-weight-bold">No cases currently with Finance.</h6>
                             </td>
                         </tr>
                         @endforelse
@@ -84,32 +135,39 @@
 
         {{-- Finance Processed (Open/Closed) --}}
         @if($initiatedCases->count() > 0 || $completedCases->count() > 0)
-        <div class="metric-card overflow-hidden mt-4" style="opacity: 0.8;">
-            <div class="p-3 bg-white d-flex justify-content-between align-items-center" style="background: var(--rd-surface3) !important;">
-                <h6 class="m-0 rajdhani text-dark font-weight-bold"><i class="fas fa-history mr-2 text-muted"></i> PREVIOUSLY PROCESSED CASES</h6>
+        <div class="card border shadow-sm mt-4" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
+            <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
+                <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-history mr-2 text-muted"></i> PREVIOUSLY PROCESSED CASES</h6>
             </div>
             <div class="table-responsive">
-                <table class="table dg-case-table mb-0">
+                <table class="table clean-data-table mb-0">
                     <thead>
                         <tr>
                             <th class="pl-4">Ref #</th>
                             <th>Candidate Details</th>
                             <th class="text-center">Current Status</th>
-                            <th class="text-right pr-4">View Log</th>
+                            <th class="text-right pr-4">Log</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($initiatedCases->merge($completedCases) as $p)
                         <tr>
-                            <td class="pl-4"><span class="badge badge-dark text-muted" style="border: 1px solid var(--rd-border);">CC-{{ $p->ctc_id }}</span></td>
-                            <td>
-                                <div class="text-dark small font-weight-bold">{{ $p->ctc_empnamecomp }}</div>
+                            <td class="pl-4">
+                                <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 11px;">
+                                    CC-{{ $p->ctc_id }}
+                                </span>
                             </td>
-                            <td class="text-center text-muted small font-weight-bold">
-                                {{ strtoupper($p->ctc_status) }}
+                            <td>
+                                <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
+                                <div class="text-muted small">{{ $p->ctc_newjobtitle }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light border font-weight-bold px-3 py-1 text-muted">
+                                    {{ strtoupper($p->ctc_status) }}
+                                </span>
                             </td>
                             <td class="text-right pr-4">
-                                <a href="{{ route('finance.contract-cases.show', $p->ctc_id) }}" class="btn btn-link btn-sm text-muted rajdhani" style="font-size: 11px;">
+                                <a href="{{ route('finance.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
                                     VIEW TRAIL
                                 </a>
                             </td>
