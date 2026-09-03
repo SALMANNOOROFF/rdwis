@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <div class="content-wrapper">
@@ -171,10 +171,16 @@
                                     </span>
                                 </div>
 
-                                <a href="{{ route('projects.show',$project->prj_id) }}"
-                                   class="btn btn-outline-primary btn-sm px-4" style="border-radius: 20px;">
-                                    View Project <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
+                                <div class="d-flex align-items-center">
+                                    <a href="{{ route('projects.financial_view', $project->prj_id) }}"
+                                       class="btn btn-outline-info btn-sm px-3 mr-2" style="border-radius: 20px;">
+                                        <i class="fas fa-chart-line mr-1"></i> Financial View
+                                    </a>
+                                    <a href="{{ route('projects.show',$project->prj_id) }}"
+                                       class="btn btn-outline-primary btn-sm px-4" style="border-radius: 20px;">
+                                        View Project <i class="fas fa-arrow-right ml-1"></i>
+                                    </a>
+                                </div>
                             </div>
 
                             {{-- TIMELINE --}}

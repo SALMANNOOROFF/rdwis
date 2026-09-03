@@ -98,8 +98,9 @@
                                     @if($st === 'Previous')
                                       <th style="width: 14%; color: var(--rd-text2);" class="p-2">Release Date</th>
                                     @endif
-                                    <th style="width: 20%; color: var(--rd-text2);" class="p-2">Head/Contract</th>
-                                    <th style="width: 10%; color: var(--rd-text2);" class="text-right p-2">Status</th>
+                                    <th style="width: 18%; color: var(--rd-text2);" class="p-2">Head/Contract</th>
+                                    <th style="width: 8%; color: var(--rd-text2);" class="text-center p-2">Status</th>
+                                    <th style="width: 14%; color: var(--rd-text2);" class="text-right p-2">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,9 +111,10 @@
                                     $join = $emp->emp_joindt ? \Carbon\Carbon::parse($emp->emp_joindt) : null;
                                     $last = $emp->emp_lastdt ? \Carbon\Carbon::parse($emp->emp_lastdt) : null;
                                     $latestCtr = $latestContracts[$emp->emp_id] ?? null;
-                                    $headCode = $latestCtr?->hed_code ?: ($emp->hed_code ?? null);
-                                    $headDisplay = $headCode ?: ($emp->emp_title ?: ($emp->emp_hed_id ? '#'.$emp->emp_hed_id : '—'));
-                                    $contractJob = $latestCtr?->ctr_jobtitle ?: ($emp->emp_desig ?: '');
+                                    $headCode = $latestCtr?->current_head_code ?: ($latestCtr?->hed_code ?: ($latestCtr?->prj_code ?: ($emp->hed_code ?: ($emp->prj_code ?? null))));
+                                    $prjTitle = $latestCtr?->current_prj_title ?: ($latestCtr?->prj_title ?: ($emp->prj_title ?: ($latestCtr?->hed_name ?: ($emp->hed_name ?? null))));
+                                    $distinctCount = (int)($latestCtr?->distinct_count ?? 0);
+                                    $plansList = $latestCtr?->plans_list ?? [];
                                     $ctrEnd = $latestCtr?->ctr_enddt ? \Carbon\Carbon::parse($latestCtr->ctr_enddt) : null;
                                     $isExpiringSoon = false;
                                     $daysRemaining = null;
@@ -149,7 +151,7 @@
                                                     </a>
                                                     @if(!empty($isGlobalHrViewer) && (!empty($emp->unt_namesh) || !empty($emp->unt_name)))
                                                         <span class="badge badge-light border text-secondary ml-1 font-weight-bold" style="font-size: 10px;">
-                                                            {{ $emp->unt_namesh ?: $emp->unt_name }}
+                                                             {{ $emp->unt_namesh ?: $emp->unt_name }}
                                                         </span>
                                                     @endif
                                                     @if($isExpiringSoon)
@@ -182,20 +184,102 @@
                                           {{ ($status === 'Previous' && $last) ? $last->format('d-M-Y') : '—' }}
                                       </td>
                                     @endif
-                                    <td class="align-middle p-2">
-                                        <div class="font-weight-bold" style="color: var(--rd-text1);">{{ $headDisplay }}</div>
-                                        @if(!empty($contractJob))
-                                            <small class="text-muted d-block" style="font-size: 0.75rem;">{{ $contractJob }}</small>
+                                    <td class="align-middle p-2" style="max-width: 320px;">
+                                        @if(!empty($headCode) || !empty($prjTitle))
+                                            <div class="d-flex align-items-center flex-wrap">
+                                                @if(!empty($headCode))
+                                                    <span class="badge px-2 py-1 font-weight-bold mr-1.5 shadow-xs" style="background-color: #0284c7; color: #ffffff; font-size: 11px; border-radius: 5px; letter-spacing: 0.3px;">{{ $headCode }}</span>
+                                                @endif
+                                                <span class="font-weight-bold text-truncate" style="color: var(--rd-text1); font-size: 0.88rem; max-width: 170px;" title="{{ $prjTitle ?: $headCode }}">
+                                                    {{ $prjTitle ?: $headCode }}
+                                                </span>
+                                                @if($distinctCount > 1 && !empty($plansList))
+                                                    <div class="dropdown d-inline-block ml-1">
+                                                        <button class="btn btn-xs dropdown-toggle shadow-none" 
+                                                                type="button" 
+                                                                id="planDrop{{ preg_replace('/[^a-zA-Z0-9]/', '', $emp->emp_id) }}" 
+                                                                data-toggle="dropdown" 
+                                                                aria-haspopup="true" 
+                                                                aria-expanded="false"
+                                                                style="background: rgba(2, 132, 199, 0.12); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.35); font-size: 9.5px; font-weight: 700; border-radius: 4px; padding: 2px 6px;">
+                                                            <i class="fas fa-calendar-alt mr-1"></i>{{ $distinctCount }} Projects
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right shadow-lg p-0 border" 
+                                                             style="min-width: 320px; max-height: 320px; overflow-y: auto; z-index: 1050; border-radius: 8px;" 
+                                                             aria-labelledby="planDrop{{ preg_replace('/[^a-zA-Z0-9]/', '', $emp->emp_id) }}">
+                                                            <div class="bg-light px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                                                                <span class="font-weight-bold text-dark" style="font-size: 11.5px;"><i class="fas fa-layer-group text-primary mr-1"></i> Project Allocations</span>
+                                                                <span class="badge badge-info font-weight-bold" style="font-size: 9.5px;">{{ count($plansList) }} {{ count($plansList) === 1 ? 'Period' : 'Periods' }}</span>
+                                                            </div>
+                                                            <div class="p-1.5">
+                                                                @foreach($plansList as $pl)
+                                                                    @php
+                                                                        $periodStr = ($pl['start_label'] === $pl['end_label'])
+                                                                            ? $pl['start_label'] . ' (1 Mo)'
+                                                                            : 'From ' . $pl['start_label'] . ' To ' . $pl['end_label'] . ' (' . $pl['months_count'] . ' Mos)';
+                                                                    @endphp
+                                                                    <div class="p-2 rounded mb-1 {{ $pl['is_current'] ? 'bg-primary-subtle' : '' }}" 
+                                                                         style="{{ $pl['is_current'] ? 'background-color: rgba(14, 165, 233, 0.1); border-left: 3px solid #0284c7;' : 'border-bottom: 1px solid #f1f5f9;' }}">
+                                                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                                                            <div class="d-flex align-items-center text-truncate mr-2">
+                                                                                <span class="badge {{ $pl['is_current'] ? 'badge-primary' : 'badge-secondary' }} px-1.5 py-0.5 font-weight-bold mr-1.5" 
+                                                                                      style="font-size: 9.5px; {{ $pl['is_current'] ? 'background-color: #0284c7 !important;' : '' }}">
+                                                                                    {{ $pl['code'] }}
+                                                                                </span>
+                                                                                <span class="font-weight-600 text-dark text-truncate" style="font-size: 11px; max-width: 150px;" title="{{ $pl['title'] }}">
+                                                                                    {{ $pl['title'] }}
+                                                                                </span>
+                                                                            </div>
+                                                                            @if($pl['is_current'])
+                                                                                <span class="badge badge-success flex-shrink-0" style="font-size: 7.5px; padding: 1px 4px; font-weight: 800;">CURRENT</span>
+                                                                            @endif
+                                                                        </div>
+                                                                        <div class="text-muted small font-weight-500 pl-1" style="font-size: 10px;">
+                                                                            <i class="far fa-calendar-alt text-secondary mr-1"></i>{{ $periodStr }}
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <div class="font-weight-bold" style="color: var(--rd-text3);">—</div>
                                         @endif
                                     </td>
-                                    <td class="align-middle text-right p-2">
+                                    <td class="align-middle text-center p-2">
                                         @php $cls = $status==='Current' ? 'text-success font-weight-bold' : 'text-danger font-weight-bold'; @endphp
-                                        <span class="{{ $cls }}" style="font-size: .95rem">{{ $status }}</span>
+                                        <span class="{{ $cls }}" style="font-size: .9rem">{{ $status }}</span>
+                                    </td>
+                                    <td class="align-middle text-right p-2">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="btn btn-light border btn-xs" title="View Profile">
+                                                <i class="fas fa-eye text-secondary"></i>
+                                            </a>
+                                            @if($canEdit ?? false)
+                                                <a href="{{ route('divhr.employee.edit', $emp->emp_id) }}" class="btn btn-light border btn-xs" title="Edit Profile">
+                                                    <i class="fas fa-edit text-primary"></i>
+                                                </a>
+                                                @if($status === 'Current')
+                                                    <a href="{{ route('division.contract-cases.create', ['type' => 'Cr', 'emp_id' => $emp->emp_id]) }}" class="btn btn-light border btn-xs" title="Renew Contract (Cr)">
+                                                        <i class="fas fa-sync-alt text-warning"></i>
+                                                    </a>
+                                                    <a href="{{ route('division.contract-cases.create', ['type' => 'Ce', 'emp_id' => $emp->emp_id]) }}" class="btn btn-light border btn-xs" title="Extend Contract (Ce)">
+                                                        <i class="fas fa-calendar-plus text-success"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('division.contract-cases.create', ['type' => 'Rh', 'emp_id' => $emp->emp_id]) }}" class="btn btn-light border btn-xs" title="Rehire Employee (Rh)">
+                                                        <i class="fas fa-user-plus text-info"></i>
+                                                    </a>
+                                                @endif
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="{{ request('status','Current')==='Previous' ? 7 : 6 }}" class="text-center py-5 text-muted">
+                                    <td colspan="{{ request('status','Current')==='Previous' ? 8 : 7 }}" class="text-center py-5 text-muted">
                                         <i class="fas fa-user-times fa-3x mb-3 d-block text-gray-300"></i>
                                         No employees found.
                                     </td>

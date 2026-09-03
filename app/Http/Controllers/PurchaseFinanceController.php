@@ -52,9 +52,8 @@ class PurchaseFinanceController extends Controller
 
         // 4. Closed: Finalized cases (Fulfilled / Partially Fulfilled / Completed / Cancelled / Rejected)
         $closed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
-            ->whereIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->whereIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected'])
             ->orderBy('pcs_id', 'desc')
-            ->limit(50)
             ->get();
 
         // Metrics for Finance

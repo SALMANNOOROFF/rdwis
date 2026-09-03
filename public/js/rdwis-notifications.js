@@ -238,8 +238,8 @@ $(function() {
             }
 
             // Real-time Sidebar Badges (Parent to Child Blinking Badges)
-            if (res && res.badges) {
-                updateSidebarBadges(res.badges);
+            if (data && data.badges) {
+                updateSidebarBadges(data.badges);
             }
         });
     }

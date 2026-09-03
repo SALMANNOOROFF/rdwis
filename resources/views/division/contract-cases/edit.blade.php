@@ -531,6 +531,7 @@
                                 <div class="col-6">
                                     <label class="rd-form-label">End Date <span class="required-star">*</span></label>
                                     <input type="date" name="ctc_newenddt" id="ctc_enddate" class="rd-form-control" required value="{{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('Y-m-d') : '' }}">
+                                    <small class="d-block mt-1 font-weight-500 text-info" id="max-end-date-display" style="font-size: 0.75rem;"></small>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -742,8 +743,40 @@ $(document).ready(function() {
         }
     }
 
+    // ── 1-Year Max End Date Calculation ───────────────────────
+    function updateMaxEndDate() {
+        const startVal = $('#ctc_startdate').val();
+        if (startVal) {
+            const startDate = new Date(startVal + 'T00:00:00');
+            if (!isNaN(startDate.getTime())) {
+                const maxDate = new Date(startDate);
+                maxDate.setFullYear(maxDate.getFullYear() + 1);
+                maxDate.setDate(maxDate.getDate() - 1);
+
+                const yyyy = maxDate.getFullYear();
+                const mm = String(maxDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(maxDate.getDate()).padStart(2, '0');
+                const maxDateStr = `${yyyy}-${mm}-${dd}`;
+
+                $('#ctc_enddate').attr('max', maxDateStr);
+                $('#max-end-date-display').html(`<i class="fas fa-info-circle mr-1"></i> Maximum end date: <strong>${maxDateStr}</strong> (1 year from start)`);
+                return maxDateStr;
+            }
+        }
+        $('#ctc_enddate').removeAttr('max');
+        $('#max-end-date-display').text('');
+        return null;
+    }
+
     $('#salary-input, #prob-months-input, #prob-salary-input').on('input', calculateFinancials);
-    $('#ctc_startdate, #ctc_enddate').on('change', calculateFinancials);
+    $('#ctc_startdate').on('change input', function() {
+        updateMaxEndDate();
+        calculateFinancials();
+    });
+    $('#ctc_enddate').on('change input', calculateFinancials);
+
+    // Initial check on page load
+    updateMaxEndDate();
 
     const projOptionsHtml = $('#proj-options').html();
     function updateMonthlyProjectRows(start, end) {
@@ -788,6 +821,17 @@ $(document).ready(function() {
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
+        }
+
+        // Client-side 1-year max cap check
+        const startVal = $('#ctc_startdate').val();
+        const endVal = $('#ctc_enddate').val();
+        if (startVal && endVal) {
+            const maxDateStr = updateMaxEndDate();
+            if (maxDateStr && endVal > maxDateStr) {
+                Swal.fire('Validation Error', 'Contract duration cannot exceed 1 year from the start date.', 'error');
+                return;
+            }
         }
 
         const formData = new FormData(form);

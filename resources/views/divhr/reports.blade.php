@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -488,9 +488,9 @@
                 } else if (colKey === 'missing_count' || colKey === 'total_contracts' || colKey === 'total_qualifs') {
                     val = `<span class="badge badge-info px-2 py-1">${val}</span>`;
                 } else if (colKey === 'grade' || colKey === 'last_grade' || colKey === 'ctr_grade' || colKey === 'current_grade') {
-                    val = val !== '—' ? `<span class="badge px-2 py-1" style="font-size: 0.82rem; background: rgba(23,162,184,0.2); color: #67e8f9; border-radius: 6px;">${val}</span>` : '—';
+                    val = val !== '—' ? `<span class="badge px-2.5 py-1 font-weight-bold shadow-xs" style="font-size: 0.82rem; background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 5px;">${val}</span>` : '—';
                 } else if (colKey === 'salary' || colKey === 'last_salary' || colKey === 'ctr_salary' || colKey === 'current_salary') {
-                    val = val !== '—' ? `<span style="color: #22c55e; font-weight: 700;">${val}</span>` : '—';
+                    val = val !== '—' ? `<span style="color: #0f766e; font-weight: 800; font-size: 0.92rem;">${val}</span>` : '—';
                 } else if (colKey === 'pct_increase') {
                     if (val.startsWith('+')) {
                         val = `<span class="text-success font-weight-bold">${val}</span>`;
@@ -498,22 +498,25 @@
                         val = `<span class="text-danger font-weight-bold">${val}</span>`;
                     }
                 } else if (colKey === 'contract_no') {
-                    val = `<span class="badge" style="border: 1px solid rgba(103,232,249,0.4); color: #67e8f9; background: rgba(103,232,249,0.1); border-radius: 10px; font-size: 0.78rem; padding: 4px 8px;">${val}</span>`;
+                    val = `<span class="badge px-2.5 py-1 font-weight-bold shadow-xs" style="background-color: #0284c7; color: #ffffff; border-radius: 5px; font-size: 0.78rem;">${val}</span>`;
                 } else if (colKey === 'contracts_history') {
                     if (Array.isArray(val) && val.length > 0) {
-                        let html = '<table class="table table-sm text-nowrap mb-0" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border); font-size: 0.8rem; border-radius: 6px;">';
-                        html += '<thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #67e8f9;"><th style="padding:4px 8px;">Contract Record</th><th style="padding:4px 8px;">Grade</th><th style="padding:4px 8px;">Salary</th><th style="padding:4px 8px;">% Inc.</th><th style="padding:4px 8px;">Start Date</th><th style="padding:4px 8px;">End Date</th><th style="padding:4px 8px;">Job Title</th><th style="padding:4px 8px;">Head</th></tr></thead><tbody>';
+                        let html = '<table class="table table-sm table-bordered text-nowrap mb-0 shadow-xs" style="background: #ffffff; border: 1px solid #e2e8f0; font-size: 0.8rem; border-radius: 6px; overflow: hidden;">';
+                        html += '<thead><tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1; color: #334155; font-weight: 700; font-size: 0.75rem;"><th style="padding:5px 8px;">Contract Record</th><th style="padding:5px 8px;">Grade</th><th style="padding:5px 8px;">Salary</th><th style="padding:5px 8px;">% Inc.</th><th style="padding:5px 8px;">Start Date</th><th style="padding:5px 8px;">End Date</th><th style="padding:5px 8px;">Job Title</th><th style="padding:5px 8px;">Project Head</th></tr></thead><tbody>';
                         val.forEach(c => {
-                            const pctColor = c.pct_increase.startsWith('+') ? '#22c55e' : (c.pct_increase.startsWith('-') ? '#f87171' : '#94a3b8');
-                            html += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
-                                <td style="padding:4px 8px;"><span class="badge" style="border: 1px solid rgba(103,232,249,0.3); color: #67e8f9; background: rgba(103,232,249,0.1); font-size: 0.75rem;">Contract ${c.no}</span></td>
-                                <td style="padding:4px 8px;"><span class="badge" style="background: rgba(23,162,184,0.2); color: #67e8f9;">${c.grade}</span></td>
-                                <td style="padding:4px 8px; color: #22c55e; font-weight: 700;">${c.salary}</td>
-                                <td style="padding:4px 8px; color: ${pctColor}; font-weight: 700;">${c.pct_increase}</td>
-                                <td style="padding:4px 8px;">${c.ctr_start || '—'}</td>
-                                <td style="padding:4px 8px;">${c.ctr_end || '—'}</td>
-                                <td style="padding:4px 8px;">${c.ctr_jobtitle}</td>
-                                <td style="padding:4px 8px; color: var(--rd-text3);">${c.head_code}</td>
+                            const pctColor = c.pct_increase.startsWith('+') ? '#16a34a' : (c.pct_increase.startsWith('-') ? '#dc2626' : '#64748b');
+                            const headBadge = (c.head_code && c.head_code !== '—') 
+                                ? `<span class="badge px-2 py-0.5 font-weight-bold shadow-xs" style="background-color: #0284c7; color: #ffffff; border-radius: 4px; font-size: 0.76rem;">${c.head_code}</span>` 
+                                : '<span class="text-muted">—</span>';
+                            html += `<tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding:5px 8px;"><span class="badge font-weight-bold" style="border: 1px solid rgba(2,132,199,0.3); color: #0284c7; background: rgba(2,132,199,0.08); font-size: 0.76rem; border-radius: 4px;">Contract ${c.no}</span></td>
+                                <td style="padding:5px 8px;"><span class="badge font-weight-bold" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.76rem;">${c.grade}</span></td>
+                                <td style="padding:5px 8px; color: #0f766e; font-weight: 800;">${c.salary}</td>
+                                <td style="padding:5px 8px; color: ${pctColor}; font-weight: 800;">${c.pct_increase}</td>
+                                <td style="padding:5px 8px; color: #334155;">${c.ctr_start || '—'}</td>
+                                <td style="padding:5px 8px; color: #334155;">${c.ctr_end || '—'}</td>
+                                <td style="padding:5px 8px; font-weight: 600; color: #1e293b;">${c.ctr_jobtitle}</td>
+                                <td style="padding:5px 8px;">${headBadge}</td>
                             </tr>`;
                         });
                         html += '</tbody></table>';
@@ -523,17 +526,17 @@
                     }
                 } else if (colKey === 'qualifications_list') {
                     if (Array.isArray(val) && val.length > 0) {
-                        let html = '<table class="table table-sm text-nowrap mb-0" style="background: var(--rd-neutral-50); border: 1px solid var(--rd-border); font-size: 0.8rem; border-radius: 6px;">';
-                        html += '<thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #67e8f9;"><th style="padding:4px 8px;">Type</th><th style="padding:4px 8px;">Title / Degree</th><th style="padding:4px 8px;">Institution</th><th style="padding:4px 8px;">Duration</th><th style="padding:4px 8px;">Grade</th><th style="padding:4px 8px;">End Date</th></tr></thead><tbody>';
+                        let html = '<table class="table table-sm table-bordered text-nowrap mb-0 shadow-xs" style="background: #ffffff; border: 1px solid #e2e8f0; font-size: 0.8rem; border-radius: 6px; overflow: hidden;">';
+                        html += '<thead><tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1; color: #334155; font-weight: 700; font-size: 0.75rem;"><th style="padding:5px 8px;">Type</th><th style="padding:5px 8px;">Title / Degree</th><th style="padding:5px 8px;">Institution</th><th style="padding:5px 8px;">Duration</th><th style="padding:5px 8px;">Grade</th><th style="padding:5px 8px;">End Date</th></tr></thead><tbody>';
                         val.forEach(q => {
-                            const typeBg = (q.qlf_type || '').toLowerCase() === 'degree' ? 'background: rgba(95,120,88,0.18); color: #60a5fa;' : ((q.qlf_type || '').toLowerCase() === 'course' ? 'background: rgba(34,197,94,0.2); color: #22c55e;' : 'background: rgba(168,85,247,0.2); color: #a855f7;');
-                            html += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
-                                <td style="padding:4px 8px;"><span class="badge" style="${typeBg}">${q.qlf_type}</span></td>
-                                <td style="padding:4px 8px; font-weight: 700; color: var(--rd-text1);">${q.qlf_name}</td>
-                                <td style="padding:4px 8px;">${q.qlf_inst}</td>
-                                <td style="padding:4px 8px;">${q.qlf_duration}</td>
-                                <td style="padding:4px 8px; color: #22c55e;">${q.qlf_grade}</td>
-                                <td style="padding:4px 8px;">${q.qlf_enddt || '—'}</td>
+                            const typeBg = (q.qlf_type || '').toLowerCase() === 'degree' ? 'background: rgba(2,132,199,0.12); color: #0284c7; border: 1px solid rgba(2,132,199,0.25);' : ((q.qlf_type || '').toLowerCase() === 'course' ? 'background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.25);' : 'background: #f1f5f9; color: #475569;');
+                            html += `<tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding:5px 8px;"><span class="badge font-weight-bold" style="${typeBg} font-size: 0.76rem; border-radius: 4px;">${q.qlf_type}</span></td>
+                                <td style="padding:5px 8px; font-weight: 700; color: #1e293b;">${q.qlf_name}</td>
+                                <td style="padding:5px 8px; color: #475569;">${q.qlf_inst}</td>
+                                <td style="padding:5px 8px; color: #475569;">${q.qlf_duration}</td>
+                                <td style="padding:5px 8px; color: #0f766e; font-weight: 700;">${q.qlf_grade}</td>
+                                <td style="padding:5px 8px; color: #64748b;">${q.qlf_enddt || '—'}</td>
                             </tr>`;
                         });
                         html += '</tbody></table>';

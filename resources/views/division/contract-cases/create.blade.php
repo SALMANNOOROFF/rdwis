@@ -379,12 +379,18 @@
                             @if(in_array(strtoupper($type), ['CR', 'CE', 'RH']))
                                 <!-- Employee Selector for Cr/Ce/Rh -->
                                 <div class="form-group mb-4">
-                                    <label class="rd-form-label">Select Active Employee <span class="required-star">*</span></label>
+                                    <label class="rd-form-label">
+                                        @if(strtoupper($type) === 'RH')
+                                            Select Separated Employee (Released / Terminated) <span class="required-star">*</span>
+                                        @else
+                                            Select Active Employee <span class="required-star">*</span>
+                                        @endif
+                                    </label>
                                     <select id="emp-selector" class="rd-form-control select2" required style="width: 100%;">
                                         <option value="">-- Choose Employee --</option>
                                         @foreach($employees as $emp)
-                                            <option value="{{ $emp->emp_id }}">
-                                                {{ $emp->emp_name }} ({{ $emp->emp_id }}) {{ $emp->emp_rank ? '- '.$emp->emp_rank : '' }}
+                                            <option value="{{ $emp->emp_id }}" {{ request('emp_id') == $emp->emp_id ? 'selected' : '' }}>
+                                                {{ $emp->emp_name }} ({{ $emp->emp_id }}) [{{ $emp->emp_status }}] {{ $emp->emp_rank ? '- '.$emp->emp_rank : '' }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -513,6 +519,7 @@
                                 <div class="col-6">
                                     <label class="rd-form-label">End Date <span class="required-star">*</span></label>
                                     <input type="date" name="ctc_newenddt" id="ctc_enddate" class="rd-form-control" required>
+                                    <small class="d-block mt-1 font-weight-500 text-info" id="max-end-date-display" style="font-size: 0.75rem;"></small>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -706,8 +713,20 @@ $(document).ready(function() {
 
                         $('#ctc_startdate').val(lc.ctr_startdt);
                         $('#ctc_enddate').val(lc.suggested_ce_end);
+
+                    } else if (caseType === 'RH') {
+                        // Rehiring: Pre-fill past designation/grade & default 1-year term
+                        $('#ctc_newjobtitle').val(lc.ctr_jobtitle || '');
+                        $('#ctc_newgrade').val(lc.ctr_grade || '');
+                        $('#salary-input').val(lc.ctr_salary || 0);
+                        $('#ctc_emp_type').val(lc.ctr_type === 'Part Time' ? 'Part Time' : 'Full Time');
+
+                        defaultExpectedStart = lc.suggested_rh_start;
+                        $('#ctc_startdate').val(lc.suggested_rh_start);
+                        $('#ctc_enddate').val(lc.suggested_rh_end);
                     }
 
+                    updateMaxEndDate();
                     calculateFinancials();
                 }
             },
@@ -812,8 +831,40 @@ $(document).ready(function() {
         }
     }
 
+    // ── 1-Year Max End Date Calculation ───────────────────────
+    function updateMaxEndDate() {
+        const startVal = $('#ctc_startdate').val();
+        if (startVal) {
+            const startDate = new Date(startVal + 'T00:00:00');
+            if (!isNaN(startDate.getTime())) {
+                const maxDate = new Date(startDate);
+                maxDate.setFullYear(maxDate.getFullYear() + 1);
+                maxDate.setDate(maxDate.getDate() - 1);
+
+                const yyyy = maxDate.getFullYear();
+                const mm = String(maxDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(maxDate.getDate()).padStart(2, '0');
+                const maxDateStr = `${yyyy}-${mm}-${dd}`;
+
+                $('#ctc_enddate').attr('max', maxDateStr);
+                $('#max-end-date-display').html(`<i class="fas fa-info-circle mr-1"></i> Maximum end date: <strong>${maxDateStr}</strong> (1 year from start)`);
+                return maxDateStr;
+            }
+        }
+        $('#ctc_enddate').removeAttr('max');
+        $('#max-end-date-display').text('');
+        return null;
+    }
+
     $('#salary-input, #prob-months-input, #prob-salary-input').on('input', calculateFinancials);
-    $('#ctc_startdate, #ctc_enddate').on('change', calculateFinancials);
+    $('#ctc_startdate').on('change input', function() {
+        updateMaxEndDate();
+        calculateFinancials();
+    });
+    $('#ctc_enddate').on('change input', calculateFinancials);
+
+    // Initial check on page load if start date is pre-filled
+    updateMaxEndDate();
 
     const projOptionsHtml = $('#proj-options').html();
     function updateMonthlyProjectRows(start, end) {
@@ -852,6 +903,17 @@ $(document).ready(function() {
             return;
         }
 
+        // Client-side 1-year max cap check
+        const startVal = $('#ctc_startdate').val();
+        const endVal = $('#ctc_enddate').val();
+        if (startVal && endVal) {
+            const maxDateStr = updateMaxEndDate();
+            if (maxDateStr && endVal > maxDateStr) {
+                Swal.fire('Validation Error', 'Contract duration cannot exceed 1 year from the start date.', 'error');
+                return;
+            }
+        }
+
         const formData = new FormData(form);
         
         // Remove project mappings based on mode
@@ -887,6 +949,11 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Auto-trigger load if employee is preselected from query param
+    if ($('#emp-selector').val()) {
+        $('#emp-selector').trigger('change');
+    }
 });
 </script>
 @endpush

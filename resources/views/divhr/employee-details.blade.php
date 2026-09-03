@@ -111,15 +111,42 @@
         <span class="text-text3 font-medium text-sm">Employees /</span>
         <h1 class="text-xl font-bold text-text1 tracking-tight" style="font-family: 'Rajdhani', sans-serif;">{{ $emp->emp_name ?? 'Jonathan Pierce' }}</h1>
       </div>
-      <div class="flex gap-2 w-full sm:w-auto">
+      <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
         <button onclick="history.back()"
-          class="flex-1 sm:flex-initial px-4 py-2 text-xs font-semibold text-text1 bg-surface3 border border-border2 rounded-lg shadow-refined hover:bg-surface4 transition-all">
+          class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-text1 bg-surface3 border border-border2 rounded-lg shadow-refined hover:bg-surface4 transition-all">
           <i class="fas fa-arrow-left mr-1"></i> Back
         </button>
-        <button
-          class="flex-1 sm:flex-initial px-5 py-2 text-xs font-semibold text-white bg-primary rounded-lg shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all">
-          Edit Profile
-        </button>
+
+        @if($canEdit ?? false)
+          @if(in_array(strtolower($emp->emp_status ?? 'active'), ['active', 'current']))
+            {{-- Contract Renewal (Cr) button --}}
+            <a href="{{ route('division.contract-cases.create', ['type' => 'Cr', 'emp_id' => $emp->emp_id ?? $id]) }}"
+              class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-decoration-none"
+              title="Initiate Contract Renewal (Cr) Case for this employee">
+              <i class="fas fa-sync-alt text-amber-700"></i> Renew Contract (Cr)
+            </a>
+
+            {{-- Contract Extension (Ce) button --}}
+            <a href="{{ route('division.contract-cases.create', ['type' => 'Ce', 'emp_id' => $emp->emp_id ?? $id]) }}"
+              class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-bold text-emerald-900 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-lg shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-decoration-none"
+              title="Initiate Contract Extension (Ce) Case for this employee">
+              <i class="fas fa-calendar-plus text-emerald-700"></i> Extend Contract (Ce)
+            </a>
+          @else
+            {{-- Rehiring (Rh) button --}}
+            <a href="{{ route('division.contract-cases.create', ['type' => 'Rh', 'emp_id' => $emp->emp_id ?? $id]) }}"
+              class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-bold text-cyan-900 bg-cyan-100 hover:bg-cyan-200 border border-cyan-300 rounded-lg shadow-sm transition-all inline-flex items-center justify-center gap-1.5 text-decoration-none"
+              title="Initiate Rehiring (Rh) Case for this separated employee">
+              <i class="fas fa-user-plus text-cyan-700"></i> Rehire Employee (Rh)
+            </a>
+          @endif
+
+          {{-- Edit Profile button (Division & HR only) --}}
+          <a href="{{ route('divhr.employee.edit', $emp->emp_id ?? $id) }}"
+            class="flex-1 sm:flex-initial px-4 py-2 text-xs font-bold text-white bg-primary rounded-lg shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all inline-flex items-center justify-center gap-1.5 text-decoration-none">
+            <i class="fas fa-edit mr-1"></i> Edit Profile
+          </a>
+        @endif
       </div>
     </header>
     <div class="grid grid-cols-12 gap-6">
@@ -281,16 +308,72 @@
             </div>
             <div
               class="bg-transparent p-3 rounded-xl border border-border1 mb-3">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                 <div>
                   <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Department</p>
                   <p class="font-semibold text-text1 text-xs truncate">{{ $authUnit?->unt_name ?? ($base?->eff_unit_name ?? ($emp?->unt_name ?? '—')) }}</p>
                 </div>
                 <div>
+                  <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Hired Project Head</p>
+                  @php
+                    $detHeadCode = $currentContract?->ctr_hed_code ?: ($currentContract?->ctr_prj_code ?: ($emp?->hed_code ?: ($emp?->prj_code ?? null)));
+                    $detPrjTitle = $currentContract?->ctr_prj_title ?: ($emp?->prj_title ?: ($currentContract?->ctr_hed_name ?: ($emp?->hed_name ?? null)));
+                    $dPlans = $currentContractPlans ?? collect();
+                    $dCount = (int)($distinctPlanCount ?? 0);
+                  @endphp
+                  <div class="flex items-center flex-wrap gap-1">
+                    <p class="font-semibold text-text1 text-xs truncate max-w-[200px]" title="{{ $detPrjTitle }}">
+                      @if($detHeadCode)
+                        <span class="px-2 py-0.5 font-bold mr-1 rounded text-[10px] text-white shadow-xs" style="background-color: #0284c7;">{{ $detHeadCode }}</span>
+                      @endif
+                      {{ $detPrjTitle ?: ($detHeadCode ?: '—') }}
+                    </p>
+                    @if($dCount > 1 && $dPlans->isNotEmpty())
+                      <div class="relative inline-block text-left" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false" type="button" class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/10 text-sky-500 border border-sky-500/30 hover:bg-sky-500/20">
+                          <i class="fas fa-layer-group mr-1 text-[8px]"></i>{{ $dCount }} Projects
+                          <i class="fas fa-chevron-down ml-1 text-[7px]"></i>
+                        </button>
+                        <div x-show="open" x-cloak class="origin-top-right absolute right-0 mt-1 w-72 rounded-xl shadow-xl bg-surface border border-border1 z-50 p-2 max-h-60 overflow-y-auto">
+                          <div class="text-[10px] font-bold text-text3 uppercase tracking-wider px-2 py-1 border-b border-border1 mb-1.5 flex justify-between items-center">
+                            <span>Project Allocations</span>
+                            <span class="text-[9px] px-1.5 py-0.5 bg-sky-500/10 text-sky-500 rounded font-bold">{{ $dPlans->count() }} {{ $dPlans->count() === 1 ? 'Period' : 'Periods' }}</span>
+                          </div>
+                          @foreach($dPlans as $dp)
+                            @php
+                              $isCur = is_array($dp) ? ($dp['is_current'] ?? false) : ($dp->is_current ?? false);
+                              $dispCode = is_array($dp) ? ($dp['display_code'] ?? ($dp['code'] ?? '—')) : ($dp->display_code ?? ($dp->code ?? '—'));
+                              $dispTitle = is_array($dp) ? ($dp['display_title'] ?? ($dp['title'] ?? '')) : ($dp->display_title ?? ($dp->title ?? ''));
+                              $pStart = is_array($dp) ? ($dp['start_label'] ?? ($dp['month_label'] ?? '')) : ($dp->start_label ?? ($dp->month_label ?? ''));
+                              $pEnd = is_array($dp) ? ($dp['end_label'] ?? ($dp['month_label'] ?? '')) : ($dp->end_label ?? ($dp->month_label ?? ''));
+                              $mCount = is_array($dp) ? ($dp['months_count'] ?? 1) : ($dp->months_count ?? 1);
+                              $periodStr = ($pStart === $pEnd) ? $pStart . ' (1 Mo)' : "From {$pStart} To {$pEnd} ({$mCount} Mos)";
+                            @endphp
+                            <div class="p-2 rounded text-[11px] mb-1 {{ $isCur ? 'bg-sky-500/10 border-l-2 border-sky-500' : 'hover:bg-surface2 border-b border-border1' }}">
+                              <div class="flex items-center justify-between gap-1.5 mb-1">
+                                <div class="flex items-center gap-1.5 truncate">
+                                  <span class="px-1.5 py-0.5 {{ $isCur ? 'bg-sky-600 text-white' : 'bg-surface3 text-text2' }} rounded text-[9px] font-bold">{{ $dispCode }}</span>
+                                  <span class="text-text1 font-medium truncate text-[10.5px]" title="{{ $dispTitle }}">{{ $dispTitle }}</span>
+                                </div>
+                                @if($isCur)
+                                  <span class="text-[7.5px] font-bold text-emerald-500 uppercase flex-shrink-0 bg-emerald-500/10 px-1 rounded">Current</span>
+                                @endif
+                              </div>
+                              <div class="text-[9.5px] text-text3 font-medium pl-1">
+                                <i class="far fa-calendar-alt mr-1"></i>{{ $periodStr }}
+                              </div>
+                            </div>
+                          @endforeach
+                        </div>
+                      </div>
+                    @endif
+                  </div>
+                </div>
+                <div>
                   <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Designation</p>
                   <p class="font-semibold text-text1 text-xs truncate">{{ $currentContract?->ctr_jobtitle ?? ($emp?->emp_title ?? '—') }}</p>
                 </div>
-                <div class="col-span-2 md:col-span-1 border-t md:border-t-0 pt-2 md:pt-0 border-border1">
+                <div class="border-t md:border-t-0 pt-2 md:pt-0 border-border1">
                   <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Next Review</p>
                   <p class="font-semibold text-text1 text-xs">
                     {{ !empty($currentContract?->ctr_enddt) ? \Carbon\Carbon::parse($currentContract?->ctr_enddt)->format('d-M-Y') : '—' }}
@@ -300,15 +383,17 @@
               <div
                 class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-border1">
                 <div>
-                  <p class="text-[10px] text-text2 uppercase tracking-widest mb-1 font-bold">Current Annual Salary
-                  </p>
+                  <p class="text-[10px] text-text2 uppercase tracking-widest mb-1 font-bold">Current Annual Salary</p>
                   @php
-                    $monthlyNet = $base?->srq_netsalary ?? $base?->srq_salary ?? null;
-                    $annualNet = $monthlyNet ? $monthlyNet * 12 : null;
+                    $monthlySalary = (float)($currentContract?->ctr_salary ?: ($lastContract?->ctr_salary ?: ($base?->srq_netsalary ?: ($base?->srq_salary ?: 0))));
+                    $annualNet = $monthlySalary > 0 ? ($monthlySalary * 12) : null;
                   @endphp
-                  <p class="text-xl font-black text-text1">
+                  <p class="text-xl font-black text-text1 leading-none">
                     {{ $annualNet ? number_format($annualNet) : '—' }}
                   </p>
+                  @if($monthlySalary > 0)
+                    <span class="text-[10px] text-text3 font-semibold block mt-1">({{ number_format($monthlySalary) }} / mo)</span>
+                  @endif
                 </div>
                 <div>
                   <p class="text-[10px] text-text2 uppercase tracking-widest mb-1.5 font-bold">Probation Period</p>
@@ -341,10 +426,11 @@
                   <thead
                     class="sticky top-0 z-10 bg-surface2 border-b border-border1">
                     <tr>
-                      <th class="px-4 py-2 font-bold text-[9px] text-text3 uppercase">Role</th>
-                      <th class="px-4 py-2 font-bold text-[9px] text-text3 uppercase">Salary</th>
-                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">Start</th>
-                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">End</th>
+                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">Role / Grade</th>
+                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">Project Head</th>
+                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">Salary</th>
+                      <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase">Start</th>
+                      <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase">End</th>
                       <th class="px-2 py-2 pr-12 font-bold text-[9px] text-text3 uppercase text-center relative">
                         Status
                         <span class="absolute right-2 top-1 flex gap-1.5">
@@ -367,9 +453,22 @@
                         $cls = $label === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                               : ($label === 'Future' ? 'bg-primary/10 text-primary border border-primary/20'
                               : 'bg-surface3 text-text2 border border-border1');
+                        $cHead = $c->ctr_hed_code ?: ($c->ctr_prj_code ?? null);
+                        $cPrj = $c->ctr_prj_title ?: ($c->ctr_hed_name ?: ($c->ctr_hed_code ?: ($c->ctr_prj_code ?? null)));
                       @endphp
                       <tr class="hover:bg-surface2/50 transition-colors">
-                        <td class="px-2 py-2 font-medium text-text1" style="max-width: 120px;">{{ $c->ctr_jobtitle ?? '—' }}</td>
+                        <td class="px-3 py-2 font-medium text-text1" style="max-width: 120px;">
+                          <span class="font-bold">{{ $c->ctr_jobtitle ?? '—' }}</span>
+                          @if(!empty($c->ctr_grade))
+                            <span class="text-[9px] text-text3 block font-semibold">{{ $c->ctr_grade }}</span>
+                          @endif
+                        </td>
+                        <td class="px-3 py-2 font-medium text-text1" style="max-width: 150px;">
+                          @if($cHead)
+                            <span class="px-1.5 py-0.5 font-bold mr-1 rounded text-[9px] text-white shadow-xs" style="background-color: #0284c7;">{{ $cHead }}</span>
+                          @endif
+                          <span class="text-[10.5px] font-semibold text-text1 text-truncate" title="{{ $cPrj }}">{{ $cPrj ?: ($cHead ?: '—') }}</span>
+                        </td>
                         <td class="px-3 py-2 font-bold text-text1">{{ $c->ctr_salary ? number_format($c->ctr_salary) : '—' }}</td>
                         <td class="px-2 py-2 text-text2">{{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('M Y') : '—' }}</td>
                         <td class="px-2 py-2 text-text2">{{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('M Y') : '—' }}</td>
@@ -378,7 +477,7 @@
                         </td>
                       </tr>
                     @empty
-                      <tr><td colspan="5" class="px-3 py-2 text-center text-text3">No contracts</td></tr>
+                      <tr><td colspan="6" class="px-3 py-2 text-center text-text3">No contracts</td></tr>
                     @endforelse
                   </tbody>
                 </table>
@@ -386,58 +485,104 @@
             </div>
           </div>
           <div class="xl:col-span-4 min-h-[385px] flex flex-col space-y-3">
+            @php
+              $pts = $salaryTimeline ?? [];
+              $ptCount = count($pts);
+              $firstSal = $ptCount > 0 ? (float)$pts[0]['salary'] : (float)($firstContract?->ctr_salary ?? 0);
+              $lastSal = $ptCount > 0 ? (float)$pts[$ptCount - 1]['salary'] : (float)($lastContract?->ctr_salary ?? 0);
+              
+              $gPct = ($firstSal > 0 && $lastSal > 0) ? round((($lastSal - $firstSal) / $firstSal) * 100, 1) : null;
+
+              $svgWidth = 360;
+              $svgHeight = 130;
+              $padX = 30;
+              $padTop = 20;
+              $padBtm = 20;
+              $availW = $svgWidth - (2 * $padX);
+              $availH = $svgHeight - $padTop - $padBtm;
+
+              $salValues = array_map(fn($p) => (float)$p['salary'], $pts);
+              $minS = !empty($salValues) ? min($salValues) : 0;
+              $maxS = !empty($salValues) ? max($salValues) : 0;
+              $rangeS = max(1, $maxS - $minS);
+
+              $coords = [];
+              if ($ptCount === 1) {
+                $coords[] = ['x' => $padX + ($availW / 2), 'y' => $padTop + ($availH / 2), 'pt' => $pts[0]];
+                $pathD = "M {$padX}," . ($padTop + ($availH / 2)) . " L " . ($svgWidth - $padX) . "," . ($padTop + ($availH / 2));
+                $areaD = "M {$padX}," . ($padTop + ($availH / 2)) . " L " . ($svgWidth - $padX) . "," . ($padTop + ($availH / 2)) . " V {$svgHeight} H {$padX} Z";
+              } elseif ($ptCount > 1) {
+                foreach ($pts as $idx => $p) {
+                  $cx = $padX + ($idx / ($ptCount - 1)) * $availW;
+                  if ($maxS == $minS) {
+                    $cy = $padTop + ($availH / 2);
+                  } else {
+                    $cy = ($padTop + $availH) - ((($p['salary'] - $minS) / $rangeS) * $availH);
+                  }
+                  $coords[] = ['x' => round($cx, 1), 'y' => round($cy, 1), 'pt' => $p];
+                }
+                $pathParts = [];
+                foreach ($coords as $i => $c) {
+                  $pathParts[] = ($i === 0 ? 'M ' : 'L ') . $c['x'] . ',' . $c['y'];
+                }
+                $pathD = implode(' ', $pathParts);
+                $areaD = $pathD . " V {$svgHeight} H {$coords[0]['x']} Z";
+              } else {
+                $pathD = "";
+                $areaD = "";
+              }
+            @endphp
             <div style="height:240px;"
               class="bg-surface border border-border1 rounded-xl p-3 flex flex-col">
-              <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-1.5">
                   <i class="fas fa-chart-line text-primary text-lg mr-1.5"></i>
                   <h3 class="font-bold text-sm text-text1">Salary Progression</h3>
                 </div>
-                @php
-                  $gFirst = $firstContract?->ctr_salary ?? null;
-                  $gLast = $lastContract?->ctr_salary ?? null;
-                  $g = ($gFirst && $gLast && $gFirst > 0) ? round((($gLast - $gFirst)/$gFirst)*100, 1) : null;
-                @endphp
                 <span
                   class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-500/20 uppercase tracking-tighter">Growth
-                  {{ $g !== null ? ($g > 0 ? '+' : '').$g.'%' : '—' }}</span>
+                  {{ $gPct !== null ? ($gPct >= 0 ? '+'.$gPct.'%' : $gPct.'%') : '0%' }}</span>
               </div>
-              <div class="flex-grow flex items-end justify-center relative min-h-[90px] px-1 mb-3">
-                <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 400 200">
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0%" x2="0%" y1="0%" y2="100%">
-                      <stop offset="0%" style="stop-color:var(--rd-accent);stop-opacity:0.25"></stop>
-                      <stop offset="100%" style="stop-color:var(--rd-accent);stop-opacity:0"></stop>
-                    </linearGradient>
-                  </defs>
-                  <path d="M 0,180 L 100,165 L 200,125 L 300,90 L 400,30" fill="none" stroke="var(--rd-accent)"
-                    stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
-                  <path d="M 0,180 L 100,165 L 200,125 L 300,90 L 400,30 V 200 H 0 Z" fill="url(#chartGradient)"></path>
-                  <circle cx="0" cy="180" fill="var(--rd-surface)" r="6" stroke="var(--rd-accent)" stroke-width="2"></circle>
-                  <circle cx="100" cy="165" fill="var(--rd-surface)" r="6" stroke="var(--rd-accent)" stroke-width="2"></circle>
-                  <circle cx="200" cy="125" fill="var(--rd-surface)" r="6" stroke="var(--rd-accent)" stroke-width="2"></circle>
-                  <circle cx="300" cy="90" fill="var(--rd-surface)" r="6" stroke="var(--rd-accent)" stroke-width="2"></circle>
-                  <circle cx="400" cy="30" fill="var(--rd-surface)" r="6" stroke="var(--rd-accent)" stroke-width="2"></circle>
-                </svg>
+              <div class="flex-grow flex items-end justify-center relative min-h-[90px] px-1 mb-2">
+                @if(!empty($coords))
+                  <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 {{ $svgWidth }} {{ $svgHeight }}">
+                    <defs>
+                      <linearGradient id="chartGradientDynamic" x1="0%" x2="0%" y1="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--rd-accent);stop-opacity:0.28"></stop>
+                        <stop offset="100%" style="stop-color:var(--rd-accent);stop-opacity:0.02"></stop>
+                      </linearGradient>
+                    </defs>
+                    <path d="{{ $areaD }}" fill="url(#chartGradientDynamic)"></path>
+                    <path d="{{ $pathD }}" fill="none" stroke="var(--rd-accent)"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+                    @foreach($coords as $c)
+                      <circle cx="{{ $c['x'] }}" cy="{{ $c['y'] }}" fill="var(--rd-surface)" r="5" stroke="var(--rd-accent)" stroke-width="2.5">
+                        <title>{{ $c['pt']['year'] }}: PKR {{ number_format($c['pt']['salary']) }} ({{ $c['pt']['jobtitle'] }})</title>
+                      </circle>
+                    @endforeach
+                  </svg>
+                @else
+                  <div class="text-xs text-text3 flex items-center justify-center h-full">No progression data</div>
+                @endif
               </div>
               <div
-                class="flex justify-between text-[7px] text-text3 font-black uppercase tracking-widest border-t border-border1 pt-1.5 mb-1">
-                <span>2020</span>
-                <span>2021</span>
-                <span>2022</span>
-                <span>2023</span>
-                <span>2024</span>
+                class="flex justify-between text-[8px] text-text3 font-black uppercase tracking-wider border-t border-border1 pt-1.5 mb-1 px-1">
+                @forelse($pts as $p)
+                  <span class="hover:text-primary transition" title="{{ $p['year'] }}: PKR {{ number_format($p['salary']) }}">{{ $p['year'] }}</span>
+                @empty
+                  <span>{{ date('Y') }}</span>
+                @endforelse
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <div style="display: flex; align-items: center; flex-direction: row-reverse; justify-content: space-between; height: 30px;"
                   class="p-1.5 bg-transparent rounded-lg border border-border1">
                   <p class="text-[7px] text-text3 uppercase font-black tracking-widest mb-0.5">Base Start</p>
-                  <p class="text-xs font-black text-text1">{{ !empty($firstContract?->ctr_salary) ? number_format($firstContract?->ctr_salary) : '—' }}</p>
+                  <p class="text-xs font-black text-text1">{{ $firstSal > 0 ? number_format($firstSal) : '—' }}</p>
                 </div>
                 <div style="display: flex; align-items: center; flex-direction: row-reverse; justify-content: space-between; height: 30px;"
                   class="p-1.5 bg-primary/10 rounded-lg border border-primary/20">
                   <p class="text-[7px] text-primary uppercase font-black tracking-widest mb-0.5">Current</p>
-                  <p class="text-xs font-black text-text1">{{ !empty($lastContract?->ctr_salary) ? number_format($lastContract?->ctr_salary) : '—' }}</p>
+                  <p class="text-xs font-black text-text1">{{ $lastSal > 0 ? number_format($lastSal) : '—' }}</p>
                 </div>
               </div>
             </div>
@@ -625,13 +770,69 @@
       <div class="flex justify-between text-xs"><span class="text-text2">Phone</span><span class="font-bold text-text1">{{ $emer['mobile'] ?? '—' }}</span></div>
     </div>
   </div>
-</div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <!-- Row: Official & Security Clearance + Personal / Demographic Details -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <!-- Official & Security Clearance -->
+    <div class="bg-surface border border-border1 rounded-xl p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <i class="fas fa-shield-alt text-primary text-lg mr-1.5"></i>
+        <h3 class="font-bold text-text1">Official & Security Clearance</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between text-xs py-1 border-b border-border1">
+          <span class="text-text2 font-medium">Clearance Status</span>
+          <span class="font-bold text-text1">
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider {{ ($empC->emp_secclear ?? '') === 'Cleared' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-surface3 text-text2' }}">
+              {{ $empC->emp_secclear ?? 'Not Cleared' }}
+            </span>
+          </span>
+        </div>
+        <div class="flex justify-between text-xs py-1 border-b border-border1">
+          <span class="text-text2 font-medium">Clearance Number</span>
+          <span class="font-bold text-text1">{{ $empC->emp_cnum ?? '—' }}</span>
+        </div>
+        <div class="flex justify-between text-xs py-1 border-b border-border1">
+          <span class="text-text2 font-medium">Issue Date</span>
+          <span class="font-bold text-text1">{{ !empty($empC->emp_cissuedt) ? \Carbon\Carbon::parse($empC->emp_cissuedt)->format('d-M-Y') : '—' }}</span>
+        </div>
+        <div class="flex justify-between text-xs py-1">
+          <span class="text-text2 font-medium">Expiry Date</span>
+          <span class="font-bold text-text1">{{ !empty($empC->emp_cexpdt) ? \Carbon\Carbon::parse($empC->emp_cexpdt)->format('d-M-Y') : '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personal & Demographics -->
+    <div class="bg-surface border border-border1 rounded-xl p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <i class="fas fa-id-card text-primary text-lg mr-1.5"></i>
+        <h3 class="font-bold text-text1">Demographics & Address</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between text-xs py-1 border-b border-border1">
+          <span class="text-text2 font-medium">Date of Birth / Gender</span>
+          <span class="font-bold text-text1">
+            {{ !empty($empA?->emp_dob) ? \Carbon\Carbon::parse($empA->emp_dob)->format('d-M-Y') : '—' }}
+            ({{ $empA?->emp_gender ?? '—' }})
+          </span>
+        </div>
+        <div class="flex justify-between text-xs py-1 border-b border-border1">
+          <span class="text-text2 font-medium">Marital / Nationality</span>
+          <span class="font-bold text-text1">{{ $empA?->emp_marital ?? '—' }} / {{ $empA?->emp_ntnlty ?? 'Pakistani' }}</span>
+        </div>
+        <div class="flex justify-between text-xs py-1 border-b border-border1">
+          <span class="text-text2 font-medium">Religion / Caste</span>
+          <span class="font-bold text-text1">{{ $empB?->emp_religion ?? '—' }} ({{ $empB?->emp_caste ?? '—' }})</span>
+        </div>
+        <div class="flex justify-between text-xs py-1">
+          <span class="text-text2 font-medium">Permanent Address</span>
+          <span class="font-bold text-text1 text-right truncate max-w-[60%]" title="{{ $empA?->emp_paddress ?? '' }}">{{ $empA?->emp_paddress ?? '—' }}</span>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {

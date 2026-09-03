@@ -292,4 +292,189 @@ class ContractCaseApprovalService
             $this->recordRemark($case, $user, $remarks, 'Cancelled');
         });
     }
+
+    // ── FINANCIAL & GRADE POWERS / THRESHOLD LOGIC (GOD MODE) ────────
+
+    /**
+     * Parse SPS/BPS grade string to rank integer (1-10) for scale comparisons
+     */
+    public static function parseGradeLevel(?string $grade): int
+    {
+        if (empty($grade)) return 1;
+        $grade = strtoupper(trim((string)$grade));
+
+        // SPS Scale (SPS-01 to SPS-10)
+        if (preg_match('/SPS[- ]?0?(\d+)/i', $grade, $m)) {
+            return min(10, max(1, (int) $m[1]));
+        }
+
+        // BPS Scale (BPS-01 to BPS-22 mapped to 1-10 equivalents)
+        if (preg_match('/BPS[- ]?0?(\d+)/i', $grade, $m)) {
+            $bps = (int) $m[1];
+            if ($bps <= 4) return 1;
+            if ($bps <= 7) return 2;
+            if ($bps <= 10) return 3;
+            if ($bps <= 13) return 4;
+            if ($bps <= 15) return 5;
+            if ($bps == 16) return 6;
+            if ($bps == 17) return 7;
+            if ($bps == 18) return 8;
+            if ($bps == 19) return 9;
+            return 10;
+        }
+
+        // Plain numbers
+        if (preg_match('/^(\d+)$/', $grade, $m)) {
+            return min(10, max(1, (int) $m[1]));
+        }
+
+        // Senior titles
+        if (preg_match('/(DIRECTOR|CHIEF|PRINCIPAL|CONSULTANT|MP-)/i', $grade)) {
+            return 10;
+        }
+
+        return 5;
+    }
+
+    public function getMdSalaryThreshold(): float
+    {
+        return (float) SystemSetting::get('hr_md_salary_limit', '150000');
+    }
+
+    public function getMdGradeThreshold(): string
+    {
+        return (string) SystemSetting::get('hr_md_grade', 'SPS-7');
+    }
+
+    public function getDdgSalaryThreshold(): float
+    {
+        return (float) SystemSetting::get('hr_ddg_salary_limit', '300000');
+    }
+
+    public function getDdgGradeThreshold(): string
+    {
+        return (string) SystemSetting::get('hr_ddg_grade', 'SPS-8');
+    }
+
+    /**
+     * Determine the terminal approval authority required for this case based on God Mode limits.
+     *
+     * @param HrCtrCase $case
+     * @return string 'MD' | 'DDG' | 'DG'
+     */
+    public function getRequiredAuthority(HrCtrCase $case): string
+    {
+        $salary = (float) ($case->ctc_approvedsalary ?: ($case->ctc_newsalary ?? 0));
+        $grade = (string) ($case->ctc_approvedgrade ?: ($case->ctc_newgrade ?? ''));
+        $caseGradeLevel = self::parseGradeLevel($grade);
+
+        $mdSalaryLimit = $this->getMdSalaryThreshold();
+        $mdGradeLimit = self::parseGradeLevel($this->getMdGradeThreshold());
+
+        $ddgSalaryLimit = $this->getDdgSalaryThreshold();
+        $ddgGradeLimit = self::parseGradeLevel($this->getDdgGradeThreshold());
+
+        // Check if within MD's delegated authority
+        if ($salary <= $mdSalaryLimit && $caseGradeLevel <= $mdGradeLimit) {
+            return 'MD';
+        }
+
+        // Check if within DDG's delegated authority
+        if ($salary <= $ddgSalaryLimit && $caseGradeLevel <= $ddgGradeLimit) {
+            return 'DDG';
+        }
+
+        // Exceeds DDG limits -> Requires DG Terminal Approval
+        return 'DG';
+    }
+
+    /**
+     * Check if a specific role is authorized to approve this case terminally
+     */
+    public function canApprove(string $role, HrCtrCase $case): bool
+    {
+        $role = strtoupper(trim($role));
+        if (in_array($role, ['DG', 'NRDI'])) {
+            return true;
+        }
+
+        $required = $this->getRequiredAuthority($case);
+
+        if (in_array($role, ['DDG', 'HQS'])) {
+            return in_array($required, ['MD', 'DDG']);
+        }
+
+        if (in_array($role, ['MD', 'RDW'])) {
+            return $required === 'MD';
+        }
+
+        return false;
+    }
+
+    /**
+     * Detailed breakdown of limits and authority for display in show views
+     */
+    public function getApprovalAuthorityDetails(HrCtrCase $case): array
+    {
+        $salary = (float) ($case->ctc_approvedsalary ?: ($case->ctc_newsalary ?? 0));
+        $grade = (string) ($case->ctc_approvedgrade ?: ($case->ctc_newgrade ?? 'SPS-1'));
+        $caseGradeLevel = self::parseGradeLevel($grade);
+
+        $mdSalaryLimit = $this->getMdSalaryThreshold();
+        $mdGradeStr = $this->getMdGradeThreshold();
+        $mdGradeLimit = self::parseGradeLevel($mdGradeStr);
+
+        $ddgSalaryLimit = $this->getDdgSalaryThreshold();
+        $ddgGradeStr = $this->getDdgGradeThreshold();
+        $ddgGradeLimit = self::parseGradeLevel($ddgGradeStr);
+
+        $required = $this->getRequiredAuthority($case);
+
+        return [
+            'salary'           => $salary,
+            'grade'            => $grade,
+            'case_grade_lvl'   => $caseGradeLevel,
+            'md_salary_limit'  => $mdSalaryLimit,
+            'md_grade_limit'   => $mdGradeStr,
+            'md_grade_lvl'     => $mdGradeLimit,
+            'ddg_salary_limit' => $ddgSalaryLimit,
+            'ddg_grade_limit'  => $ddgGradeStr,
+            'ddg_grade_lvl'    => $ddgGradeLimit,
+            'required_stage'   => $required,
+            'can_md_approve'   => ($salary <= $mdSalaryLimit && $caseGradeLevel <= $mdGradeLimit),
+            'can_ddg_approve'  => ($salary <= $ddgSalaryLimit && $caseGradeLevel <= $ddgGradeLimit),
+            'can_dg_approve'   => true,
+        ];
+    }
+
+    /**
+     * Get dynamic pipeline stepper steps based on required authority (MD, DDG, or DG)
+     */
+    public function getWorkflowSteps(HrCtrCase $case): array
+    {
+        $req = $this->getRequiredAuthority($case);
+
+        $steps = [
+            ['id' => 'Division', 'label' => 'Initiated', 'icon' => 'fa-edit'],
+            ['id' => 'HR', 'label' => 'HR Scrutiny', 'icon' => 'fa-user-check'],
+            ['id' => 'Finance', 'label' => 'Finance', 'icon' => 'fa-coins'],
+        ];
+
+        if ($req === 'MD') {
+            $steps[] = ['id' => 'MD', 'label' => 'MD Approval', 'icon' => 'fa-file-signature'];
+        } elseif ($req === 'DDG') {
+            $steps[] = ['id' => 'MD', 'label' => 'MD Review', 'icon' => 'fa-file-signature'];
+            $steps[] = ['id' => 'DDG', 'label' => 'DDG Approval', 'icon' => 'fa-stamp'];
+        } else {
+            $steps[] = ['id' => 'MD', 'label' => 'MD Review', 'icon' => 'fa-file-signature'];
+            $steps[] = ['id' => 'DDG', 'label' => 'DDG Review', 'icon' => 'fa-stamp'];
+            $steps[] = ['id' => 'DG', 'label' => 'DG Approval', 'icon' => 'fa-gavel'];
+        }
+
+        $steps[] = ['id' => 'Approved', 'label' => 'Ready Fulfill', 'icon' => 'fa-check-double'];
+        $steps[] = ['id' => 'Fulfilled', 'label' => 'Fulfilled', 'icon' => 'fa-award'];
+
+        return $steps;
+    }
 }
+

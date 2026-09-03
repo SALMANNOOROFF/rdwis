@@ -309,30 +309,29 @@ hr {
   background-color: var(--rd-neutral-300) !important;
   color: var(--rd-text1) !important;
 }
-/* Active: sage-tinted bg + sage text + sage left border */
+/* Active: Clean warm neutral + Cyan/Blue Accent (No Green Highlight) */
 .nav-sidebar > .nav-item > .nav-link.active,
 .nav-sidebar .nav-treeview > .nav-item > .nav-link.active {
-  background-color: var(--rd-primary-100) !important;
-  color: var(--rd-primary-700) !important;
+  background-color: var(--rd-neutral-200) !important;
+  color: var(--rd-text1) !important;
   font-weight: 700 !important;
-  border-left: 3px solid var(--rd-primary-600) !important;
+  border-left: 3px solid #0284c7 !important;
 }
-/* Sidebar icons: neutral by default, sage on active */
+/* Sidebar icons */
 .nav-sidebar .nav-icon {
-  color: var(--rd-text3) !important;
   margin-right: 8px;
   width: 1.1em;
   text-align: center;
 }
 .nav-sidebar .nav-link.active .nav-icon {
-  color: var(--rd-primary-600) !important;
+  color: inherit;
 }
 .nav-sidebar .nav-link:hover .nav-icon {
   color: var(--rd-text1) !important;
 }
 /* Sub-items treeview */
 .nav-sidebar .nav-treeview {
-  background-color: rgba(113,140,105,0.03) !important;
+  background-color: transparent !important;
 }
 
 /* Sidebar Treeview Dropdown Arrow & Badge Standardized Alignment */

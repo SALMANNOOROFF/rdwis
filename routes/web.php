@@ -138,6 +138,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
         Route::get('/print-minute', function () { return view('purchase.new_case.print_minute'); })->name('purchase.new_case.print_minute');
 
+        // Universal Project Financial View Route (Full Page)
+        Route::get('/project/{id}/financial-view', [ProjectController::class, 'financialView'])->name('projects.financial_view');
+        Route::get('/openprojectdetails/{id}/financial-view', [ProjectController::class, 'financialView']);
+
         Route::get('/sord/dashboard', [\App\Http\Controllers\DashboardController::class, 'sord'])
             ->name('sord.dashboard')
             ->middleware('area:rdwprj,rdw');
@@ -282,6 +286,10 @@ Route::middleware('auth')->group(function () {
                 ->name('hr.contract-cases.return');
             Route::post('/contract-cases/{id}/fulfill', [\App\Http\Controllers\HR\ContractCaseController::class, 'fulfill'])
                 ->name('hr.contract-cases.fulfill');
+            Route::post('/contract-cases/{id}/add-employee', [\App\Http\Controllers\HR\ContractCaseController::class, 'addEmployee'])
+                ->name('hr.contract-cases.add-employee');
+            Route::get('/contract-cases/preview-emp-id', [\App\Http\Controllers\HR\ContractCaseController::class, 'previewEmployeeId'])
+                ->name('hr.contract-cases.preview-emp-id');
             Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\HR\ContractCaseController::class, 'reject'])
                 ->name('hr.contract-cases.reject');
 
@@ -423,6 +431,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase/receipts', [\App\Http\Controllers\PurchaseReceiptController::class, 'index'])->name('purchase.receipts.index');
         Route::get('/purchase/receipts/case/{pcs_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'create'])->name('purchase.receipts.create');
         Route::post('/purchase/receipts/case/{pcs_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'store'])->name('purchase.receipts.store');
+        Route::post('/purchase/receipts/case/{pcs_id}/cancel', [\App\Http\Controllers\PurchaseReceiptController::class, 'cancelCase'])->name('purchase.receipts.cancel');
         Route::get('/inventory/assets', [\App\Http\Controllers\PurchaseReceiptController::class, 'assetsIndex'])->name('inventory.assets.index');
         Route::post('/inventory/assets/transition/{iac_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'updateAssetStatus'])->name('inventory.assets.update_status');
 
@@ -525,29 +534,33 @@ Route::middleware('auth')->group(function () {
         });
 
         // HR (hr area)
-        Route::middleware('area:hr,prj,rdwprj')->group(function () {
+        Route::middleware('area:hr,prj,rdwprj,fin,rdw,hqs,nrdi,it')->group(function () {
 
-        Route::get('/divhr/employelist', [DivHrController::class, 'employeelist'])->name('divhr.employelist');
-        Route::prefix('divhr')->group(function () {
+            Route::get('/divhr/employelist', [DivHrController::class, 'employeelist'])->name('divhr.employelist');
+            Route::prefix('divhr')->group(function () {
 
-            Route::get('/employeelist', [DivHrController::class, 'employeelist'])
-                ->name('divhr.employelist');
+                Route::get('/employeelist', [DivHrController::class, 'employeelist'])
+                    ->name('divhr.employelist');
 
-            Route::get('/employee/{id}', [DivHrController::class, 'employeedetail'])
-                ->name('divhr.employeedetail');
-            Route::post('/employee/{id}/photo', [DivHrController::class, 'uploadPhoto'])
-                ->name('divhr.employee.upload_photo');
+                Route::get('/employee/{id}', [DivHrController::class, 'employeedetail'])
+                    ->name('divhr.employeedetail');
+                Route::get('/employee/{id}/edit', [DivHrController::class, 'employeeEdit'])
+                    ->name('divhr.employee.edit');
+                Route::post('/employee/{id}/update', [DivHrController::class, 'employeeUpdate'])
+                    ->name('divhr.employee.update');
+                Route::post('/employee/{id}/photo', [DivHrController::class, 'uploadPhoto'])
+                    ->name('divhr.employee.upload_photo');
 
-            Route::get('/attendance', [DivHrController::class, 'attendance'])
-                ->name('divhr.attendance');
-            Route::post('/attendance/save', [DivHrController::class, 'attendanceSave'])
-                ->name('divhr.attendance.save')
-                ->middleware('approver');
+                Route::get('/attendance', [DivHrController::class, 'attendance'])
+                    ->name('divhr.attendance');
+                Route::post('/attendance/save', [DivHrController::class, 'attendanceSave'])
+                    ->name('divhr.attendance.save')
+                    ->middleware('approver');
 
-            Route::get('/initiate-contract', [DivHrController::class, 'initiateContract'])
-                ->name('divhr.contract.initiate');
+                Route::get('/initiate-contract', [DivHrController::class, 'initiateContract'])
+                    ->name('divhr.contract.initiate');
 
-        });
+            });
         });
 
     }); // End Division Group
@@ -628,6 +641,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['area:fin,prj,rdwprj,hqs,rdw,nrdi,it'])
         ->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'finDashboard'])->name('dashboard');
+            Route::get('/commitments', function () {
+                return redirect()->route('fin.payments.index');
+            })->name('commitments.landing');
+            Route::get('/commitments/salary-orders', [\App\Http\Controllers\Finance\PaymentController::class, 'salaryPlaceholder'])->name('commitments.salary.placeholder');
             Route::get('/payments', [\App\Http\Controllers\Finance\PaymentController::class, 'index'])->name('payments.index');
             Route::get('/payments/{cmt_id}', [\App\Http\Controllers\Finance\PaymentController::class, 'show'])->name('payments.show');
             Route::post('/payments/{cmt_id}/transaction', [\App\Http\Controllers\Finance\PaymentController::class, 'storeTransaction'])->name('payments.store_transaction');
@@ -652,6 +669,15 @@ Route::middleware('auth')->group(function () {
     // Procurement Notifications
     Route::get('/notifications/unread', [\App\Http\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+
+    // =========================================================
+    // COMPLAINTS & SUGGESTIONS SUPPORT TICKETING SYSTEM
+    // =========================================================
+    Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets.index');
+    Route::post('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'store'])->name('support.tickets.store');
+    Route::get('/support/tickets/{id}', [\App\Http\Controllers\SupportTicketController::class, 'show'])->name('support.tickets.show');
+    Route::post('/support/tickets/{id}/reply', [\App\Http\Controllers\SupportTicketController::class, 'reply'])->name('support.tickets.reply');
+    Route::post('/support/tickets/{id}/status', [\App\Http\Controllers\SupportTicketController::class, 'updateStatus'])->name('support.tickets.status');
 
     }); // End force password change
 }); // End Auth

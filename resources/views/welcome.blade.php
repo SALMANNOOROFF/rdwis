@@ -68,15 +68,17 @@
             vertical-align: middle;
         }
 
-        /* Standardized Sidebar Treeview Dropdown Arrow & Badge Layout */
-        .nav-sidebar .nav-link {
+        /* Standardized Sidebar Treeview Dropdown Arrow & Badge Layout (Expanded Mode) */
+        body:not(.sidebar-collapse) .nav-sidebar .nav-link,
+        body.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link {
             position: relative !important;
             display: flex !important;
             align-items: center !important;
             padding-right: 28px !important;
         }
 
-        .nav-sidebar .nav-link p {
+        body:not(.sidebar-collapse) .nav-sidebar .nav-link p,
+        body.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link p {
             display: inline-flex !important;
             align-items: center !important;
             margin: 0 !important;
@@ -84,15 +86,19 @@
             white-space: nowrap !important;
         }
 
-        .nav-sidebar .nav-link p > .badge,
-        .nav-sidebar .nav-link p > span.badge {
+        body:not(.sidebar-collapse) .nav-sidebar .nav-link p > .badge,
+        body:not(.sidebar-collapse) .nav-sidebar .nav-link p > span.badge,
+        body.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link p > .badge,
+        body.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link p > span.badge {
             margin-left: 6px !important;
             margin-right: 4px !important;
             flex-shrink: 0 !important;
         }
 
-        .nav-sidebar .nav-link p > .right,
-        .nav-sidebar .nav-link > .right {
+        body:not(.sidebar-collapse) .nav-sidebar .nav-link p > .right,
+        body:not(.sidebar-collapse) .nav-sidebar .nav-link > .right,
+        body.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link p > .right,
+        body.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link > .right {
             position: absolute !important;
             right: 10px !important;
             top: 50% !important;
@@ -108,6 +114,129 @@
         .nav-item.menu-is-opening > .nav-link p > .right,
         .nav-item.menu-is-opening > .nav-link > .right {
             transform: translateY(-50%) rotate(-90deg) !important;
+        }
+
+        /* =========================================================================
+           SIDEBAR COLLAPSED (MINI) MODE FIXES — ICONS ONLY & CLEAN PROFILE HIDING
+           ========================================================================= */
+        body.sidebar-collapse .main-sidebar:not(:hover) .user-panel,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .user-panel {
+            display: none !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            overflow: hidden !important;
+        }
+
+        body.sidebar-collapse .main-sidebar:not(:hover) .brand-link,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .brand-link {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 0.8125rem 0.5rem !important;
+            text-align: center !important;
+        }
+
+        body.sidebar-collapse .main-sidebar:not(:hover) .brand-link .brand-image,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .brand-link .brand-image {
+            margin: 0 auto !important;
+            float: none !important;
+            max-height: 33px !important;
+        }
+
+        body.sidebar-collapse .main-sidebar:not(:hover) .brand-link .brand-text,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .brand-link .brand-text {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            opacity: 0 !important;
+        }
+
+        body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link p,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link p,
+        body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-header,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-header,
+        body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link .right,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link .right,
+        body.sidebar-collapse .main-sidebar:not(:hover) .nav-treeview {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            opacity: 0 !important;
+        }
+
+        body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 4.6rem !important;
+            padding: 0.75rem 0 !important;
+            margin: 2px 0 !important;
+            text-align: center !important;
+        }
+
+        body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link .nav-icon,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link .nav-icon {
+            margin: 0 auto !important;
+            font-size: 1.3rem !important;
+            display: inline-block !important;
+            text-align: center !important;
+            float: none !important;
+            width: auto !important;
+        }
+
+        /* When hovering over collapsed sidebar -> smooth expand */
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover {
+            width: 250px !important;
+        }
+
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover .brand-link {
+            display: block !important;
+            text-align: left !important;
+            padding: 0.8125rem 0.5rem !important;
+        }
+
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover .brand-link .brand-text {
+            display: inline-block !important;
+            visibility: visible !important;
+            width: auto !important;
+            opacity: 1 !important;
+        }
+
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover .user-panel {
+            display: flex !important;
+            height: auto !important;
+            margin-top: 1rem !important;
+            margin-bottom: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-link {
+            display: flex !important;
+            width: auto !important;
+            padding-right: 28px !important;
+            padding-left: 1rem !important;
+            justify-content: flex-start !important;
+        }
+
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-link p {
+            display: inline-flex !important;
+            visibility: visible !important;
+            width: 100% !important;
+            opacity: 1 !important;
+        }
+
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-header {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-link .nav-icon {
+            margin-right: 0.5rem !important;
+            font-size: 1.1rem !important;
         }
 
         .wrapper {
@@ -543,26 +672,51 @@
               </ul>
           </li>
           --}}
-           <li class="nav-item {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') ? 'menu-open' : '' }}">
-               <a href="#" class="nav-link {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') ? 'active' : '' }}">
-                   <i class="nav-icon fas fa-shopping-cart"></i>
-                   <p>PURCHASE CASES <span class="badge badge-blinking-red badge-pur-parent {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span> <i class="right fas fa-angle-left"></i></p>
-               </a>
-               <ul class="nav nav-treeview">
-                   <li class="nav-item">
-                       <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
-                           <i class="fas fa-list nav-icon"></i>
-                           <p>VIEW ALL <span class="badge badge-blinking-red badge-pur-child {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span></p>
-                       </a>
-                   </li>
-                   <li class="nav-item">
-                       <a href="{{ route('purchase.select') }}" class="nav-link {{ Request::routeIs('purchase.select') ? 'active' : '' }}">
-                           <i class="fas fa-plus-circle nav-icon"></i>
-                           <p>INITIATE CASE</p>
-                       </a>
-                   </li>
-               </ul>
-           </li>
+            <li class="nav-item {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-shopping-cart"></i>
+                    <p>PURCHASE CASES <span class="badge badge-blinking-red badge-pur-parent {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span> <i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
+                            <i class="fas fa-list nav-icon"></i>
+                            <p>VIEW ALL <span class="badge badge-blinking-red badge-pur-child {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span></p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('purchase.select') }}" class="nav-link {{ Request::routeIs('purchase.select') ? 'active' : '' }}">
+                            <i class="fas fa-plus-circle nav-icon"></i>
+                            <p>INITIATE CASE</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('training.index') }}" class="nav-link {{ Request::routeIs('training.index') || Request::routeIs('training.create') ? 'active' : '' }}">
+                            <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                            <p>TRAINING</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('training.books.index') }}" class="nav-link {{ Request::routeIs('training.books.*') ? 'active' : '' }}">
+                            <i class="fas fa-book nav-icon"></i>
+                            <p>BOOKS PROCUREMENT</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('training.license.index') }}" class="nav-link {{ Request::routeIs('training.license.*') ? 'active' : '' }}">
+                            <i class="fas fa-file-signature nav-icon"></i>
+                            <p>LICENCE / FEES</p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('division.contract-cases.index') }}" class="nav-link {{ Request::routeIs('division.contract-cases.*') ? 'active' : '' }}">
+                    <i class="fas fa-file-signature nav-icon text-warning"></i>
+                    <p>CONTRACT CASES <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
+                </a>
+            </li>
 
             <li class="nav-item">
                 <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
@@ -578,29 +732,8 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a href="{{ route('training.index') }}" class="nav-link {{ Request::routeIs('training.index') || Request::routeIs('training.create') ? 'active' : '' }}">
-                    <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                    <p>TRAINING</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('training.books.index') }}" class="nav-link {{ Request::routeIs('training.books.*') ? 'active' : '' }}">
-                    <i class="fas fa-book nav-icon"></i>
-                    <p>BOOKS PROCUREMENT</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('training.license.index') }}" class="nav-link {{ Request::routeIs('training.license.*') ? 'active' : '' }}">
-                    <i class="fas fa-file-signature nav-icon"></i>
-                    <p>LICENCE / FEES</p>
-                </a>
-            </li>
-
-            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance') || Request::routeIs('division.contract-cases.*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance') || Request::routeIs('division.contract-cases.*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-users text-primary"></i>
                     <p>HUMAN RESOURCES <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                 </a>
@@ -627,36 +760,9 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('divhr.attendance') }}" class="nav-link {{ Request::routeIs('divhr.attendance') ? 'active' : '' }}">
-                            <i class="fas fa-calendar-check nav-icon"></i><p>ATTENDANCE</p>
+                            <i class="fas fa-calendar-check nav-icon text-success"></i><p>ATTENDANCE</p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('division.contract-cases.index') }}" class="nav-link {{ Request::routeIs('division.contract-cases.*') ? 'active' : '' }}">
-                            <i class="fas fa-file-signature nav-icon"></i><p>INITIATE CONTRACT CASE <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-money-check-alt nav-icon"></i>
-                    <p>SALARY REQUISITIONS <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                    <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-edit nav-icon"></i><p>DRAFT</p></a></li>
-                    <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-lock nav-icon"></i><p>CLOSED</p></a></li>
-                </ul>
-            </li>
-            
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="nav-icon fas fa-coins"></i>
-                    <p>FINANCE <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                    <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-wallet nav-icon"></i><p>ACCOUNTS</p></a></li>
-                    <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-hand-holding-usd nav-icon"></i><p>LOANS</p></a></li>
                 </ul>
             </li>
 
@@ -707,8 +813,8 @@
                </a>
            </li>
 
-           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('hr.contract-cases.*') ? 'menu-open' : '' }}">
-               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('hr.contract-cases.*') ? 'active' : '' }}">
+           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'menu-open' : '' }}">
+               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-users text-primary"></i>
                    <p>HUMAN RESOURCES <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                </a>
@@ -739,13 +845,14 @@
                            <p>Attendance</p>
                        </a>
                    </li>
-                   <li class="nav-item">
-                       <a href="{{ route('hr.contract-cases.index') }}" class="nav-link {{ Request::routeIs('hr.contract-cases.*') || Request::routeIs('divhr.contract.*') ? 'active' : '' }}">
-                           <i class="nav-icon fas fa-file-signature text-warning"></i>
-                           <p>Contract Cases <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
-                       </a>
-                   </li>
                </ul>
+           </li>
+
+           <li class="nav-item">
+               <a href="{{ route('hr.contract-cases.index') }}" class="nav-link {{ Request::routeIs('hr.contract-cases.*') || Request::routeIs('divhr.contract.*') ? 'active' : '' }}">
+                   <i class="nav-icon fas fa-file-signature text-warning"></i>
+                   <p>Contract Cases <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
+               </a>
            </li>
 
            <li class="nav-item">
@@ -861,12 +968,29 @@
            </li>
            @endif
 
-          @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'nrdi', 'hqs']) || session('impersonated_by_god'))
-          <li class="nav-item">
-              <a href="{{ route('fin.payments.index') }}" class="nav-link {{ Request::routeIs('fin.payments.*') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-money-check-alt text-primary"></i>
-                  <p>DISBURSEMENTS & PAYMENTS</p>
+          @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'nrdi', 'hqs', 'rdw', 'it']) || session('impersonated_by_god'))
+          <li class="nav-item {{ Request::routeIs('fin.payments.*') || Request::routeIs('fin.commitments.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link">
+                  <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
+                  <p>
+                      COMMITMENTS
+                      <i class="right fas fa-angle-left"></i>
+                  </p>
               </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('fin.payments.index') }}" class="nav-link {{ Request::routeIs('fin.payments.*') ? 'active' : '' }}">
+                          <i class="fas fa-shopping-cart nav-icon text-info"></i>
+                          <p>Purchase Case</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('fin.commitments.salary.placeholder') }}" class="nav-link {{ Request::routeIs('fin.commitments.salary.*') ? 'active' : '' }}">
+                          <i class="fas fa-money-check-alt nav-icon text-success"></i>
+                          <p>Salary Order</p>
+                      </a>
+                  </li>
+              </ul>
           </li>
           @endif
 
@@ -1004,6 +1128,42 @@
               </a>
           </li>
       @endif
+
+          {{-- GLOBAL SUPPORT / COMPLAINTS & SUGGESTIONS FOR EVERY USER --}}
+          @php
+              $curUser = Auth::user();
+              $sbPendingTickets = 0;
+              if ($curUser) {
+                  try {
+                      $uArea = strtolower(trim((string)($curUser->acc_untarea ?? '')));
+                      $isResolv = in_array($uArea, ['it', 'gomoe', 'godmode']) || session('impersonated_by_god');
+                      if ($isResolv) {
+                          $sbPendingTickets = \Illuminate\Support\Facades\DB::table('sup.tickets')
+                              ->whereIn('tkt_status', ['Open', 'In Progress', 'Returned'])
+                              ->count();
+                      } else {
+                          $sbPendingTickets = \Illuminate\Support\Facades\DB::table('sup.tickets')
+                              ->where('tkt_user_id', $curUser->acc_id)
+                              ->where('tkt_status', 'Returned')
+                              ->count();
+                      }
+                  } catch (\Exception $e) {
+                      $sbPendingTickets = 0;
+                  }
+              }
+          @endphp
+          <li class="nav-header" style="color: #94a3b8; font-size: 9.5px; letter-spacing: 0.8px; font-weight: 700; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; padding-bottom: 2px;">HELPDESK</li>
+          <li class="nav-item">
+              <a href="{{ route('support.tickets.index') }}" class="nav-link {{ Request::routeIs('support.tickets.*') ? 'active' : '' }}" style="border-radius: 6px; margin: 1px 6px; padding: 6px 10px;">
+                  <i class="nav-icon fas fa-headset text-info" style="font-size: 13px; margin-right: 6px;"></i>
+                  <p style="font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      Complaints / Suggestions
+                      @if($sbPendingTickets > 0)
+                          <span class="badge badge-warning badge-pill ml-1 font-weight-bold" style="font-size: 9px; padding: 2px 5px;">{{ $sbPendingTickets }}</span>
+                      @endif
+                  </p>
+              </a>
+          </li>
 
           </ul>
         </nav>

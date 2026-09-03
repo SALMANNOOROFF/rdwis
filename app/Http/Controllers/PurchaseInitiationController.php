@@ -305,6 +305,22 @@ class PurchaseInitiationController extends Controller
                 return ['ok' => true, 'message' => 'Uploaded.', 'pcsId' => (int) $purchase->pcs_id];
             }
 
+            if ($op === 'delete_file') {
+                $patId = (int) $request->input('pat_id');
+                $att = DB::table('pur.purattachments')
+                    ->where('pat_objtype', 'pcs')
+                    ->where('pat_objid', $purchase->pcs_id)
+                    ->where('pat_id', $patId)
+                    ->first();
+                if ($att) {
+                    if (!empty($att->pat_path)) {
+                        app(\App\Services\FileStorageService::class)->delete($att->pat_path);
+                    }
+                    DB::table('pur.purattachments')->where('pat_id', $patId)->delete();
+                }
+                return ['ok' => true, 'message' => 'Attachment deleted.', 'pcsId' => (int) $purchase->pcs_id];
+            }
+
             if ($op === 'add_item') {
                 $maxSerial = (int) (DB::table('pur.purcaseitems')->where('pci_pcs_id', $purchase->pcs_id)->max('pci_serial') ?? 0);
                 $nextSerial = $maxSerial + 1;
@@ -320,7 +336,8 @@ class PurchaseInitiationController extends Controller
                     'pci_qtyunit' => $unit,
                     'pci_price' => 0,
                     'pci_type' => 1,
-                    'pci_subtype' => 1,
+                    'pci_subtype' => 'General',
+                    'pci_category' => 1,
                 ], 'pci_id');
 
                 $quotes = DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->get(['qte_id', 'qte_num']);
@@ -439,6 +456,11 @@ class PurchaseInitiationController extends Controller
                     $firmName = $firm ? $firm->frm_name : $firmName;
                 }
 
+                $isSst = $taxType === 'SST';
+                $sstAmount = $isSst ? $taxAmount : 0.0;
+                $gstAmount = !$isSst ? $taxAmount : 0.0;
+                $midPrice = $subtotal + $sstAmount;
+
                 if ($qteId) {
                     // Update existing quote
                     DB::table('pur.quotes')->where('qte_id', $qteId)->update([
@@ -446,9 +468,9 @@ class PurchaseInitiationController extends Controller
                         'qte_firmname' => $firmName,
                         'qte_price' => $total,
                         'qte_intprice' => $subtotal,
-                        'qte_inttax' => $taxAmount,
-                        'qte_midprice' => $total,
-                        'qte_midtax' => $taxAmount,
+                        'qte_inttax' => $sstAmount,
+                        'qte_midprice' => $midPrice,
+                        'qte_midtax' => $gstAmount,
                         'qte_num' => $qteNum,
                         'qte_date' => $qteDate,
                     ]);
@@ -461,9 +483,9 @@ class PurchaseInitiationController extends Controller
                         'qte_firmname' => $firmName,
                         'qte_price' => $total,
                         'qte_intprice' => $subtotal,
-                        'qte_inttax' => $taxAmount,
-                        'qte_midprice' => $total,
-                        'qte_midtax' => $taxAmount,
+                        'qte_inttax' => $sstAmount,
+                        'qte_midprice' => $midPrice,
+                        'qte_midtax' => $gstAmount,
                         'qte_num' => $qteNum,
                         'qte_date' => $qteDate,
                         'qte_techaccept' => true,
@@ -516,7 +538,8 @@ class PurchaseInitiationController extends Controller
                     ]);
                 }
 
-                $this->recalcCasePricing($purchase->pcs_id);
+                $declaredTax = $this->declaredTaxFrom($request);
+                $this->recalcCasePricing($purchase->pcs_id, $declaredTax);
 
                 return ['ok' => true, 'message' => 'Quotation saved successfully.', 'pcsId' => (int) $purchase->pcs_id];
             }
@@ -616,13 +639,20 @@ class PurchaseInitiationController extends Controller
             $att = $quoteAttachments->get($q->qte_id);
             $filePath = $att ? (string) $att->pat_path : null;
             $fileName = $filePath ? basename(str_replace('\\', '/', $filePath)) : null;
+            $qBase = (float) ($q->qte_intprice ?: $q->qte_price);
+            $qSst = (float) ($q->qte_inttax ?? 0);
+            $qGst = (float) ($q->qte_midtax ?? 0);
+            $qTot = (float) ($q->qte_price ?: ($qBase + $qSst + $qGst));
             return [
                 'qte_id' => (int) $q->qte_id,
                 'qte_num' => (int) ($q->qte_num ?? 0),
                 'firm_name' => (string) ($q->firm?->frm_name ?? $q->qte_firmname),
-                'qte_price' => (float) ($q->qte_price ?? 0),
-                'qte_subtotal' => (float) ($q->qte_intprice ?? 0),
-                'qte_tax' => (float) ($q->qte_inttax ?? 0),
+                'qte_price' => $qTot,
+                'qte_subtotal' => $qBase,
+                'qte_inttax' => $qSst,
+                'qte_midtax' => $qGst,
+                'qte_tax' => $qSst + $qGst,
+                'tax_type' => $qSst > 0 ? 'SST' : 'GST',
                 'attachment_path' => $filePath,
                 'attachment_name' => $fileName ?? 'Quote Document',
             ];
@@ -645,6 +675,7 @@ class PurchaseInitiationController extends Controller
         $attachments = $purchase->attachments->values()->map(fn($a) => [
             'pat_id' => (int) $a->pat_id,
             'pat_path' => (string) $a->pat_path,
+            'pat_type' => (string) ($a->pat_type ?: ''),
             'pat_filename' => basename(str_replace('\\', '/', (string)($a->pat_path ?? ''))),
         ])->values();
 
@@ -652,6 +683,10 @@ class PurchaseInitiationController extends Controller
             'pcs_id' => (int) $purchase->pcs_id,
             'pcs_title' => (string) $purchase->pcs_title,
             'pcs_remarks' => (string) ($purchase->pcs_remarks ?? ''),
+            'pcs_intprice' => (float) ($purchase->pcs_intprice ?? 0),
+            'pcs_inttax' => (float) ($purchase->pcs_inttax ?? 0),
+            'pcs_midprice' => (float) ($purchase->pcs_midprice ?? 0),
+            'pcs_midtax' => (float) ($purchase->pcs_midtax ?? 0),
             'pcs_price' => (float) ($purchase->pcs_price ?? 0),
             'items' => $items,
             'quotes' => $quotes,
@@ -660,81 +695,60 @@ class PurchaseInitiationController extends Controller
         ];
     }
 
-    protected function recalcCasePricing(int $pcsId): void
+    /**
+     * Re-price a case the way legacy did (App\Services\PurchasePricingService).
+     *
+     * Replaces the old flat "18% on the lowest quote" arithmetic, which wrote the
+     * same tax figure into both pcs_inttax and pcs_midtax and set pcs_midprice to
+     * the tax-inclusive total - breaking the legacy cascade
+     * (pcs_midprice = pcs_intprice + pcs_inttax, pcs_price = pcs_midprice + pcs_midtax)
+     * and leaving list and detail screens reading different numbers.
+     *
+     * @param  array|null  $declaredTax  ['type' => 'GST'|'SST', 'percent' => float]
+     */
+    protected function recalcCasePricing(int $pcsId, ?array $declaredTax = null): void
     {
-        $quoteIds = DB::table('pur.quotes')->where('qte_pcs_id', $pcsId)->pluck('qte_id')->toArray();
+        $pricing = app(\App\Services\PurchasePricingService::class);
+
+        $quoteIds = DB::table('pur.quotes')->where('qte_pcs_id', $pcsId)->pluck('qte_id')->all();
+
         if (count($quoteIds) === 0) {
-            $items = DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcsId)->get();
-            $itemsTotal = 0;
-            foreach ($items as $it) {
-                $qty = (float)($it->pci_qty ?? 1);
-                $rate = (float)($it->pci_price ?: ($it->pci_rate ?: ($it->pci_estcost ?: ($it->pci_estprice ?? 0))));
-                $itemsTotal += ($rate > 0 ? $rate * ($it->pci_price ? 1 : $qty) : 0);
-            }
-            DB::table('pur.purcases')->where('pcs_id', $pcsId)->update([
-                'pcs_price' => $itemsTotal,
-                'pcs_midprice' => $itemsTotal,
-                'pcs_intprice' => $itemsTotal
-            ]);
+            // No quotes yet: the case is still an estimate off its own item lines.
+            $pricing->recalcCaseFromItems($pcsId, $declaredTax);
+            $pricing->updateFirmAndRecomm($pcsId);
             return;
         }
 
-        $totals = [];
-        $subtotals = [];
-        $taxes = [];
+        $quoteType = (int) (DB::table('pur.purcases')->where('pcs_id', $pcsId)->value('pcs_quotetype') ?: 1);
+
         foreach ($quoteIds as $qteId) {
-            $quote = DB::table('pur.quotes')->where('qte_id', $qteId)->first();
-            $items = DB::table('pur.quoteitems')->where('qti_qte_id', $qteId)->get();
-            $sub = 0;
-            foreach ($items as $qi) {
-                $qty = (float)($qi->qti_qty ?? 1);
-                $unitPrice = (float)($qi->qti_price ?? 0);
-                $sub += ($unitPrice * $qty);
-            }
-            
-            $taxPercent = (float)($quote->qte_taxpercent ?? ($quote->qte_tax ?? 18));
-            $taxAmount = $sub * ($taxPercent / 100);
-            $grandTotal = $sub + $taxAmount;
-
-            DB::table('pur.quotes')->where('qte_id', $qteId)->update([
-                'qte_price' => $grandTotal,
-                'qte_intprice' => $sub,
-                'qte_inttax' => $taxAmount
-            ]);
-            $totals[$qteId] = $grandTotal;
-            $subtotals[$qteId] = $sub;
-            $taxes[$qteId] = $taxAmount;
+            $pricing->recalcQuoteFromItems((int) $qteId, $quoteType, $declaredTax);
         }
 
-        asort($totals);
-        reset($totals);
-        $winnerId = (int) key($totals);
-        $winnerTotal = (float) ($totals[$winnerId] ?? 0);
+        // Keep a selection the user already made; otherwise pick the cheapest
+        // technically acceptable offer, as CompareQuotesAndMarkLowest() did.
+        $current = DB::table('pur.quotes')
+            ->where('qte_pcs_id', $pcsId)
+            ->where('qte_recomm', true)
+            ->value('qte_id');
 
-        DB::table('pur.purcases')->where('pcs_id', $pcsId)->update([
-            'pcs_price' => $winnerTotal,
-            'pcs_midprice' => $winnerTotal,
-            'pcs_intprice' => (float)($subtotals[$winnerId] ?? $winnerTotal),
-            'pcs_inttax' => (float)($taxes[$winnerId] ?? 0),
-            'pcs_midtax' => (float)($taxes[$winnerId] ?? 0),
-        ]);
+        $pricing->markRecommended($pcsId, $current ? (int) $current : null);
+        $pricing->applyRecommendedQuote($pcsId, $declaredTax);
+    }
 
-        $winnerItems = DB::table('pur.quoteitems')
-            ->where('qti_qte_id', $winnerId)
-            ->get(['qti_pci_id', 'qti_price', 'qti_qty']);
-
-        $map = [];
-        foreach ($winnerItems as $row) {
-            $map[(int) $row->qti_pci_id] = (float) $row->qti_price;
+    /**
+     * Tax type / percentage declared by the case form, or null when it sent none.
+     */
+    protected function declaredTaxFrom(Request $request): ?array
+    {
+        if (!$request->filled('tax_percent') && !$request->filled('tax_type')) {
+            return null;
         }
 
-        $items = DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcsId)->get(['pci_id']);
-        foreach ($items as $it) {
-            $pciId = (int) $it->pci_id;
-            DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcsId)->where('pci_id', $pciId)->update([
-                'pci_price' => (float) ($map[$pciId] ?? 0),
-            ]);
-        }
+        return [
+            'type'    => strtoupper(trim((string) $request->input('tax_type', 'GST'))),
+            'percent' => (float) $request->input('tax_percent', 0),
+        ];
     }
 
     /**

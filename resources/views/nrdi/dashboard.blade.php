@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -53,7 +53,6 @@
         border-color: rgba(34, 197, 94, 0.25);
         box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.12), 0 0 32px rgba(34, 197, 94, 0.08);
     }
-
     .card-red {
         box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.06), 0 0 24px rgba(239, 68, 68, 0.03);
         border-left: 3px solid rgba(239, 68, 68, 0.4);
@@ -61,6 +60,22 @@
     .card-red:hover {
         border-color: rgba(239, 68, 68, 0.25);
         box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.12), 0 0 32px rgba(239, 68, 68, 0.08);
+    }
+    .card-purple {
+        box-shadow: 0 0 0 1px rgba(95, 120, 88, 0.08), 0 0 24px rgba(95, 120, 88, 0.04);
+        border-left: 3px solid var(--rd-accent, #5F7858);
+    }
+    .card-purple:hover {
+        border-color: var(--rd-accent, #5F7858);
+        box-shadow: 0 0 0 1px var(--rd-accent, #5F7858), 0 0 32px rgba(95, 120, 88, 0.12);
+    }
+    .card-blue {
+        box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.08), 0 0 24px rgba(2, 132, 199, 0.04);
+        border-left: 3px solid #0284c7;
+    }
+    .card-blue:hover {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 1px #0284c7, 0 0 32px rgba(2, 132, 199, 0.12);
     }
 
     /* Pill Navigation */
@@ -258,29 +273,49 @@
 
     <!-- KPI Metric Cards Grid -->
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card-cyber card-cyan px-4 py-3 h-100">
-                <div class="kpi-title">Total Approved Budget</div>
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card-cyber card-purple px-3 py-3 h-100">
+                <div class="kpi-title d-flex justify-content-between align-items-center">
+                    <span>Pending Actions</span>
+                    <i class="fas fa-clock" style="font-size: 13px; color: var(--rd-accent, #5F7858);"></i>
+                </div>
+                <div class="kpi-value" id="kpi-pending-cases" style="color: var(--rd-accent, #5F7858);">0</div>
+                <div class="kpi-sub" id="kpi-pending-cases-sub">0 Purchase • 0 Contract</div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card-cyber card-blue px-3 py-3 h-100">
+                <div class="kpi-title d-flex justify-content-between align-items-center">
+                    <span>Active HR / Staff</span>
+                    <i class="fas fa-users" style="font-size: 13px; color: #0284c7;"></i>
+                </div>
+                <div class="kpi-value" id="kpi-employees" style="color: #0284c7;">0</div>
+                <div class="kpi-sub" id="kpi-employees-sub">Active personnel</div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card-cyber card-cyan px-3 py-3 h-100">
+                <div class="kpi-title">Approved Budget</div>
                 <div class="kpi-value" id="kpi-budget">Rs 0</div>
                 <div class="kpi-sub">Total allocated funds</div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card-cyber card-amber px-4 py-3 h-100">
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card-cyber card-amber px-3 py-3 h-100">
                 <div class="kpi-title">Total Utilized</div>
                 <div class="kpi-value" id="kpi-utilized">Rs 0</div>
-                <div class="kpi-sub">Evaluated case expenses</div>
+                <div class="kpi-sub">Evaluated expenses</div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card-cyber card-green px-4 py-3 h-100">
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card-cyber card-green px-3 py-3 h-100">
                 <div class="kpi-title">Remaining Balance</div>
                 <div class="kpi-value" id="kpi-remaining">Rs 0</div>
-                <div class="kpi-sub">Available active buffer</div>
+                <div class="kpi-sub">Active buffer</div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card-cyber card-red px-4 py-3 h-100">
+        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+            <div class="card-cyber card-red px-3 py-3 h-100">
                 <div class="kpi-title">Procurement Credit</div>
                 <div class="kpi-value" id="kpi-credit">Rs 0</div>
                 <div class="kpi-sub">Loan-eligible cases</div>
@@ -479,6 +514,18 @@
                 $('#dashboard-error-banner').addClass('d-none');
                 
                 // Update KPI Cards
+                const pendingPur = Number(apiData.kpis.pendingPurchaseCases || 0);
+                const pendingCtr = Number(apiData.kpis.pendingContractCases || 0);
+                const totalPending = Number(apiData.kpis.pendingCases ?? (pendingPur + pendingCtr));
+                
+                $('#kpi-pending-cases').text(totalPending);
+                $('#kpi-pending-cases-sub').text(`${pendingPur} Purchase • ${pendingCtr} Contract`);
+
+                const empsTotal = Number(apiData.kpis.employeesTotal || 0);
+                const empsHired = Number(apiData.kpis.employeesHired || 0);
+                $('#kpi-employees').text(empsTotal);
+                $('#kpi-employees-sub').text(`${empsTotal} active staff • ${empsHired} hired (1y)`);
+
                 $('#kpi-budget').text(formatMoney(apiData.kpis.budgetReceived));
                 $('#kpi-utilized').text(formatMoney(apiData.kpis.utilized));
                 $('#kpi-remaining').text(formatMoney(apiData.kpis.remaining));
@@ -613,16 +660,16 @@
             if (p.status.toLowerCase().includes('complete') || p.status.toLowerCase() === 'closed') statusClass = 'completed';
             else if (p.status.toLowerCase().includes('delay')) statusClass = 'delayed';
             
-            const link = $('<a class="list-item"></a>')
+            const link = $('<a class="list-item shadow-xs mb-1"></a>')
                 .attr('href', `/nrdi/projects/${p.id}`)
                 .attr('title', `${p.code} — ${p.statusRaw || ''}`);
                 
-            const left = $('<div class="min-w-0"></div>');
-            left.append($('<div class="font-weight-bold text-xs" style="color: #67e8f9;"></div>').text(p.code));
-            left.append($('<div class="text-muted truncate" style="font-size: 11px;"></div>').text(p.division));
+            const left = $('<div class="min-w-0 d-flex flex-column"></div>');
+            left.append($('<div class="d-flex align-items-center mb-1"><span class="badge px-2 py-0.5 font-weight-bold text-white shadow-xs mr-1" style="background-color: #0284c7; border-radius: 4px; font-size: 11px;">' + p.code + '</span></div>'));
+            left.append($('<div class="text-muted truncate font-weight-500" style="font-size: 11px;"></div>').text(p.division));
             
-            const right = $('<div class="d-flex align-items-center gap-2"></div>');
-            right.append($('<span class="text-xs text-muted font-weight-bold mr-1"></span>').text(p.employees));
+            const right = $('<div class="d-flex align-items-center gap-1.5 flex-shrink-0"></div>');
+            right.append($('<span class="badge badge-pill badge-light border text-dark font-weight-bold px-2 py-0.5 mr-1" style="font-size: 10.5px;" title="' + p.employees + ' Active Employees Assigned"><i class="fas fa-users text-primary mr-1"></i>' + p.employees + '</span>'));
             
             const badge = $('<span class="badge-status"></span>')
                 .text(p.status)
@@ -678,18 +725,21 @@
                         type: 'line',
                         label: 'Budget Received',
                         data: budgets,
-                        borderColor: '#00BFFF',
-                        backgroundColor: 'rgba(0,191,255,0.06)',
-                        borderWidth: 2,
+                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                        borderWidth: 2.5,
                         tension: 0.35,
-                        pointRadius: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#0284c7',
+                        fill: true
                     },
                     {
                         label: 'Utilized',
                         data: utilized,
-                        backgroundColor: 'rgba(229,229,229,0.12)',
-                        borderColor: 'rgba(229,229,229,0.30)',
-                        borderWidth: 1,
+                        backgroundColor: 'rgba(16, 185, 129, 0.30)',
+                        borderColor: '#10b981',
+                        borderWidth: 1.5,
+                        borderRadius: 4
                     }
                 ]
             },
@@ -697,16 +747,16 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { labels: { color: 'rgba(229,229,229,0.8)', font: { size: 11 } } },
+                    legend: { labels: { color: '#334155', font: { size: 11, weight: 'bold' } } },
                 },
                 scales: {
                     x: {
-                        ticks: { color: 'rgba(229,229,229,0.55)', font: { size: 10 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
+                        ticks: { color: '#64748b', font: { size: 10, weight: '600' } },
+                        grid: { color: 'rgba(100, 116, 139, 0.08)' }
                     },
                     y: {
-                        ticks: { color: 'rgba(229,229,229,0.55)', font: { size: 10 } },
-                        grid: { color: 'rgba(255,255,255,0.05)' }
+                        ticks: { color: '#64748b', font: { size: 10, weight: '600' } },
+                        grid: { color: 'rgba(100, 116, 139, 0.08)' }
                     }
                 }
             }
@@ -725,8 +775,8 @@
                 labels: ['Completed', 'Ongoing', 'Delayed'],
                 datasets: [{
                     data: [stat.completed, stat.ongoing, stat.delayed],
-                    backgroundColor: ['rgba(34,197,94,0.75)', 'rgba(0,191,255,0.60)', 'rgba(248,113,113,0.70)'],
-                    borderColor: 'rgba(18,26,34,0.85)',
+                    backgroundColor: ['#10b981', '#0284c7', '#ef4444'],
+                    borderColor: '#ffffff',
                     borderWidth: 2
                 }]
             },
@@ -734,7 +784,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom', labels: { color: 'rgba(229,229,229,0.8)', font: { size: 10 } } }
+                    legend: { position: 'bottom', labels: { color: '#334155', font: { size: 10.5, weight: '600' } } }
                 }
             }
         });
@@ -747,17 +797,17 @@
         const total = Number(apiData.kpis.employeesTotal || 0);
         const existing = Math.max(0, total - hired);
         
-        $('#hr-kpi-sub').text(`${total} total • ${hired} hired`);
+        $('#hr-kpi-sub').text(`${total} Active Personnel • ${hired} Hired (Past Year)`);
         
         const ctx = document.getElementById('employeesDonutChart').getContext('2d');
         chartEmployeesDonut = new Chart4(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Hired (12m)', 'Existing'],
+                labels: ['Hired (Past Year)', 'Retained Staff'],
                 datasets: [{
                     data: [hired, existing],
-                    backgroundColor: ['rgba(0,191,255,0.60)', 'rgba(229,229,229,0.12)'],
-                    borderColor: 'rgba(18,26,34,0.85)',
+                    backgroundColor: ['#0284c7', '#6366f1'],
+                    borderColor: '#ffffff',
                     borderWidth: 2
                 }]
             },
@@ -765,7 +815,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom', labels: { color: 'rgba(229,229,229,0.8)', font: { size: 10 } } }
+                    legend: { position: 'bottom', labels: { color: '#334155', font: { size: 10.5, weight: '600' } } }
                 }
             }
         });
@@ -786,8 +836,8 @@
                 datasets: [{
                     label: 'Employees',
                     data: data,
-                    backgroundColor: 'rgba(229,229,229,0.12)',
-                    borderColor: 'rgba(229,229,229,0.25)',
+                    backgroundColor: 'rgba(2, 132, 199, 0.85)',
+                    borderColor: '#0284c7',
                     borderWidth: 1,
                     borderRadius: 4
                 }]
@@ -797,8 +847,8 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { display: false } },
-                    y: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { display: false } },
+                    y: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { color: 'rgba(100, 116, 139, 0.08)' } }
                 }
             }
         });
@@ -821,8 +871,8 @@
                 labels: ['Reviewed', 'Pending'],
                 datasets: [{
                     data: [reviewed, pending],
-                    backgroundColor: ['rgba(34,197,94,0.75)', 'rgba(0,191,255,0.60)'],
-                    borderColor: 'rgba(18,26,34,0.85)',
+                    backgroundColor: ['#10b981', '#f59e0b'],
+                    borderColor: '#ffffff',
                     borderWidth: 2
                 }]
             },
@@ -846,8 +896,8 @@
                 datasets: [{
                     label: 'Cases',
                     data: count,
-                    backgroundColor: 'rgba(0,191,255,0.16)',
-                    borderColor: 'rgba(0,191,255,0.55)',
+                    backgroundColor: 'rgba(2, 132, 199, 0.75)',
+                    borderColor: '#0284c7',
                     borderWidth: 1,
                     borderRadius: 4
                 }]
@@ -857,8 +907,8 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { display: false } },
-                    y: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { display: false } },
+                    y: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { color: 'rgba(100, 116, 139, 0.08)' } }
                 }
             }
         });
@@ -879,8 +929,8 @@
                 datasets: [{
                     label: 'Completion %',
                     data: percent,
-                    backgroundColor: 'rgba(0,191,255,0.16)',
-                    borderColor: 'rgba(0,191,255,0.55)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                    borderColor: '#10b981',
                     borderWidth: 1,
                     borderRadius: 4
                 }]
@@ -890,8 +940,8 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { display: false } },
-                    y: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 }, max: 100, beginAtZero: true }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { display: false } },
+                    y: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' }, max: 100, beginAtZero: true }, grid: { color: 'rgba(100, 116, 139, 0.08)' } }
                 }
             }
         });
@@ -929,16 +979,16 @@
                     {
                         label: 'Budget',
                         data: budgets,
-                        backgroundColor: 'rgba(0,191,255,0.16)',
-                        borderColor: 'rgba(0,191,255,0.55)',
+                        backgroundColor: 'rgba(2, 132, 199, 0.75)',
+                        borderColor: '#0284c7',
                         borderWidth: 1,
                         borderRadius: 4
                     },
                     {
                         label: 'Utilized',
                         data: utilized,
-                        backgroundColor: 'rgba(229,229,229,0.10)',
-                        borderColor: 'rgba(229,229,229,0.25)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.75)',
+                        borderColor: '#10b981',
                         borderWidth: 1,
                         borderRadius: 4
                     }
@@ -947,18 +997,18 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: 'rgba(229,229,229,0.8)', font: { size: 9 } } } },
+                plugins: { legend: { labels: { color: '#334155', font: { size: 9.5, weight: '600' } } } },
                 scales: {
-                    x: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { display: false } },
-                    y: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { display: false } },
+                    y: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { color: 'rgba(100, 116, 139, 0.08)' } }
                 }
             }
         });
         
         // 2. Divisional Personnel load
-        const empPerDiv = apiData.charts.employeesPerDivision || [];
-        const empLabels = empPerDiv.map(item => item.division);
-        const empCount = empPerDiv.map(item => item.count);
+        const empDiv = apiData.charts.employeesPerDivision || [];
+        const empLabels = empDiv.map(item => item.division);
+        const empCounts = empDiv.map(item => item.count);
         
         const ctxEmp = document.getElementById('employeesPerDivChart').getContext('2d');
         chartEmployeesPerDiv = new Chart4(ctxEmp, {
@@ -967,9 +1017,9 @@
                 labels: empLabels,
                 datasets: [{
                     label: 'Employees',
-                    data: empCount,
-                    backgroundColor: 'rgba(229,229,229,0.12)',
-                    borderColor: 'rgba(229,229,229,0.25)',
+                    data: empCounts,
+                    backgroundColor: 'rgba(99, 102, 241, 0.80)',
+                    borderColor: '#6366f1',
                     borderWidth: 1,
                     borderRadius: 4
                 }]
@@ -979,27 +1029,27 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { display: false } },
-                    y: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { display: false } },
+                    y: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { color: 'rgba(100, 116, 139, 0.08)' } }
                 }
             }
         });
         
         // 3. Divisional Active Projects count
-        const projPerDiv = apiData.charts.projectsPerDivision || [];
-        const projLabels = projPerDiv.map(item => item.division);
-        const projCount = projPerDiv.map(item => item.count);
+        const prjDiv = apiData.charts.projectsPerDivision || [];
+        const prjLabels = prjDiv.map(item => item.division);
+        const prjCounts = prjDiv.map(item => item.count);
         
-        const ctxProj = document.getElementById('projectsPerDivChart').getContext('2d');
-        chartProjectsPerDiv = new Chart4(ctxProj, {
+        const ctxPrj = document.getElementById('projectsPerDivChart').getContext('2d');
+        chartProjectsPerDiv = new Chart4(ctxPrj, {
             type: 'bar',
             data: {
-                labels: projLabels,
+                labels: prjLabels,
                 datasets: [{
                     label: 'Projects',
-                    data: projCount,
-                    backgroundColor: 'rgba(0,191,255,0.16)',
-                    borderColor: 'rgba(0,191,255,0.55)',
+                    data: prjCounts,
+                    backgroundColor: 'rgba(245, 158, 11, 0.80)',
+                    borderColor: '#f59e0b',
                     borderWidth: 1,
                     borderRadius: 4
                 }]
@@ -1009,8 +1059,8 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { display: false } },
-                    y: { ticks: { color: 'rgba(229,229,229,0.5)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { display: false } },
+                    y: { ticks: { color: '#64748b', font: { size: 9.5, weight: '600' } }, grid: { color: 'rgba(100, 116, 139, 0.08)' } }
                 }
             }
         });

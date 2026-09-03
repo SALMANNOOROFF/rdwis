@@ -93,20 +93,30 @@ class SidebarBadgeService
                 ->whereIn('ctc_status', ['Draft', 'Returned', 'Under Revision'])
                 ->count();
         } elseif ($area === 'hr') {
-            $ctrCount = DB::table('hr.ctrcases')
-                ->whereIn('ctc_status', ['Under HR Scrutiny'])
+            $ctrCount = \App\Models\HrCtrCase::atStage('HR')
+                ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
                 ->count();
+            if ($ctrCount === 0) {
+                $ctrCount = DB::table('hr.ctrcases')->whereIn('ctc_status', ['Under HR Scrutiny'])->count();
+            }
         } elseif ($area === 'fin') {
-            $ctrCount = DB::table('hr.ctrcases')
-                ->whereIn('ctc_status', ['Under Finance Scrutiny'])
+            $ctrCount = \App\Models\HrCtrCase::atStage('Finance')
+                ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
                 ->count();
+            if ($ctrCount === 0) {
+                $ctrCount = DB::table('hr.ctrcases')->whereIn('ctc_status', ['Under Finance Scrutiny'])->count();
+            }
         } elseif ($area === 'rdw') {
-            $ctrCount = DB::table('hr.ctrcases')
-                ->whereIn('ctc_status', ['Under Approval'])
+            $ctrCount = \App\Models\HrCtrCase::atStage('MD')
+                ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
                 ->count();
-        } elseif (in_array($area, ['hqs', 'nrdi'])) {
-            $ctrCount = DB::table('hr.ctrcases')
-                ->whereIn('ctc_status', ['Under Approval'])
+        } elseif ($area === 'hqs') {
+            $ctrCount = \App\Models\HrCtrCase::atStage('DDG')
+                ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
+                ->count();
+        } elseif ($area === 'nrdi') {
+            $ctrCount = \App\Models\HrCtrCase::atStage('DG')
+                ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
                 ->count();
         } else {
             $ctrCount = 0;

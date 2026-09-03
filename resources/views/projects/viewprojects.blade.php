@@ -58,6 +58,7 @@
                                 <tr>
                                     <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th>
                                     <th style="min-width: 250px;" class="p-2">Project Details</th>
+                                    <th style="min-width: 100px;" class="text-center p-2">Team</th>
                                     <th style="min-width: 150px;" class="p-2">Timeline</th>
                                     <th style="min-width: 150px;" class="p-2">Financial Standing</th>
                                     <th style="min-width: 150px;" class="text-right p-2">MPR Status</th>
@@ -147,9 +148,27 @@
                                         <div class="font-weight-bold text-dark text-truncate" style="max-width: 300px; font-size: 0.9rem;" title="{{ $project->prj_title }}">
                                             {{ $project->prj_title }}
                                         </div>
+                                        <div class="mt-1">
+                                            <a href="{{ route('projects.financial_view', $project->prj_id) }}" class="btn btn-xs btn-outline-info font-weight-bold" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px;" title="Open Financial View">
+                                                <i class="fas fa-chart-line mr-1"></i> Financial View
+                                            </a>
+                                        </div>
                                     </td>
 
-                                    {{-- 3. TIMELINE & MILESTONES --}}
+                                    {{-- 3. TEAM / EMPLOYEES COUNT --}}
+                                    <td class="align-middle text-center p-2">
+                                        @if(($project->emp_count ?? 0) > 0)
+                                            <span class="badge badge-pill font-weight-bold text-white px-2.5 py-1 shadow-xs" style="background-color: #0284c7; font-size: 11px;" title="{{ $project->emp_count }} Active Employees Assigned">
+                                                <i class="fas fa-users mr-1 text-xs"></i>{{ $project->emp_count }} {{ $project->emp_count === 1 ? 'Emp' : 'Emps' }}
+                                            </span>
+                                        @else
+                                            <span class="badge badge-pill badge-light border text-muted px-2 py-0.5" style="font-size: 10px;" title="No active employees">
+                                                <i class="fas fa-user-slash mr-1 text-xs"></i>0
+                                            </span>
+                                        @endif
+                                    </td>
+
+                                    {{-- 4. TIMELINE & MILESTONES --}}
                                     <td class="align-middle p-2">
                                         <div class="d-flex justify-content-between text-muted text-xs mb-1">
                                             <span>Start: <b>{{ $startDate ? $startDate->format('d-M-y') : 'N/A' }}</b></span>
@@ -164,7 +183,7 @@
                                         </div>
                                     </td>
 
-                                    {{-- 4. FINANCIALS --}}
+                                    {{-- 5. FINANCIALS --}}
                                     <td class="align-middle p-2">
                                         <div class="d-flex justify-content-between text-muted text-xs mb-1">
                                             <span>Spent: <b>{{ number_format($spent / 1000000, 2) }} M</b></span>
@@ -178,7 +197,7 @@
                                         </div>
                                     </td>
 
-                                    {{-- 5. MPR STATUS (Far Right) --}}
+                                    {{-- 6. MPR STATUS (Far Right) --}}
                                     <td class="align-middle text-right p-2">
                                         <div class="d-flex align-items-center justify-content-end">
                                             <span class="{{ $statusClass }} text-sm mr-2">{{ $docStatus }}</span>
@@ -197,7 +216,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="fas fa-folder-open fa-3x mb-3 d-block text-gray-300"></i>
                                         No projects found.
                                     </td>

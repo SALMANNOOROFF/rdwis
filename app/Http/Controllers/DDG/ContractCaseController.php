@@ -62,20 +62,32 @@ class ContractCaseController extends Controller
         ])->findOrFail($id);
 
         $authorityRole = 'DDG';
-        return view('md.contract-cases.show', compact('case', 'authorityRole'));
+        $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
+        $canApprove = $this->approvalService->canApprove('DDG', $case);
+
+        return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
     }
 
     public function approve($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Approved by Deputy Director General (DDG).');
+
+        if (!$this->approvalService->canApprove('DDG', $case)) {
+            $required = $this->approvalService->getRequiredAuthority($case);
+            return response()->json([
+                'success' => false,
+                'message' => "Case terms exceed DDG delegated approval authority. This case must be forwarded to {$required} for approval."
+            ], 403);
+        }
+
+        $remarks = $request->input('remarks', 'Approved by Deputy Director General (DDG) under delegated authority.');
 
         $this->approvalService->approve($case, $user, $request->all(), $remarks);
 
         return response()->json([
             'success' => true,
-            'message' => 'Contract Case approved by DDG successfully.'
+            'message' => 'Contract Case approved by DDG under delegated authority.'
         ]);
     }
 

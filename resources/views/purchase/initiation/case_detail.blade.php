@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -101,23 +101,23 @@
         </div>
 
         @php
-            $winnerQuote = $purchase->quotes->sortBy(function($q) {
-                return (float)($q->qte_midprice ?: ($q->qte_price + ($q->qte_inttax ?? $q->qte_midtax ?? 0)));
-            })->first();
+            $winnerQuote = $purchase->quotes->where('qte_recomm', true)->first()
+                ?? $purchase->quotes->sortBy('qte_price')->first();
 
             if ($winnerQuote) {
-                $basePrice = (float)($winnerQuote->qte_intprice ?: $winnerQuote->qte_price);
-                $tax = (float)($winnerQuote->qte_inttax ?: ($winnerQuote->qte_midtax ?: 0));
-                $taxType = strtoupper($winnerQuote->qte_taxtype ?? ($winnerQuote->qte_quotetype ?? 'GST'));
-                $sst = str_contains($taxType, 'SST') ? $tax : 0;
-                $gst = !str_contains($taxType, 'SST') ? $tax : 0;
-                $total = $basePrice + $sst + $gst;
+                $basePrice = (float)($winnerQuote->qte_intprice ?: ($winnerQuote->qte_price - (float)($winnerQuote->qte_inttax ?? 0) - (float)($winnerQuote->qte_midtax ?? 0)));
+                $sst = (float)($winnerQuote->qte_inttax ?? 0);
+                $gst = (float)($winnerQuote->qte_midtax ?? 0);
+                if ($sst == 0 && $gst == 0 && (float)$winnerQuote->qte_price > $basePrice) {
+                    $gst = (float)$winnerQuote->qte_price - $basePrice;
+                }
+                $total = (float)($winnerQuote->qte_price ?: ($basePrice + $sst + $gst));
             } else {
-                $basePrice = (float)($purchase->pcs_intprice ?: $purchase->pcs_price);
-                $tax = (float)($purchase->pcs_inttax ?: ($purchase->pcs_midtax ?: 0));
-                $sst = 0;
-                $gst = $tax;
-                $total = $basePrice + $tax;
+                $breakdown = $purchase->tax_breakdown;
+                $basePrice = $breakdown['base'];
+                $sst = $breakdown['sst'];
+                $gst = $breakdown['gst'];
+                $total = $breakdown['total'];
             }
         @endphp
 
@@ -177,7 +177,7 @@
         </table>
 
         <div style="margin-bottom: 20px;">
-            <strong>Terms and Conditions:</strong> Payment on delivery / Inspection at site.
+            <strong>Terms and Conditions:</strong> {{ $purchase->pcs_remarks ?: 'Complete Payment After Delivery' }}
         </div>
 
         <span class="section-title">Quotes: ({{ $purchase->quotes->count() }})</span>
@@ -213,11 +213,14 @@
             </div>
         </div>
 
-        <div>
-            <strong>Remarks:</strong> 
+        @if(!empty($purchase->pcs_remarks) && is_array(json_decode($purchase->pcs_remarks, true)))
             @php $remarks = json_decode($purchase->pcs_remarks, true); @endphp
-            {{ $remarks['justification'] ?? 'No additional remarks.' }}
-        </div>
+            @if(!empty($remarks['justification']))
+                <div>
+                    <strong>Remarks:</strong> {{ $remarks['justification'] }}
+                </div>
+            @endif
+        @endif
 
         <div class="footer">
             <span>1 of 1</span>

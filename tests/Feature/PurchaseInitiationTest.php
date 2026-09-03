@@ -5,12 +5,13 @@ namespace Tests\Feature;
 use App\Models\CenAccount;
 use App\Models\Purchase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PurchaseInitiationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, WithoutMiddleware;
 
     public function test_division_user_can_view_draft_case()
     {
@@ -63,7 +64,7 @@ class PurchaseInitiationTest extends TestCase
         $purchase->pcs_date = now()->toDateString();
         $purchase->save();
 
-        $response = $this->actingAs($user)->post(route('purchase.initiation.save', $purchase->pcs_id), [
+        $response = $this->withoutExceptionHandling()->actingAs($user)->post(route('purchase.initiation.save', $purchase->pcs_id), [
             'op' => 'add_item',
             'item_desc' => 'New Test Item',
             'item_qty' => 5

@@ -34,8 +34,13 @@ class DivHrController extends Controller
 
         $q = Employee::query()
             ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('prj.projects as p', function ($join) {
+                $join->on('p.prj_id', '=', 'h.hed_prj_id')
+                     ->orOn('p.prj_id', '=', 'hr.emps.emp_hed_id')
+                     ->orOn('p.prj_id', '=', 'h.hed_id');
+            })
             ->leftJoin('cen.units as u', 'u.unt_id', '=', 'hr.emps.emp_unt_id')
-            ->select('hr.emps.*', 'h.hed_code', 'u.unt_name', 'u.unt_namesh');
+            ->select('hr.emps.*', 'h.hed_code', 'h.hed_name', 'p.prj_title', 'p.prj_code', 'u.unt_name', 'u.unt_namesh');
 
         if (!$isGlobalHrViewer) {
             // For Division users, strictly lock to their division units
@@ -101,27 +106,170 @@ class DivHrController extends Controller
         $empIds = $employees->pluck('emp_id')->filter()->toArray();
         $latestContracts = [];
         if (!empty($empIds)) {
-            $latestContracts = DB::table('hr.contracts as c')
+            $today = Carbon::today()->toDateString();
+
+            // 1. Fetch contracts for all employees in list
+            $contractsRaw = DB::table('hr.contracts as c')
                 ->leftJoin('cen.heads as ch', 'c.ctr_hed_id', '=', 'ch.hed_id')
+                ->leftJoin('prj.projects as cp', function ($join) {
+                    $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                         ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                         ->orOn('cp.prj_id', '=', 'ch.hed_id');
+                })
                 ->whereIn('c.ctr_num', $empIds)
-                ->select('c.ctr_num', 'c.ctr_jobtitle', 'c.ctr_salary', 'ch.hed_code', 'c.ctr_startdt', 'c.ctr_enddt')
+                ->select(
+                    'c.ctr_id',
+                    'c.ctr_num', 
+                    'c.ctr_jobtitle', 
+                    'c.ctr_salary', 
+                    'c.ctr_grade',
+                    'ch.hed_code', 
+                    'ch.hed_name',
+                    'cp.prj_title', 
+                    'cp.prj_code',
+                    'c.ctr_startdt', 
+                    'c.ctr_enddt',
+                    'c.ctr_termindt'
+                )
                 ->orderBy('c.ctr_startdt', 'desc')
                 ->orderBy('c.ctr_id', 'desc')
-                ->get()
-                ->groupBy('ctr_num')
-                ->map(fn($group) => $group->first());
+                ->get();
+
+            $groupedContracts = $contractsRaw->groupBy('ctr_num');
+            $activeContractIds = [];
+            $latestContracts = [];
+
+            foreach ($groupedContracts as $empId => $empContracts) {
+                // Find active contract covering today, otherwise most recent
+                $activeCtr = $empContracts->first(function ($c) use ($today) {
+                    $end = $c->ctr_termindt ?: $c->ctr_enddt;
+                    return $c->ctr_startdt <= $today && (!$end || $end >= $today);
+                }) ?: $empContracts->first();
+
+                if ($activeCtr) {
+                    $latestContracts[$empId] = $activeCtr;
+                    $activeContractIds[] = $activeCtr->ctr_id;
+                }
+            }
+
+            // 2. Resolve current month plan & distinct project count from hr.contractplans
+            if (!empty($activeContractIds)) {
+                $allPlans = DB::table('hr.contractplans as p')
+                    ->leftJoin('cen.heads as h', 'h.hed_id', '=', 'p.cpn_hed_id')
+                    ->leftJoin('prj.projects as prj', function ($join) {
+                        $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                             ->orOn('prj.prj_id', '=', 'p.cpn_hed_id')
+                             ->orOn('prj.prj_id', '=', 'h.hed_id');
+                    })
+                    ->whereIn('p.cpn_ctr_id', $activeContractIds)
+                    ->select(
+                        'p.cpn_ctr_id',
+                        'p.cpn_startdt',
+                        'p.cpn_enddt',
+                        'p.cpn_hed_id',
+                        'h.hed_code',
+                        'h.hed_name',
+                        'prj.prj_code',
+                        'prj.prj_title'
+                    )
+                    ->orderBy('p.cpn_startdt', 'asc')
+                    ->get()
+                    ->groupBy('cpn_ctr_id');
+
+                foreach ($latestContracts as $empId => $ctr) {
+                    $plans = $allPlans[$ctr->ctr_id] ?? collect();
+                    
+                    // Legacy hr_contractplans_current_u logic: Find current month's plan row
+                    $currentPlan = $plans->first(function ($p) use ($today) {
+                        return $today >= $p->cpn_startdt && $today <= $p->cpn_enddt;
+                    });
+
+                    if (!$currentPlan && $plans->isNotEmpty()) {
+                        $currentPlan = $plans->first();
+                    }
+
+                    $distinctHeads = $plans->pluck('cpn_hed_id')->filter()->unique();
+                    $distinctCount = $distinctHeads->count();
+
+                    $ctr->current_head_code = $currentPlan?->hed_code ?: ($currentPlan?->prj_code ?: ($ctr->hed_code ?: ($ctr->prj_code ?? null)));
+                    $ctr->current_prj_title = $currentPlan?->prj_title ?: ($currentPlan?->hed_name ?: ($ctr->prj_title ?: ($ctr->hed_name ?? null)));
+                    $ctr->distinct_count = $distinctCount;
+
+                    // Group contiguous monthly slices by project into clean From-To spans
+                    $projectSpans = [];
+                    $currentSpan = null;
+                    foreach ($plans as $p) {
+                        $headId = $p->cpn_hed_id;
+                        $pCode = $p->hed_code ?: ($p->prj_code ?: 'Unassigned');
+                        $pTitle = $p->prj_title ?: ($p->hed_name ?: $pCode);
+
+                        if ($currentSpan === null || $currentSpan['head_id'] !== $headId) {
+                            if ($currentSpan !== null) {
+                                $projectSpans[] = $currentSpan;
+                            }
+                            $currentSpan = [
+                                'head_id'      => $headId,
+                                'code'         => $pCode,
+                                'title'        => $pTitle,
+                                'start_dt'     => $p->cpn_startdt,
+                                'end_dt'       => $p->cpn_enddt,
+                                'start_label'  => Carbon::parse($p->cpn_startdt)->format('M Y'),
+                                'end_label'    => Carbon::parse($p->cpn_enddt)->format('M Y'),
+                                'months_count' => 1,
+                                'is_current'   => ($today >= $p->cpn_startdt && $today <= $p->cpn_enddt),
+                            ];
+                        } else {
+                            $currentSpan['end_dt'] = $p->cpn_enddt;
+                            $currentSpan['end_label'] = Carbon::parse($p->cpn_enddt)->format('M Y');
+                            $currentSpan['months_count']++;
+                            if ($today >= $p->cpn_startdt && $today <= $p->cpn_enddt) {
+                                $currentSpan['is_current'] = true;
+                            }
+                        }
+                    }
+                    if ($currentSpan !== null) {
+                        $projectSpans[] = $currentSpan;
+                    }
+
+                    $ctr->plans_list = $projectSpans;
+                    $ctr->project_spans = $projectSpans;
+                }
+            }
         }
         
-        return view('divhr.employelist', compact('employees','activeCount','previousCount', 'mode', 'lower', 'upper', 'varModeStr', 'userAuth', 'latestContracts', 'isGlobalHrViewer', 'divisions'));
+        $canEdit = $this->checkCanEditEmployee($user);
+        
+        return view('divhr.employelist', compact('employees','activeCount','previousCount', 'mode', 'lower', 'upper', 'varModeStr', 'userAuth', 'latestContracts', 'isGlobalHrViewer', 'divisions', 'canEdit'));
     }
 
     // Employee detail page (ID from URL)
     public function employeedetail($id)
     {
+        $user = Auth::user();
+        $isGlobalHrViewer = $this->isGlobalHrViewer($user);
+
+        // Security authorization
+        if (!$isGlobalHrViewer) {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $empCheck = DB::table('hr.emps')
+                ->where('emp_id', $id)
+                ->whereBetween('emp_unt_id', [$lower, $upper])
+                ->first();
+            if (!$empCheck) {
+                abort(403, 'Unauthorized access to this employee profile.');
+            }
+        }
+
         $emp = Employee::query()
             ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('prj.projects as p', function ($join) {
+                $join->on('p.prj_id', '=', 'h.hed_prj_id')
+                     ->orOn('p.prj_id', '=', 'hr.emps.emp_hed_id')
+                     ->orOn('p.prj_id', '=', 'h.hed_id');
+            })
             ->leftJoin('cen.units as u', 'hr.emps.emp_unt_id', '=', 'u.unt_id')
-            ->select('hr.emps.*', 'h.hed_code', 'u.unt_name')
+            ->select('hr.emps.*', 'h.hed_code', 'h.hed_name', 'p.prj_title', 'p.prj_code', 'u.unt_name')
             ->where('emp_id', $id)
             ->first();
 
@@ -166,18 +314,135 @@ class DivHrController extends Controller
         $monthRef = $base ? $base->srq_month : Carbon::now()->toDateString();
         $currentContract = DB::table('hr.contracts as c')
             ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+            ->leftJoin('prj.projects as cp', function ($join) {
+                $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                     ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                     ->orOn('cp.prj_id', '=', 'ch.hed_id');
+            })
             ->where('c.ctr_num', $id)
             ->whereRaw('? between c.ctr_startdt and c.ctr_enddt', [$monthRef])
             ->orderBy('c.ctr_enddt', 'desc')
-            ->select('c.*', 'ch.hed_code as ctr_hed_code', 'ch.hed_name as ctr_hed_name')
+            ->select(
+                'c.*', 
+                'ch.hed_code as ctr_hed_code', 
+                'ch.hed_name as ctr_hed_name',
+                'cp.prj_title as ctr_prj_title',
+                'cp.prj_code as ctr_prj_code'
+            )
             ->first();
+
+        // If not found in current active window, get the latest contract
+        if (!$currentContract) {
+            $currentContract = DB::table('hr.contracts as c')
+                ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+                ->leftJoin('prj.projects as cp', function ($join) {
+                    $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                         ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                         ->orOn('cp.prj_id', '=', 'ch.hed_id');
+                })
+                ->where('c.ctr_num', $id)
+                ->orderBy('c.ctr_startdt', 'desc')
+                ->orderBy('c.ctr_id', 'desc')
+                ->select(
+                    'c.*', 
+                    'ch.hed_code as ctr_hed_code', 
+                    'ch.hed_name as ctr_hed_name',
+                    'cp.prj_title as ctr_prj_title',
+                    'cp.prj_code as ctr_prj_code'
+                )
+                ->first();
+        }
+
+        $currentContractPlans = collect();
+        $distinctPlanCount = 0;
+        if ($currentContract) {
+            $today = Carbon::today()->toDateString();
+            $plansRaw = DB::table('hr.contractplans as p')
+                ->leftJoin('cen.heads as h', 'h.hed_id', '=', 'p.cpn_hed_id')
+                ->leftJoin('prj.projects as prj', function ($join) {
+                    $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                         ->orOn('prj.prj_id', '=', 'p.cpn_hed_id')
+                         ->orOn('prj.prj_id', '=', 'h.hed_id');
+                })
+                ->where('p.cpn_ctr_id', $currentContract->ctr_id)
+                ->select(
+                    'p.*',
+                    'h.hed_code',
+                    'h.hed_name',
+                    'prj.prj_code',
+                    'prj.prj_title'
+                )
+                ->orderBy('p.cpn_startdt', 'asc')
+                ->get();
+
+            $distinctHeads = $plansRaw->pluck('cpn_hed_id')->filter()->unique();
+            $distinctPlanCount = $distinctHeads->count();
+
+            $currentPlan = $plansRaw->first(function ($p) use ($today) {
+                return $today >= $p->cpn_startdt && $today <= $p->cpn_enddt;
+            }) ?: $plansRaw->first();
+
+            if ($currentPlan) {
+                $currentContract->ctr_hed_code = $currentPlan->hed_code ?: ($currentPlan->prj_code ?: $currentContract->ctr_hed_code);
+                $currentContract->ctr_prj_title = $currentPlan->prj_title ?: ($currentPlan->hed_name ?: $currentContract->ctr_prj_title);
+            }
+
+            // Group contiguous monthly slices by project into clean From-To spans
+            $projectSpans = [];
+            $currentSpan = null;
+            foreach ($plansRaw as $p) {
+                $headId = $p->cpn_hed_id;
+                $pCode = $p->hed_code ?: ($p->prj_code ?: 'Unassigned');
+                $pTitle = $p->prj_title ?: ($p->hed_name ?: $pCode);
+
+                if ($currentSpan === null || $currentSpan['head_id'] !== $headId) {
+                    if ($currentSpan !== null) {
+                        $projectSpans[] = $currentSpan;
+                    }
+                    $currentSpan = [
+                        'head_id'       => $headId,
+                        'display_code'  => $pCode,
+                        'display_title' => $pTitle,
+                        'start_dt'      => $p->cpn_startdt,
+                        'end_dt'        => $p->cpn_enddt,
+                        'start_label'   => Carbon::parse($p->cpn_startdt)->format('M Y'),
+                        'end_label'     => Carbon::parse($p->cpn_enddt)->format('M Y'),
+                        'months_count'  => 1,
+                        'is_current'    => ($today >= $p->cpn_startdt && $today <= $p->cpn_enddt),
+                    ];
+                } else {
+                    $currentSpan['end_dt'] = $p->cpn_enddt;
+                    $currentSpan['end_label'] = Carbon::parse($p->cpn_enddt)->format('M Y');
+                    $currentSpan['months_count']++;
+                    if ($today >= $p->cpn_startdt && $today <= $p->cpn_enddt) {
+                        $currentSpan['is_current'] = true;
+                    }
+                }
+            }
+            if ($currentSpan !== null) {
+                $projectSpans[] = $currentSpan;
+            }
+
+            $currentContractPlans = collect($projectSpans);
+        }
 
         $contractsHistory = DB::table('hr.contracts as c')
             ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+            ->leftJoin('prj.projects as cp', function ($join) {
+                $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                     ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                     ->orOn('cp.prj_id', '=', 'ch.hed_id');
+            })
             ->where('c.ctr_num', $id)
             ->orderBy('c.ctr_startdt', 'desc')
             ->orderBy('c.ctr_id', 'desc')
-            ->select('c.*', 'ch.hed_code as ctr_hed_code', 'ch.hed_name as ctr_hed_name')
+            ->select(
+                'c.*', 
+                'ch.hed_code as ctr_hed_code', 
+                'ch.hed_name as ctr_hed_name',
+                'cp.prj_title as ctr_prj_title',
+                'cp.prj_code as ctr_prj_code'
+            )
             ->get()
             ->map(function ($row) {
                 $today = Carbon::today();
@@ -203,6 +468,7 @@ class DivHrController extends Controller
         $ext = DB::table('hr.empsextb')
             ->where('empextb_emp_id', $id)
             ->first();
+        $empB = $ext;
         $kin = null;
         $emer = null;
         $kinSame = false;
@@ -223,6 +489,8 @@ class DivHrController extends Controller
             }
         }
 
+        $empC = DB::table('hr.empsextc')->where('empextc_emp_id', $id)->first();
+
         $salaryProgression = DB::table('fin.salorders')
             ->where('sor_emp_id', $id)
             ->selectRaw('EXTRACT(YEAR FROM sor_month)::int as yr, SUM(sor_netsalary)::bigint as total')
@@ -241,19 +509,29 @@ class DivHrController extends Controller
 
         $degrees = DB::table('hr.qualifs')
             ->where('qlf_emp_id', $id)
-            ->where('qlf_type', 'Degree')
+            ->whereIn('qlf_type', ['Degree', 'Education'])
             ->orderBy('qlf_enddt', 'desc')
             ->get();
 
         $certs = DB::table('hr.qualifs')
             ->where('qlf_emp_id', $id)
-            ->where('qlf_type', '<>', 'Degree')
+            ->where('qlf_type', 'Course')
             ->orderBy('qlf_enddt', 'desc')
             ->get();
 
         $vehicles = DB::table('hr.vehicles')
             ->where('vcl_emp_id', $id)
             ->orderBy('vcl_year', 'desc')
+            ->get();
+
+        $devices = DB::table('hr.devices')
+            ->where('dvc_emp_id', $id)
+            ->orderBy('dvc_id', 'asc')
+            ->get();
+
+        $bankAccounts = DB::table('hr.bnkaccounts')
+            ->where('bac_emp_id', $id)
+            ->orderBy('bac_id', 'asc')
             ->get();
 
         $jobs = DB::table('hr.jobs')
@@ -273,11 +551,47 @@ class DivHrController extends Controller
         }
 
         $attachments = DB::table('hr.empattachments')->where('eat_objid', $id)->get();
+        $canEdit = $this->checkCanEditEmployee(Auth::user());
+
+        $salaryContracts = DB::table('hr.contracts as c')
+            ->where('c.ctr_num', $id)
+            ->whereNotNull('c.ctr_startdt')
+            ->orderBy('c.ctr_startdt', 'asc')
+            ->orderBy('c.ctr_id', 'asc')
+            ->get();
+
+        $salaryTimeline = [];
+        foreach ($salaryContracts as $sc) {
+            $yr = Carbon::parse($sc->ctr_startdt)->format('Y');
+            $salaryTimeline[$yr] = [
+                'year'     => $yr,
+                'salary'   => (float)$sc->ctr_salary,
+                'jobtitle' => $sc->ctr_jobtitle ?? '—',
+                'date'     => $sc->ctr_startdt,
+            ];
+        }
+
+        if (count($salaryTimeline) === 1) {
+            $firstPoint = reset($salaryTimeline);
+            $lastSc = $salaryContracts->last();
+            $endYr = $lastSc->ctr_enddt ? Carbon::parse($lastSc->ctr_enddt)->format('Y') : (string)((int)$firstPoint['year'] + 1);
+            if ($endYr !== $firstPoint['year']) {
+                $salaryTimeline[$endYr] = [
+                    'year'     => $endYr,
+                    'salary'   => $firstPoint['salary'],
+                    'jobtitle' => $firstPoint['jobtitle'],
+                    'date'     => $lastSc->ctr_enddt,
+                ];
+            }
+        }
+        $salaryTimeline = array_values($salaryTimeline);
 
         return view('divhr.employee-details', compact(
             'id',
             'emp',
             'empA',
+            'empB',
+            'empC',
             'authUnit',
             'base',
             'subheads',
@@ -289,14 +603,408 @@ class DivHrController extends Controller
             'emer',
             'kinSame',
             'salaryProgression',
+            'salaryTimeline',
             'previousProjects',
             'degrees',
             'certs',
             'vehicles',
+            'devices',
+            'bankAccounts',
             'jobs',
             'yearsInService',
-            'attachments'
+            'attachments',
+            'canEdit',
+            'currentContractPlans',
+            'distinctPlanCount'
         ));
+    }
+
+    public function employeeEdit($id)
+    {
+        $this->authorizeEmployeeEdit(Auth::user());
+
+        $emp = DB::table('hr.emps')->where('emp_id', $id)->first();
+        if (!$emp) {
+            abort(404, 'Employee not found');
+        }
+
+        $empA = DB::table('hr.empsexta')->where('empexta_emp_id', $id)->first();
+        $empB = DB::table('hr.empsextb')->where('empextb_emp_id', $id)->first();
+        $empC = DB::table('hr.empsextc')->where('empextc_emp_id', $id)->first();
+
+        $degrees = DB::table('hr.qualifs')
+            ->where('qlf_emp_id', $id)
+            ->whereIn('qlf_type', ['Degree', 'Education'])
+            ->orderBy('qlf_enddt', 'desc')
+            ->get();
+
+        $certs = DB::table('hr.qualifs')
+            ->where('qlf_emp_id', $id)
+            ->where('qlf_type', 'Course')
+            ->orderBy('qlf_enddt', 'desc')
+            ->get();
+
+        $jobs = DB::table('hr.jobs')
+            ->where('job_emp_id', $id)
+            ->orderBy('job_from', 'desc')
+            ->get();
+
+        $vehicles = DB::table('hr.vehicles')
+            ->where('vcl_emp_id', $id)
+            ->orderBy('vcl_year', 'desc')
+            ->get();
+
+        $devices = DB::table('hr.devices')
+            ->where('dvc_emp_id', $id)
+            ->orderBy('dvc_id', 'asc')
+            ->get();
+
+        $bankAccounts = DB::table('hr.bnkaccounts')
+            ->where('bac_emp_id', $id)
+            ->orderBy('bac_id', 'asc')
+            ->get();
+
+        $departments = DB::table('cen.units')->orderBy('unt_name')->get();
+        $heads = DB::table('cen.heads as h')
+            ->leftJoin('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+            ->select('h.hed_id', 'h.hed_code', 'h.hed_name', 'h.hed_unt_id', 'p.prj_title', 'p.prj_code')
+            ->orderBy('h.hed_code')
+            ->get();
+
+        $today = \Carbon\Carbon::today()->toDateString();
+        $activePlan = DB::table('hr.contractplans as cp')
+            ->join('hr.contracts as c', 'c.ctr_id', '=', 'cp.cpn_ctr_id')
+            ->where('c.ctr_num', $id)
+            ->whereRaw('? between cp.cpn_startdt and cp.cpn_enddt', [$today])
+            ->whereNotNull('cp.cpn_hed_id')
+            ->select('cp.cpn_hed_id')
+            ->first();
+
+        $currentHeadId = $activePlan ? $activePlan->cpn_hed_id : $emp->emp_hed_id;
+        $currentHead = DB::table('cen.heads as h')
+            ->leftJoin('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+            ->where('h.hed_id', $currentHeadId)
+            ->select('h.hed_id', 'h.hed_code', 'h.hed_name', 'p.prj_title', 'p.prj_code')
+            ->first();
+
+        return view('divhr.employee-edit', compact(
+            'id',
+            'emp',
+            'empA',
+            'empB',
+            'empC',
+            'degrees',
+            'certs',
+            'jobs',
+            'vehicles',
+            'devices',
+            'bankAccounts',
+            'departments',
+            'heads',
+            'currentHead'
+        ));
+    }
+
+    public function employeeUpdate(Request $request, $id)
+    {
+        $this->authorizeEmployeeEdit(Auth::user());
+
+        $emp = DB::table('hr.emps')->where('emp_id', $id)->first();
+        if (!$emp) {
+            abort(404, 'Employee not found');
+        }
+
+        $validated = $request->validate([
+            // Core
+            'emp_name'     => 'required|string|max:200',
+            'emp_cnic'     => 'required|string|max:20',
+            'emp_joindt'   => 'required|date',
+            'emp_unt_id'   => 'required|integer',
+            'emp_hed_id'   => 'nullable|integer',
+            'emp_status'   => 'required|string|max:50',
+            'emp_rank'     => 'nullable|string|max:100',
+            'emp_title'    => 'nullable|string|max:255',
+            'emp_lastdt'   => 'nullable|date',
+            'emp_remarks'  => 'nullable|string',
+
+            // Personal 1 (empsexta)
+            'emp_discip'         => 'nullable|string|max:255',
+            'emp_qualif'         => 'nullable|integer',
+            'emp_spec'           => 'nullable|string|max:255',
+            'emp_paddress'       => 'nullable|string|max:500',
+            'emp_dob'            => 'nullable|date',
+            'emp_marital'        => 'nullable|string|max:50',
+            'emp_ntnlty'         => 'nullable|string|max:100',
+            'emp_ntnlty_other'   => 'nullable|string|max:100',
+            'emp_pob'            => 'nullable|string|max:100',
+            'emp_taddress'       => 'nullable|string|max:500',
+            'emp_mobile'         => 'nullable|string|max:20',
+            'emp_mobile2'        => 'nullable|string|max:20',
+            'emp_landline'       => 'nullable|string|max:20',
+            'emp_gender'         => 'nullable|string|max:20',
+            'emp_email'          => 'nullable|string|max:150',
+            'emp_father'         => 'nullable|string|max:200',
+            'emp_father_cnic'    => 'nullable|string|max:20',
+
+            // Personal 2 (empsextb)
+            'emp_nokname'        => 'nullable|string|max:200',
+            'emp_nokrelation'    => 'nullable|string|max:100',
+            'emp_nokcnic'        => 'nullable|string|max:20',
+            'emp_emername'       => 'nullable|string|max:200',
+            'emp_emerrelation'   => 'nullable|string|max:100',
+            'emp_emermobile'     => 'nullable|string|max:20',
+            'emp_idmark'         => 'nullable|string|max:255',
+            'emp_height'         => 'nullable|numeric',
+            'emp_caste'          => 'nullable|string|max:100',
+            'emp_religion'       => 'nullable|string|max:100',
+            'emp_sect'           => 'nullable|string|max:100',
+            'emp_police'         => 'nullable|string|max:200',
+            'emp_political'      => 'nullable|string|max:200',
+
+            // Official (empsextc)
+            'emp_cnum'           => 'nullable|string|max:100',
+            'emp_cissuedt'       => 'nullable|date',
+            'emp_cexpdt'         => 'nullable|date',
+            'emp_secclear'       => 'nullable|string|max:100',
+
+            // Multi-row arrays
+            'degrees'            => 'nullable|array',
+            'certs'              => 'nullable|array',
+            'jobs'               => 'nullable|array',
+            'vehicles'           => 'nullable|array',
+            'devices'            => 'nullable|array',
+            'bank_accounts'      => 'nullable|array',
+        ]);
+
+        DB::transaction(function () use ($id, $request, $validated) {
+            $cleanCnic = function (?string $val): ?string {
+                if (empty($val)) return null;
+                $val = trim($val);
+                $digits = preg_replace('/\D/', '', $val);
+                if (strlen($digits) === 13) {
+                    return substr($digits, 0, 5) . '-' . substr($digits, 5, 7) . '-' . substr($digits, 12, 1);
+                }
+                return mb_substr($val, 0, 15);
+            };
+
+            $cleanPhone = function (?string $val, int $max = 13): ?string {
+                if (empty($val)) return null;
+                return mb_substr(trim($val), 0, $max);
+            };
+
+            // 1. Update Core (hr.emps)
+            DB::table('hr.emps')->where('emp_id', $id)->update([
+                'emp_name'     => mb_substr($validated['emp_name'], 0, 200),
+                'emp_cnic'     => $cleanCnic($validated['emp_cnic']) ?? mb_substr($validated['emp_cnic'], 0, 15),
+                'emp_joindt'   => $validated['emp_joindt'],
+                'emp_unt_id'   => (int)$validated['emp_unt_id'],
+                'emp_hed_id'   => $emp->emp_hed_id,
+                'emp_status'   => $validated['emp_status'],
+                'emp_rank'     => !empty($validated['emp_rank']) ? mb_substr($validated['emp_rank'], 0, 100) : null,
+                'emp_title'    => !empty($validated['emp_title']) ? mb_substr($validated['emp_title'], 0, 255) : null,
+                'emp_lastdt'   => !empty($validated['emp_lastdt']) ? $validated['emp_lastdt'] : null,
+                'emp_remarks'  => $validated['emp_remarks'] ?? null,
+                'emp_locked'   => $request->has('emp_locked') ? true : false,
+                'emp_cleared'  => $request->has('emp_cleared') ? true : false,
+            ]);
+
+            // 2. Upsert Personal 1 (hr.empsexta)
+            DB::table('hr.empsexta')->updateOrInsert(
+                ['empexta_emp_id' => $id],
+                [
+                    'emp_discip'         => $validated['emp_discip'] ?? '',
+                    'emp_qualif'         => (int)($validated['emp_qualif'] ?? 0),
+                    'emp_spec'           => $validated['emp_spec'] ?? null,
+                    'emp_paddress'       => $validated['emp_paddress'] ?? '',
+                    'emp_dob'            => !empty($validated['emp_dob']) ? $validated['emp_dob'] : '1990-01-01',
+                    'emp_marital'        => $validated['emp_marital'] ?? 'Single',
+                    'emp_ntnlty'         => $validated['emp_ntnlty'] ?? 'Pakistani',
+                    'emp_ntnlty_other'   => $validated['emp_ntnlty_other'] ?? null,
+                    'emp_pob'            => $validated['emp_pob'] ?? '',
+                    'emp_taddress'       => $validated['emp_taddress'] ?? '',
+                    'emp_mobile'         => $cleanPhone($validated['emp_mobile'] ?? null, 13) ?? '',
+                    'emp_mobile2'        => $cleanPhone($validated['emp_mobile2'] ?? null, 13),
+                    'emp_landline'       => $cleanPhone($validated['emp_landline'] ?? null, 13),
+                    'emp_gender'         => $validated['emp_gender'] ?? 'Male',
+                    'emp_email'          => $validated['emp_email'] ?? '',
+                    'emp_father'         => $validated['emp_father'] ?? '',
+                    'emp_father_cnic'    => $cleanCnic($validated['emp_father_cnic'] ?? null),
+                ]
+            );
+
+            // 3. Upsert Personal 2 (hr.empsextb)
+            DB::table('hr.empsextb')->updateOrInsert(
+                ['empextb_emp_id' => $id],
+                [
+                    'emp_nokname'        => $validated['emp_nokname'] ?? '',
+                    'emp_nokrelation'    => $validated['emp_nokrelation'] ?? '',
+                    'emp_nokcnic'        => $cleanCnic($validated['emp_nokcnic'] ?? null) ?? '',
+                    'emp_emername'       => $validated['emp_emername'] ?? '',
+                    'emp_emerrelation'   => $validated['emp_emerrelation'] ?? '',
+                    'emp_emermobile'     => $cleanPhone($validated['emp_emermobile'] ?? null, 20) ?? '',
+                    'emp_idmark'         => $validated['emp_idmark'] ?? '',
+                    'emp_height'         => (float)($validated['emp_height'] ?? 0),
+                    'emp_caste'          => $validated['emp_caste'] ?? '',
+                    'emp_religion'       => $validated['emp_religion'] ?? '',
+                    'emp_sect'           => $validated['emp_sect'] ?? '',
+                    'emp_police'         => $validated['emp_police'] ?? '',
+                    'emp_political'      => $validated['emp_political'] ?? '',
+                ]
+            );
+
+            // 4. Upsert Official (hr.empsextc)
+            DB::table('hr.empsextc')->updateOrInsert(
+                ['empextc_emp_id' => $id],
+                [
+                    'emp_cnum'           => $validated['emp_cnum'] ?? null,
+                    'emp_cissuedt'       => !empty($validated['emp_cissuedt']) ? $validated['emp_cissuedt'] : null,
+                    'emp_cexpdt'         => !empty($validated['emp_cexpdt']) ? $validated['emp_cexpdt'] : null,
+                    'emp_secclear'       => $validated['emp_secclear'] ?? null,
+                ]
+            );
+
+            // 5. Sync Education (Degrees)
+            DB::table('hr.qualifs')->where('qlf_emp_id', $id)->whereIn('qlf_type', ['Degree', 'Education'])->delete();
+            if (!empty($validated['degrees'])) {
+                foreach ($validated['degrees'] as $deg) {
+                    if (!empty($deg['qlf_name']) || !empty($deg['qlf_inst'])) {
+                        DB::table('hr.qualifs')->insert([
+                            'qlf_emp_id'   => $id,
+                            'qlf_type'     => 'Degree',
+                            'qlf_level'    => (int)($deg['qlf_level'] ?? 0),
+                            'qlf_name'     => $deg['qlf_name'] ?? '',
+                            'qlf_inst'     => $deg['qlf_inst'] ?? '',
+                            'qlf_duration' => (float)($deg['qlf_duration'] ?? 1),
+                            'qlf_unit'     => $deg['qlf_unit'] ?? 'Years',
+                            'qlf_enddt'    => !empty($deg['qlf_enddt']) ? $deg['qlf_enddt'] : date('Y-m-d'),
+                            'qlf_grade'    => $deg['qlf_grade'] ?? null,
+                            'qlf_license'  => $deg['qlf_license'] ?? null,
+                            'qlf_spec'     => $deg['qlf_spec'] ?? null,
+                        ]);
+                    }
+                }
+            }
+
+            // 6. Sync Courses & Certifications
+            DB::table('hr.qualifs')->where('qlf_emp_id', $id)->where('qlf_type', 'Course')->delete();
+            if (!empty($validated['certs'])) {
+                foreach ($validated['certs'] as $ct) {
+                    if (!empty($ct['qlf_name']) || !empty($ct['qlf_inst'])) {
+                        DB::table('hr.qualifs')->insert([
+                            'qlf_emp_id'   => $id,
+                            'qlf_type'     => 'Course',
+                            'qlf_level'    => (int)($ct['qlf_level'] ?? 0),
+                            'qlf_name'     => $ct['qlf_name'] ?? '',
+                            'qlf_inst'     => $ct['qlf_inst'] ?? '',
+                            'qlf_duration' => (float)($ct['qlf_duration'] ?? 1),
+                            'qlf_unit'     => $ct['qlf_unit'] ?? 'Months',
+                            'qlf_enddt'    => !empty($ct['qlf_enddt']) ? $ct['qlf_enddt'] : date('Y-m-d'),
+                            'qlf_grade'    => $ct['qlf_grade'] ?? null,
+                            'qlf_license'  => $ct['qlf_license'] ?? null,
+                            'qlf_spec'     => $ct['qlf_spec'] ?? null,
+                        ]);
+                    }
+                }
+            }
+
+            // 7. Sync Career (hr.jobs)
+            DB::table('hr.jobs')->where('job_emp_id', $id)->delete();
+            if (!empty($validated['jobs'])) {
+                foreach ($validated['jobs'] as $jb) {
+                    if (!empty($jb['job_company']) || !empty($jb['job_jobtitle'])) {
+                        DB::table('hr.jobs')->insert([
+                            'job_emp_id'   => $id,
+                            'job_company'  => $jb['job_company'] ?? '',
+                            'job_jobtitle' => $jb['job_jobtitle'] ?? '',
+                            'job_repto'    => $jb['job_repto'] ?? null,
+                            'job_team'     => !empty($jb['job_team']) ? (int)$jb['job_team'] : null,
+                            'job_from'     => !empty($jb['job_from']) ? $jb['job_from'] : date('Y-m-d'),
+                            'job_to'       => !empty($jb['job_to']) ? $jb['job_to'] : null,
+                            'job_resp'     => $jb['job_resp'] ?? null,
+                            'job_ach'      => $jb['job_ach'] ?? null,
+                            'job_city'     => $jb['job_city'] ?? 'Karachi',
+                        ]);
+                    }
+                }
+            }
+
+            // 8. Sync Vehicles (hr.vehicles)
+            DB::table('hr.vehicles')->where('vcl_emp_id', $id)->delete();
+            if (!empty($validated['vehicles'])) {
+                foreach ($validated['vehicles'] as $v) {
+                    if (!empty($v['vcl_maker']) || !empty($v['vcl_regis'])) {
+                        DB::table('hr.vehicles')->insert([
+                            'vcl_emp_id'  => $id,
+                            'vcl_type'    => $v['vcl_type'] ?? 'Car',
+                            'vcl_maker'   => $v['vcl_maker'] ?? '',
+                            'vcl_variant' => $v['vcl_variant'] ?? '',
+                            'vcl_year'    => (int)($v['vcl_year'] ?? date('Y')),
+                            'vcl_regis'   => $v['vcl_regis'] ?? '',
+                            'vcl_color'   => $v['vcl_color'] ?? '',
+                        ]);
+                    }
+                }
+            }
+
+            // 9. Sync Devices (hr.devices)
+            DB::table('hr.devices')->where('dvc_emp_id', $id)->delete();
+            if (!empty($validated['devices'])) {
+                foreach ($validated['devices'] as $d) {
+                    if (!empty($d['dvc_brand']) || !empty($d['dvc_imei1'])) {
+                        DB::table('hr.devices')->insert([
+                            'dvc_emp_id' => $id,
+                            'dvc_type'   => $d['dvc_type'] ?? 'Mobile Phone',
+                            'dvc_brand'  => $d['dvc_brand'] ?? '',
+                            'dvc_model'  => $d['dvc_model'] ?? '',
+                            'dvc_imei1'  => mb_substr($d['dvc_imei1'] ?? '', 0, 18),
+                            'dvc_imei2'  => !empty($d['dvc_imei2']) ? mb_substr($d['dvc_imei2'], 0, 18) : null,
+                        ]);
+                    }
+                }
+            }
+
+            // 10. Sync Bank Accounts (hr.bnkaccounts)
+            DB::table('hr.bnkaccounts')->where('bac_emp_id', $id)->delete();
+            if (!empty($validated['bank_accounts'])) {
+                foreach ($validated['bank_accounts'] as $ba) {
+                    if (!empty($ba['bac_bnkname']) || !empty($ba['bac_accnum'])) {
+                        DB::table('hr.bnkaccounts')->insert([
+                            'bac_emp_id'    => $id,
+                            'bac_bnkname'   => $ba['bac_bnkname'] ?? '',
+                            'bac_bchname'   => $ba['bac_bchname'] ?? '',
+                            'bac_bchcode'   => $ba['bac_bchcode'] ?? null,
+                            'bac_acctitle'  => $ba['bac_acctitle'] ?? '',
+                            'bac_accnum'    => $ba['bac_accnum'] ?? '',
+                            'bac_bchcity'   => $ba['bac_bchcity'] ?? 'Karachi',
+                            'bac_selforpay' => !empty($ba['bac_selforpay']) ? true : false,
+                        ]);
+                    }
+                }
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee profile updated successfully.',
+            'redirect_url' => route('divhr.employeedetail', $id),
+        ]);
+    }
+
+    public function checkCanEditEmployee($user): bool
+    {
+        if (!$user) return false;
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHr = in_array($area, ['hr']) || (method_exists($user, 'canAccessArea') && $user->canAccessArea('hr'));
+        $isDivision = $area === 'prj' || (method_exists($user, 'isDivision') && $user->isDivision());
+
+        return $isHr || $isDivision;
+    }
+
+    public function authorizeEmployeeEdit($user)
+    {
+        if (!$this->checkCanEditEmployee($user)) {
+            abort(403, 'Unauthorized access. Only Division and HR personnel have edit access to Employee Profiles.');
+        }
     }
 
     /**
@@ -591,16 +1299,68 @@ class DivHrController extends Controller
 
         $data = [];
 
-        // Helper to fetch latest contracts for employees without date restrictions
-        $getLatestContracts = function() use ($empIds) {
-            return DB::table('hr.contracts as c')
+        $today = Carbon::today()->toDateString();
+        // Helper to fetch latest/active contracts for employees and resolve current project assignment
+        $getLatestContracts = function() use ($empIds, $today) {
+            $rawContracts = DB::table('hr.contracts as c')
                 ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+                ->leftJoin('prj.projects as cp', function ($join) {
+                    $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                         ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                         ->orOn('cp.prj_id', '=', 'ch.hed_id');
+                })
                 ->whereIn('c.ctr_num', $empIds)
-                ->select('c.*', 'ch.hed_code as ctr_hed_code')
-                ->orderBy('c.ctr_enddt', 'desc')
-                ->get()
-                ->unique('ctr_num')
-                ->keyBy('ctr_num');
+                ->select(
+                    'c.*', 
+                    'ch.hed_code as ctr_hed_code',
+                    'ch.hed_name as ctr_hed_name',
+                    'cp.prj_code as ctr_prj_code',
+                    'cp.prj_title as ctr_prj_title'
+                )
+                ->orderBy('c.ctr_startdt', 'desc')
+                ->orderBy('c.ctr_id', 'desc')
+                ->get();
+
+            $grouped = $rawContracts->groupBy('ctr_num');
+            $latest = collect();
+            $activeIds = [];
+
+            foreach ($grouped as $num => $ctrs) {
+                $act = $ctrs->first(function($c) use ($today) {
+                    $end = $c->ctr_termindt ?: $c->ctr_enddt;
+                    return $c->ctr_startdt <= $today && (!$end || $end >= $today);
+                }) ?: $ctrs->first();
+
+                if ($act) {
+                    $latest->put($num, $act);
+                    $activeIds[] = $act->ctr_id;
+                }
+            }
+
+            if (!empty($activeIds)) {
+                $plans = DB::table('hr.contractplans as p')
+                    ->leftJoin('cen.heads as h', 'h.hed_id', '=', 'p.cpn_hed_id')
+                    ->leftJoin('prj.projects as prj', function ($join) {
+                        $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                             ->orOn('prj.prj_id', '=', 'p.cpn_hed_id')
+                             ->orOn('prj.prj_id', '=', 'h.hed_id');
+                    })
+                    ->whereIn('p.cpn_ctr_id', $activeIds)
+                    ->select('p.*', 'h.hed_code', 'h.hed_name', 'prj.prj_code', 'prj.prj_title')
+                    ->get()
+                    ->groupBy('cpn_ctr_id');
+
+                foreach ($latest as $num => $ctr) {
+                    $cPlans = $plans->get($ctr->ctr_id, collect());
+                    $curPlan = $cPlans->first(fn($p) => $today >= $p->cpn_startdt && $today <= $p->cpn_enddt) ?: $cPlans->first();
+                    if ($curPlan) {
+                        $ctr->ctr_hed_code = $curPlan->hed_code ?: ($curPlan->prj_code ?: $ctr->ctr_hed_code);
+                        $ctr->ctr_prj_title = $curPlan->prj_title ?: ($curPlan->hed_name ?: $ctr->ctr_prj_title);
+                    }
+                }
+            }
+
+            return $latest;
         };
 
         switch ($type) {
@@ -747,8 +1507,19 @@ class DivHrController extends Controller
             case 'custom':
                 $allContracts = DB::table('hr.contracts as c')
                     ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+                    ->leftJoin('prj.projects as cp', function ($join) {
+                        $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                             ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                             ->orOn('cp.prj_id', '=', 'ch.hed_id');
+                    })
                     ->whereIn('c.ctr_num', $empIds)
-                    ->select('c.*', 'ch.hed_code as ctr_hed_code')
+                    ->select(
+                        'c.*', 
+                        'ch.hed_code as ctr_hed_code',
+                        'ch.hed_name as ctr_hed_name',
+                        'cp.prj_code as ctr_prj_code',
+                        'cp.prj_title as ctr_prj_title'
+                    )
                     ->orderBy('c.ctr_num')->orderBy('c.ctr_startdt', 'asc')
                     ->get();
 
@@ -785,7 +1556,7 @@ class DivHrController extends Controller
                             'ctr_start' => $c->ctr_startdt,
                             'ctr_end' => $c->ctr_enddt,
                             'ctr_jobtitle' => $c->ctr_jobtitle ?? '—',
-                            'head_code' => $c->ctr_hed_code ?? '—',
+                            'head_code' => $c->ctr_hed_code ?: ($c->ctr_prj_code ?: '—'),
                         ];
                     }
 
@@ -810,5 +1581,14 @@ class DivHrController extends Controller
         }
 
         return response()->json(['data' => $data, 'count' => count($data)]);
+    }
+
+    protected function isGlobalHrViewer($user): bool
+    {
+        if (!$user) return false;
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        return in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc', 'it'])
+            || session('impersonated_by_god')
+            || strtolower($user->acc_username ?? '') === 'superadminrdw';
     }
 }

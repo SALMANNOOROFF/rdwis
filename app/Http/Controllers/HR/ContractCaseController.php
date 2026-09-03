@@ -6,21 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\HrCtrCase;
 use App\Services\ContractCaseApprovalService;
 use App\Services\ContractCaseFulfillmentService;
+use App\Services\EmployeeCreationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Exception;
 
 class ContractCaseController extends Controller
 {
     protected ContractCaseApprovalService $approvalService;
     protected ContractCaseFulfillmentService $fulfillmentService;
+    protected EmployeeCreationService $employeeCreationService;
 
     public function __construct(
         ContractCaseApprovalService $approvalService,
-        ContractCaseFulfillmentService $fulfillmentService
+        ContractCaseFulfillmentService $fulfillmentService,
+        EmployeeCreationService $employeeCreationService
     ) {
         $this->approvalService = $approvalService;
         $this->fulfillmentService = $fulfillmentService;
+        $this->employeeCreationService = $employeeCreationService;
     }
 
     public function index(Request $request)
@@ -87,8 +92,73 @@ class ContractCaseController extends Controller
         ])->findOrFail($id);
 
         $strength = [];
+        $deptMap = EmployeeCreationService::getDepartmentMap();
+        $departments = DB::table('cen.units')->orderBy('unt_name')->get();
 
-        return view('hr.contract-cases.show', compact('case', 'strength'));
+        return view('hr.contract-cases.show', compact('case', 'strength', 'deptMap', 'departments'));
+    }
+
+    public function addEmployee($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $user = Auth::user();
+
+        // Server-side authorization check: Only HR administrators can register new employees
+        $userArea = strtolower(trim((string)($user->acc_untarea ?? '')));
+        if (!in_array($userArea, ['hr', 'rdw', 'nrdi', 'hqs']) && (!$user || !$user->canAccessArea('hr'))) {
+            abort(403, 'Unauthorized access. Only HR administrators can register new employees for contract cases.');
+        }
+
+        $validated = $request->validate([
+            'emp_cnic'   => ['required', 'string', 'regex:/^(\d{5}-\d{7}-\d{1}|\d{13})$/'],
+            'emp_joindt' => 'required|date',
+            'emp_name'   => 'required|string|max:200',
+            'emp_unt_id' => 'required|integer',
+            'emp_title'  => 'nullable|string|max:255',
+            'emp_rank'   => 'nullable|string|max:100',
+        ], [
+            'emp_cnic.required'   => 'Please enter CNIC.',
+            'emp_cnic.regex'      => 'Please enter a valid CNIC (e.g. 42101-1234567-1 or 13 digits).',
+            'emp_joindt.required' => 'Please enter joining date.',
+            'emp_name.required'   => 'Please enter employee name.',
+            'emp_unt_id.required' => 'Please select department.',
+        ]);
+
+        try {
+            $employee = $this->employeeCreationService->addEmployeeForContractCase($case, $validated, $user);
+
+            return response()->json([
+                'success'  => true,
+                'message'  => "Employee {$employee->emp_id} successfully created and linked to the contract case!",
+                'emp_id'   => $employee->emp_id,
+                'employee' => $employee
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function previewEmployeeId(Request $request)
+    {
+        $unitId = (int)$request->query('emp_unt_id');
+        $joinDate = (string)$request->query('emp_joindt', date('Y-m-d'));
+        $cnic = (string)$request->query('emp_cnic', '');
+
+        try {
+            $info = $this->employeeCreationService->generateEmpId($unitId, $joinDate, $cnic);
+            return response()->json([
+                'success' => true,
+                'data'    => $info
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 
     public function forward($id, Request $request)

@@ -424,7 +424,7 @@
                                         </span>
                                     </div>
 
-                                    {{-- Attached Project Documents Box (Read-Only) --}}
+                                    {{-- Attached Documents (Project & Case Side-by-Side) --}}
                                     @php
                                         $prjId = $purchase->project?->prj_id 
                                             ?? ($purchase->head?->hed_prj_id ?? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->value('hed_prj_id'));
@@ -437,49 +437,117 @@
                                                 ->where('jat_path', '<>', '')
                                                 ->get()
                                             : collect();
+
+                                        $caseAttachments = \Illuminate\Support\Facades\DB::table('pur.purattachments')
+                                            ->where('pat_objid', $purchase->pcs_id)
+                                            ->where('pat_objtype', 'pcs')
+                                            ->whereNotNull('pat_path')
+                                            ->where('pat_path', '<>', '')
+                                            ->get();
                                     @endphp
-                                    <div class="mt-2" style="max-width: 420px;">
-                                        <div class="card border shadow-sm" style="border-radius: 6px; border-color: #cbd5e1 !important; background: #ffffff;">
-                                            <div class="card-header py-1 px-2 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-paperclip text-primary mr-1" style="font-size: 10px;"></i>
-                                                    <span class="font-weight-bold" style="font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Attachments</span>
-                                                    <span class="badge badge-secondary badge-pill ml-1" style="font-size: 9px; padding: 1px 5px;">{{ $projectAttachments->count() }}</span>
+                                    <div class="mt-2 d-flex align-items-stretch" style="gap: 8px; max-width: 500px; width: 100%;">
+                                        
+                                        {{-- 1. PROJECT ATTACHMENTS --}}
+                                        <div class="card border shadow-sm" style="flex: 1 1 0; min-width: 0; border-radius: 6px; border-color: #cbd5e1 !important; background: #ffffff; margin-bottom: 0;">
+                                            <div class="card-header py-1 px-2 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; min-height: 24px;">
+                                                <div class="d-flex align-items-center overflow-hidden">
+                                                    <i class="fas fa-paperclip text-primary mr-1 flex-shrink-0" style="font-size: 9px;"></i>
+                                                    <span class="font-weight-bold text-truncate" style="font-size: 9.5px; color: #475569; text-transform: uppercase; letter-spacing: 0.3px;">PROJECT ATTACHMENTS</span>
                                                 </div>
+                                                <span class="badge badge-secondary badge-pill ml-1 flex-shrink-0" style="font-size: 8.5px; padding: 1px 4px;">{{ $projectAttachments->count() }}</span>
                                             </div>
-                                            <div class="p-1" style="font-size: 11px;">
+                                            <div class="px-2 py-1" style="font-size: 10.5px; max-height: 110px; overflow-y: auto;">
                                                 @if($projectAttachments->count() > 0)
-                                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px 6px;">
-                                                        @foreach($projectAttachments as $pDoc)
-                                                            @php
-                                                                $ext = strtolower(pathinfo($pDoc->jat_path, PATHINFO_EXTENSION));
-                                                                $icon = match($ext) {
-                                                                    'pdf' => 'fa-file-pdf text-danger',
-                                                                    'jpg', 'jpeg', 'png' => 'fa-file-image text-primary',
-                                                                    'doc', 'docx' => 'fa-file-word text-info',
-                                                                    'xls', 'xlsx' => 'fa-file-excel text-success',
-                                                                    default => 'fa-file-alt text-secondary'
-                                                                };
-                                                            @endphp
-                                                            <div class="d-flex justify-content-between align-items-center px-1 py-0.5 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0; min-height: 24px;">
-                                                                <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
-                                                                    <i class="fas {{ $icon }} mr-1 flex-shrink-0" style="font-size: 10px; width: 11px;"></i>
-                                                                    <span class="text-truncate font-weight-bold text-dark" style="font-size: 10px; line-height: 1.1;" title="{{ $pDoc->jat_type }}">
-                                                                        {{ $pDoc->jat_type }}
-                                                                    </span>
-                                                                </div>
-                                                                <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 flex-shrink-0" style="font-size: 9px; line-height: 1.2; border-radius: 3px;" title="View {{ $pDoc->jat_type }}">
-                                                                    <i class="fas fa-eye"></i> View
-                                                                </a>
+                                                    @foreach($projectAttachments as $pIdx => $pDoc)
+                                                        <div class="d-flex justify-content-between align-items-center py-0.5 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f1f5f9 !important; min-height: 20px;">
+                                                            <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
+                                                                <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 13px;">{{ $pIdx + 1 }}.</span>
+                                                                <span class="text-truncate font-weight-600 text-dark" style="font-size: 10px; line-height: 1.1;" title="{{ $pDoc->jat_type }}">
+                                                                    {{ $pDoc->jat_type }}
+                                                                </span>
                                                             </div>
-                                                        @endforeach
-                                                    </div>
+                                                            <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" target="_blank" class="text-primary px-0.5 hover-zoom flex-shrink-0" style="font-size: 10px;" title="View {{ $pDoc->jat_type }}">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                        </div>
+                                                    @endforeach
                                                 @else
-                                                    <div class="text-center py-1 text-muted" style="font-size: 10px;">
-                                                        <i class="fas fa-folder-open text-muted mr-1"></i> No project documents attached.
+                                                    <div class="text-center py-2 text-muted" style="font-size: 9.5px;">
+                                                        <i class="fas fa-folder-open text-muted mr-1"></i> No files.
                                                     </div>
                                                 @endif
                                             </div>
+                                        </div>
+
+                                        {{-- 2. CASE ATTACHMENTS --}}
+                                        <div class="card border shadow-sm" style="flex: 1 1 0; min-width: 0; border-radius: 6px; border-color: #cbd5e1 !important; background: #ffffff; margin-bottom: 0;">
+                                            <div class="card-header py-1 px-2 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; min-height: 24px;">
+                                                <div class="d-flex align-items-center overflow-hidden">
+                                                    <i class="fas fa-file-invoice text-primary mr-1 flex-shrink-0" style="font-size: 9px;"></i>
+                                                    <span class="font-weight-bold text-truncate" style="font-size: 9.5px; color: #475569; text-transform: uppercase; letter-spacing: 0.3px;">CASE ATTACHMENTS</span>
+                                                </div>
+                                                <div class="d-flex align-items-center flex-shrink-0">
+                                                    <span class="badge badge-secondary badge-pill ml-1" id="pcCaseAttCountBadge" style="font-size: 8.5px; padding: 1px 4px;">{{ $caseAttachments->count() }}</span>
+                                                    @if($canEdit)
+                                                        <button type="button" class="btn btn-xs btn-outline-primary py-0 px-1 ml-1 edit-only" onclick="document.getElementById('pcCaseAttachDirectInput').click()" style="font-size: 8px; line-height: 1; border-radius: 2px; padding: 1px 3px;" title="Upload Case Document">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="px-2 py-1" id="pcCaseAttachmentsList" style="font-size: 10.5px; max-height: 110px; overflow-y: auto;">
+                                                @if($caseAttachments->count() > 0)
+                                                    @foreach($caseAttachments as $cIdx => $cDoc)
+                                                        @php
+                                                            $cName = trim((string)($cDoc->pat_type ?: ''));
+                                                            if (empty($cName) || strtolower($cName) === 'attachment') {
+                                                                $fn = strtolower(basename(str_replace('\\', '/', $cDoc->pat_path)));
+                                                                $cName = match(true) {
+                                                                    str_starts_with($fn, 'frm-') => 'Form',
+                                                                    str_starts_with($fn, 'min-') => 'Minute',
+                                                                    str_starts_with($fn, 'san-') => 'Sanction',
+                                                                    str_starts_with($fn, 'fs-') => 'Financial Status',
+                                                                    str_starts_with($fn, 'app-') => 'Approval',
+                                                                    str_starts_with($fn, 'aip-') => 'Approval in Principal',
+                                                                    str_starts_with($fn, 'mrr-') => 'Market Research Report',
+                                                                    str_starts_with($fn, 'wo-') => 'Work Order',
+                                                                    str_starts_with($fn, 'pcs-') => 'Form',
+                                                                    default => ($cDoc->pat_type ?: basename(str_replace('\\', '/', $cDoc->pat_path)))
+                                                                };
+                                                            }
+                                                        @endphp
+                                                        <div class="d-flex justify-content-between align-items-center py-0.5 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f1f5f9 !important; min-height: 20px;">
+                                                            <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
+                                                                <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 13px;">{{ $cIdx + 1 }}.</span>
+                                                                <span class="text-truncate font-weight-600 text-dark" style="font-size: 10px; line-height: 1.1;" title="{{ $cName }}">
+                                                                    {{ $cName }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="d-flex align-items-center flex-shrink-0" style="gap: 3px;">
+                                                                <a href="{{ url('/purchase/quote-attachment/' . $cDoc->pat_id . '/view') }}" target="_blank" class="text-primary px-0.5 hover-zoom" style="font-size: 10px;" title="View {{ $cName }}">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                                @if($canEdit)
+                                                                    <button type="button" class="btn btn-link text-danger p-0 pc-del-attachment-btn ml-1 edit-only" data-pat-id="{{ $cDoc->pat_id }}" title="Delete" style="font-size: 9px;">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                    </button>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                @else
+                                                    <div class="text-center py-2 text-muted" style="font-size: 9.5px;">
+                                                        <i class="fas fa-folder-open text-muted mr-1"></i> No files.
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            @if($canEdit)
+                                                <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST" enctype="multipart/form-data" id="pcDirectAttachForm" style="display:none;">
+                                                    @csrf
+                                                    <input type="hidden" name="op" value="add_files">
+                                                    <input type="file" name="attachments[]" id="pcCaseAttachDirectInput" multiple onchange="document.getElementById('pcDirectAttachForm').submit();">
+                                                </form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -487,23 +555,23 @@
                             
                             {{-- Financial Overview & Case Cost Summary --}}
                             @php
-                                $winningQuote = $purchase->quotes->sortBy(function($q) {
-                                    return (float)($q->qte_midprice ?: ($q->qte_price + ($q->qte_inttax ?? $q->qte_midtax ?? 0)));
-                                })->first();
+                                $winningQuote = $purchase->quotes->where('qte_recomm', true)->first()
+                                    ?? $purchase->quotes->sortBy('qte_price')->first();
 
                                 if ($winningQuote) {
-                                    $initBase = (float)($winningQuote->qte_intprice ?: $winningQuote->qte_price);
-                                    $initTax = (float)($winningQuote->qte_inttax ?: ($winningQuote->qte_midtax ?: 0));
-                                    $initTaxType = strtoupper($winningQuote->qte_taxtype ?? ($winningQuote->qte_quotetype ?? 'GST'));
-                                    $initSst = str_contains($initTaxType, 'SST') ? $initTax : 0;
-                                    $initGst = !str_contains($initTaxType, 'SST') ? $initTax : 0;
-                                    $initTot = $initBase + $initSst + $initGst;
+                                    $initBase = (float)($winningQuote->qte_intprice ?: ($winningQuote->qte_price - (float)($winningQuote->qte_inttax ?? 0) - (float)($winningQuote->qte_midtax ?? 0)));
+                                    $initSst = (float)($winningQuote->qte_inttax ?? 0);
+                                    $initGst = (float)($winningQuote->qte_midtax ?? 0);
+                                    if ($initSst == 0 && $initGst == 0 && (float)$winningQuote->qte_price > $initBase) {
+                                        $initGst = (float)$winningQuote->qte_price - $initBase;
+                                    }
+                                    $initTot = (float)($winningQuote->qte_price ?: ($initBase + $initSst + $initGst));
                                 } else {
-                                    $initBase = (float)($purchase->pcs_intprice ?: $purchase->pcs_price);
-                                    $initTax = (float)($purchase->pcs_inttax ?: ($purchase->pcs_midtax ?: 0));
-                                    $initSst = 0;
-                                    $initGst = $initTax;
-                                    $initTot = $initBase + $initTax;
+                                    $breakdown = $purchase->tax_breakdown;
+                                    $initBase = $breakdown['base'];
+                                    $initSst = $breakdown['sst'];
+                                    $initGst = $breakdown['gst'];
+                                    $initTot = $breakdown['total'];
                                 }
                             @endphp
                             <div class="text-right d-flex flex-column align-items-end" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; font-size: 12px; min-width: 260px;">
@@ -642,46 +710,25 @@
                                 <input type="file" id="pcDirectQuoteUploadInput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt">
                         </div>
 
-                        {{-- 3. Case Remarks Section --}}
+                        {{-- 3. Terms & Conditions Section --}}
                         <div class="mb-4">
-                            <div class="dg-sec-label mb-2"><i class="fas fa-info-circle fa-xs"></i> Case Remarks</div>
+                            <div class="dg-sec-label mb-2"><i class="fas fa-file-contract fa-xs"></i> Terms & Conditions</div>
                             <div class="view-only p-3 rounded" id="pcRemarksText" style="background: #f8fafc; border: 1.5px solid #e2e8f0; font-size: 13px; line-height: 1.6; border-radius: 8px; color: #1e293b;">
                                 @if(!empty(trim($purchase->pcs_remarks)))
                                     {{ $purchase->pcs_remarks }}
                                 @else
-                                    <span class="opacity-50 italic">No remarks provided during case initiation.</span>
+                                    <span class="opacity-50 italic">No terms & conditions provided during case initiation.</span>
                                 @endif
                             </div>
                             @if($canEdit)
                                 <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST" id="pcRemarksForm" class="edit-only">
                                     @csrf
                                     <input type="hidden" name="op" value="save_remarks">
-                                    <textarea name="pcs_remarks" id="pcRemarksInput" class="form-control" rows="3" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 13px; resize: vertical;" placeholder="Enter case remarks...">{{ $purchase->pcs_remarks }}</textarea>
+                                    <textarea name="pcs_remarks" id="pcRemarksInput" class="form-control" rows="3" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 13px; resize: vertical;" placeholder="Enter terms & conditions...">{{ $purchase->pcs_remarks }}</textarea>
                                     <div class="d-flex justify-content-end mt-2">
-                                        <button type="submit" class="btn btn-primary btn-sm rajdhani font-weight-bold px-3" style="height: 32px; font-size: 12px; letter-spacing: 0.5px;"><i class="fas fa-save mr-1"></i> SAVE REMARKS</button>
+                                        <button type="submit" class="btn btn-primary btn-sm rajdhani font-weight-bold px-3" style="height: 32px; font-size: 12px; letter-spacing: 0.5px;"><i class="fas fa-save mr-1"></i> SAVE TERMS & CONDITIONS</button>
                                     </div>
                                 </form>
-                            @endif
-                        </div>
-
-                        {{-- 4. Related Files Section --}}
-                        <div class="mb-4">
-                            <div class="dg-sec-label mb-2"><i class="fas fa-paperclip fa-xs"></i> Related Files</div>
-                            <div class="d-flex flex-wrap gap-2 mb-3" id="pcFilesWrap">
-                                {{-- Rendered by JS --}}
-                            </div>
-                            @if($canEdit)
-                                <div class="edit-only p-3 rounded" style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px;">
-                                    <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST" enctype="multipart/form-data" id="pcFilesForm" class="d-flex align-items-center" style="gap: 10px;">
-                                        @csrf
-                                        <input type="hidden" name="op" value="add_files">
-                                        <div class="flex-grow-1">
-                                            <input type="file" name="attachments[]" id="pcFilesInput" multiple class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 36px; padding: 5px 8px; font-size: 12px;" required>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-sm px-3 rajdhani font-weight-bold" style="height: 36px; font-size: 12px; letter-spacing: 0.5px; white-space: nowrap;"><i class="fas fa-upload mr-1"></i> UPLOAD</button>
-                                    </form>
-                                    <div class="text-muted small mt-2" style="font-size: 11px;"><i class="fas fa-info-circle mr-1 text-primary"></i> Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB each)</div>
-                                </div>
                             @endif
                         </div>
 
@@ -965,7 +1012,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content" style="background: #ffffff; border: 1px solid var(--rd-border2); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.12);">
             <div class="modal-header py-2 px-3" style="background: var(--rd-surface2); border-bottom: 1px solid var(--rd-border);">
-                <h6 class="modal-title rajdhani font-weight-bold text-dark" style="letter-spacing: 1px;">CASE REMARKS</h6>
+                <h6 class="modal-title rajdhani font-weight-bold text-dark" style="letter-spacing: 1px;">TERMS & CONDITIONS</h6>
                 <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body p-3">
@@ -1027,19 +1074,19 @@
                 {{-- Top Summary bar --}}
                 <div class="row no-gutters border-bottom" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
                     <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
-                        <div class="small text-muted rajdhani">ALLOCATION</div>
+                        <div class="small text-muted rajdhani font-weight-bold">ALLOCATION</div>
                         <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->allocation) }}</div>
                     </div>
                     <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
-                        <div class="small text-muted rajdhani">MTSS SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">MTSS SHARE</div>
                         <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->mtss_share) }}</div>
                     </div>
                     <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
-                        <div class="small text-muted rajdhani">RDW SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">RDW SHARE</div>
                         <div class="h5 mb-0 text-primary font-weight-bold rajdhani">{{ number_format($head->rdw_share) }}</div>
                     </div>
                     <div class="col-md-3 p-3">
-                        <div class="small text-muted rajdhani">CSRF SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">CSRF SHARE</div>
                         <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->csrf_share) }}</div>
                     </div>
                 </div>
@@ -1063,6 +1110,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <tr style="background: rgba(37,99,235,0.04); border-bottom: 1px solid var(--rd-border);">
+                                        <td class="pl-3 font-weight-bold text-dark"><i class="fas fa-coins text-warning mr-1"></i> Allocated</td>
+                                        <td class="text-right font-weight-bold" style="color: var(--rd-primary-700);">{{ number_format($head->pcc_share ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold" style="color: #d97706;">{{ number_format($head->csrf_share ?? 0) }}</td>
+                                        <td class="text-right pr-3 font-weight-bold" style="color: #16a34a;">{{ number_format($head->allocation ?? 0) }}</td>
+                                    </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">Received</td>
                                         <td class="text-right" style="color: var(--rd-primary-700);">{{ number_format($head->pcc_received ?? 0) }}</td>
@@ -1425,14 +1478,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 $filePath = $att ? (string) $att->pat_path : null;
                 $fileName = $filePath ? basename(str_replace('\\', '/', $filePath)) : null;
                 $isBase = ($q->qte_num == 1 || $q->qte_id == $pcQuotes->min('qte_id'));
+                $qBase = (float) ($q->qte_intprice ?: $q->qte_price);
+                $qSst = (float) ($q->qte_inttax ?? 0);
+                $qGst = (float) ($q->qte_midtax ?? 0);
+                $qTot = (float) ($q->qte_price ?: ($qBase + $qSst + $qGst));
                 return [
                     'qte_id' => (int) $q->qte_id,
                     'qte_num' => (int) ($q->qte_num ?? 0),
                     'firm_name' => (string) ($q->firm?->frm_name ?? $q->qte_firmname),
-                    'qte_price' => (float) ($q->qte_price ?? 0),
-                    'qte_subtotal' => (float) ($q->qte_intprice ?? 0),
-                    'qte_tax' => (float) ($q->qte_inttax ?? 0),
-                    'tax_type' => (string) ($q->qte_taxtype ?? 'GST'),
+                    'qte_price' => $qTot,
+                    'qte_subtotal' => $qBase,
+                    'qte_inttax' => $qSst,
+                    'qte_midtax' => $qGst,
+                    'qte_tax' => $qSst + $qGst,
+                    'tax_type' => $qSst > 0 ? 'SST' : 'GST',
                     'is_base' => (bool) $isBase,
                     'attachment_path' => $filePath,
                     'attachment_name' => $fileName ?? 'Quote Document',
@@ -1441,6 +1500,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'attachments' => $purchase->attachments->map(fn($a) => [
                 'pat_id' => (int) $a->pat_id,
                 'pat_path' => (string) $a->pat_path,
+                'pat_type' => (string) ($a->pat_type ?: ''),
                 'pat_filename' => basename(str_replace('\\', '/', (string)($a->pat_path ?? ''))),
             ])->values(),
             'quote_items' => $quoteItemMap,
@@ -1472,14 +1532,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function sortQuotesByPrice(quotes) {
         return [...quotes].sort((a, b) => {
-            const bPriceA = Number(a.qte_subtotal || a.qte_intprice || a.qte_price || 0);
-            const taxA = Number(a.qte_tax || a.qte_inttax || a.qte_midtax || 0);
-            const totA = bPriceA + taxA;
-
-            const bPriceB = Number(b.qte_subtotal || b.qte_intprice || b.qte_price || 0);
-            const taxB = Number(b.qte_tax || b.qte_inttax || b.qte_midtax || 0);
-            const totB = bPriceB + taxB;
-
+            const totA = Number(a.qte_price || (Number(a.qte_subtotal || a.qte_intprice || 0) + Number(a.qte_inttax || 0) + Number(a.qte_midtax || 0)));
+            const totB = Number(b.qte_price || (Number(b.qte_subtotal || b.qte_intprice || 0) + Number(b.qte_inttax || 0) + Number(b.qte_midtax || 0)));
             return totA - totB;
         });
     }
@@ -1522,13 +1576,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (sorted.length > 0 && baseEl && totEl) {
             const winner = sorted[0];
-            const bPrice = Number(winner.qte_subtotal || winner.qte_intprice || winner.qte_price || 0);
-            const taxAmt = Number(winner.qte_tax || winner.qte_inttax || winner.qte_midtax || 0);
-            const tType = String(winner.tax_type || winner.qte_taxtype || winner.qte_quotetype || 'GST').toUpperCase();
-            const isSst = tType.includes('SST');
-            const sstAmt = isSst ? taxAmt : 0;
-            const gstAmt = !isSst ? taxAmt : 0;
-            const totalAmt = bPrice + sstAmt + gstAmt;
+            const bPrice = Number(winner.qte_subtotal || winner.qte_intprice || (Number(winner.qte_price || 0) - Number(winner.qte_inttax || 0) - Number(winner.qte_midtax || 0)));
+            const sstAmt = Number(winner.qte_inttax || 0);
+            const gstAmt = Number(winner.qte_midtax || (winner.qte_tax && !sstAmt ? winner.qte_tax : 0));
+            const totalAmt = Number(winner.qte_price || (bPrice + sstAmt + gstAmt));
 
             baseEl.innerText = fmt(bPrice);
             if (sstEl) sstEl.innerText = fmt(sstAmt);
@@ -1544,9 +1595,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const td2 = isWinner ? 'text-success font-weight-bold' : 'text-dark font-weight-bold';
             const td3 = isWinner ? 'text-success font-weight-bold' : 'text-primary font-weight-bold';
 
-            const bPrice = Number(q.qte_subtotal || q.qte_intprice || q.qte_price || 0);
-            const taxAmt = Number(q.qte_tax || q.qte_inttax || q.qte_midtax || 0);
-            const quoteTotal = bPrice + taxAmt;
+            const bPrice = Number(q.qte_subtotal || q.qte_intprice || (Number(q.qte_price || 0) - Number(q.qte_inttax || 0) - Number(q.qte_midtax || 0)));
+            const sstAmt = Number(q.qte_inttax || 0);
+            const gstAmt = Number(q.qte_midtax || (q.qte_tax && !sstAmt ? q.qte_tax : 0));
+            const taxAmt = sstAmt + gstAmt;
+            const quoteTotal = Number(q.qte_price || (bPrice + taxAmt));
 
             return `
                 <tr style="${trStyle}">
@@ -1557,7 +1610,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                     <td class="text-right pr-3 font-weight-bold ${td3}">
                         <div style="color: ${isWinner ? '#166534' : '#0f172a'} !important;">Rs. ${fmt(quoteTotal)}</div>
-                        ${bPrice > 0 && taxAmt > 0 ? `<div style="font-size:10px; font-weight:normal; color: var(--rd-text3);">Base: ${fmt(bPrice)} | Tax: ${fmt(taxAmt)}</div>` : ''}
+                        ${bPrice > 0 && taxAmt > 0 ? `<div style="font-size:10px; font-weight:normal; color: var(--rd-text3);">Base: ${fmt(bPrice)} | ${sstAmt > 0 ? `SST: ${fmt(sstAmt)} ` : ''}${gstAmt > 0 ? `GST: ${fmt(gstAmt)}` : ''}</div>` : ''}
                     </td>
                     <td class="text-center">
                         ${q.attachment_path ? `
@@ -1587,30 +1640,59 @@ document.addEventListener('DOMContentLoaded', function() {
         if (inp) inp.value = state.pcs_remarks || '';
         if (!el) return;
         const txt = (state.pcs_remarks || '').trim();
-        el.innerHTML = txt ? txt.replaceAll('<', '&lt;').replaceAll('>', '&gt;') : `<span class="opacity-50 italic">No remarks provided during case initiation.</span>`;
+        el.innerHTML = txt ? txt.replaceAll('<', '&lt;').replaceAll('>', '&gt;') : `<span class="opacity-50 italic">No terms & conditions provided during case initiation.</span>`;
+    }
+
+    function resolveAttName(f) {
+        if (f.pat_type && f.pat_type.trim() && f.pat_type.trim().toLowerCase() !== 'attachment') {
+            return f.pat_type.trim();
+        }
+        const fn = (f.pat_filename || '').toLowerCase();
+        if (fn.startsWith('frm-')) return 'Form';
+        if (fn.startsWith('min-')) return 'Minute';
+        if (fn.startsWith('san-')) return 'Sanction';
+        if (fn.startsWith('fs-')) return 'Financial Status';
+        if (fn.startsWith('app-')) return 'Approval';
+        if (fn.startsWith('aip-')) return 'Approval in Principal';
+        if (fn.startsWith('mrr-')) return 'Market Research Report';
+        if (fn.startsWith('wo-')) return 'Work Order';
+        if (fn.startsWith('pcs-')) return 'Form';
+        return f.pat_type || f.pat_filename || 'Attachment';
     }
 
     function renderFiles() {
-        const wrapEl = document.getElementById('pcFilesWrap');
-        if (!wrapEl) return;
+        const wrapEl = document.getElementById('pcCaseAttachmentsList');
+        const countBadge = document.getElementById('pcCaseAttCountBadge');
         const files = state.attachments || [];
+        if (countBadge) countBadge.textContent = files.length;
+        if (!wrapEl) return;
         if (!files.length) {
-            wrapEl.innerHTML = `<div class="text-muted small italic opacity-50">No files attached.</div>`;
+            wrapEl.innerHTML = `<div class="text-center py-2 text-muted" style="font-size: 9.5px;"><i class="fas fa-folder-open text-muted mr-1"></i> No files.</div>`;
             return;
         }
-        wrapEl.innerHTML = files.map((f) => `
-            <div class="d-flex align-items-center p-2 rounded" style="background: #f8fafc; border: 1.5px solid #cbd5e1; min-width: 200px; position: relative;">
-                <i class="far fa-file-pdf text-danger mr-2" style="font-size: 16px;"></i>
-                <div class="flex-grow-1 overflow-hidden mr-2">
-                    <div class="small font-weight-bold text-dark text-nowrap" style="color: #0f172a !important; overflow: hidden; text-overflow: ellipsis; font-size: 11px;">${(f.pat_filename || '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</div>
+        wrapEl.innerHTML = files.map((f, idx) => {
+            const name = resolveAttName(f);
+            return `
+                <div class="d-flex justify-content-between align-items-center py-0.5 ${idx < files.length - 1 ? 'border-bottom' : ''}" style="border-color: #f1f5f9 !important; min-height: 20px;">
+                    <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
+                        <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 13px;">${idx + 1}.</span>
+                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 10px; line-height: 1.1;" title="${name.replaceAll('"', '&quot;')}">
+                            ${name.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center flex-shrink-0" style="gap: 3px;">
+                        <a href="${quoteViewBase}/${f.pat_id}/view" target="_blank" class="text-primary px-0.5 hover-zoom" style="font-size: 10px;" title="View ${name.replaceAll('"', '&quot;')}">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        ${canEdit ? `
+                            <button type="button" class="btn btn-link text-danger p-0 pc-del-attachment-btn ml-1 edit-only" data-pat-id="${f.pat_id}" title="Delete" style="font-size: 9px;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
-                <div class="d-flex gap-1">
-                    <a href="${quoteViewBase}/${f.pat_id}/view" target="_blank" class="btn btn-xs btn-outline-primary" style="padding: 2px 6px; border-radius: 4px;" title="View">
-                        <i class="fas fa-eye" style="font-size: 10px;"></i>
-                    </a>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     let modalVendors = [];
@@ -1755,24 +1837,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sorted.length > 0) {
             const winner = sorted[0];
             totalPrice = parseFloat(winner.qte_price || 0);
-            const tax = parseFloat(winner.qte_tax || winner.qte_midtax || winner.qte_inttax || 0);
-            basePrice = parseFloat(winner.qte_subtotal || winner.qte_intprice || (totalPrice - tax));
-            if (basePrice <= 0 && totalPrice > 0 && tax === 0) {
-                basePrice = totalPrice;
+            sstAmount = parseFloat(winner.qte_inttax || 0);
+            gstAmount = parseFloat(winner.qte_midtax || 0);
+            basePrice = parseFloat(winner.qte_subtotal || winner.qte_intprice || 0);
+            if (basePrice <= 0 && totalPrice > 0) {
+                basePrice = totalPrice - sstAmount - gstAmount;
             }
-            const taxType = (winner.tax_type || winner.qte_taxtype || 'GST').toUpperCase();
-            
-            if (taxType.includes('SST')) {
-                sstAmount = tax;
-                gstAmount = 0;
-            } else {
-                gstAmount = tax;
-                sstAmount = 0;
+            if (totalPrice <= 0) {
+                totalPrice = basePrice + sstAmount + gstAmount;
             }
         } else {
             const items = state.items || [];
             basePrice = items.reduce((acc, it) => acc + (parseFloat(it.pci_qty || 1) * parseFloat(it.pci_price || 0)), 0);
-            totalPrice = (parseFloat(state.pcs_price || 0) > 0) ? parseFloat(state.pcs_price) : basePrice;
+            sstAmount = parseFloat(state.pcs_inttax || 0);
+            gstAmount = parseFloat(state.pcs_midtax || 0);
+            totalPrice = (parseFloat(state.pcs_price || 0) > 0) ? parseFloat(state.pcs_price) : (basePrice + sstAmount + gstAmount);
         }
 
         const fmt2 = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -2682,19 +2761,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('pcFilesForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        if (!ensureEditing()) return;
-        const form = e.target;
-        const fd = new FormData(form);
+    $(document).on('change', '#pcCaseAttachDirectInput', async function() {
+        if (!this.files || !this.files.length) return;
+        const fd = new FormData();
+        fd.append('op', 'add_files');
+        fd.append('_token', @json(csrf_token()));
+        for (let i = 0; i < this.files.length; i++) {
+            fd.append('attachments[]', this.files[i]);
+        }
         try {
             const json = await postForm(fd);
             state = json.data;
             renderAll();
-            toast(json.message || 'Uploaded');
-            form.reset();
+            toast(json.message || 'File(s) uploaded successfully');
         } catch (err) {
-            toast(err.message || 'Error');
+            toast(err.message || 'Error uploading files');
+        }
+        this.value = '';
+    });
+
+    $(document).on('click', '.pc-del-attachment-btn', async function(e) {
+        e.preventDefault();
+        const patId = this.getAttribute('data-pat-id');
+        if (!patId) return;
+        if (!confirm('Are you sure you want to delete this case attachment?')) return;
+        const fd = new FormData();
+        fd.append('op', 'delete_file');
+        fd.append('pat_id', patId);
+        fd.append('_token', @json(csrf_token()));
+        try {
+            const json = await postForm(fd);
+            state = json.data;
+            renderAll();
+            toast(json.message || 'Attachment deleted');
+        } catch (err) {
+            toast(err.message || 'Error deleting attachment');
         }
     });
 

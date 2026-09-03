@@ -62,7 +62,10 @@ class ContractCaseController extends Controller
         ])->findOrFail($id);
 
         $authorityRole = 'DG';
-        return view('md.contract-cases.show', compact('case', 'authorityRole'));
+        $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
+        $canApprove = true;
+
+        return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
     }
 
     public function approve($id, Request $request)

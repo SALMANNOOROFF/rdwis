@@ -263,12 +263,13 @@
                     <h1 class="page-title mb-1">
                         Finance Scrutiny &bull; Case #{{ $case->ctc_id }}
                     </h1>
-                    <div class="d-flex align-items-center gap-2 mt-1">
+                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
                         <span class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 20px; font-size: 11px;">
-                            {{ strtoupper($case->ctc_type) }} CASE
+                            <i class="fas fa-tag mr-1"></i> {{ strtoupper($case->ctc_type) }} CASE
                         </span>
-                        <span class="status-badge-chip ml-2">
-                            <i class="fas fa-coins text-primary"></i> HOLDER: {{ $case->currentSubstatus->display_name ?? $case->ctc_status }}
+                        {{-- Current Holder Stage (css_stage) --}}
+                        <span class="badge badge-info px-3 py-1 font-weight-bold text-white shadow-sm" style="border-radius: 20px; font-size: 11.5px; background: #0284c7;" title="Current Substatus / Workflow Holder Stage">
+                            <i class="fas fa-user-clock mr-1"></i> Current Holder: {{ $case->current_stage ?? $case->currentSubstatus->css_stage ?? 'Finance' }}
                         </span>
                     </div>
                 </div>
@@ -279,26 +280,26 @@
 
             <!-- Workflow Progress Stepper -->
             @php
+                $approvalService = app(\App\Services\ContractCaseApprovalService::class);
+                $workflowSteps = $approvalService->getWorkflowSteps($case);
                 $currStage = $case->current_stage ?? 'Finance';
-                $stageOrder = ['Division', 'HR', 'Finance', 'MD', 'DDG', 'DG', 'Approved', 'Fulfilled'];
-                $stageIndex = array_search($currStage, $stageOrder);
-                if ($stageIndex === false) $stageIndex = 2;
+                
+                $stepIds = array_column($workflowSteps, 'id');
+                $currIndex = array_search($currStage, $stepIds);
+                if ($currIndex === false) $currIndex = 2;
+                $isFulfilled = ($case->ctc_status === 'Fulfilled' || $currStage === 'Fulfilled');
             @endphp
             <div class="pipeline-stepper-card">
                 <div class="stepper-container">
-                    @foreach([
-                        ['id' => 'Division', 'label' => 'Initiated', 'icon' => 'fa-edit'],
-                        ['id' => 'HR', 'label' => 'HR Scrutiny', 'icon' => 'fa-user-check'],
-                        ['id' => 'Finance', 'label' => 'Finance', 'icon' => 'fa-coins'],
-                        ['id' => 'MD', 'label' => 'MD Review', 'icon' => 'fa-file-signature'],
-                        ['id' => 'DDG', 'label' => 'DDG Office', 'icon' => 'fa-stamp'],
-                        ['id' => 'DG', 'label' => 'DG Approval', 'icon' => 'fa-gavel'],
-                        ['id' => 'Approved', 'label' => 'Ready Fulfill', 'icon' => 'fa-check-double'],
-                        ['id' => 'Fulfilled', 'label' => 'Fulfilled', 'icon' => 'fa-award'],
-                    ] as $i => $s)
+                    @foreach($workflowSteps as $i => $s)
                         @php
-                            $isDone = $stageIndex > $i || $case->ctc_status === 'Fulfilled';
-                            $isActive = $currStage === $s['id'] && $case->ctc_status !== 'Fulfilled';
+                            if ($isFulfilled) {
+                                $isDone = true;
+                                $isActive = false;
+                            } else {
+                                $isDone = $currIndex > $i;
+                                $isActive = $currIndex === $i;
+                            }
                         @endphp
                         <div class="step-item {{ $isDone ? 'completed' : '' }} {{ $isActive ? 'active' : '' }}">
                             <div class="step-circle">
@@ -460,11 +461,14 @@
                         <!-- General Status Card -->
                         <div class="clean-card">
                             <div class="clean-card-header">
-                                <span><i class="fas fa-info-circle mr-2 text-primary"></i> Current Status</span>
+                                <span><i class="fas fa-info-circle mr-2 text-primary"></i> Current Status & Holder</span>
                             </div>
                             <div class="p-4 text-center">
-                                <h6 class="font-weight-bold text-dark mb-1">{{ $case->currentSubstatus->display_name ?? $case->ctc_status }}</h6>
-                                <p class="text-muted small mb-0 font-weight-500">Holder Stage: <strong>{{ $case->current_stage }}</strong></p>
+                                <div class="mb-2">
+                                    <span class="badge badge-info px-3 py-1.5 font-weight-bold text-white" style="font-size: 13px; border-radius: 6px; background: #0284c7;">
+                                        <i class="fas fa-user-clock mr-1"></i> Current Holder: {{ $case->current_stage ?? $case->currentSubstatus->css_stage ?? 'In Review' }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     @endif

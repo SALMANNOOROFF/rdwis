@@ -41,7 +41,7 @@ class Project extends Model
     
     public function milestones()
     {
-        return $this->hasMany(Milestone::class, 'msn_xprj_id', 'prj_id');
+        return $this->hasMany(Milestone::class, 'msn_xprj_id', 'prj_id')->orderBy('msn_id', 'asc');
     }
 
     public function history()

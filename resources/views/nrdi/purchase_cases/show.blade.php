@@ -526,19 +526,19 @@
                 {{-- Top Summary bar --}}
                 <div class="row no-gutters border-bottom border-dark" style="background: var(--rd-neutral-200);">
                     <div class="col-md-3 border-right border-dark p-3">
-                        <div class="small text-muted rajdhani">ALLOCATION</div>
+                        <div class="small text-muted rajdhani font-weight-bold">ALLOCATION</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->allocation ?? 0) }}</div>
                     </div>
                     <div class="col-md-3 border-right border-dark p-3">
-                        <div class="small text-muted rajdhani">MTSS SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">MTSS SHARE</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->mtss_share ?? 0) }}</div>
                     </div>
                     <div class="col-md-3 border-right border-dark p-3">
-                        <div class="small text-muted rajdhani">RDW SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">RDW SHARE</div>
                         <div class="h5 mb-0 text-info font-weight-bold rajdhani">{{ number_format($head->rdw_share ?? 0) }}</div>
                     </div>
                     <div class="col-md-3 p-3">
-                        <div class="small text-muted rajdhani">CSRF SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">CSRF SHARE</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->csrf_share ?? 0) }}</div>
                     </div>
                 </div>
@@ -562,6 +562,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <tr style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255,255,255,0.08);">
+                                        <td class="pl-3 font-weight-bold text-white"><i class="fas fa-coins text-warning mr-1"></i> Allocated</td>
+                                        <td class="text-right font-weight-bold" style="color: #4da3ff;">{{ number_format($head->pcc_share ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold" style="color: #ffb84d;">{{ number_format($head->csrf_share ?? 0) }}</td>
+                                        <td class="text-right pr-3 font-weight-bold" style="color: #4dff88;">{{ number_format($head->allocation ?? 0) }}</td>
+                                    </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">Received</td>
                                         <td class="text-right" style="color: #4da3ff;">{{ number_format($head->pcc_received ?? 0) }}</td>

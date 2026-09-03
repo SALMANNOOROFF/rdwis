@@ -283,12 +283,13 @@
                     <h1 class="page-title mb-1">
                         HR Contract Scrutiny &bull; Case #{{ $case->ctc_id }}
                     </h1>
-                    <div class="d-flex align-items-center gap-2 mt-1">
+                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
                         <span class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 20px; font-size: 11px;">
-                            {{ strtoupper($case->ctc_type) }} CASE
+                            <i class="fas fa-tag mr-1"></i> {{ strtoupper($case->ctc_type) }} CASE
                         </span>
-                        <span class="status-badge-chip ml-2">
-                            <i class="fas fa-user-shield text-primary"></i> HOLDER: {{ $case->currentSubstatus->display_name ?? $case->ctc_status }}
+                        {{-- Current Holder Stage (css_stage) --}}
+                        <span class="badge badge-info px-3 py-1 font-weight-bold text-white shadow-sm" style="border-radius: 20px; font-size: 11.5px; background: #0284c7;" title="Current Substatus / Workflow Holder Stage">
+                            <i class="fas fa-user-clock mr-1"></i> Current Holder: {{ $case->current_stage ?? $case->currentSubstatus->css_stage ?? 'HR' }}
                         </span>
                     </div>
                 </div>
@@ -299,26 +300,26 @@
 
             <!-- Workflow Progress Stepper -->
             @php
+                $approvalService = app(\App\Services\ContractCaseApprovalService::class);
+                $workflowSteps = $approvalService->getWorkflowSteps($case);
                 $currStage = $case->current_stage ?? 'HR';
-                $stageOrder = ['Division', 'HR', 'Finance', 'MD', 'DDG', 'DG', 'Approved', 'Fulfilled'];
-                $stageIndex = array_search($currStage, $stageOrder);
-                if ($stageIndex === false) $stageIndex = 1;
+                
+                $stepIds = array_column($workflowSteps, 'id');
+                $currIndex = array_search($currStage, $stepIds);
+                if ($currIndex === false) $currIndex = 1;
+                $isFulfilled = ($case->ctc_status === 'Fulfilled' || $currStage === 'Fulfilled');
             @endphp
             <div class="pipeline-stepper-card">
                 <div class="stepper-container">
-                    @foreach([
-                        ['id' => 'Division', 'label' => 'Initiated', 'icon' => 'fa-edit'],
-                        ['id' => 'HR', 'label' => 'HR Scrutiny', 'icon' => 'fa-user-check'],
-                        ['id' => 'Finance', 'label' => 'Finance', 'icon' => 'fa-coins'],
-                        ['id' => 'MD', 'label' => 'MD Review', 'icon' => 'fa-file-signature'],
-                        ['id' => 'DDG', 'label' => 'DDG Office', 'icon' => 'fa-stamp'],
-                        ['id' => 'DG', 'label' => 'DG Approval', 'icon' => 'fa-gavel'],
-                        ['id' => 'Approved', 'label' => 'Ready Fulfill', 'icon' => 'fa-check-double'],
-                        ['id' => 'Fulfilled', 'label' => 'Fulfilled', 'icon' => 'fa-award'],
-                    ] as $i => $s)
+                    @foreach($workflowSteps as $i => $s)
                         @php
-                            $isDone = $stageIndex > $i || $case->ctc_status === 'Fulfilled';
-                            $isActive = $currStage === $s['id'] && $case->ctc_status !== 'Fulfilled';
+                            if ($isFulfilled) {
+                                $isDone = true;
+                                $isActive = false;
+                            } else {
+                                $isDone = $currIndex > $i;
+                                $isActive = $currIndex === $i;
+                            }
                         @endphp
                         <div class="step-item {{ $isDone ? 'completed' : '' }} {{ $isActive ? 'active' : '' }}">
                             <div class="step-circle">
@@ -354,7 +355,7 @@
                                 @endif
                             </div>
                             <div class="data-grid-cell data-grid-label">Division</div>
-                            <div class="data-grid-cell data-grid-value">{{ $case->unit->unt_name ?? 'Division' }}</div>
+                            <div class="data-grid-cell data-grid-value font-weight-bold text-dark">{{ $case->division_name }}</div>
                         </div>
 
                         <div class="data-grid-table">
@@ -477,33 +478,68 @@
                             </div>
                         </div>
                     @elseif($case->current_stage === 'Approved')
-                        <!-- HR Fulfillment Panel -->
-                        <div class="clean-card" style="border: 2px solid #10B981; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);">
-                            <div class="clean-card-header" style="background: #ECFDF5; color: #065F46;">
-                                <span><i class="fas fa-award mr-2"></i> Contract Issuance & Fulfillment</span>
-                            </div>
-                            <div class="p-4">
-                                <p class="text-muted small mb-3 font-weight-500">
-                                    Executive approval is complete. Issue official contract and register into active employee roster.
-                                </p>
-                                <div class="form-group mb-3">
-                                    <label class="rd-form-label font-weight-bold">Formal Signing Date <span class="text-danger">*</span></label>
-                                    <input type="date" id="signDate" class="form-control" style="border-radius: 8px;" value="{{ date('Y-m-d') }}">
+                        @php
+                            $isHg = strtoupper(trim((string)$case->ctc_type)) === 'HG';
+                            $hasEmployee = !empty($case->ctc_emp_id);
+                        @endphp
+
+                        @if($isHg && !$hasEmployee)
+                            <!-- HR Add Employee Required Panel -->
+                            <div class="clean-card" style="border: 2px solid var(--rd-primary-600); box-shadow: 0 4px 20px rgba(95, 120, 88, 0.18);">
+                                <div class="clean-card-header" style="background: var(--rd-neutral-50); color: var(--rd-primary-700);">
+                                    <span><i class="fas fa-user-plus mr-2 text-primary"></i> Step 1: Add Employee Record</span>
                                 </div>
-                                <button type="button" class="btn-action-fulfill" id="btn-fulfill-contract">
-                                    <i class="fas fa-check-double"></i> Fulfill & Issue Contract
-                                </button>
+                                <div class="p-4">
+                                    <div class="alert alert-info py-2 px-3 mb-3" style="font-size: 0.85rem; border-radius: 8px; background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;">
+                                        <i class="fas fa-info-circle mr-1"></i> <strong>Action Required:</strong> This is a new Hiring case. The employee record must be created and linked to the case before official contract fulfillment can occur.
+                                    </div>
+                                    <p class="text-muted small mb-3 font-weight-500">
+                                        Candidate: <strong>{{ $case->ctc_empnamecomp }}</strong><br>
+                                        Position: <strong>{{ $case->ctc_approvedjobtitle ?: $case->ctc_newjobtitle }}</strong> ({{ $case->ctc_approvedgrade ?: $case->ctc_newgrade }})
+                                    </p>
+                                    <button type="button" class="btn btn-primary btn-block font-weight-bold py-2 shadow-sm" id="btn-open-add-emp-modal" style="background: var(--rd-primary-600); border-color: var(--rd-primary-600); border-radius: 8px; font-size: 0.95rem;">
+                                        <i class="fas fa-id-card mr-1"></i> Add Employee to System
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <!-- HR Fulfillment Panel -->
+                            <div class="clean-card" style="border: 2px solid #10B981; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);">
+                                <div class="clean-card-header" style="background: #ECFDF5; color: #065F46;">
+                                    <span><i class="fas fa-award mr-2"></i> Contract Issuance & Fulfillment</span>
+                                </div>
+                                <div class="p-4">
+                                    @if($hasEmployee)
+                                        <div class="p-3 mb-3 rounded border" style="background: #F0FDF4; border-color: #BBF7D0 !important; font-size: 0.85rem;">
+                                            <span class="text-success font-weight-bold d-block mb-1"><i class="fas fa-user-check mr-1"></i> Linked Employee:</span>
+                                            <span class="font-weight-600 text-dark">{{ $case->ctc_empnamecomp }}</span> — <code class="font-weight-bold text-primary">{{ $case->ctc_emp_id }}</code>
+                                        </div>
+                                    @endif
+                                    <p class="text-muted small mb-3 font-weight-500">
+                                        Executive approval is complete. Issue official contract and register into active employee roster.
+                                    </p>
+                                    <div class="form-group mb-3">
+                                        <label class="rd-form-label font-weight-bold">Formal Signing Date <span class="text-danger">*</span></label>
+                                        <input type="date" id="signDate" class="form-control" style="border-radius: 8px;" value="{{ date('Y-m-d') }}">
+                                    </div>
+                                    <button type="button" class="btn-action-fulfill" id="btn-fulfill-contract">
+                                        <i class="fas fa-check-double"></i> Fulfill & Issue Contract
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
                     @else
                         <!-- General Status Card -->
                         <div class="clean-card">
                             <div class="clean-card-header">
-                                <span><i class="fas fa-info-circle mr-2 text-primary"></i> Current Status</span>
+                                <span><i class="fas fa-info-circle mr-2 text-primary"></i> Current Status & Holder</span>
                             </div>
                             <div class="p-4 text-center">
-                                <h6 class="font-weight-bold text-dark mb-1">{{ $case->currentSubstatus->display_name ?? $case->ctc_status }}</h6>
-                                <p class="text-muted small mb-0 font-weight-500">Holder Stage: <strong>{{ $case->current_stage }}</strong></p>
+                                <div class="mb-2">
+                                    <span class="badge badge-info px-3 py-1.5 font-weight-bold text-white" style="font-size: 13px; border-radius: 6px; background: #0284c7;">
+                                        <i class="fas fa-user-clock mr-1"></i> Current Holder: {{ $case->current_stage ?? $case->currentSubstatus->css_stage ?? 'In Review' }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -534,11 +570,193 @@
     </section>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- ADD EMPLOYEE MODAL (Hg Hiring Flow)                                   -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: var(--rd-neutral-50); border-bottom: 1px solid var(--rd-neutral-200); border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title font-weight-bold text-dark" id="addEmployeeModalLabel">
+                    <i class="fas fa-user-plus mr-2 text-primary"></i> Add Employee Record (Hg Case #{{ $case->ctc_id }})
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formAddEmployee">
+                @csrf
+                <div class="modal-body p-4">
+                    <!-- Live Employee ID Preview Card -->
+                    <div class="p-3 mb-4 rounded border text-center" style="background: #F8FAFC; border-color: #E2E8F0 !important;">
+                        <span class="text-muted small text-uppercase font-weight-bold d-block mb-1">Generated Employee ID</span>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span class="badge badge-dark px-3 py-2 font-weight-bold" style="font-size: 1.25rem; letter-spacing: 1px; font-family: monospace;" id="previewEmpIdBadge">--/--/--/----</span>
+                        </div>
+                        <small class="text-muted d-block mt-1">Format: <code>{Dept}-{JoinYear}-{JoinMonth}-{CnicSuffix}</code></small>
+                    </div>
+
+                    <!-- Department Fallback Warning -->
+                    <div id="deptFallbackWarning" class="alert alert-warning py-2 px-3 mb-3 small d-none" style="border-radius: 8px; background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E;">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> <strong>Notice:</strong> Department number not yet confirmed for this department — using unit ID as fallback. Please verify the generated Employee ID before proceeding.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="rd-form-label font-weight-bold">Employee Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="emp_name" id="modalEmpName" class="form-control" style="border-radius: 8px;" value="{{ $case->ctc_empnamecomp }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="rd-form-label font-weight-bold">Department / Unit <span class="text-danger">*</span></label>
+                            <select name="emp_unt_id" id="modalEmpUntId" class="form-control" style="border-radius: 8px;" required>
+                                @php
+                                    $targetUnitId = $case->ctc_approvedunt_id ?: ($case->ctc_newunt_id ?: $case->ctc_unt_id);
+                                @endphp
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->unt_id }}" {{ $targetUnitId == $dept->unt_id ? 'selected' : '' }}>
+                                        {{ $dept->unt_name }} ({{ $dept->unt_namesh }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="rd-form-label font-weight-bold">CNIC (with dashes) <span class="text-danger">*</span></label>
+                            <input type="text" name="emp_cnic" id="modalEmpCnic" class="form-control" style="border-radius: 8px; font-family: monospace;" placeholder="42101-1234567-1" value="{{ $case->ctc_cnic }}" required>
+                            <small class="text-muted">Standard format: <code>XXXXX-XXXXXXX-X</code></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="rd-form-label font-weight-bold">Joining Date <span class="text-danger">*</span></label>
+                            <input type="date" name="emp_joindt" id="modalEmpJoinDt" class="form-control" style="border-radius: 8px;" value="{{ $case->ctc_approvedstartdt ?: $case->ctc_newstartdt }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="rd-form-label font-weight-bold">Job Title</label>
+                            <input type="text" name="emp_title" id="modalEmpTitle" class="form-control" style="border-radius: 8px;" value="{{ $case->ctc_approvedjobtitle ?: $case->ctc_newjobtitle }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="rd-form-label font-weight-bold">Grade / Rank</label>
+                            <input type="text" name="emp_rank" id="modalEmpRank" class="form-control" style="border-radius: 8px;" value="{{ $case->ctc_approvedgrade ?: $case->ctc_newgrade }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: var(--rd-neutral-50); border-top: 1px solid var(--rd-neutral-200); border-radius: 0 0 12px 12px;">
+                    <button type="button" class="btn btn-secondary px-4 font-weight-bold" data-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 font-weight-bold" id="btnSaveEmployee" style="background: var(--rd-primary-600); border-color: var(--rd-primary-600); border-radius: 8px;">
+                        <i class="fas fa-save mr-1"></i> Save & Link Employee
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
 $(document).ready(function() {
+    const deptMap = @json($deptMap ?? []);
+
+    // ── Open Add Employee Modal ────────────────────────────────
+    $('#btn-open-add-emp-modal').click(function() {
+        updateEmpIdPreview();
+        $('#addEmployeeModal').modal('show');
+    });
+
+    // ── Real-time Employee ID Live Preview ────────────────────
+    function updateEmpIdPreview() {
+        const unitId = parseInt($('#modalEmpUntId').val()) || 0;
+        const joinDt = $('#modalEmpJoinDt').val() || '';
+        const cnic = ($('#modalEmpCnic').val() || '').trim();
+
+        // 1. Dept number
+        let deptNum = '00';
+        let isFallback = false;
+        if (deptMap[unitId]) {
+            deptNum = String(deptMap[unitId]).padStart(2, '0');
+            $('#deptFallbackWarning').addClass('d-none');
+        } else if (unitId > 0) {
+            deptNum = String(unitId).padStart(2, '0').substring(0, 2);
+            isFallback = true;
+            $('#deptFallbackWarning').removeClass('d-none');
+        } else {
+            $('#deptFallbackWarning').addClass('d-none');
+        }
+
+        // 2. Year & Month
+        let yy = 'YY';
+        let mm = 'MM';
+        if (joinDt && joinDt.length >= 7) {
+            yy = joinDt.substring(2, 4);
+            mm = joinDt.substring(5, 7);
+        }
+
+        // 3. CNIC Suffix: Mid(cnic, 11, 3) & Right(cnic, 1)
+        let suffix = 'XXXX';
+        if (/^\d{5}-\d{7}-\d{1}$/.test(cnic)) {
+            const mid = cnic.substring(10, 13);
+            const last = cnic.slice(-1);
+            suffix = mid + last;
+        } else {
+            const digits = cnic.replace(/\D/g, '');
+            if (digits.length === 13) {
+                const mid = digits.substring(9, 12);
+                const last = digits.slice(-1);
+                suffix = mid + last;
+            }
+        }
+
+        const previewId = `${deptNum}-${yy}-${mm}-${suffix}`;
+        $('#previewEmpIdBadge').text(previewId);
+    }
+
+    $('#modalEmpUntId, #modalEmpJoinDt, #modalEmpCnic').on('input change', updateEmpIdPreview);
+
+    // ── Save Employee via AJAX ────────────────────────────────
+    $('#formAddEmployee').submit(function(e) {
+        e.preventDefault();
+
+        const cnic = $('#modalEmpCnic').val().trim();
+        const joinDt = $('#modalEmpJoinDt').val();
+        const name = $('#modalEmpName').val().trim();
+        const unitId = $('#modalEmpUntId').val();
+
+        if (!cnic || !joinDt || !name || !unitId) {
+            Swal.fire('Required Fields', 'Please fill in all mandatory fields (Name, Department, CNIC, Joining Date).', 'warning');
+            return;
+        }
+
+        const btn = $('#btnSaveEmployee');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Saving...');
+
+        $.ajax({
+            url: "{{ route('hr.contract-cases.add-employee', $case->ctc_id) }}",
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(resp) {
+                $('#addEmployeeModal').modal('hide');
+                Swal.fire({
+                    title: 'Employee Registered',
+                    text: resp.message,
+                    icon: 'success',
+                    confirmButtonColor: '#5F7858',
+                }).then(() => {
+                    window.location.reload();
+                });
+            },
+            error: function(err) {
+                btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Save & Link Employee');
+                const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Failed to create employee record.';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    });
+
     // ── Forward to Finance ────────────────────────────────────
     $('#btn-forward-fin').click(function() {
         const rem = $('#hrRemarks').val();

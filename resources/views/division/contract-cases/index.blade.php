@@ -213,9 +213,11 @@
                                                         <span class="case-salary-text">PKR {{ number_format((float) ($p->ctc_newsalary ?? 0)) }}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="status-badge-chip bg-warning text-dark font-weight-bold">
-                                                            <i class="fas fa-edit"></i> {{ $p->ctc_status }}
-                                                        </span>
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span class="badge badge-info text-white font-weight-bold px-2 py-1" style="font-size: 11px; border-radius: 4px; background: #0284c7;">
+                                                                <i class="fas fa-user-clock mr-1"></i> Holder: {{ $p->current_stage ?? $p->currentSubstatus->css_stage ?? 'Division' }}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right pr-4">
                                                         @if($p->ctc_status === 'Under Revision' || $p->ctc_status === 'Draft')
@@ -252,7 +254,7 @@
                                                     <th class="pl-4">Reference</th>
                                                     <th>Candidate / Designation</th>
                                                     <th class="text-right">Salary</th>
-                                                    <th class="text-center">Current Reviewer</th>
+                                                    <th class="text-center">Current Status & Holder</th>
                                                     <th class="text-right pr-4">Actions</th>
                                                 </tr>
                                             </thead>
@@ -275,9 +277,11 @@
                                                         <span class="case-salary-text">PKR {{ number_format((float) ($p->ctc_newsalary ?? 0)) }}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="status-badge-chip" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">
-                                                            <i class="fas fa-hourglass-half"></i> {{ $p->ctc_status }}
-                                                        </span>
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span class="badge badge-info text-white font-weight-bold px-2 py-1" style="font-size: 11px; border-radius: 4px; background: #0284c7;">
+                                                                <i class="fas fa-user-clock mr-1"></i> Holder: {{ $p->current_stage ?? $p->currentSubstatus->css_stage ?? 'In Review' }}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right pr-4">
                                                         <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
@@ -308,7 +312,7 @@
                                                     <th class="pl-4">Reference</th>
                                                     <th>Candidate / Designation</th>
                                                     <th class="text-right">Salary</th>
-                                                    <th class="text-center">Outcome</th>
+                                                    <th class="text-center">Final Outcome & Holder</th>
                                                     <th class="text-right pr-4">Archive</th>
                                                 </tr>
                                             </thead>
@@ -331,9 +335,11 @@
                                                         <span class="text-muted font-weight-bold">PKR {{ number_format((float) ($p->ctc_newsalary ?? 0)) }}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="status-badge-chip {{ $isApproved ? 'bg-success text-white' : 'bg-danger text-white' }}">
-                                                            <i class="fas {{ $isApproved ? 'fa-check-double' : 'fa-times-circle' }}"></i> {{ strtoupper($s) }}
-                                                        </span>
+                                                        <div class="d-flex flex-column align-items-center gap-1">
+                                                            <span class="badge {{ $isApproved ? 'badge-success' : 'badge-danger' }} text-white font-weight-bold px-2 py-1" style="font-size: 11px; border-radius: 4px;">
+                                                                <i class="fas {{ $isApproved ? 'fa-check-double' : 'fa-times-circle' }} mr-1"></i> Stage: {{ $p->current_stage ?? $p->currentSubstatus->css_stage ?? $p->ctc_status }}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right pr-4">
                                                         <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="btn btn-link text-muted font-weight-bold" style="font-size: 11px;">

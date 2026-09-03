@@ -17,23 +17,43 @@
             margin: 5px 0;
         }
         /* --- INFO PANEL --- */
-        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); display: flex; flex-wrap: wrap; overflow: visible; }
-        .info-left-content { flex: 1; padding: 15px; display: flex; align-items: center; min-width: 300px; }
-        .info-right-team { width: 350px; background: var(--rd-surface); border-left: 1px solid var(--rd-border); padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; }
-        @media (max-width: 991.98px) {
-            .info-panel { flex-direction: column; }
-            .info-right-team { width: 100%; border-left: none; border-top: 1px solid var(--rd-border); padding: 20px 15px; }
-            .info-left-content { border-right: none !important; }
+        .info-panel { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); overflow: visible; }
+        .info-label { font-size: 0.82rem; text-transform: uppercase; color: var(--rd-text3); font-weight: 800; letter-spacing: 0.6px; display: block; margin-bottom: 6px; }
+        .info-value { font-size: 0.95rem; color: var(--rd-text1); font-weight: 600; line-height: 1.4; }
+        .cost-tag { background: var(--rd-success-soft); color: var(--rd-success); padding: 5px 12px; border-radius: 4px; font-weight: 700; border: 1px solid var(--rd-success); display: inline-block; }
+        
+        /* --- KEY DATES GRID (TOP PANEL) --- */
+        .key-dates-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 8px; }
+        .key-dates-grid-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 8px; }
+        .kd-item { background: var(--rd-surface2, #f8fafc); border: 1px solid var(--rd-border, #e2e8f0); border-left: 3.5px solid var(--rd-border, #cbd5e1); border-radius: 7px; padding: 6px 10px; transition: all 0.2s; }
+        .kd-item.done { border-left-color: var(--rd-success, #28a745); }
+        .kd-item.active { border-left-color: var(--rd-accent, #5F7858); }
+        .kd-item.text-danger { border-left-color: var(--rd-danger, #dc3545); }
+        .kd-item.text-success { border-left-color: var(--rd-success, #28a745); }
+        .kd-label { font-size: 0.70rem; font-weight: 700; text-transform: uppercase; color: var(--rd-text3, #64748b); display: block; line-height: 1.1; margin-bottom: 3px; }
+        .kd-val { font-size: 0.90rem; font-weight: 800; color: var(--rd-text1, #1e293b); display: block; line-height: 1.1; white-space: nowrap; }
+        @media (min-width: 992px) {
+            .border-right-lg { border-right: 1px solid var(--rd-border, #e2e8f0) !important; }
+            .border-left-lg { border-left: 1px solid var(--rd-border, #e2e8f0) !important; }
         }
-        .info-label { font-size: 0.7rem; text-transform: uppercase; color: var(--rd-text3); font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-        .info-value { font-size: 0.9rem; color: var(--rd-text1); font-weight: 600; line-height: 1.4; }
-        .cost-tag { background: var(--rd-success-soft); color: var(--rd-success); padding: 4px 10px; border-radius: 4px; font-weight: 700; border: 1px solid var(--rd-success); display: inline-block; }
+
+        /* --- RADIAL PROGRESS RINGS (FINANCE KNOBS) --- */
+        .radial-ring-wrap { position: relative; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; }
+        .ring-pct-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.80rem; font-weight: 800; line-height: 1; pointer-events: none; }
+        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .finance-box {
+            width: 78px; height: 96px; background: var(--rd-surface2, #f8fafc); border: 1px solid var(--rd-border, #e2e8f0); border-radius: 8px; padding: 6px 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .finance-title { margin-top: 4px; font-size: 0.76rem; font-weight: 800; color: var(--rd-text3, #64748b); text-transform: uppercase; letter-spacing: 0.5px; }
+
         /* --- TEAM SECTION --- */
-        .team-section-container { display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; }
-        .team-avatar-wrapper { width: 42px; height: 42px; margin-left: -10px; position: relative; z-index: 10; cursor: pointer; transition: transform 0.2s; }
-        .team-avatar-wrapper:hover { transform: scale(1.2); z-index: 100; margin: 0 5px; }
-        .team-avatar-wrapper img { width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--rd-surface); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); object-fit: cover; background: var(--rd-surface); }
-        .more-staff-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--rd-surface); color: var(--rd-text2); border: 2px dashed var(--rd-border); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-left: 5px; z-index: 0; }
+        .team-section-container { display: flex; align-items: center; justify-content: flex-start; }
+        .team-avatar-wrapper { width: 38px; height: 38px; margin-right: -6px; position: relative; z-index: 10; cursor: pointer; transition: transform 0.2s; }
+        .team-avatar-wrapper:hover { transform: scale(1.2); z-index: 100; margin: 0 4px; }
+        .team-avatar-wrapper img { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--rd-surface); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); object-fit: cover; background: var(--rd-surface); }
+        .more-staff-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--rd-surface); color: var(--rd-text2); border: 2px dashed var(--rd-border); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; margin-left: 8px; z-index: 0; }
         
         /* --- DATES & DOCS --- */
         .date-grid-item { position: relative; padding-left: 10px; margin-bottom: 14px; border-left: 2px solid var(--rd-border); }
@@ -131,20 +151,19 @@
         .status-bubble.ontrack { background: var(--rd-success); box-shadow: 0 0 10px rgba(40,167,69,.3); }
 
         /* --- MILESTONE TABLE --- */
-        .milestone-container { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 8px; overflow: hidden; }
-        .milestone-scroll-box { max-height: 450px; overflow-y: auto; overflow-x: auto; }
-        .table-custom thead th { background: var(--rd-surface2); color: var(--rd-text3); text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid var(--rd-border); padding: 12px 15px; position: sticky; top: 0; z-index: 5; }
-        .table-custom tbody td { padding: 10px 15px; vertical-align: middle; color: var(--rd-text2); font-size: 0.85rem; border-bottom: 1px solid var(--rd-border); }
+        .milestone-container { background: var(--rd-surface); border: 1px solid var(--rd-border); border-radius: 10px; overflow: hidden; }
+        .milestone-scroll-box { overflow-x: auto; }
+        .table-custom thead th { background: var(--rd-surface2); color: var(--rd-text3); text-transform: uppercase; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.5px; border-bottom: 2px solid var(--rd-border); padding: 13px 18px; position: sticky; top: 0; z-index: 5; }
+        .table-custom tbody td { padding: 13px 18px; vertical-align: middle; color: var(--rd-text2); font-size: 0.88rem; border-bottom: 1px solid var(--rd-border); }
 
-        /* --- FINANCE KNobs --- */
-        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+        /* --- FINANCE KNOBS --- */
+        .finance-bars-wrap { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .finance-box {
-            width: 90px; height: 110px; background: var(--rd-surface); border-radius: 10px; padding: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+            width: 68px; height: 84px; background: var(--rd-surface2, #f8fafc); border: 1px solid var(--rd-border, #e2e8f0); border-radius: 8px; padding: 5px 2px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column;
             align-items: center; justify-content: center;
         }
-        .finance-box canvas { width: 65px; height: 65px; }
-        .finance-title { margin-top: 5px; font-size: 9px; font-weight: 800; color: var(--rd-text3); text-transform: uppercase; letter-spacing: 0.5px; }
+        .finance-title { margin-top: 3px; font-size: 8px; font-weight: 800; color: var(--rd-text3, #64748b); text-transform: uppercase; letter-spacing: 0.5px; }
 
         .command-view a[href*="attachment/delete"] { display: none !important; }
         .command-view form[action*="upload-single"],
@@ -165,11 +184,14 @@
         $edc = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : null;
         $edcClass = $edc && $today->gt($edc) ? 'text-danger' : 'text-success';
 
-        // Milestones
-        $milestones = $project->milestones->sortBy('msn_targetdt')->values();
-        $nextMilestone = $milestones->firstWhere('msn_status', '!=', 'Completed');
+        // Milestones sorted serial-number wise (by msn_id or msn_idd)
+        $milestones = $project->milestones->sortBy(function($m) {
+            return (int) ($m->msn_id ?: $m->msn_idd ?: 0);
+        })->values();
+
         $totalMilestones = $milestones->count();
-        $completedMilestones = $milestones->where('msn_status', 'Completed')->count();
+        $completedMilestones = $milestones->filter(fn($m) => strtolower(trim($m->msn_status ?? '')) === 'completed')->count();
+        $nextMilestone = $milestones->first(fn($m) => strtolower(trim($m->msn_status ?? '')) !== 'completed');
 
         // Next milestone status
         $isOverdue = false;
@@ -191,8 +213,8 @@
         // Project Date Boundaries
         $firstMs  = $milestones->first();
         $lastMs   = $milestones->last();
-        $prjStart = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : ($firstMs ? \Carbon\Carbon::parse($firstMs->msn_targetdt) : $today);
-        $prjEnd   = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : ($lastMs ? \Carbon\Carbon::parse($lastMs->msn_targetdt) : $today);
+        $prjStart = $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt) : ($firstMs && $firstMs->msn_targetdt ? \Carbon\Carbon::parse($firstMs->msn_targetdt) : $today);
+        $prjEnd   = $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt) : ($lastMs && $lastMs->msn_targetdt ? \Carbon\Carbon::parse($lastMs->msn_targetdt) : $today);
         if ($prjEnd->lt($prjStart)) $prjEnd = $prjStart->copy()->addDay();
 
         // If the project has overrun (today, or an achieved milestone date, falls after
@@ -213,17 +235,15 @@
         $overallTimePercent = round(($daysPassedTotal / $totalDaysSpan) * 100, 1);
         $overallTimePercent = max(0, min(100, $overallTimePercent));
 
-        // Progress calculation based on latest completed milestone
-        $latestCompletedMs = $milestones->where('msn_status', 'Completed')->last();
+        // Progress calculation based on milestone completion
         $overallPercent = 0;
-        if ($completedMilestones === $totalMilestones && $totalMilestones > 0) {
-            $overallPercent = 100;
-        } elseif ($latestCompletedMs) {
-            $latestTargetDate = \Carbon\Carbon::parse($latestCompletedMs->msn_targetdt);
-            $overallPercent = ($prjStart->diffInDays($latestTargetDate, false) / $totalDaysSpan) * 100;
-            $overallPercent = max(0, min(100, $overallPercent));
+        if ($totalMilestones > 0) {
+            if ($completedMilestones === $totalMilestones) {
+                $overallPercent = 100;
+            } else {
+                $overallPercent = round(($completedMilestones / $totalMilestones) * 100, 1);
+            }
         }
-        $overallPercent = round($overallPercent, 1);
 
         // $team is passed from the controller
         $displayLimit = 6;
@@ -299,95 +319,204 @@
 
             <div class="card-body bg-light-blue">
 
-            <!-- INFO PANEL (Sponsor + Budget + Team) -->
-<div class="info-panel">
-    <div class="info-left-content">
-        <div class="row w-100 m-0 align-items-center">
-            <div class="col-md-4 pl-0 border-right">
-                <div class="mb-4">
-                    <span class="badge badge-light border px-3 py-2 rounded-pill text-uppercase shadow-sm">
-                        <i class="fas fa-handshake text-primary mr-1"></i> {{ $project->prj_sponsor ?? 'N/A' }}
-                    </span>
-                </div>
-                <div>
-                    <h6 class="text-dark font-weight-bold mb-1" style="font-size:0.95rem;">Scope of Work</h6>
-                    <p class="text-muted m-0 mb-2" style="font-size:0.85rem; line-height:1.45;">
-                        {{ Str::limit($project->prj_scope ?? 'No scope defined.', 110) }}
-                    </p>
-                    @if($head)
-                        <button type="button" class="btn btn-xs btn-outline-info rajdhani font-weight-bold" data-toggle="modal" data-target="#financialIntelligenceModal">
-                            <i class="fas fa-chart-line mr-1"></i> DETAILED FINANCIAL VIEW
-                        </button>
-                    @endif
-                </div>
-            </div>
-
-            <div class="col-md-8 px-4">
-                <div class="row align-items-center">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <span class="d-block text-muted text-uppercase small fw-bold">Total Budget</span>
-                            <span class="d-block text-dark fw-bold" style="font-size: 1.05rem;">
-                                Rs. {{ number_format($project->prj_propcost / 1_000_000, 2) }} M
+            <!-- INFO PANEL (Sponsor + Key Dates + Budget + Knobs + Team) -->
+            <div class="info-panel p-3.5" style="padding: 16px 20px;">
+                <div class="d-flex flex-wrap align-items-center justify-content-between" style="gap: 20px;">
+                    
+                    {{-- 1. SPONSOR & SCOPE (Left Column) --}}
+                    <div class="info-sec info-sec-scope" style="flex: 1 1 210px; max-width: 260px;">
+                        <div class="mb-2">
+                            <span class="badge badge-light border px-3 py-1.5 rounded-pill text-uppercase shadow-sm font-weight-bold" style="font-size:0.82rem;">
+                                <i class="fas fa-handshake text-primary mr-1"></i> {{ $project->prj_sponsor ?? 'N/A' }}
                             </span>
                         </div>
                         <div>
-                            <span class="d-block text-muted text-uppercase small fw-bold">Total Spent</span>
-                            <span class="d-block text-danger fw-bold" style="font-size: 1.05rem;">
-                                Rs. {{ number_format(($totalSpent ?? 0) / 1_000_000, 2) }} M
+                            <h6 class="text-dark font-weight-bold mb-1" style="font-size:0.95rem;">Scope of Work</h6>
+                            <p class="text-muted m-0 mb-2" style="font-size:0.86rem; line-height:1.4;">
+                                {{ Str::limit($project->prj_scope ?? 'No scope defined.', 90) }}
+                            </p>
+                            @if($head)
+                                <a href="{{ route('projects.financial_view', $project->prj_id) }}" class="btn btn-xs btn-outline-info rajdhani font-weight-bold" style="font-size:0.78rem; padding: 3px 8px;">
+                                    <i class="fas fa-chart-line mr-1"></i> FINANCIAL VIEW
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- 2. KEY DATES (2 Columns Grid) --}}
+                    <div class="info-sec info-sec-dates pl-lg-3 border-left-lg" style="flex: 1 1 240px; max-width: 300px;">
+                        <span class="info-label text-primary font-weight-bold mb-2" style="font-size:0.82rem; letter-spacing:0.5px;">
+                            <i class="fas fa-calendar-alt mr-1"></i> KEY DATES
+                        </span>
+                        <div class="key-dates-grid-2col">
+                            <div class="kd-item {{ $project->prj_rcptdt ? 'done' : '' }}">
+                                <span class="kd-label">Received</span>
+                                <span class="kd-val">{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('d M y') : '—' }}</span>
+                            </div>
+                            <div class="kd-item {{ $project->prj_assigndt ? 'done' : '' }}">
+                                <span class="kd-label">Assigned</span>
+                                <span class="kd-val">{{ $project->prj_assigndt ? \Carbon\Carbon::parse($project->prj_assigndt)->format('d M y') : '—' }}</span>
+                            </div>
+                            <div class="kd-item {{ $project->prj_propdt ? 'done' : '' }}">
+                                <span class="kd-label">Proposal</span>
+                                <span class="kd-val">{{ $project->prj_propdt ? \Carbon\Carbon::parse($project->prj_propdt)->format('d M y') : '—' }}</span>
+                            </div>
+                            <div class="kd-item {{ $project->prj_aprvdt ? 'done' : '' }}">
+                                <span class="kd-label">Approved</span>
+                                <span class="kd-val">{{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M y') : '—' }}</span>
+                            </div>
+                            <div class="kd-item active">
+                                <span class="kd-label">Start</span>
+                                <span class="kd-val">{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d M y') : '—' }}</span>
+                            </div>
+                            <div class="kd-item {{ $edcClass }}">
+                                <span class="kd-label">EDC</span>
+                                <span class="kd-val">{{ $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt)->format('d M y') : '—' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 3. FINANCIAL NUMBERS (Total Budget -> Received -> Total Spent) --}}
+                    @php
+                        $recAmount = $head ? (float)($head->received ?? 0) : 0;
+                    @endphp
+                    <div class="info-sec info-sec-budget pl-lg-3 border-left-lg" style="flex: 1 1 200px; max-width: 250px;">
+                        <span class="info-label text-primary font-weight-bold mb-2" style="font-size:0.82rem; letter-spacing:0.5px;">
+                            <i class="fas fa-coins mr-1"></i> BUDGET & SPENT
+                        </span>
+                        <div class="budget-items-stacked">
+                            <div class="mb-2">
+                                <span class="d-block text-muted text-uppercase fw-bold" style="font-size:0.74rem; line-height:1.1;">Total Budget</span>
+                                <span class="d-block text-dark font-weight-bold" style="font-size: 1.12rem; line-height: 1.2;">
+                                    Rs. {{ number_format(($project->prj_propcost ?? 0) / 1_000_000, 2) }} M
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <span class="d-block text-muted text-uppercase fw-bold" style="font-size:0.74rem; line-height:1.1;">Received</span>
+                                @if($recAmount > 0)
+                                    <span class="d-block text-success font-weight-bold" style="font-size: 1.12rem; line-height: 1.2;">
+                                        Rs. {{ number_format($recAmount / 1_000_000, 2) }} M
+                                    </span>
+                                @else
+                                    <span class="badge badge-warning text-dark font-weight-bold" style="font-size: 0.76rem; padding: 3px 8px; letter-spacing: 0.2px;">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> Amount Not Received Yet
+                                    </span>
+                                @endif
+                            </div>
+                            <div>
+                                <span class="d-block text-muted text-uppercase fw-bold" style="font-size:0.74rem; line-height:1.1;">Total Spent</span>
+                                <span class="d-block text-danger font-weight-bold" style="font-size: 1.12rem; line-height: 1.2;">
+                                    Rs. {{ number_format(($totalSpent ?? 0) / 1_000_000, 2) }} M
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 4. FINANCE KNOBS (EQUIP, HR, MISC with perfectly centered SVG circles) --}}
+                    <div class="info-sec info-sec-knobs pl-lg-3 border-left-lg" style="flex: 0 0 auto;">
+                        <span class="info-label text-primary font-weight-bold mb-2" style="font-size:0.82rem; letter-spacing:0.5px;">
+                            <i class="fas fa-chart-pie mr-1"></i> SUBHEAD UTILIZATION
+                        </span>
+                        <div class="finance-bars-wrap d-flex align-items-center" style="gap: 10px;">
+                            @php
+                                $equipVal = min(100, max(0, (int)($finData['equip_pct'] ?? 0)));
+                                $hrVal = min(100, max(0, (int)($finData['hr_pct'] ?? 0)));
+                                $miscVal = min(100, max(0, (int)($finData['misc_pct'] ?? 0)));
+                                $circ = 138.23; // 2 * pi * 22
+                            @endphp
+                            {{-- EQUIP --}}
+                            <div class="finance-box">
+                                <div class="radial-ring-wrap">
+                                    <svg width="54" height="54" viewBox="0 0 54 54">
+                                        <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
+                                        <circle cx="27" cy="27" r="22" stroke="#FC7A58" stroke-width="5" fill="none"
+                                                stroke-dasharray="{{ $circ }}" stroke-dashoffset="{{ $circ - ($circ * $equipVal / 100) }}"
+                                                stroke-linecap="round" transform="rotate(-90 27 27)" />
+                                    </svg>
+                                    <span class="ring-pct-val" style="color:#FC7A58;">{{ $equipVal }}%</span>
+                                </div>
+                                <div class="finance-title">EQUIP</div>
+                            </div>
+
+                            {{-- HR --}}
+                            <div class="finance-box">
+                                <div class="radial-ring-wrap">
+                                    <svg width="54" height="54" viewBox="0 0 54 54">
+                                        <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
+                                        <circle cx="27" cy="27" r="22" stroke="#42e695" stroke-width="5" fill="none"
+                                                stroke-dasharray="{{ $circ }}" stroke-dashoffset="{{ $circ - ($circ * $hrVal / 100) }}"
+                                                stroke-linecap="round" transform="rotate(-90 27 27)" />
+                                    </svg>
+                                    <span class="ring-pct-val" style="color:#20c997;">{{ $hrVal }}%</span>
+                                </div>
+                                <div class="finance-title">HR</div>
+                            </div>
+
+                            {{-- MISC --}}
+                            <div class="finance-box">
+                                <div class="radial-ring-wrap">
+                                    <svg width="54" height="54" viewBox="0 0 54 54">
+                                        <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
+                                        <circle cx="27" cy="27" r="22" stroke="#4f8cff" stroke-width="5" fill="none"
+                                                stroke-dasharray="{{ $circ }}" stroke-dashoffset="{{ $circ - ($circ * $miscVal / 100) }}"
+                                                stroke-linecap="round" transform="rotate(-90 27 27)" />
+                                    </svg>
+                                    <span class="ring-pct-val" style="color:#4f8cff;">{{ $miscVal }}%</span>
+                                </div>
+                                <div class="finance-title">MISC</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 5. EMPLOYEES / TEAM (Far Right Column) --}}
+                    <div class="info-sec info-sec-team pl-lg-3 border-left-lg" style="flex: 0 0 auto; min-width: 150px;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="info-label text-primary font-weight-bold mb-0" style="font-size:0.82rem; letter-spacing:0.5px;">
+                                <i class="fas fa-users mr-1"></i> EMPLOYEES
+                            </span>
+                            <span class="badge badge-pill badge-primary px-2.5 py-1 small font-weight-bold" style="font-size: 0.78rem;">
+                                {{ count($team) }}
                             </span>
                         </div>
+                        
+                        <div class="team-section-container justify-content-start mt-1">
+                            @forelse($team as $index => $member)
+                                @php
+                                    $img = is_object($member) && isset($member->emp_photodest) 
+                                        ? (\App\Facades\FileStorage::url($member->emp_photodest) ?: asset('dist/img/profile-1.jfif'))
+                                        : (is_array($member) && isset($member['img']) ? $member['img'] : asset('dist/img/profile-1.jfif'));
+                                    $name = is_object($member) ? ($member->emp_name ?? '') : ($member['name'] ?? '');
+                                    $role = is_object($member) ? ($member->emp_title ?: 'Project Staff') : ($member['role'] ?? 'Project Staff');
+                                    $email = is_object($member) ? ($member->emp_email ?: 'N/A') : ($member['email'] ?? 'N/A');
+                                    $phone = is_object($member) ? ($member->emp_mobile ?: 'N/A') : ($member['phone'] ?? 'N/A');
+                                    $empId = is_object($member) ? ($member->emp_id ?? '') : ($member['emp_id'] ?? '');
+                                @endphp
+                                @if($index < 4)
+                                    <div class="team-avatar-wrapper" style="width:38px; height:38px;"
+                                         onclick="openEmployeeModal('{{ $name }}','{{ $role }}','{{ $img }}','{{ $email }}','{{ $phone }}','{{ $empId }}')"
+                                         title="{{ $name }} ({{ $role }})">
+                                        <img src="{{ $img }}" alt="{{ $name }}" style="width:38px; height:38px;" onerror="this.onerror=null; this.src='{{ asset('dist/img/profile-1.jfif') }}';">
+                                    </div>
+                                @endif
+                            @empty
+                                <span class="text-muted small" style="font-size:0.84rem;">No staff assigned</span>
+                            @endforelse
+
+                            @if(count($team) > 4)
+                                <button type="button" class="more-staff-btn" style="width:38px; height:38px; font-size:11px;" onclick="openAllStaffModal()" title="View all staff">
+                                    +{{ count($team) - 4 }}
+                                </button>
+                            @endif
+                        </div>
+                        @if(count($team) > 0)
+                            <small class="text-muted d-block mt-1 font-weight-bold" style="font-size:0.74rem;">
+                                {{ count($team) }} Active Personnel
+                            </small>
+                        @endif
                     </div>
 
-                    <div class="col-md-8 d-flex justify-content-around">
-                        <div class="finance-bars-wrap">
-                            <div class="finance-box">
-                                <input type="text" class="knob" value="30" data-skin="tron" data-thickness="0.2"
-                                       data-width="65" data-height="65" data-fgColor="#FC7A58" data-readonly="true">
-                                <div class="finance-title mt-2">Equip</div>
-                            </div>
-                            <div class="finance-box">
-                                <input type="text" class="knob" value="50" data-skin="tron" data-thickness="0.2"
-                                       data-width="65" data-height="65" data-fgColor="#42e695" data-readonly="true">
-                                <div class="finance-title mt-2">HR</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="info-right-team">
-        <div class="d-flex justify-content-end mb-3">
-            <span class="info-label text-primary">Team ({{ count($team) }})</span>
-        </div>
-        <div class="team-section-container">
-            @foreach($team as $index => $member)
-                @php
-                    $img = \App\Facades\FileStorage::url($member->emp_photodest) ?: asset('dist/img/profile-1.jfif');
-                    $name = $member->emp_name;
-                    $role = $member->emp_title ?: 'Project Staff';
-                    $email = $member->emp_email ?: 'N/A';
-                    $phone = $member->emp_mobile ?: 'N/A';
-                    $empId = $member->emp_id;
-                @endphp
-                @if($index < $displayLimit)
-                    <div class="team-avatar-wrapper"
-                         onclick="openEmployeeModal('{{ $name }}','{{ $role }}','{{ $img }}','{{ $email }}','{{ $phone }}','{{ $empId }}')">
-                        <img src="{{ $img }}" alt="{{ $name }}" onerror="this.onerror=null; this.src='{{ asset('dist/img/profile-1.jfif') }}';">
-                    </div>
-                @endif
-            @endforeach
-
-            @if(count($team) > $displayLimit)
-                <button type="button" class="more-staff-btn" onclick="openAllStaffModal()">
-                    <i class="fas fa-plus"></i>
-                </button>
-            @endif
-        </div>
-    </div>
-</div>
 <style>
 /* ===== START & END RED SQUARES ===== */
 .edge-box {
@@ -586,64 +715,82 @@
         <div class="today-glow"></div>
     </div>
 
-   {{-- MILESTONES --}}
+    {{-- MILESTONES --}}
 @foreach($milestones as $ms)
     @php
+        $msStatus = strtolower(trim($ms->msn_status ?? ''));
+        $isCompleted = ($msStatus === 'completed');
+        $isActive = (!$isCompleted && optional($nextMilestone)->msn_id === $ms->msn_id);
+
         $stepClass = '';
-        if (strtolower($ms->msn_status) === 'completed') {
+        if ($isCompleted) {
             $stepClass = 'completed';
-        } elseif (optional($nextMilestone)->msn_id === $ms->msn_id) {
+        } elseif ($isActive) {
             $stepClass = 'active';
         }
 
-        $targetDate   = \Carbon\Carbon::parse($ms->msn_targetdt);
+        $targetDate   = $ms->msn_targetdt ? \Carbon\Carbon::parse($ms->msn_targetdt) : null;
         $achievedDate = $ms->msn_achvdt ? \Carbon\Carbon::parse($ms->msn_achvdt) : null;
 
-        $isLate = $achievedDate && $achievedDate->gt($targetDate);
+        $isLate = false;
+        if ($achievedDate && $targetDate) {
+            $isLate = $achievedDate->gt($targetDate);
+        } elseif (!$achievedDate && $targetDate && $today->gt($targetDate) && !$isCompleted) {
+            $isLate = true;
+        }
 
-        // Date-based milestone position on timeline track, inset so it
-        // never lands exactly under the START/END boxes
-        $daysFromStart = $prjStart->diffInDays($targetDate, false);
-        $rawPercent = ($daysFromStart / max(1, $totalDaysSpan)) * 100;
-        $rawPercent = max(0, min(100, $rawPercent));
-        $milestonePercent = $trackInsetStart + ($rawPercent * $trackInsetRange / 100);
+        // Date-based milestone position on timeline track
+        if ($targetDate && $totalDaysSpan > 0) {
+            $daysFromStart = $prjStart->diffInDays($targetDate, false);
+            $rawPercent = ($daysFromStart / max(1, $totalDaysSpan)) * 100;
+            $rawPercent = max(0, min(100, $rawPercent));
+            $milestonePercent = $trackInsetStart + ($rawPercent * $trackInsetRange / 100);
+        } elseif ($totalMilestones > 1) {
+            $milestonePercent = $trackInsetStart + ($loop->index / ($totalMilestones - 1)) * $trackInsetRange;
+        } else {
+            $milestonePercent = 50;
+        }
+        $milestonePercent = round(max($trackInsetStart, min($trackInsetStart + $trackInsetRange, $milestonePercent)), 1);
 
-        if ($achievedDate) {
-            // achieved vs target difference, scaled to the same inset track
+        if ($achievedDate && $targetDate) {
             $diffDays = $targetDate->diffInDays($achievedDate, false);
             $oneDayPercent = ($trackInsetRange / 100) * (100 / max(1, $totalDaysSpan));
             $achievedPercent = $milestonePercent + ($diffDays * $oneDayPercent);
             $achievedPercent = max(1, min(99, $achievedPercent));
+        } else {
+            $achievedPercent = $milestonePercent;
         }
+
+        $msLabel = 'MS-' . ($ms->msn_id ?: $loop->iteration);
     @endphp
 
     <div class="step-item {{ $stepClass }}" style="left: {{ $milestonePercent }}%;"
      onclick="openMilestoneDetail(
-        'MS-{{ $loop->iteration }}',
-        '{{ $targetDate->format('d M Y') }}',
+        '{{ $msLabel }}',
+        '{{ $targetDate ? $targetDate->format('d M Y') : 'TBD' }}',
         '{{ $achievedDate ? $achievedDate->format('d M Y') : 'Not achieved' }}',
-        '{{ $isLate ? 'Late' : 'On Time' }}'
+        '{{ $isCompleted ? 'Completed' : ($isLate ? 'Late' : 'On Time') }}'
      )">
 
         {{-- MS LABEL --}}
-        <div class="step-label">MS-{{ $loop->iteration }}</div>
+        <div class="step-label">{{ $msLabel }}</div>
 
         {{-- DIAMOND --}}
         <div class="step-dot">
             @if($stepClass === 'completed')
                 <i class="fas fa-check text-white" style="font-size:0.55rem"></i>
             @else
-                {{ $loop->iteration }}
+                {{ $ms->msn_id ?: $loop->iteration }}
             @endif
         </div>
 
         {{-- TARGET DATE (UNDER DIAMOND) --}}
         <div class="step-date">
-            {{ $targetDate->format('d M Y') }}
+            {{ $targetDate ? $targetDate->format('d M Y') : 'TBD' }}
         </div>
     </div>
 
-    {{-- ACHIEVED FLAG (repositioned below target date band, connected via a line, so it no longer overlaps the target diamond/date) --}}
+    {{-- ACHIEVED FLAG --}}
    @if($achievedDate)
     <div class="achieved-marker {{ $isLate ? 'late' : 'ontime' }}"
          style="left: {{ $achievedPercent }}%;">
@@ -687,17 +834,13 @@
 <!-- ================= SECOND ROW ================= -->
 <div class="row mt-4">
 
-    <!-- LEFT -->
-    <div class="col-lg-10 col-md-9">
+    <!-- LEFT & MIDDLE (Milestones Detail - Wide & Open) -->
+    <div class="col-xl-9 col-lg-8 col-md-12 mb-4">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="font-weight-bold m-0 text-dark">
+            <h6 class="font-weight-bold m-0 text-dark" style="font-size: 0.96rem;">
                 <i class="fas fa-list-ol text-primary mr-2"></i> Milestones Detail
             </h6>
-            <!-- <a href="{{ route('projects.add-milestone', $project->prj_id) }}"
-               class="btn btn-primary btn-sm shadow-sm">
-                <i class="fas fa-plus mr-1"></i> Add Milestone
-            </a> -->
         </div>
 
         <div class="milestone-container shadow-sm">
@@ -706,52 +849,61 @@
                 <table class="table table-custom w-100 m-0">
                     <thead>
                         <tr>
-                            <th style="width:40px;">#</th>
-                            <th>Type</th>
+                            <th style="width: 85px;">#</th>
+                            <th style="width: 120px;">Type</th>
                             <th>Description</th>
-                            <th>Target</th>
-                            <th>Achieved</th>
-                            <th>Status</th>
-                            <th class="text-right"></th>
-                            <!-- <th class="text-right">Action</th> -->
+                            <th style="width: 140px;">Target</th>
+                            <th style="width: 150px;" class="text-center">Achieved</th>
+                            <th style="width: 150px;" class="text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($milestones as $milestone)
+                            @php
+                                $mStatus = strtolower(trim($milestone->msn_status ?? ''));
+                                $targetDt = $milestone->msn_targetdt ? \Carbon\Carbon::parse($milestone->msn_targetdt) : null;
+                                $achvDt = $milestone->msn_achvdt ? \Carbon\Carbon::parse($milestone->msn_achvdt) : null;
+                            @endphp
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td><span class="badge badge-light border">{{ $milestone->msn_type }}</span></td>
-                                <td class="fw-bold">{{ $milestone->msn_desc }}</td>
-                                <td>{{ \Carbon\Carbon::parse($milestone->msn_targetdt)->format('d M, Y') }}</td>
+                                <td class="font-weight-bold text-dark">MS-{{ $milestone->msn_id ?: $loop->iteration }}</td>
+                                <td><span class="badge badge-light border text-dark font-weight-bold" style="font-size:0.75rem;">{{ $milestone->msn_type ?: 'Milestone' }}</span></td>
+                                <td class="font-weight-bold text-dark" style="font-size:0.90rem;">{{ $milestone->msn_desc }}</td>
+                                <td class="font-weight-bold text-muted" style="font-size:0.86rem;">{{ $targetDt ? $targetDt->format('d M, Y') : 'N/A' }}</td>
                                 <td class="text-center">
-                                    @if($milestone->msn_achvdt)
-                                        <span class="text-success fw-bold">
-                                            {{ \Carbon\Carbon::parse($milestone->msn_achvdt)->format('d M, Y') }}
+                                    @if($achvDt)
+                                        <span class="text-success font-weight-bold" style="font-size:0.86rem;">
+                                            <i class="fas fa-check-circle mr-1"></i> {{ $achvDt->format('d M, Y') }}
                                         </span>
                                     @else
-                                        <button class="btn btn-sm btn-outline-primary rounded-circle"
-                                                onclick="openAchieveModal('{{ $milestone->msn_id }}')">
-                                            <i class="fas fa-calendar-check"></i>
-                                        </button>
+                                        @if(!($readOnly ?? false))
+                                            <button class="btn btn-xs btn-outline-primary rounded-pill px-2.5 font-weight-bold"
+                                                    onclick="openAchieveModal('{{ $milestone->msn_id }}')">
+                                                <i class="fas fa-calendar-check mr-1"></i> Mark
+                                            </button>
+                                        @else
+                                            <span class="text-muted small">-</span>
+                                        @endif
                                     @endif
                                 </td>
-                                <td>
-                                    @if(strtolower($milestone->msn_status) === 'completed')
-                                        <span class="badge badge-success px-3">Completed</span>
+                                <td class="text-center">
+                                    @if($mStatus === 'completed')
+                                        <span class="badge badge-success px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-check mr-1"></i> Completed</span>
+                                    @elseif($mStatus === 'in progress')
+                                        <span class="badge badge-primary px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-spinner fa-spin mr-1"></i> In Progress</span>
+                                    @elseif($mStatus === 'awaited')
+                                        <span class="badge badge-info px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-hourglass-half mr-1"></i> Awaited</span>
+                                    @elseif($mStatus === 'not started')
+                                        <span class="badge badge-secondary px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-circle mr-1" style="font-size: 7px;"></i> Not Started</span>
                                     @else
-                                        <span class="badge badge-warning text-white px-3">{{ $milestone->msn_status }}</span>
+                                        <span class="badge badge-warning text-dark px-3 py-1 font-weight-bold" style="font-size:0.76rem;">{{ $milestone->msn_status ?: 'Pending' }}</span>
                                     @endif
-                                </td>
-                                <td class="text-right">
-                                    <!-- <a href="{{ route('milestone.edit', $milestone->msn_id) }}" class="text-warning">
-                                        <i class="fas fa-pen"></i>
-                                    </a> -->
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">
-                                    No milestones defined yet.
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="fas fa-flag-checkered fa-2x mb-2 text-muted" style="opacity: 0.3;"></i>
+                                    <p class="font-weight-bold mb-0">No milestones defined yet.</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -763,71 +915,30 @@
 
     </div>
 
-    <!-- RIGHT -->
-    <div class="col-lg-2 col-md-3">
+    <!-- FAR RIGHT (Attachments Widget - Corner Pinned) -->
+    <div class="col-xl-3 col-lg-4 col-md-12 mb-4">
 
         <div class="sticky-top" style="top:20px;">
-
-            <h6 class="font-weight-bold text-dark mb-3">
-                <i class="fas fa-calendar-alt text-primary mr-2"></i> Key Dates
-            </h6>
-
-            <div class="row" style="row-gap: 14px;">
-                <div class="col-12 col-md-6">
-                    <div class="date-grid-item {{ $project->prj_rcptdt ? 'done' : '' }}">
-                        <span class="d-title">Received</span>
-                        <span class="d-value">{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('d M y') : '—' }}</span>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <div class="date-grid-item {{ $project->prj_assigndt ? 'done' : '' }}">
-                        <span class="d-title">Assigned</span>
-                        <span class="d-value">{{ $project->prj_assigndt ? \Carbon\Carbon::parse($project->prj_assigndt)->format('d M y') : '—' }}</span>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <div class="date-grid-item {{ $project->prj_propdt ? 'done' : '' }}">
-                        <span class="d-title">Proposal</span>
-                        <span class="d-value">{{ $project->prj_propdt ? \Carbon\Carbon::parse($project->prj_propdt)->format('d M y') : '—' }}</span>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <div class="date-grid-item {{ $project->prj_aprvdt ? 'done' : '' }}">
-                        <span class="d-title">Approved</span>
-                        <span class="d-value">{{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M y') : '—' }}</span>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="date-grid-item active">
-                        <span class="d-title">Project Start</span>
-                        <span class="d-value">{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('d M y') : '—' }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="my-4">
-
-            <div class="attachments-wrapper" style="padding-top: 4px;">
+            <div class="attachments-wrapper">
                 @include('partials.attachments_widget', [
                     'module' => 'prj',
                     'objectId' => $project->prj_id,
-                    'title' => 'Attachments',
+                    'title' => 'Project Attachments',
                     'defaultSlots' => ['Project Proposal', 'URD', 'Work Order', 'PPF'],
                     'attachments' => $allAttachments ?? $project->attachments,
                     'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
                 ])
             </div>
-
         </div>
 
     </div>
 
 </div>
-    </div>
+
+            </div> {{-- /.card-body --}}
+        </div> {{-- /.card --}}
+    </div> {{-- /.container-fluid --}}
+</div> {{-- /.content-wrapper --}}
 
 
     <!-- MODALS -->
@@ -955,11 +1066,6 @@
         </div>
     </div>
 
-</div>
-</div>
-</div>
-</div>
-
 {{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
 @if($head)
 <div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
@@ -980,27 +1086,21 @@
                 {{-- Top Summary bar --}}
                 <div class="row no-gutters border-bottom border-dark" style="background: var(--rd-neutral-200);">
                     <div class="col-md-3 border-right border-dark p-3">
-                        <div class="small text-muted rajdhani">ALLOCATION</div>
+                        <div class="small text-muted rajdhani font-weight-bold">ALLOCATION</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->allocation) }}</div>
                     </div>
                     <div class="col-md-3 border-right border-dark p-3">
-                        <div class="small text-muted rajdhani">MTSS SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">MTSS SHARE</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->mtss_share) }}</div>
                     </div>
                     <div class="col-md-3 border-right border-dark p-3">
-                        <div class="small text-muted rajdhani">RDW SHARE</div>
+                        <div class="small text-muted rajdhani font-weight-bold">RDW SHARE</div>
                         <div class="h5 mb-0 text-info font-weight-bold rajdhani">{{ number_format($head->rdw_share ?? 0) }}</div>
                     </div>
-                    <div class="col-md-3 border-right border-dark p-3">
-                        <div class="small text-muted rajdhani">CSRF SHARE</div>
+                    <div class="col-md-3 p-3">
+                        <div class="small text-muted rajdhani font-weight-bold">CSRF SHARE</div>
                         <div class="h5 mb-0 text-white font-weight-bold rajdhani">{{ number_format($head->csrf_share ?? 0) }}</div>
                     </div>
-                    @if($showPrjShareValue ?? true)
-                    <div class="col-md-3 p-3">
-                        <div class="small text-muted rajdhani">PRJ SHARE</div>
-                        <div class="h5 mb-0 text-warning font-weight-bold rajdhani">{{ number_format($head->prj_share ?? 0) }}</div>
-                    </div>
-                    @endif
                 </div>
 
                 <div class="row no-gutters">
@@ -1024,6 +1124,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                     <tr style="background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255,255,255,0.08);">
+                                         <td class="pl-3 font-weight-bold text-white"><i class="fas fa-coins text-warning mr-1"></i> Allocated</td>
+                                         <td class="text-right font-weight-bold" style="color: #4da3ff;">{{ number_format($head->pcc_share ?? 0) }}</td>
+                                         <td class="text-right font-weight-bold" style="color: #ffb84d;">{{ number_format($head->csrf_share ?? 0) }}</td>
+                                         @if($showProjectActualSection ?? true)
+                                         <td class="text-right pr-3 font-weight-bold" style="color: #4dff88;">{{ number_format($head->allocation ?? 0) }}</td>
+                                         @endif
+                                     </tr>
                                      <tr>
                                          <td class="pl-3 text-muted">Received</td>
                                          <td class="text-right" style="color: #4da3ff;">{{ number_format($head->pcc_received ?? 0) }}</td>

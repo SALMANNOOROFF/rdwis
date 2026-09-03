@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -257,9 +257,9 @@
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card-cyber card-cyan px-4 py-3 h-100">
-                <div class="kpi-title">Total Active Cases</div>
+                <div class="kpi-title">Pending Cases</div>
                 <div class="kpi-value" id="kpi-cases">0</div>
-                <div class="kpi-sub" id="kpi-cases-sub">0 currently active cases</div>
+                <div class="kpi-sub" id="kpi-cases-sub">Cases pending action</div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
@@ -401,18 +401,20 @@
                 apiData = response;
                 
                 // Update KPI Cards
-                const pending = Number(apiData.kpis.pendingCases || 0);
-                const reviewed = Number(apiData.kpis.reviewedCases || 0);
-                const totalCases = pending + reviewed;
+                const pendingPur = Number(apiData.kpis.pendingPurchaseCases || 0);
+                const pendingCtr = Number(apiData.kpis.pendingContractCases || 0);
+                const totalPending = Number(apiData.kpis.pendingCases ?? (pendingPur + pendingCtr));
                 
-                $('#kpi-cases').text(totalCases);
-                $('#kpi-cases-sub').text(`${pending} pending • ${reviewed} reviewed`);
+                $('#kpi-cases').text(totalPending);
+                $('#kpi-cases-sub').text(`${pendingPur} Purchase • ${pendingCtr} Contract`);
                 
                 $('#kpi-budget').text(formatMoney(apiData.kpis.budgetReceived));
                 $('#kpi-budget-sub').text(`Across ${apiData.kpis.projectsTotal} active projects`);
                 
                 $('#kpi-utilized').text(formatMoney(apiData.kpis.utilized));
-                $('#kpi-personnel').text(apiData.kpis.employeesTotal);
+                const empsTotal = Number(apiData.kpis.employeesTotal || 0);
+                $('#kpi-personnel').text(empsTotal);
+                $('#kpi-personnel-sub').text(`${empsTotal} active staff`);
                 
                 // Populate Division Dropdown (only once)
                 if ($('#division-dropdown option').length <= 1) {

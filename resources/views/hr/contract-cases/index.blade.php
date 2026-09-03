@@ -16,22 +16,64 @@
     background: #FFFFFF;
     border: 1.5px solid var(--rd-border);
     border-radius: 12px;
-    padding: 1.2rem 1.5rem;
+    padding: 1rem 1.4rem;
     box-shadow: 0 2px 8px rgba(41, 40, 36, 0.04);
 }
 .kpi-summary-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     color: var(--rd-text3);
 }
 .kpi-summary-value {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
     font-weight: 800;
     color: var(--rd-text1);
     line-height: 1.2;
-    margin-top: 4px;
+    margin-top: 2px;
+}
+
+/* Custom Tab Buttons */
+.hub-tab-btn {
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    border-radius: 30px !important;
+    padding: 8px 20px !important;
+    transition: all 0.2s ease;
+    margin-right: 8px;
+    border: 1.5px solid var(--rd-border) !important;
+    background: #FFFFFF !important;
+    color: var(--rd-text2) !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none !important;
+}
+.hub-tab-btn:hover {
+    background: var(--rd-neutral-100) !important;
+    color: var(--rd-text1) !important;
+}
+.hub-tab-btn.active {
+    background: var(--rd-primary-600) !important;
+    color: #FFFFFF !important;
+    border-color: var(--rd-primary-600) !important;
+    box-shadow: 0 4px 14px rgba(95, 120, 88, 0.25);
+}
+.hub-tab-btn.active .badge-tab-count {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+.badge-tab-count {
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 12px;
+    background: var(--rd-neutral-200);
+    color: var(--rd-neutral-800);
 }
 
 .clean-data-table thead th {
@@ -57,9 +99,10 @@
 
 <div class="content-wrapper hr-page pt-4">
     <div class="container-fluid px-4">
-        {{-- Header --}}
+        
+        {{-- Top Header Row --}}
         <div class="row align-items-center mb-4">
-            <div class="col-md-7">
+            <div class="col-md-6">
                 <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                     <span class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 20px; font-size: 10px; letter-spacing: 0.8px;">
                         HR OPERATIONS AUTHORITY
@@ -78,122 +121,380 @@
                     </div>
                     @endif
                 </div>
-                <h1 class="font-weight-bold text-dark m-0" style="font-size: 2.2rem; letter-spacing: -0.5px;">HR Contract Scrutiny Hub</h1>
-                <p class="text-muted mb-0 font-weight-500" style="font-size: 0.95rem;">Candidate qualification, grading scale, and duration validation queue.</p>
+                <h1 class="font-weight-bold text-dark m-0" style="font-size: 2.1rem; letter-spacing: -0.5px;">HR Contract Scrutiny Hub</h1>
+                <p class="text-muted mb-0 font-weight-500" style="font-size: 0.92rem;">Candidate qualification, grading scale, and duration validation queue.</p>
             </div>
-            <div class="col-md-5 text-right">
-                <div class="d-inline-block kpi-summary-card text-left mr-2" style="border-left: 4px solid var(--rd-primary-600);">
-                    <div class="kpi-summary-label">Salary Volume</div>
+            
+            <div class="col-md-6 text-right d-flex justify-content-end align-items-center flex-wrap gap-2">
+                {{-- Add Employee / Initiate Hiring Button --}}
+                <a href="{{ route('division.contract-cases.create', ['type' => 'Hg']) }}" class="btn btn-primary px-3.5 py-2 font-weight-bold shadow-sm" style="border-radius: 8px; font-size: 0.9rem; background: var(--rd-primary-600); border-color: var(--rd-primary-600);">
+                    <i class="fas fa-user-plus mr-1.5"></i> Add Employee (Hg)
+                </a>
+                
+                {{-- Employee Directory Button --}}
+                <a href="{{ route('divhr.employelist') }}" class="btn btn-light border px-3 py-2 font-weight-bold shadow-sm" style="border-radius: 8px; font-size: 0.9rem;">
+                    <i class="fas fa-users mr-1.5 text-secondary"></i> Employee Directory
+                </a>
+            </div>
+        </div>
+
+        {{-- KPI Cards Row --}}
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-2">
+                <div class="kpi-summary-card" style="border-left: 4px solid #EF4444;">
+                    <div class="kpi-summary-label">Pending HR Action</div>
+                    <div class="kpi-summary-value text-danger">{{ $actionReqCases->count() }} <small class="text-muted" style="font-size: 0.8rem;">cases</small></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <div class="kpi-summary-card" style="border-left: 4px solid #F59E0B;">
+                    <div class="kpi-summary-label">Open in Pipeline</div>
+                    <div class="kpi-summary-value text-warning">{{ $initiatedCases->count() }} <small class="text-muted" style="font-size: 0.8rem;">cases</small></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <div class="kpi-summary-card" style="border-left: 4px solid #10B981;">
+                    <div class="kpi-summary-label">Closed / Fulfilled</div>
+                    <div class="kpi-summary-value text-success">{{ $completedCases->count() }} <small class="text-muted" style="font-size: 0.8rem;">cases</small></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <div class="kpi-summary-card" style="border-left: 4px solid var(--rd-primary-600);">
+                    <div class="kpi-summary-label">Total Salary Volume</div>
                     <div class="kpi-summary-value text-primary">PKR {{ number_format($actionReqCases->sum('ctc_newsalary')) }}</div>
                 </div>
-                <div class="d-inline-block kpi-summary-card text-left">
-                    <div class="kpi-summary-label">Pending Review</div>
-                    <div class="kpi-summary-value text-dark">{{ $actionReqCases->count() }} Cases</div>
+            </div>
+        </div>
+
+        {{-- Filter Tabs Bar --}}
+        <div class="d-flex align-items-center flex-wrap mb-3" role="tablist">
+            <button type="button" class="hub-tab-btn active" data-tab="tab-pending">
+                <i class="fas fa-bolt text-warning"></i> Pending Action
+                <span class="badge-tab-count">{{ $actionReqCases->count() }}</span>
+            </button>
+            <button type="button" class="hub-tab-btn" data-tab="tab-open">
+                <i class="fas fa-hourglass-half text-primary"></i> Open / In Pipeline
+                <span class="badge-tab-count">{{ $initiatedCases->count() }}</span>
+            </button>
+            <button type="button" class="hub-tab-btn" data-tab="tab-closed">
+                <i class="fas fa-check-circle text-success"></i> Closed / Fulfilled
+                <span class="badge-tab-count">{{ $completedCases->count() }}</span>
+            </button>
+            <button type="button" class="hub-tab-btn" data-tab="tab-all">
+                <i class="fas fa-list"></i> All Cases
+                <span class="badge-tab-count">{{ $cases->count() }}</span>
+            </button>
+        </div>
+
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        {{-- TAB 1: PENDING HR ACTION                                    --}}
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        <div class="hub-tab-panel" id="tab-pending">
+            <div class="card border shadow-sm" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
+                <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
+                    <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-users-cog mr-2 text-primary"></i> CASES PENDING HR ACTION (REVIEW / FULFILLMENT)</h6>
+                    <span class="badge badge-danger px-3 py-1 font-weight-bold" style="border-radius: 20px;">{{ $actionReqCases->count() }} ACTION REQUIRED</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table clean-data-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pl-4">Ref #</th>
+                                <th>Division</th>
+                                <th>Candidate Details</th>
+                                <th class="text-right">Project</th>
+                                <th class="text-right">Proposed Salary</th>
+                                <th class="text-center">Current Stage</th>
+                                <th class="text-right pr-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($actionReqCases as $p)
+                            <tr>
+                                <td class="pl-4">
+                                    <span class="badge badge-light border text-dark font-weight-bold px-2 py-1" style="font-size: 11px;">
+                                        CC-{{ $p->ctc_id }}
+                                    </span>
+                                </td>
+                                <td class="font-weight-bold text-dark">
+                                    {{ $p->division_name }}
+                                    @if($p->division_short && $p->division_short !== $p->division_name)
+                                        <small class="text-muted d-block font-weight-normal">({{ $p->division_short }})</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
+                                    <div class="text-muted small">
+                                        <span class="badge badge-primary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
+                                        <i class="fas fa-user-tag mr-1"></i> {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})
+                                    </div>
+                                </td>
+                                <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->casePlans->first()->project->prj_code ?? 'Core / Non-Project' }}</td>
+                                <td class="text-right font-weight-bold text-primary" style="font-size: 1.05rem;">Rs. {{ number_format($p->ctc_newsalary) }}</td>
+                                <td class="text-center">
+                                    <div class="d-flex flex-column align-items-center gap-1">
+                                        <span class="badge {{ $p->current_stage === 'Approved' ? 'badge-success' : 'badge-warning' }} font-weight-bold px-2 py-1" style="font-size: 11px; border-radius: 4px;">
+                                            <i class="fas fa-user-clock mr-1"></i> Holder: {{ $p->current_stage ?? 'HR' }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-right pr-4">
+                                    <a href="{{ route('hr.contract-cases.show', $p->ctc_id) }}" class="btn btn-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
+                                        @if($p->current_stage === 'Approved')
+                                            <i class="fas fa-check-double mr-1"></i> FULFILL & CLOSE
+                                        @else
+                                            <i class="fas fa-check-circle mr-1"></i> REVIEW & FORWARD
+                                        @endif
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="fas fa-check-circle text-success mb-3" style="font-size: 40px; opacity: 0.4;"></i>
+                                    <h6 class="text-muted font-weight-bold">All caught up! No cases currently pending HR action.</h6>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        {{-- HR Queue --}}
-        <div class="card border shadow-sm" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
-            <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
-                <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-users-cog mr-2 text-primary"></i> CASES PENDING HR SCRUTINY</h6>
-                <span class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 20px;">{{ $actionReqCases->count() }} PENDING</span>
-            </div>
-            <div class="table-responsive">
-                <table class="table clean-data-table mb-0">
-                    <thead>
-                        <tr>
-                            <th class="pl-4">Ref #</th>
-                            <th>Division</th>
-                            <th>Candidate Details</th>
-                            <th class="text-right">Project</th>
-                            <th class="text-right">Proposed Salary</th>
-                            <th class="text-right pr-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($actionReqCases as $p)
-                        <tr>
-                            <td class="pl-4">
-                                <span class="badge badge-light border text-dark font-weight-bold px-2 py-1" style="font-size: 11px;">
-                                    CC-{{ $p->ctc_id }}
-                                </span>
-                            </td>
-                            <td class="font-weight-bold text-dark">Division {{ $p->ctc_divisionid }}</td>
-                            <td>
-                                <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
-                                <div class="text-muted small">
-                                    <span class="badge badge-primary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
-                                    <i class="fas fa-user-tag mr-1"></i> {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})
-                                </div>
-                            </td>
-                            <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->casePlans->first()->project->prj_code ?? 'Core / Non-Project' }}</td>
-                            <td class="text-right font-weight-bold text-primary" style="font-size: 1.05rem;">Rs. {{ number_format($p->ctc_newsalary) }}</td>
-                            <td class="text-right pr-4">
-                                <a href="{{ route('hr.contract-cases.show', $p->ctc_id) }}" class="btn btn-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
-                                    <i class="fas fa-check-circle mr-1"></i> REVIEW & FORWARD
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <i class="fas fa-shield-alt text-muted mb-3" style="font-size: 40px; opacity: 0.3;"></i>
-                                <h6 class="text-muted font-weight-bold">No cases currently pending HR Scrutiny.</h6>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        {{-- TAB 2: OPEN / IN PIPELINE (FORWARDED BY HR)                --}}
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        <div class="hub-tab-panel d-none" id="tab-open">
+            <div class="card border shadow-sm" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
+                <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
+                    <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-hourglass-half mr-2 text-warning"></i> OPEN CASES IN PIPELINE (FORWARDED AHEAD)</h6>
+                    <span class="badge badge-warning px-3 py-1 font-weight-bold" style="border-radius: 20px;">{{ $initiatedCases->count() }} IN PIPELINE</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table clean-data-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pl-4">Ref #</th>
+                                <th>Division</th>
+                                <th>Candidate Details</th>
+                                <th class="text-right">Project</th>
+                                <th class="text-right">Proposed Salary</th>
+                                <th class="text-center">Current Status & Holder</th>
+                                <th class="text-right pr-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($initiatedCases as $p)
+                            <tr>
+                                <td class="pl-4">
+                                    <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 11px;">
+                                        CC-{{ $p->ctc_id }}
+                                    </span>
+                                </td>
+                                <td class="font-weight-bold text-dark">
+                                    {{ $p->division_name }}
+                                    @if($p->division_short && $p->division_short !== $p->division_name)
+                                        <small class="text-muted d-block font-weight-normal">({{ $p->division_short }})</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
+                                    <div class="text-muted small">
+                                        <span class="badge badge-secondary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
+                                        {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})
+                                    </div>
+                                </td>
+                                <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->casePlans->first()->project->prj_code ?? 'Core / Non-Project' }}</td>
+                                <td class="text-right font-weight-bold text-dark" style="font-size: 0.95rem;">Rs. {{ number_format($p->ctc_newsalary) }}</td>
+                                <td class="text-center">
+                                    <div class="d-flex flex-column align-items-center gap-1">
+                                        <span class="badge badge-info font-weight-bold px-2 py-1" style="font-size: 11px; border-radius: 4px;">
+                                            <i class="fas fa-user-clock mr-1"></i> Holder: {{ strtoupper($p->current_stage) }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-right pr-4">
+                                    <a href="{{ route('hr.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
+                                        <i class="fas fa-eye mr-1"></i> VIEW TRAIL
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="fas fa-inbox text-muted mb-3" style="font-size: 40px; opacity: 0.3;"></i>
+                                    <h6 class="text-muted font-weight-bold">No open cases currently with other authorities.</h6>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        {{-- HR Processed (Open/Closed) --}}
-        @if($initiatedCases->count() > 0 || $completedCases->count() > 0)
-        <div class="card border shadow-sm mt-4" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
-            <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
-                <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-history mr-2 text-muted"></i> PREVIOUSLY PROCESSED CASES</h6>
-            </div>
-            <div class="table-responsive">
-                <table class="table clean-data-table mb-0">
-                    <thead>
-                        <tr>
-                            <th class="pl-4">Ref #</th>
-                            <th>Candidate Details</th>
-                            <th class="text-center">Current Status</th>
-                            <th class="text-right pr-4">Log</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($initiatedCases->merge($completedCases) as $p)
-                        <tr>
-                            <td class="pl-4">
-                                <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 11px;">
-                                    CC-{{ $p->ctc_id }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
-                                <div class="text-muted small">{{ $p->ctc_newjobtitle }}</div>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge badge-light border font-weight-bold px-3 py-1 text-muted">
-                                    {{ strtoupper($p->ctc_status) }}
-                                </span>
-                            </td>
-                            <td class="text-right pr-4">
-                                <a href="{{ route('hr.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
-                                    VIEW TRAIL
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        {{-- TAB 3: CLOSED / COMPLETED                                  --}}
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        <div class="hub-tab-panel d-none" id="tab-closed">
+            <div class="card border shadow-sm" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
+                <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
+                    <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-archive mr-2 text-muted"></i> CLOSED & FULFILLED CASES</h6>
+                    <span class="badge badge-success px-3 py-1 font-weight-bold" style="border-radius: 20px;">{{ $completedCases->count() }} CLOSED</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table clean-data-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pl-4">Ref #</th>
+                                <th>Division</th>
+                                <th>Candidate Details</th>
+                                <th class="text-right">Project</th>
+                                <th class="text-center">Final Status & Holder</th>
+                                <th class="text-right pr-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($completedCases as $p)
+                            <tr>
+                                <td class="pl-4">
+                                    <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 11px;">
+                                        CC-{{ $p->ctc_id }}
+                                    </span>
+                                </td>
+                                <td class="font-weight-bold text-dark">
+                                    {{ $p->division_name }}
+                                    @if($p->division_short && $p->division_short !== $p->division_name)
+                                        <small class="text-muted d-block font-weight-normal">({{ $p->division_short }})</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
+                                    <div class="text-muted small">
+                                        <span class="badge badge-light border mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
+                                        {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})
+                                    </div>
+                                </td>
+                                <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->casePlans->first()->project->prj_code ?? 'Core / Non-Project' }}</td>
+                                <td class="text-center">
+                                    @php
+                                        $stBadge = in_array(strtolower($p->ctc_status), ['fulfilled', 'closed']) ? 'badge-success' : (in_array(strtolower($p->ctc_status), ['rejected', 'not approved', 'cancelled']) ? 'badge-danger' : 'badge-secondary');
+                                    @endphp
+                                    <div class="d-flex flex-column align-items-center gap-1">
+                                        <span class="badge {{ $stBadge }} font-weight-bold px-2 py-1" style="font-size: 11px; border-radius: 4px;">
+                                            <i class="fas fa-check-double mr-1"></i> Stage: {{ $p->current_stage ?? $p->currentSubstatus->css_stage ?? $p->ctc_status }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-right pr-4">
+                                    <a href="{{ route('hr.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-secondary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
+                                        <i class="fas fa-eye mr-1"></i> VIEW ARCHIVE
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-folder-open text-muted mb-3" style="font-size: 40px; opacity: 0.3;"></i>
+                                    <h6 class="text-muted font-weight-bold">No completed/closed cases found.</h6>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        @endif
+
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        {{-- TAB 4: ALL CASES (MASTER LOG)                              --}}
+        {{-- ═══════════════════════════════════════════════════════════ --}}
+        <div class="hub-tab-panel d-none" id="tab-all">
+            <div class="card border shadow-sm" style="border-radius: 12px; overflow: hidden; background: #FFFFFF;">
+                <div class="p-3 d-flex justify-content-between align-items-center" style="background: #FFFFFF; border-bottom: 1.5px solid var(--rd-neutral-200);">
+                    <h6 class="m-0 text-dark font-weight-bold"><i class="fas fa-list mr-2 text-primary"></i> MASTER CONTRACT CASES LOG</h6>
+                    <span class="badge badge-dark px-3 py-1 font-weight-bold" style="border-radius: 20px;">{{ $cases->count() }} TOTAL</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table clean-data-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pl-4">Ref #</th>
+                                <th>Division</th>
+                                <th>Candidate Details</th>
+                                <th class="text-right">Project</th>
+                                <th class="text-right">Salary</th>
+                                <th class="text-center">Current Status & Holder</th>
+                                <th class="text-right pr-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($cases as $p)
+                            <tr>
+                                <td class="pl-4">
+                                    <span class="badge badge-light border text-muted px-2 py-1" style="font-size: 11px;">
+                                        CC-{{ $p->ctc_id }}
+                                    </span>
+                                </td>
+                                <td class="font-weight-bold text-dark">
+                                    {{ $p->division_name }}
+                                    @if($p->division_short && $p->division_short !== $p->division_name)
+                                        <small class="text-muted d-block font-weight-normal">({{ $p->division_short }})</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="text-dark font-weight-bold" style="font-size: 0.95rem;">{{ $p->ctc_empnamecomp }}</div>
+                                    <div class="text-muted small">
+                                        <span class="badge badge-light border mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
+                                        {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})
+                                    </div>
+                                </td>
+                                <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->casePlans->first()->project->prj_code ?? 'Core / Non-Project' }}</td>
+                                <td class="text-right font-weight-bold text-primary" style="font-size: 0.95rem;">Rs. {{ number_format($p->ctc_newsalary) }}</td>
+                                <td class="text-center">
+                                    <div class="d-flex flex-column align-items-center gap-1">
+                                        <span class="badge badge-info font-weight-bold px-2 py-1" style="font-size: 11px; border-radius: 4px;">
+                                            <i class="fas fa-user-clock mr-1"></i> Holder: {{ $p->current_stage ?? $p->currentSubstatus->css_stage ?? 'Division' }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-right pr-4">
+                                    <a href="{{ route('hr.contract-cases.show', $p->ctc_id) }}" class="btn btn-outline-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
+                                        <i class="fas fa-eye mr-1"></i> VIEW
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <h6 class="text-muted font-weight-bold">No contract cases found.</h6>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $('.hub-tab-btn').click(function(e) {
+        e.preventDefault();
+        const targetTab = $(this).data('tab');
+
+        $('.hub-tab-btn').removeClass('active');
+        $(this).addClass('active');
+
+        $('.hub-tab-panel').addClass('d-none');
+        $('#' + targetTab).removeClass('d-none');
+    });
+});
+</script>
+@endpush
 @endsection

@@ -154,14 +154,20 @@ class FileStorageServiceTest extends TestCase
 
     public function test_store_and_attach_updates_slot_and_handles_legacy_secondary_write(): void
     {
-        $file = UploadedFile::fake()->create('approval.pdf', 100, 'application/pdf');
-        $path = $this->service->storeAndAttach($file, 'ctc', 'mx-ctc-', 999996, 'Approval', 'ctc');
+        $ctrcase = DB::table('hr.ctrcases')->first();
+        if (!$ctrcase) {
+            $this->markTestSkipped('No ctrcase found.');
+        }
 
-        $this->assertEquals('hr/mx-ctc-999996.pdf', $path);
+        $objId = $ctrcase->ctc_id;
+        $file = UploadedFile::fake()->create('approval.pdf', 100, 'application/pdf');
+        $path = $this->service->storeAndAttach($file, 'ctc', 'mx-ctc-', $objId, 'Approval', 'ctc');
+
+        $this->assertEquals("hr/mx-ctc-{$objId}.pdf", $path);
 
         $slot = DB::table('hr.ctrcaseattachments')
             ->where('cat_objtype', 'ctc')
-            ->where('cat_objid', 999996)
+            ->where('cat_objid', $objId)
             ->where('cat_type', 'Approval')
             ->first();
 

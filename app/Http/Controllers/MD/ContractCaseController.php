@@ -60,20 +60,33 @@ class ContractCaseController extends Controller
             'unit'
         ])->findOrFail($id);
 
-        return view('md.contract-cases.show', compact('case'));
+        $authorityRole = 'MD';
+        $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
+        $canApprove = $this->approvalService->canApprove('MD', $case);
+
+        return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
     }
 
     public function approve($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Approved by Managing Director.');
+
+        if (!$this->approvalService->canApprove('MD', $case)) {
+            $required = $this->approvalService->getRequiredAuthority($case);
+            return response()->json([
+                'success' => false,
+                'message' => "Case terms exceed MD delegated approval authority. This case must be forwarded to {$required} for approval."
+            ], 403);
+        }
+
+        $remarks = $request->input('remarks', 'Approved by Managing Director under delegated authority.');
 
         $this->approvalService->approve($case, $user, $request->all(), $remarks);
 
         return response()->json([
             'success' => true,
-            'message' => 'Contract Case approved successfully.'
+            'message' => 'Contract Case approved by MD under delegated authority.'
         ]);
     }
 

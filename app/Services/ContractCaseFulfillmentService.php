@@ -44,12 +44,17 @@ class ContractCaseFulfillmentService
             throw new InvalidArgumentException('Please enter signing date of the new contract (ctc_newsigndt).');
         }
 
-        // 2. Ce Validation: Extension reason required
+        // 2. Hg Validation: Employee must be added before closing/fulfilling case
+        if ($type === 'HG' && empty($case->ctc_emp_id)) {
+            throw new InvalidArgumentException('Please add employee before closing the case.');
+        }
+
+        // 3. Ce Validation: Extension reason required
         if ($type === 'CE' && empty($terminRemarks)) {
             throw new InvalidArgumentException('Reason for contract extension is required (ctc_terminremarks).');
         }
 
-        // 3. Cr Early Termination Validation:
+        // 4. Cr Early Termination Validation:
         if ($type === 'CR' && $case->ctc_ctr_id) {
             $oldCtr = HrContract::find($case->ctc_ctr_id);
             if ($oldCtr) {
@@ -115,6 +120,9 @@ class ContractCaseFulfillmentService
                 $empId = substr($empId, 0, 13);
                 $uniqueCnic = $case->ctc_cnic ?: ('99999-' . str_pad((string)$case->ctc_id, 7, '0', STR_PAD_LEFT) . '-1');
 
+                $firstPlanHeadId = HrCtrCasePlan::where('ccp_ctc_id', $case->ctc_id)->whereNotNull('ccp_hed_id')->value('ccp_hed_id');
+                $headId = $case->ctc_prj_id ?: $firstPlanHeadId;
+
                 $empExists = DB::table('hr.emps')->where('emp_id', $empId)->exists();
                 if (!$empExists) {
                     DB::table('hr.emps')->insert([
@@ -122,10 +130,15 @@ class ContractCaseFulfillmentService
                         'emp_name'   => $case->ctc_empnamecomp ?: 'New Employee',
                         'emp_cnic'   => $uniqueCnic,
                         'emp_unt_id' => $unitId,
+                        'emp_hed_id' => $headId,
                         'emp_title'  => $case->ctc_approvedjobtitle ?: $case->ctc_newjobtitle,
                         'emp_rank'   => $case->ctc_approvedgrade ?: $case->ctc_newgrade,
                         'emp_joindt' => $case->ctc_approvedstartdt ?: $case->ctc_newstartdt,
                         'emp_status' => 'Active',
+                    ]);
+                } else if ($headId) {
+                    DB::table('hr.emps')->where('emp_id', $empId)->update([
+                        'emp_hed_id' => $headId,
                     ]);
                 }
 
@@ -139,6 +152,7 @@ class ContractCaseFulfillmentService
                     'ctr_num'      => $empId,
                     'ctr_date'     => $signDate,
                     'ctr_unt_id'   => $unitId,
+                    'ctr_hed_id'   => $headId,
                     'ctr_startdt'  => $case->ctc_approvedstartdt ?: $case->ctc_newstartdt,
                     'ctr_enddt'    => $case->ctc_approvedenddt ?: $case->ctc_newenddt,
                     'ctr_salary'   => $case->ctc_approvedsalary ?: $case->ctc_newsalary,

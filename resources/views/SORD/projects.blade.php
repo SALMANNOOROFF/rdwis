@@ -103,9 +103,10 @@
                             <thead class="sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2); color: var(--rd-text3);">
                                 <tr>
                                     <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th>
-                                    <th style="width: 30%;">Project Details</th>
-                                    <th style="width: 20%;">Timeline</th>
-                                    <th style="width: 20%;">Financials</th>
+                                    <th style="width: 28%;">Project Details</th>
+                                    <th style="width: 15%;">Timeline</th>
+                                    <th style="width: 15%;">Financials</th>
+                                    <th style="width: 12%;" class="text-center p-2">Team</th>
                                     <th style="width: 25%;" class="text-center p-2">MPR Status</th>
                                 </tr>
                             </thead>
@@ -139,7 +140,7 @@
                             {{-- DIVISION HEADER (Clickable for Collapse) --}}
                             <tbody class="division-group" data-division-id="{{ $divProjects->first()->unit->unt_id ?? '' }}">
                                 <tr class="bg-light division-header collapsed" role="button" data-toggle="collapse" data-target="#{{ $divId }}" aria-expanded="false" aria-controls="{{ $divId }}" style="cursor: pointer;">
-                                    <td colspan="5" class="font-weight-bold py-2 px-3" style="background-color: var(--rd-surface2); color: var(--rd-text1);">
+                                    <td colspan="6" class="font-weight-bold py-2 px-3" style="background-color: var(--rd-surface2); color: var(--rd-text1);">
                                         <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
                                             <span class="d-flex align-items-center flex-wrap" style="gap: 5px;">
                                                 <i class="fas fa-building text-secondary mr-2"></i> {{ $divisionName ?? 'Unknown Division' }}
@@ -237,6 +238,11 @@
                                         <div class="text-truncate small" style="max-width: 350px; color: var(--rd-text1);" title="{{ $project->prj_title }}">
                                             {{ $project->prj_title }}
                                         </div>
+                                        <div class="mt-1">
+                                            <a href="{{ route('projects.financial_view', $project->prj_id) }}" class="btn btn-xs btn-outline-info font-weight-bold" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px;" title="Open Financial View">
+                                                <i class="fas fa-chart-line mr-1"></i> Financial View
+                                            </a>
+                                        </div>
                                     </td>
 
                                     {{-- Timeline --}}
@@ -259,6 +265,19 @@
                                         <div class="progress progress-xs rounded-pill" style="height: 4px;">
                                             <div class="progress-bar bg-success" role="progressbar" style="width: {{ $spentPercentage }}%"></div>
                                         </div>
+                                    </td>
+
+                                    {{-- Team / Employees Count --}}
+                                    <td class="align-middle text-center p-2">
+                                        @if(($project->emp_count ?? 0) > 0)
+                                            <span class="badge badge-pill font-weight-bold text-white px-2.5 py-1 shadow-xs" style="background-color: #0284c7; font-size: 11px;" title="{{ $project->emp_count }} Active Employees Assigned">
+                                                <i class="fas fa-users mr-1 text-xs"></i>{{ $project->emp_count }} {{ $project->emp_count === 1 ? 'Emp' : 'Emps' }}
+                                            </span>
+                                        @else
+                                            <span class="badge badge-pill badge-light border text-muted px-2 py-0.5" style="font-size: 10px;" title="No active employees">
+                                                <i class="fas fa-user-slash mr-1 text-xs"></i>0
+                                            </span>
+                                        @endif
                                     </td>
 
                                     {{-- MPR Status & Action (Centered) --}}
@@ -291,7 +310,7 @@
                             @empty
                             <tbody>
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="fas fa-folder-open fa-3x mb-3 d-block text-gray-300"></i>
                                         No projects found.
                                     </td>

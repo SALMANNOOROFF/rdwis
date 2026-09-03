@@ -878,13 +878,18 @@ class PurchaseController extends Controller
             return response()->json(['error' => 'Quote not found'], 404);
         }
 
-        $purchase->pcs_price = $selectedQuote->qte_price;
-        $purchase->pcs_midprice = $selectedQuote->qte_price;
-        $purchase->save();
+        $pricing = app(\App\Services\PurchasePricingService::class);
+        $pricing->markRecommended((int) $purchase->pcs_id, (int) $selectedQuote->qte_id);
+        $pricing->applyRecommendedQuote((int) $purchase->pcs_id);
+
+        $purchase->refresh();
 
         return response()->json([
             'success' => true,
-            'new_price' => $selectedQuote->qte_price,
+            'new_price' => $purchase->pcs_price,
+            'base_price' => $purchase->pcs_intprice,
+            'sst' => $purchase->pcs_inttax,
+            'gst' => $purchase->pcs_midtax,
             'firm_name' => $selectedQuote->firm?->frm_name ?? $selectedQuote->qte_firmname,
         ]);
     }

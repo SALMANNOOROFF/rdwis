@@ -87,9 +87,8 @@ class PurchaseProcurementController extends Controller
         $closed = Purchase::with(['unit', 'project', 'latestDecision.account'])
             ->whereBetween('pcs_unt_id', [$lower, $upper])
             ->whereIn(\Illuminate\Support\Facades\DB::raw("LOWER(TRIM(COALESCE(pcs_type, 'ps')))"), $psTypes)
-            ->whereIn('pcs_status', ['Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+            ->whereIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected'])
             ->orderBy('pcs_id', 'desc')
-            ->limit(50)
             ->get();
 
         // Metrics

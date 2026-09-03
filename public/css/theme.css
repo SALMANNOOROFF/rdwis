@@ -280,30 +280,29 @@ hr {
   color: var(--rd-text1) !important;
 }
 
-/* Active Nav Link: Soft Sage background + Sage text + Sage Left Accent */
+/* Active Nav Link: Clean Warm Neutral + Cyan/Blue Accent (No Green Highlight) */
 .nav-sidebar > .nav-item > .nav-link.active,
 .nav-sidebar .nav-treeview > .nav-item > .nav-link.active {
-  background-color: var(--rd-primary-100) !important;
-  color: var(--rd-primary-700) !important;
+  background-color: var(--rd-neutral-200) !important;
+  color: var(--rd-text1) !important;
   font-weight: 700 !important;
-  border-left: 3px solid var(--rd-primary-600) !important;
+  border-left: 3px solid #0284c7 !important;
 }
 
 .nav-sidebar .nav-icon {
-  color: var(--rd-text3) !important;
   margin-right: 8px;
   width: 1.1em;
   text-align: center;
 }
 .nav-sidebar .nav-link.active .nav-icon {
-  color: var(--rd-primary-600) !important;
+  color: inherit;
 }
 .nav-sidebar .nav-link:hover .nav-icon {
   color: var(--rd-text1) !important;
 }
 
 .nav-sidebar .nav-treeview {
-  background-color: rgba(113,140,105,0.03) !important;
+  background-color: transparent !important;
 }
 
 
@@ -953,15 +952,128 @@ label,
   animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes slideInDown {
-  0% {
-    transform: translateX(-50%) translateY(-120%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
+/* =========================================================================
+   SIDEBAR COLLAPSED (MINI) MODE FIXES — ICONS ONLY & CLEAN PROFILE HIDING
+   ========================================================================= */
+body.sidebar-collapse .main-sidebar:not(:hover) .user-panel,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .user-panel {
+    display: none !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
 }
+
+body.sidebar-collapse .main-sidebar:not(:hover) .brand-link,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .brand-link {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0.8125rem 0.5rem !important;
+    text-align: center !important;
+}
+
+body.sidebar-collapse .main-sidebar:not(:hover) .brand-link .brand-image,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .brand-link .brand-image {
+    margin: 0 auto !important;
+    float: none !important;
+    max-height: 33px !important;
+}
+
+body.sidebar-collapse .main-sidebar:not(:hover) .brand-link .brand-text,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .brand-link .brand-text {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    opacity: 0 !important;
+}
+
+body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link p,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link p,
+body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-header,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-header,
+body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link .right,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link .right,
+body.sidebar-collapse .main-sidebar:not(:hover) .nav-treeview {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    opacity: 0 !important;
+}
+
+body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 4.6rem !important;
+    padding: 0.75rem 0 !important;
+    margin: 2px 0 !important;
+    text-align: center !important;
+}
+
+body.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link .nav-icon,
+body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .nav-sidebar .nav-link .nav-icon {
+    margin: 0 auto !important;
+    font-size: 1.3rem !important;
+    display: inline-block !important;
+    text-align: center !important;
+    float: none !important;
+    width: auto !important;
+}
+
+/* When hovering over collapsed sidebar -> smooth expand */
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover {
+    width: 250px !important;
+}
+
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover .brand-link {
+    display: block !important;
+    text-align: left !important;
+    padding: 0.8125rem 0.5rem !important;
+}
+
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover .brand-link .brand-text {
+    display: inline-block !important;
+    visibility: visible !important;
+    width: auto !important;
+    opacity: 1 !important;
+}
+
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover .user-panel {
+    display: flex !important;
+    height: auto !important;
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+    padding-bottom: 1rem !important;
+}
+
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-link {
+    display: flex !important;
+    width: auto !important;
+    padding-right: 28px !important;
+    padding-left: 1rem !important;
+    justify-content: flex-start !important;
+}
+
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-link p {
+    display: inline-flex !important;
+    visibility: visible !important;
+    width: 100% !important;
+    opacity: 1 !important;
+}
+
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-header {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body.sidebar-collapse.sidebar-mini .main-sidebar:hover .nav-sidebar .nav-link .nav-icon {
+    margin-right: 0.5rem !important;
+    font-size: 1.1rem !important;
+}
+
 
 

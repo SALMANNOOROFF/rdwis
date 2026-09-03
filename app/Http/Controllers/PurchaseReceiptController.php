@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseReceiptController extends Controller
@@ -12,26 +13,60 @@ class PurchaseReceiptController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user();
+        [$lower, $upper] = $this->getUserHorizon($user);
+
         $fulfillmentFilter = $request->get('fulfillment', 'All');
+        $unitFilter = $request->get('unit_id', 'All');
+        $search = trim($request->get('search', ''));
 
         $query = DB::table('pur.purcases as p')
             ->leftJoin('cen.heads as h', 'p.pcs_hed_id', '=', 'h.hed_id')
             ->leftJoin('cen.units as u', 'p.pcs_unt_id', '=', 'u.unt_id')
-            ->where('p.pcs_status', 'Approved')
+            ->leftJoin('cen.units as iu', 'p.pcs_intunt_id', '=', 'iu.unt_id')
+            ->leftJoin('frm.firmz as f', 'p.pcs_frm_id', '=', 'f.frm_id')
+            ->whereIn('p.pcs_status', ['Approved', 'Fulfilled', 'Partially Fulfilled'])
+            ->whereBetween('p.pcs_intunt_id', [$lower, $upper])
             ->select(
                 'p.*',
                 'h.hed_code',
                 'h.hed_name',
-                'u.unt_namesh'
+                'u.unt_namesh',
+                'iu.unt_namesh as int_unt_namesh',
+                'f.frm_name'
             );
 
         if ($fulfillmentFilter !== 'All') {
             $query->where('p.pcs_fulfillment_status', $fulfillmentFilter);
         }
 
+        if ($unitFilter !== 'All' && is_numeric($unitFilter)) {
+            $query->where('p.pcs_intunt_id', (int)$unitFilter);
+        }
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('p.pcs_title', 'ILIKE', "%{$search}%")
+                  ->orWhere('f.frm_name', 'ILIKE', "%{$search}%")
+                  ->orWhere('h.hed_code', 'ILIKE', "%{$search}%")
+                  ->orWhere('h.hed_name', 'ILIKE', "%{$search}%");
+
+                if (is_numeric($search)) {
+                    $q->orWhere('p.pcs_id', (int)$search)
+                      ->orWhere('p.pcs_minute', (int)$search);
+                }
+            });
+        }
+
+        // Available units within horizon for dropdown
+        $units = DB::table('cen.units')
+            ->whereBetween('unt_id', [$lower, $upper])
+            ->orderBy('unt_namesh')
+            ->get();
+
         $purchases = $query->orderBy('p.pcs_id', 'desc')->paginate(20);
 
-        return view('purchase.receipts.index', compact('purchases', 'fulfillmentFilter'));
+        return view('purchase.receipts.index', compact('purchases', 'fulfillmentFilter', 'unitFilter', 'search', 'units'));
     }
 
     /**
@@ -47,9 +82,11 @@ class PurchaseReceiptController extends Controller
         $purchase = DB::table('pur.purcases as p')
             ->leftJoin('cen.heads as h', 'p.pcs_hed_id', '=', 'h.hed_id')
             ->leftJoin('cen.units as u', 'p.pcs_unt_id', '=', 'u.unt_id')
+            ->leftJoin('cen.units as iu', 'p.pcs_intunt_id', '=', 'iu.unt_id')
+            ->leftJoin('frm.firmz as f', 'p.pcs_frm_id', '=', 'f.frm_id')
             ->where('p.pcs_id', $pcs_id)
-            ->where('p.pcs_status', 'Approved')
-            ->select('p.*', 'h.hed_code', 'h.hed_name', 'u.unt_namesh')
+            ->whereIn('p.pcs_status', ['Approved', 'Fulfilled', 'Partially Fulfilled'])
+            ->select('p.*', 'h.hed_code', 'h.hed_name', 'u.unt_namesh', 'iu.unt_namesh as int_unt_namesh', 'f.frm_name')
             ->firstOrFail();
 
         $items = DB::table('pur.purcaseitems')
@@ -61,6 +98,14 @@ class PurchaseReceiptController extends Controller
             ->where('prt_pcs_id', $pcs_id)
             ->orderBy('prt_id', 'desc')
             ->get();
+
+        // Attach receipt items to previous receipts
+        foreach ($previousReceipts as $pr) {
+            $pr->items = DB::table('pur.purreceiptitems')
+                ->where('pti_prt_id', $pr->prt_id)
+                ->orderBy('pti_serial', 'asc')
+                ->get();
+        }
 
         return view('purchase.receipts.create', compact('purchase', 'items', 'previousReceipts'));
     }
@@ -76,15 +121,18 @@ class PurchaseReceiptController extends Controller
         }
 
         $request->validate([
+            'prt_date' => 'nullable|date|before_or_equal:today',
             'items' => 'required|array',
             'items.*.received_qty' => 'nullable|numeric|min:0',
         ]);
 
+        $prtDate = $request->filled('prt_date') ? $request->prt_date : now()->toDateString();
+
         $purchase = DB::table('pur.purcases')->where('pcs_id', $pcs_id)->firstOrFail();
 
-        // Validation 1: Re-verify case is Approved
-        if ($purchase->pcs_status !== 'Approved') {
-            return back()->with('error', 'Only Approved purchase cases are eligible for goods receipt.');
+        // Validation 1: Re-verify case is Approved or Partially Fulfilled
+        if (!in_array($purchase->pcs_status, ['Approved', 'Partially Fulfilled'])) {
+            return back()->with('error', 'Only Approved or active purchase cases are eligible for goods receipt.');
         }
 
         // Validation 2: Block receipt if case is already Fully Received
@@ -113,15 +161,27 @@ class PurchaseReceiptController extends Controller
         ];
         $isMaterialCase = in_array(strtolower(trim($purchase->pcs_type ?? '')), $materialPcsTypes);
 
-        DB::transaction(function () use ($pcs_id, $purchase, $caseItems, $request, $isMaterialCase) {
+        DB::transaction(function () use ($pcs_id, $purchase, $caseItems, $request, $isMaterialCase, $prtDate) {
+            // Calculate total financial value of this receipt batch (prt_value)
+            $totalReceiptValue = 0;
+            foreach ($request->items as $pci_id => $data) {
+                $receivedQty = (float)($data['received_qty'] ?? 0);
+                if ($receivedQty <= 0) continue;
+                $item = $caseItems->get($pci_id);
+                if (!$item) continue;
+                $itemPrice = (float)($item->pci_price ?? 0);
+                $totalReceiptValue += ($receivedQty * $itemPrice);
+            }
+
             // 1. Create Receipt master record
             $prt_id = DB::table('pur.purreceipts')->insertGetId([
-                'prt_date'   => now()->toDateString(),
+                'prt_date'   => $prtDate,
                 'prt_unt_id' => $purchase->pcs_unt_id,
                 'prt_prj_id' => $purchase->pcs_hed_id,
                 'prt_status' => 'Finalized',
                 'prt_pcs_id' => $pcs_id,
                 'prt_dtg'    => now(),
+                'prt_value'  => $totalReceiptValue,
             ], 'prt_id');
 
             $serial = 1;
@@ -138,7 +198,7 @@ class PurchaseReceiptController extends Controller
                 $alreadyFulfilled = (float)($item->pci_fulfilment ?? 0);
                 $remainingOrdered = max(0, $orderedQty - $alreadyFulfilled);
 
-                if ($receivedQty > $remainingOrdered) {
+                if ($receivedQty > ($remainingOrdered + 0.001)) {
                     throw new \Exception("Received quantity ({$receivedQty}) exceeds remaining ordered quantity ({$remainingOrdered}) for item: {$item->pci_desc}");
                 }
 
@@ -158,8 +218,8 @@ class PurchaseReceiptController extends Controller
                     ->where('pci_id', $pci_id)
                     ->update(['pci_fulfilment' => $newFulfilment]);
 
-                // 4. Populate Inventory Assets (ina.invats & ina.invatcomps) ONLY for material cases (Whitelist)
-                if ($isMaterialCase) {
+                // 4. Populate Inventory Assets (ina.invats & ina.invatcomps) ONLY for non-service items (pci_type != 3) and material cases
+                if ($isMaterialCase && (int)($item->pci_type ?? 1) !== 3) {
                     $ias_id = DB::table('ina.invats')->insertGetId([
                         'ias_pcs_id'    => $pcs_id,
                         'ias_pci_id'    => $pci_id,
@@ -168,7 +228,7 @@ class PurchaseReceiptController extends Controller
                         'ias_qtyunit'   => $item->pci_qtyunit,
                         'ias_unt_id'    => $purchase->pcs_unt_id,
                         'ias_effhed_id' => $purchase->pcs_effhed_id,
-                        'ias_chargedate'=> now()->toDateString(),
+                        'ias_chargedate'=> $prtDate,
                         'ias_price'     => $item->pci_price ?? 0,
                         'ias_type'      => (string)($item->pci_type ?? '1'),
                         'ias_subtype'   => (string)($item->pci_subtype ?? 'General'),
@@ -185,35 +245,83 @@ class PurchaseReceiptController extends Controller
                 }
             }
 
-            // 5. Check total fulfillment status for the case
-            $updatedItems = DB::table('pur.purcaseitems')->where('pci_pcs_id', $pcs_id)->get();
-            $fullyReceived = true;
-            $partiallyReceived = false;
+            // 5. Check total fulfillment status for the case (reproducing legacy cmdFinalize_Click check)
+            $unfulfilledItemsCount = DB::table('pur.purcaseitems')
+                ->where('pci_pcs_id', $pcs_id)
+                ->whereRaw('COALESCE(pci_fulfilment, 0) < pci_qty')
+                ->count();
 
-            foreach ($updatedItems as $it) {
-                $ordered = (float)($it->pci_qty ?? 0);
-                $fulfilled = (float)($it->pci_fulfilment ?? 0);
-                if ($fulfilled < $ordered) {
-                    $fullyReceived = false;
-                }
-                if ($fulfilled > 0) {
-                    $partiallyReceived = true;
-                }
+            if ($unfulfilledItemsCount === 0) {
+                // All items fully fulfilled across all receipts
+                DB::table('pur.purcases')
+                    ->where('pcs_id', $pcs_id)
+                    ->update([
+                        'pcs_status'             => 'Fulfilled',
+                        'pcs_closedtg'           => now(),
+                        'pcs_fulfillment_status' => 'Fully Received',
+                    ]);
+            } else {
+                // Partially fulfilled - remains Approved
+                DB::table('pur.purcases')
+                    ->where('pcs_id', $pcs_id)
+                    ->update([
+                        'pcs_status'             => 'Approved',
+                        'pcs_fulfillment_status' => 'Partially Received',
+                    ]);
             }
-
-            $fulfillmentStatus = 'Pending Receipt';
-            if ($fullyReceived) {
-                $fulfillmentStatus = 'Fully Received';
-            } elseif ($partiallyReceived) {
-                $fulfillmentStatus = 'Partially Received';
-            }
-
-            DB::table('pur.purcases')
-                ->where('pcs_id', $pcs_id)
-                ->update(['pcs_fulfillment_status' => $fulfillmentStatus]);
         });
 
-        return redirect()->route('purchase.receipts.index')->with('success', 'Goods receipt finalized and inventory items updated successfully!');
+        return redirect()->route('purchase.receipts.index')->with('success', 'Goods receipt finalized, inventory assets recorded, and case status updated successfully!');
+    }
+
+    /**
+     * Cancel an approved or partially fulfilled purchase case (CancelPC equivalent).
+     */
+    public function cancelCase(Request $request, $pcs_id)
+    {
+        $purchase = DB::table('pur.purcases')->where('pcs_id', $pcs_id)->firstOrFail();
+
+        // Check for any draft receipts for this case
+        $draftReceipt = DB::table('pur.purreceipts')
+            ->where('prt_pcs_id', $pcs_id)
+            ->where('prt_status', 'Draft')
+            ->first();
+
+        if ($draftReceipt) {
+            return back()->with('error', 'A draft purchase receipt exists for this case. It cannot be cancelled until draft receipts are finalized or cancelled.');
+        }
+
+        // Check if any finalized receipts exist
+        $hasFinalizedReceipts = DB::table('pur.purreceipts')
+            ->where('prt_pcs_id', $pcs_id)
+            ->where('prt_status', 'Finalized')
+            ->exists();
+
+        DB::transaction(function () use ($pcs_id, $hasFinalizedReceipts) {
+            if ($hasFinalizedReceipts) {
+                // Partially fulfilled history -> closed as Partially Fulfilled
+                DB::table('pur.purcases')
+                    ->where('pcs_id', $pcs_id)
+                    ->update([
+                        'pcs_status'   => 'Partially Fulfilled',
+                        'pcs_closedtg' => now(),
+                    ]);
+            } else {
+                // No receipts -> Cancelled
+                DB::table('pur.purcases')
+                    ->where('pcs_id', $pcs_id)
+                    ->update([
+                        'pcs_status'   => 'Cancelled',
+                        'pcs_closedtg' => now(),
+                    ]);
+            }
+        });
+
+        $statusMsg = $hasFinalizedReceipts
+            ? 'The remaining unfulfilled balance of this purchase case has been cancelled (marked Partially Fulfilled).'
+            : 'The purchase case has been cancelled successfully.';
+
+        return redirect()->route('purchase.receipts.index')->with('success', $statusMsg);
     }
 
     /**
@@ -385,5 +493,42 @@ class PurchaseReceiptController extends Controller
             ]);
 
         return back()->with('success', 'Asset status updated successfully!');
+    }
+
+    /**
+     * Helper to resolve the logged-in user's horizon lower and upper bounds.
+     */
+    private function getUserHorizon($user): array
+    {
+        if (!$user) {
+            return [0, 99999999];
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHqOrFinance = in_array($userArea, ['fin', 'rdw', 'hqs', 'nrdi', 'it', 'rdwprj', 'prjrdw', 'proc', 'prc'], true);
+
+        if ($isHqOrFinance) {
+            $lower = (int)($user->acc_lowerm ?: 0);
+            $upper = (int)($user->acc_upperm ?: 99999999);
+        } else {
+            $lower = (int)$user->acc_lowers;
+            $upper = (int)$user->acc_uppers;
+
+            if ($lower === 0 && $upper === 0) {
+                $lower = (int)$user->acc_lowerm;
+                $upper = (int)$user->acc_upperm;
+            }
+
+            if ($lower === 0 && $upper === 0) {
+                $lower = (int)$user->acc_unt_id;
+                $upper = (int)$user->acc_unt_id;
+            }
+        }
+
+        if ($lower === 0 && $upper === 0) {
+            return [0, 99999999];
+        }
+
+        return [$lower, $upper];
     }
 }

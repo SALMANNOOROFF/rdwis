@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Division;
 
 use App\Http\Controllers\Controller;
 use App\Models\HrCtrCase;
+use App\Models\HrCtrCasePlan;
 use App\Models\HrContract;
 use App\Models\HrEmployee;
 use App\Services\ContractCaseApprovalService;
@@ -86,18 +87,46 @@ class ContractCaseController extends Controller
             ->orderBy('prj_code')
             ->get();
 
-        // Fetch existing employees in this division for Cr (Renewal) and Ce (Extension)
+        // Fetch existing employees in this division based on case type
         $employees = collect();
-        if (in_array(strtoupper($type), ['CR', 'CE', 'RH'])) {
+        $typeUpper = strtoupper(trim((string)$type));
+
+        if (in_array($typeUpper, ['CR', 'CE'])) {
+            // Cr (Renewal) and Ce (Extension): ONLY Active employees
             $employees = DB::table('hr.emps')
                 ->where(function ($q) use ($divisionId) {
                     if ($divisionId > 0) {
                         $q->where('emp_unt_id', $divisionId);
                     }
                 })
-                ->select('emp_id', 'emp_name', 'emp_cnic', 'emp_rank', 'emp_title')
+                ->where('emp_status', 'Active')
+                ->select('emp_id', 'emp_name', 'emp_cnic', 'emp_rank', 'emp_title', 'emp_status')
                 ->orderBy('emp_name')
                 ->get();
+        } elseif ($typeUpper === 'RH') {
+            // Rh (Rehiring): ONLY Released or Terminated employees
+            $employees = DB::table('hr.emps')
+                ->where(function ($q) use ($divisionId) {
+                    if ($divisionId > 0) {
+                        $q->where('emp_unt_id', $divisionId);
+                    }
+                })
+                ->whereIn('emp_status', ['Released', 'Terminated'])
+                ->select('emp_id', 'emp_name', 'emp_cnic', 'emp_rank', 'emp_title', 'emp_status')
+                ->orderBy('emp_name')
+                ->get();
+        }
+
+        // If a specific employee is targeted via URL query, ensure they are present in the dropdown
+        $preselectedEmpId = trim((string)$request->query('emp_id', ''));
+        if (!empty($preselectedEmpId) && !$employees->contains('emp_id', $preselectedEmpId)) {
+            $preEmp = DB::table('hr.emps')
+                ->where('emp_id', $preselectedEmpId)
+                ->select('emp_id', 'emp_name', 'emp_cnic', 'emp_rank', 'emp_title', 'emp_status')
+                ->first();
+            if ($preEmp) {
+                $employees->prepend($preEmp);
+            }
         }
 
         return view('division.contract-cases.create', compact('type', 'projects', 'divisionName', 'employees'));
@@ -140,6 +169,8 @@ class ContractCaseController extends Controller
             $suggestedCrStart = $effectiveEnd->copy()->addDay()->format('Y-m-d');
             $suggestedCrEnd = $effectiveEnd->copy()->addDay()->addYear()->subDay()->format('Y-m-d');
             $suggestedCeEnd = $effectiveEnd->copy()->addMonth()->format('Y-m-d');
+            $suggestedRhStart = $effectiveEnd->copy()->addDay()->format('Y-m-d');
+            $suggestedRhEnd = $effectiveEnd->copy()->addDay()->addYear()->subDay()->format('Y-m-d');
 
             $contractData = [
                 'ctr_id'             => $lastContract->ctr_id,
@@ -154,6 +185,27 @@ class ContractCaseController extends Controller
                 'suggested_cr_start' => $suggestedCrStart,
                 'suggested_cr_end'   => $suggestedCrEnd,
                 'suggested_ce_end'   => $suggestedCeEnd,
+                'suggested_rh_start' => $suggestedRhStart,
+                'suggested_rh_end'   => $suggestedRhEnd,
+            ];
+        } else {
+            $suggestedRhStart = now()->format('Y-m-d');
+            $suggestedRhEnd = now()->copy()->addYear()->subDay()->format('Y-m-d');
+            $contractData = [
+                'ctr_id'             => null,
+                'ctr_jobtitle'       => $emp->emp_title,
+                'ctr_grade'          => $emp->emp_rank,
+                'ctr_salary'         => null,
+                'ctr_type'           => 'Full Time',
+                'ctr_startdt'        => $suggestedRhStart,
+                'ctr_enddt'          => $suggestedRhEnd,
+                'ctr_termindt'       => null,
+                'effective_enddt'    => null,
+                'suggested_cr_start' => $suggestedRhStart,
+                'suggested_cr_end'   => $suggestedRhEnd,
+                'suggested_ce_end'   => null,
+                'suggested_rh_start' => $suggestedRhStart,
+                'suggested_rh_end'   => $suggestedRhEnd,
             ];
         }
 
@@ -161,9 +213,10 @@ class ContractCaseController extends Controller
             'success'         => true,
             'has_active_case' => false,
             'employee'        => [
-                'emp_id'   => $emp->emp_id,
-                'emp_name' => $emp->emp_name,
-                'emp_cnic' => $emp->emp_cnic,
+                'emp_id'     => $emp->emp_id,
+                'emp_name'   => $emp->emp_name,
+                'emp_cnic'   => $emp->emp_cnic,
+                'emp_status' => $emp->emp_status,
             ],
             'last_contract'   => $contractData,
         ]);
@@ -195,6 +248,16 @@ class ContractCaseController extends Controller
         ]);
 
         $type = strtoupper(trim($validated['ctc_type']));
+
+        // 1-Year Maximum Validity Cap (applies to ALL types: Hg, Cr, Ce, Rh)
+        $startDt = Carbon::parse($validated['ctc_newstartdt']);
+        $maxEndDt = $startDt->copy()->addYear()->subDay();
+        if (Carbon::parse($validated['ctc_newenddt'])->gt($maxEndDt)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Contract duration cannot exceed 1 year from the start date.'
+            ], 422);
+        }
 
         // Ce validation: extension remarks mandatory
         if ($type === 'CE' && empty(trim((string)($validated['ctc_terminremarks'] ?? '')))) {
@@ -298,6 +361,11 @@ class ContractCaseController extends Controller
                 $monthlyMap,
                 $singleProjId ? (int)$singleProjId : null
             );
+
+            // Legacy GetContractCaseProject logic: case-level ctc_prj_id reflects the first month's assignment
+            $firstPlan = HrCtrCasePlan::where('ccp_ctc_id', $case->ctc_id)->orderBy('ccp_startdt', 'asc')->first();
+            $case->ctc_prj_id = $firstPlan ? $firstPlan->ccp_hed_id : ($singleProjId ? (int)$singleProjId : null);
+            $case->save();
 
             // Calculate exact price
             $this->pricingService->calculatePrice($case);
@@ -411,6 +479,16 @@ class ContractCaseController extends Controller
 
         $type = strtoupper(trim($case->ctc_type));
 
+        // 1-Year Maximum Validity Cap (applies to ALL types: Hg, Cr, Ce, Rh)
+        $startDt = Carbon::parse($validated['ctc_newstartdt']);
+        $maxEndDt = $startDt->copy()->addYear()->subDay();
+        if (Carbon::parse($validated['ctc_newenddt'])->gt($maxEndDt)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Contract duration cannot exceed 1 year from the start date.'
+            ], 422);
+        }
+
         // Ce validation: enforce immutable fields server-side
         if ($type === 'CE') {
             if (empty(trim((string)($validated['ctc_terminremarks'] ?? '')))) {
@@ -498,6 +576,11 @@ class ContractCaseController extends Controller
                 $monthlyMap,
                 $singleProjId ? (int)$singleProjId : null
             );
+
+            // Legacy GetContractCaseProject logic: case-level ctc_prj_id reflects the first month's assignment
+            $firstPlan = HrCtrCasePlan::where('ccp_ctc_id', $case->ctc_id)->orderBy('ccp_startdt', 'asc')->first();
+            $case->ctc_prj_id = $firstPlan ? $firstPlan->ccp_hed_id : ($singleProjId ? (int)$singleProjId : null);
+            $case->save();
 
             // Recalculate price
             $this->pricingService->calculatePrice($case);

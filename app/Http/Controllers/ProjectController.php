@@ -33,6 +33,9 @@ class ProjectController extends Controller
 
     $projects = $query->orderBy('prj_id', 'desc')->get();
     
+    // Attach active employee counts for each project
+    $this->attachProjectEmployeeCounts($projects);
+
     // Fetch live financial expenditures
     $finService = app(\App\Services\FinancialIntelligenceService::class);
     foreach ($projects as $project) {
@@ -102,6 +105,8 @@ class ProjectController extends Controller
         'term' => $term,
     ]);
 
+    $this->attachProjectEmployeeCounts($projects);
+
     $divisions = Unit::where('unt_type', 'Division')
         ->whereBetween('unt_id', [$lower, $upper])
         ->orderBy('unt_name', 'asc')
@@ -149,10 +154,29 @@ class ProjectController extends Controller
         $balance = $head->balance ?? (($project->prj_propcost ?? 0) - $totalSpent);
         $spentPercentage = ($project->prj_propcost ?? 0) > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
 
+        $equipSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'equip') !== false);
+        $hrSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'hr') !== false || stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'personnel') !== false);
+        $miscSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'misc') !== false);
+
+        $equipExp = (float)(is_array($equipSh) ? ($equipSh['expenditure'] ?? 0) : ($equipSh->expenditure ?? 0));
+        $equipAlloc = (float)(is_array($equipSh) ? ($equipSh['allocation'] ?? 0) : ($equipSh->allocation ?? 0));
+        $equipPct = $equipAlloc > 0 ? round(($equipExp / $equipAlloc) * 100) : ($totalSpent > 0 ? round(($equipExp / $totalSpent) * 100) : 0);
+
+        $hrExp = (float)(is_array($hrSh) ? ($hrSh['expenditure'] ?? 0) : ($hrSh->expenditure ?? 0));
+        $hrAlloc = (float)(is_array($hrSh) ? ($hrSh['allocation'] ?? 0) : ($hrSh->allocation ?? 0));
+        $hrPct = $hrAlloc > 0 ? round(($hrExp / $hrAlloc) * 100) : ($totalSpent > 0 ? round(($hrExp / $totalSpent) * 100) : 0);
+
+        $miscExp = (float)(is_array($miscSh) ? ($miscSh['expenditure'] ?? 0) : ($miscSh->expenditure ?? 0));
+        $miscAlloc = (float)(is_array($miscSh) ? ($miscSh['allocation'] ?? 0) : ($miscSh->allocation ?? 0));
+        $miscPct = $miscAlloc > 0 ? round(($miscExp / $miscAlloc) * 100) : ($totalSpent > 0 ? round(($miscExp / $totalSpent) * 100) : 0);
+
         $finData = [
-            'equip' => $totalSpent * 0.45,
-            'hr'    => $totalSpent * 0.35,
-            'misc'  => $totalSpent * 0.20,
+            'equip' => $equipExp ?: ($totalSpent * 0.45),
+            'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
+            'hr'    => $hrExp ?: ($totalSpent * 0.35),
+            'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
+            'misc'  => $miscExp ?: ($totalSpent * 0.20),
+            'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
         ];
 
         $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
@@ -168,14 +192,46 @@ class ProjectController extends Controller
 
         $showProjectActualSection = false;
         $showPrjShareValue = false;
-        $team = collect();
+        $today = \Carbon\Carbon::today()->toDateString();
+        $heads = DB::table('cen.heads')->get()->keyBy('hed_id');
+
+        $activeEmployees = DB::table('hr.emps')
+            ->whereRaw("LOWER(emp_status) IN ('active','current')")
+            ->get(['emp_id', 'emp_hed_id']);
+
+        $activePlans = DB::table('hr.contractplans as cp')
+            ->join('hr.contracts as c', 'c.ctr_id', '=', 'cp.cpn_ctr_id')
+            ->whereRaw('? between cp.cpn_startdt and cp.cpn_enddt', [$today])
+            ->whereNotNull('cp.cpn_hed_id')
+            ->select('c.ctr_num as emp_id', 'cp.cpn_hed_id')
+            ->get()
+            ->keyBy('emp_id');
+
+        $teamEmpIds = [];
+        foreach ($activeEmployees as $emp) {
+            $currentHeadId = $activePlans->has($emp->emp_id)
+                ? $activePlans[$emp->emp_id]->cpn_hed_id
+                : $emp->emp_hed_id;
+
+            $h = $heads->get($currentHeadId);
+            $prjId = null;
+            if ($h) {
+                $prjId = $h->hed_prj_id ?: $h->hed_id;
+            }
+
+            if ($prjId == $id) {
+                $teamEmpIds[] = $emp->emp_id;
+            }
+        }
+
+        $team = \App\Models\Employee::whereIn('hr.emps.emp_id', $teamEmpIds)
+            ->leftJoin('hr.empsexta', 'hr.emps.emp_id', '=', 'hr.empsexta.empexta_emp_id')
+            ->select('hr.emps.*', 'hr.empsexta.emp_email', 'hr.empsexta.emp_mobile')
+            ->get();
+
         if ($head) {
             $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
             $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
-            $team = \App\Models\Employee::where('emp_hed_id', $headRecord->hed_id)
-                ->leftJoin('hr.empsexta', 'hr.emps.emp_id', '=', 'hr.empsexta.empexta_emp_id')
-                ->select('hr.emps.*', 'hr.empsexta.emp_email', 'hr.empsexta.emp_mobile')
-                ->get();
         }
 
         return view('projects.openprojectdetails', compact(
@@ -216,10 +272,29 @@ class ProjectController extends Controller
         $balance = $head->balance ?? ($project->prj_propcost - $totalSpent);
         $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
 
+        $equipSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'equip') !== false);
+        $hrSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'hr') !== false || stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'personnel') !== false);
+        $miscSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'misc') !== false);
+
+        $equipExp = (float)(is_array($equipSh) ? ($equipSh['expenditure'] ?? 0) : ($equipSh->expenditure ?? 0));
+        $equipAlloc = (float)(is_array($equipSh) ? ($equipSh['allocation'] ?? 0) : ($equipSh->allocation ?? 0));
+        $equipPct = $equipAlloc > 0 ? round(($equipExp / $equipAlloc) * 100) : ($totalSpent > 0 ? round(($equipExp / $totalSpent) * 100) : 0);
+
+        $hrExp = (float)(is_array($hrSh) ? ($hrSh['expenditure'] ?? 0) : ($hrSh->expenditure ?? 0));
+        $hrAlloc = (float)(is_array($hrSh) ? ($hrSh['allocation'] ?? 0) : ($hrSh->allocation ?? 0));
+        $hrPct = $hrAlloc > 0 ? round(($hrExp / $hrAlloc) * 100) : ($totalSpent > 0 ? round(($hrExp / $totalSpent) * 100) : 0);
+
+        $miscExp = (float)(is_array($miscSh) ? ($miscSh['expenditure'] ?? 0) : ($miscSh->expenditure ?? 0));
+        $miscAlloc = (float)(is_array($miscSh) ? ($miscSh['allocation'] ?? 0) : ($miscSh->allocation ?? 0));
+        $miscPct = $miscAlloc > 0 ? round(($miscExp / $miscAlloc) * 100) : ($totalSpent > 0 ? round(($miscExp / $totalSpent) * 100) : 0);
+
         $finData = [
-            'equip' => $totalSpent * 0.45,
-            'hr'    => $totalSpent * 0.35,
-            'misc'  => $totalSpent * 0.20
+            'equip' => $equipExp ?: ($totalSpent * 0.45),
+            'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
+            'hr'    => $hrExp ?: ($totalSpent * 0.35),
+            'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
+            'misc'  => $miscExp ?: ($totalSpent * 0.20),
+            'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
         ];
 
         $mprsSubmitted = PrgHistory::where('pgh_xprj_id', $id)->count();
@@ -234,20 +309,125 @@ class ProjectController extends Controller
 
         $showProjectActualSection = false;
         $showPrjShareValue = false;
-        $team = collect();
+        $today = \Carbon\Carbon::today()->toDateString();
+        $heads = DB::table('cen.heads')->get()->keyBy('hed_id');
+        $activeEmployees = DB::table('hr.emps')
+            ->whereRaw("LOWER(emp_status) IN ('active','current')")
+            ->get(['emp_id', 'emp_hed_id']);
+
+        $activePlans = DB::table('hr.contractplans as cp')
+            ->join('hr.contracts as c', 'c.ctr_id', '=', 'cp.cpn_ctr_id')
+            ->whereRaw('? between cp.cpn_startdt and cp.cpn_enddt', [$today])
+            ->whereNotNull('cp.cpn_hed_id')
+            ->select('c.ctr_num as emp_id', 'cp.cpn_hed_id')
+            ->get()
+            ->keyBy('emp_id');
+
+        $teamEmpIds = [];
+        foreach ($activeEmployees as $emp) {
+            $currentHeadId = $activePlans->has($emp->emp_id)
+                ? $activePlans[$emp->emp_id]->cpn_hed_id
+                : $emp->emp_hed_id;
+
+            $h = $heads->get($currentHeadId);
+            $prjId = null;
+            if ($h) {
+                $prjId = $h->hed_prj_id ?: $h->hed_id;
+            }
+
+            if ($prjId == $id) {
+                $teamEmpIds[] = $emp->emp_id;
+            }
+        }
+
+        $team = \App\Models\Employee::whereIn('hr.emps.emp_id', $teamEmpIds)
+            ->leftJoin('hr.empsexta', 'hr.emps.emp_id', '=', 'hr.empsexta.empexta_emp_id')
+            ->select('hr.emps.*', 'hr.empsexta.emp_email', 'hr.empsexta.emp_mobile')
+            ->get();
+
         if ($head) {
             $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
             $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
-            $team = \App\Models\Employee::where('emp_hed_id', $headRecord->hed_id)
-                ->leftJoin('hr.empsexta', 'hr.emps.emp_id', '=', 'hr.empsexta.empexta_emp_id')
-                ->select('hr.emps.*', 'hr.empsexta.emp_email', 'hr.empsexta.emp_mobile')
-                ->get();
         }
 
         return view('projects.openprojectdetails', compact(
             'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
             'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head', 'subheads',
             'showProjectActualSection', 'showPrjShareValue', 'team'
+        ));
+    }
+
+    /**
+     * Dedicated Full Page for Financial Intelligence Report
+     */
+    public function financialView($id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $project = Project::with('milestones', 'attachments', 'unit')->where('prj_id', $id)->firstOrFail();
+
+        // Financial Intelligence (Legacy Logic Integration)
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $id)->first();
+        
+        $head = null;
+        $subheads = [];
+        if ($headRecord) {
+            $head = $finService->getHeadStatus($headRecord->hed_id);
+            $subheads = $finService->getSubheadBreakdown($headRecord->hed_id);
+        }
+
+        $totalSpent = $head->expenditure ?? 0;
+        $balance = $head->balance ?? ($project->prj_propcost - $totalSpent);
+        $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
+
+        $equipSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'equip') !== false);
+        $hrSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'hr') !== false || stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'personnel') !== false);
+        $miscSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'misc') !== false);
+
+        $equipExp = (float)(is_array($equipSh) ? ($equipSh['expenditure'] ?? 0) : ($equipSh->expenditure ?? 0));
+        $equipAlloc = (float)(is_array($equipSh) ? ($equipSh['allocation'] ?? 0) : ($equipSh->allocation ?? 0));
+        $equipPct = $equipAlloc > 0 ? round(($equipExp / $equipAlloc) * 100) : ($totalSpent > 0 ? round(($equipExp / $totalSpent) * 100) : 0);
+
+        $hrExp = (float)(is_array($hrSh) ? ($hrSh['expenditure'] ?? 0) : ($hrSh->expenditure ?? 0));
+        $hrAlloc = (float)(is_array($hrSh) ? ($hrSh['allocation'] ?? 0) : ($hrSh->allocation ?? 0));
+        $hrPct = $hrAlloc > 0 ? round(($hrExp / $hrAlloc) * 100) : ($totalSpent > 0 ? round(($hrExp / $totalSpent) * 100) : 0);
+
+        $miscExp = (float)(is_array($miscSh) ? ($miscSh['expenditure'] ?? 0) : ($miscSh->expenditure ?? 0));
+        $miscAlloc = (float)(is_array($miscSh) ? ($miscSh['allocation'] ?? 0) : ($miscSh->allocation ?? 0));
+        $miscPct = $miscAlloc > 0 ? round(($miscExp / $miscAlloc) * 100) : ($totalSpent > 0 ? round(($miscExp / $totalSpent) * 100) : 0);
+
+        $finData = [
+            'equip' => $equipExp ?: ($totalSpent * 0.45),
+            'equip_alloc' => $equipAlloc,
+            'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
+            'hr'    => $hrExp ?: ($totalSpent * 0.35),
+            'hr_alloc' => $hrAlloc,
+            'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
+            'misc'  => $miscExp ?: ($totalSpent * 0.20),
+            'misc_alloc' => $miscAlloc,
+            'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
+        ];
+
+        $showProjectActualSection = false;
+        $showPrjShareValue = false;
+        if ($head) {
+            $showProjectActualSection = !(round($head->pcc_expenditure, 2) == round($head->pcc_own_exp, 2) && round($head->others_loans_taken, 2) == 0.0);
+            $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
+        }
+
+        // Back navigation URL
+        $backUrl = url()->previous();
+        if (!$backUrl || str_contains($backUrl, 'financial-view')) {
+            $backUrl = route('projects.show', $project->prj_id);
+        }
+
+        return view('projects.financial_view', compact(
+            'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
+            'head', 'subheads', 'showProjectActualSection', 'showPrjShareValue', 'backUrl'
         ));
     }
 
@@ -730,12 +910,58 @@ class ProjectController extends Controller
     $divisions = Unit::where('unt_area', 'prj')->orderBy('unt_name', 'asc')->get();
 
     // 2. Saare Projects uthao (Unit relation ke sath taake naam dikha sakein)
-    // Hum 'paginate' nahi use kar rahe kyunki aapka existing page JS filtering use karta hai
     $projects = Project::with('unit')->orderBy('prj_id', 'desc')->get();
+
+    $this->attachProjectEmployeeCounts($projects);
 
     // 3. Naye View par bhejo
     return view('sord.projects', compact('projects', 'divisions'));
 }
+
+    protected function attachProjectEmployeeCounts($projects)
+    {
+        $today = \Carbon\Carbon::today()->toDateString();
+
+        // 1. Get all active employees
+        $activeEmployees = DB::table('hr.emps')
+            ->whereRaw("LOWER(emp_status) IN ('active','current')")
+            ->get(['emp_id', 'emp_hed_id']);
+
+        // 2. Active contract plans for today
+        $activePlans = DB::table('hr.contractplans as cp')
+            ->join('hr.contracts as c', 'c.ctr_id', '=', 'cp.cpn_ctr_id')
+            ->whereRaw('? between cp.cpn_startdt and cp.cpn_enddt', [$today])
+            ->whereNotNull('cp.cpn_hed_id')
+            ->select('c.ctr_num as emp_id', 'cp.cpn_hed_id')
+            ->get()
+            ->keyBy('emp_id');
+
+        // 3. Map head to project
+        $heads = DB::table('cen.heads')->get()->keyBy('hed_id');
+
+        $projectStaffCounts = [];
+        foreach ($activeEmployees as $emp) {
+            $currentHeadId = $activePlans->has($emp->emp_id)
+                ? $activePlans[$emp->emp_id]->cpn_hed_id
+                : $emp->emp_hed_id;
+
+            $head = $heads->get($currentHeadId);
+            $prjId = null;
+            if ($head) {
+                $prjId = $head->hed_prj_id ?: $head->hed_id;
+            }
+
+            if ($prjId) {
+                $projectStaffCounts[$prjId] = ($projectStaffCounts[$prjId] ?? 0) + 1;
+            }
+        }
+
+        foreach ($projects as $p) {
+            $p->emp_count = (int) ($projectStaffCounts[$p->prj_id] ?? 0);
+        }
+
+        return $projects;
+    }
 
    // --- SORD READ-ONLY PROJECT DETAILS ---
    public function sordShow($id)
@@ -750,6 +976,8 @@ class ProjectController extends Controller
        $balance = $project->prj_propcost;
        $spentPercentage = 0;
        $finData = ['equip' => 0, 'hr' => 0, 'misc' => 0];
+       $head = null;
+       $subheads = [];
        
        if ($headRecord) {
            $head = $finService->getHeadStatus($headRecord->hed_id);
@@ -757,11 +985,30 @@ class ProjectController extends Controller
            $balance = $head->balance ?? ($project->prj_propcost - $totalSpent);
            $spentPercentage = $project->prj_propcost > 0 ? round(($totalSpent / $project->prj_propcost) * 100, 1) : 0;
            
-           // 3. Category Data
+           $subheads = $finService->getSubheadBreakdown($headRecord->hed_id);
+           $equipSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'equip') !== false);
+           $hrSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'hr') !== false || stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'personnel') !== false);
+           $miscSh = collect($subheads)->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'misc') !== false);
+
+           $equipExp = (float)(is_array($equipSh) ? ($equipSh['expenditure'] ?? 0) : ($equipSh->expenditure ?? 0));
+           $equipAlloc = (float)(is_array($equipSh) ? ($equipSh['allocation'] ?? 0) : ($equipSh->allocation ?? 0));
+           $equipPct = $equipAlloc > 0 ? round(($equipExp / $equipAlloc) * 100) : ($totalSpent > 0 ? round(($equipExp / $totalSpent) * 100) : 0);
+
+           $hrExp = (float)(is_array($hrSh) ? ($hrSh['expenditure'] ?? 0) : ($hrSh->expenditure ?? 0));
+           $hrAlloc = (float)(is_array($hrSh) ? ($hrSh['allocation'] ?? 0) : ($hrSh->allocation ?? 0));
+           $hrPct = $hrAlloc > 0 ? round(($hrExp / $hrAlloc) * 100) : ($totalSpent > 0 ? round(($hrExp / $totalSpent) * 100) : 0);
+
+           $miscExp = (float)(is_array($miscSh) ? ($miscSh['expenditure'] ?? 0) : ($miscSh->expenditure ?? 0));
+           $miscAlloc = (float)(is_array($miscSh) ? ($miscSh['allocation'] ?? 0) : ($miscSh->allocation ?? 0));
+           $miscPct = $miscAlloc > 0 ? round(($miscExp / $miscAlloc) * 100) : ($totalSpent > 0 ? round(($miscExp / $totalSpent) * 100) : 0);
+
            $finData = [
-               'equip' => $totalSpent * 0.45,
-               'hr'    => $totalSpent * 0.35,
-               'misc'  => $totalSpent * 0.20
+               'equip' => $equipExp ?: ($totalSpent * 0.45),
+               'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
+               'hr'    => $hrExp ?: ($totalSpent * 0.35),
+               'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
+               'misc'  => $miscExp ?: ($totalSpent * 0.20),
+               'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
            ];
        }
 

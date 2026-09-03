@@ -90,6 +90,60 @@ class HrCtrCase extends Model
         return $this->belongsTo(\App\Models\Unit::class, 'ctc_unt_id', 'unt_id');
     }
 
+    public function division()
+    {
+        return $this->belongsTo(\App\Models\Unit::class, 'ctc_divisionid', 'unt_id');
+    }
+
+    public function newUnit()
+    {
+        return $this->belongsTo(\App\Models\Unit::class, 'ctc_newunt_id', 'unt_id');
+    }
+
+    public function getDivisionNameAttribute(): string
+    {
+        if ($this->division && !empty($this->division->unt_name)) {
+            return $this->division->unt_name;
+        }
+        if ($this->unit && !empty($this->unit->unt_name)) {
+            return $this->unit->unt_name;
+        }
+        if ($this->newUnit && !empty($this->newUnit->unt_name)) {
+            return $this->newUnit->unt_name;
+        }
+        if (!empty($this->ctc_divisionid)) {
+            $u = \App\Models\Unit::find($this->ctc_divisionid);
+            if ($u && !empty($u->unt_name)) return $u->unt_name;
+        }
+        if (!empty($this->ctc_unt_id)) {
+            $u = \App\Models\Unit::find($this->ctc_unt_id);
+            if ($u && !empty($u->unt_name)) return $u->unt_name;
+        }
+        return 'Headquarters / Directorate';
+    }
+
+    public function getDivisionShortAttribute(): string
+    {
+        if ($this->division && !empty($this->division->unt_namesh)) {
+            return $this->division->unt_namesh;
+        }
+        if ($this->unit && !empty($this->unit->unt_namesh)) {
+            return $this->unit->unt_namesh;
+        }
+        if ($this->newUnit && !empty($this->newUnit->unt_namesh)) {
+            return $this->newUnit->unt_namesh;
+        }
+        if (!empty($this->ctc_divisionid)) {
+            $u = \App\Models\Unit::find($this->ctc_divisionid);
+            if ($u && !empty($u->unt_namesh)) return $u->unt_namesh;
+        }
+        if (!empty($this->ctc_unt_id)) {
+            $u = \App\Models\Unit::find($this->ctc_unt_id);
+            if ($u && !empty($u->unt_namesh)) return $u->unt_namesh;
+        }
+        return '';
+    }
+
     public function remarksHistory()
     {
         return $this->hasMany(HrCtrCaseRemark::class, 'crr_ctc_id', 'ctc_id')->orderBy('crr_id', 'desc');

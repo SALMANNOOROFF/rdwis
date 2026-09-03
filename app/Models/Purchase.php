@@ -32,7 +32,19 @@ class Purchase extends Model
     'pcs_price',
     'pcs_remarks',
     'pcs_subject',
-    'pcs_minute'
+    'pcs_minute',
+    // Legacy two-stage tax cascade (see App\Services\PurchasePricingService):
+    // intprice + inttax = midprice, midprice + midtax = price
+    'pcs_intprice',
+    'pcs_inttax',
+    'pcs_midprice',
+    'pcs_midtax',
+    'pcs_quotetype',
+    'pcs_frm_id',
+    'pcs_recomm',
+    'pcs_intunt_id',
+    'pcs_transtype',
+    'pcs_noloan'
 ];
 
 
@@ -79,99 +91,137 @@ class Purchase extends Model
     }
 
     /**
-     * Accessor: Get dynamic live case value (Lowest Quote -> Selected Quote -> Items Total -> Recorded Estimate)
+     * Accessor: tax-inclusive case value (legacy pcs_price).
+     *
+     * Reads the stored cascade first - historical rates differ from today's
+     * (GST has been 17% and 18%, SST 10/13/15%), so a recomputation would show a
+     * figure the file never carried. Quotes and item lines are only a fallback for
+     * cases that have not been priced yet.
      */
     public function getLiveValueAttribute(): float
     {
-        // 1. If explicit pcs_price > 0, return it
-        if ((float)($this->pcs_price ?? 0) > 0) {
-            return (float)$this->pcs_price;
+        $total = (float) ($this->pcs_price ?? 0);
+        if ($total > 0) {
+            return $total;
         }
 
-        // 2. If quotes exist, calculate lowest/winning quote price
-        if ($this->relationLoaded('quotes') || $this->quotes()->exists()) {
-            $winnerQuote = $this->quotes->sortBy(function($q) {
-                return (float)($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0)));
-            })->first();
+        // Rebuild from whatever part of the cascade is present
+        $base = (float) ($this->pcs_intprice ?? 0);
+        $sst  = (float) ($this->pcs_inttax ?? 0);
+        $mid  = (float) ($this->pcs_midprice ?? 0) ?: ($base + $sst);
+        $total = $mid + (float) ($this->pcs_midtax ?? 0);
+        if ($total > 0) {
+            return $total;
+        }
 
-            if ($winnerQuote) {
-                $qPrice = (float)($winnerQuote->qte_price ?: ($winnerQuote->qte_midprice ?: ($winnerQuote->qte_intprice ?? 0)));
-                if ($qPrice > 0) {
-                    return $qPrice;
-                }
+        // Still unpriced: the selected quote, then the item lines
+        $quote = $this->winning_quote;
+        if ($quote) {
+            $qTotal = (float) ($quote->qte_price ?: ($quote->qte_midprice ?: ($quote->qte_intprice ?? 0)));
+            if ($qTotal > 0) {
+                return $qTotal;
             }
         }
 
-        // 3. If items exist, calculate sum of items (quantity * unit price)
-        if ($this->relationLoaded('items') || $this->items()->exists()) {
-            $itemsTotal = (float) $this->items->sum(function($item) {
-                $qty = (float)($item->pci_qty ?? 1);
-                if ($qty <= 0) $qty = 1;
-                $rate = (float)($item->pci_price ?: ($item->pci_rate ?: ($item->pci_estcost ?: ($item->pci_estprice ?? 0))));
-                return ($rate > 0) ? ($rate * $qty) : 0;
-            });
-            if ($itemsTotal > 0) {
-                return $itemsTotal;
-            }
-        }
-
-        // 4. Fallbacks
-        if ((float)($this->pcs_intprice ?? 0) > 0) return (float)$this->pcs_intprice;
-        if ((float)($this->pcs_midprice ?? 0) > 0) return (float)$this->pcs_midprice;
-        if ((float)($this->pcs_estprice ?? 0) > 0) return (float)$this->pcs_estprice;
-
-        return 0.0;
+        return $this->itemsBaseTotal();
     }
 
     /**
-     * Accessor: Get price without GST / SST (Base Price)
+     * Accessor: base value before SST and GST (legacy pcs_intprice).
+     *
+     * For a quotetype 1 case this is exactly the selected quote's amount - the
+     * quote holds base prices and the case adds the tax - which is why the list
+     * column and the case page now agree.
      */
     public function getWithoutGstPriceAttribute(): float
     {
-        // 1. Quoted / Scrutinized Base Price (pcs_midprice)
-        if ((float)($this->pcs_midprice ?? 0) > 0) {
-            return (float)$this->pcs_midprice;
+        $base = (float) ($this->pcs_intprice ?? 0);
+        if ($base > 0) {
+            return $base;
         }
 
-        // 2. Lowest Quote Base Price (qte_midprice or qte_intprice)
-        if ($this->relationLoaded('quotes') || $this->quotes()->exists()) {
-            $winnerQuote = $this->quotes->sortBy(function($q) {
-                return (float)($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0)));
-            })->first();
+        $mid = (float) ($this->pcs_midprice ?? 0);
+        $sst = (float) ($this->pcs_inttax ?? 0);
+        if ($mid > 0) {
+            return max(0, $mid - $sst);
+        }
 
-            if ($winnerQuote) {
-                $base = (float)($winnerQuote->qte_midprice ?: ($winnerQuote->qte_intprice ?? 0));
-                if ($base > 0) return $base;
-                $qPrice = (float)($winnerQuote->qte_price ?? 0);
-                $qTax = (float)($winnerQuote->qte_midtax ?: ($winnerQuote->qte_inttax ?? 0));
-                if ($qPrice > 0) {
-                    return max(0, $qPrice - $qTax);
+        $total = (float) ($this->pcs_price ?? 0);
+        if ($total > 0) {
+            return max(0, $total - $sst - (float) ($this->pcs_midtax ?? 0));
+        }
+
+        $quote = $this->winning_quote;
+        if ($quote) {
+            $qBase = (float) ($quote->qte_intprice ?: 0);
+            if ($qBase > 0) {
+                return $qBase;
+            }
+            $qTotal = (float) ($quote->qte_price ?? 0);
+            if ($qTotal > 0) {
+                return max(0, $qTotal - (float) ($quote->qte_inttax ?? 0) - (float) ($quote->qte_midtax ?? 0));
+            }
+        }
+
+        return $this->itemsBaseTotal();
+    }
+
+    /**
+     * Sum of the case's own item lines (price x qty), tax free.
+     */
+    public function itemsBaseTotal(): float
+    {
+        if (!$this->relationLoaded('items') && !$this->exists) {
+            return 0.0;
+        }
+
+        return (float) $this->items->sum(function ($item) {
+            $qty = (float) ($item->pci_qty ?? 1);
+            if ($qty <= 0) {
+                $qty = 1;
+            }
+            $rate = (float) ($item->pci_price ?: ($item->pci_estprice ?? 0));
+
+            return $rate > 0 ? $rate * $qty : 0;
+        });
+    }
+
+    /**
+     * Accessor: Base / SST / GST / Total split for display, from the stored fields.
+     *
+     * @return array{base: float, sst: float, mid: float, gst: float, total: float,
+     *               tax: float, sst_pct: ?float, gst_pct: ?float, has_tax: bool,
+     *               derived: bool, balanced: bool}
+     */
+    public function getTaxBreakdownAttribute(): array
+    {
+        $bases = null;
+
+        // Only when the items are already in memory - never add a query per row
+        if ($this->relationLoaded('items')) {
+            $service = 0.0;
+            $goods   = 0.0;
+            foreach ($this->items as $item) {
+                $qty  = (float) ($item->pci_qty ?? 1) ?: 1;
+                $line = (float) ($item->pci_price ?? 0) * $qty;
+                if ((int) $item->pci_type === \App\Services\PurchasePricingService::TYPE_SERVICE) {
+                    $service += $line;
+                } else {
+                    $goods += $line;
                 }
             }
+            $bases = ['service' => $service, 'goods' => $goods];
         }
 
-        // 3. Items Total Sum
-        if ($this->relationLoaded('items') || $this->items()->exists()) {
-            $itemsTotal = (float) $this->items->sum(function($item) {
-                $qty = (float)($item->pci_qty ?? 1);
-                if ($qty <= 0) $qty = 1;
-                $rate = (float)($item->pci_price ?: ($item->pci_rate ?: ($item->pci_estcost ?: ($item->pci_estprice ?? 0))));
-                return ($rate > 0) ? ($rate * $qty) : 0;
-            });
-            if ($itemsTotal > 0) {
-                return $itemsTotal;
-            }
-        }
+        return \App\Services\PurchasePricingService::breakdown($this, $bases);
+    }
 
-        // 4. Initial Estimated Price (pcs_intprice)
-        if ((float)($this->pcs_intprice ?? 0) > 0) {
-            return (float)$this->pcs_intprice;
-        }
-
-        // 5. Fallback: pcs_price minus any recorded tax
-        $total = (float)($this->pcs_price ?? 0);
-        $tax = (float)($this->pcs_midtax ?: ($this->pcs_inttax ?? 0));
-        return $total > 0 ? max(0, $total - $tax) : $this->live_value;
+    /**
+     * Accessor: SST + GST carried on this case.
+     */
+    public function getTotalTaxAttribute(): float
+    {
+        return round((float) ($this->pcs_inttax ?? 0) + (float) ($this->pcs_midtax ?? 0), 2);
     }
 
     /**
@@ -193,16 +243,30 @@ class Purchase extends Model
     }
 
     /**
-     * Accessor: Get winning / lowest quote
+     * Accessor: the selected quote.
+     *
+     * Selection is data, not arithmetic: legacy writes qte_recomm = 1 on exactly one
+     * quote per case (Queries/pur_quotes_recomm.sql), so never infer it by comparing
+     * prices. Only a case whose quotes have not been compared yet falls back to the
+     * cheapest technically acceptable offer, which is what legacy would have picked.
      */
     public function getWinningQuoteAttribute()
     {
-        if (!$this->relationLoaded('quotes') && !$this->quotes()->exists()) {
+        $quotes = $this->quotes;
+        if (!$quotes || $quotes->isEmpty()) {
             return null;
         }
-        return $this->quotes->sortBy(function($q) {
-            return (float)($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0)));
-        })->first();
+
+        $selected = $quotes->first(fn($q) => (bool) $q->qte_recomm);
+        if ($selected) {
+            return $selected;
+        }
+
+        $acceptable = $quotes->filter(fn($q) => (bool) $q->qte_techaccept);
+
+        return ($acceptable->isNotEmpty() ? $acceptable : $quotes)
+            ->sortBy(fn($q) => (float) ($q->qte_price ?: ($q->qte_midprice ?: ($q->qte_intprice ?? 0))))
+            ->first();
     }
 
     /**
@@ -219,6 +283,15 @@ class Purchase extends Model
     public function quotes()
     {
         return $this->hasMany(Quote::class, 'qte_pcs_id', 'pcs_id');
+    }
+
+    /**
+     * The single selected quote (legacy qte_recomm). Eager-loadable counterpart of
+     * the winning_quote accessor.
+     */
+    public function recommendedQuote()
+    {
+        return $this->hasOne(Quote::class, 'qte_pcs_id', 'pcs_id')->where('qte_recomm', true);
     }
 
     /**

@@ -224,7 +224,7 @@ class DashboardController extends Controller
         }
 
         $closedProjectStatuses = ['Closed', 'Completed'];
-        $pendingCaseStatuses = ['Draft', 'Under Scrutiny', 'In Progress'];
+        $pendingCaseStatuses = ['Draft', 'Under Scrutiny', 'In Progress', 'Under Approval', 'Under Revision'];
         $reviewedCaseStatuses = ['Approved', 'Fulfilled', 'Completed'];
 
         $budgetReceivedQuery = DB::table('prj.projects');
@@ -306,13 +306,74 @@ class DashboardController extends Controller
 
         $projectsOngoing = max(0, $projectsTotal - $projectsCompleted);
 
-        $pendingCasesQuery = DB::table('pur.purcases')->whereIn('pcs_status', $pendingCaseStatuses);
-        if ($selectedProject) {
-            $pendingCasesQuery->where('pcs_hed_id', $selectedProject['id']);
+        $stageMap = [
+            'fin'  => 'DFinance',
+            'rdw'  => 'MD',
+            'hqs'  => 'DDG',
+            'nrdi' => 'DG',
+            'proc' => 'DProc',
+        ];
+        $ctrStageMap = [
+            'fin'  => 'Finance',
+            'rdw'  => 'MD',
+            'hqs'  => 'DDG',
+            'nrdi' => 'DG',
+            'hr'   => 'HR',
+        ];
+
+        $targetStage = $stageMap[$userArea] ?? null;
+        $targetCtrStage = $ctrStageMap[$userArea] ?? null;
+
+        if ($userArea === 'hr') {
+            $pendingPurchaseCases = 0;
+        } elseif ($targetStage) {
+            $purQuery = \App\Models\Purchase::atStage($targetStage)
+                ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected']);
+            if ($selectedProject) {
+                $purQuery->where('pcs_hed_id', $selectedProject['id']);
+            } elseif (!empty($selectedUnitIds)) {
+                $purQuery->whereIn('pcs_unt_id', $selectedUnitIds);
+            }
+            $pendingPurchaseCases = (int) $purQuery->count();
         } else {
-            $pendingCasesQuery->whereIn('pcs_unt_id', $selectedUnitIds);
+            $purQuery = DB::table('pur.purcases')->whereIn('pcs_status', ['Draft', 'Returned']);
+            if ($selectedProject) {
+                $purQuery->where('pcs_hed_id', $selectedProject['id']);
+            } elseif (!empty($selectedUnitIds)) {
+                $purQuery->whereIn('pcs_unt_id', $selectedUnitIds);
+            }
+            $pendingPurchaseCases = (int) $purQuery->count();
         }
-        $pendingCases = (int) $pendingCasesQuery->count();
+
+        if (in_array($userArea, ['proc', 'prc'], true)) {
+            $pendingContractCases = 0;
+        } elseif ($targetCtrStage) {
+            $ctrQuery = \App\Models\HrCtrCase::whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
+            if ($selectedProject) {
+                $ctrQuery->where('ctc_prj_id', $selectedProject['id']);
+            } elseif (!empty($selectedUnitIds)) {
+                $ctrQuery->where(function($q) use ($selectedUnitIds) {
+                    $q->whereIn('ctc_unt_id', $selectedUnitIds)
+                      ->orWhereIn('ctc_divisionid', $selectedUnitIds);
+                });
+            }
+            $pendingContractCases = (int) $ctrQuery->get()->filter(function($c) use ($targetCtrStage) {
+                return $c->current_stage === $targetCtrStage;
+            })->count();
+        } else {
+            $ctrQuery = DB::table('hr.ctrcases')->whereIn('ctc_status', ['Draft', 'Returned', 'Under Revision']);
+            if ($selectedProject) {
+                $ctrQuery->where('ctc_prj_id', $selectedProject['id']);
+            } elseif (!empty($selectedUnitIds)) {
+                $ctrQuery->where(function($q) use ($selectedUnitIds) {
+                    $q->whereIn('ctc_unt_id', $selectedUnitIds)
+                      ->orWhereIn('ctc_divisionid', $selectedUnitIds);
+                });
+            }
+            $pendingContractCases = (int) $ctrQuery->count();
+        }
+
+        $pendingCases = $pendingPurchaseCases + $pendingContractCases;
 
         $reviewedCasesQuery = DB::table('pur.purcases')->whereIn('pcs_status', $reviewedCaseStatuses);
         if ($selectedProject) {
@@ -525,16 +586,42 @@ class DashboardController extends Controller
 
         $projRows = $projRowsQuery->get();
 
-        $employeesByProject = DB::table('cen.heads as h')
-            ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
-            ->leftJoin('hr.emps as e', function($join) {
-                $join->on('e.emp_hed_id', '=', 'h.hed_id')
-                     ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current']);
-            })
-            ->whereIn('p.prj_unt_id', $selectedUnitIds)
-            ->select('p.prj_id', DB::raw('COUNT(e.emp_id) as emp_count'))
-            ->groupBy('p.prj_id')
-            ->pluck('emp_count', 'prj_id');
+        $today = now()->toDateString();
+        $activeEmployees = DB::table('hr.emps')
+            ->whereRaw("LOWER(emp_status) IN ('active','current')")
+            ->get(['emp_id', 'emp_hed_id']);
+
+        $activePlans = DB::table('hr.contractplans as cp')
+            ->join('hr.contracts as c', 'c.ctr_id', '=', 'cp.cpn_ctr_id')
+            ->whereRaw('? between cp.cpn_startdt and cp.cpn_enddt', [$today])
+            ->whereNotNull('cp.cpn_hed_id')
+            ->select('c.ctr_num as emp_id', 'cp.cpn_hed_id')
+            ->get()
+            ->keyBy('emp_id');
+
+        $heads = DB::table('cen.heads')->get()->keyBy('hed_id');
+
+        $projectStaffCounts = [];
+        foreach ($activeEmployees as $emp) {
+            $currentHeadId = $activePlans->has($emp->emp_id)
+                ? $activePlans[$emp->emp_id]->cpn_hed_id
+                : $emp->emp_hed_id;
+
+            $h = $heads->get($currentHeadId);
+            $prjId = null;
+            if ($h) {
+                $prjId = $h->hed_prj_id ?: $h->hed_id;
+            }
+
+            if ($prjId) {
+                $projectStaffCounts[$prjId] = ($projectStaffCounts[$prjId] ?? 0) + 1;
+            }
+        }
+
+        $employeesByProject = [];
+        foreach ($projRows as $p) {
+            $employeesByProject[(int)$p->prj_id] = (int) ($projectStaffCounts[$p->prj_id] ?? 0);
+        }
 
         $projectProgressTop = $projRows
             ->filter(fn ($p) => ! in_array((string) $p->prj_status, $closedProjectStatuses, true))
@@ -627,6 +714,8 @@ class DashboardController extends Controller
                 'projectsTotal' => $projectsTotal,
                 'reviewedCases' => $reviewedCases,
                 'pendingCases' => $pendingCases,
+                'pendingPurchaseCases' => $pendingPurchaseCases,
+                'pendingContractCases' => $pendingContractCases,
             ],
             'charts' => [
                 'finance' => [

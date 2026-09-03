@@ -298,12 +298,13 @@
                     <h1 class="page-title mb-1">
                         {{ $roleTitle }} Portal &bull; Case #{{ $case->ctc_id }}
                     </h1>
-                    <div class="d-flex align-items-center gap-2 mt-1">
+                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
                         <span class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 20px; font-size: 11px;">
-                            {{ strtoupper($case->ctc_type) }} CASE
+                            <i class="fas fa-tag mr-1"></i> {{ strtoupper($case->ctc_type) }} CASE
                         </span>
-                        <span class="status-badge-chip ml-2">
-                            <i class="fas fa-crown text-warning"></i> HOLDER: {{ $case->currentSubstatus->display_name ?? $case->ctc_status }}
+                        {{-- Current Holder Stage (css_stage) --}}
+                        <span class="badge badge-info px-3 py-1 font-weight-bold text-white shadow-sm" style="border-radius: 20px; font-size: 11.5px; background: #0284c7;" title="Current Substatus / Workflow Holder Stage">
+                            <i class="fas fa-user-clock mr-1"></i> Current Holder: {{ $case->current_stage ?? $case->currentSubstatus->css_stage ?? $role }}
                         </span>
                     </div>
                 </div>
@@ -314,26 +315,26 @@
 
             <!-- Workflow Progress Stepper -->
             @php
+                $approvalService = app(\App\Services\ContractCaseApprovalService::class);
+                $workflowSteps = $approvalService->getWorkflowSteps($case);
                 $currStage = $case->current_stage ?? $role;
-                $stageOrder = ['Division', 'HR', 'Finance', 'MD', 'DDG', 'DG', 'Approved', 'Fulfilled'];
-                $stageIndex = array_search($currStage, $stageOrder);
-                if ($stageIndex === false) $stageIndex = 3;
+                
+                $stepIds = array_column($workflowSteps, 'id');
+                $currIndex = array_search($currStage, $stepIds);
+                if ($currIndex === false) $currIndex = 0;
+                $isFulfilled = ($case->ctc_status === 'Fulfilled' || $currStage === 'Fulfilled');
             @endphp
             <div class="pipeline-stepper-card">
                 <div class="stepper-container">
-                    @foreach([
-                        ['id' => 'Division', 'label' => 'Initiated', 'icon' => 'fa-edit'],
-                        ['id' => 'HR', 'label' => 'HR Scrutiny', 'icon' => 'fa-user-check'],
-                        ['id' => 'Finance', 'label' => 'Finance', 'icon' => 'fa-coins'],
-                        ['id' => 'MD', 'label' => 'MD Review', 'icon' => 'fa-file-signature'],
-                        ['id' => 'DDG', 'label' => 'DDG Office', 'icon' => 'fa-stamp'],
-                        ['id' => 'DG', 'label' => 'DG Approval', 'icon' => 'fa-gavel'],
-                        ['id' => 'Approved', 'label' => 'Ready Fulfill', 'icon' => 'fa-check-double'],
-                        ['id' => 'Fulfilled', 'label' => 'Fulfilled', 'icon' => 'fa-award'],
-                    ] as $i => $s)
+                    @foreach($workflowSteps as $i => $s)
                         @php
-                            $isDone = $stageIndex > $i || $case->ctc_status === 'Fulfilled';
-                            $isActive = $currStage === $s['id'] && $case->ctc_status !== 'Fulfilled';
+                            if ($isFulfilled) {
+                                $isDone = true;
+                                $isActive = false;
+                            } else {
+                                $isDone = $currIndex > $i;
+                                $isActive = $currIndex === $i;
+                            }
                         @endphp
                         <div class="step-item {{ $isDone ? 'completed' : '' }} {{ $isActive ? 'active' : '' }}">
                             <div class="step-circle">
@@ -360,81 +361,85 @@
                         </div>
                         
                         <div class="data-grid-table">
+                            <div class="data-grid-cell data-grid-label">Originating Division</div>
+                            <div class="data-grid-cell data-grid-value font-weight-bold text-dark">
+                                {{ $case->division_name }}
+                                @if($case->division_short && $case->division_short !== $case->division_name)
+                                    <span class="badge badge-light border text-muted ml-1" style="font-size: 10px;">{{ $case->division_short }}</span>
+                                @endif
+                            </div>
+
                             <div class="data-grid-cell data-grid-label">Case Type</div>
                             <div class="data-grid-cell data-grid-value text-primary">
                                 @if($case->ctc_type == 'Hg') Fresh Hiring (Hg)
-                                @elseif($case->ctc_type == 'Ce') Contract Extension (Ce)
                                 @elseif($case->ctc_type == 'Cr') Contract Renewal (Cr)
-                                @elseif($case->ctc_type == 'Rh') Rehiring (Rh)
+                                @elseif($case->ctc_type == 'Ce') Contract Extension (Ce)
+                                @elseif($case->ctc_type == 'Rh') Re-Hiring (Rh)
+                                @else {{ strtoupper($case->ctc_type) }}
                                 @endif
                             </div>
-                            <div class="data-grid-cell data-grid-label">Division</div>
-                            <div class="data-grid-cell data-grid-value">{{ $case->unit->unt_name ?? 'Division' }}</div>
                         </div>
 
                         <div class="data-grid-table">
                             <div class="data-grid-cell data-grid-label">Candidate Name</div>
                             <div class="data-grid-cell data-grid-value font-weight-bold text-dark">{{ $case->ctc_empnamecomp }}</div>
-                            <div class="data-grid-cell data-grid-label">Employee ID</div>
-                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_emp_id ?: 'New Candidate' }}</div>
-                        </div>
 
-                        <div class="data-grid-table">
-                            <div class="data-grid-cell data-grid-label">Designation</div>
-                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_newjobtitle }}</div>
-                            <div class="data-grid-cell data-grid-label">Grade / Scale</div>
-                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_newgrade }}</div>
-                        </div>
+                            <div class="data-grid-cell data-grid-label">CNIC Number</div>
+                            <div class="data-grid-cell data-grid-value" style="font-family: monospace;">{{ $case->ctc_cnic ?: 'N/A' }}</div>
 
-                        <div class="data-grid-table">
-                            <div class="data-grid-cell data-grid-label">Monthly Salary</div>
-                            <div class="data-grid-cell data-grid-value text-success font-weight-bold" style="font-size: 1rem;">
-                                Rs. {{ number_format($case->ctc_newsalary) }} / mo
+                            <div class="data-grid-cell data-grid-label">Contact / Phone</div>
+                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_contact ?: 'N/A' }}</div>
+
+                            <div class="data-grid-cell data-grid-label">Proposed Job Title</div>
+                            <div class="data-grid-cell data-grid-value font-weight-bold">{{ $case->ctc_newjobtitle }}</div>
+
+                            <div class="data-grid-cell data-grid-label">Proposed Grade / Rank</div>
+                            <div class="data-grid-cell data-grid-value"><span class="badge badge-secondary px-2 py-1 font-weight-bold">{{ $case->ctc_newgrade }}</span></div>
+
+                            <div class="data-grid-cell data-grid-label">Employment Nature</div>
+                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_emp_type ?: 'Contract' }}</div>
+
+                            <div class="data-grid-cell data-grid-label">Proposed Monthly Salary</div>
+                            <div class="data-grid-cell data-grid-value text-primary font-weight-bold" style="font-size: 1.15rem;">
+                                PKR {{ number_format((float) ($case->ctc_newsalary ?? 0)) }}
                             </div>
-                            <div class="data-grid-cell data-grid-label">Total Case Price</div>
-                            <div class="data-grid-cell data-grid-value text-primary font-weight-bold" style="font-size: 1rem;">
-                                Rs. {{ number_format((float)($case->ctc_price ?? 0)) }}
+
+                            <div class="data-grid-cell data-grid-label">Proposed Contract Period</div>
+                            <div class="data-grid-cell data-grid-value font-weight-bold">
+                                {{ \Carbon\Carbon::parse($case->ctc_newstartdt)->format('d M Y') }} &mdash; {{ \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M Y') }}
                             </div>
+
+                            <div class="data-grid-cell data-grid-label">Probation Period</div>
+                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_newprob ? $case->ctc_newprob . ' Months' : 'Nil' }}</div>
+
+                            <div class="data-grid-cell data-grid-label">Probation Salary</div>
+                            <div class="data-grid-cell data-grid-value">PKR {{ number_format((float) ($case->ctc_newprobsal ?? 0)) }}</div>
+
+                            <div class="data-grid-cell data-grid-label">Job Description / Scope</div>
+                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_jd ?: 'Standard Terms' }}</div>
+
+                            @if($case->previousContract)
+                                <div class="data-grid-cell data-grid-label bg-light">Previous Contract Reference</div>
+                                <div class="data-grid-cell data-grid-value bg-light">
+                                    Contract #{{ $case->previousContract->ctr_id }} &bull; (PKR {{ number_format($case->previousContract->ctr_salary) }} / {{ $case->previousContract->ctr_rank }})
+                                </div>
+                            @endif
                         </div>
-
-                        <div class="data-grid-table">
-                            <div class="data-grid-cell data-grid-label">Start Date</div>
-                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_newstartdt ? \Carbon\Carbon::parse($case->ctc_newstartdt)->format('d M Y') : 'N/A' }}</div>
-                            <div class="data-grid-cell data-grid-label">End Date</div>
-                            <div class="data-grid-cell data-grid-value">{{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M Y') : 'N/A' }}</div>
-                        </div>
-
-                        @if($case->ctc_newprob > 0)
-                            <div class="data-grid-table">
-                                <div class="data-grid-cell data-grid-label">Probation Period</div>
-                                <div class="data-grid-cell data-grid-value">{{ $case->ctc_newprob }} Months</div>
-                                <div class="data-grid-cell data-grid-label">Probation Salary</div>
-                                <div class="data-grid-cell data-grid-value">Rs. {{ number_format((float)($case->ctc_newprobsal ?: $case->ctc_newsalary)) }}</div>
-                            </div>
-                        @endif
-
-                        @if($case->ctc_terminremarks)
-                            <div class="p-3 border-top" style="background: #FFFBEB; border-color: var(--rd-neutral-200) !important;">
-                                <span class="text-warning font-weight-bold d-block mb-1"><i class="fas fa-info-circle mr-1"></i> Extension / Early Termination Remarks:</span>
-                                <p class="text-dark mb-0 font-weight-500" style="font-size: 0.9rem;">{{ $case->ctc_terminremarks }}</p>
-                            </div>
-                        @endif
                     </div>
 
-                    <!-- Project Plan Breakdown Table -->
+                    <!-- Project Allocations -->
                     @if($case->casePlans->isNotEmpty())
                         <div class="clean-card">
                             <div class="clean-card-header">
-                                <span><i class="fas fa-project-diagram mr-2 text-primary"></i> Budget Allocation by Project Head</span>
-                                <span class="badge badge-secondary px-2 py-1 font-weight-bold">{{ $case->casePlans->count() }} Months</span>
+                                <span><i class="fas fa-project-diagram mr-2 text-primary"></i> Budget & Project Allocations</span>
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-hover mb-0" style="font-size: 0.88rem;">
-                                    <thead style="background: var(--rd-neutral-50);">
+                                <table class="table clean-table mb-0">
+                                    <thead>
                                         <tr>
-                                            <th class="text-muted font-weight-bold" style="border: none;">#</th>
-                                            <th class="text-muted font-weight-bold" style="border: none;">Month Period</th>
-                                            <th class="text-muted font-weight-bold" style="border: none;">Project Head</th>
+                                            <th>#</th>
+                                            <th>Period</th>
+                                            <th>Charge Head / Project Allocation</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -476,19 +481,57 @@
                                 <span><i class="fas fa-stamp mr-2 text-primary"></i> {{ $role }} Executive Action</span>
                             </div>
                             <div class="p-4">
+                                {{-- Financial & Grade Delegated Authority Evaluation Box --}}
+                                @php
+                                    $reqStage = $authDetails['required_stage'] ?? 'DG';
+                                    $isDesignatedAuthority = ($role === 'MD' && $reqStage === 'MD') ||
+                                                             ($role === 'DDG' && in_array($reqStage, ['MD', 'DDG'])) ||
+                                                             ($role === 'DG');
+                                @endphp
+
+                                @if($isDesignatedAuthority)
+                                    <div class="alert alert-success border-0 small mb-3 p-2.5 d-flex align-items-start" style="border-radius: 8px; background: #ecfdf5; border-left: 4px solid #10b981 !important;">
+                                        <i class="fas fa-check-circle text-success mr-2 mt-1"></i>
+                                        <div>
+                                            <strong class="text-success d-block">{{ $role }} Designated Final Approval Authority</strong>
+                                            <span class="text-muted" style="font-size: 11.5px;">
+                                                Case salary (PKR {{ number_format($authDetails['salary'] ?? $case->ctc_newsalary) }}) and grade ({{ $authDetails['grade'] ?? $case->ctc_newgrade }}) fall within {{ $role }} approval powers. You can grant <strong>Final Approval</strong> to finalize this case.
+                                            </span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="alert alert-warning border-0 small mb-3 p-2.5 d-flex align-items-start" style="border-radius: 8px; background: #fffbeb; border-left: 4px solid #f59e0b !important;">
+                                        <i class="fas fa-info-circle text-warning mr-2 mt-1"></i>
+                                        <div>
+                                            <strong class="text-warning d-block">Exceeds {{ $role }} Approval Limit</strong>
+                                            <span class="text-muted" style="font-size: 11.5px;">
+                                                Case salary (PKR {{ number_format($authDetails['salary'] ?? $case->ctc_newsalary) }}) or grade ({{ $authDetails['grade'] ?? $case->ctc_newgrade }}) exceeds {{ $role }} limit. This case requires <strong>{{ $reqStage }} Approval</strong>. Please endorse and forward ahead.
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <div class="form-group mb-3">
                                     <label class="rd-form-label font-weight-bold">Executive Remarks <span class="text-danger">*</span></label>
                                     <textarea id="execRemarks" class="rd-textarea" rows="3" placeholder="Enter executive decision, endorsement notes, or review comments..."></textarea>
                                 </div>
 
-                                @if($role === 'DG')
-                                    <button type="button" class="btn-action-approve" id="btn-approve-case">
-                                        <i class="fas fa-gavel"></i> DG Final Approval
+                                {{-- If role is the designated authority, show ONLY Approve button --}}
+                                @if($isDesignatedAuthority)
+                                    <button type="button" class="btn-action-approve mb-2" id="btn-approve-case" style="background: #10b981; border-color: #10b981; color: white;">
+                                        <i class="fas fa-check-double mr-1.5"></i> Grant {{ $role }} Final Approval
                                     </button>
                                 @else
-                                    <button type="button" class="btn-action-forward" id="btn-forward-case">
-                                        <i class="fas fa-arrow-right"></i> Endorse & Forward to {{ $role === 'MD' ? 'DDG' : 'DG' }}
-                                    </button>
+                                    {{-- If role is NOT designated authority (exceeds limit), show ONLY Forward button --}}
+                                    @if($role === 'MD')
+                                        <button type="button" class="btn-action-forward mb-2" id="btn-forward-case">
+                                            <i class="fas fa-arrow-right"></i> Endorse & Forward to DDG
+                                        </button>
+                                    @elseif($role === 'DDG')
+                                        <button type="button" class="btn-action-forward mb-2" id="btn-forward-case">
+                                            <i class="fas fa-arrow-right"></i> Endorse & Forward to DG
+                                        </button>
+                                    @endif
                                 @endif
 
                                 <button type="button" class="btn-action-return" id="btn-return-case">
@@ -503,11 +546,14 @@
                         <!-- General Status Card -->
                         <div class="clean-card">
                             <div class="clean-card-header">
-                                <span><i class="fas fa-info-circle mr-2 text-primary"></i> Current Status</span>
+                                <span><i class="fas fa-info-circle mr-2 text-primary"></i> Current Status & Holder</span>
                             </div>
                             <div class="p-4 text-center">
-                                <h6 class="font-weight-bold text-dark mb-1">{{ $case->currentSubstatus->display_name ?? $case->ctc_status }}</h6>
-                                <p class="text-muted small mb-0 font-weight-500">Holder Stage: <strong>{{ $case->current_stage }}</strong></p>
+                                <div class="mb-2">
+                                    <span class="badge badge-info px-3 py-1.5 font-weight-bold text-white" style="font-size: 13px; border-radius: 6px; background: #0284c7;">
+                                        <i class="fas fa-user-clock mr-1"></i> Current Holder: {{ $case->current_stage ?? $case->currentSubstatus->css_stage ?? 'In Review' }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -544,8 +590,9 @@
 <script>
 $(document).ready(function() {
     const routePrefix = '{{ $routePrefix }}';
+    const role = '{{ $role }}';
 
-    // ── Approve (DG only) ─────────────────────────────────────
+    // ── Approve (MD / DDG / DG) ──────────────────────────────
     $('#btn-approve-case').click(function() {
         const rem = $('#execRemarks').val();
         if (!rem) {
@@ -554,8 +601,8 @@ $(document).ready(function() {
         }
 
         Swal.fire({
-            title: 'Grant DG Final Approval',
-            text: 'Are you sure you want to grant executive approval for this contract case?',
+            title: 'Grant ' + role + ' Final Approval',
+            text: 'Are you sure you want to grant executive approval for this contract case? Once approved, the case will be forwarded to HR for fulfillment.',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Yes, Grant Approval',
@@ -563,17 +610,20 @@ $(document).ready(function() {
             cancelButtonColor: '#94a3b8'
         }).then((res) => {
             if (res.isConfirmed) {
+                const approveUrl = "/" + routePrefix + "/contract-cases/{{ $case->ctc_id }}/approve";
+
                 $.ajax({
-                    url: "{{ route('dg.contract-cases.approve', $case->ctc_id) }}",
+                    url: approveUrl,
                     method: 'POST',
                     data: { _token: '{{ csrf_token() }}', remarks: rem },
                     success: function(resp) {
                         Swal.fire('Approved', resp.message, 'success').then(() => {
-                            window.location.href = "{{ route('dg.contract-cases.index') }}";
+                            window.location.href = "/" + routePrefix + "/contract-cases";
                         });
                     },
-                    error: function() {
-                        Swal.fire('Error', 'Failed to approve case.', 'error');
+                    error: function(err) {
+                        const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Failed to approve case.';
+                        Swal.fire('Error', msg, 'error');
                     }
                 });
             }
