@@ -5,8 +5,7 @@
     $service = app(\App\Services\PurchaseApprovalService::class);
     $area = $area ?? $userArea;
     $canApprove = $service->canApprove($area, (float)($purchase->pcs_price ?? 0), $purchase);
-    $nextAuthName = $service->getNextAuthorityName($purchase, $area);
-    $returnTargets = $service->getReturnTargets($purchase);
+    $destinations = $service->getAvailableDestinations($userArea);
     
     // Determine if this user's stage matches the case's current substatus stage
     $currentStage = $purchase->currentSubstatus?->pss_stage;
@@ -33,7 +32,6 @@
     $currentStatusDisplay = $purchase->current_stage_display ?? $service->getStatusDisplayName($purchase->pcs_status);
 
     // Calculate the next numbering for the list:
-    // Main minute sheet ends at paragraph 4.
     $liCount = 0;
     foreach($purchase->decisions as $dec) {
         if ($dec->pdec_action === 'save_draft') continue;
@@ -44,28 +42,6 @@
         }
     }
     $nextRemarkNumber = 4 + $liCount + 1;
-
-    // Fetch existing draft for this user if any (rendered in textarea as 1. 2. for user ease)
-    $myDraftDecision = $purchase->decisions->where('pdec_acc_id', $u->acc_id)->where('pdec_action', 'save_draft')->first();
-    $existingDraftRaw = '';
-    if ($myDraftDecision && !empty($myDraftDecision->pdec_remarks)) {
-        $clean = preg_replace('/<\/?(ol|ul)>/', '', $myDraftDecision->pdec_remarks);
-        preg_match_all('/<li>(.*?)<\/li>/is', $clean, $matches);
-        if (!empty($matches[1])) {
-            $lines = [];
-            $curNum = 1;
-            foreach ($matches[1] as $lineContent) {
-                $lines[] = $curNum . ". " . trim(strip_tags($lineContent));
-                $curNum++;
-            }
-            $existingDraftRaw = implode("\n", $lines);
-        } else {
-            $existingDraftRaw = trim(strip_tags($myDraftDecision->pdec_remarks));
-            if (!preg_match('/^\d+\./', $existingDraftRaw)) {
-                $existingDraftRaw = "1. " . $existingDraftRaw;
-            }
-        }
-    }
 @endphp
 
 @if($isCurrentStage)
@@ -74,13 +50,8 @@
         <div class="font-weight-bold rajdhani text-dark" style="font-size: 14px;">
             <i class="fas fa-user-circle text-primary mr-1"></i> {{ $u->acc_name }} 
             <span class="text-muted small ml-1" style="font-weight: 600;">({{ strtoupper($userArea) }})</span>
-            <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 10px; color: var(--rd-accent); letter-spacing: 0.5px;">
+            <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 10px; color: var(--rd-accent, #5F7858); letter-spacing: 0.5px;">
                 <i class="fas fa-pen-nib mr-1"></i> SCRUTINY & ACTION
-            </span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span id="saveDraftStatus" class="small text-muted font-italic" style="font-size: 11px;">
-                @if($myDraftDecision) <span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks drafted</span> @endif
             </span>
         </div>
     </div>
@@ -91,6 +62,7 @@
         <input type="hidden" name="target_status" id="formTargetStatusInput" value="">
         <input type="hidden" name="remarks" id="remarksHiddenInput">
 
+        {{-- Remarks Textarea --}}
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1.5">
                 <span class="text-dark small rajdhani font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">
@@ -100,195 +72,300 @@
                     <i class="fas fa-arrows-alt-v mr-0.5"></i> Drag corner to resize
                 </span>
             </div>
-            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;">{{ $existingDraftRaw }}</textarea>
+            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;"></textarea>
             
-            {{-- Quick Comments --}}
-            <div class="mt-2 d-flex flex-wrap" style="gap: 6px;">
-                <span class="badge badge-secondary p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600;">FNA, please.</span>
-                <span class="badge badge-secondary p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600;">Recommended and forwarded.</span>
-                <span class="badge badge-secondary p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600;">For approval please.</span>
-                <span class="badge badge-secondary p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-weight: 600;">Discussed.</span>
-                @if($userArea === 'proc')
-                <span class="badge badge-info p-1 px-2 cursor-pointer quick-comment-btn" style="font-size: 11px; background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; font-weight: 600;">Quotes verified and recommended.</span>
-                @endif
+            {{-- User Quick Remarks (Custom shortcuts) --}}
+            <div class="mt-2">
+                @include('partials._user_quick_remarks', ['targetTextarea' => '#inlineRemarks'])
             </div>
         </div>
 
-        <div class="d-flex" style="gap: 10px; width: 100%;">
-            @if($canApprove)
-                {{-- FINAL APPROVING AUTHORITY (MD <= 4L, DDG <= 10L, DG) --}}
-                <button type="button" onclick="handleAction('approve')" class="dg-btn-action dg-btn-success flex-grow-1" style="font-size: 14px; letter-spacing: 0.5px;">
-                    <i class="fas fa-check-double mr-1.5"></i> APPROVED / APPROVE CASE
-                </button>
-                <div class="btn-group flex-grow-1">
-                    <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-undo mr-1"></i> RETURN
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right bg-white border shadow-lg mt-2" style="min-width: 200px; border-radius: 8px; padding: 6px 0; border-color: var(--rd-text1) !important;">
-                        <h6 class="dropdown-header text-warning rajdhani mb-1" style="font-size: 11px; letter-spacing: 0.5px; font-weight: 700;">SELECT RETURN TARGET:</h6>
-                        @foreach($returnTargets as $status => $name)
-                            <a class="dropdown-item text-dark py-2 d-flex align-items-center" href="javascript:void(0)" onclick="confirmReturn('{{ $status }}', '{{ $name }}')">
-                                <i class="fas fa-chevron-left mr-2 text-muted" style="font-size: 10px;"></i>
-                                <span class="rajdhani font-weight-bold" style="font-size: 13px;">{{ $name }}</span>
-                            </a>
-                        @endforeach
+        {{-- Send / Forward To Destination Dropdown (Opens Downwards with Real-time Search) --}}
+        <div class="form-group mb-3 position-relative" id="pcDestDropdownContainer">
+            <label class="font-weight-bold text-muted small mb-1 d-flex justify-content-between" style="font-size: 10px; text-transform: uppercase;">
+                <span><i class="fas fa-paper-plane text-primary mr-1"></i> Send / Forward To Destination: <span class="text-danger">*</span></span>
+                <span class="text-muted font-italic" style="font-size: 9px; text-transform: none;">Search department, division, or director</span>
+            </label>
+            
+            <input type="hidden" name="target_destination" id="pcTargetDestinationInput" value="">
+
+            {{-- Display Toggle Box --}}
+            <div id="pcDestDropdownToggle" class="form-control form-control-sm d-flex align-items-center justify-content-between" style="font-size: 12px; font-weight: 600; border-radius: 6px; border-color: #cbd5e1; height: 38px; cursor: pointer; background: #ffffff; user-select: none;">
+                <span id="pcDestSelectedLabel" class="text-muted text-truncate font-weight-normal">
+                    <i class="fas fa-search mr-1.5 text-muted"></i> -- Select Destination Department / Authority --
+                </span>
+                <i class="fas fa-chevron-down text-muted ml-2" id="pcDestDropdownChevron" style="font-size: 11px; transition: transform 0.2s;"></i>
+            </div>
+
+            {{-- Downward Dropdown Menu --}}
+            <div id="pcDestDropdownMenu" class="shadow-lg border bg-white" style="display: none; position: absolute; top: 100% !important; bottom: auto !important; left: 0; right: 0; z-index: 1050; margin-top: 3px; border-radius: 8px; border-color: #cbd5e1 !important; box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;">
+                {{-- Sticky Search Input --}}
+                <div class="p-2 border-bottom bg-light">
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0" style="border-color: #cbd5e1;"><i class="fas fa-search text-muted" style="font-size: 11px;"></i></span>
+                        </div>
+                        <input type="text" id="pcDestSearchInput" class="form-control border-left-0" placeholder="Type department, division, or director name..." style="font-size: 12px; border-color: #cbd5e1;" autocomplete="off">
                     </div>
                 </div>
-            @else
-                {{-- INTERMEDIATE OR INITIATOR --}}
-                @if($isInitiator)
-                    @php
-                        $caseType = strtolower(trim((string) ($purchase->pcs_type ?? 'ps')));
-                        $isProcCase = in_array($caseType, ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
-                    @endphp
 
-                    @if(!$isProcCase)
-                        {{-- Non-PS Cases: Direct release to HQ without Procurement --}}
-                        <div class="d-flex flex-column w-100" style="gap: 8px;">
-                            <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success w-100 font-weight-bold" style="font-size: 13px; letter-spacing: 0.5px;">
-                                <i class="fas fa-paper-plane mr-1"></i> RELEASE CASE TO HQ
-                            </button>
-                        </div>
-                    @else
-                        @if($isDraft && !$hasFloated)
-                            {{-- State 1: Division Draft Initial State -> Float to Procurement --}}
-                            <button type="button" onclick="handleAction('float_to_proc')" class="dg-btn-action dg-btn-info w-100 font-weight-bold" style="font-size: 13px; letter-spacing: 0.5px;">
-                                <i class="fas fa-paper-plane mr-1"></i> FLOAT TO PROCUREMENT DEPT
-                            </button>
-                        @elseif($isDraft && $hasFloated && !$hasDProcSaved)
-                            {{-- State 2: Floated to Procurement, waiting for DProc response --}}
-                            <div class="p-3 rounded text-center w-100" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
-                                <div class="font-weight-bold text-primary rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
-                                    <i class="fas fa-hourglass-half mr-1"></i> FLOATED TO PROCUREMENT DEPT
-                                </div>
-                                <div class="text-muted" style="font-size: 12px;">
-                                    Case is currently with Director Procurement for quotation collection & scrutiny. Once saved by Procurement, the <strong>Release</strong> button will be enabled here.
-                                </div>
-                            </div>
-                        @else
-                            {{-- State 3: DProc has saved (or returned case) -> Division can now RELEASE or RESHARE FOR CORRECTION --}}
-                            <div class="d-flex flex-column w-100" style="gap: 8px;">
-                                <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success w-100 font-weight-bold" style="font-size: 13px; letter-spacing: 0.5px;">
-                                    <i class="fas fa-paper-plane mr-1"></i> RELEASE CASE TO HQ
-                                </button>
-                                @if($hasFloated && $hasDProcSaved)
-                                <button type="button" onclick="handleAction('reshare_to_proc')" class="btn btn-xs rajdhani font-weight-bold py-2 w-100" style="font-size: 12px; letter-spacing: 0.5px; border-radius: 6px; background: #fef3c7; border: 1.5px solid #f59e0b; color: #b45309;">
-                                    <i class="fas fa-undo-alt mr-1"></i> RESHARE TO PROCUREMENT DEPT FOR CORRECTION
-                                </button>
-                                @endif
-                            </div>
-                        @endif
-                    @endif
-                @else
-                    @if($isDProcDraft)
+                {{-- Scrollable Destination Items --}}
+                <div id="pcDestItemsList" style="max-height: 230px; overflow-y: auto; padding: 4px 0;">
+                    @foreach($destinations as $destCode => $dest)
                         @php
-                            $caseType = strtolower(trim((string) ($purchase->pcs_type ?? 'ps')));
-                            $isProcCase = in_array($caseType, ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                            $searchKeywords = strtolower($dest['name'] . ' ' . ($dest['director'] ?? '') . ' ' . ($dest['desig'] ?? '') . ' ' . $destCode);
                         @endphp
-                        @if(!$isProcCase)
-                            <div class="p-3 rounded text-center w-100" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
-                                <div class="font-weight-bold text-muted rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
-                                    <i class="fas fa-info-circle mr-1"></i> NON-PROCUREMENT CASE
-                                </div>
-                                <div class="text-muted small" style="font-size: 12px;">
-                                    This is a non-procurement ({{ strtoupper($caseType) }}) case managed directly by Division and HQ Finance.
-                                </div>
+                        <div class="pc-dest-option-item px-3 py-2" data-code="{{ $destCode }}" data-name="{{ $dest['name'] }}" data-search="{{ $searchKeywords }}" style="cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f5f9;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-dark font-weight-bold" style="font-size: 12.5px;">{{ $dest['name'] }}</span>
+                                <span class="badge badge-light border text-muted px-1.5 py-0.5" style="font-size: 9.5px; border-radius: 4px;">{{ $dest['badge'] ?? $destCode }}</span>
                             </div>
-                        @elseif(!$hasFloated && $isDraft)
-                            <div class="p-3 rounded text-center w-100" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
-                                <div class="font-weight-bold text-warning rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
-                                    <i class="fas fa-clock mr-1"></i> AWAITING DIVISION
+                            @if(!empty($dest['director']))
+                                <div class="text-muted text-truncate" style="font-size: 11px; margin-top: 1px;">
+                                    <i class="fas fa-user-tie text-secondary mr-1" style="font-size: 9.5px;"></i> {{ $dest['director'] }}
+                                    @if(!empty($dest['desig']))
+                                        <span class="text-muted font-weight-normal">&bull; {{ $dest['desig'] }}</span>
+                                    @endif
                                 </div>
-                                <div class="text-muted" style="font-size: 12px;">
-                                    This case is still in draft at Division and has not been floated to Procurement yet.
-                                </div>
-                            </div>
-                        @elseif($hasDProcSaved && $isDraft)
-                            <div class="p-3 rounded text-center w-100" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
-                                <div class="font-weight-bold text-success rajdhani mb-1" style="font-size: 13px; letter-spacing: 0.5px;">
-                                    <i class="fas fa-check-circle mr-1"></i> ACTION TAKEN & SAVED
-                                </div>
-                                <div class="text-muted small" style="font-size: 12px;">
-                                    You have finalized quotations and scrutiny remarks. Case is awaiting release by Division (locked unless reshared).
-                                </div>
-                            </div>
-                        @else
-                            <div class="d-flex w-100" style="gap: 8px;">
-                                <button type="button" class="btn btn-outline-warning btn-sm font-weight-bold px-3" data-toggle="modal" data-target="#pcAddQuoteModal" style="border-radius: 6px;">
-                                    <i class="fas fa-plus-circle mr-1"></i> MANAGE QUOTES
-                                </button>
-                                <button type="button" onclick="handleAction('dproc_save')" id="btnForward" class="dg-btn-action dg-btn-success flex-grow-1 font-weight-bold">
-                                    <i class="fas fa-check-circle mr-1"></i> FINALIZE & TAKE ACTION
-                                </button>
-                            </div>
-                        @endif
-                    @else
-                        <button type="button" onclick="handleAction('forward')" id="btnForward" class="dg-btn-action dg-btn-success flex-grow-1">
-                            <div class="d-flex flex-column align-items-center">
-                                <span><i class="fas fa-thumbs-up mr-1"></i> RECOMMEND</span>
-                                @if($nextAuthName)<span style="font-size: 9px; opacity: 0.9; margin-top: 2px;">TO: {{ strtoupper($nextAuthName) }}</span>@endif
-                            </div>
-                        </button>
-                        <div class="btn-group flex-grow-1">
-                            <button type="button" class="dg-btn-action dg-btn-return w-100 dropdown-toggle" data-toggle="dropdown" id="btnReturn" disabled aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-undo mr-1"></i> RETURN
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right bg-white border shadow-lg mt-2" style="min-width: 200px; border-radius: 8px; padding: 6px 0; border-color: var(--rd-text1) !important;">
-                                <h6 class="dropdown-header text-warning rajdhani mb-1" style="font-size: 11px; letter-spacing: 0.5px; font-weight: 700;">SELECT RETURN TARGET:</h6>
-                                @foreach($returnTargets as $status => $name)
-                                    <a class="dropdown-item text-dark py-2 d-flex align-items-center" href="javascript:void(0)" onclick="confirmReturn('{{ $status }}', '{{ $name }}')">
-                                        <i class="fas fa-chevron-left mr-2 text-muted" style="font-size: 10px;"></i>
-                                        <span class="rajdhani font-weight-bold" style="font-size: 13px;">{{ $name }}</span>
-                                    </a>
-                                @endforeach
-                            </div>
+                            @endif
                         </div>
-                    @endif
-                @endif
+                    @endforeach
+                    <div id="pcDestNoResults" class="p-3 text-center text-muted small" style="display: none;">
+                        <i class="fas fa-info-circle mr-1"></i> No matching department, division, or director found.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Action Buttons Row: Left = SEND CASE (Prominent), Right = Compact Approve & Compact Cancel (Expanding on hover, ONLY for Approving Authority) --}}
+        <div class="d-flex align-items-center" style="gap: 8px; width: 100%;">
+            {{-- Left: Prominent Send Case Button --}}
+            <button type="button" onclick="handleAction('forward')" id="btnForward" class="btn-action-send flex-grow-1" style="height: 40px; font-size: 13.5px; letter-spacing: 0.6px; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fas fa-paper-plane mr-2"></i>
+                <span class="font-weight-bold rajdhani">SEND CASE</span>
+            </button>
+
+            @if($canApprove)
+                {{-- Right: Compact Approve Button (Green Tick, expands on hover) --}}
+                <button type="button" onclick="handleAction('approve')" id="btnApprove" class="btn-action-approve" title="Approve Purchase Case">
+                    <i class="fas fa-check"></i>
+                    <span class="btn-expand-text rajdhani font-weight-bold">APPROVE</span>
+                </button>
+
+                {{-- Right: Compact Cancel / Reject Button (Red Cross, expands on hover) --}}
+                <button type="button" onclick="handleAction('cancel')" id="btnCancel" class="btn-action-cancel" title="Cancel / Reject Purchase Case">
+                    <i class="fas fa-times"></i>
+                    <span class="btn-expand-text rajdhani font-weight-bold">REJECT</span>
+                </button>
             @endif
         </div>
     </form>
 </div>
 
 <style>
-.dg-btn-action {
+/* Send Button: wide on the left */
+.btn-action-send {
+    background: #16a34a !important;
+    border: none;
+    border-radius: 6px;
+    color: #ffffff !important;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.6px;
-    padding: 10px 14px;
-    border-radius: 6px;
-    border: none;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.12);
-    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
 }
-.dg-btn-success { background: #16a34a !important; color: #ffffff !important; }
-.dg-btn-success:hover:not(:disabled) { background: #15803d !important; }
-.dg-btn-success:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-action-send:hover {
+    background: #15803d !important;
+    box-shadow: 0 4px 10px rgba(21, 128, 61, 0.3);
+    transform: translateY(-1px);
+}
 
-.dg-btn-info { background: var(--rd-primary-700) !important; color: #ffffff !important; }
-.dg-btn-info:hover:not(:disabled) { background: var(--rd-primary-600) !important; }
+/* Compact Approve Button: green icon on right, expands on hover */
+.btn-action-approve {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 40px;
+    background: #16a34a !important;
+    border: none;
+    border-radius: 6px;
+    color: #ffffff !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0 12px;
+}
+.btn-action-approve .btn-expand-text {
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
+    transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
+    overflow: hidden;
+    display: inline-block;
+}
+.btn-action-approve:hover {
+    flex: 0 0 115px;
+    width: 115px;
+    background: #15803d !important;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+    transform: translateY(-1px);
+}
+.btn-action-approve:hover .btn-expand-text {
+    max-width: 70px;
+    opacity: 1;
+    margin-left: 6px;
+}
 
-.dg-btn-danger { background: #dc2626 !important; color: #ffffff !important; }
-.dg-btn-danger:hover:not(:disabled) { background: #b91c1c !important; }
+/* Compact Cancel Button: red icon on right, expands on hover */
+.btn-action-cancel {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 40px;
+    background: #dc2626 !important;
+    border: none;
+    border-radius: 6px;
+    color: #ffffff !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0 12px;
+}
+.btn-action-cancel .btn-expand-text {
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
+    transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
+    overflow: hidden;
+    display: inline-block;
+}
+.btn-action-cancel:hover {
+    flex: 0 0 105px;
+    width: 105px;
+    background: #b91c1c !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+    transform: translateY(-1px);
+}
+.btn-action-cancel:hover .btn-expand-text {
+    max-width: 60px;
+    opacity: 1;
+    margin-left: 6px;
+}
 
-.dg-btn-return { background: #fee2e2 !important; color: #dc2626 !important; border: 1.5px solid #fca5a5 !important; }
-.dg-btn-return:hover:not(:disabled) { background: #dc2626 !important; color: #ffffff !important; }
-.dg-btn-return:disabled { opacity: 0.4; cursor: not-allowed; }
+.pc-dest-option-item:hover {
+    background: #f1f5f9;
+}
+.pc-dest-option-item.selected {
+    background: #e2e8f0;
+}
 </style>
 
 <script>
     const nextNum = {{ $nextRemarkNumber }};
     const inlineRemarks = document.getElementById('inlineRemarks');
-    const btnReturn = document.getElementById('btnReturn');
     const btnForward = document.getElementById('btnForward');
-    const btnSaveRemarks = document.getElementById('btnSaveRemarks');
-    const saveDraftStatus = document.getElementById('saveDraftStatus');
 
-    let lastSavedRemarks = inlineRemarks ? inlineRemarks.value.trim() : '';
+    // Downward Searchable Dropdown Logic
+    const pcDestContainer = document.getElementById('pcDestDropdownContainer');
+    const pcDestToggle = document.getElementById('pcDestDropdownToggle');
+    const pcDestMenu = document.getElementById('pcDestDropdownMenu');
+    const pcDestSearch = document.getElementById('pcDestSearchInput');
+    const pcDestHiddenInput = document.getElementById('pcTargetDestinationInput');
+    const pcDestLabel = document.getElementById('pcDestSelectedLabel');
+    const pcDestChevron = document.getElementById('pcDestDropdownChevron');
+    const pcDestItems = document.querySelectorAll('.pc-dest-option-item');
+    const pcDestNoResults = document.getElementById('pcDestNoResults');
+
+    function openPcDestDropdown() {
+        if (!pcDestMenu) return;
+        pcDestMenu.style.display = 'block';
+        if (pcDestChevron) pcDestChevron.style.transform = 'rotate(180deg)';
+        if (pcDestSearch) {
+            pcDestSearch.value = '';
+            filterPcDestItems('');
+            setTimeout(() => pcDestSearch.focus(), 50);
+        }
+    }
+
+    function closePcDestDropdown() {
+        if (!pcDestMenu) return;
+        pcDestMenu.style.display = 'none';
+        if (pcDestChevron) pcDestChevron.style.transform = 'rotate(0deg)';
+    }
+
+    function filterPcDestItems(q) {
+        let matchCount = 0;
+        const query = (q || '').toLowerCase().trim();
+        pcDestItems.forEach(item => {
+            const searchData = item.getAttribute('data-search') || '';
+            if (query === '' || searchData.includes(query)) {
+                item.style.display = 'block';
+                matchCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        if (pcDestNoResults) {
+            pcDestNoResults.style.display = matchCount === 0 ? 'block' : 'none';
+        }
+    }
+
+    if (pcDestToggle) {
+        pcDestToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (pcDestMenu.style.display === 'block') {
+                closePcDestDropdown();
+            } else {
+                openPcDestDropdown();
+            }
+        });
+    }
+
+    if (pcDestSearch) {
+        pcDestSearch.addEventListener('input', function() {
+            filterPcDestItems(this.value);
+        });
+        pcDestSearch.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
+    pcDestItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const code = this.getAttribute('data-code');
+            const name = this.getAttribute('data-name');
+            if (pcDestHiddenInput) pcDestHiddenInput.value = code;
+            if (pcDestLabel) {
+                pcDestLabel.innerHTML = `<span class="text-dark font-weight-bold"><i class="fas fa-check-circle text-success mr-1"></i> ${name}</span>`;
+            }
+            pcDestItems.forEach(i => i.classList.remove('selected'));
+            this.classList.add('selected');
+            closePcDestDropdown();
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (pcDestContainer && !pcDestContainer.contains(e.target)) {
+            closePcDestDropdown();
+        }
+    });
 
     function getNextLocalNumber() {
         if (!inlineRemarks) return 2;
@@ -304,7 +381,6 @@
         inlineRemarks.addEventListener('focus', function() {
             if (this.value.trim() === '') {
                 this.value = "1. ";
-                updateGlowState();
             }
         });
 
@@ -332,7 +408,6 @@
                     const after = text.substring(selectionStart);
                     this.value = before + newNumber + after;
                     this.selectionStart = this.selectionEnd = before.length + newNumber.length;
-                    updateGlowState();
                 }
             }
             
@@ -340,187 +415,52 @@
                 e.preventDefault();
             }
         });
-    }
 
-    function updateGlowState() {
-        if (!inlineRemarks) return;
-        const currentVal = inlineRemarks.value.trim();
-        const prefix = "1. ";
-        const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== "1.";
-        const isModified = currentVal !== lastSavedRemarks;
-
-        if (btnSaveRemarks) {
-            if (hasContent && isModified) {
-                btnSaveRemarks.classList.add('btn-glow-pulse');
-                btnSaveRemarks.disabled = false;
-                if (saveDraftStatus) saveDraftStatus.innerHTML = '<span class="text-warning"><i class="fas fa-circle fa-xs mr-1"></i>Unsaved remarks</span>';
-            } else {
-                btnSaveRemarks.classList.remove('btn-glow-pulse');
-                if (!hasContent) {
-                    btnSaveRemarks.disabled = true;
-                    if (saveDraftStatus) saveDraftStatus.innerHTML = '';
-                } else if (!isModified && lastSavedRemarks.length > 0) {
-                    if (saveDraftStatus) saveDraftStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Remarks saved</span>';
-                }
-            }
-        }
-
-        if (btnReturn) btnReturn.disabled = !hasContent;
-        // btnForward is always enabled for one-click action
-        if (btnForward) btnForward.disabled = false;
-    }
-
-    inlineRemarks.addEventListener('input', function() {
-        const prefix = "1. ";
-        if (!this.value.startsWith(prefix) && this.value.trim() !== '') {
-            const currentVal = this.value;
-            if (currentVal.length < prefix.length) {
-                this.value = prefix;
-            } else {
-                this.value = prefix + currentVal.replace(/^\d+\.?\s*/, '');
-            }
-            this.selectionStart = this.selectionEnd = prefix.length;
-        }
-        updateGlowState();
-    });
-
-    document.querySelectorAll('.quick-comment-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const comment = this.textContent.trim();
+        inlineRemarks.addEventListener('input', function() {
             const prefix = "1. ";
-            let currentVal = inlineRemarks.value;
-            
-            if (currentVal.trim() === '' || !currentVal.startsWith(prefix)) {
-                inlineRemarks.value = prefix + comment;
-            } else {
-                const lines = currentVal.split('\n');
-                const lastLine = lines[lines.length - 1];
-                
-                if (lastLine.match(/^\d+\.\s*$/)) {
-                    lines[lines.length - 1] = lastLine + comment;
-                    inlineRemarks.value = lines.join('\n');
+            if (!this.value.startsWith(prefix) && this.value.trim() !== '') {
+                const currentVal = this.value;
+                if (currentVal.length < prefix.length) {
+                    this.value = prefix;
                 } else {
-                    inlineRemarks.value = currentVal + (currentVal.endsWith(' ') ? '' : ' ') + comment;
+                    this.value = prefix + currentVal.replace(/^\d+\.?\s*/, '');
                 }
-            }
-            
-            inlineRemarks.dispatchEvent(new Event('input'));
-            inlineRemarks.focus();
-        });
-    });
-
-    function buildRemarksHtml() {
-        let remarks = inlineRemarks.value.trim();
-        let lines = remarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        let cleanedLines = lines.map(line => line.replace(/^\d+\.\s*/, '').trim()).filter(l => l.length > 0);
-        if (cleanedLines.length === 0) return '';
-        let liItems = cleanedLines.map(line => `<li>${line}</li>`).join('');
-        return `<ol start="${nextNum}">${liItems}</ol>`;
-    }
-
-    function saveRemarksDraft() {
-        const finalHtml = buildRemarksHtml();
-        if (!finalHtml) {
-            Swal.fire({ title: 'Empty Remarks', text: 'Please type some remarks first before saving.', icon: 'warning', background: '#001226', color: '#fff' });
-            return;
-        }
-
-        const originalBtnHtml = btnSaveRemarks.innerHTML;
-        btnSaveRemarks.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> SAVING...';
-        btnSaveRemarks.disabled = true;
-
-        const form = document.getElementById('authorityActionForm');
-        const actionUrl = form.getAttribute('action');
-        const formData = new FormData();
-        formData.append('_token', '{{ csrf_token() }}');
-        formData.append('action', 'save_draft');
-        formData.append('remarks', finalHtml);
-
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            btnSaveRemarks.innerHTML = originalBtnHtml;
-            if (data.success) {
-                lastSavedRemarks = inlineRemarks.value.trim();
-                btnSaveRemarks.classList.remove('btn-glow-pulse');
-                saveDraftStatus.innerHTML = '<span class="text-success font-weight-bold"><i class="fas fa-check-circle mr-1"></i>Saved to Minute Sheet</span>';
-                
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    background: '#001226',
-                    color: '#fff'
-                });
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Remarks saved! Check Minute View.'
-                });
-            } else {
-                btnSaveRemarks.disabled = false;
-                Swal.fire({ title: 'Error', text: data.message || 'Could not save remarks.', icon: 'error', background: '#001226', color: '#fff' });
-            }
-        })
-        .catch(err => {
-            btnSaveRemarks.innerHTML = originalBtnHtml;
-            btnSaveRemarks.disabled = false;
-            console.error(err);
-            Swal.fire({ title: 'Error', text: 'Network or server error while saving.', icon: 'error', background: '#001226', color: '#fff' });
-        });
-    }
-
-    function confirmReturn(targetStatus, targetName) {
-        let remarks = inlineRemarks.value.trim();
-        let lines = remarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        let cleanedLines = lines.map(line => line.replace(/^\d+\.\s*/, '').trim()).filter(l => l.length > 0);
-
-        if (cleanedLines.length === 0) {
-            Swal.fire({ title: 'Remarks Required!', text: 'Remarks are compulsory for returning a case.', icon: 'warning', background: '#001226', color: '#fff' });
-            return;
-        }
-
-        Swal.fire({
-            title: 'Confirm Return?',
-            text: `Return this case to ${targetName}?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Return',
-            background: '#001226',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                handleAction('return', targetStatus);
+                this.selectionStart = this.selectionEnd = prefix.length;
             }
         });
     }
 
-    window.handleAction = function(action, targetStatus = null) {
-        if (typeof logToDebug === 'function') logToDebug(`Action Triggered: ${action}`, 'INFO');
-        
+    window.handleAction = function(action) {
         let remarks = inlineRemarks ? inlineRemarks.value.trim() : '';
         let lines = remarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         let cleanedLines = lines.map(line => line.replace(/^\d+\.\s*/, '').trim()).filter(l => l.length > 0);
 
-        if (action === 'return' && cleanedLines.length === 0) {
-            Swal.fire({ title: 'Remarks Required!', text: 'Remarks are compulsory for returning a case.', icon: 'warning', background: '#001226', color: '#fff' });
+        // Strict Remarks Validation
+        if (cleanedLines.length === 0) {
+            Swal.fire({ 
+                title: 'Remarks Required!', 
+                text: 'You must enter scrutiny remarks before performing this action.', 
+                icon: 'warning', 
+                background: '#ffffff', 
+                color: '#0f172a' 
+            });
+            if (inlineRemarks) inlineRemarks.focus();
             return;
         }
 
-        if (cleanedLines.length === 0) {
-            if (action === 'approve') cleanedLines = ['Case approved'];
-            else if (action === 'float_to_proc') cleanedLines = ['Case floated to Procurement Department for quotation collection.'];
-            else if (action === 'dproc_save') cleanedLines = ['Quotation details and scrutiny remarks saved.'];
-            else if (action === 'reshare_to_proc') cleanedLines = ['Case reshared to Procurement Department for quotation correction.'];
-            else if (action === 'forward') cleanedLines = ['Case released and forwarded for approval.'];
-            else cleanedLines = ['Forwarded for review.'];
+        const targetDest = pcDestHiddenInput ? pcDestHiddenInput.value : null;
+
+        // Strict Destination Validation for Send Case
+        if (action === 'forward' && !targetDest) {
+            Swal.fire({ 
+                title: 'Destination Required!', 
+                text: 'Please select a destination department or authority to send the case.', 
+                icon: 'warning', 
+                background: '#ffffff', 
+                color: '#0f172a' 
+            });
+            if (pcDestToggle) openPcDestDropdown();
+            return;
         }
 
         let liItems = cleanedLines.map(line => `<li>${line}</li>`).join('');
@@ -531,42 +471,53 @@
         const targetStatusInput = document.getElementById('formTargetStatusInput');
         const actionForm = document.getElementById('authorityActionForm');
 
-        if (!actionForm) {
-            if (typeof logToDebug === 'function') logToDebug('ERROR: actionForm (authorityActionForm) not found in DOM!');
-            return;
-        }
+        if (!actionForm) return;
 
         if (remarksInput) remarksInput.value = finalHtml;
         if (actionInput) actionInput.value = action;
-        
-        if (action === 'return' && targetStatusInput) {
-            targetStatusInput.value = targetStatus;
+        if (targetStatusInput) targetStatusInput.value = targetDest;
+
+        let confirmTitle = 'Confirm Action?';
+        let confirmText = 'You are about to submit your decision.';
+        let confirmBtnColor = '#16a34a';
+
+        if (action === 'approve') {
+            confirmTitle = 'Approve Purchase Case?';
+            confirmText = 'Are you sure you want to approve this purchase case?';
+            confirmBtnColor = '#16a34a';
+        } else if (action === 'cancel') {
+            confirmTitle = 'Cancel / Reject Case?';
+            confirmText = 'Are you sure you want to reject/cancel this purchase case?';
+            confirmBtnColor = '#dc2626';
+        } else if (action === 'forward') {
+            const selectedItem = document.querySelector(`.pc-dest-option-item[data-code="${targetDest}"]`);
+            const destText = selectedItem ? selectedItem.getAttribute('data-name') : (targetDest || 'selected destination');
+            confirmTitle = 'Send Case?';
+            confirmText = `Send this case to ${destText}?`;
+            confirmBtnColor = '#16a34a';
         }
 
-        if (action === 'return') {
-            actionForm.submit();
-        } else {
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Confirm Action?',
-                    text: `You are about to submit your decision.`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Confirm',
-                    background: '#ffffff',
-                    color: '#0f172a'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        if (typeof logToDebug === 'function') logToDebug('Submitting form via SweetAlert confirmation...', 'INFO');
-                        actionForm.submit();
-                    }
-                });
-            } else {
-                if (confirm('Confirm Action? You are about to submit your decision.')) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: confirmTitle,
+                text: confirmText,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Confirm & Proceed',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: confirmBtnColor,
+                background: '#ffffff',
+                color: '#0f172a'
+            }).then((result) => {
+                if (result.isConfirmed) {
                     actionForm.submit();
                 }
+            });
+        } else {
+            if (confirm(confirmText)) {
+                actionForm.submit();
             }
         }
-    }
+    };
 </script>
 @endif

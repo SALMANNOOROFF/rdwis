@@ -595,23 +595,83 @@ class ContractCaseController extends Controller
 
     public function show($id)
     {
-        $case = HrCtrCase::with(['casePlans.project', 'attachments', 'remarksHistory', 'currentSubstatus', 'previousContract', 'employee'])
-            ->findOrFail($id);
+        $case = HrCtrCase::with([
+            'casePlans.project',
+            'attachments',
+            'remarksHistory',
+            'currentSubstatus',
+            'previousContract',
+            'newContract',
+            'employee',
+            'unit'
+        ])->findOrFail($id);
 
-        return view('division.contract-cases.show', compact('case'));
+        $authorityRole = 'Division';
+        $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
+        $canApprove = false;
+
+        return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
     }
 
     public function release($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+
+        // Enforce candidate CNIC validation before release
+        $cnic = $case->candidate_cnic;
+        if (empty($cnic) || trim($cnic) === '' || strtolower(trim($cnic)) === 'n/a') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot release case: Candidate CNIC number is required before releasing to HR Scrutiny. Please edit the case and provide a valid CNIC.'
+            ], 422);
+        }
+
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Released to HR for scrutiny.');
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
 
         $this->approvalService->release($case, $user, $remarks);
 
         return response()->json([
             'success' => true,
             'message' => 'Contract Case released to HR Scrutiny successfully.'
+        ]);
+    }
+
+    public function forward($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $user = Auth::user();
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+
+        $targetStage = $request->input('target_destination') ?? $request->input('target_stage') ?? 'HR';
+
+        if ($targetStage === 'HR') {
+            $cnic = $case->candidate_cnic;
+            if (empty($cnic) || trim($cnic) === '' || strtolower(trim($cnic)) === 'n/a') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot release case: Candidate CNIC number is required before releasing to HR Scrutiny. Please edit the case and provide a valid CNIC.'
+                ], 422);
+            }
+            $this->approvalService->release($case, $user, $remarks);
+            return response()->json([
+                'success' => true,
+                'message' => 'Contract Case released to HR Scrutiny successfully.'
+            ]);
+        }
+
+        $nextStage = $this->approvalService->forward($case, $user, $remarks, $targetStage);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Case forwarded to {$nextStage} successfully.",
+            'next_stage' => $nextStage
         ]);
     }
 

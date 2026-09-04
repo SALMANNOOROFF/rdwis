@@ -91,7 +91,7 @@
                             @php $st = request('status','Current'); @endphp
                             <thead class="bg-white text-muted sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2) !important; border-bottom: 2px solid var(--rd-border);">
                                 <tr>
-                                    <th class="text-center p-2 col-eye" style="width: 20px; color: var(--rd-text2);"><i class="fas fa-eye"></i></th>
+                                    <th class="text-center p-2 col-eye" style="width: 65px; color: var(--rd-text2); font-weight: 700;"><i class="fas fa-eye mr-1"></i> View</th>
                                     <th class="p-2" style="width: 30%; color: var(--rd-text2);">Name</th>
                                     <th style="width: 15%; color: var(--rd-text2);" class="p-2">Employee ID</th>
                                     <th style="width: 14%; color: var(--rd-text2);" class="p-2">Joined</th>
@@ -130,9 +130,9 @@
                                     data-name="{{ strtolower($emp->emp_name) }}"
                                     data-id="{{ strtolower($emp->emp_id) }}"
                                     data-status="{{ strtolower($status) }}">
-                                    <td class="align-middle text-center p-2 col-eye" style="width: 50px;">
-                                        <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="btn btn-xs btn-primary shadow-sm" style="width: 30px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;">
-                                            <i class="fas fa-chevron-right text-xs"></i>
+                                    <td class="align-middle text-center p-2 col-eye" style="width: 65px;">
+                                        <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important; white-space: nowrap;" title="View Profile">
+                                            <i class="fas fa-eye mr-1"></i> View
                                         </a>
                                     </td>
                                     <td class="align-middle p-2 text-truncate">

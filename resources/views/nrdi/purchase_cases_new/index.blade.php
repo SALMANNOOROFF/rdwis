@@ -147,7 +147,7 @@
                     <table class="hub-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;"></th>
+                                <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
                                 <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
@@ -170,8 +170,8 @@
                             @endphp
                             <tr class="hub-row fade-up" data-div="{{ $pDiv }}" style="{{ $isShown ? '' : 'display: none;' }}">
                                 <td class="text-center">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
-                                        <i class="fas fa-chevron-right"></i>
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; white-space: nowrap; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;" title="View Case">
+                                        <i class="fas fa-eye mr-1"></i> View
                                     </a>
                                 </td>
                                 <td>
@@ -235,7 +235,7 @@
                     <table class="hub-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;"></th>
+                                <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
                                 <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
@@ -251,8 +251,8 @@
                             @endphp
                             <tr class="hub-row fade-up" data-div="{{ $pDiv }}" style="{{ $isShown ? '' : 'display: none;' }}">
                                 <td class="text-center">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
-                                        <i class="fas fa-chevron-right"></i>
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; white-space: nowrap; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;" title="View Case">
+                                        <i class="fas fa-eye mr-1"></i> View
                                     </a>
                                 </td>
                                 <td>
@@ -311,7 +311,7 @@
                     <table class="hub-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;"></th>
+                                <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
                                 <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
@@ -327,8 +327,8 @@
                             @endphp
                             <tr class="hub-row fade-up" data-div="{{ $pDiv }}" style="{{ $isShown ? '' : 'display: none;' }}">
                                 <td class="text-center">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
-                                        <i class="fas fa-chevron-right"></i>
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; white-space: nowrap; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;" title="View Case">
+                                        <i class="fas fa-eye mr-1"></i> View
                                     </a>
                                 </td>
                                 <td>
@@ -388,7 +388,7 @@
                     <table class="hub-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;"></th>
+                                <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
                                 <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
@@ -404,8 +404,8 @@
                             @endphp
                             <tr class="hub-row fade-up" data-div="{{ $pDiv }}" style="{{ $isShown ? '' : 'display: none;' }}">
                                 <td class="text-center">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
-                                        <i class="fas fa-chevron-right"></i>
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; white-space: nowrap; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;" title="View Case">
+                                        <i class="fas fa-eye mr-1"></i> View
                                     </a>
                                 </td>
                                 <td>

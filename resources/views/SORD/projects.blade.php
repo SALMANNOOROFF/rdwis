@@ -102,7 +102,7 @@
                         <table class="table table-hover table-striped mb-0 text-nowrap" id="projectsTable">
                             <thead class="sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2); color: var(--rd-text3);">
                                 <tr>
-                                    <th style="width: 50px;" class="text-center p-2"><i class="fas fa-eye"></i></th>
+                                    <th style="width: 75px;" class="text-center p-2 font-weight-bold"><i class="fas fa-eye mr-1"></i> View</th>
                                     <th style="width: 28%;">Project Details</th>
                                     <th style="width: 15%;">Timeline</th>
                                     <th style="width: 15%;">Financials</th>
@@ -217,9 +217,9 @@
                                     data-date="{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') : '' }}">
                                     
                                     {{-- 1. LEFT ACTION BUTTON --}}
-                                    <td class="align-middle p-0 text-center border-right">
-                                        <a href="{{ route('sord.project_details', $project->prj_id) }}" class="vertical-btn d-block text-white bg-primary shadow-hover h-100" title="View Details">
-                                            <i class="fas fa-chevron-right"></i>
+                                    <td class="align-middle text-center p-2 border-right" style="width: 75px;">
+                                        <a href="{{ route('sord.project_details', $project->prj_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2.5 py-1.5 shadow-sm" style="border-radius: 6px; font-size: 0.78rem; background-color: var(--rd-primary-600) !important; border-color: var(--rd-primary-700) !important; white-space: nowrap;" title="View Project Details">
+                                            <i class="fas fa-eye mr-1"></i> View
                                         </a>
                                     </td>
 

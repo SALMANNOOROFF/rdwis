@@ -10,10 +10,26 @@ use Illuminate\Support\Facades\DB;
 class PaymentController extends Controller
 {
     /**
+     * Ensure only authenticated Finance Directorate users can access Commitments & Payments.
+     */
+    private function ensureFinanceAuthorized(): void
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(401, 'Unauthenticated.');
+        }
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        if ($userArea !== 'fin' && $user->acc_username !== 'superadminrdw') {
+            abort(403, 'Unauthorized. Only Finance Directorate is authorized to access Commitments & Payments.');
+        }
+    }
+
+    /**
      * Commitments Landing (Redirects to main Purchase Case Commitments list).
      */
     public function landing()
     {
+        $this->ensureFinanceAuthorized();
         return redirect()->route('fin.payments.index');
     }
 
@@ -23,6 +39,7 @@ class PaymentController extends Controller
      */
     public function index(Request $request)
     {
+        $this->ensureFinanceAuthorized();
         $user = Auth::user();
         [$lower, $upper] = $this->getUserHorizon($user);
 
@@ -151,6 +168,7 @@ class PaymentController extends Controller
      */
     public function show($cmt_id)
     {
+        $this->ensureFinanceAuthorized();
         $commitment = DB::table('fin.commitments as c')
             ->join('pur.purcases as p', function ($join) {
                 $join->on('c.cmt_docid', '=', 'p.pcs_id')
@@ -236,6 +254,7 @@ class PaymentController extends Controller
      */
     public function storeTransaction(Request $request, $cmt_id)
     {
+        $this->ensureFinanceAuthorized();
         $commitment = DB::table('fin.commitments as c')
             ->join('pur.purcases as p', function ($join) {
                 $join->on('c.cmt_docid', '=', 'p.pcs_id')
@@ -367,6 +386,7 @@ class PaymentController extends Controller
      */
     public function salaryPlaceholder()
     {
+        $this->ensureFinanceAuthorized();
         return view('finance.payments.salary_placeholder');
     }
 

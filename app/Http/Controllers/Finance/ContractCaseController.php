@@ -60,16 +60,24 @@ class ContractCaseController extends Controller
             'unit'
         ])->findOrFail($id);
 
-        return view('finance.contract-cases.show', compact('case'));
+        $authorityRole = 'Finance';
+        $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
+        $canApprove = false;
+
+        return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
     }
 
     public function forward($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Forwarded to MD for approval.');
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+        $targetStage = $request->input('target_destination') ?? $request->input('target_stage') ?? 'MD';
 
-        $nextStage = $this->approvalService->forward($case, $user, $remarks, 'MD');
+        $nextStage = $this->approvalService->forward($case, $user, $remarks, $targetStage);
 
         return response()->json([
             'success' => true,
@@ -82,8 +90,11 @@ class ContractCaseController extends Controller
     {
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Returned by Finance.');
-        $targetStage = $request->input('target_stage', 'HR');
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+        $targetStage = $request->input('target_destination') ?? $request->input('target_stage') ?? 'HR';
 
         $destStage = $this->approvalService->return($case, $user, $remarks, $targetStage);
 
@@ -98,6 +109,9 @@ class ContractCaseController extends Controller
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
         $remarks = $request->input('remarks', 'Case rejected by Finance.');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
 
         $this->approvalService->reject($case, $user, $remarks);
 

@@ -84,15 +84,14 @@
 
         {{-- Top Back Navigation Bar --}}
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="{{ route('division.finance-of-project.index', ['head_id' => $head->hed_id, 'tab' => 'status']) }}"
+            <a href="{{ route('projects.financial_view', $head->prj_id) }}"
                class="btn btn-secondary btn-sm shadow-sm font-weight-bold" style="border-radius: 20px; padding: 6px 16px;">
-                <i class="fas fa-arrow-left mr-1"></i> Back to {{ $head->hed_code }} Status
+                <i class="fas fa-arrow-left mr-1"></i> Back to {{ $head->prj_title }} Financial View
             </a>
 
             <div>
-                <span class="text-muted small mr-2">Quick Navigation:</span>
-                <a href="{{ route('division.finance-of-project.index', ['tab' => 'overview']) }}" class="btn btn-outline-secondary btn-sm rounded-pill">
-                    <i class="fas fa-table mr-1"></i> All Projects
+                <a href="{{ route('view-projects') }}" class="btn btn-outline-secondary btn-sm rounded-pill font-weight-bold">
+                    <i class="fas fa-folder-open mr-1"></i> All Projects
                 </a>
             </div>
         </div>

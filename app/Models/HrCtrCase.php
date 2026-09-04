@@ -149,6 +149,62 @@ class HrCtrCase extends Model
         return $this->hasMany(HrCtrCaseRemark::class, 'crr_ctc_id', 'ctc_id')->orderBy('crr_id', 'desc');
     }
 
+    public function getIsHrAdminAttribute(): bool
+    {
+        $divId = (int)($this->ctc_divisionid ?: ($this->ctc_unt_id ?: ($this->ctc_newunt_id ?: 0)));
+        if (in_array($divId, [820000, 840000, 880000, 10000, 100000, 800000, 810000, 860000])) {
+            return true;
+        }
+        $name = strtolower($this->division_name ?? '');
+        $short = strtolower($this->division_short ?? '');
+        return str_contains($name, 'hr') || str_contains($name, 'human') ||
+               str_contains($name, 'admin') || str_contains($name, 'information system') ||
+               str_contains($name, 'is department') || str_contains($name, 'head quarter') ||
+               in_array($short, ['hr', 'admin', 'is', 'hqs', 'it', 'ext']);
+    }
+
+    public function getDefaultProjectCodeAttribute(): string
+    {
+        return $this->is_hr_admin ? 'CSRF' : 'Core';
+    }
+
+    public function getDefaultProjectNameAttribute(): string
+    {
+        return $this->is_hr_admin ? 'Center Special Research Fund (CSRF)' : 'Institutional Core Budget';
+    }
+
+    public function getProjectCodeAttribute(): string
+    {
+        if ($this->is_hr_admin) {
+            return 'CSRF';
+        }
+        $plan = $this->casePlans->first();
+        if ($plan && $plan->project && !empty($plan->project->prj_code)) {
+            return $plan->project->prj_code;
+        }
+        if ($plan && !empty($plan->ccp_hed_id)) {
+            $hedCode = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $plan->ccp_hed_id)->value('hed_code');
+            if ($hedCode) return $hedCode;
+        }
+        return 'Core';
+    }
+
+    public function getProjectNameAttribute(): string
+    {
+        if ($this->is_hr_admin) {
+            return 'Center Special Research Fund (CSRF)';
+        }
+        $plan = $this->casePlans->first();
+        if ($plan && $plan->project && !empty($plan->project->prj_name)) {
+            return $plan->project->prj_name;
+        }
+        if ($plan && !empty($plan->ccp_hed_id)) {
+            $hedName = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $plan->ccp_hed_id)->value('hed_name');
+            if ($hedName) return $hedName;
+        }
+        return 'Institutional Core Budget';
+    }
+
     // ── Sub-Status Relationships ──────────────────────────────
 
     /**
@@ -189,4 +245,146 @@ class HrCtrCase extends Model
     {
         return $this->currentSubstatus->css_stage ?? null;
     }
+
+    public function getCurrentOfficeNameAttribute(): string
+    {
+        $stage = $this->current_stage ?? 'Division';
+        return match($stage) {
+            'Division'     => 'Division Office' . ($this->division_short ? ' (' . $this->division_short . ')' : ''),
+            'HR'           => 'HR Directorate (Scrutiny)',
+            'Finance'      => 'Finance Directorate (Scrutiny)',
+            'MD'           => 'MD Office (Under Review)',
+            'DDG'          => 'DDG Office (Under Review)',
+            'DG'           => 'DG Office (Final Review)',
+            'Approved'     => 'Approved by Competent Authority',
+            'Fulfilled'    => 'Completed / Fulfilled',
+            'Not Approved' => 'Not Approved',
+            'Cancelled'    => 'Cancelled',
+            default        => $stage . ' Office'
+        };
+    }
+
+    public function getEffectivePreviousContractAttribute()
+    {
+        if ($this->previousContract) {
+            return $this->previousContract;
+        }
+        if (!empty($this->ctc_ctr_id)) {
+            $c = HrContract::find($this->ctc_ctr_id);
+            if ($c) return $c;
+        }
+        if (!empty($this->ctc_emp_id)) {
+            return HrContract::where('ctr_num', $this->ctc_emp_id)
+                ->where('ctr_id', '!=', $this->ctc_newctr_id ?? 0)
+                ->orderBy('ctr_enddt', 'desc')
+                ->first();
+        }
+        return null;
+    }
+
+    public function getPreviousSalaryAttribute(): ?float
+    {
+        $prevCtr = $this->effective_previous_contract;
+        if ($prevCtr && isset($prevCtr->ctr_salary)) {
+            return (float)$prevCtr->ctr_salary;
+        }
+        return null;
+    }
+
+    public function getPreviousGradeAttribute(): ?string
+    {
+        $prevCtr = $this->effective_previous_contract;
+        if ($prevCtr && !empty($prevCtr->ctr_grade)) {
+            return $prevCtr->ctr_grade;
+        }
+        if ($this->employee && !empty($this->employee->emp_grade)) {
+            return $this->employee->emp_grade;
+        }
+        return null;
+    }
+
+    public function getPreviousJobtitleAttribute(): ?string
+    {
+        $prevCtr = $this->effective_previous_contract;
+        if ($prevCtr && !empty($prevCtr->ctr_jobtitle)) {
+            return $prevCtr->ctr_jobtitle;
+        }
+        if ($this->employee && !empty($this->employee->emp_desig)) {
+            return $this->employee->emp_desig;
+        }
+        return null;
+    }
+
+    public function getPreviousStartdtAttribute(): ?string
+    {
+        $prevCtr = $this->effective_previous_contract;
+        return $prevCtr?->ctr_startdt ?? null;
+    }
+
+    public function getPreviousEnddtAttribute(): ?string
+    {
+        $prevCtr = $this->effective_previous_contract;
+        return $prevCtr?->ctr_enddt ?? null;
+    }
+
+    public function getFatherNameAttribute(): ?string
+    {
+        if (!empty($this->ctc_emp_id)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.empsexta')->where('empexta_emp_id', $this->ctc_emp_id)->value('emp_father');
+            if (!empty($val)) return $val;
+        }
+        if (!empty($this->ctc_cnic)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.applicants')->where('apl_cnic', $this->ctc_cnic)->value('apl_father');
+            if (!empty($val)) return $val;
+        }
+        if ($this->employee && !empty($this->employee->emp_fathername)) {
+            return $this->employee->emp_fathername;
+        }
+        return null;
+    }
+
+    public function getCandidateCnicAttribute(): ?string
+    {
+        if (!empty($this->ctc_cnic)) {
+            return $this->ctc_cnic;
+        }
+        if ($this->employee && !empty($this->employee->emp_cnic)) {
+            return $this->employee->emp_cnic;
+        }
+        if (!empty($this->ctc_emp_id)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.emps')->where('emp_id', $this->ctc_emp_id)->value('emp_cnic');
+            if (!empty($val)) return $val;
+        }
+        return null;
+    }
+
+    public function getCandidateMobileAttribute(): ?string
+    {
+        if (!empty($this->ctc_contact)) {
+            return $this->ctc_contact;
+        }
+        if (!empty($this->ctc_emp_id)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.empsexta')->where('empexta_emp_id', $this->ctc_emp_id)->value('emp_mobile');
+            if (!empty($val)) return $val;
+        }
+        if (!empty($this->ctc_cnic)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.applicants')->where('apl_cnic', $this->ctc_cnic)->value('apl_mobile');
+            if (!empty($val)) return $val;
+        }
+        return null;
+    }
+
+    public function getCandidateEmailAttribute(): ?string
+    {
+        if (!empty($this->ctc_emp_id)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.empsexta')->where('empexta_emp_id', $this->ctc_emp_id)->value('emp_email');
+            if (!empty($val)) return $val;
+        }
+        if (!empty($this->ctc_cnic)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.applicants')->where('apl_cnic', $this->ctc_cnic)->value('apl_email');
+            if (!empty($val)) return $val;
+        }
+        return null;
+    }
 }
+

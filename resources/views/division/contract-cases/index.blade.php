@@ -206,7 +206,7 @@
                                                         <div class="case-title-text">{{ $p->ctc_empnamecomp }}</div>
                                                         <div class="text-muted small">
                                                             <span class="badge badge-primary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
-                                                            {{ $p->ctc_newjobtitle }} &bull; {{ $p->casePlans->first()->project->prj_code ?? 'Core' }}
+                                                            {{ $p->ctc_newjobtitle }} &bull; {{ $p->project_code }}
                                                         </div>
                                                     </td>
                                                     <td class="text-right">
@@ -270,7 +270,7 @@
                                                         <div class="case-title-text">{{ $p->ctc_empnamecomp }}</div>
                                                         <div class="text-muted small">
                                                             <span class="badge badge-secondary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
-                                                            {{ $p->ctc_newjobtitle }} &bull; {{ $p->casePlans->first()->project->prj_code ?? 'Core' }}
+                                                            {{ $p->ctc_newjobtitle }} &bull; {{ $p->project_code }}
                                                         </div>
                                                     </td>
                                                     <td class="text-right">

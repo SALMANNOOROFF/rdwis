@@ -106,9 +106,9 @@ class ContractCaseApprovalService
     /**
      * Add a record into hr.ctrcaseremarks
      */
-    public function recordRemark(HrCtrCase $case, $user, string $remarks, string $status): void
+    public function recordRemark(HrCtrCase $case, $user, ?string $remarks, string $status): void
     {
-        if (empty(trim($remarks))) {
+        if (empty(trim($remarks ?? ''))) {
             return;
         }
 
@@ -176,11 +176,35 @@ class ContractCaseApprovalService
                 }
             }
 
-            $legacyStatus = self::STAGE_TO_LEGACY_STATUS[$nextStage] ?? 'Under Approval';
+            if ($nextStage === 'Division' || in_array($nextStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
+                $targetName = $nextStage === 'Division' ? 'Division' : $nextStage . ' Division';
+                $nextStage = 'Division';
+                $legacyStatus = 'Under Revision';
+                $actionText = 'Sent to ' . $targetName . ' (Under Revision)';
+            } elseif ($nextStage === 'Approved') {
+                $this->approve($case, $user, [], $remarks);
+                return 'Approved';
+            } else {
+                $legacyStatus = self::STAGE_TO_LEGACY_STATUS[$nextStage] ?? 'Under Approval';
+                $deptTitles = [
+                    'HR'       => 'HR Directorate (Scrutiny)',
+                    'Finance'  => 'Finance Directorate (Director Finance)',
+                    'DProc'    => 'Procurement Department',
+                    'Admin'    => 'Administration Department',
+                    'IS'       => 'Information System Department (IS)',
+                    'IT'       => 'Information Technology Department (IT)',
+                    'Projects' => 'Projects Department',
+                    'MD'       => 'MD Office',
+                    'DDG'      => 'DDG Office',
+                    'DG'       => 'Director General (DG)',
+                ];
+                $actionText = 'Sent to ' . ($deptTitles[$nextStage] ?? $nextStage);
+            }
+
             $this->transitionSubstatus($case, $nextStage, $legacyStatus);
 
             if (!empty($remarks)) {
-                $this->recordRemark($case, $user, $remarks, $legacyStatus);
+                $this->recordRemark($case, $user, $remarks, $actionText);
             }
 
             return $nextStage;
@@ -236,7 +260,7 @@ class ContractCaseApprovalService
     /**
      * Return case to previous stage or Division (Under Revision)
      */
-    public function return(HrCtrCase $case, $user, string $remarks, ?string $targetStage = null): string
+    public function return(HrCtrCase $case, $user, ?string $remarks = null, ?string $targetStage = null): string
     {
         return DB::transaction(function () use ($case, $user, $remarks, $targetStage) {
             $currentStage = $case->currentSubstatus->css_stage ?? 'HR';
@@ -265,7 +289,7 @@ class ContractCaseApprovalService
 
             $legacyStatus = ($destStage === 'Division') ? 'Under Revision' : (self::STAGE_TO_LEGACY_STATUS[$destStage] ?? 'Under Revision');
             $this->transitionSubstatus($case, $destStage, $legacyStatus);
-            $this->recordRemark($case, $user, $remarks, $legacyStatus);
+            $this->recordRemark($case, $user, $remarks ?: 'Returned to ' . $destStage, $legacyStatus);
 
             return $destStage;
         });
@@ -274,23 +298,212 @@ class ContractCaseApprovalService
     /**
      * Reject case (Not Approved)
      */
-    public function reject(HrCtrCase $case, $user, string $remarks): void
+    public function reject(HrCtrCase $case, $user, ?string $remarks = null): void
     {
         DB::transaction(function () use ($case, $user, $remarks) {
             $this->closeSubstatus($case, 'Not Approved', 'Not Approved');
-            $this->recordRemark($case, $user, $remarks, 'Not Approved');
+            $this->recordRemark($case, $user, $remarks ?: 'Not Approved', 'Not Approved');
         });
     }
 
     /**
      * Cancel case
      */
-    public function cancel(HrCtrCase $case, $user, string $remarks = 'Case cancelled'): void
+    public function cancel(HrCtrCase $case, $user, ?string $remarks = 'Case cancelled'): void
     {
         DB::transaction(function () use ($case, $user, $remarks) {
             $this->closeSubstatus($case, 'Cancelled', 'Cancelled');
-            $this->recordRemark($case, $user, $remarks, 'Cancelled');
+            $this->recordRemark($case, $user, $remarks ?: 'Case cancelled', 'Cancelled');
         });
+    }
+
+    /**
+     * Get available destination targets for sending a contract case
+     */
+    public function getAvailableDestinations(?string $currentRole = null): array
+    {
+        $role = strtolower(trim((string)$currentRole));
+        if (in_array($role, ['proc', 'prc'], true)) $role = 'dproc';
+        
+        $canSendToDdg = !in_array($role, ['division', 'prj', 'rdwprj', 'initiation'], true);
+        $canSendToDg = !in_array($role, ['division', 'prj', 'rdwprj', 'initiation'], true);
+        $canSendToMd = ($role !== 'rdw' && $role !== 'md');
+
+        $list = [];
+
+        // 1. Finance Department
+        $list['Finance'] = [
+            'code'     => 'Finance',
+            'name'     => 'Finance Department',
+            'director' => 'Cdr (R) S F Rahman',
+            'desig'    => 'Director Finance',
+            'badge'    => 'FIN',
+        ];
+
+        // 2. Human Resource Department (HR)
+        $list['HR'] = [
+            'code'     => 'HR',
+            'name'     => 'Human Resource Department (HR)',
+            'director' => 'Lt PN Basim Talat',
+            'desig'    => 'Staff Officer - Human Resources',
+            'badge'    => 'HR',
+        ];
+
+        // 3. Information System Department (IS)
+        $list['IS'] = [
+            'code'     => 'IS',
+            'name'     => 'Information System Department (IS)',
+            'director' => 'Lt Cdr (Rtd) Adnan Mustafa',
+            'desig'    => 'Director Information System',
+            'badge'    => 'IS',
+        ];
+
+        // 4. Information Technology Department (IT)
+        $list['IT'] = [
+            'code'     => 'IT',
+            'name'     => 'Information Technology Department (IT)',
+            'director' => 'Director IT',
+            'desig'    => 'Directorate of Information Technology',
+            'badge'    => 'IT',
+        ];
+
+        // 5. Administration Department (Admin)
+        $list['Admin'] = [
+            'code'     => 'Admin',
+            'name'     => 'Administration Department (Admin)',
+            'director' => 'H/Lt PN Sajid Ali Cheema',
+            'desig'    => 'Manager Admin R&D Wing',
+            'badge'    => 'ADMIN',
+        ];
+
+        // 6. Managing Director (MD)
+        if ($canSendToMd) {
+            $list['MD'] = [
+                'code'     => 'MD',
+                'name'     => 'Managing Director (MD Office)',
+                'director' => 'Cdre Malik M Imran',
+                'desig'    => 'Managing Director RDW',
+                'badge'    => 'MD',
+            ];
+        }
+
+        // 8. Deputy Director General (DDG)
+        if ($canSendToDdg) {
+            $list['DDG'] = [
+                'code'     => 'DDG',
+                'name'     => 'Deputy Director General (DDG Office)',
+                'director' => 'Deputy Director General',
+                'desig'    => 'DDG HQs NRD',
+                'badge'    => 'DDG',
+            ];
+        }
+
+        // 9. Director General (DG)
+        if ($canSendToDg) {
+            $list['DG'] = [
+                'code'     => 'DG',
+                'name'     => 'Director General (DG Office)',
+                'director' => 'R/Admiral Sohail Arshad',
+                'desig'    => 'Director General NRDI',
+                'badge'    => 'DG',
+            ];
+        }
+
+        // 9. Enabling Technology Division (Enab)
+        $list['Enab'] = [
+            'code'     => 'Enab',
+            'name'     => 'Enabling Technology Division (Enab)',
+            'director' => 'Commodore Hammad Raza',
+            'desig'    => 'Director Enabling Technologies',
+            'badge'    => 'ENAB',
+        ];
+
+        // 12. Communication Division (Comm)
+        $list['Comm'] = [
+            'code'     => 'Comm',
+            'name'     => 'Communication Division (Comm)',
+            'director' => 'Capt PN Aleem Mushtaq',
+            'desig'    => 'Director Communication',
+            'badge'    => 'COMM',
+        ];
+
+        // 13. Naval Weapons System Division (NWS)
+        $list['NWS'] = [
+            'code'     => 'NWS',
+            'name'     => 'Naval Weapons System Division (NWS)',
+            'director' => 'Commodore Attaullah Memon SI(M)',
+            'desig'    => 'Director Naval Weapon Systems',
+            'badge'    => 'NWS',
+        ];
+
+        // 14. Sensors Division (Sensors)
+        $list['Sensors'] = [
+            'code'     => 'Sensors',
+            'name'     => 'Sensors Division (Sensors)',
+            'director' => 'Commodore Tariq Mairaj SI(M)',
+            'desig'    => 'Director Sensors',
+            'badge'    => 'SENS',
+        ];
+
+        // 15. Systems Division (Sys)
+        $list['Sys'] = [
+            'code'     => 'Sys',
+            'name'     => 'Systems Division (Sys)',
+            'director' => 'Capt PN Abdur Rehman Hashmi',
+            'desig'    => 'Director Systems',
+            'badge'    => 'SYS',
+        ];
+
+        // 16. System of Systems Engineering Division (SoSE)
+        $list['SoSE'] = [
+            'code'     => 'SoSE',
+            'name'     => 'System of Systems Engineering Division (SoSE)',
+            'director' => 'Capt PN M. Abdul Rehman Hashmi',
+            'desig'    => 'Director System of Systems Engineering',
+            'badge'    => 'SOSE',
+        ];
+
+        return $list;
+    }
+
+    /**
+     * Get available return targets for contract cases based on current stage
+     */
+    public function getReturnTargets(HrCtrCase $case, ?string $currentRole = null): array
+    {
+        $currentStage = $case->currentSubstatus->css_stage ?? $currentRole ?? 'HR';
+        $targets = [];
+
+        switch ($currentStage) {
+            case 'DG':
+                $targets['DDG'] = 'DDG';
+                $targets['MD'] = 'MD';
+                $targets['Finance'] = 'Director Finance';
+                $targets['HR'] = 'Director HR';
+                $targets['Division'] = 'Division (Initiator)';
+                break;
+            case 'DDG':
+                $targets['MD'] = 'MD';
+                $targets['Finance'] = 'Director Finance';
+                $targets['HR'] = 'Director HR';
+                $targets['Division'] = 'Division (Initiator)';
+                break;
+            case 'MD':
+                $targets['Finance'] = 'Director Finance';
+                $targets['HR'] = 'Director HR';
+                $targets['Division'] = 'Division (Initiator)';
+                break;
+            case 'Finance':
+                $targets['HR'] = 'Director HR';
+                $targets['Division'] = 'Division (Initiator)';
+                break;
+            case 'HR':
+            default:
+                $targets['Division'] = 'Division (Initiator)';
+                break;
+        }
+
+        return $targets;
     }
 
     // ── FINANCIAL & GRADE POWERS / THRESHOLD LOGIC (GOD MODE) ────────

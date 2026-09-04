@@ -792,12 +792,13 @@ class PurchaseController extends Controller
     public function releaseCase(Request $request, $id)
     {
         $pcs = Purchase::findOrFail($id);
-        $remarks = $request->input('remarks', 'Case released by Division.');
-        $action = $request->input('action', 'forward');
+        $remarks = $request->input('remarks') ?: 'Case released by Division.';
+        $action = $request->input('action') ?: 'forward';
+        $targetStage = $request->input('target_status') ?? $request->input('target_destination');
 
         try {
             // Use the service to handle the transition logic, decision log, and notification
-            $this->approvalService->processDecision($pcs, $action, $remarks);
+            $this->approvalService->processDecision($pcs, $action, $remarks, $targetStage);
             
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => true, 'message' => 'Remarks saved successfully!']);

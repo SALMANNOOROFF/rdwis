@@ -25,10 +25,14 @@ class FinanceOfProjectController extends Controller
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
-        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
-        $isGlobalViewer = in_array($area, ['rdw', 'hqs', 'nrdi', 'fin', 'proc', 'prc', 'it'])
-            || session('impersonated_by_god')
-            || strtolower($user->acc_username ?? '') === 'superadminrdw';
+        if ($request->filled('head_id')) {
+            $head = DB::table('cen.heads')->where('hed_id', $request->head_id)->first();
+            if ($head && !empty($head->hed_prj_id)) {
+                return redirect()->route('projects.financial_view', $head->hed_prj_id);
+            }
+        }
+
+        return redirect()->route('view-projects');
 
         // Query heads joined with projects and units
         $headsQuery = DB::table('cen.heads as h')

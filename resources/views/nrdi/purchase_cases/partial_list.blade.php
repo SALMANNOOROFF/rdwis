@@ -16,10 +16,10 @@
     };
 @endphp
 <tr class="hub-row div-row-{{ $p->pcs_unt_id }}">
-    {{-- 1. Action Arrow --}}
-    <td>
-        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="nav-arrow">
-            <i class="fas fa-chevron-right"></i>
+    {{-- 1. Action View Button --}}
+    <td class="text-center">
+        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; white-space: nowrap; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;" title="View Case">
+            <i class="fas fa-eye mr-1"></i> View
         </a>
     </td>
 

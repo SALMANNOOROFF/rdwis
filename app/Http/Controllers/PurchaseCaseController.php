@@ -322,7 +322,7 @@ class PurchaseCaseController extends Controller
     public function action(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:forward,forward_negative,return,approve,reject,save_draft,dproc_save,float_to_proc,reshare_to_proc',
+            'action' => 'required|in:forward,forward_negative,return,approve,reject,not_approved,cancel,save_draft,dproc_save,float_to_proc,reshare_to_proc',
             'remarks' => 'nullable|string',
             'target_status' => 'nullable|string',
         ]);

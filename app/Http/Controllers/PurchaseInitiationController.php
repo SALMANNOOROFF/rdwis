@@ -225,7 +225,7 @@ class PurchaseInitiationController extends Controller
     {
         $op = (string) $request->input('op', '');
         $rules = [
-            'op' => 'required|in:save_title,save_remarks,add_files,add_item,edit_item,delete_item,add_quote,delete_quote,upload_quote_file',
+            'op' => 'required|in:save_title,save_remarks,add_files,delete_file,add_item,edit_item,delete_item,add_quote,delete_quote,upload_quote_file',
         ];
 
         if ($op === 'save_title') {
@@ -235,6 +235,8 @@ class PurchaseInitiationController extends Controller
         } elseif ($op === 'add_files') {
             $rules['attachments'] = 'required|array';
             $rules['attachments.*'] = 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240';
+        } elseif ($op === 'delete_file') {
+            $rules['pat_id'] = 'required|integer';
         } elseif ($op === 'add_item') {
             $rules['item_desc'] = 'required|string|max:2000';
             $rules['item_qty'] = 'required|numeric|min:0.0001';
@@ -259,22 +261,27 @@ class PurchaseInitiationController extends Controller
         $request->validate($rules);
 
         $user = Auth::user();
-        $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc') || str_contains(strtolower(trim($user->acc_untarea)), 'prc');
+        $isDProc = str_contains(strtolower(trim($user->acc_untarea ?? '')), 'proc') || str_contains(strtolower(trim($user->acc_untarea ?? '')), 'prc');
 
-        $query = Purchase::query();
-        if ($isDProc) {
-            $lower = $user->acc_lowerm;
-            $upper = $user->acc_upperm;
-            $query->whereBetween('pcs_unt_id', [$lower, $upper]);
+        if ($op === 'add_files' || $op === 'delete_file') {
+            // Any authenticated user can upload or remove case attachments across all stages
+            $purchase = Purchase::findOrFail($id);
         } else {
-            $query->where('pcs_unt_id', $user->acc_unt_id);
-        }
+            $query = Purchase::query();
+            if ($isDProc) {
+                $lower = $user->acc_lowerm;
+                $upper = $user->acc_upperm;
+                $query->whereBetween('pcs_unt_id', [$lower, $upper]);
+            } else {
+                $query->where('pcs_unt_id', $user->acc_unt_id);
+            }
 
-        $purchase = $query->findOrFail($id);
+            $purchase = $query->findOrFail($id);
 
-        $status = strtolower(trim((string) $purchase->pcs_status));
-        if (!in_array($status, ['draft', 'returned']) && !$isDProc) {
-            return $this->respond($request, (int) $purchase->pcs_id, false, 'Case cannot be edited in current status.');
+            $status = strtolower(trim((string) $purchase->pcs_status));
+            if (!in_array($status, ['draft', 'returned']) && !$isDProc) {
+                return $this->respond($request, (int) $purchase->pcs_id, false, 'Case cannot be edited in current status.');
+            }
         }
 
         $result = DB::transaction(function () use ($request, $purchase, $op) {

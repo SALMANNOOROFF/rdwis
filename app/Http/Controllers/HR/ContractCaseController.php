@@ -91,11 +91,14 @@ class ContractCaseController extends Controller
             'unit'
         ])->findOrFail($id);
 
+        $authorityRole = 'HR';
+        $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
+        $canApprove = false;
         $strength = [];
         $deptMap = EmployeeCreationService::getDepartmentMap();
         $departments = DB::table('cen.units')->orderBy('unt_name')->get();
 
-        return view('hr.contract-cases.show', compact('case', 'strength', 'deptMap', 'departments'));
+        return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove', 'strength', 'deptMap', 'departments'));
     }
 
     public function addEmployee($id, Request $request)
@@ -165,9 +168,13 @@ class ContractCaseController extends Controller
     {
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Forwarded to Finance for financial scrutiny.');
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+        $targetStage = $request->input('target_destination') ?? $request->input('target_stage') ?? 'Finance';
 
-        $nextStage = $this->approvalService->forward($case, $user, $remarks);
+        $nextStage = $this->approvalService->forward($case, $user, $remarks, $targetStage);
 
         return response()->json([
             'success' => true,
@@ -180,9 +187,13 @@ class ContractCaseController extends Controller
     {
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Returned to Division for revision.');
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+        $targetStage = $request->input('target_destination') ?? $request->input('target_stage') ?? 'Division';
 
-        $destStage = $this->approvalService->return($case, $user, $remarks, 'Division');
+        $destStage = $this->approvalService->return($case, $user, $remarks, $targetStage);
 
         return response()->json([
             'success' => true,
@@ -215,6 +226,9 @@ class ContractCaseController extends Controller
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
         $remarks = $request->input('remarks', 'Case rejected by HR.');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
 
         $this->approvalService->reject($case, $user, $remarks);
 

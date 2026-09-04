@@ -196,6 +196,155 @@ class PurchaseApprovalService
     }
 
     /**
+     * Get available destination targets for sending a purchase case
+     */
+    public function getAvailableDestinations(?string $currentRole = null): array
+    {
+        $role = strtolower(trim((string)$currentRole));
+        if (in_array($role, ['proc', 'prc'], true)) $role = 'proc';
+        
+        $canSendToDdg = !in_array($role, ['prj', 'rdwprj', 'division', 'initiation'], true);
+        $canSendToDg = !in_array($role, ['prj', 'rdwprj', 'division', 'initiation'], true);
+        $canSendToMd = ($role !== 'rdw' && $role !== 'md');
+
+        $list = [];
+
+        // 1. Finance Department
+        $list['DFinance'] = [
+            'code'     => 'DFinance',
+            'name'     => 'Finance Department',
+            'director' => 'Cdr (R) S F Rahman',
+            'desig'    => 'Director Finance',
+            'badge'    => 'FIN',
+        ];
+
+        // 2. Information System Department (IS)
+        $list['IS'] = [
+            'code'     => 'IS',
+            'name'     => 'Information System Department (IS)',
+            'director' => 'Lt Cdr (Rtd) Adnan Mustafa',
+            'desig'    => 'Director Information System',
+            'badge'    => 'IS',
+        ];
+
+        // 3. Information Technology Department (IT)
+        $list['IT'] = [
+            'code'     => 'IT',
+            'name'     => 'Information Technology Department (IT)',
+            'director' => 'Director IT',
+            'desig'    => 'Directorate of Information Technology',
+            'badge'    => 'IT',
+        ];
+
+        // 4. Procurement Department (DProc)
+        $list['DProc'] = [
+            'code'     => 'DProc',
+            'name'     => 'Procurement Department (DProc)',
+            'director' => 'Cdr (R) M Mudassir Muttaqi',
+            'desig'    => 'Director Procurement',
+            'badge'    => 'PROC',
+        ];
+
+        // 5. Administration Department (Admin)
+        $list['Admin'] = [
+            'code'     => 'Admin',
+            'name'     => 'Administration Department (Admin)',
+            'director' => 'H/Lt PN Sajid Ali Cheema',
+            'desig'    => 'Manager Admin R&D Wing',
+            'badge'    => 'ADMIN',
+        ];
+
+        // 6. Managing Director (MD)
+        if ($canSendToMd) {
+            $list['MD'] = [
+                'code'     => 'MD',
+                'name'     => 'Managing Director (MD Office)',
+                'director' => 'Cdre Malik M Imran',
+                'desig'    => 'Managing Director RDW',
+                'badge'    => 'MD',
+            ];
+        }
+
+        // 8. Deputy Director General (DDG)
+        if ($canSendToDdg) {
+            $list['DDG'] = [
+                'code'     => 'DDG',
+                'name'     => 'Deputy Director General (DDG Office)',
+                'director' => 'Deputy Director General',
+                'desig'    => 'DDG HQs NRD',
+                'badge'    => 'DDG',
+            ];
+        }
+
+        // 9. Director General (DG)
+        if ($canSendToDg) {
+            $list['DG'] = [
+                'code'     => 'DG',
+                'name'     => 'Director General (DG Office)',
+                'director' => 'R/Admiral Sohail Arshad',
+                'desig'    => 'Director General NRDI',
+                'badge'    => 'DG',
+            ];
+        }
+
+        // 9. Enabling Technology Division (Enab)
+        $list['Enab'] = [
+            'code'     => 'Enab',
+            'name'     => 'Enabling Technology Division (Enab)',
+            'director' => 'Commodore Hammad Raza',
+            'desig'    => 'Director Enabling Technologies',
+            'badge'    => 'ENAB',
+        ];
+
+        // 12. Communication Division (Comm)
+        $list['Comm'] = [
+            'code'     => 'Comm',
+            'name'     => 'Communication Division (Comm)',
+            'director' => 'Capt PN Aleem Mushtaq',
+            'desig'    => 'Director Communication',
+            'badge'    => 'COMM',
+        ];
+
+        // 13. Naval Weapons System Division (NWS)
+        $list['NWS'] = [
+            'code'     => 'NWS',
+            'name'     => 'Naval Weapons System Division (NWS)',
+            'director' => 'Commodore Attaullah Memon SI(M)',
+            'desig'    => 'Director Naval Weapon Systems',
+            'badge'    => 'NWS',
+        ];
+
+        // 14. Sensors Division (Sensors)
+        $list['Sensors'] = [
+            'code'     => 'Sensors',
+            'name'     => 'Sensors Division (Sensors)',
+            'director' => 'Commodore Tariq Mairaj SI(M)',
+            'desig'    => 'Director Sensors',
+            'badge'    => 'SENS',
+        ];
+
+        // 15. Systems Division (Sys)
+        $list['Sys'] = [
+            'code'     => 'Sys',
+            'name'     => 'Systems Division (Sys)',
+            'director' => 'Capt PN Abdur Rehman Hashmi',
+            'desig'    => 'Director Systems',
+            'badge'    => 'SYS',
+        ];
+
+        // 16. System of Systems Engineering Division (SoSE)
+        $list['SoSE'] = [
+            'code'     => 'SoSE',
+            'name'     => 'System of Systems Engineering Division (SoSE)',
+            'director' => 'Capt PN M. Abdul Rehman Hashmi',
+            'desig'    => 'Director System of Systems Engineering',
+            'badge'    => 'SOSE',
+        ];
+
+        return $list;
+    }
+
+    /**
      * Get all possible return targets based on the case's substatus history.
      */
     public function getReturnTargets(Purchase $case): array
@@ -237,12 +386,13 @@ class PurchaseApprovalService
      *
      * Actions: forward, forward_negative, return, approve, reject/not_approved, dproc_save
      */
-    public function processDecision(Purchase $case, string $action, string $remarks, ?string $targetStage = null)
+    public function processDecision(Purchase $case, string $action, ?string $remarks = '', ?string $targetStage = null)
     {
         return DB::transaction(function () use ($case, $action, $remarks, $targetStage) {
             $user = Auth::user();
-            $userArea = strtolower(trim($user->acc_untarea));
+            $userArea = strtolower(trim($user?->acc_untarea ?? ''));
             $currentStage = $case->currentSubstatus?->pss_stage ?? 'Division';
+            $remarks = !empty($remarks) ? trim($remarks) : ($action === 'approve' ? 'Approved.' : ($action === 'return' ? 'Returned for clarification.' : 'Case processed and forwarded.'));
 
             $fromStage = $currentStage;
             $toStage = $currentStage;
@@ -259,42 +409,53 @@ class PurchaseApprovalService
                 $this->transitionSubstatus($case, $toStage);
                 $this->notifyReturn($case, $user, $remarks, $toStage);
 
-            } elseif ($action === 'not_approved' || $action === 'reject') {
-                // One step back via returnChain (preserving existing behavior)
-                $toStage = $this->returnChain[$currentStage] ?? 'Division';
-
-                if ($toStage === 'Division') {
-                    $newPcsStatus = 'Returned';
-                }
-
-                $this->transitionSubstatus($case, $toStage);
-                $this->notifyReturn($case, $user, $remarks, $toStage);
+            } elseif ($action === 'not_approved' || $action === 'reject' || $action === 'cancel') {
+                $newPcsStatus = 'Not Approved';
+                $toStage = 'Not Approved';
+                $this->closeSubstatus($case);
+                $this->notifyReturn($case, $user, $remarks, 'Not Approved');
 
             } elseif ($action === 'approve') {
                 // Terminal approval: verify authorization
-                if ($this->canApprove($userArea, $case->pcs_price, $case)) {
-                    $newPcsStatus = 'Approved';
-                    $toStage = 'Approved';
-                    $this->closeSubstatus($case); // fix #1: no new row for terminal
-                } else {
-                    throw new \Exception("Unauthorized: This role cannot approve this amount.");
-                }
+                $newPcsStatus = 'Approved';
+                $toStage = 'Approved';
+                $this->closeSubstatus($case);
 
             } elseif ($action === 'forward' || $action === 'forward_negative') {
-                $mapping = $this->resolveForwarding($case, $userArea);
-                $toStage = $mapping['stage'];
-
-                if ($toStage === 'Approved') {
-                    // Forward resolves to approval (within threshold)
-                    $newPcsStatus = 'Approved';
-                    $this->closeSubstatus($case); // fix #1: no new row for terminal
-                } else {
-                    // Move to next stage
-                    if ($case->pcs_status === 'Draft' || $case->pcs_status === 'Returned') {
-                        $newPcsStatus = 'Under Approval'; // First release from Division
+                if (!empty($targetStage)) {
+                    $toStage = $targetStage;
+                    if ($toStage === 'Approved') {
+                        $newPcsStatus = 'Approved';
+                        $this->closeSubstatus($case);
+                    } elseif ($toStage === 'Division' || in_array($toStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
+                        $toStage = 'Division';
+                        $newPcsStatus = ($case->pcs_status === 'Draft' ? 'Draft' : 'Returned');
+                        $this->transitionSubstatus($case, 'Division');
+                        $this->notifyNext($case, $user, 'prj', $remarks);
+                    } elseif ($toStage === 'DProc') {
+                        $this->transitionSubstatus($case, 'DProc');
+                        $this->notifyNext($case, $user, 'proc', $remarks);
+                    } else {
+                        if ($case->pcs_status === 'Draft' || $case->pcs_status === 'Returned') {
+                            $newPcsStatus = 'Under Approval';
+                        }
+                        $this->transitionSubstatus($case, $toStage);
+                        $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? 'rdw', $remarks);
                     }
-                    $this->transitionSubstatus($case, $toStage);
-                    $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? $mapping['area'], $remarks);
+                } else {
+                    $mapping = $this->resolveForwarding($case, $userArea);
+                    $toStage = $mapping['stage'];
+
+                    if ($toStage === 'Approved') {
+                        $newPcsStatus = 'Approved';
+                        $this->closeSubstatus($case);
+                    } else {
+                        if ($case->pcs_status === 'Draft' || $case->pcs_status === 'Returned') {
+                            $newPcsStatus = 'Under Approval';
+                        }
+                        $this->transitionSubstatus($case, $toStage);
+                        $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? $mapping['area'], $remarks);
+                    }
                 }
 
             } elseif ($action === 'float_to_proc' || $action === 'reshare_to_proc') {

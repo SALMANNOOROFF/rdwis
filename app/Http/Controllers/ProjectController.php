@@ -367,17 +367,83 @@ class ProjectController extends Controller
             return redirect()->route('login');
         }
 
-        $project = Project::with('milestones', 'attachments', 'unit')->where('prj_id', $id)->firstOrFail();
+        $project = Project::with('milestones', 'attachments', 'unit')->where('prj_id', $id)->first();
+        if (!$project) {
+            $headForPrj = DB::table('cen.heads')->where('hed_id', $id)->first();
+            if ($headForPrj && $headForPrj->hed_prj_id) {
+                $project = Project::with('milestones', 'attachments', 'unit')->where('prj_id', $headForPrj->hed_prj_id)->first();
+            }
+        }
+        if (!$project) {
+            abort(404, 'Project not found');
+        }
 
         // Financial Intelligence (Legacy Logic Integration)
         $finService = app(\App\Services\FinancialIntelligenceService::class);
-        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $id)->first();
+        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $project->prj_id)->first();
+        if (!$headRecord && is_numeric($id)) {
+            $headRecord = DB::table('cen.heads')->where('hed_id', $id)->first();
+        }
         
         $head = null;
         $subheads = [];
+        $loans = null;
+        $milestones = collect();
+        $installments = collect();
+        $transfers = collect();
+
         if ($headRecord) {
             $head = $finService->getHeadStatus($headRecord->hed_id);
             $subheads = $finService->getSubheadBreakdown($headRecord->hed_id);
+            $loans = $finService->getLoans($headRecord->hed_id);
+
+            $milestones = DB::table('prj.milestones as m')
+                ->leftJoin('fin.msncosts as mc', function ($join) use ($headRecord) {
+                    $join->on('m.msn_idd', '=', 'mc.mct_msn_idd')
+                         ->where('mc.mct_hed_id', '=', $headRecord->hed_id);
+                })
+                ->where('m.msn_xprj_id', $project->prj_id)
+                ->select(
+                    'm.msn_id',
+                    'm.msn_idd',
+                    'm.msn_type',
+                    'm.msn_desc',
+                    'm.msn_status',
+                    'm.msn_cost',
+                    'm.msn_startdt',
+                    'm.msn_targetdt',
+                    'm.msn_achvdt',
+                    'mc.mct_cost'
+                )
+                ->orderBy('m.msn_id')
+                ->get();
+
+            $installments = DB::table('fin.sharesinstall as si')
+                ->leftJoin('fin.transactions as t', 't.trn_id', '=', 'si.shi_fitrn_id')
+                ->leftJoin('prj.milestones as m', 'm.msn_idd', '=', 'si.shi_msn_idd')
+                ->where('si.shi_hed_id', $headRecord->hed_id)
+                ->select(
+                    'si.shi_id',
+                    'si.shi_hed_id',
+                    'si.shi_pcc',
+                    'si.shi_cf',
+                    'si.shi_prj',
+                    't.trn_date',
+                    'm.msn_desc'
+                )
+                ->orderBy('si.shi_id')
+                ->get();
+
+            $transfers = DB::table('fin.transfers')
+                ->where('trf_tohed', $headRecord->hed_id)
+                ->orWhere('trf_fromhed', $headRecord->hed_id)
+                ->orderBy('trf_id')
+                ->get();
+        }
+
+        $allAttachments = \App\Models\PrjAttachment::where('jat_objid', $project->prj_id)->get();
+        if ($allAttachments->isEmpty() && $project->attachments) {
+            $allAttachments = $project->attachments;
         }
 
         $totalSpent = $head->expenditure ?? 0;
@@ -427,7 +493,9 @@ class ProjectController extends Controller
 
         return view('projects.financial_view', compact(
             'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
-            'head', 'subheads', 'showProjectActualSection', 'showPrjShareValue', 'backUrl'
+            'head', 'subheads', 'loans', 'milestones', 'installments', 'transfers',
+            'headRecord', 'showProjectActualSection', 'showPrjShareValue', 'backUrl',
+            'allAttachments'
         ));
     }
 

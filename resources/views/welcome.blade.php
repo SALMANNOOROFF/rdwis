@@ -642,12 +642,6 @@
               </a>
           </li>
 
-          <li class="nav-item">
-              <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
-                  <i class="fas fa-chart-pie nav-icon text-warning"></i>
-                  <p>Financing Of Projects</p>
-              </a>
-          </li>
 
 {{-- Hiding Old Purchase System as requested --}}
           {{-- 
@@ -800,13 +794,6 @@
           </li>
 
            <li class="nav-item">
-               <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
-                   <i class="fas fa-chart-pie nav-icon text-warning"></i>
-                   <p>Financing Of Projects</p>
-               </a>
-           </li>
-
-           <li class="nav-item">
                <a href="{{ route('nrdi.firms.list') }}" class="nav-link {{ Request::routeIs('nrdi.firms.*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-building text-cyan"></i>
                    <p>SUPPLIERS & FIRMS</p>
@@ -893,14 +880,6 @@
           </li> 
           @endif
 
-           {{-- Financing Of Projects (Accessible to MD, DDG, DG, Finance, Procurement) --}}
-           <li class="nav-item">
-               <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
-                   <i class="fas fa-chart-pie nav-icon text-warning"></i>
-                   <p>Financing Of Projects</p>
-               </a>
-           </li>
-
           <li class="nav-item">
               @php
                   $purchaseRoute = 'nrdi.purchase_cases_new.index';
@@ -968,7 +947,7 @@
            </li>
            @endif
 
-          @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'nrdi', 'hqs', 'rdw', 'it']) || session('impersonated_by_god'))
+          @if(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'fin')
           <li class="nav-item {{ Request::routeIs('fin.payments.*') || Request::routeIs('fin.commitments.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>

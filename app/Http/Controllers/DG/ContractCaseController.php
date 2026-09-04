@@ -72,13 +72,35 @@ class ContractCaseController extends Controller
     {
         $case = HrCtrCase::findOrFail($id);
         $user = Auth::user();
-        $remarks = $request->input('remarks', 'Final approval granted by Director General (DG).');
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
 
         $this->approvalService->approve($case, $user, $request->all(), $remarks);
 
         return response()->json([
             'success' => true,
             'message' => 'Contract Case final approval granted by DG. Case is now ready for HR fulfillment.'
+        ]);
+    }
+
+    public function forward($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $user = Auth::user();
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+        $targetStage = $request->input('target_destination') ?? $request->input('target_stage') ?? 'DDG';
+
+        $nextStage = $this->approvalService->forward($case, $user, $remarks, $targetStage);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Case forwarded to {$nextStage} successfully.",
+            'next_stage' => $nextStage
         ]);
     }
 

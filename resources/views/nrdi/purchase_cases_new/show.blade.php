@@ -488,11 +488,10 @@
                                                 </div>
                                                 <div class="d-flex align-items-center flex-shrink-0">
                                                     <span class="badge badge-secondary badge-pill ml-1" id="pcCaseAttCountBadge" style="font-size: 8.5px; padding: 1px 4px;">{{ $caseAttachments->count() }}</span>
-                                                    @if($canEdit)
-                                                        <button type="button" class="btn btn-xs btn-outline-primary py-0 px-1 ml-1 edit-only" onclick="document.getElementById('pcCaseAttachDirectInput').click()" style="font-size: 8px; line-height: 1; border-radius: 2px; padding: 1px 3px;" title="Upload Case Document">
-                                                            <i class="fas fa-plus"></i>
-                                                        </button>
-                                                    @endif
+                                                    <input type="file" id="pcCaseAttachDirectInput" multiple style="display: none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                                    <button type="button" class="btn btn-xs btn-primary p-0 d-flex align-items-center justify-content-center ml-1" onclick="document.getElementById('pcCaseAttachDirectInput').click()" style="width: 18px; height: 18px; border-radius: 4px; background: var(--rd-accent, #5F7858) !important; border: none; cursor: pointer;" title="Upload Case Attachment (+)">
+                                                        <i class="fas fa-plus" style="font-size: 8.5px; color: #ffffff;"></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                             <div class="px-2 py-1" id="pcCaseAttachmentsList" style="font-size: 10.5px; max-height: 110px; overflow-y: auto;">
@@ -541,13 +540,6 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                            @if($canEdit)
-                                                <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST" enctype="multipart/form-data" id="pcDirectAttachForm" style="display:none;">
-                                                    @csrf
-                                                    <input type="hidden" name="op" value="add_files">
-                                                    <input type="file" name="attachments[]" id="pcCaseAttachDirectInput" multiple onchange="document.getElementById('pcDirectAttachForm').submit();">
-                                                </form>
-                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -1206,8 +1198,7 @@
                     {{-- Right Pane: Visual Analytics & Subheads --}}
                     <div class="col-xl-7 p-4" style="background: #ffffff;">
                         <div class="row">
-                            {{-- Mini Category Charts --}}
-                            @foreach(array_slice($subheads, 0, 3) as $idx => $sh)
+                            @foreach(collect($subheads)->slice(0, 3) as $idx => $sh)
                             <div class="col-md-4 mb-4">
                                 <div class="subhead-mini-card p-3 rounded border text-center h-100" style="border-color: var(--rd-border) !important; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
                                     <div class="d-flex justify-content-center mb-2" style="height: 80px;">
