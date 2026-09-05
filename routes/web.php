@@ -9,6 +9,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DocMprController; 
 use App\Http\Controllers\MprController;
 use App\Http\Controllers\DivHrController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\PurItemsController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\SystemAdminAccountController;
@@ -565,11 +566,63 @@ Route::middleware('auth')->group(function () {
                 Route::post('/employee/{id}/photo', [DivHrController::class, 'uploadPhoto'])
                     ->name('divhr.employee.upload_photo');
 
-                Route::get('/attendance', [DivHrController::class, 'attendance'])
+                Route::get('/attendance', [AttendanceController::class, 'index'])
                     ->name('divhr.attendance');
-                Route::post('/attendance/save', [DivHrController::class, 'attendanceSave'])
+                Route::post('/attendance/save', [AttendanceController::class, 'save'])
                     ->name('divhr.attendance.save')
                     ->middleware('approver');
+                Route::get('/attendance/oneday', [AttendanceController::class, 'oneday'])
+                    ->name('divhr.attendance.oneday');
+                Route::get('/attendance/summary', [AttendanceController::class, 'summary'])
+                    ->name('divhr.attendance.summary');
+                Route::get('/attendance/day-details', [AttendanceController::class, 'dayDetails'])
+                    ->name('divhr.attendance.day_details');
+                Route::post('/attendance/save-remark', [AttendanceController::class, 'saveRemark'])
+                    ->name('divhr.attendance.save_remark');
+                Route::post('/attendance/bulk-action', [AttendanceController::class, 'bulkAction'])
+                    ->name('divhr.attendance.bulk_action')
+                    ->middleware('approver');
+                Route::post('/attendance/generate-sheet', [AttendanceController::class, 'generateSheet'])
+                    ->name('divhr.attendance.generate_sheet')
+                    ->middleware('approver');
+
+                // ====================================================
+                // SALARY GENERATION PIPELINE (PHASE 4)
+                // ====================================================
+                Route::prefix('salary')->group(function () {
+                    Route::get('/requisitions', [\App\Http\Controllers\SalaryController::class, 'requisitionsIndex'])
+                        ->name('divhr.salary.requisitions.index');
+                    Route::get('/requisitions/create', [\App\Http\Controllers\SalaryController::class, 'requisitionsCreate'])
+                        ->name('divhr.salary.requisitions.create');
+                    Route::get('/preview', [\App\Http\Controllers\SalaryController::class, 'preview'])
+                        ->name('divhr.salary.preview');
+                    Route::post('/requisitions/generate', [\App\Http\Controllers\SalaryController::class, 'generateRequisitions'])
+                        ->name('divhr.salary.requisitions.generate')
+                        ->middleware('approver');
+                    Route::post('/requisitions/{srq_id}/release', [\App\Http\Controllers\SalaryController::class, 'releaseRequisition'])
+                        ->name('divhr.salary.requisitions.release')
+                        ->middleware('approver');
+                    Route::post('/requisitions/{srq_id}/cancel', [\App\Http\Controllers\SalaryController::class, 'cancelRequisition'])
+                        ->name('divhr.salary.requisitions.cancel')
+                        ->middleware('approver');
+                    Route::post('/requisitions/{srq_id}/create-orders', [\App\Http\Controllers\SalaryController::class, 'createOrders'])
+                        ->name('divhr.salary.requisitions.create_orders')
+                        ->middleware('approver');
+
+                    Route::get('/orders', [\App\Http\Controllers\SalaryController::class, 'ordersIndex'])
+                        ->name('divhr.salary.orders.index');
+                    Route::get('/orders/{sor_id}', [\App\Http\Controllers\SalaryController::class, 'orderShow'])
+                        ->name('divhr.salary.orders.show');
+                    Route::post('/orders/{sor_id}/approve', [\App\Http\Controllers\SalaryController::class, 'approveOrder'])
+                        ->name('divhr.salary.orders.approve')
+                        ->middleware('approver');
+                    Route::post('/orders/{sor_id}/cancel', [\App\Http\Controllers\SalaryController::class, 'cancelOrder'])
+                        ->name('divhr.salary.orders.cancel')
+                        ->middleware('approver');
+
+                    Route::get('/commitments/verify', [\App\Http\Controllers\SalaryController::class, 'verifyCommitments'])
+                        ->name('divhr.salary.commitments.verify');
+                });
 
                 Route::get('/initiate-contract', [DivHrController::class, 'initiateContract'])
                     ->name('divhr.contract.initiate');

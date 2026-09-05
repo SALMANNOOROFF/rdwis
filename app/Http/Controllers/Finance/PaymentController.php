@@ -47,8 +47,58 @@ class PaymentController extends Controller
         $unitFilter = $request->get('unit_id', 'All');
         $search = trim($request->get('search', ''));
 
-        $query = DB::table('fin.commitments as c')
-            ->join('pur.purcases as p', function ($join) {
+        $typeFilter = $request->get('type', 'purchase'); // 'purchase' or 'salary'
+
+        $query = DB::table('fin.commitments as c');
+
+        if ($typeFilter === 'salary') {
+            $query->join('fin.salorders as s', function ($join) {
+                $join->on('c.cmt_docid', '=', 's.sor_id')
+                     ->where('c.cmt_type', '=', 'Sa');
+            })
+            ->leftJoin('cen.heads as eh', 'c.cmt_effhed_id', '=', 'eh.hed_id')
+            ->leftJoin('cen.units as eu', 'eh.hed_unt_id', '=', 'eu.unt_id')
+            ->leftJoin('cen.heads as fh', 'c.cmt_hed_id', '=', 'fh.hed_id')
+            ->leftJoin('cen.units as fu', 'fh.hed_unt_id', '=', 'fu.unt_id')
+            ->leftJoin('cen.units as su', 's.sor_effunt_id', '=', 'su.unt_id')
+            ->where(function ($w) use ($lower, $upper) {
+                $w->whereBetween('s.sor_effunt_id', [$lower, $upper])
+                  ->orWhereBetween('s.sor_unt_id', [$lower, $upper]);
+            })
+            ->select(
+                'c.cmt_id',
+                'c.cmt_docid',
+                'c.cmt_type',
+                'c.cmt_date',
+                'c.cmt_amount',
+                'c.cmt_status',
+                'c.cmt_effhed_id',
+                'c.cmt_hed_id',
+                'c.cmt_remarks',
+                's.sor_id as pcs_id',
+                DB::raw("'Salary: ' || s.sor_empnamecomp || ' (' || to_char(s.sor_month, 'Mon-YYYY') || ')' as pcs_title"),
+                DB::raw("'Sa' as pcs_type"),
+                's.sor_id as pcs_minute',
+                's.sor_month as pcs_date',
+                's.sor_salary as pcs_intprice',
+                DB::raw("0 as pcs_inttax"),
+                's.sor_salary as pcs_midprice',
+                DB::raw("0 as pcs_midtax"),
+                's.sor_salary as pcs_price',
+                's.sor_transtype as pcs_transtype',
+                's.sor_noloan as pcs_noloan',
+                's.sor_effunt_id as pcs_intunt_id',
+                'eh.hed_code as eff_hed_code',
+                'eh.hed_name as eff_hed_name',
+                'eu.unt_namesh as eff_unt_namesh',
+                'fh.hed_code as for_hed_code',
+                'fh.hed_name as for_hed_name',
+                'fu.unt_namesh as for_unt_namesh',
+                'su.unt_namesh as int_unt_namesh',
+                's.sor_bnkacctitle as frm_name'
+            );
+        } else {
+            $query->join('pur.purcases as p', function ($join) {
                 $join->on('c.cmt_docid', '=', 'p.pcs_id')
                      ->on('c.cmt_type', '=', 'p.pcs_type');
             })
@@ -91,6 +141,7 @@ class PaymentController extends Controller
                 'iu.unt_namesh as int_unt_namesh',
                 'f.frm_name'
             );
+        }
 
         // Tab filter: Open = Awaited, Closed = Paid + Cancelled
         if ($tab === 'Closed') {
@@ -102,45 +153,88 @@ class PaymentController extends Controller
 
         // Division / Unit filter (interactive narrowing within user's horizon)
         if ($unitFilter !== 'All' && is_numeric($unitFilter)) {
-            $query->where('p.pcs_intunt_id', (int)$unitFilter);
+            if ($typeFilter === 'salary') {
+                $query->where(function ($q) use ($unitFilter) {
+                    $q->where('s.sor_effunt_id', (int)$unitFilter)
+                      ->orWhere('s.sor_unt_id', (int)$unitFilter);
+                });
+            } else {
+                $query->where('p.pcs_intunt_id', (int)$unitFilter);
+            }
         }
 
         // Search filter
         if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('p.pcs_title', 'ILIKE', "%{$search}%")
-                  ->orWhere('f.frm_name', 'ILIKE', "%{$search}%")
-                  ->orWhere('eh.hed_code', 'ILIKE', "%{$search}%")
+            $query->where(function ($q) use ($search, $typeFilter) {
+                if ($typeFilter === 'salary') {
+                    $q->where('s.sor_empnamecomp', 'ILIKE', "%{$search}%")
+                      ->orWhere('s.sor_emp_id', 'ILIKE', "%{$search}%")
+                      ->orWhere('s.sor_bnkacctitle', 'ILIKE', "%{$search}%");
+                } else {
+                    $q->where('p.pcs_title', 'ILIKE', "%{$search}%")
+                      ->orWhere('f.frm_name', 'ILIKE', "%{$search}%");
+                }
+                $q->orWhere('eh.hed_code', 'ILIKE', "%{$search}%")
                   ->orWhere('eh.hed_name', 'ILIKE', "%{$search}%")
                   ->orWhere('fh.hed_code', 'ILIKE', "%{$search}%")
                   ->orWhere('fh.hed_name', 'ILIKE', "%{$search}%");
 
                 if (is_numeric($search)) {
-                    $q->orWhere('p.pcs_id', (int)$search)
-                      ->orWhere('c.cmt_id', (int)$search)
-                      ->orWhere('p.pcs_minute', (int)$search);
+                    if ($typeFilter === 'salary') {
+                        $q->orWhere('s.sor_id', (int)$search);
+                    } else {
+                        $q->orWhere('p.pcs_id', (int)$search)
+                          ->orWhere('p.pcs_minute', (int)$search);
+                    }
+                    $q->orWhere('c.cmt_id', (int)$search);
                 }
             });
         }
 
         // Counts for tab badges
-        $openCount = DB::table('fin.commitments as c')
-            ->join('pur.purcases as p', function ($join) {
-                $join->on('c.cmt_docid', '=', 'p.pcs_id')
-                     ->on('c.cmt_type', '=', 'p.pcs_type');
-            })
-            ->whereBetween('p.pcs_intunt_id', [$lower, $upper])
-            ->where('c.cmt_status', 'Awaited')
-            ->count();
+        if ($typeFilter === 'salary') {
+            $openCount = DB::table('fin.commitments as c')
+                ->join('fin.salorders as s', function ($join) {
+                    $join->on('c.cmt_docid', '=', 's.sor_id')
+                         ->where('c.cmt_type', '=', 'Sa');
+                })
+                ->where(function ($w) use ($lower, $upper) {
+                    $w->whereBetween('s.sor_effunt_id', [$lower, $upper])
+                      ->orWhereBetween('s.sor_unt_id', [$lower, $upper]);
+                })
+                ->where('c.cmt_status', 'Awaited')
+                ->count();
 
-        $closedCount = DB::table('fin.commitments as c')
-            ->join('pur.purcases as p', function ($join) {
-                $join->on('c.cmt_docid', '=', 'p.pcs_id')
-                     ->on('c.cmt_type', '=', 'p.pcs_type');
-            })
-            ->whereBetween('p.pcs_intunt_id', [$lower, $upper])
-            ->whereIn('c.cmt_status', ['Paid', 'Cancelled'])
-            ->count();
+            $closedCount = DB::table('fin.commitments as c')
+                ->join('fin.salorders as s', function ($join) {
+                    $join->on('c.cmt_docid', '=', 's.sor_id')
+                         ->where('c.cmt_type', '=', 'Sa');
+                })
+                ->where(function ($w) use ($lower, $upper) {
+                    $w->whereBetween('s.sor_effunt_id', [$lower, $upper])
+                      ->orWhereBetween('s.sor_unt_id', [$lower, $upper]);
+                })
+                ->whereIn('c.cmt_status', ['Paid', 'Cancelled'])
+                ->count();
+        } else {
+            $openCount = DB::table('fin.commitments as c')
+                ->join('pur.purcases as p', function ($join) {
+                    $join->on('c.cmt_docid', '=', 'p.pcs_id')
+                         ->on('c.cmt_type', '=', 'p.pcs_type');
+                })
+                ->whereBetween('p.pcs_intunt_id', [$lower, $upper])
+                ->where('c.cmt_status', 'Awaited')
+                ->count();
+
+            $closedCount = DB::table('fin.commitments as c')
+                ->join('pur.purcases as p', function ($join) {
+                    $join->on('c.cmt_docid', '=', 'p.pcs_id')
+                         ->on('c.cmt_type', '=', 'p.pcs_type');
+                })
+                ->whereBetween('p.pcs_intunt_id', [$lower, $upper])
+                ->whereIn('c.cmt_status', ['Paid', 'Cancelled'])
+                ->count();
+        }
 
         // Available units within horizon for dropdown
         $units = DB::table('cen.units')
@@ -170,38 +264,43 @@ class PaymentController extends Controller
     {
         $this->ensureFinanceAuthorized();
         $commitment = DB::table('fin.commitments as c')
-            ->join('pur.purcases as p', function ($join) {
+            ->leftJoin('pur.purcases as p', function ($join) {
                 $join->on('c.cmt_docid', '=', 'p.pcs_id')
                      ->on('c.cmt_type', '=', 'p.pcs_type');
+            })
+            ->leftJoin('fin.salorders as s', function ($join) {
+                $join->on('c.cmt_docid', '=', 's.sor_id')
+                     ->where('c.cmt_type', '=', 'Sa');
             })
             ->leftJoin('cen.heads as eh', 'c.cmt_effhed_id', '=', 'eh.hed_id')
             ->leftJoin('cen.units as eu', 'eh.hed_unt_id', '=', 'eu.unt_id')
             ->leftJoin('cen.heads as fh', 'c.cmt_hed_id', '=', 'fh.hed_id')
             ->leftJoin('cen.units as fu', 'fh.hed_unt_id', '=', 'fu.unt_id')
             ->leftJoin('cen.units as iu', 'p.pcs_intunt_id', '=', 'iu.unt_id')
+            ->leftJoin('cen.units as su', 's.sor_effunt_id', '=', 'su.unt_id')
             ->leftJoin('frm.firmz as f', 'p.pcs_frm_id', '=', 'f.frm_id')
             ->select(
                 'c.*',
-                'p.pcs_id',
-                'p.pcs_title',
-                'p.pcs_minute',
-                'p.pcs_date',
-                'p.pcs_type',
-                'p.pcs_transtype',
-                'p.pcs_noloan',
-                'p.pcs_intprice',
-                'p.pcs_inttax',
-                'p.pcs_midprice',
-                'p.pcs_midtax',
-                'p.pcs_price',
+                DB::raw("COALESCE(p.pcs_id, s.sor_id) as pcs_id"),
+                DB::raw("COALESCE(p.pcs_title, 'Salary: ' || s.sor_empnamecomp || ' (' || to_char(s.sor_month, 'Mon-YYYY') || ')') as pcs_title"),
+                DB::raw("COALESCE(p.pcs_minute, s.sor_id) as pcs_minute"),
+                DB::raw("COALESCE(p.pcs_date, s.sor_month) as pcs_date"),
+                DB::raw("COALESCE(p.pcs_type, s.sor_type, c.cmt_type) as pcs_type"),
+                DB::raw("COALESCE(p.pcs_transtype, s.sor_transtype, 1) as pcs_transtype"),
+                DB::raw("COALESCE(p.pcs_noloan, s.sor_noloan, false) as pcs_noloan"),
+                DB::raw("COALESCE(p.pcs_intprice, s.sor_salary) as pcs_intprice"),
+                DB::raw("COALESCE(p.pcs_inttax, 0) as pcs_inttax"),
+                DB::raw("COALESCE(p.pcs_midprice, s.sor_salary) as pcs_midprice"),
+                DB::raw("COALESCE(p.pcs_midtax, 0) as pcs_midtax"),
+                DB::raw("COALESCE(p.pcs_price, s.sor_salary) as pcs_price"),
                 'eh.hed_code as eff_hed_code',
                 'eh.hed_name as eff_hed_name',
                 'eu.unt_namesh as eff_unt_namesh',
                 'fh.hed_code as for_hed_code',
                 'fh.hed_name as for_hed_name',
                 'fu.unt_namesh as for_unt_namesh',
-                'iu.unt_namesh as int_unt_namesh',
-                'f.frm_name'
+                DB::raw("COALESCE(iu.unt_namesh, su.unt_namesh) as int_unt_namesh"),
+                DB::raw("COALESCE(f.frm_name, s.sor_bnkacctitle) as frm_name")
             )
             ->where('c.cmt_id', $cmt_id)
             ->first();
@@ -256,12 +355,25 @@ class PaymentController extends Controller
     {
         $this->ensureFinanceAuthorized();
         $commitment = DB::table('fin.commitments as c')
-            ->join('pur.purcases as p', function ($join) {
+            ->leftJoin('pur.purcases as p', function ($join) {
                 $join->on('c.cmt_docid', '=', 'p.pcs_id')
                      ->on('c.cmt_type', '=', 'p.pcs_type');
             })
+            ->leftJoin('fin.salorders as s', function ($join) {
+                $join->on('c.cmt_docid', '=', 's.sor_id')
+                     ->where('c.cmt_type', '=', 'Sa');
+            })
             ->where('c.cmt_id', $cmt_id)
-            ->select('c.*', 'p.pcs_transtype', 'p.pcs_noloan', 'p.pcs_intprice', 'p.pcs_inttax', 'p.pcs_midprice', 'p.pcs_midtax', 'p.pcs_price')
+            ->select(
+                'c.*',
+                DB::raw("COALESCE(p.pcs_transtype, s.sor_transtype, 1) as pcs_transtype"),
+                DB::raw("COALESCE(p.pcs_noloan, s.sor_noloan, false) as pcs_noloan"),
+                DB::raw("COALESCE(p.pcs_intprice, s.sor_salary) as pcs_intprice"),
+                DB::raw("COALESCE(p.pcs_inttax, 0) as pcs_inttax"),
+                DB::raw("COALESCE(p.pcs_midprice, s.sor_salary) as pcs_midprice"),
+                DB::raw("COALESCE(p.pcs_midtax, 0) as pcs_midtax"),
+                DB::raw("COALESCE(p.pcs_price, s.sor_salary) as pcs_price")
+            )
             ->first();
 
         if (!$commitment) {
@@ -363,6 +475,25 @@ class PaymentController extends Controller
                     ->where('cmt_id', $cmt_id)
                     ->update($updates);
             }
+
+            // 3. If a salary commitment is settled as Paid, sync fin.salorders and hr.salreqs
+            // (Legacy: fin_commitments_u_so.bas:70-85)
+            if ($isComplete && $commitment->cmt_type === 'Sa') {
+                $sor = DB::table('fin.salorders')->where('sor_id', $commitment->cmt_docid)->first();
+                if ($sor) {
+                    DB::table('fin.salorders')->where('sor_id', $sor->sor_id)->update([
+                        'sor_status'   => 'Fulfilled',
+                        'sor_closedtg' => now(),
+                    ]);
+                    if ($sor->sor_srq_id) {
+                        DB::table('hr.salreqs')->where('srq_id', $sor->sor_srq_id)->update([
+                            'srq_fulfilment' => $sor->sor_salary,
+                            'srq_status'     => 'Fulfilled',
+                            'srq_closedtg'   => now(),
+                        ]);
+                    }
+                }
+            }
         });
 
         $msg = $installmentTotal > 0
@@ -382,12 +513,12 @@ class PaymentController extends Controller
     }
 
     /**
-     * Placeholder screen for Salary Order Commitments (deferred module).
+     * Screen for Salary Order Commitments (equivalent to legacy fin_commitments_u_so).
      */
-    public function salaryPlaceholder()
+    public function salaryPlaceholder(Request $request)
     {
         $this->ensureFinanceAuthorized();
-        return view('finance.payments.salary_placeholder');
+        return redirect()->route('fin.payments.index', array_merge($request->all(), ['type' => 'salary']));
     }
 
     /**
