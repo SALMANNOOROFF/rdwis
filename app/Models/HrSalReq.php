@@ -74,7 +74,18 @@ class HrSalReq extends Model
         'srq_releasedtg',
         'srq_closedtg',
         'srq_parent',
+        'srq_remarks2',
     ];
+
+    public function head(): BelongsTo
+    {
+        return $this->belongsTo(CenHead::class, 'srq_hed_id', 'hed_id');
+    }
+
+    public function effectiveHead(): BelongsTo
+    {
+        return $this->belongsTo(CenHead::class, 'srq_effhed_id', 'hed_id');
+    }
 
     public function employee(): BelongsTo
     {

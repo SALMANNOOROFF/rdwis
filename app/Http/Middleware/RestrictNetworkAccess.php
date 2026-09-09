@@ -10,21 +10,28 @@ class RestrictNetworkAccess
 {
     public function handle(Request $request, Closure $next)
     {
-        // 1. Get IPs from config/allowed_ips.php (Sole Configuration Source)
-        $ipsConfigFile = config('allowed_ips', []);
-        
-        if (isset($ipsConfigFile['allowed']) || isset($ipsConfigFile['blocked'])) {
-            $allowedIps = $ipsConfigFile['allowed'] ?? [];
-            $blockedIps = $ipsConfigFile['blocked'] ?? [];
-        } else {
-            $allowedIps = is_array($ipsConfigFile) ? $ipsConfigFile : [];
+        // 1. Get IPs from config/allowed_ips.php or app.allowed_ips (for testing)
+        $appAllowed = config('app.allowed_ips');
+        if ($appAllowed !== null) {
+            $allowedIps = is_array($appAllowed) ? $appAllowed : array_map('trim', explode(',', (string) $appAllowed));
             $blockedIps = [];
+        } else {
+            $ipsConfigFile = config('allowed_ips', []);
+            if (isset($ipsConfigFile['allowed']) || isset($ipsConfigFile['blocked'])) {
+                $allowedIps = $ipsConfigFile['allowed'] ?? [];
+                $blockedIps = $ipsConfigFile['blocked'] ?? [];
+            } else {
+                $allowedIps = is_array($ipsConfigFile) ? $ipsConfigFile : [];
+                $blockedIps = [];
+            }
         }
         
         $allowedIps = array_unique(array_filter($allowedIps));
         $blockedIps = array_unique(array_filter($blockedIps));
         
-        $clientIp = $request->ip();
+        $rawClientIp = $request->ip() ?: '127.0.0.1';
+        // Strip IPv6-mapped IPv4 prefix (e.g. ::ffff:10.120.29.158 -> 10.120.29.158)
+        $clientIp = preg_replace('/^::ffff:/i', '', trim($rawClientIp));
 
         // Allow localhost/loopback by default
         if (in_array($clientIp, ['127.0.0.1', '::1', 'localhost'], true)) {
@@ -48,6 +55,11 @@ class RestrictNetworkAccess
         }
 
         if (! empty($allowedIps)) {
+            // Wildcard allow all
+            if (in_array('*', $allowedIps, true)) {
+                return $next($request);
+            }
+
             $isAllowed = false;
             foreach ($allowedIps as $allowedPattern) {
                 if ($this->ipMatches($clientIp, $allowedPattern)) {
@@ -72,7 +84,7 @@ class RestrictNetworkAccess
     }
 
     /**
-     * Check if a client IP matches an allowed IP pattern (exact, range, or CIDR).
+     * Check if a client IP matches an allowed IP pattern (exact, wildcard, range, or CIDR).
      *
      * @param string $clientIp
      * @param string $pattern
@@ -80,11 +92,19 @@ class RestrictNetworkAccess
      */
     private function ipMatches(string $clientIp, string $pattern): bool
     {
-        if ($clientIp === $pattern) {
+        $clientIp = preg_replace('/^::ffff:/i', '', trim($clientIp));
+        $pattern = trim($pattern);
+
+        if ($pattern === '*' || $clientIp === $pattern) {
             return true;
         }
 
-        // Handle IP range (e.g., 10.120.29.1-10.120.29.200)
+        // Handle wildcard pattern (e.g., 10.* or 192.168.*)
+        if (str_contains($pattern, '*') && fnmatch($pattern, $clientIp)) {
+            return true;
+        }
+
+        // Handle IP range (e.g., 10.120.29.1-10.120.29.200 or 10.120.29.5-20)
         if (str_contains($pattern, '-')) {
             [$start, $end] = array_map('trim', explode('-', $pattern, 2));
 
@@ -100,25 +120,19 @@ class RestrictNetworkAccess
                 filter_var($end, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) &&
                 filter_var($clientIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                 
-                $clientLong = ip2long($clientIp);
-                $startLong = ip2long($start);
-                $endLong = ip2long($end);
+                $clientLong = (float) sprintf('%u', ip2long($clientIp));
+                $startLong = (float) sprintf('%u', ip2long($start));
+                $endLong = (float) sprintf('%u', ip2long($end));
 
-                if ($clientLong !== false && $startLong !== false && $endLong !== false) {
-                    $clientFloat = (float) sprintf('%u', $clientLong);
-                    $startFloat = (float) sprintf('%u', $startLong);
-                    $endFloat = (float) sprintf('%u', $endLong);
-
-                    if ($startFloat > $endFloat) {
-                        [$startFloat, $endFloat] = [$endFloat, $startFloat];
-                    }
-
-                    return $clientFloat >= $startFloat && $clientFloat <= $endFloat;
+                if ($startLong > $endLong) {
+                    [$startLong, $endLong] = [$endLong, $startLong];
                 }
+
+                return $clientLong >= $startLong && $clientLong <= $endLong;
             }
         }
 
-        // Handle CIDR notation (e.g., 10.120.29.0/24)
+        // Handle CIDR notation (e.g., 10.120.29.0/24 or 10.0.0.0/8)
         if (str_contains($pattern, '/')) {
             [$subnet, $bits] = array_map('trim', explode('/', $pattern, 2));
 
@@ -135,7 +149,8 @@ class RestrictNetworkAccess
                 $subnetLong = ip2long($subnet);
 
                 if ($clientLong !== false && $subnetLong !== false) {
-                    return ($clientLong >> (32 - $bits)) === ($subnetLong >> (32 - $bits));
+                    $mask = -1 << (32 - $bits);
+                    return ($clientLong & $mask) === ($subnetLong & $mask);
                 }
             }
         }

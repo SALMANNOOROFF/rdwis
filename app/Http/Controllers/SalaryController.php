@@ -29,11 +29,19 @@ class SalaryController extends Controller
         }
 
         $month = $request->query('month');
-        $status = $request->query('status');
+        $status = $request->query('status', 'Draft');
 
         $requisitions = $this->salaryService->getRequisitions($user, $month, $status);
 
         return view('hr.salary.requisitions.index', compact('requisitions', 'month', 'status'));
+    }
+
+    protected function getUserBounds($user): array
+    {
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
+        $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
+        return [(int)$lower, (int)$upper];
     }
 
     /**
@@ -49,8 +57,7 @@ class SalaryController extends Controller
         $month = $request->query('month', now()->format('Y-m'));
         $unitId = $request->query('unit_id');
 
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        [$lower, $upper] = $this->getUserBounds($user);
 
         $units = DB::table('cen.units')
             ->whereBetween('unt_id', [$lower, $upper])
@@ -148,8 +155,7 @@ class SalaryController extends Controller
         }
 
         $req = HrSalReq::findOrFail($srqId);
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        [$lower, $upper] = $this->getUserBounds($user);
 
         if ($req->srq_unt_id < $lower || $req->srq_unt_id > $upper) {
             abort(403, 'Unauthorized unit access.');
@@ -160,8 +166,9 @@ class SalaryController extends Controller
         }
 
         $this->salaryService->releaseRequisitions($srqId);
+        $orders = $this->salaryService->createSalaryOrders($srqId);
 
-        return back()->with('success', "Salary requisition #{$srqId} released to 'In Process' successfully.");
+        return back()->with('success', "Salary requisition #{$srqId} released to In Process and " . count($orders) . " Draft Salary Order(s) created for Finance.");
     }
 
     /**
@@ -179,18 +186,11 @@ class SalaryController extends Controller
         ]);
 
         $req = HrSalReq::findOrFail($srqId);
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        [$lower, $upper] = $this->getUserBounds($user);
 
         if ($req->srq_unt_id < $lower || $req->srq_unt_id > $upper) {
             abort(403, 'Unauthorized unit access.');
         }
-
-        if ($req->srq_status === 'Cancelled' || $req->srq_status === 'Fulfilled') {
-            return back()->with('error', "Requisition #{$srqId} is already {$req->srq_status} and cannot be cancelled.");
-        }
-
-        Log::info("Requisition #{$srqId} cancelled by {$user->acc_username}. Reason: {$request->input('reason')}");
 
         $this->salaryService->cancelRequisition($srqId);
 
@@ -199,7 +199,7 @@ class SalaryController extends Controller
 
     /**
      * 7. Salary Orders Dashboard.
-     * Filterable by exact sor_status (Draft, Approved, Cancelled) and month.
+     * Legacy fin_salorders_u.bas: Approvers and Monitors manage orders by tab.
      */
     public function ordersIndex(Request $request)
     {
@@ -208,8 +208,12 @@ class SalaryController extends Controller
             return redirect()->route('login');
         }
 
+        if (strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'hr') {
+            abort(403, 'Unauthorized. HR does not have access to Salary Orders. Salary Orders are managed by Finance.');
+        }
+
         $month = $request->query('month');
-        $status = $request->query('status');
+        $status = $request->query('status', 'Draft');
 
         $orders = $this->salaryService->getOrders($user, $month, $status);
 
@@ -218,6 +222,7 @@ class SalaryController extends Controller
 
     /**
      * 8. Create Orders from Requisition Group (In Process -> Draft Orders).
+     * Restricted to Finance only.
      */
     public function createOrders(Request $request, int $srqId)
     {
@@ -226,9 +231,12 @@ class SalaryController extends Controller
             return redirect()->route('login');
         }
 
+        if (strtolower(trim((string) ($user->acc_untarea ?? ''))) !== 'fin') {
+            abort(403, 'Unauthorized. Only Finance can create or manage Salary Orders.');
+        }
+
         $req = HrSalReq::findOrFail($srqId);
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        [$lower, $upper] = $this->getUserBounds($user);
 
         if ($req->srq_unt_id < $lower || $req->srq_unt_id > $upper) {
             abort(403, 'Unauthorized unit access.');
@@ -255,6 +263,10 @@ class SalaryController extends Controller
             return redirect()->route('login');
         }
 
+        if (strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'hr') {
+            abort(403, 'Unauthorized. HR does not have access to Salary Orders. Salary Orders are managed by Finance.');
+        }
+
         $order = $this->salaryService->getOrderDetail($sorId, $user);
         if (!$order) {
             abort(404, "Salary order #{$sorId} not found or unauthorized.");
@@ -273,8 +285,8 @@ class SalaryController extends Controller
             return redirect()->route('login');
         }
 
-        if (($user->acc_auth ?? '') !== 'approver' && !in_array(strtolower($user->acc_untarea ?? ''), ['hr', 'nrdi', 'fin', 'it'], true)) {
-            abort(403, 'Approver authorization required to approve salary orders.');
+        if (($user->acc_auth ?? '') !== 'approver' || strtolower(trim((string) ($user->acc_untarea ?? ''))) !== 'fin') {
+            abort(403, 'Finance approver authorization required to approve salary orders.');
         }
 
         $order = FinSalOrder::findOrFail($sorId);
@@ -303,8 +315,7 @@ class SalaryController extends Controller
         ]);
 
         $order = FinSalOrder::findOrFail($sorId);
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        [$lower, $upper] = $this->getUserBounds($user);
 
         if ($order->sor_unt_id < $lower || $order->sor_unt_id > $upper) {
             abort(403, 'Unauthorized unit access.');
@@ -316,10 +327,54 @@ class SalaryController extends Controller
 
         Log::info("Salary order #{$sorId} cancelled by {$user->acc_username}. Reason: {$request->input('reason')}");
 
-        $this->salaryService->cancelOrder($sorId);
+        try {
+            $this->salaryService->cancelOrder($sorId);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
+            }
+            throw $e;
+        }
 
         return redirect()->route('divhr.salary.orders.index')
             ->with('success', "Salary order #{$sorId} and associated commitments cancelled successfully.");
+    }
+
+    /**
+     * 14. Manual Salary Override POST/PATCH endpoint (Draft Orders only).
+     */
+    public function updateSalary(Request $request, int $sorId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $request->validate([
+            'sor_salary' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        try {
+            $order = $this->salaryService->adjustOrderSalary($sorId, (float) $request->input('sor_salary'), $user);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
+            }
+            return back()->with('error', $e->getMessage());
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success'     => true,
+                'sor_id'      => $order->sor_id,
+                'sor_salary'  => $order->sor_salary,
+                'sor_remarks' => $order->sor_remarks,
+                'message'     => "Salary for order #{$sorId} updated to PKR " . number_format($order->sor_salary) . ".",
+            ]);
+        }
+
+        return redirect()->route('divhr.salary.orders.show', $sorId)
+            ->with('success', "Salary for order #{$sorId} updated to PKR " . number_format($order->sor_salary) . ".");
     }
 
     /**
@@ -337,5 +392,66 @@ class SalaryController extends Controller
         $audit = $this->salaryService->getCommitmentVerifications($month);
 
         return view('hr.salary.commitments.verify', compact('audit', 'month'));
+    }
+
+    /**
+     * 13. Printable Salary Slip View (M/S MTSS PAY SLIP).
+     */
+    public function slip(Request $request, int $sorId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $slipData = $this->salaryService->getSalarySlipData($sorId, $user);
+
+        return view('hr.salary.slip', $slipData);
+    }
+
+    /**
+     * 14. Update srq_remarks2 (Additional Remarks) for Salary Requisition.
+     */
+    public function updateRemarks2(Request $request, int $srqId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
+        $req = HrSalReq::findOrFail($srqId);
+        [$lower, $upper] = $this->getUserBounds($user);
+
+        if ($req->srq_unt_id < $lower || $req->srq_unt_id > $upper) {
+            return response()->json(['error' => 'Unauthorized unit access.'], 403);
+        }
+
+        $req->srq_remarks2 = $request->input('remarks2');
+        $req->save();
+
+        return response()->json(['success' => true, 'remarks2' => $req->srq_remarks2]);
+    }
+
+    /**
+     * 15. Update sor_remarks2 (Additional Remarks) for Salary Order.
+     */
+    public function updateOrderRemarks2(Request $request, int $sorId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+
+        $order = FinSalOrder::findOrFail($sorId);
+        [$lower, $upper] = $this->getUserBounds($user);
+
+        if ($order->sor_unt_id < $lower || $order->sor_unt_id > $upper) {
+            return response()->json(['error' => 'Unauthorized unit access.'], 403);
+        }
+
+        $order->sor_remarks2 = $request->input('remarks2');
+        $order->save();
+
+        return response()->json(['success' => true, 'remarks2' => $order->sor_remarks2]);
     }
 }

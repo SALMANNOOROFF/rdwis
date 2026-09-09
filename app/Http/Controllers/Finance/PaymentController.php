@@ -25,12 +25,27 @@ class PaymentController extends Controller
     }
 
     /**
-     * Commitments Landing (Redirects to main Purchase Case Commitments list).
+     * Commitments Landing (Hub for Purchase Cases and Salary Payroll).
      */
     public function landing()
     {
         $this->ensureFinanceAuthorized();
-        return redirect()->route('fin.payments.index');
+        $user = Auth::user();
+        [$lower, $upper] = $this->getUserHorizon($user);
+
+        $openPurchaseCount = DB::table('fin.commitments')
+            ->where('cmt_type', '!=', 'Sa')
+            ->where('cmt_status', 'Awaited')
+            ->whereBetween('cmt_unt_id', [$lower, $upper])
+            ->count();
+
+        $closedPurchaseCount = DB::table('fin.commitments')
+            ->where('cmt_type', '!=', 'Sa')
+            ->whereIn('cmt_status', ['Paid', 'Cancelled'])
+            ->whereBetween('cmt_unt_id', [$lower, $upper])
+            ->count();
+
+        return view('finance.payments.landing', compact('openPurchaseCount', 'closedPurchaseCount'));
     }
 
     /**
@@ -75,6 +90,13 @@ class PaymentController extends Controller
                 'c.cmt_effhed_id',
                 'c.cmt_hed_id',
                 'c.cmt_remarks',
+                's.sor_id',
+                's.sor_emp_id',
+                's.sor_empnamecomp',
+                's.sor_month',
+                's.sor_salary',
+                's.sor_transtype',
+                's.sor_noloan',
                 's.sor_id as pcs_id',
                 DB::raw("'Salary: ' || s.sor_empnamecomp || ' (' || to_char(s.sor_month, 'Mon-YYYY') || ')' as pcs_title"),
                 DB::raw("'Sa' as pcs_type"),
@@ -91,10 +113,13 @@ class PaymentController extends Controller
                 'eh.hed_code as eff_hed_code',
                 'eh.hed_name as eff_hed_name',
                 'eu.unt_namesh as eff_unt_namesh',
+                'eu.unt_name as eff_unt_name',
                 'fh.hed_code as for_hed_code',
                 'fh.hed_name as for_hed_name',
                 'fu.unt_namesh as for_unt_namesh',
+                'fu.unt_name as for_unt_name',
                 'su.unt_namesh as int_unt_namesh',
+                'su.unt_name as int_unt_name',
                 's.sor_bnkacctitle as frm_name'
             );
         } else {
@@ -251,6 +276,7 @@ class PaymentController extends Controller
             'tab',
             'unitFilter',
             'search',
+            'typeFilter',
             'units',
             'openCount',
             'closedCount'
@@ -519,6 +545,82 @@ class PaymentController extends Controller
     {
         $this->ensureFinanceAuthorized();
         return redirect()->route('fin.payments.index', array_merge($request->all(), ['type' => 'salary']));
+    }
+
+    /**
+     * 1-Click Pay for Salary Order Commitment (fin_commitments_u_so.bas cmdPaid_Click).
+     * Disburses salary, creates fin.transactions record, sets cmt_status='Paid',
+     * sor_status='Fulfilled', srq_status='Fulfilled', srq_fulfilment=sor_salary.
+     */
+    public function paySalaryCommitment(Request $request, int $cmtId)
+    {
+        $this->ensureFinanceAuthorized();
+
+        $trnDate = $request->input('trn_date') ?? $request->input('payment_date');
+        $request->merge(['trn_date' => $trnDate]);
+
+        $request->validate([
+            'trn_date' => 'required|date',
+        ]);
+
+        $commitment = DB::table('fin.commitments')
+            ->where('cmt_id', $cmtId)
+            ->where('cmt_type', 'Sa')
+            ->first();
+
+        if (!$commitment) {
+            return back()->with('error', 'Salary commitment not found.');
+        }
+
+        if ($commitment->cmt_status !== 'Awaited') {
+            return back()->with('error', "Commitment already has status '{$commitment->cmt_status}'.");
+        }
+
+        $sor = DB::table('fin.salorders')->where('sor_id', $commitment->cmt_docid)->first();
+        if (!$sor) {
+            return back()->with('error', 'Associated salary order not found.');
+        }
+
+        DB::transaction(function () use ($commitment, $sor, $request) {
+            // 1. Add payment in fin.transactions (matching fin_commitments_u_so.bas)
+            $lastSeq = DB::table('fin.transactions')
+                ->where('trn_cmt_id', $commitment->cmt_id)
+                ->max('trn_seq') ?? 0;
+
+            DB::table('fin.transactions')->insert([
+                'trn_cmt_id'    => $commitment->cmt_id,
+                'trn_date'      => $request->trn_date,
+                'trn_amount1'   => -1 * abs((float)$sor->sor_salary),
+                'trn_tax1'      => 0,
+                'trn_amount2'   => -1 * abs((float)$sor->sor_salary),
+                'trn_balance'   => 0,
+                'trn_seq'       => $lastSeq + 1,
+                'trn_transtype' => $sor->sor_transtype ?? 1,
+                'trn_noloan'    => $sor->sor_noloan ?? false,
+            ]);
+
+            // 2. Close salary order
+            DB::table('fin.salorders')->where('sor_id', $sor->sor_id)->update([
+                'sor_status'   => 'Fulfilled',
+                'sor_closedtg' => now(),
+            ]);
+
+            // 3. Close salary requisition
+            if ($sor->sor_srq_id) {
+                DB::table('hr.salreqs')->where('srq_id', $sor->sor_srq_id)->update([
+                    'srq_fulfilment' => $sor->sor_salary,
+                    'srq_status'     => 'Fulfilled',
+                    'srq_closedtg'   => now(),
+                ]);
+            }
+
+            // 4. Close commitment
+            DB::table('fin.commitments')->where('cmt_id', $commitment->cmt_id)->update([
+                'cmt_status' => 'Paid',
+            ]);
+        });
+
+        return back()->with('success', "Salary commitment #{$commitment->cmt_id} (Order #{$sor->sor_id} - {$sor->sor_empnamecomp}) marked as Paid successfully.");
     }
 
     /**

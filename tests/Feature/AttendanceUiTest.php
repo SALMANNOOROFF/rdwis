@@ -295,4 +295,46 @@ class AttendanceUiTest extends TestCase
             $content
         );
     }
+
+    /**
+     * 9. Test HTTP POST save rejects out-of-scope employee with 403 Forbidden.
+     */
+    public function test_http_post_save_rejects_out_of_scope_employee_with_403(): void
+    {
+        // Find or create an employee belonging to unit 450000
+        $empId = 'T' . substr(uniqid(), -11);
+        DB::table('hr.emps')->insert([
+            'emp_id'      => $empId,
+            'emp_name'    => 'Out Of Scope Employee',
+            'emp_cnic'    => '42201-9988776-5',
+            'emp_unt_id'  => 450000,
+            'emp_status'  => 'Active',
+            'emp_joindt'  => '2024-01-01',
+        ]);
+
+        // Restrict user horizon to 200000 - 299999 (strictly excluding 450000)
+        $scopedUser = clone $this->adminUser;
+        $scopedUser->acc_lowers = 200000;
+        $scopedUser->acc_uppers = 299999;
+        $scopedUser->acc_lowerm = 200000;
+        $scopedUser->acc_upperm = 299999;
+        $scopedUser->acc_access = 'single';
+        $scopedUser->save();
+
+        $payload = [
+            [
+                'emp_id' => $empId,
+                'day'    => 10,
+                'val'    => 'P',
+            ],
+        ];
+
+        // Attempt HTTP POST save as scopedUser
+        $response = $this->actingAs($scopedUser)->post(route('divhr.attendance.save'), [
+            'month'        => '2024-11',
+            'payload_json' => json_encode($payload),
+        ]);
+
+        $response->assertStatus(403);
+    }
 }

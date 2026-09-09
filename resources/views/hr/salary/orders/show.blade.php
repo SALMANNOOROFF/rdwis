@@ -16,22 +16,35 @@
       </div>
     </div>
     <div class="d-flex align-items-center" style="gap: 8px;">
+      <a href="{{ route('divhr.salary.requisitions.index') }}" class="btn btn-sm btn-outline-primary font-weight-bold">
+        <i class="fas fa-file-invoice-dollar mr-1"></i> Salary Requisitions
+      </a>
       <a href="{{ route('divhr.salary.orders.index') }}" class="btn btn-sm btn-outline-secondary font-weight-bold">
         <i class="fas fa-arrow-left mr-1"></i> Back to Orders
       </a>
-      @if($order->sor_status === 'Draft')
-        <form method="POST" action="{{ route('divhr.salary.orders.approve', $order->sor_id) }}" class="d-inline" onsubmit="return confirm('Approve salary order #{{ $order->sor_id }}? This will book a negative liability commitment in fin.commitments.');">
+      @php
+          $isPaid = $order->commitment && $order->commitment->cmt_status === 'Paid';
+          $isFulfilled = $order->sor_status === 'Fulfilled';
+          $canCancel = !$isPaid && !$isFulfilled && $order->sor_status !== 'Cancelled';
+          $isFinanceApprover = strtolower(trim((string) (auth()->user()->acc_untarea ?? ''))) === 'fin' && (auth()->user()->acc_auth ?? '') === 'approver';
+      @endphp
+
+      @if($order->sor_status === 'Draft' && $isFinanceApprover)
+        <form method="POST" action="{{ route('divhr.salary.orders.approve', $order->sor_id) }}" class="d-inline" onsubmit="return confirm('Approve salary order #{{ $order->sor_id }}? Approving will create a financial commitment of Rs. {{ number_format($order->sor_salary) }} in fin.commitments.');">
           @csrf
           <button type="submit" class="btn btn-sm btn-primary font-weight-bold px-3 shadow-sm">
             <i class="fas fa-check-double mr-1"></i> Approve Order
           </button>
         </form>
-        <button type="button" class="btn btn-sm btn-outline-danger btn-trigger-cancel font-weight-bold px-3"
-                data-action="{{ route('divhr.salary.orders.cancel', $order->sor_id) }}"
-                data-desc="Salary Order #{{ $order->sor_id }} - {{ $order->sor_empnamecomp }} (Rs. {{ number_format($order->sor_salary) }})">
-          <i class="fas fa-times mr-1"></i> Cancel Order
-        </button>
-      @elseif($order->sor_status === 'Approved')
+      @endif
+
+      @if(in_array($order->sor_status, ['Approved', 'Fulfilled']))
+        <a href="{{ route('divhr.salary.orders.slip', $order->sor_id) }}" target="_blank" class="btn btn-sm btn-outline-info font-weight-bold px-3 shadow-sm">
+          <i class="fas fa-print mr-1"></i> Print Pay Slip
+        </a>
+      @endif
+
+      @if($canCancel)
         <button type="button" class="btn btn-sm btn-outline-danger btn-trigger-cancel font-weight-bold px-3"
                 data-action="{{ route('divhr.salary.orders.cancel', $order->sor_id) }}"
                 data-desc="Salary Order #{{ $order->sor_id }} - {{ $order->sor_empnamecomp }} (Rs. {{ number_format($order->sor_salary) }})">
@@ -52,6 +65,12 @@
     <div class="alert alert-danger alert-dismissible fade show shadow-sm py-2 px-3 small border-0 mb-3" style="background: #fef2f2; color: #dc2626; border-left: 4px solid #dc2626 !important;">
       <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
       <button type="button" class="close text-danger" data-dismiss="alert">&times;</button>
+    </div>
+  @endif
+
+  @if($order->sor_parent > 0)
+    <div class="alert alert-info py-2 px-3 small border-0 mb-3 shadow-sm" style="background: #eff6ff; color: #1e40af; border-left: 4px solid #3b82f6 !important;">
+      <i class="fas fa-link mr-1"></i> <strong>Linked Order Group:</strong> This is a child order linked to Parent Order <strong>#{{ $order->sor_parent }}</strong>. Approving or cancelling here will update the parent order and all linked child orders together.
     </div>
   @endif
 
@@ -148,11 +167,23 @@
                   </tr>
                 @endif
                 <tr style="background: #f0fdf4; border-top: 2px solid #86efac;">
-                  <td class="font-weight-bold text-success" style="font-size: 1.05rem;">Net Payable Salary (sor_salary)</td>
+                  <td class="font-weight-bold text-success" style="font-size: 1.05rem;">
+                    Net Payable Salary (sor_salary)
+                    @if($order->sor_status === 'Draft' && $isFinanceApprover)
+                      <button type="button" class="btn btn-xs btn-outline-success ml-2 px-2 font-weight-bold" data-toggle="modal" data-target="#adjustSalaryModal">
+                        <i class="fas fa-edit mr-1"></i> Adjust Salary
+                      </button>
+                    @endif
+                  </td>
                   <td class="text-right font-monospace font-weight-bold text-success" style="font-size: 1.2rem;">
                     {{ number_format($order->sor_salary) }}
                   </td>
-                  <td class="text-success small font-weight-bold">Final Order Amount</td>
+                  <td class="text-success small font-weight-bold">
+                    Final Order Amount
+                    @if($order->sor_salary < $order->sor_netsalary)
+                      <div class="text-xs text-muted font-weight-normal">(Calculated Net: {{ number_format($order->sor_netsalary) }})</div>
+                    @endif
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -162,6 +193,9 @@
           @if($order->sor_remarks)
             <div class="mt-3 p-2 rounded small" style="background: #f8fafc; border: 1px solid #e2e8f0;">
               <strong>Remarks:</strong> {{ $order->sor_remarks }}
+              @if(str_contains($order->sor_remarks, 'Pending -'))
+                <span class="badge badge-warning text-dark ml-1"><i class="fas fa-clock mr-1"></i> Partial Salary Retained</span>
+              @endif
             </div>
           @endif
         </div>
@@ -284,6 +318,82 @@
 
 {{-- Cancellation Modal --}}
 @include('hr.salary.partials.cancel_modal')
+
+@if($order->sor_status === 'Draft' && $isFinanceApprover)
+{{-- Adjust Salary Modal --}}
+<div class="modal fade" id="adjustSalaryModal" tabindex="-1" role="dialog" aria-labelledby="adjustSalaryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow">
+      <form method="POST" action="{{ route('divhr.salary.orders.update_salary', $order->sor_id) }}">
+        @csrf
+        @method('PATCH')
+        <div class="modal-header bg-white border-bottom py-3">
+          <h5 class="modal-title font-weight-bold text-dark" id="adjustSalaryModalLabel">
+            <i class="fas fa-sliders-h text-primary mr-2"></i>Adjust Salary (Draft Order #{{ $order->sor_id }})
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 px-3 small border-0 mb-3" style="background: #eff6ff; color: #1e40af;">
+            <i class="fas fa-info-circle mr-1"></i> <strong>Rule:</strong> Salary can only be decreased below calculated net (PKR {{ number_format($order->sor_netsalary) }}). Any reduction will automatically append <code>Pending - {diff}.</code> to remarks.
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="font-weight-bold small text-muted text-uppercase mb-1">Calculated Net Ceiling (sor_netsalary)</label>
+            <div class="h5 font-monospace font-weight-bold text-secondary mb-0">
+              PKR {{ number_format($order->sor_netsalary) }}
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="override_sor_salary" class="font-weight-bold small text-dark mb-1">
+              New Payable Salary (sor_salary) <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text font-weight-bold">PKR</span>
+              </div>
+              <input type="number" step="1" min="0" max="{{ $order->sor_netsalary }}" 
+                     name="sor_salary" id="override_sor_salary" 
+                     class="form-control font-monospace font-weight-bold" 
+                     value="{{ $order->sor_salary }}" required>
+            </div>
+            <small class="form-text text-muted">Must not exceed calculated net PKR {{ number_format($order->sor_netsalary) }}.</small>
+          </div>
+
+          <div id="pendingDiffPreview" class="p-2 rounded small border text-muted" style="background: #f8fafc; display: none;">
+            <i class="fas fa-comment-dots text-primary mr-1"></i> Auto-remark will become: <strong id="pendingDiffText" class="text-dark"></strong>
+          </div>
+        </div>
+        <div class="modal-footer bg-light py-2 px-4">
+          <button type="button" class="btn btn-sm btn-outline-secondary font-weight-bold" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-success font-weight-bold px-3">
+            <i class="fas fa-save mr-1"></i> Save Adjustment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  const ceiling = {{ (float)$order->sor_netsalary }};
+  $('#override_sor_salary').on('input', function() {
+    const val = parseFloat($(this).val());
+    if (!isNaN(val) && val < ceiling) {
+      const diff = Math.round(ceiling - val);
+      $('#pendingDiffText').text('Pending - ' + diff + '.');
+      $('#pendingDiffPreview').show();
+    } else {
+      $('#pendingDiffPreview').hide();
+    }
+  }).trigger('input');
+});
+</script>
+@endif
 
 <script>
 $(document).ready(function() {

@@ -58,12 +58,57 @@ class AttendanceService
     }
 
     /**
+     * Check whether the user is authorized to edit/mark attendance for a given employee.
+     * Division users can only edit employees in their division.
+     * Central/HR users can view all, but can ONLY edit employees in their own department (acc_unt_id).
+     */
+    public function canUserEditEmployeeAttendance(Authenticatable|User|CenAccount $user, string $empId, ?int $empUnitId = null): bool
+    {
+        $auth = strtolower(trim((string) ($user->acc_auth ?? '')));
+        if (!in_array($auth, ['approver', 'editor'], true) && !empty($auth)) {
+            return false;
+        }
+
+        if ($empUnitId === null) {
+            $emp = DB::table('hr.emps')->where('emp_id', $empId)->first();
+            if (!$emp) {
+                return false;
+            }
+            $empUnitId = (int)$emp->emp_unt_id;
+        }
+
+        // Edit authority is strictly governed by user's single-scope / own department bounds (acc_lowers .. acc_uppers)
+        $lower = (int)$user->acc_lowers;
+        $upper = (int)$user->acc_uppers;
+
+        if ($lower === 0 && $upper === 0) {
+            $lower = (int)($user->acc_unt_id ?? 0);
+            $upper = (int)($user->acc_unt_id ?? 0);
+        }
+
+        if ($lower === 0 && $upper === 0) {
+            $lower = (int)$user->acc_lowerm;
+            $upper = (int)$user->acc_upperm;
+        }
+
+        if ($lower === 0 && $upper === 0) {
+            return true;
+        }
+
+        return $empUnitId >= $lower && $empUnitId <= $upper;
+    }
+
+    /**
      * Verify unit scoping on write, abort with 403 if unauthorized.
      */
     public function authorizeEmployeeWrite(Authenticatable|User|CenAccount $user, string $empId): void
     {
         if (!$this->canUserAccessEmployee($user, $empId)) {
             throw new HttpException(403, "Access denied. Employee {$empId} is outside your unit scope.", null, [], 403);
+        }
+
+        if (!$this->canUserEditEmployeeAttendance($user, $empId)) {
+            throw new HttpException(403, "Access denied. You can only mark or edit attendance for employees in your own department.", null, [], 403);
         }
     }
 
@@ -421,7 +466,7 @@ class AttendanceService
 
         $cutoffDay = $this->getPayrollCutoffDay();
 
-        $data = $rows->map(function ($r) use ($days, $cutoffDay, $first) {
+        $data = $rows->map(function ($r) use ($days, $cutoffDay, $first, $user) {
             $vals = [];
             $lockedDays = [];
             for ($d = 1; $d <= 31; $d++) {
@@ -455,6 +500,7 @@ class AttendanceService
                 'name'        => $r->emp_name,
                 'att_id'      => $r->att_id,
                 'unit_id'     => $r->emp_unt_id,
+                'can_edit'    => $this->canUserEditEmployeeAttendance($user, $r->emp_id, (int)$r->emp_unt_id),
                 'locked'      => (bool) ($r->att_locked1 && $r->att_locked2),
                 'locked1'     => (bool) ($r->att_locked1 ?? false),
                 'locked2'     => (bool) ($r->att_locked2 ?? false),
@@ -583,6 +629,9 @@ class AttendanceService
 
         $cutoff = $this->getPayrollCutoffDay();
         foreach ($grid['list'] as $emp) {
+            if (empty($emp['can_edit'])) {
+                continue;
+            }
             for ($d = $startDay; $d <= $endDay; $d++) {
                 $dayDt = $first->copy()->addDays($d - 1);
                 $isWeekend = $dayDt->isWeekend();

@@ -31,8 +31,13 @@ class AttendanceController extends Controller
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
         $isCentral = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs'], true);
 
+        $isDivision = method_exists($user, 'isDivision') ? $user->isDivision() : in_array($area, ['prj', 'rdwprj'], true);
+
         // Mode handling with Session Persistence
-        if ($request->has('mode')) {
+        if ($isDivision) {
+            $mode = 's';
+            session(['hr_mode' => 's']);
+        } elseif ($request->has('mode')) {
             $mode = $request->query('mode') === 's' ? 's' : 'm';
             session(['hr_mode' => $mode]);
         } else {
@@ -45,8 +50,12 @@ class AttendanceController extends Controller
         $gridData = $this->attendanceService->getAttendanceGrid($user, $monthStr, $mode);
         $isApprover = in_array(strtolower(trim((string) ($user->acc_auth ?? ''))), ['approver', 'editor'], true);
 
+        $unitName = $user->acc_untname ?? ($user->unit->unt_name ?? 'Division');
+
         return view('hr.attendance.index', array_merge($gridData, [
             'isCentral'    => $isCentral,
+            'isDivision'   => $isDivision,
+            'unitName'     => $unitName,
             'isApprover'   => $isApprover,
             'floorDate'    => AttendanceService::FLOOR_DATE,
             'currentMonth' => Carbon::now()->format('Y-m'),
@@ -132,8 +141,11 @@ class AttendanceController extends Controller
 
         $updated = $this->attendanceService->saveAttendance($user, $month, $payload);
 
-        return redirect()->route('divhr.attendance', ['month' => $month])
-            ->with('success', "Attendance saved successfully ({$updated} records updated).");
+        $target = $request->headers->get('referer')
+            ? redirect()->back()
+            : redirect()->route('divhr.attendance', ['month' => $month]);
+
+        return $target->with('success', "Attendance saved successfully ({$updated} records updated).");
     }
 
     /**
@@ -200,8 +212,11 @@ class AttendanceController extends Controller
         $month = $request->input('month');
         $updated = $this->attendanceService->applyBulkAction($user, $month, $request->all());
 
-        return redirect()->route('divhr.attendance', ['month' => $month])
-            ->with('success', "Bulk action completed: {$updated} entries updated.");
+        $target = $request->headers->get('referer')
+            ? redirect()->back()
+            : redirect()->route('divhr.attendance', ['month' => $month]);
+
+        return $target->with('success', "Bulk action completed: {$updated} entries updated.");
     }
 
     /**
@@ -217,7 +232,10 @@ class AttendanceController extends Controller
         $month = $request->input('month', now()->format('Y-m'));
         $count = $this->attendanceService->makeAttendanceSheet($month);
 
-        return redirect()->route('divhr.attendance', ['month' => $month])
-            ->with('success', "Attendance sheet created for {$month} ({$count} new employee rows added).");
+        $target = $request->headers->get('referer')
+            ? redirect()->back()
+            : redirect()->route('divhr.attendance', ['month' => $month]);
+
+        return $target->with('success', "Attendance sheet created for {$month} ({$count} new employee rows added).");
     }
 }

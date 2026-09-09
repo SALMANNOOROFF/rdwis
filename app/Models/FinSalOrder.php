@@ -100,6 +100,16 @@ class FinSalOrder extends Model
         return $this->belongsTo(Unit::class, 'sor_effunt_id', 'unt_id');
     }
 
+    public function head(): BelongsTo
+    {
+        return $this->belongsTo(CenHead::class, 'sor_hed_id', 'hed_id');
+    }
+
+    public function effectiveHead(): BelongsTo
+    {
+        return $this->belongsTo(CenHead::class, 'sor_effhed_id', 'hed_id');
+    }
+
     public function subheads(): HasMany
     {
         return $this->hasMany(FinSalOrderShd::class, 'sod_sor_id', 'sor_id');

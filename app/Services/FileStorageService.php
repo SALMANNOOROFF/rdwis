@@ -124,23 +124,130 @@ class FileStorageService
         }
 
         $normalized = $this->normalizePath($relativePath);
-        return Storage::disk('public')->url($normalized);
+        return '/storage/' . ltrim($normalized, '/');
     }
 
     /**
-     * Check if an attachment file physically exists on the public disk.
+     * Resolve physical file path across multiple candidate directories,
+     * with transparent LAN remote fallback for multi-PC setups.
+     *
+     * @param string|null $relativePath
+     * @return string|null
+     */
+    public function resolvePhysicalPath(?string $relativePath): ?string
+    {
+        if (empty($relativePath)) {
+            return null;
+        }
+
+        $normalized = $this->normalizePath($relativePath);
+
+        if (Storage::disk('public')->exists($normalized)) {
+            return Storage::disk('public')->path($normalized);
+        }
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            public_path('storage/' . $normalized),
+            storage_path('app/' . $normalized),
+            public_path($normalized),
+            base_path($normalized),
+        ];
+
+        foreach ($candidates as $cand) {
+            $standard = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $cand);
+            if (file_exists($standard) && is_file($standard)) {
+                return $standard;
+            }
+        }
+
+        // On-demand LAN fetch fallback for secondary PCs
+        if ($this->tryFetchRemote($normalized)) {
+            $localSaved = storage_path('app/public/' . $normalized);
+            $standard = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $localSaved);
+            if (file_exists($standard) && is_file($standard)) {
+                return $standard;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Attempt to fetch a missing physical file from the primary server across the local network.
+     * Saves the file permanently into storage/app/public/{normalized} on first access.
+     *
+     * @param string $normalized
+     * @return bool
+     */
+    public function tryFetchRemote(string $normalized): bool
+    {
+        if (empty($normalized)) {
+            return false;
+        }
+
+        $configuredHost = env('PRIMARY_STORAGE_HOST', env('REMOTE_STORAGE_HOST', ''));
+        $hosts = array_unique(array_filter([
+            $configuredHost,
+            'http://192.168.1.159',
+            'http://192.168.1.159:80',
+            'http://rdwisv2.mil',
+            'https://192.168.1.159:8443',
+            'http://192.168.1.159:8000',
+        ]));
+
+        $currentUrl = config('app.url', '');
+
+        foreach ($hosts as $host) {
+            // Avoid querying ourselves if this machine is already 192.168.1.159
+            if (str_contains($currentUrl, '192.168.1.159') && str_contains($host, '192.168.1.159')) {
+                continue;
+            }
+
+            $targetUrl = rtrim($host, '/') . '/storage/' . ltrim($normalized, '/');
+
+            try {
+                $ctx = stream_context_create([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                    'http' => [
+                        'method' => 'GET',
+                        'timeout' => 8,
+                        'follow_location' => 1,
+                        'header' => "User-Agent: RDWIS-Storage-Sync/2.0\r\n",
+                    ],
+                ]);
+
+                $fileData = @file_get_contents($targetUrl, false, $ctx);
+                if ($fileData !== false && strlen($fileData) > 0) {
+                    $localDest = storage_path('app/public/' . $normalized);
+                    $destDir = dirname($localDest);
+                    if (!is_dir($destDir)) {
+                        @mkdir($destDir, 0777, true);
+                    }
+                    if (@file_put_contents($localDest, $fileData) !== false) {
+                        return true;
+                    }
+                }
+            } catch (\Throwable $t) {
+                // Remote fetch failed, try next candidate
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if an attachment file physically exists on the public disk or candidates.
      *
      * @param string|null $relativePath
      * @return bool
      */
     public function exists(?string $relativePath): bool
     {
-        if (empty($relativePath)) {
-            return false;
-        }
-
-        $normalized = $this->normalizePath($relativePath);
-        return Storage::disk('public')->exists($normalized);
+        return !is_null($this->resolvePhysicalPath($relativePath));
     }
 
     /**
@@ -153,6 +260,11 @@ class FileStorageService
     {
         if (empty($relativePath)) {
             return null;
+        }
+
+        $resolved = $this->resolvePhysicalPath($relativePath);
+        if ($resolved) {
+            return $resolved;
         }
 
         $normalized = $this->normalizePath($relativePath);
@@ -190,15 +302,35 @@ class FileStorageService
      */
     public function response(?string $relativePath, ?string $downloadName = null, bool $download = false): BinaryFileResponse
     {
-        if (empty($relativePath) || !$this->exists($relativePath)) {
-            abort(404, 'Attachment file not found on storage disk. The physical file may not have been migrated.');
+        $fullPath = $this->resolvePhysicalPath($relativePath);
+
+        if (!$fullPath) {
+            abort(404, 'Attachment file not found on storage disk. The physical file may not have been migrated or synced.');
         }
 
-        $fullPath = $this->path($relativePath);
+        $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'pdf'  => 'application/pdf',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'webp' => 'image/webp',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'doc'  => 'application/msword',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'xls'  => 'application/vnd.ms-excel',
+            'txt'  => 'text/plain',
+            'csv'  => 'text/csv',
+        ];
+        $mime = $mimeTypes[$ext] ?? (mime_content_type($fullPath) ?: 'application/octet-stream');
         $filename = $downloadName ?: basename($fullPath);
 
         return response()->file($fullPath, [
+            'Content-Type' => $mime,
             'Content-Disposition' => ($download ? 'attachment' : 'inline') . '; filename="' . $filename . '"',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'Access-Control-Allow-Origin' => '*',
             'Cache-Control' => 'no-store, no-cache, must-revalidate',
             'Pragma' => 'no-cache',
         ]);

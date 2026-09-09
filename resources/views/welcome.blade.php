@@ -726,8 +726,8 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-users text-primary"></i>
                     <p>HUMAN RESOURCES <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                 </a>
@@ -753,8 +753,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('divhr.attendance') }}" class="nav-link {{ Request::routeIs('divhr.attendance') ? 'active' : '' }}">
+                        <a href="{{ route('division.attendance') }}" class="nav-link {{ Request::routeIs('division.attendance*') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
                             <i class="fas fa-calendar-check nav-icon text-success"></i><p>ATTENDANCE</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
+                            <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i><p>SALARY REQUISITIONS</p>
                         </a>
                     </li>
                 </ul>
@@ -800,8 +805,8 @@
                </a>
            </li>
 
-           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'menu-open' : '' }}">
-               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
+           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
+               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-users text-primary"></i>
                    <p>HUMAN RESOURCES <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                </a>
@@ -827,9 +832,15 @@
                        </a>
                    </li>
                    <li class="nav-item">
-                       <a href="{{ route('divhr.attendance') }}" class="nav-link {{ Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
-                           <i class="nav-icon fas fa-calendar-check text-success"></i>
-                           <p>Attendance</p>
+                        <a href="{{ route('hr.attendance') }}" class="nav-link {{ Request::routeIs('hr.attendance*') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-calendar-check text-success"></i>
+                            <p>Attendance</p>
+                        </a>
+                    </li>
+                   <li class="nav-item">
+                       <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
+                           <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
+                           <p>Salary Requisitions</p>
                        </a>
                    </li>
                </ul>
@@ -943,12 +954,17 @@
                            <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / SAILORS</p>
                        </a>
                    </li>
+                   <li class="nav-item">
+                       <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
+                           <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i><p>SALARY REQUISITIONS</p>
+                       </a>
+                   </li>
                </ul>
            </li>
            @endif
 
           @if(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'fin')
-          <li class="nav-item {{ Request::routeIs('fin.payments.*') || Request::routeIs('fin.commitments.*') ? 'menu-open' : '' }}">
+          <li class="nav-item {{ Request::routeIs('fin.payments.*') || Request::routeIs('fin.commitments.*') || Request::routeIs('divhr.salary.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
                   <p>
@@ -964,9 +980,15 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a href="{{ route('fin.commitments.salary.placeholder') }}" class="nav-link {{ Request::routeIs('fin.commitments.salary.*') ? 'active' : '' }}">
+                      <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions.*') ? 'active' : '' }}">
+                          <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i>
+                          <p>Salary Requisitions</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('divhr.salary.orders.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.orders.*') ? 'active' : '' }}">
                           <i class="fas fa-money-check-alt nav-icon text-success"></i>
-                          <p>Salary Order</p>
+                          <p>Salary Orders</p>
                       </a>
                   </li>
               </ul>

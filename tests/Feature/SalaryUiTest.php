@@ -20,6 +20,8 @@ class SalaryUiTest extends TestCase
 
     protected SalaryGenerationService $salaryService;
     protected $adminUser;
+    protected $hrUser;
+    protected $prjUser;
 
     protected function setUp(): void
     {
@@ -27,14 +29,35 @@ class SalaryUiTest extends TestCase
 
         $this->salaryService = app(SalaryGenerationService::class);
 
-        $this->adminUser = CenAccount::where('acc_untarea', 'ILIKE', 'hr')->first()
-            ?? CenAccount::where('acc_untarea', 'ILIKE', 'nrdi')->first()
+        // Finance Approver user for order actions and general admin tests
+        $this->adminUser = CenAccount::where('acc_untarea', 'ILIKE', 'fin')->first()
+            ?? CenAccount::where('acc_untarea', 'ILIKE', 'it')->first()
             ?? CenAccount::first();
 
+        $this->adminUser->acc_untarea = 'fin';
         $this->adminUser->acc_lowers = 100000;
         $this->adminUser->acc_uppers = 999999;
+        $this->adminUser->acc_lowerm = 100000;
+        $this->adminUser->acc_upperm = 999999;
         $this->adminUser->acc_auth = 'approver';
         $this->adminUser->save();
+
+        // Dedicated HR user for asserting HR queue boundaries
+        $this->hrUser = CenAccount::where('acc_untarea', 'ILIKE', 'hr')->first();
+        if ($this->hrUser) {
+            $this->hrUser->acc_lowers = 100000;
+            $this->hrUser->acc_uppers = 999999;
+            $this->hrUser->save();
+        }
+
+        // Dedicated PRJ (Division) user for asserting Division queue boundaries
+        $this->prjUser = CenAccount::where('acc_untarea', 'ILIKE', 'prj')->first();
+        if ($this->prjUser) {
+            $this->prjUser->acc_lowers = 100000;
+            $this->prjUser->acc_uppers = 999999;
+            $this->prjUser->acc_auth = 'approver';
+            $this->prjUser->save();
+        }
     }
 
     /**
@@ -487,6 +510,11 @@ class SalaryUiTest extends TestCase
             'sor_status'      => 'Draft',
         ]);
 
+        // FIX 3: Assert confirmation prompt includes exact formatted commitment amount
+        $showResponse = $this->actingAs($this->adminUser)->get(route('divhr.salary.orders.show', $order->sor_id));
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee("Approve salary order #{$order->sor_id}? Approving will create a financial commitment of Rs. " . number_format($order->sor_salary) . " in fin.commitments.", false);
+
         $response = $this->actingAs($this->adminUser)->post(route('divhr.salary.orders.approve', $order->sor_id));
         $response->assertRedirect(route('divhr.salary.orders.show', $order->sor_id));
         $response->assertSessionHas('success');
@@ -498,5 +526,243 @@ class SalaryUiTest extends TestCase
         $this->assertNotNull($commitment);
         $this->assertEquals('Awaited', $commitment->cmt_status);
         $this->assertEquals(-135000.0, (float)$commitment->cmt_amount);
+    }
+
+    /**
+     * 10. FIX 4: Test Salary Slip view renders real data and printable layout.
+     * Also verifies "Print Pay Slip" button on orders.show and HR 403 access control.
+     */
+    public function test_salary_slip_view_renders_real_data_and_print_layout(): void
+    {
+        [$empId, $ctrId, $unitId, $headId] = $this->createEmployeeWithContract();
+        $salMonth = '2024-01-31';
+
+        $order = $this->createSalaryOrder([
+            'sor_type'        => 'Sa',
+            'sor_emp_id'      => $empId,
+            'sor_empnamecomp' => 'Pay Slip Employee',
+            'sor_unt_id'      => $unitId,
+            'sor_effhed_id'   => $headId,
+            'sor_effunt_id'   => $unitId,
+            'sor_month'       => $salMonth,
+            'sor_salary'      => 145000,
+            'sor_ctrsalary'   => 150000,
+            'sor_grosalary'   => 150000,
+            'sor_underwork'   => 5000,
+            'sor_status'      => 'Approved',
+        ]);
+
+        // A. Verify "Print Pay Slip" button is present on Order Detail view for Approved order
+        $showResponse = $this->actingAs($this->adminUser)->get(route('divhr.salary.orders.show', $order->sor_id));
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee('Print Pay Slip');
+        $showResponse->assertSee(route('divhr.salary.orders.slip', $order->sor_id));
+
+        // B. Render the slip itself
+        $slipResponse = $this->actingAs($this->adminUser)->get(route('divhr.salary.orders.slip', $order->sor_id));
+        $slipResponse->assertStatus(200);
+        $slipResponse->assertViewIs('hr.salary.slip');
+
+        // C. Assert legacy title and structure
+        $slipResponse->assertSee('M/S MTSS PAY SLIP');
+        $slipResponse->assertSee('Pay Slip Employee');
+        $slipResponse->assertSee($empId);
+        $slipResponse->assertSee('Rs. 150,000'); // Base salary
+        $slipResponse->assertSee('Rs. 5,000');   // Underwork deduction
+        $slipResponse->assertSee('Rs. 145,000'); // Net payable
+        $slipResponse->assertSee('@media print', false);
+
+        // D. Verify HR role is blocked from viewing Salary Order and Slip (routing rule)
+        if ($this->hrUser) {
+            $hrOrderResponse = $this->actingAs($this->hrUser)->get(route('divhr.salary.orders.show', $order->sor_id));
+            $hrOrderResponse->assertStatus(403);
+
+            $hrSlipResponse = $this->actingAs($this->hrUser)->get(route('divhr.salary.orders.slip', $order->sor_id));
+            $hrSlipResponse->assertStatus(403);
+        }
+    }
+
+    /**
+     * 11. Permanent routing test: HR role cannot view or manage Salary Orders.
+     */
+    public function test_hr_role_cannot_view_or_manage_salary_orders(): void
+    {
+        [$empId, $ctrId, $unitId, $headId] = $this->createEmployeeWithContract();
+        $order = $this->createSalaryOrder([
+            'sor_emp_id'      => $empId,
+            'sor_empnamecomp' => 'Routing Guard Emp',
+            'sor_unt_id'      => $unitId,
+            'sor_effhed_id'   => $headId,
+            'sor_effunt_id'   => $unitId,
+            'sor_month'       => '2024-01-31',
+            'sor_status'      => 'Draft',
+        ]);
+
+        $hrUser = $this->hrUser ?? CenAccount::where('acc_untarea', 'hr')->first();
+        $this->assertNotNull($hrUser, 'HR test user must exist.');
+
+        // HR hits GET on salary orders index route -> assert 403
+        $indexResponse = $this->actingAs($hrUser)->get(route('divhr.salary.orders.index'));
+        $indexResponse->assertStatus(403);
+
+        // HR hits GET on specific order show route -> assert 403
+        $showResponse = $this->actingAs($hrUser)->get(route('divhr.salary.orders.show', $order->sor_id));
+        $showResponse->assertStatus(403);
+    }
+
+    /**
+     * 12. Permanent routing test: HR and Division cannot access Commitments Hub.
+     * Guarded by area:fin middleware on /fin/payments.
+     */
+    public function test_hr_and_division_cannot_access_commitments_hub(): void
+    {
+        $hrUser = $this->hrUser ?? CenAccount::where('acc_untarea', 'hr')->first();
+        $prjUser = $this->prjUser ?? CenAccount::where('acc_untarea', 'prj')->first();
+        $finUser = $this->adminUser;
+
+        $this->assertNotNull($hrUser, 'HR user must exist.');
+        $this->assertNotNull($prjUser, 'Division/PRJ user must exist.');
+        $this->assertNotNull($finUser, 'Finance user must exist.');
+
+        // Re-enable CheckArea middleware specifically to test route gating
+        $middleware = [\App\Http\Middleware\CheckArea::class];
+
+        // HR-role test user hits GET /fin/payments -> assert 403
+        $hrResponse = $this->withMiddleware($middleware)->actingAs($hrUser)->get(route('fin.payments.index'));
+        $hrResponse->assertStatus(403);
+
+        // Division/prj-role test user hits GET /fin/payments -> assert 403
+        $prjResponse = $this->withMiddleware($middleware)->actingAs($prjUser)->get(route('fin.payments.index'));
+        $prjResponse->assertStatus(403);
+
+        // Finance/fin-role test user hits GET /fin/payments -> assert 200 (positive control)
+        $finResponse = $this->withMiddleware($middleware)->actingAs($finUser)->get(route('fin.payments.index'));
+        $finResponse->assertStatus(200);
+    }
+
+    /**
+     * 13. Permanent routing test: Division can view/monitor orders in their horizon,
+     * but attempting POST to approve returns 403 (Finance-only approver role).
+     */
+    public function test_division_can_view_but_not_approve_salary_orders(): void
+    {
+        [$empId, $ctrId, $unitId, $headId] = $this->createEmployeeWithContract();
+        $order = $this->createSalaryOrder([
+            'sor_emp_id'      => $empId,
+            'sor_empnamecomp' => 'Division Monitor Emp',
+            'sor_unt_id'      => $unitId,
+            'sor_effhed_id'   => $headId,
+            'sor_effunt_id'   => $unitId,
+            'sor_month'       => '2024-01-31',
+            'sor_salary'      => 100000,
+            'sor_status'      => 'Draft',
+        ]);
+
+        $prjUser = $this->prjUser ?? CenAccount::where('acc_untarea', 'prj')->first();
+        $this->assertNotNull($prjUser, 'Division/PRJ user must exist.');
+
+        // Division can GET orders index (returns 200)
+        $indexResponse = $this->actingAs($prjUser)->get(route('divhr.salary.orders.index'));
+        $indexResponse->assertStatus(200);
+
+        // Division can GET order show (returns 200, view/monitor)
+        $showResponse = $this->actingAs($prjUser)->get(route('divhr.salary.orders.show', $order->sor_id));
+        $showResponse->assertStatus(200);
+        $showResponse->assertDontSee('Approve Order'); // Button must not render for Division
+
+        // Attempting POST to approve returns 403
+        $approveResponse = $this->actingAs($prjUser)->post(route('divhr.salary.orders.approve', $order->sor_id));
+        $approveResponse->assertStatus(403);
+
+        // Order remains in Draft status
+        $this->assertEquals('Draft', $order->fresh()->sor_status);
+    }
+
+    /**
+     * 14. UI Test: Child-order view shows linked-group banner, parent-order view does not.
+     */
+    public function test_linked_group_banner_rendered_on_child_order_and_absent_on_parent_order(): void
+    {
+        [$empId, $ctrId, $unitId, $headId] = $this->createEmployeeWithContract();
+        $parentOrder = $this->createSalaryOrder([
+            'sor_emp_id'    => $empId,
+            'sor_unt_id'    => $unitId,
+            'sor_effhed_id' => $headId,
+            'sor_status'    => 'Draft',
+            'sor_parent'    => 0,
+        ]);
+
+        $childOrder = $this->createSalaryOrder([
+            'sor_emp_id'    => $empId,
+            'sor_unt_id'    => $unitId,
+            'sor_effhed_id' => $headId,
+            'sor_status'    => 'Draft',
+            'sor_parent'    => $parentOrder->sor_id,
+        ]);
+
+        // 1. Parent order view: linked-group banner is absent
+        $parentResponse = $this->actingAs($this->adminUser)->get(route('divhr.salary.orders.show', $parentOrder->sor_id));
+        $parentResponse->assertStatus(200);
+        $parentResponse->assertDontSee('Linked Order Group:');
+
+        // 2. Child order view: linked-group banner is present
+        $childResponse = $this->actingAs($this->adminUser)->get(route('divhr.salary.orders.show', $childOrder->sor_id));
+        $childResponse->assertStatus(200);
+        $childResponse->assertSee('Linked Order Group:');
+        $childResponse->assertSee("Parent Order <strong>#{$parentOrder->sor_id}</strong>", false);
+    }
+
+    /**
+     * 15. UI Test: Adjust Salary button and modal visible only for Draft orders viewed by Finance approvers.
+     */
+    public function test_adjust_salary_button_and_modal_visibility_rules(): void
+    {
+        [$empId, $ctrId, $unitId, $headId] = $this->createEmployeeWithContract();
+
+        $draftOrder = $this->createSalaryOrder([
+            'sor_emp_id'    => $empId,
+            'sor_unt_id'    => $unitId,
+            'sor_effhed_id' => $headId,
+            'sor_status'    => 'Draft',
+        ]);
+
+        $approvedOrder = $this->createSalaryOrder([
+            'sor_emp_id'    => $empId,
+            'sor_unt_id'    => $unitId,
+            'sor_effhed_id' => $headId,
+            'sor_status'    => 'Approved',
+        ]);
+
+        // Case 1: Draft order viewed by Finance Approver -> Visible
+        $finApproverResponse = $this->actingAs($this->adminUser)->get(route('divhr.salary.orders.show', $draftOrder->sor_id));
+        $finApproverResponse->assertStatus(200);
+        $finApproverResponse->assertSee('Adjust Salary');
+        $finApproverResponse->assertSee('id="adjustSalaryModal"', false);
+
+        // Case 2: Approved order viewed by Finance Approver -> Absent
+        $approvedResponse = $this->actingAs($this->adminUser)->get(route('divhr.salary.orders.show', $approvedOrder->sor_id));
+        $approvedResponse->assertStatus(200);
+        $approvedResponse->assertDontSee('Adjust Salary');
+        $approvedResponse->assertDontSee('id="adjustSalaryModal"', false);
+
+        // Case 3: Draft order viewed by Division/PRJ monitor -> Absent
+        $prjUser = $this->prjUser ?? CenAccount::where('acc_untarea', 'prj')->first();
+        if ($prjUser) {
+            $prjResponse = $this->actingAs($prjUser)->get(route('divhr.salary.orders.show', $draftOrder->sor_id));
+            $prjResponse->assertStatus(200);
+            $prjResponse->assertDontSee('Adjust Salary');
+            $prjResponse->assertDontSee('id="adjustSalaryModal"', false);
+        }
+
+        // Case 4: Draft order viewed by Finance non-approver (e.g. monitor) -> Absent
+        $finNonApprover = CenAccount::where('acc_untarea', 'ILIKE', 'fin')
+            ->where('acc_auth', '!=', 'approver')
+            ->first();
+        if ($finNonApprover) {
+            $finNonApproverResponse = $this->actingAs($finNonApprover)->get(route('divhr.salary.orders.show', $draftOrder->sor_id));
+            $finNonApproverResponse->assertStatus(200);
+            $finNonApproverResponse->assertDontSee('Adjust Salary');
+            $finNonApproverResponse->assertDontSee('id="adjustSalaryModal"', false);
+        }
     }
 }

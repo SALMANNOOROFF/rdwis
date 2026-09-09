@@ -163,4 +163,36 @@ class RestrictNetworkAccessTest extends TestCase
         $this->expectException(HttpException::class);
         $middleware->handle($req2, $next);
     }
+
+    public function test_allows_ipv6_mapped_ipv4_client_ip()
+    {
+        $middleware = new RestrictNetworkAccess();
+        $next = function ($req) {
+            return response('OK');
+        };
+
+        Config::set('allowed_ips.allowed', ['10.0.0.0/8', '192.168.0.0/16']);
+
+        $req = Request::create('/', 'GET');
+        $req->server->set('REMOTE_ADDR', '::ffff:10.120.29.158');
+        $this->assertEquals('OK', $middleware->handle($req, $next)->getContent());
+
+        $req2 = Request::create('/', 'GET');
+        $req2->server->set('REMOTE_ADDR', '::ffff:192.168.1.160');
+        $this->assertEquals('OK', $middleware->handle($req2, $next)->getContent());
+    }
+
+    public function test_allows_wildcard_pattern()
+    {
+        $middleware = new RestrictNetworkAccess();
+        $next = function ($req) {
+            return response('OK');
+        };
+
+        Config::set('allowed_ips.allowed', ['*']);
+
+        $req = Request::create('/', 'GET');
+        $req->server->set('REMOTE_ADDR', '10.120.29.158');
+        $this->assertEquals('OK', $middleware->handle($req, $next)->getContent());
+    }
 }

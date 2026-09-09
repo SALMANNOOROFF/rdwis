@@ -133,30 +133,35 @@
             </a>
         </div>
 
-        <!-- 2. Salary Orders Commitments Card (Stub / Future) -->
+        <!-- 2. Salary Payroll & Orders Commitments Card -->
         <div class="col-lg-6 mb-4">
-            <div class="hub-card disabled-card p-4">
+            <div class="hub-card active-card p-4">
                 <div>
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div class="icon-box icon-salary">
-                            <i class="fas fa-users-cog"></i>
+                            <i class="fas fa-file-invoice-dollar"></i>
                         </div>
-                        <span class="badge badge-secondary px-3 py-2 rajdhani font-weight-bold" style="font-size: 12px; background: rgba(255,255,255,0.1);">DEFERRED / UNDER DEV</span>
+                        <span class="badge badge-success px-3 py-2 rajdhani font-weight-bold" style="font-size: 13px;">ACTIVE MODULE</span>
                     </div>
                     
-                    <h3 class="text-white rajdhani font-weight-bold mb-2 text-muted">Salary Orders (HR Payroll)</h3>
+                    <h3 class="text-white rajdhani font-weight-bold mb-2">Salary Requisitions & Orders (Payroll)</h3>
                     <p class="text-muted small mb-4" style="line-height: 1.6;">
-                        Disbursements against monthly payroll requisitions (<code class="text-muted">fin.salorders</code> &amp; <code class="text-muted">cmt_type = 'Sa'</code>). Single-shot settlement flow closing salary orders and employee requisitions simultaneously.
+                        Review, adjust remarks, approve and disburse monthly payroll requisitions and salary orders (<code class="text-info">fin.salorders</code> &amp; <code class="text-info">hr.salreqs</code>). Settlement updates orders and closes requisitions simultaneously.
                     </p>
                 </div>
 
                 <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                    <div class="stat-pill">
-                        <span class="text-muted">Tied to HR Salreqs Subsystem</span>
+                    <div class="d-flex" style="gap: 8px;">
+                        <a href="{{ route('divhr.salary.requisitions.index') }}" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold px-3">
+                            <i class="fas fa-file-invoice-dollar mr-1"></i> Salary Requisitions
+                        </a>
+                        <a href="{{ route('divhr.salary.orders.index') }}" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold px-3">
+                            <i class="fas fa-receipt mr-1"></i> Salary Orders
+                        </a>
                     </div>
-                    <span class="text-muted rajdhani font-weight-bold">
-                        <i class="fas fa-lock mr-1"></i> Disabled
-                    </span>
+                    <a href="{{ route('divhr.salary.orders.index') }}" class="text-info rajdhani font-weight-bold d-flex align-items-center">
+                        Open Orders <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
                 </div>
             </div>
         </div>

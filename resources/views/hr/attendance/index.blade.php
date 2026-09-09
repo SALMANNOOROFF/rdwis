@@ -195,6 +195,14 @@
     user-select: none;
   }
 
+  /* Cell State: Readonly (Other Department for Central/HR user) */
+  .cell-readonly {
+    background-color: #f8fafc !important;
+    cursor: not-allowed !important;
+    color: #64748b !important;
+    user-select: none;
+  }
+
   /* Cell State: Future Date */
   .cell-future {
     background: repeating-linear-gradient(
@@ -267,20 +275,29 @@
       <!-- Title & Central Mode Switcher -->
       <div class="d-flex align-items-center flex-wrap" style="gap: 12px;">
         <h4 class="mb-0 font-weight-bold" style="font-family: 'Rajdhani', sans-serif; color: #0f172a;">
-          <i class="fas fa-calendar-check mr-2 text-primary"></i>Staff Attendance Management
+          <i class="fas fa-calendar-check mr-2 text-primary"></i>
+          @if(!empty($isDivision))
+            {{ $unitName ?? 'Division' }} Attendance
+          @elseif(strtolower(trim(Auth::user()->acc_untarea ?? '')) === 'hr')
+            HR Directorate Attendance
+          @else
+            Staff Attendance Management
+          @endif
         </h4>
 
-        @if($isCentral)
+        @if($isCentral && empty($isDivision))
           <div class="btn-group btn-group-sm shadow-sm" role="group">
-            <a href="{{ route('divhr.attendance', ['mode' => 'm', 'month' => $month]) }}" 
+            <a href="{{ route(Route::currentRouteName() ?: 'divhr.attendance', ['mode' => 'm', 'month' => $month]) }}" 
                class="btn {{ $mode === 'm' ? 'btn-danger font-weight-bold' : 'btn-outline-secondary' }}" 
-               style="{{ $mode === 'm' ? '' : 'background: #ffffff;' }}">
-              <i class="fas fa-globe mr-1"></i> ALL DEPT
+               style="{{ $mode === 'm' ? '' : 'background: #ffffff;' }}"
+               title="View all departments (View Only for other departments)">
+              <i class="fas fa-globe mr-1"></i> ALL DEPT (VIEW)
             </a>
-            <a href="{{ route('divhr.attendance', ['mode' => 's', 'month' => $month]) }}" 
+            <a href="{{ route(Route::currentRouteName() ?: 'divhr.attendance', ['mode' => 's', 'month' => $month]) }}" 
                class="btn {{ $mode === 's' ? 'btn-primary font-weight-bold' : 'btn-outline-secondary' }}"
-               style="{{ $mode === 's' ? '' : 'background: #ffffff;' }}">
-              <i class="fas fa-sitemap mr-1"></i> MY DEPT
+               style="{{ $mode === 's' ? '' : 'background: #ffffff;' }}"
+               title="Work on own department only">
+              <i class="fas fa-sitemap mr-1"></i> MY DEPT (EDIT)
             </a>
           </div>
         @endif
@@ -339,20 +356,21 @@
             </button>
           </form>
 
-          <!-- Division Salary Generation Button -->
+          <!-- Division Salary Generation & Requisitions Buttons -->
           <div class="btn-group btn-group-sm shadow-sm mr-2" role="group">
-            <a href="{{ route('divhr.salary.requisitions.create', ['month' => $month]) }}" 
+            <button type="button" 
                id="btn-generate-salary-from-att"
+               data-toggle="modal" data-target="#generateSalaryModal"
                class="btn btn-sm btn-primary font-weight-bold" 
                style="background: #2563eb; border-color: #1d4ed8; color: #ffffff;" 
-               title="Generate Monthly Salary Requisitions for {{ $month }}">
+               title="Generate Monthly Salary Requisition for {{ $month }}">
               <i class="fas fa-money-check-alt mr-1"></i> Generate Salary
-            </a>
+            </button>
             <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month]) }}" 
-               class="btn btn-sm btn-outline-primary" 
+               class="btn btn-sm btn-outline-primary font-weight-bold" 
                style="background: #eff6ff; border-color: #93c5fd; color: #1e40af;"
                title="View Salary Requisitions for {{ $month }}">
-              <i class="fas fa-list-alt mr-1"></i> Requisitions
+              <i class="fas fa-file-invoice-dollar mr-1"></i> Salary Requisitions
             </a>
           </div>
         @endif
@@ -461,6 +479,7 @@
                     $lockedDays = $row['locked_days'] ?? [];
                     $vals = $row['vals'] ?? [];
                     $attId = $row['att_id'] ?? null;
+                    $canEditEmp = !empty($row['can_edit']);
                   @endphp
                   <tr data-emp-id="{{ $row['emp_id'] }}" data-att-id="{{ $attId }}">
                     <!-- Fixed Col 1: Index -->
@@ -468,7 +487,12 @@
                     
                     <!-- Fixed Col 2: Employee Info -->
                     <td class="sticky-col-emp" title="{{ $row['name'] }} ({{ $row['emp_id'] }})">
-                      <div class="font-weight-bold text-truncate" style="color: #0f172a !important;">{{ $row['name'] }}</div>
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div class="font-weight-bold text-truncate" style="color: #0f172a !important;">{{ $row['name'] }}</div>
+                        @if(!$canEditEmp)
+                          <span class="badge badge-light text-muted border font-weight-normal ml-1" style="font-size: 10px;" title="View-only: Other department">View Only</span>
+                        @endif
+                      </div>
                       <div class="text-muted text-xs font-monospace">{{ $row['emp_id'] }}</div>
                     </td>
 
@@ -486,7 +510,10 @@
                         $cellClass = 'cell-editable';
                         $readonly = false;
 
-                        if ($isWeekend) {
+                        if (!$canEditEmp) {
+                            $cellClass = 'cell-readonly';
+                            $readonly = true;
+                        } elseif ($isWeekend) {
                             $cellClass = 'cell-weekend';
                             $readonly = true;
                         } elseif ($isLocked) {
@@ -506,10 +533,10 @@
                           data-day="{{ $d }}"
                           data-val="{{ $val }}"
                           data-original-val="{{ $val }}"
-                          data-locked="{{ ($isLocked || $isWeekend) ? '1' : '0' }}"
+                          data-locked="{{ ($isLocked || $isWeekend || !$canEditEmp) ? '1' : '0' }}"
                           data-readonly="{{ $readonly ? '1' : '0' }}"
-                          title="{{ $isWeekend ? 'Weekend / Holiday (Locked)' : ($isLocked ? 'Period is locked (Cutoff protection)' : ($isFuture ? 'Future date' : 'Day ' . $d . ' - Click or type code')) }}">
-                        @if($isLocked && !$isWeekend)
+                          title="{{ !$canEditEmp ? 'View-only: Belongs to another department. You can only mark attendance for your own department.' : ($isWeekend ? 'Weekend / Holiday (Locked)' : ($isLocked ? 'Period is locked (Cutoff protection)' : ($isFuture ? 'Future date' : 'Day ' . $d . ' - Click or type code'))) }}">
+                        @if($isLocked && !$isWeekend && $canEditEmp)
                           <span class="lock-icon mr-1"><i class="fas fa-lock"></i></span>
                         @endif
                         {{-- DO NOT PRINT 'Z' inside weekend/holiday cells as requested by user ("yhn z na likha aye") --}}
@@ -877,6 +904,304 @@ $(document).ready(function() {
       }
     });
   });
+  // ==========================================
+  // Generate Salary Modal Logic (Employee Checkboxes)
+  // ==========================================
+  let attPreviewLoaded = false;
+  let attPreviewData = null;
+
+  $('#generateSalaryModal').on('show.bs.modal', function() {
+    if (attPreviewLoaded) return;
+
+    $('#att-gen-loader').show();
+    $('#att-gen-content').hide();
+    $('#att-gen-error-box').hide();
+
+    $.ajax({
+      url: "{{ route('divhr.salary.preview') }}",
+      type: "GET",
+      data: { month: "{{ $month }}" },
+      success: function(res) {
+        attPreviewLoaded = true;
+        attPreviewData = res;
+        $('#att-gen-loader').hide();
+        renderAttPreview(res);
+        $('#att-gen-content').fadeIn();
+      },
+      error: function(xhr) {
+        $('#att-gen-loader').hide();
+        $('#att-gen-error-msg').text(xhr.responseJSON?.message || xhr.responseJSON?.error || 'Could not load salary preview.');
+        $('#att-gen-error-box').show();
+      }
+    });
+  });
+
+  function renderAttPreview(data) {
+    const included = data.included || [];
+    const excluded = data.excluded || [];
+    const counts = data.counts || {};
+
+    $('#att-kpi-eligible').text(counts.eligible || included.length);
+    $('#att-kpi-excluded').text(counts.excluded || excluded.length);
+    $('#att-excluded-count-badge').text(counts.excluded || excluded.length);
+
+    const $tbody = $('#att-eligible-tbody');
+    $tbody.empty();
+
+    if (included.length === 0) {
+      $tbody.append('<tr><td colspan="8" class="text-center text-muted py-4 font-weight-bold">No eligible employees found for this month in your division.</td></tr>');
+      $('#att-check-all-emps').prop('disabled', true);
+      $('#att-btn-submit-generate').prop('disabled', true);
+      $('#att-kpi-selected, #att-submit-count').text(0);
+    } else {
+      $('#att-check-all-emps').prop('disabled', false).prop('checked', true);
+      included.forEach(function(item) {
+        const emp = item.employee;
+        const b = item.breakdown[0] || {};
+        const isMeezan = b.bnkaccdetail && b.bnkaccdetail !== '(Pay by Cheque)';
+        const bankBadge = isMeezan
+          ? '<span class="badge badge-success px-2 py-1"><i class="fas fa-university mr-1"></i> ' + b.bnkaccdetail + '</span>'
+          : '<span class="badge badge-secondary px-2 py-1"><i class="fas fa-money-check mr-1"></i> ' + (b.bnkaccdetail || 'Pay by Cheque') + '</span>';
+
+        const row = `
+          <tr>
+            <td class="text-center">
+              <input type="checkbox" class="att-candidate-checkbox" value="${emp.emp_id}" checked>
+            </td>
+            <td class="font-monospace font-weight-bold" style="color: #0369a1;">${emp.emp_id}</td>
+            <td>
+              <div class="font-weight-bold text-dark">${emp.emp_name}</div>
+              <div class="small text-muted">${emp.emp_rank || ''} ${emp.emp_title || ''}</div>
+            </td>
+            <td class="small font-weight-bold text-secondary">Unit ${emp.emp_unt_id}</td>
+            <td class="text-right font-monospace">${Number(b.ctrsalary || 0).toLocaleString()}</td>
+            <td class="text-right font-monospace text-danger">${Number(b.underwork || 0).toLocaleString()}</td>
+            <td class="text-right font-monospace font-weight-bold" style="color: #15803d; font-size: 0.95rem;">
+              ${Number(item.total_salary || 0).toLocaleString()}
+            </td>
+            <td>${bankBadge}</td>
+          </tr>
+        `;
+        $tbody.append(row);
+      });
+      updateAttSelectedCount();
+    }
+
+    // Excluded list
+    if (excluded.length > 0) {
+      const $exTbody = $('#att-excluded-tbody');
+      $exTbody.empty();
+      excluded.forEach(function(ex) {
+        const emp = ex.employee || {};
+        $exTbody.append(`
+          <tr>
+            <td class="font-monospace font-weight-bold text-danger">${emp.emp_id || '-'}</td>
+            <td>${emp.emp_name || '-'}</td>
+            <td>Unit ${emp.emp_unt_id || '-'}</td>
+            <td><span class="badge badge-danger">${ex.reason || 'Excluded'}</span></td>
+          </tr>
+        `);
+      });
+      $('#att-excluded-wrapper').show();
+    } else {
+      $('#att-excluded-wrapper').hide();
+    }
+  }
+
+  function updateAttSelectedCount() {
+    const selectedCount = $('.att-candidate-checkbox:checked').length;
+    $('#att-kpi-selected').text(selectedCount);
+    $('#att-submit-count').text(selectedCount);
+    $('#att-btn-submit-generate').prop('disabled', selectedCount === 0);
+  }
+
+  $(document).on('change', '#att-check-all-emps', function() {
+    $('.att-candidate-checkbox').prop('checked', $(this).is(':checked'));
+    updateAttSelectedCount();
+  });
+
+  $(document).on('change', '.att-candidate-checkbox', function() {
+    const allChecked = $('.att-candidate-checkbox:checked').length === $('.att-candidate-checkbox').length;
+    $('#att-check-all-emps').prop('checked', allChecked);
+    updateAttSelectedCount();
+  });
+
+  $('#att-btn-submit-generate').on('click', function() {
+    const selectedIds = $('.att-candidate-checkbox:checked').map(function() {
+      return $(this).val();
+    }).get();
+
+    if (selectedIds.length === 0) {
+      Swal.fire({ icon: 'warning', title: 'No Selection', text: 'Please select at least 1 employee.' });
+      return;
+    }
+
+    const $btn = $(this);
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Generating...');
+
+    $.ajax({
+      url: "{{ route('divhr.salary.requisitions.generate') }}",
+      type: "POST",
+      data: {
+        _token: "{{ csrf_token() }}",
+        month: "{{ $month }}",
+        emp_ids: selectedIds
+      },
+      success: function(res) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Requisitions Generated!',
+          text: 'Successfully generated ' + (res.created_count || selectedIds.length) + ' salary requisition(s) in Draft status.',
+          confirmButtonText: 'View Draft Requisitions'
+        }).then(function() {
+          window.location.href = "{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'Draft']) }}";
+        });
+      },
+      error: function(xhr) {
+        $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-1"></i> Generate Requisition (' + selectedIds.length + ' Selected)');
+        const msg = xhr.responseJSON?.error || xhr.responseJSON?.message || 'Could not generate requisitions.';
+        Swal.fire({
+          icon: 'error',
+          title: 'Generation Failed',
+          text: msg
+        });
+      }
+    });
+  });
 });
 </script>
+
+{{-- Generate Salary Modal (with Employee Checkboxes) --}}
+<div class="modal fade" id="generateSalaryModal" tabindex="-1" role="dialog" aria-labelledby="generateSalaryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+      <div class="modal-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <div class="p-2 rounded mr-3" style="background: #eff6ff; color: #2563eb;">
+            <i class="fas fa-money-check-alt fa-lg"></i>
+          </div>
+          <div>
+            <h5 class="modal-title font-weight-bold text-dark mb-0" id="generateSalaryModalLabel">
+              Generate Salary Requisitions
+            </h5>
+            <small class="text-muted">
+              Period: <span class="font-weight-bold text-primary">{{ \Carbon\Carbon::parse($month . '-01')->format('F Y') }}</span> 
+              &bull; Unit Scope: <span class="font-weight-bold text-dark">{{ $isCentral ? 'Central Horizon' : 'My Division' }}</span>
+            </small>
+          </div>
+        </div>
+        <button type="button" class="close text-secondary" data-dismiss="modal" aria-label="Close" style="opacity: 0.8; font-size: 1.5rem;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body p-4" style="background: #f8fafc;">
+        {{-- Loader --}}
+        <div id="att-gen-loader" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" style="width: 2.5rem; height: 2.5rem;"></div>
+          <div class="mt-3 font-weight-bold text-muted small">Scanning division candidates & auditing against 7 legacy pipeline checks...</div>
+        </div>
+
+        {{-- Error Banner --}}
+        <div id="att-gen-error-box" class="alert alert-danger py-2 px-3 small border-0 mb-3 shadow-sm" style="display: none; background: #fef2f2; color: #b91c1c; border-left: 4px solid #ef4444 !important;">
+          <i class="fas fa-exclamation-circle mr-1"></i> <span id="att-gen-error-msg"></span>
+        </div>
+
+        {{-- Content Container --}}
+        <div id="att-gen-content" style="display: none;">
+          {{-- KPI Bar --}}
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm p-2 text-center" style="border-radius: 8px; background: #ffffff;">
+                <div class="text-xs text-uppercase font-weight-bold text-muted">Eligible Candidates</div>
+                <div class="h4 font-weight-bold text-success mb-0" id="att-kpi-eligible">0</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm p-2 text-center" style="border-radius: 8px; background: #ffffff;">
+                <div class="text-xs text-uppercase font-weight-bold text-muted">Selected For Generation</div>
+                <div class="h4 font-weight-bold text-primary mb-0" id="att-kpi-selected">0</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm p-2 text-center" style="border-radius: 8px; background: #ffffff;">
+                <div class="text-xs text-uppercase font-weight-bold text-muted">Excluded (Audit)</div>
+                <div class="h4 font-weight-bold text-danger mb-0" id="att-kpi-excluded">0</div>
+              </div>
+            </div>
+          </div>
+
+          {{-- Candidate Table --}}
+          <div class="card border-0 shadow-sm mb-3" style="border-radius: 8px; background: #ffffff;">
+            <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
+              <span class="font-weight-bold small text-dark">
+                <i class="fas fa-users mr-1 text-primary"></i> Select Employees to Include in this Requisition
+              </span>
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="att-check-all-emps" checked>
+                <label class="custom-control-label small font-weight-bold text-secondary" for="att-check-all-emps">Select / Deselect All</label>
+              </div>
+            </div>
+            <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
+              <table class="table table-sm table-hover table-striped mb-0 align-middle">
+                <thead style="background: #f1f5f9; color: #334155; position: sticky; top: 0; z-index: 5;">
+                  <tr>
+                    <th style="width: 45px;" class="text-center">#</th>
+                    <th style="width: 120px;">Emp ID</th>
+                    <th>Employee Name & Title</th>
+                    <th>Unit</th>
+                    <th class="text-right">Contract Salary</th>
+                    <th class="text-right">Deductions</th>
+                    <th class="text-right">Net Salary</th>
+                    <th>Bank Rule</th>
+                  </tr>
+                </thead>
+                <tbody id="att-eligible-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          {{-- Excluded Accordion / Collapse --}}
+          <div id="att-excluded-wrapper" style="display: none;">
+            <div class="card border-0 shadow-sm mb-0" style="border-radius: 8px; background: #ffffff;">
+              <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center" style="cursor: pointer;" data-toggle="collapse" data-target="#att-excluded-collapse">
+                <span class="small font-weight-bold text-danger">
+                  <i class="fas fa-ban mr-1"></i> View Excluded Candidates (<span id="att-excluded-count-badge">0</span>)
+                </span>
+                <i class="fas fa-chevron-down text-muted small"></i>
+              </div>
+              <div id="att-excluded-collapse" class="collapse">
+                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                  <table class="table table-sm table-bordered mb-0 small">
+                    <thead style="background: #fef2f2; color: #991b1b;">
+                      <tr>
+                        <th style="width: 120px;">Emp ID</th>
+                        <th>Name</th>
+                        <th>Unit</th>
+                        <th>Audit Exclusion Reason</th>
+                      </tr>
+                    </thead>
+                    <tbody id="att-excluded-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer bg-white py-2 px-4 border-top d-flex justify-content-between">
+        <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month]) }}" class="btn btn-sm btn-outline-secondary font-weight-bold">
+          <i class="fas fa-list-alt mr-1"></i> Open Requisitions Dashboard
+        </a>
+        <div>
+          <button type="button" class="btn btn-sm btn-secondary font-weight-bold mr-1" data-dismiss="modal">Close</button>
+          <button type="button" id="att-btn-submit-generate" class="btn btn-sm btn-success font-weight-bold px-4 shadow-sm" disabled>
+            <i class="fas fa-check-circle mr-1"></i> Generate Requisition (<span id="att-submit-count">0</span> Selected)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection

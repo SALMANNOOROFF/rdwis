@@ -255,4 +255,44 @@ class AttachmentController extends Controller
 
         return redirect()->back()->with('success', 'Attachment deleted successfully.');
     }
+
+    /**
+     * Direct storage file serving route (/storage/{path})
+     * Handles previews, streaming, and cross-network requests.
+     */
+    public function serveStorageFile(Request $request, string $path): BinaryFileResponse
+    {
+        $fullPath = $this->storage->resolvePhysicalPath($path);
+
+        if (!$fullPath) {
+            abort(404, 'Requested document not found on storage disk.');
+        }
+
+        $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'pdf'  => 'application/pdf',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'webp' => 'image/webp',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'doc'  => 'application/msword',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'xls'  => 'application/vnd.ms-excel',
+            'txt'  => 'text/plain',
+            'csv'  => 'text/csv',
+        ];
+        $mime = $mimeTypes[$ext] ?? (mime_content_type($fullPath) ?: 'application/octet-stream');
+        $download = $request->query('download') === '1';
+
+        return response()->file($fullPath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => ($download ? 'attachment' : 'inline') . '; filename="' . basename($fullPath) . '"',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'Access-Control-Allow-Origin' => '*',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+        ]);
+    }
 }

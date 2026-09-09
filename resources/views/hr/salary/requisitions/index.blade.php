@@ -7,7 +7,7 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
       <h3 class="font-weight-bold mb-0 text-dark" style="font-family: 'Rajdhani', sans-serif;">
-        <i class="fas fa-file-invoice-dollar text-primary mr-2"></i>Salary Requisitions Dashboard
+        <i class="fas fa-file-invoice-dollar text-primary mr-2"></i>Salary Requisitions - {{ $status === 'Open' || $status === 'In Process' ? 'In Process' : ($status === 'Closed' ? 'Closed' : 'Draft') }}
       </h3>
       <div class="text-muted small">
         <a href="{{ route('divhr.attendance') }}" class="text-muted">HR</a> / 
@@ -16,12 +16,17 @@
       </div>
     </div>
     <div class="d-flex align-items-center" style="gap: 8px;">
+      <a href="{{ route('divhr.attendance', ['month' => $month ?? '']) }}" class="btn btn-sm btn-outline-secondary font-weight-bold">
+        <i class="fas fa-arrow-left mr-1"></i> Back to Attendance
+      </a>
+      @if(strtolower(trim((string) (auth()->user()->acc_untarea ?? ''))) === 'fin')
       <a href="{{ route('divhr.salary.orders.index') }}" class="btn btn-sm btn-outline-primary font-weight-bold">
         <i class="fas fa-receipt mr-1"></i> Salary Orders
       </a>
       <a href="{{ route('divhr.salary.commitments.verify') }}" class="btn btn-sm btn-outline-info font-weight-bold">
         <i class="fas fa-shield-alt mr-1"></i> Audit Commitments
       </a>
+      @endif
       <a href="{{ route('divhr.salary.requisitions.create') }}" class="btn btn-sm btn-success font-weight-bold shadow-sm">
         <i class="fas fa-plus-circle mr-1"></i> New Salary Requisition
       </a>
@@ -46,33 +51,28 @@
   <div class="card border-0 shadow-sm mb-3" style="border-radius: 8px; background: #ffffff;">
     <div class="card-body p-3">
       <form method="GET" action="{{ route('divhr.salary.requisitions.index') }}" class="row align-items-center">
+        <input type="hidden" name="status" value="{{ $status ?? 'Draft' }}">
         <div class="col-md-3 mb-2 mb-md-0">
           <label class="small text-muted font-weight-bold mb-1">Filter Month</label>
           <input type="month" name="month" class="form-control form-control-sm" value="{{ $month ?? '' }}" onchange="this.form.submit()">
         </div>
         <div class="col-md-7 mb-2 mb-md-0">
-          <label class="small text-muted font-weight-bold mb-1">Status Filter (Exact srq_status)</label>
+          <label class="small text-muted font-weight-bold mb-1">Status Filter (srq_status)</label>
           <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
-            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month]) }}" class="btn btn-sm {{ empty($status) ? 'btn-primary font-weight-bold' : 'btn-outline-secondary' }}">
-              All
-            </a>
-            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'Draft']) }}" class="btn btn-sm {{ $status === 'Draft' ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-secondary' }}">
+            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'Draft']) }}" class="btn btn-sm {{ ($status ?? 'Draft') === 'Draft' ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-secondary' }}" title="Draft requisitions">
               Draft
             </a>
-            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'In Process']) }}" class="btn btn-sm {{ $status === 'In Process' ? 'btn-info font-weight-bold' : 'btn-outline-secondary' }}">
-              In Process
+            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'Open']) }}" class="btn btn-sm {{ in_array($status, ['Open', 'In Process'], true) ? 'btn-info font-weight-bold' : 'btn-outline-secondary' }}" title="In Process requisitions">
+              In Process <small class="text-muted d-none d-lg-inline">(Open)</small>
             </a>
-            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'Fulfilled']) }}" class="btn btn-sm {{ $status === 'Fulfilled' ? 'btn-success font-weight-bold' : 'btn-outline-secondary' }}">
-              Fulfilled
-            </a>
-            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'Cancelled']) }}" class="btn btn-sm {{ $status === 'Cancelled' ? 'btn-danger font-weight-bold' : 'btn-outline-secondary' }}">
-              Cancelled
+            <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month, 'status' => 'Closed']) }}" class="btn btn-sm {{ in_array($status, ['Closed', 'Fulfilled', 'Cancelled'], true) ? 'btn-danger font-weight-bold' : 'btn-outline-secondary' }}" title="Fulfilled & Cancelled requisitions">
+              Closed <small class="text-muted d-none d-lg-inline">(Fulfilled / Cancelled)</small>
             </a>
           </div>
         </div>
         <div class="col-md-2 text-md-right mt-2 mt-md-0">
           <label class="d-none d-md-block small text-transparent mb-1">&nbsp;</label>
-          <a href="{{ route('divhr.salary.requisitions.index') }}" class="btn btn-sm btn-outline-secondary">
+          <a href="{{ route('divhr.salary.requisitions.index', ['status' => 'Draft']) }}" class="btn btn-sm btn-outline-secondary">
             <i class="fas fa-undo mr-1"></i> Reset
           </a>
         </div>
@@ -84,17 +84,19 @@
   <div class="card border-0 shadow-sm" style="border-radius: 8px; background: #ffffff;">
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-hover table-striped mb-0 align-middle" style="border-collapse: separate;">
-          <thead style="background: #f8fafc; color: #1e293b; border-bottom: 2px solid #cbd5e1;">
+        <table class="table table-hover mb-0 align-middle" style="font-size: 13px;">
+          <thead style="background: #f8fafc; color: #475569; border-bottom: 2px solid #e2e8f0;">
             <tr>
-              <th style="width: 80px;" class="text-center font-weight-bold">SRQ ID</th>
-              <th class="font-weight-bold">Employee</th>
-              <th class="font-weight-bold">Unit</th>
-              <th class="font-weight-bold">Salary Period</th>
-              <th class="text-right font-weight-bold">Net Salary</th>
-              <th class="text-center font-weight-bold">Status (srq_status)</th>
-              <th class="font-weight-bold">Released Date / Age</th>
-              <th style="width: 220px;" class="text-center font-weight-bold">Actions</th>
+              <th style="width: 100px;">Req ID</th>
+              <th>Employee</th>
+              <th>Project</th>
+              <th>Contract Salary</th>
+              <th>Payable</th>
+              <th>Meezan Account Details</th>
+              <th>Remarks</th>
+              <th style="width: 150px;">Add. Remarks</th>
+              <th class="text-center">Status (srq_status)</th>
+              <th style="width: 140px;" class="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -107,78 +109,109 @@
                     'Cancelled'  => 'background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;',
                 ];
                 $badgeStyle = $statusColors[$r->srq_status] ?? 'background: #f1f5f9; color: #475569;';
-                $age = $r->srq_releasedtg ? \Carbon\Carbon::parse($r->srq_releasedtg)->diffForHumans() : ($r->srq_closedtg ? 'Closed ' . \Carbon\Carbon::parse($r->srq_closedtg)->diffForHumans() : 'Created Draft');
+                $isFinUser = strtolower(trim((string) (auth()->user()->acc_untarea ?? ''))) === 'fin';
+                $relDate = $r->srq_releasedtg 
+                    ? \Carbon\Carbon::parse($r->srq_releasedtg)->format('d M y') 
+                    : ($r->created_at ? \Carbon\Carbon::parse($r->created_at)->format('d M y') : '');
+                $salMonth = \Carbon\Carbon::parse($r->srq_month)->format('M y');
               @endphp
               <tr>
-                <td class="text-center font-monospace font-weight-bold" style="color: #0369a1;">#{{ $r->srq_id }}</td>
+                {{-- 1. Req ID --}}
                 <td>
+                  <div class="font-weight-bold" style="color: #1e293b;">#{{ $r->srq_id }}</div>
+                  @if($relDate)
+                    <div class="small text-muted" style="font-size: 11px;">{{ $relDate }}</div>
+                  @endif
+                </td>
+
+                {{-- 2. Employee --}}
+                <td>
+                  <div class="small text-muted font-monospace" style="font-size: 11.5px;">{{ $r->srq_emp_id }}</div>
                   <div class="font-weight-bold text-dark">{{ $r->srq_empnamecomp ?: ($r->employee->emp_name ?? 'N/A') }}</div>
-                  <div class="small text-muted font-monospace">{{ $r->srq_emp_id }}</div>
                 </td>
+
+                {{-- 3. Project --}}
                 <td>
-                  <span class="small font-weight-bold text-secondary">{{ $r->unit->unt_name ?? "Unit {$r->srq_unt_id}" }}</span>
+                  <div class="font-weight-bold text-dark">{{ $r->head->hed_name ?? ($r->effectiveHead->hed_name ?? 'Central') }}</div>
+                  <div class="small text-muted" style="font-size: 11px;">{{ $r->unit->unt_namesh ?? ($r->unit->unt_name ?? '') }}</div>
                 </td>
+
+                {{-- 4. Contract Salary --}}
                 <td>
-                  <span class="badge px-2 py-1 font-weight-bold" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
-                    {{ \Carbon\Carbon::parse($r->srq_month)->format('M Y') }}
-                  </span>
+                  <div class="font-weight-bold text-dark">{{ number_format($r->srq_ctrsalary ?: $r->srq_salary) }}</div>
+                  <div class="small text-muted" style="font-size: 11px;">{{ $salMonth }}</div>
                 </td>
-                <td class="text-right font-weight-bold" style="color: #0f172a; font-family: monospace; font-size: 1rem;">
-                  {{ number_format($r->srq_salary) }}
+
+                {{-- 5. Payable (Red bold font matching legacy Screenshot 2) --}}
+                <td>
+                  <div class="font-weight-bold text-danger" style="font-size: 14px;">{{ number_format($r->srq_salary) }}</div>
+                  <div class="small text-muted" style="font-size: 11px;">{{ $r->effectiveHead->hed_name ?? ($r->head->hed_name ?? '') }}</div>
                 </td>
+
+                {{-- 6. Meezan Account Details --}}
+                <td>
+                  <div class="font-monospace text-dark font-weight-bold" style="font-size: 12px;">{{ $r->srq_bnkaccdetail ?: '(Pay by Cheque)' }}</div>
+                  <div class="small text-muted text-truncate" style="max-width: 170px; font-size: 11.5px;">{{ $r->srq_bnkacctitle ?: ($r->employee->emp_name ?? '') }}</div>
+                </td>
+
+                {{-- 7. Remarks --}}
+                <td>
+                  <div class="small text-dark" style="font-size: 12px;">{{ $r->srq_remarks ?: '-' }}</div>
+                </td>
+
+                {{-- 8. Add. Remarks (Editable text input matching legacy) --}}
+                <td>
+                  <input type="text" 
+                         class="form-control form-control-sm border-secondary-subtle" 
+                         style="font-size: 12px; height: 28px;"
+                         value="{{ $r->srq_remarks2 }}" 
+                         placeholder="Add remarks..." 
+                         data-id="{{ $r->srq_id }}"
+                         onchange="saveSrqRemarks(this)">
+                </td>
+
+                {{-- 9. Status --}}
                 <td class="text-center">
                   <span class="badge px-2 py-1 font-weight-bold" style="{{ $badgeStyle }}">
                     {{ $r->srq_status }}
                   </span>
                 </td>
-                <td class="small text-muted">
-                  <div>{{ $r->srq_releasedtg ? \Carbon\Carbon::parse($r->srq_releasedtg)->format('Y-m-d H:i') : '-' }}</div>
-                  <div class="text-xs">{{ $age }}</div>
-                </td>
+
+                {{-- 10. Actions (Draft: Release & Cancel; In Process: Cancel only) --}}
                 <td class="text-center">
-                  <div class="btn-group btn-group-sm" role="group">
-                    {{-- Draft Action: Release --}}
-                    @if($r->srq_status === 'Draft')
+                  @if($r->srq_status === 'Draft')
+                    <div class="d-flex align-items-center justify-content-center" style="gap: 4px;">
                       <form method="POST" action="{{ route('divhr.salary.requisitions.release', $r->srq_id) }}" class="d-inline" onsubmit="return confirm('Release requisition #{{ $r->srq_id }} to In Process?');">
                         @csrf
-                        <button type="submit" class="btn btn-xs btn-primary font-weight-bold px-2 mr-1" title="Release to In Process">
-                          <i class="fas fa-paper-plane mr-1"></i> Release
+                        <button type="submit" class="btn btn-xs btn-primary font-weight-bold px-2" title="Release to In Process">
+                          Release
                         </button>
                       </form>
                       <button type="button" class="btn btn-xs btn-outline-danger btn-trigger-cancel font-weight-bold px-2"
                               data-action="{{ route('divhr.salary.requisitions.cancel', $r->srq_id) }}"
                               data-desc="Salary Requisition #{{ $r->srq_id }} - {{ $r->srq_empnamecomp }} ({{ number_format($r->srq_salary) }})">
-                        <i class="fas fa-times"></i> Cancel
+                        Cancel
                       </button>
-                    @elseif($r->srq_status === 'In Process')
-                      <form method="POST" action="{{ route('divhr.salary.requisitions.create_orders', $r->srq_id) }}" class="d-inline" onsubmit="return confirm('Generate salary orders for requisition #{{ $r->srq_id }}?');">
-                        @csrf
-                        <button type="submit" class="btn btn-xs btn-success font-weight-bold px-2 mr-1" title="Create Salary Orders">
-                          <i class="fas fa-receipt mr-1"></i> Create Order
-                        </button>
-                      </form>
+                    </div>
+                  @elseif($r->srq_status === 'In Process')
+                    <div class="d-flex align-items-center justify-content-center" style="gap: 4px;">
+                      <span class="badge badge-light text-muted font-weight-normal border mr-1" title="Order generated for Finance">Submitted to Finance</span>
                       <button type="button" class="btn btn-xs btn-outline-danger btn-trigger-cancel font-weight-bold px-2"
                               data-action="{{ route('divhr.salary.requisitions.cancel', $r->srq_id) }}"
                               data-desc="Salary Requisition #{{ $r->srq_id }} - {{ $r->srq_empnamecomp }} ({{ number_format($r->srq_salary) }})">
-                        <i class="fas fa-times"></i> Cancel
+                        Cancel
                       </button>
-                    @elseif($r->srq_status === 'Fulfilled')
-                      @if($r->order)
-                        <a href="{{ route('divhr.salary.orders.show', $r->order->sor_id) }}" class="btn btn-xs btn-outline-info font-weight-bold px-2">
-                          <i class="fas fa-external-link-alt mr-1"></i> View Order #{{ $r->order->sor_id }}
-                        </a>
-                      @else
-                        <span class="text-muted small">Fulfilled</span>
-                      @endif
-                    @else
-                      <span class="text-muted small">Closed</span>
-                    @endif
-                  </div>
+                    </div>
+                  @elseif($r->srq_status === 'Fulfilled')
+                    <span class="text-success small font-weight-bold"><i class="fas fa-check-circle mr-1"></i> Fulfilled</span>
+                  @else
+                    <span class="text-muted small">Closed</span>
+                  @endif
                 </td>
               </tr>
             @empty
               <tr>
-                <td colspan="8" class="text-center py-5 text-muted">
+                <td colspan="10" class="text-center py-5 text-muted">
                   <i class="fas fa-inbox fa-3x mb-3 text-light" style="color: #cbd5e1 !important;"></i>
                   <div class="font-weight-bold">No salary requisitions found for the selected filters.</div>
                   <div class="small">Click "New Salary Requisition" above to initiate a requisition generation flow.</div>
@@ -218,5 +251,22 @@ $(document).ready(function() {
     $('#cancelModal').modal('show');
   });
 });
+
+function saveSrqRemarks(input) {
+  const id = $(input).data('id');
+  const val = $(input).val();
+  $.ajax({
+    url: '{{ url("div/hr/salary/requisitions") }}/' + id + '/remarks2',
+    type: 'PATCH',
+    data: {
+      _token: '{{ csrf_token() }}',
+      remarks2: val
+    },
+    success: function() {
+      $(input).addClass('is-valid border-success');
+      setTimeout(() => $(input).removeClass('is-valid border-success'), 1500);
+    }
+  });
+}
 </script>
 @endsection

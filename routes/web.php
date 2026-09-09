@@ -285,10 +285,35 @@ Route::middleware('auth')->group(function () {
                 ->name('division.contract-cases.forward');
             Route::post('/contract-cases/{id}/cancel', [\App\Http\Controllers\Division\ContractCaseController::class, 'cancel'])
                 ->name('division.contract-cases.cancel');
+
+            // --- DIVISION ATTENDANCE ROUTES ---
+            Route::get('/attendance', [AttendanceController::class, 'index'])
+                ->name('division.attendance');
+            Route::post('/attendance/save', [AttendanceController::class, 'save'])
+                ->name('division.attendance.save')
+                ->middleware('approver');
+            Route::get('/attendance/oneday', [AttendanceController::class, 'oneday'])
+                ->name('division.attendance.oneday');
+            Route::get('/attendance/summary', [AttendanceController::class, 'summary'])
+                ->name('division.attendance.summary');
+            Route::get('/attendance/day-details', [AttendanceController::class, 'dayDetails'])
+                ->name('division.attendance.day_details');
+            Route::post('/attendance/save-remark', [AttendanceController::class, 'saveRemark'])
+                ->name('division.attendance.save_remark');
+            Route::post('/attendance/bulk-action', [AttendanceController::class, 'bulkAction'])
+                ->name('division.attendance.bulk_action')
+                ->middleware('approver');
+            Route::post('/attendance/generate-sheet', [AttendanceController::class, 'generateSheet'])
+                ->name('division.attendance.generate_sheet')
+                ->middleware('approver');
         });
 
         // --- HR CONTRACT CASE ROUTES & REPORTS ---
         Route::prefix('hr')->middleware('area:hr,prj,rdwprj,hqs,rdw,nrdi,it')->group(function () {
+            // HR Attendance Route
+            Route::get('/attendance', [AttendanceController::class, 'index'])
+                ->name('hr.attendance');
+
             Route::get('/contract-cases', [\App\Http\Controllers\HR\ContractCaseController::class, 'index'])
                 ->name('hr.contract-cases.index');
             Route::get('/contract-cases/{id}', [\App\Http\Controllers\HR\ContractCaseController::class, 'show'])
@@ -375,12 +400,7 @@ Route::middleware('auth')->group(function () {
 
         Route::group([
             'middleware' => [
-                function ($request, $next) {
-                    if (Auth::user()->isSORD()) {
-                        return redirect()->route('sord.dashboard');
-                    }
-                    return $next($request);
-                },
+                \App\Http\Middleware\RedirectIfSord::class,
                 'area:prj,rdwprj',
             ],
         ], function () {
@@ -555,7 +575,7 @@ Route::middleware('auth')->group(function () {
             Route::prefix('divhr')->group(function () {
 
                 Route::get('/employeelist', [DivHrController::class, 'employeelist'])
-                    ->name('divhr.employelist');
+                    ->name('divhr.employeelist');
 
                 Route::get('/employee/{id}', [DivHrController::class, 'employeedetail'])
                     ->name('divhr.employeedetail');
@@ -608,6 +628,8 @@ Route::middleware('auth')->group(function () {
                     Route::post('/requisitions/{srq_id}/create-orders', [\App\Http\Controllers\SalaryController::class, 'createOrders'])
                         ->name('divhr.salary.requisitions.create_orders')
                         ->middleware('approver');
+                    Route::patch('/requisitions/{srq_id}/remarks2', [\App\Http\Controllers\SalaryController::class, 'updateRemarks2'])
+                        ->name('divhr.salary.requisitions.remarks2');
 
                     Route::get('/orders', [\App\Http\Controllers\SalaryController::class, 'ordersIndex'])
                         ->name('divhr.salary.orders.index');
@@ -619,6 +641,13 @@ Route::middleware('auth')->group(function () {
                     Route::post('/orders/{sor_id}/cancel', [\App\Http\Controllers\SalaryController::class, 'cancelOrder'])
                         ->name('divhr.salary.orders.cancel')
                         ->middleware('approver');
+                    Route::patch('/orders/{sor_id}/salary', [\App\Http\Controllers\SalaryController::class, 'updateSalary'])
+                        ->name('divhr.salary.orders.update_salary')
+                        ->middleware('approver');
+                    Route::patch('/orders/{sor_id}/remarks2', [\App\Http\Controllers\SalaryController::class, 'updateOrderRemarks2'])
+                        ->name('divhr.salary.orders.remarks2');
+                    Route::get('/orders/{sor_id}/slip', [\App\Http\Controllers\SalaryController::class, 'slip'])
+                        ->name('divhr.salary.orders.slip');
 
                     Route::get('/commitments/verify', [\App\Http\Controllers\SalaryController::class, 'verifyCommitments'])
                         ->name('divhr.salary.commitments.verify');
@@ -640,12 +669,7 @@ Route::middleware('auth')->group(function () {
         'prefix' => 'sord',
         'as' => 'sord.',
         'middleware' => [
-            function ($request, $next) {
-                if (Auth::user()->isDivision()) {
-                    return redirect()->route('dashboard');
-                }
-                return $next($request);
-            },
+            \App\Http\Middleware\RedirectIfDivision::class,
             'area:rdwprj,rdw',
         ],
     ], function () {
@@ -713,13 +737,12 @@ Route::middleware('auth')->group(function () {
 
             // COMMITMENTS & PAYMENTS - STRICTLY FINANCE ONLY
             Route::middleware(['area:fin'])->group(function () {
-                Route::get('/commitments', function () {
-                    return redirect()->route('fin.payments.index');
-                })->name('commitments.landing');
+                Route::get('/commitments', [\App\Http\Controllers\Finance\PaymentController::class, 'landing'])->name('commitments.landing');
                 Route::get('/commitments/salary-orders', [\App\Http\Controllers\Finance\PaymentController::class, 'salaryPlaceholder'])->name('commitments.salary.placeholder');
                 Route::get('/payments', [\App\Http\Controllers\Finance\PaymentController::class, 'index'])->name('payments.index');
                 Route::get('/payments/{cmt_id}', [\App\Http\Controllers\Finance\PaymentController::class, 'show'])->name('payments.show');
                 Route::post('/payments/{cmt_id}/transaction', [\App\Http\Controllers\Finance\PaymentController::class, 'storeTransaction'])->name('payments.store_transaction');
+                Route::post('/commitments/salary/{cmt_id}/pay', [\App\Http\Controllers\Finance\PaymentController::class, 'paySalaryCommitment'])->name('commitments.salary.pay');
             });
             
             // Finance Reports (Accessible to HQ, Divisions, Fin)
@@ -758,38 +781,7 @@ Route::middleware('auth')->group(function () {
 }); // End Auth
 
 // Direct Storage File Serving Route (Handles previews, streaming, and cross-network requests)
-Route::get('/storage/{path}', function ($path) {
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath) || is_dir($fullPath)) {
-        $altPath = public_path('storage/' . $path);
-        if (file_exists($altPath) && !is_dir($altPath)) {
-            $fullPath = $altPath;
-        } else {
-            abort(404, 'Requested document not found.');
-        }
-    }
-
-    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-    $mimeTypes = [
-        'pdf' => 'application/pdf',
-        'png' => 'image/png',
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'gif' => 'image/gif',
-        'webp' => 'image/webp',
-        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'doc' => 'application/msword',
-        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'xls' => 'application/vnd.ms-excel',
-        'txt' => 'text/plain',
-    ];
-    $mime = $mimeTypes[$ext] ?? (mime_content_type($fullPath) ?: 'application/octet-stream');
-
-    return response()->file($fullPath, [
-        'Content-Type' => $mime,
-        'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
-        'X-Frame-Options' => 'SAMEORIGIN',
-        'Access-Control-Allow-Origin' => '*',
-    ]);
-})->where('path', '.*')->name('storage.serve');
+Route::get('/storage/{path}', [\App\Http\Controllers\AttachmentController::class, 'serveStorageFile'])
+    ->where('path', '.*')
+    ->name('storage.serve');
 

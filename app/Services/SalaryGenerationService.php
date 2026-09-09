@@ -39,11 +39,21 @@ class SalaryGenerationService
         $query = DB::table('hr.emps as e')
             ->select('e.emp_id', 'e.emp_name', 'e.emp_title', 'e.emp_rank', 'e.emp_unt_id', 'e.emp_status', 'e.emp_lastdt', 'e.emp_hed_id');
 
-        if ($unitScope !== null) {
+        if ($user) {
+            $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+            $userLower = $isMultiple ? (int)($user->acc_lowerm ?? 100000) : (int)($user->acc_lowers ?? 100000);
+            $userUpper = $isMultiple ? (int)($user->acc_upperm ?? 999999) : (int)($user->acc_uppers ?? 999999);
+
+            if ($unitScope !== null) {
+                if ($unitScope < $userLower || $unitScope > $userUpper) {
+                    abort(403, "Access denied. Unit {$unitScope} is outside your assigned division scope.");
+                }
+                $query->where('e.emp_unt_id', $unitScope);
+            } else {
+                $query->whereBetween('e.emp_unt_id', [$userLower, $userUpper]);
+            }
+        } elseif ($unitScope !== null) {
             $query->where('e.emp_unt_id', $unitScope);
-        } elseif ($user && method_exists($user, 'getVisibleUnitRange')) {
-            [$lower, $upper] = $user->getVisibleUnitRange();
-            $query->whereBetween('e.emp_unt_id', [$lower, $upper]);
         }
 
         $query->where(function ($q) use ($firstDayOfMonth) {
@@ -299,6 +309,22 @@ class SalaryGenerationService
      */
     public function generateSalary(string $salMonth, array $empIds, Authenticatable $user): array
     {
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $userLower = $isMultiple ? (int)($user->acc_lowerm ?? 100000) : (int)($user->acc_lowers ?? 100000);
+        $userUpper = $isMultiple ? (int)($user->acc_upperm ?? 999999) : (int)($user->acc_uppers ?? 999999);
+
+        $outOfBounds = DB::table('hr.emps')
+            ->whereIn('emp_id', $empIds)
+            ->where(function ($q) use ($userLower, $userUpper) {
+                $q->where('emp_unt_id', '<', $userLower)
+                  ->orWhere('emp_unt_id', '>', $userUpper);
+            })
+            ->exists();
+
+        if ($outOfBounds) {
+            abort(403, 'Unauthorized. One or more selected employees are outside your division unit scope.');
+        }
+
         $preview = $this->previewSalary($salMonth, null, $user);
         $eligibleMap = collect($preview['included'])->keyBy(fn($item) => $item['employee']->emp_id);
 
@@ -364,13 +390,17 @@ class SalaryGenerationService
 
     /**
      * Release salary requisition group (srq_id or srq_parent = srq_id) -> 'In Process'.
+     * Resolves to group root parent so child-initiated release cascades to parent and siblings.
      */
     public function releaseRequisitions(int $srqId): int
     {
-        return DB::transaction(function () use ($srqId) {
-            return HrSalReq::where(function ($q) use ($srqId) {
-                $q->where('srq_id', $srqId)
-                  ->orWhere('srq_parent', $srqId);
+        $req = HrSalReq::findOrFail($srqId);
+        $targetId = ($req->srq_parent && $req->srq_parent > 0) ? (int)$req->srq_parent : (int)$req->srq_id;
+
+        return DB::transaction(function () use ($targetId) {
+            return HrSalReq::where(function ($q) use ($targetId) {
+                $q->where('srq_id', $targetId)
+                  ->orWhere('srq_parent', $targetId);
             })->update([
                 'srq_status'      => 'In Process',
                 'srq_releasedtg' => now(),
@@ -470,17 +500,58 @@ class SalaryGenerationService
     /**
      * Approve salary order group (Salary.bas ApproveSalOrderGroup).
      * Creates negative commitment in fin.commitments and updates status to 'Approved'.
+     *
+     * FIX ITEM 4: Resolves to group root parent so child-initiated approval cascades to parent and all siblings.
+     * FIX ITEM 3: Second contract-verification gate at approval time against fin.contractsverif (legacy fin_salorders_u.bas:88-102).
      */
     public function approveSalaryOrders(int $sorId, Authenticatable $user): array
     {
-        return DB::transaction(function () use ($sorId) {
-            $orders = FinSalOrder::where(function ($q) use ($sorId) {
-                $q->where('sor_id', $sorId)
-                  ->orWhere('sor_parent', $sorId);
+        $initialOrder = FinSalOrder::findOrFail($sorId);
+        $targetId = ($initialOrder->sor_parent && $initialOrder->sor_parent > 0) ? (int)$initialOrder->sor_parent : (int)$initialOrder->sor_id;
+
+        return DB::transaction(function () use ($targetId, $user) {
+            $orders = FinSalOrder::where(function ($q) use ($targetId) {
+                $q->where('sor_id', $targetId)
+                  ->orWhere('sor_parent', $targetId);
             })->get();
 
             if ($orders->isEmpty()) {
-                throw new \InvalidArgumentException("Salary order {$sorId} not found.");
+                throw new \InvalidArgumentException("Salary order {$targetId} not found.");
+            }
+
+            // FIX ITEM 3: Contract verification check across entire group
+            $allCtrIds = [];
+            foreach ($orders as $o) {
+                $rawContracts = trim((string)($o->sor_contracts ?? ''));
+                if ($rawContracts === '') {
+                    abort(422, 'Cannot approve: contract verification required for employee(s) in this order group.');
+                }
+                $ids = array_filter(array_map('trim', explode(',', $rawContracts)));
+                if (empty($ids)) {
+                    abort(422, 'Cannot approve: contract verification required for employee(s) in this order group.');
+                }
+                foreach ($ids as $id) {
+                    $allCtrIds[] = (int)$id;
+                }
+            }
+
+            $uniqueCtrIds = array_values(array_unique($allCtrIds));
+            $verifRows = DB::table('fin.contractsverif')
+                ->whereIn('cvf_ctr_id', $uniqueCtrIds)
+                ->get()
+                ->keyBy('cvf_ctr_id');
+
+            // Legacy EOF check (GoTo NotVerified): If any contract is missing from fin.contractsverif
+            if ($verifRows->count() < count($uniqueCtrIds)) {
+                abort(422, 'Cannot approve: contract verification required for employee(s) in this order group.');
+            }
+
+            // Legacy allVerified check: If any contract has cvf_verif != true
+            foreach ($uniqueCtrIds as $cid) {
+                $v = $verifRows->get($cid);
+                if (!$v || !$v->cvf_verif) {
+                    abort(422, 'Cannot approve: contract verification required for employee(s) in this order group.');
+                }
             }
 
             $commitments = [];
@@ -519,13 +590,40 @@ class SalaryGenerationService
 
     /**
      * Cancel salary requisition group (Salary.bas CancelSalaryReqGroup).
+     * Resolves to group root parent so child-initiated cancellation cascades to parent and siblings.
      */
     public function cancelRequisition(int $srqId): int
     {
-        return DB::transaction(function () use ($srqId) {
-            return HrSalReq::where(function ($q) use ($srqId) {
-                $q->where('srq_id', $srqId)
-                  ->orWhere('srq_parent', $srqId);
+        $initialReq = HrSalReq::findOrFail($srqId);
+        $targetId = ($initialReq->srq_parent && $initialReq->srq_parent > 0) ? (int)$initialReq->srq_parent : (int)$initialReq->srq_id;
+
+        return DB::transaction(function () use ($targetId) {
+            $reqs = HrSalReq::where(function ($q) use ($targetId) {
+                $q->where('srq_id', $targetId)
+                  ->orWhere('srq_parent', $targetId);
+            })->get();
+
+            if ($reqs->isEmpty()) {
+                throw new \InvalidArgumentException("Salary requisition {$targetId} not found.");
+            }
+
+            foreach ($reqs as $req) {
+                if ($req->srq_status === 'Fulfilled') {
+                    abort(422, "Cannot cancel a fulfilled salary requisition.");
+                }
+
+                // Check linked orders
+                $linkedOrders = FinSalOrder::where('sor_srq_id', $req->srq_id)->get();
+                foreach ($linkedOrders as $lo) {
+                    if (in_array($lo->sor_status, ['Approved', 'Fulfilled'], true)) {
+                        abort(422, "Cannot cancel requisition with approved or fulfilled salary orders.");
+                    }
+                }
+            }
+
+            return HrSalReq::where(function ($q) use ($targetId) {
+                $q->where('srq_id', $targetId)
+                  ->orWhere('srq_parent', $targetId);
             })->update([
                 'srq_status'   => 'Cancelled',
                 'srq_closedtg' => now(),
@@ -536,20 +634,39 @@ class SalaryGenerationService
     /**
      * Cancel salary order group (Salary.bas CancelSalOrderGroup + Safety Commitment Cancellation).
      *
-     * NEW DELIBERATE ENHANCEMENT:
-     * If an active 'Awaited' commitment exists for an Approved order, updates cmt_status = 'Cancelled'
-     * to prevent dangling commitments.
+     * FIX ITEM 4: Resolves to group root parent so child-initiated cancellation cascades to parent and siblings.
+     * ALL-OR-NOTHING GROUP CHECK: Pre-flight check rejects entire group with 422 if ANY member is Fulfilled or has a Paid commitment.
      */
     public function cancelOrder(int $sorId): array
     {
-        return DB::transaction(function () use ($sorId) {
-            $orders = FinSalOrder::where(function ($q) use ($sorId) {
-                $q->where('sor_id', $sorId)
-                  ->orWhere('sor_parent', $sorId);
+        $initialOrder = FinSalOrder::findOrFail($sorId);
+        $targetId = ($initialOrder->sor_parent && $initialOrder->sor_parent > 0) ? (int)$initialOrder->sor_parent : (int)$initialOrder->sor_id;
+
+        return DB::transaction(function () use ($targetId) {
+            $orders = FinSalOrder::where(function ($q) use ($targetId) {
+                $q->where('sor_id', $targetId)
+                  ->orWhere('sor_parent', $targetId);
             })->get();
 
             if ($orders->isEmpty()) {
-                throw new \InvalidArgumentException("Salary order {$sorId} not found.");
+                throw new \InvalidArgumentException("Salary order {$targetId} not found.");
+            }
+
+            // CRITICAL ALL-OR-NOTHING PRE-FLIGHT CHECK:
+            // If ANY order in the group is Fulfilled or linked commitment is Paid, reject entire group with 422.
+            foreach ($orders as $order) {
+                if ($order->sor_status === 'Fulfilled') {
+                    abort(422, "Cannot cancel salary order group: Cannot cancel a fulfilled salary order (order #{$order->sor_id} is already fulfilled).");
+                }
+
+                $paidCommitment = FinCommitment::where('cmt_docid', $order->sor_id)
+                    ->where('cmt_type', 'Sa')
+                    ->where('cmt_status', 'Paid')
+                    ->first();
+
+                if ($paidCommitment) {
+                    abort(422, "Cannot cancel salary order group: Cannot cancel an order whose commitment has already been paid (commitment #{$paidCommitment->cmt_id} for order #{$order->sor_id} is paid).");
+                }
             }
 
             $cancelledCommitments = [];
@@ -585,6 +702,178 @@ class SalaryGenerationService
                 'cancelled_commitments' => $cancelledCommitments,
             ];
         });
+    }
+
+    /**
+     * Manually adjust draft salary order salary (fin_salorders_u.bas:57-74).
+     * Finance approver can only DECREASE salary (sor_salary <= sor_netsalary).
+     * Automatically handles "Pending - {diff}." remark suffix.
+     * Operates per-order-row (not cascaded to siblings, matching legacy datasheet behavior).
+     */
+    public function adjustOrderSalary(int $sorId, float $newSalary, Authenticatable $user): FinSalOrder
+    {
+        // 1. Authorization: Finance approver role required
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        if (($user->acc_auth ?? '') !== 'approver' || $userArea !== 'fin') {
+            abort(403, 'Finance approver authorization required to adjust salary.');
+        }
+
+        $order = FinSalOrder::findOrFail($sorId);
+
+        // 2. Unit horizon check
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || $userArea === 'fin';
+        $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
+        $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
+        if ($order->sor_unt_id < $lower || $order->sor_unt_id > $upper) {
+            abort(403, 'Unauthorized unit access.');
+        }
+
+        // 3. Status guard: Only Draft orders can be adjusted
+        if ($order->sor_status !== 'Draft') {
+            abort(422, "Cannot adjust salary for order #{$sorId} with status '{$order->sor_status}'. Only 'Draft' orders can be adjusted.");
+        }
+
+        // 4. Ceiling check: sor_salary_BeforeUpdate rejects increase
+        if ($newSalary > (float)$order->sor_netsalary) {
+            abort(422, 'Salary cannot be increased manually.');
+        }
+
+        if ($newSalary < 0) {
+            abort(422, 'Salary cannot be negative.');
+        }
+
+        // 5. Remarks handling: exact match for legacy sor_salary_AfterUpdate
+        // intPos = InStr(Nz(Me.sor_remarks, 0), "Pending")
+        // If intPos > 0 Then Me.sor_remarks = Trim(Left(Me.sor_remarks, intPos - 1))
+        // If Me.sor_salary.Value < Me.sor_netsalary Then
+        //     Me.sor_remarks = Trim(Me.sor_remarks & " Pending - " & Me.sor_netsalary - Me.sor_salary.Value & ".")
+        $remarks = (string)($order->sor_remarks ?? '');
+        $pos = stripos($remarks, 'Pending');
+        if ($pos !== false) {
+            $remarks = trim(substr($remarks, 0, $pos));
+        }
+
+        $diff = (float)$order->sor_netsalary - $newSalary;
+        if ($diff > 0) {
+            $diffFormatted = (int) round($diff);
+            $remarks = trim($remarks . " Pending - {$diffFormatted}.");
+        }
+
+        $order->sor_salary = (int) round($newSalary);
+        $order->sor_remarks = $remarks !== '' ? $remarks : null;
+        $order->save();
+
+        return $order;
+    }
+
+    /**
+     * Get salary slip data matching legacy fin_salary_slip layout.
+     *
+     * @param int $sorId
+     * @param Authenticatable $user
+     * @return array
+     */
+    public function getSalarySlipData(int $sorId, Authenticatable $user): array
+    {
+        // Enforce user untarea: HR cannot view salary orders/slips
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        if ($userArea === 'hr') {
+            abort(403, 'Unauthorized. HR does not have access to salary orders or pay slips.');
+        }
+
+        $order = FinSalOrder::with(['unit'])->findOrFail($sorId);
+
+        // Unit horizon check (support multiple / enterprise scope for finance and HQ)
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || $userArea === 'fin';
+        $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
+        $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
+        if ($order->sor_unt_id < $lower || $order->sor_unt_id > $upper) {
+            abort(403, 'Unauthorized unit access for salary order pay slip.');
+        }
+
+        // Linked requisition (if any)
+        $requisition = $order->sor_srq_id ? HrSalReq::find($order->sor_srq_id) : null;
+
+        // Employee demographics from hr.emps and hr.empsextb
+        $emp = DB::table('hr.emps')->where('emp_id', $order->sor_emp_id)->first();
+        $empExt = DB::table('hr.empsextb')->where('empextb_emp_id', $order->sor_emp_id)->first();
+
+        // Contract details
+        $contract = DB::table('hr.contracts')
+            ->where('ctr_num', $order->sor_emp_id)
+            ->orderBy('ctr_id', 'desc')
+            ->first()
+            ?? DB::table('hr.contracts')
+                ->where('ctr_unt_id', $order->sor_unt_id)
+                ->orderBy('ctr_id', 'desc')
+                ->first();
+
+        // Bank account details
+        $bank = DB::table('hr.bnkaccounts')->where('bac_emp_id', $order->sor_emp_id)->first();
+
+        // Unit details
+        $unit = DB::table('cen.units')->where('unt_id', $order->sor_unt_id)->first();
+
+        // Earnings breakdown
+        $baseSalary = (int) ($order->sor_ctrsalary ?: ($order->sor_grosalary ?: 0));
+        $arrears = (int) ($order->sor_arrears ?? 0);
+        $overwork = (int) ($order->sor_overwork ?? 0);
+        $award = (int) ($order->sor_award ?? 0);
+        $totalEarnings = (int) ($order->sor_grosalary + $arrears + $overwork + $award);
+
+        // Deductions breakdown
+        $underwork = (int) ($order->sor_underwork ?? 0);
+        $dues = (int) ($order->sor_dues ?? 0);
+        $withheld = (int) ($order->sor_withheld ?? 0);
+        $penalty = (int) ($order->sor_penalty ?? 0);
+        $totalDeductions = (int) ($underwork + $dues + $withheld + $penalty);
+
+        // Net payable
+        $netPayable = (int) ($order->sor_salary);
+
+        // Payment method string matching legacy:
+        // IIf([sor_bnkaccdetail]="(Pay by Cheque)","Paid by cheque.","Deposited in a/c: " & [bac_accnum] & " (" & [bac_bnkname] & ")")
+        $bankString = '';
+        if (trim($order->sor_bnkaccdetail ?? '') === '(Pay by Cheque)' || empty($order->sor_bnkaccdetail)) {
+            $bankString = 'Paid by cheque.';
+        } else {
+            $accNum = $bank->bac_accnum ?? $order->sor_bnkaccdetail;
+            $bnkName = $bank->bac_bnkname ?? ($order->sor_bnkacctitle ?: 'Bank Account');
+            $bankString = "Deposited in a/c: {$accNum} ({$bnkName})";
+        }
+
+        // Employment type string matching legacy: "Contract (" & ctr_type & ")"
+        $contractTypeStr = 'Contract';
+        if ($contract && isset($contract->ctr_type)) {
+            $contractTypeStr = $contract->ctr_type == 1 ? 'Contract (Standard)' : 'Contract (Special)';
+        }
+
+        return [
+            'order'            => $order,
+            'requisition'      => $requisition,
+            'emp'              => $emp,
+            'empExt'           => $empExt,
+            'contract'         => $contract,
+            'bank'             => $bank,
+            'unit'             => $unit,
+            'bankString'       => $bankString,
+            'contractTypeStr'  => $contractTypeStr,
+            'earnings'         => [
+                'base'     => $baseSalary,
+                'arrears'  => $arrears,
+                'overwork' => $overwork,
+                'award'    => $award,
+                'total'    => $totalEarnings,
+            ],
+            'deductions'       => [
+                'underwork' => $underwork,
+                'dues'      => $dues,
+                'withheld'  => $withheld,
+                'penalty'   => $penalty,
+                'total'     => $totalDeductions,
+            ],
+            'netPayable'       => $netPayable,
+        ];
     }
 
     /**
@@ -636,19 +925,26 @@ class SalaryGenerationService
      */
     public function getRequisitions(Authenticatable $user, ?string $month = null, ?string $status = null, int $perPage = 25)
     {
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
+        $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
 
         $query = HrSalReq::whereBetween('srq_unt_id', [$lower, $upper])
-            ->with(['employee', 'unit', 'order.commitment']);
+            ->with(['employee', 'unit', 'head', 'effectiveHead', 'order.commitment']);
 
         if (!empty($month)) {
             $monthDate = Carbon::parse($month)->endOfMonth()->toDateString();
             $query->where('srq_month', $monthDate);
         }
 
-        if (!empty($status) && in_array($status, ['Draft', 'In Process', 'Fulfilled', 'Cancelled'], true)) {
-            $query->where('srq_status', $status);
+        if (!empty($status)) {
+            if ($status === 'Open') {
+                $query->where('srq_status', 'In Process');
+            } elseif ($status === 'Closed') {
+                $query->whereIn('srq_status', ['Fulfilled', 'Cancelled']);
+            } elseif (in_array($status, ['Draft', 'In Process', 'Fulfilled', 'Cancelled'], true)) {
+                $query->where('srq_status', $status);
+            }
         }
 
         return $query->orderBy('srq_id', 'desc')->paginate($perPage);
@@ -660,21 +956,28 @@ class SalaryGenerationService
      */
     public function getOrders(Authenticatable $user, ?string $month = null, ?string $status = null, int $perPage = 25)
     {
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
+        $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
 
         $query = FinSalOrder::where(function ($q) use ($lower, $upper) {
             $q->whereBetween('sor_unt_id', [$lower, $upper])
               ->orWhereBetween('sor_effunt_id', [$lower, $upper]);
-        })->with(['employee', 'unit', 'effectiveUnit', 'commitment', 'subheads']);
+        })->with(['employee', 'unit', 'effectiveUnit', 'head', 'effectiveHead', 'commitment', 'subheads']);
 
         if (!empty($month)) {
             $monthDate = Carbon::parse($month)->endOfMonth()->toDateString();
             $query->where('sor_month', $monthDate);
         }
 
-        if (!empty($status) && in_array($status, ['Draft', 'Approved', 'Cancelled'], true)) {
-            $query->where('sor_status', $status);
+        if (!empty($status)) {
+            if ($status === 'Open') {
+                $query->where('sor_status', 'Approved');
+            } elseif ($status === 'Closed') {
+                $query->whereIn('sor_status', ['Fulfilled', 'Cancelled']);
+            } elseif (in_array($status, ['Draft', 'Approved', 'Cancelled', 'Fulfilled'], true)) {
+                $query->where('sor_status', $status);
+            }
         }
 
         return $query->orderBy('sor_id', 'desc')->paginate($perPage);
@@ -685,8 +988,9 @@ class SalaryGenerationService
      */
     public function getOrderDetail(int $sorId, Authenticatable $user): ?FinSalOrder
     {
-        $lower = $user->acc_lowers ?? 100000;
-        $upper = $user->acc_uppers ?? 999999;
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
+        $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
 
         return FinSalOrder::where('sor_id', $sorId)
             ->where(function ($q) use ($lower, $upper) {

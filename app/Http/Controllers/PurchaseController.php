@@ -1012,6 +1012,23 @@ class PurchaseController extends Controller
                     $matchedPath = $standard;
                 }
             }
+
+            if (!$matchedPath) {
+                $storage = app(\App\Services\FileStorageService::class);
+                if ($storage->tryFetchRemote($normalizedPath)) {
+                    $cand = storage_path('app/public/' . $normalizedPath);
+                    $standard = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $cand);
+                    if (file_exists($standard) && is_file($standard)) {
+                        $matchedPath = $standard;
+                        $testedPaths[] = [
+                            'path' => $standard . ' (synced from primary server)',
+                            'exists' => true,
+                            'readable' => true,
+                            'size' => filesize($standard),
+                        ];
+                    }
+                }
+            }
         }
 
         return [

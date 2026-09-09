@@ -88,21 +88,21 @@
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-project-diagram"></i>
-              <p>PROJECTS <i class="right fas fa-angle-left"></i></p>
+              <p>Projects <i class="right fas fa-angle-left"></i></p>
             </a>
 
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <a href="{{ route('view-projects') }}" class="nav-link">
                   <i class="fas fa-folder-open nav-icon"></i>
-                  <p>PROJECTS</p>
+                  <p>Projects</p>
                 </a>
               </li>
               
               <li class="nav-item">
                 <a href="{{route('openmprs')}}" class="nav-link">
                   <i class="fas fa-file-alt nav-icon"></i>
-                  <p>PREPARE MPR</p>
+                  <p>Prepare MPR</p>
                 </a>
               </li>
             </ul>
@@ -111,25 +111,25 @@
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-shopping-cart"></i>
-              <p>PURCHASE CASES <i class="right fas fa-angle-left"></i></p>
+              <p>Purchase Cases <i class="right fas fa-angle-left"></i></p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <a href="{{ route('viewpurchasecase') }}" class="nav-link">
                   <i class="fas fa-briefcase nav-icon"></i>
-                  <p>PURCHASE CASES (PCs)</p>
+                  <p>Purchase Cases (PCs)</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="fas fa-receipt nav-icon"></i>
-                  <p>RECEIPTS</p>
+                  <p>Receipts</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="cases-without-items.php" class="nav-link">
                   <i class="fas fa-exclamation-triangle nav-icon"></i>
-                  <p>CASES WITHOUT ITEMS</p>
+                  <p>Cases Without Items</p>
                 </a>
               </li>
             </ul>
@@ -138,71 +138,71 @@
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-users"></i>
-              <p>HUMAN RESOURCES <i class="right fas fa-angle-left"></i></p>
+              <p>Human Resources <i class="right fas fa-angle-left"></i></p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user-check nav-icon"></i><p>CURRENT</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user-times nav-icon"></i><p>PREVIOUS</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-calendar-check nav-icon"></i><p>ATTENDANCE</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user-check nav-icon"></i><p>Current</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-user-times nav-icon"></i><p>Previous</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-calendar-check nav-icon"></i><p>Attendance</p></a></li>
             </ul>
         </li>
 
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="fas fa-money-check-alt nav-icon"></i>
-              <p>SALARY REQUISITIONS <i class="right fas fa-angle-left"></i></p>
+              <p>Salary Requisitions <i class="right fas fa-angle-left"></i></p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-edit nav-icon"></i><p>DRAFT</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-folder-open nav-icon"></i><p>OPEN</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-lock nav-icon"></i><p>CLOSED</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-edit nav-icon"></i><p>Draft</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-folder-open nav-icon"></i><p>Open</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-lock nav-icon"></i><p>Closed</p></a></li>
             </ul>
         </li>
 
         <li class="nav-item">
             <a href="reports.php" class="nav-link">
               <i class="fas fa-chart-pie nav-icon"></i>
-              <p>REPORTS</p>
+              <p>Reports</p>
             </a>
         </li>
         
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-coins"></i>
-              <p>FINANCE <i class="right fas fa-angle-left"></i></p>
+              <p>Finance <i class="right fas fa-angle-left"></i></p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-wallet nav-icon"></i><p>ACCOUNTS</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-hand-holding-usd nav-icon"></i><p>LOANS</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-chart-bar nav-icon"></i><p>PROJECT SHARES STATUS</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i><p>HR SUBHEAD STATUS</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-university nav-icon"></i><p>CSCRF STATUS</p></a></li>
-              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-clock nav-icon"></i><p>PCs AWAITING PAYMENT</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-wallet nav-icon"></i><p>Accounts</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-hand-holding-usd nav-icon"></i><p>Loans</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-chart-bar nav-icon"></i><p>Projects Shares Status</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i><p>HR Subhead Status</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-university nav-icon"></i><p>CSCRF Status</p></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-clock nav-icon"></i><p>PCs Awaiting Payment</p></a></li>
             </ul>
         </li>
 
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-building"></i>
-              <p>FIRMS</p>
+              <p>Firms</p>
             </a>
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-boxes"></i>
-              <p>INVENTORY</p>
+              <p>Inventory</p>
             </a>
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-warehouse"></i>
-              <p>ASSETS</p>
+              <p>Assets</p>
             </a>
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-share-alt"></i>
-              <p>SHARED ASSETS</p>
+              <p>Shared Assets</p>
             </a>
         </li>
 
