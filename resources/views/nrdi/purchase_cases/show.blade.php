@@ -492,7 +492,7 @@
                                         <div class="small font-weight-bold text-white text-nowrap" style="overflow: hidden; text-overflow: ellipsis; font-size: 11px;">{{ $file->pat_filename }}</div>
                                         <div class="text-muted" style="font-size: 9px;">{{ \Carbon\Carbon::parse($file->created_at)->format('d M, Y') }}</div>
                                     </div>
-                                    <a href="{{ \App\Facades\FileStorage::url($file->pat_path) }}" target="_blank" class="btn btn-xs btn-outline-primary ml-1"><i class="fas fa-download"></i></a>
+                                    <a href="{{ \App\Facades\FileStorage::url($file->pat_path) }}" onclick="window.openLiveDocument('{{ \App\Facades\FileStorage::url($file->pat_path) }}', '{{ addslashes($file->pat_filename ?: 'Case Document') }}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-primary ml-1" title="View Document Live"><i class="fas fa-eye"></i></a>
                                 </div>
                             @empty
                                 <div class="text-center py-3 text-muted small">No documents attached.</div>

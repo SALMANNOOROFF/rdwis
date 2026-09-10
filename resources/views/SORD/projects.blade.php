@@ -226,7 +226,7 @@
                                     {{-- Project Details --}}
                                     <td class="align-middle p-2">
                                         <div class="d-flex align-items-center mb-1">
-                                            <span class="font-weight-bold text-primary mr-2" style="font-size: 1rem;">{{ $project->prj_code }}</span>
+                                            <span class="mr-2" style="font-size: 0.84rem;" title="Project Head: {{ $project->prj_code }}"><span class="text-muted" style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; margin-right: 3px; letter-spacing: 0.5px;">Head:</span><strong style="color: #4b5563;">{{ $project->prj_code }}</strong></span>
                                             @if($status == 'open')
                                                 <span class="badge badge-success px-2 py-0"><i class="fas fa-circle text-xs mr-1"></i> Open</span>
                                             @elseif($status == 'closed')
@@ -235,8 +235,10 @@
                                                 <span class="badge badge-info px-2 py-0 text-capitalize">{{ $project->prj_status }}</span>
                                             @endif
                                         </div>
-                                        <div class="text-truncate small" style="max-width: 350px; color: var(--rd-text1);" title="{{ $project->prj_title }}">
-                                            {{ $project->prj_title }}
+                                        <div class="text-truncate small" style="max-width: 350px;" title="{{ $project->prj_title }}">
+                                            <a href="{{ route('sord.project_details', $project->prj_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 0.88rem;" title="View: {{ $project->prj_title }}">
+                                                {{ $project->prj_title }}
+                                            </a>
                                         </div>
                                         <div class="mt-1">
                                             <a href="{{ route('projects.financial_view', $project->prj_id) }}" class="btn btn-xs btn-outline-info font-weight-bold" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 4px;" title="Open Financial View">

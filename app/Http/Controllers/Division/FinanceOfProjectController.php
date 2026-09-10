@@ -32,7 +32,7 @@ class FinanceOfProjectController extends Controller
             }
         }
 
-        return redirect()->route('view-projects');
+        return redirect()->route('finance.accounts.index');
 
         // Query heads joined with projects and units
         $headsQuery = DB::table('cen.heads as h')
@@ -652,14 +652,28 @@ class FinanceOfProjectController extends Controller
 
         // Summary calculations
         $totalItems = count($items);
-        $totalSum = 0;
-        foreach ($items as $it) {
-            $totalSum += (float) ($it->total ?? ($it->amount ?? 0));
+        $isWithoutGst = ($head->hed_transtype ?? 1) == 1;
+
+        $sumAmount = collect($items)->sum('amount');
+        $sumTotal = collect($items)->sum('total');
+
+        if ($figure === 'in-process' || $figure === 'expenditure') {
+            // For Without GST projects, main summary figure displays without GST (amount)
+            // For With GST projects, main summary figure displays with GST (total)
+            $totalSum = $isWithoutGst ? $sumAmount : $sumTotal;
+        } elseif ($figure === 'commitments') {
+            $totalSum = $sumAmount;
+        } else {
+            $totalSum = 0;
+            foreach ($items as $it) {
+                $totalSum += (float) ($it->total ?? ($it->amount ?? 0));
+            }
         }
 
         return view('division.finance-of-project.drilldown', compact(
             'head', 'scope', 'figure', 'subhead', 'scopeLabel', 'figureLabel',
-            'currentValue', 'items', 'totalItems', 'totalSum', 'breakdownType'
+            'currentValue', 'items', 'totalItems', 'totalSum', 'breakdownType',
+            'isWithoutGst', 'sumAmount', 'sumTotal'
         ));
     }
 }

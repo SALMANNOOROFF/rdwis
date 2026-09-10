@@ -117,8 +117,8 @@
                 </div>
 
                 {{-- Total Metric Box in Header --}}
-                <div class="text-right mt-3 mt-md-0 bg-white p-3 rounded text-dark shadow-sm border" style="min-width: 220px;">
-                    <div class="text-muted small font-weight-bold text-uppercase">Total {{ $figureLabel }}</div>
+                <div class="text-right mt-3 mt-md-0 bg-white p-3 rounded text-dark shadow-sm border" style="min-width: 230px;">
+                    <div class="text-muted small font-weight-bold text-uppercase">Total {{ $figureLabel }} {{ $isWithoutGst ? '(Without GST)' : '(With GST)' }}</div>
                     <div class="h3 font-weight-bold text-primary font-mono m-0">
                         Rs. {{ number_format(abs($totalSum), 2) }}
                     </div>
@@ -150,7 +150,7 @@
             <div class="col-md-3 col-sm-6 mb-2">
                 <div class="metric-mini-card">
                     <div>
-                        <div class="text-muted small font-weight-bold">NET TOTAL AMOUNT</div>
+                        <div class="text-muted small font-weight-bold">NET TOTAL AMOUNT {{ $isWithoutGst ? '(Excl. GST)' : '(Incl. GST)' }}</div>
                         <div class="font-weight-bold text-success h5 mb-0 font-mono">Rs. {{ number_format(abs($totalSum), 0) }}</div>
                     </div>
                     <i class="fas fa-money-bill-wave fa-2x text-success opacity-50"></i>
@@ -160,7 +160,7 @@
                 <div class="metric-mini-card">
                     <div>
                         <div class="text-muted small font-weight-bold">GST APPLICABILITY</div>
-                        <div class="font-weight-bold text-secondary h6 mb-0">{{ ($head->hed_transtype ?? 1) == 1 ? 'Without GST' : 'With GST' }}</div>
+                        <div class="font-weight-bold text-secondary h6 mb-0">{{ $isWithoutGst ? 'Without GST' : 'With GST' }}</div>
                     </div>
                     <i class="fas fa-percentage fa-2x text-secondary opacity-50"></i>
                 </div>
@@ -271,7 +271,7 @@
                                         @if($figure === 'expenditure')
                                             <td class="text-right font-mono text-muted">Rs. {{ number_format(abs(collect($items)->sum('tax')), 2) }}</td>
                                         @endif
-                                        <td class="text-right font-mono font-weight-bold text-primary">Rs. {{ number_format(abs($totalSum), 2) }}</td>
+                                        <td class="text-right font-mono font-weight-bold text-primary">Rs. {{ number_format(abs(collect($items)->sum('total')), 2) }}</td>
                                     @endif
                                     <td></td>
                                 </tr>

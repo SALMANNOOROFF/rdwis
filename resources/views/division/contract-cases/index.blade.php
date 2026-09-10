@@ -203,7 +203,11 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <div class="case-title-text">{{ $p->ctc_empnamecomp }}</div>
+                                                        <div class="case-title-text">
+                                                            <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="rd-entity-title-link font-weight-bold" title="Open Case: {{ $p->ctc_empnamecomp }}">
+                                                                {{ $p->ctc_empnamecomp }}
+                                                            </a>
+                                                        </div>
                                                         <div class="text-muted small">
                                                             <span class="badge badge-primary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
                                                             {{ $p->ctc_newjobtitle }} &bull; {{ $p->project_code }}
@@ -267,7 +271,11 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <div class="case-title-text">{{ $p->ctc_empnamecomp }}</div>
+                                                        <div class="case-title-text">
+                                                            <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="rd-entity-title-link font-weight-bold" title="Open Case: {{ $p->ctc_empnamecomp }}">
+                                                                {{ $p->ctc_empnamecomp }}
+                                                            </a>
+                                                        </div>
                                                         <div class="text-muted small">
                                                             <span class="badge badge-secondary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
                                                             {{ $p->ctc_newjobtitle }} &bull; {{ $p->project_code }}
@@ -329,7 +337,11 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <div class="case-title-text text-muted">{{ $p->ctc_empnamecomp }} ({{ $p->ctc_newjobtitle }})</div>
+                                                        <div class="case-title-text">
+                                                            <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="rd-entity-title-link font-weight-bold" title="Open Case: {{ $p->ctc_empnamecomp }}">
+                                                                {{ $p->ctc_empnamecomp }} ({{ $p->ctc_newjobtitle }})
+                                                            </a>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right">
                                                         <span class="text-muted font-weight-bold">PKR {{ number_format((float) ($p->ctc_newsalary ?? 0)) }}</span>

@@ -753,6 +753,22 @@ Route::middleware('auth')->group(function () {
             });
         });
 
+    // ====================================================
+    // FINANCE - HEAD & PROJECT ACCOUNT OPENING (cen_heads_add, cen_heads_pa_u)
+    // ====================================================
+    Route::prefix('finance/accounts')
+        ->name('finance.accounts.')
+        ->middleware(['area:fin,nrdi,hqs,rdw,it,prj,rdwprj'])
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'store'])->name('store');
+            Route::post('/{hedId}/close', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'closeAccount'])->name('close');
+            Route::post('/{hedId}/reopen', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'reopenAccount'])->name('reopen');
+            Route::get('/ajax/projects/{unitId}', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'getProjectsByUnit'])->name('projects');
+            Route::get('/ajax/project-details/{prjId}', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'getProjectDetails'])->name('project-details');
+        });
+
     // Unified Group for Approvals & Scrutiny (Redirect old routes to modern purchase_cases_new hub)
     Route::middleware(['area:proc,prc,fin,rdw,hqs,nrdi,prj,rdwprj,it'])->group(function () {
         Route::get('/approvals/dashboard', function() {

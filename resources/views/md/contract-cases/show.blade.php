@@ -694,7 +694,7 @@
                                                         <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 14px;">{{ $pIdx + 1 }}.</span>
                                                         <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;" title="{{ $pDoc->jat_type }}">{{ $pDoc->jat_type }}</span>
                                                     </div>
-                                                    <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" target="_blank" class="text-primary flex-shrink-0"><i class="fas fa-eye"></i></a>
+                                                    <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" onclick="window.openLiveDocument('{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}', '{{ addslashes($pDoc->jat_type) }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live"><i class="fas fa-eye"></i></a>
                                                 </div>
                                             @empty
                                                 <div class="text-center py-1 text-muted" style="font-size: 9px;">No files.</div>
@@ -722,7 +722,7 @@
                                                         <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 14px;">{{ $cIdx + 1 }}.</span>
                                                         <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;" title="{{ $cDoc->cat_type ?: 'Attachment' }}">{{ $cDoc->cat_type ?: 'Attachment' }}</span>
                                                     </div>
-                                                    <a href="{{ \App\Facades\FileStorage::url($cDoc->cat_path) }}" target="_blank" class="text-primary flex-shrink-0"><i class="fas fa-eye"></i></a>
+                                                    <a href="{{ \App\Facades\FileStorage::url($cDoc->cat_path) }}" onclick="window.openLiveDocument('{{ \App\Facades\FileStorage::url($cDoc->cat_path) }}', '{{ addslashes($cDoc->cat_type ?: 'Case Attachment') }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live"><i class="fas fa-eye"></i></a>
                                                 </div>
                                             @empty
                                                 <div id="noCaseAttPlaceholder" class="text-center py-1 text-muted" style="font-size: 9px;">No files.</div>

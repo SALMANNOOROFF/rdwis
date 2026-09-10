@@ -179,7 +179,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="text-dark font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->pcs_title }}</div>
+                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
+                                            {{ $p->pcs_title }}
+                                        </a>
                                     </div>
                                     <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
                                 </td>
@@ -260,7 +262,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="text-dark font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->pcs_title }}</div>
+                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
+                                            {{ $p->pcs_title }}
+                                        </a>
                                     </div>
                                     <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
                                 </td>
@@ -336,7 +340,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="text-dark font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->pcs_title }}</div>
+                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
+                                            {{ $p->pcs_title }}
+                                        </a>
                                     </div>
                                     <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
                                 </td>
@@ -413,7 +419,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="text-dark font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->pcs_title }}</div>
+                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
+                                            {{ $p->pcs_title }}
+                                        </a>
                                     </div>
                                     <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
                                 </td>

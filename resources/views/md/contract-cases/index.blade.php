@@ -144,7 +144,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="text-dark font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->ctc_empnamecomp }}</div>
+                                        <a href="{{ route("{$routePrefix}.contract-cases.show", $p->ctc_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->ctc_empnamecomp }}">
+                                            {{ $p->ctc_empnamecomp }}
+                                        </a>
                                     </div>
                                     <div class="text-ref">Ref: CC-{{ $p->ctc_id }} &bull; {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})</div>
                                 </td>
@@ -234,7 +236,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="text-dark font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->ctc_empnamecomp }}</div>
+                                        <a href="{{ route("{$routePrefix}.contract-cases.show", $p->ctc_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->ctc_empnamecomp }}">
+                                            {{ $p->ctc_empnamecomp }}
+                                        </a>
                                     </div>
                                     <div class="text-ref">Ref: CC-{{ $p->ctc_id }} &bull; {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})</div>
                                 </td>
@@ -324,7 +328,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="text-dark font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">{{ $p->ctc_empnamecomp }}</div>
+                                        <a href="{{ route("{$routePrefix}.contract-cases.show", $p->ctc_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->ctc_empnamecomp }}">
+                                            {{ $p->ctc_empnamecomp }}
+                                        </a>
                                     </div>
                                     <div class="text-ref">Ref: CC-{{ $p->ctc_id }} &bull; {{ $p->ctc_newjobtitle }} ({{ $p->ctc_newgrade }})</div>
                                 </td>

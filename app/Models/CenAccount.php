@@ -525,6 +525,12 @@ class CenAccount extends Authenticatable
         return $this->normalizedArea() === 'prj';
     }
 
+    public function isFinance(): bool
+    {
+        $area = $this->normalizedArea();
+        return in_array($area, ['fin', 'finance'], true) || stripos((string) ($this->acc_desig ?? ''), 'finance') !== false;
+    }
+
     public function isApprover(): bool
     {
         return in_array($this->normalizedAuth(), ['approver', 'editor'], true);
@@ -564,5 +570,34 @@ class CenAccount extends Authenticatable
     public function moduleRange(): array
     {
         return ['lower' => $this->acc_lowerm, 'upper' => $this->acc_upperm];
+    }
+
+    /**
+     * Check if user is Managing Director (MD), Deputy Director General (DDG), or Director General (DG).
+     */
+    public function isMdDdgDg(): bool
+    {
+        $desig = strtoupper(trim((string) ($this->acc_desig ?? '')));
+        $auth = strtolower(trim((string) ($this->acc_auth ?? '')));
+        $username = strtolower(trim((string) ($this->acc_username ?? '')));
+
+        if (
+            str_contains($desig, 'MANAGING DIRECTOR') ||
+            str_contains($desig, 'DIRECTOR GENERAL') ||
+            str_contains($desig, 'DEPUTY DIRECTOR GENERAL') ||
+            preg_match('/\b(MD|DG|DDG)\b/i', $desig)
+        ) {
+            return true;
+        }
+
+        if (in_array($auth, ['md', 'ddg', 'dg'], true)) {
+            return true;
+        }
+
+        if (in_array($username, ['srehman', 'srrehman', 'surehman', 'sarshad', 'kmunir', 'mhussain', 'famir', 'jkhan', 'jhussain', 'aakhtar', 'mimran'], true)) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -58,7 +58,11 @@
                             <td class="pl-4"><span class="badge badge-dark text-muted" style="border: 1px solid var(--rd-border);">PC-{{ $p->pcs_id }}</span></td>
                             <td class="font-weight-bold text-white">{{ $unitNameMap[$p->pcs_unt_id] ?? 'HQ Unit' }}</td>
                             <td>
-                                <div class="text-white small font-weight-bold">{{ Str::limit($p->pcs_title, 45) }}</div>
+                                <div>
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold small" title="Open Case: {{ $p->pcs_title }}">
+                                        {{ Str::limit($p->pcs_title, 45) }}
+                                    </a>
+                                </div>
                                 <div class="text-muted" style="font-size: 10px;"><i class="fas fa-user-check mr-1"></i> Scrutinized by DProc</div>
                             </td>
                             <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->project->prj_code ?? 'CENTRAL' }}</td>

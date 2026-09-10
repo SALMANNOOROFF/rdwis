@@ -926,7 +926,8 @@
                     'title' => 'Project Attachments',
                     'defaultSlots' => ['Project Proposal', 'URD', 'Work Order', 'PPF'],
                     'attachments' => $allAttachments ?? $project->attachments,
-                    'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
+                    'canUpload' => Auth::check(),
+                    'canDelete' => false,
                 ])
             </div>
         </div>
@@ -998,8 +999,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td><i class="fas fa-file-alt text-muted mr-2"></i> <strong>{{ $att->jat_type }}</strong></td>
                                     <td>
-                                        <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-info px-2">View</a>
-                                        <a href="{{ route('attachment.delete', $att->jat_id) }}" class="btn btn-xs btn-danger px-2" onclick="return confirm('Delete?')">Delete</a>
+                                        <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-info px-2 rd-live-file-view" data-file-url="{{ route('attachment.view', $att->jat_id) }}" data-file-title="{{ $att->jat_type ?? 'Document' }}">View</a>
                                     </td>
                                 </tr>
                             @empty

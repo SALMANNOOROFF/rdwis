@@ -915,7 +915,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $att->jat_type }}</td>
                                     <td>
-                                        <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-info"><i class="fas fa-eye"></i></a>
+                                        <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-info rd-live-file-view" data-file-url="{{ route('attachment.view', $att->jat_id) }}" data-file-title="{{ $att->jat_type ?? 'Document' }}"><i class="fas fa-eye"></i></a>
                                     </td>
                                 </tr>
                             @endforeach

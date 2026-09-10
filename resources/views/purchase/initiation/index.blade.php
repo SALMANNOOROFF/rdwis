@@ -154,7 +154,11 @@
                                                             @if($isOld)
                                                                 <span class="mr-2 pulse-red" title="Pending for > 48 hours"></span>
                                                             @endif
-                                                            <div class="case-title">{{ Str::limit($p->pcs_title, 50) }}</div>
+                                                            <div class="case-title">
+                                                                <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" title="Open Case: {{ $p->pcs_title }}">
+                                                                    {{ Str::limit($p->pcs_title, 50) }}
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                         <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'General Ops' }}</div>
                                                     </td>
@@ -209,7 +213,11 @@
                                                 <tr data-id="{{ $p->pcs_id }}">
                                                     <td class="pl-4"><span class="badge badge-dark text-muted px-2 py-1" style="font-size: 9px; border: 1px solid var(--rd-border);">PC-{{ $p->pcs_id }}</span></td>
                                                     <td>
-                                                        <div class="case-title">{{ Str::limit($p->pcs_title, 50) }}</div>
+                                                        <div class="case-title">
+                                                            <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" title="Open Case: {{ $p->pcs_title }}">
+                                                                {{ Str::limit($p->pcs_title, 50) }}
+                                                            </a>
+                                                        </div>
                                                         <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'HQ Procurement' }}</div>
                                                     </td>
                                                     <td class="text-right"><span class="case-value">PKR {{ number_format((float) $p->display_price) }}</span></td>
@@ -266,7 +274,11 @@
                                                 <tr data-id="{{ $p->pcs_id }}">
                                                     <td class="pl-4"><span class="badge badge-dark text-muted px-2 py-1" style="font-size: 9px; border: 1px solid var(--rd-border);">PC-{{ $p->pcs_id }}</span></td>
                                                     <td>
-                                                        <div class="case-title text-muted">{{ Str::limit($p->pcs_title, 50) }}</div>
+                                                        <div class="case-title">
+                                                            <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" title="Open Case: {{ $p->pcs_title }}">
+                                                                {{ Str::limit($p->pcs_title, 50) }}
+                                                            </a>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right"><span class="case-value text-muted">PKR {{ number_format((float) $p->display_price) }}</span></td>
                                                     <td class="text-center">

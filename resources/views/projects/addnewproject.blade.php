@@ -288,14 +288,14 @@
                             <div class="d-flex gap-3">
                                 @php $ppf = $project->attachments->where('jat_type', 'PPF')->first(); @endphp
                                 @if($ppf)
-                                <a href="{{ route('attachment.view', $ppf->jat_id) }}" target="_blank" class="badge badge-success p-2 text-white text-decoration-none">
+                                <a href="{{ route('attachment.view', $ppf->jat_id) }}" target="_blank" class="badge badge-success p-2 text-white text-decoration-none rd-live-file-view" data-file-url="{{ route('attachment.view', $ppf->jat_id) }}" data-file-title="PPF Document">
                                     <i class="fas fa-check mr-1"></i> PPF Uploaded <i class="fas fa-eye ml-1"></i>
                                 </a>
                                 @else <span class="badge badge-secondary p-2">PPF Missing</span> @endif
 
                                 @php $urd = $project->attachments->where('jat_type', 'URD')->first(); @endphp
                                 @if($urd)
-                                <a href="{{ route('attachment.view', $urd->jat_id) }}" target="_blank" class="badge badge-success p-2 text-white text-decoration-none">
+                                <a href="{{ route('attachment.view', $urd->jat_id) }}" target="_blank" class="badge badge-success p-2 text-white text-decoration-none rd-live-file-view" data-file-url="{{ route('attachment.view', $urd->jat_id) }}" data-file-title="URD Document">
                                     <i class="fas fa-check mr-1"></i> URD Uploaded <i class="fas fa-eye ml-1"></i>
                                 </a>
                                 @else <span class="badge badge-secondary p-2">URD Missing</span> @endif

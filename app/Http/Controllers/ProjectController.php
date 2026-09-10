@@ -456,25 +456,43 @@ class ProjectController extends Controller
 
         $equipExp = (float)(is_array($equipSh) ? ($equipSh['expenditure'] ?? 0) : ($equipSh->expenditure ?? 0));
         $equipAlloc = (float)(is_array($equipSh) ? ($equipSh['allocation'] ?? 0) : ($equipSh->allocation ?? 0));
+        $equipCmt = (float)(is_array($equipSh) ? ($equipSh['commitments'] ?? 0) : ($equipSh->commitments ?? 0));
+        $equipIpc = (float)(is_array($equipSh) ? ($equipSh['in_process'] ?? 0) : ($equipSh->in_process ?? 0));
+        $equipRemaining = (float)(is_array($equipSh) ? ($equipSh['can_be_spent'] ?? ($equipSh['remaining'] ?? 0)) : ($equipSh->can_be_spent ?? ($equipSh->remaining ?? 0)));
         $equipPct = $equipAlloc > 0 ? round(($equipExp / $equipAlloc) * 100) : ($totalSpent > 0 ? round(($equipExp / $totalSpent) * 100) : 0);
 
         $hrExp = (float)(is_array($hrSh) ? ($hrSh['expenditure'] ?? 0) : ($hrSh->expenditure ?? 0));
         $hrAlloc = (float)(is_array($hrSh) ? ($hrSh['allocation'] ?? 0) : ($hrSh->allocation ?? 0));
+        $hrCmt = (float)(is_array($hrSh) ? ($hrSh['commitments'] ?? 0) : ($hrSh->commitments ?? 0));
+        $hrIpc = (float)(is_array($hrSh) ? ($hrSh['in_process'] ?? 0) : ($hrSh->in_process ?? 0));
+        $hrRemaining = (float)(is_array($hrSh) ? ($hrSh['can_be_spent'] ?? ($hrSh['remaining'] ?? 0)) : ($hrSh->can_be_spent ?? ($hrSh->remaining ?? 0)));
         $hrPct = $hrAlloc > 0 ? round(($hrExp / $hrAlloc) * 100) : ($totalSpent > 0 ? round(($hrExp / $totalSpent) * 100) : 0);
 
         $miscExp = (float)(is_array($miscSh) ? ($miscSh['expenditure'] ?? 0) : ($miscSh->expenditure ?? 0));
         $miscAlloc = (float)(is_array($miscSh) ? ($miscSh['allocation'] ?? 0) : ($miscSh->allocation ?? 0));
+        $miscCmt = (float)(is_array($miscSh) ? ($miscSh['commitments'] ?? 0) : ($miscSh->commitments ?? 0));
+        $miscIpc = (float)(is_array($miscSh) ? ($miscSh['in_process'] ?? 0) : ($miscSh->in_process ?? 0));
+        $miscRemaining = (float)(is_array($miscSh) ? ($miscSh['can_be_spent'] ?? ($miscSh['remaining'] ?? 0)) : ($miscSh->can_be_spent ?? ($miscSh->remaining ?? 0)));
         $miscPct = $miscAlloc > 0 ? round(($miscExp / $miscAlloc) * 100) : ($totalSpent > 0 ? round(($miscExp / $totalSpent) * 100) : 0);
 
         $finData = [
             'equip' => $equipExp ?: ($totalSpent * 0.45),
             'equip_alloc' => $equipAlloc,
+            'equip_cmt' => $equipCmt,
+            'equip_ipc' => $equipIpc,
+            'equip_remaining' => $equipRemaining ?: ($equipAlloc - $equipExp),
             'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
             'hr'    => $hrExp ?: ($totalSpent * 0.35),
             'hr_alloc' => $hrAlloc,
+            'hr_cmt' => $hrCmt,
+            'hr_ipc' => $hrIpc,
+            'hr_remaining' => $hrRemaining ?: ($hrAlloc - $hrExp),
             'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
             'misc'  => $miscExp ?: ($totalSpent * 0.20),
             'misc_alloc' => $miscAlloc,
+            'misc_cmt' => $miscCmt,
+            'misc_ipc' => $miscIpc,
+            'misc_remaining' => $miscRemaining ?: ($miscAlloc - $miscExp),
             'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
         ];
 
@@ -685,16 +703,7 @@ class ProjectController extends Controller
     // --- DELETE ATTACHMENT ---
     public function deleteAttachment($id)
     {
-        $attachment = PrjAttachment::findOrFail($id);
-        if (!empty($attachment->jat_path)) {
-            app(\App\Services\FileStorageService::class)->delete($attachment->jat_path);
-        }
-        $attachment->delete();
-        
-        // Log deletion
-        $this->logActivity($attachment->jat_objid, 'Attachment', "Deleted Document: {$attachment->jat_type}");
-
-        return redirect()->back()->with('success', 'Document deleted successfully.');
+        abort(403, 'Permission denied: Deletion of project documents is disabled.');
     }
 
     // --- MILESTONES ---

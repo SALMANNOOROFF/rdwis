@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -63,7 +63,11 @@
                                 <span class="small text-muted rajdhani" style="font-size: 9px;">FROM: {{ $p->account->acc_name ?? 'N/A' }}</span>
                             </td>
                             <td>
-                                <div class="text-white small font-weight-bold">{{ Str::limit($p->pcs_title, 55) }}</div>
+                                <div>
+                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold small" title="Open Case: {{ $p->pcs_title }}">
+                                        {{ Str::limit($p->pcs_title, 55) }}
+                                    </a>
+                                </div>
                                 <div class="text-muted" style="font-size: 10px;">{{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}</div>
                             </td>
                             <td class="text-right font-weight-bold small text-muted">{{ $p->project->prj_code ?? 'N/A' }}</td>
@@ -111,7 +115,9 @@
                             <td class="pl-4">#{{ $p->pcs_id }}</td>
                             <td class="small font-weight-bold text-white">{{ $unitNameMap[$p->pcs_unt_id] ?? 'N/A' }}</td>
                             <td>
-                                <div class="text-muted small font-weight-bold">{{ Str::limit($p->pcs_title, 40) }}</div>
+                                <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold small" title="Open Case: {{ $p->pcs_title }}">
+                                    {{ Str::limit($p->pcs_title, 40) }}
+                                </a>
                             </td>
                             <td class="text-right">
                                 @php $lastDec = $p->latestDecision; @endphp

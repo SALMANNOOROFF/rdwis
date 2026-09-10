@@ -230,30 +230,15 @@ class AttachmentController extends Controller
      */
     public function delete(Request $request, string $module, $id)
     {
-        $cfg = $this->getModuleConfig($module);
-
-        $record = DB::table($cfg['table'])
-            ->where($cfg['pk'], $id)
-            ->first();
-
-        if ($record) {
-            if (!empty($record->{$cfg['path']})) {
-                $this->storage->delete($record->{$cfg['path']});
-            }
-
-            DB::table($cfg['table'])
-                ->where($cfg['pk'], $id)
-                ->delete();
-        }
-
+        // Deletion permanently disabled per policy
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Attachment deleted successfully.',
-            ]);
+                'success' => false,
+                'message' => 'Permission denied: Deletion of attachments is disabled.',
+            ], 403);
         }
 
-        return redirect()->back()->with('success', 'Attachment deleted successfully.');
+        return redirect()->back()->with('error', 'Permission denied: Deletion of attachments is disabled.');
     }
 
     /**

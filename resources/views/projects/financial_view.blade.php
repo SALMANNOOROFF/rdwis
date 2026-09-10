@@ -525,7 +525,7 @@
                             <div class="row">
                                 {{-- EQUIPMENT --}}
                                 <div class="col-md-4 mb-3 mb-md-0">
-                                    <div class="subhead-gauge-box h-100">
+                                    <div class="subhead-gauge-box h-100" style="padding: 16px 10px;">
                                         <div class="d-flex justify-content-center mb-2">
                                             <svg width="70" height="70" viewBox="0 0 54 54" style="transform: rotate(-90deg);">
                                                 <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
@@ -535,22 +535,41 @@
                                                 <text x="27" y="-23" text-anchor="middle" fill="#16a34a" font-size="12" font-weight="bold" font-family="'Rajdhani', sans-serif" style="transform: rotate(90deg);">{{ $finData['equip_pct'] }}%</text>
                                             </svg>
                                         </div>
-                                        <div class="font-weight-bold text-dark rajdhani" style="font-size: 1.1rem;">EQUIPMENT</div>
-                                        <div class="font-weight-bold rajdhani" style="font-size: 1rem; color: #16a34a;">Rs. {{ number_format($finData['equip'] ?? 0) }}</div>
-                                        <small class="text-muted font-weight-bold" style="font-size: 11px;">Alloc: {{ number_format($finData['equip_alloc'] ?? 0) }}</small>
-                                        @if($headRecord)
-                                        <div class="mt-2">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'Equipment']) }}" target="_blank" class="btn btn-xs btn-outline-success font-weight-bold px-2 py-0.5">
-                                                <i class="fas fa-search mr-1"></i> Expand
-                                            </a>
+                                        <div class="font-weight-bold text-dark rajdhani mb-2" style="font-size: 1.15rem; letter-spacing: 0.5px;">EQUIPMENT</div>
+
+                                        {{-- CLEAN TEXT-FORM BREAKDOWN --}}
+                                        <div class="pt-2 border-top text-left" style="border-color: #e2e8f0 !important; font-size: 11.5px; line-height: 1.8;">
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Alloc:</span>
+                                                <span class="font-weight-bold text-dark font-mono" style="white-space: nowrap;">{{ number_format($finData['equip_alloc'] ?? 0) }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
+                                                <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['equip'] ?? 0) }}</span>
+                                            </div>
+                                            @if(($finData['equip_cmt'] ?? 0) > 0)
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
+                                                <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['equip_cmt'] ?? 0) }}</span>
+                                            </div>
+                                            @endif
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
+                                                <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['equip_ipc'] ?? 0) }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
+                                                <span class="font-weight-bold font-mono {{ ($finData['equip_remaining'] ?? 0) >= 0 ? 'text-success' : 'text-danger' }}" style="white-space: nowrap;">
+                                                    {{ number_format($finData['equip_remaining'] ?? 0) }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        @endif
                                     </div>
                                 </div>
 
                                 {{-- HR --}}
                                 <div class="col-md-4 mb-3 mb-md-0">
-                                    <div class="subhead-gauge-box h-100">
+                                    <div class="subhead-gauge-box h-100" style="padding: 16px 10px;">
                                         <div class="d-flex justify-content-center mb-2">
                                             <svg width="70" height="70" viewBox="0 0 54 54" style="transform: rotate(-90deg);">
                                                 <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
@@ -560,22 +579,41 @@
                                                 <text x="27" y="-23" text-anchor="middle" fill="#0284c7" font-size="12" font-weight="bold" font-family="'Rajdhani', sans-serif" style="transform: rotate(90deg);">{{ $finData['hr_pct'] }}%</text>
                                             </svg>
                                         </div>
-                                        <div class="font-weight-bold text-dark rajdhani" style="font-size: 1.1rem;">HR / STAFF</div>
-                                        <div class="font-weight-bold rajdhani" style="font-size: 1rem; color: #0284c7;">Rs. {{ number_format($finData['hr'] ?? 0) }}</div>
-                                        <small class="text-muted font-weight-bold" style="font-size: 11px;">Alloc: {{ number_format($finData['hr_alloc'] ?? 0) }}</small>
-                                        @if($headRecord)
-                                        <div class="mt-2">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'HR']) }}" target="_blank" class="btn btn-xs btn-outline-info font-weight-bold px-2 py-0.5">
-                                                <i class="fas fa-search mr-1"></i> Expand
-                                            </a>
+                                        <div class="font-weight-bold text-dark rajdhani mb-2" style="font-size: 1.15rem; letter-spacing: 0.5px;">HR / STAFF</div>
+
+                                        {{-- CLEAN TEXT-FORM BREAKDOWN --}}
+                                        <div class="pt-2 border-top text-left" style="border-color: #e2e8f0 !important; font-size: 11.5px; line-height: 1.8;">
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Alloc:</span>
+                                                <span class="font-weight-bold text-dark font-mono" style="white-space: nowrap;">{{ number_format($finData['hr_alloc'] ?? 0) }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
+                                                <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['hr'] ?? 0) }}</span>
+                                            </div>
+                                            @if(($finData['hr_cmt'] ?? 0) > 0)
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
+                                                <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['hr_cmt'] ?? 0) }}</span>
+                                            </div>
+                                            @endif
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
+                                                <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['hr_ipc'] ?? 0) }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
+                                                <span class="font-weight-bold font-mono {{ ($finData['hr_remaining'] ?? 0) >= 0 ? 'text-success' : 'text-danger' }}" style="white-space: nowrap;">
+                                                    {{ number_format($finData['hr_remaining'] ?? 0) }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        @endif
                                     </div>
                                 </div>
 
                                 {{-- MISC --}}
                                 <div class="col-md-4">
-                                    <div class="subhead-gauge-box h-100">
+                                    <div class="subhead-gauge-box h-100" style="padding: 16px 10px;">
                                         <div class="d-flex justify-content-center mb-2">
                                             <svg width="70" height="70" viewBox="0 0 54 54" style="transform: rotate(-90deg);">
                                                 <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
@@ -585,55 +623,39 @@
                                                 <text x="27" y="-23" text-anchor="middle" fill="#d97706" font-size="12" font-weight="bold" font-family="'Rajdhani', sans-serif" style="transform: rotate(90deg);">{{ $finData['misc_pct'] }}%</text>
                                             </svg>
                                         </div>
-                                        <div class="font-weight-bold text-dark rajdhani" style="font-size: 1.1rem;">MISC</div>
-                                        <div class="font-weight-bold rajdhani" style="font-size: 1rem; color: #d97706;">Rs. {{ number_format($finData['misc'] ?? 0) }}</div>
-                                        <small class="text-muted font-weight-bold" style="font-size: 11px;">Alloc: {{ number_format($finData['misc_alloc'] ?? 0) }}</small>
-                                        @if($headRecord)
-                                        <div class="mt-2">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'Misc']) }}" target="_blank" class="btn btn-xs btn-outline-warning font-weight-bold px-2 py-0.5">
-                                                <i class="fas fa-search mr-1"></i> Expand
-                                            </a>
+                                        <div class="font-weight-bold text-dark rajdhani mb-2" style="font-size: 1.15rem; letter-spacing: 0.5px;">MISC</div>
+
+                                        {{-- CLEAN TEXT-FORM BREAKDOWN --}}
+                                        <div class="pt-2 border-top text-left" style="border-color: #e2e8f0 !important; font-size: 11.5px; line-height: 1.8;">
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Alloc:</span>
+                                                <span class="font-weight-bold text-dark font-mono" style="white-space: nowrap;">{{ number_format($finData['misc_alloc'] ?? 0) }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
+                                                <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['misc'] ?? 0) }}</span>
+                                            </div>
+                                            @if(($finData['misc_cmt'] ?? 0) > 0)
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
+                                                <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['misc_cmt'] ?? 0) }}</span>
+                                            </div>
+                                            @endif
+                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
+                                                <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['misc_ipc'] ?? 0) }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
+                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
+                                                <span class="font-weight-bold font-mono {{ ($finData['misc_remaining'] ?? 0) >= 0 ? 'text-success' : 'text-danger' }}" style="white-space: nowrap;">
+                                                    {{ number_format($finData['misc_remaining'] ?? 0) }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        {{-- 2. INTER-PROJECT NETTING & LOANS QUICK CARD --}}
-                        @if($loans)
-                        <div class="fin-table-card p-4 mb-4" style="border-left: 5px solid #dc2626;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="font-weight-bold text-danger mb-0 rajdhani" style="letter-spacing: 0.5px;">
-                                    <i class="fas fa-exchange-alt mr-1"></i> LOANS & INTER-PROJECT NETTING
-                                </h6>
-                                @if($headRecord)
-                                <div>
-                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'loans', 'loansgiven']) }}" target="_blank" class="btn btn-xs btn-outline-info font-weight-bold">
-                                        <i class="fas fa-search mr-1"></i> Given
-                                    </a>
-                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'loans', 'loanstaken']) }}" target="_blank" class="btn btn-xs btn-outline-danger font-weight-bold ml-1">
-                                        <i class="fas fa-search mr-1"></i> Taken
-                                    </a>
-                                </div>
-                                @endif
-                            </div>
-                            <div class="row pt-2">
-                                <div class="col-4 border-right" style="border-color: #e2e8f0 !important;">
-                                    <span class="fin-label text-dark" style="font-size: 0.72rem;">Own Exp.</span>
-                                    <div class="font-weight-bold text-dark rajdhani" style="font-size: 0.95rem;">{{ number_format($loans->pcc_own_exp ?? 0) }}</div>
-                                </div>
-                                <div class="col-4 border-right" style="border-color: #e2e8f0 !important;">
-                                    <span class="fin-label" style="color: #d97706; font-size: 0.72rem;">Loans Given</span>
-                                    <div class="font-weight-bold rajdhani" style="color: #d97706; font-size: 0.95rem;">{{ number_format($loans->pcc_loansgiven ?? 0) }}</div>
-                                </div>
-                                <div class="col-4">
-                                    <span class="fin-label text-danger" style="font-size: 0.72rem;">Loans Taken</span>
-                                    <div class="font-weight-bold text-danger rajdhani" style="font-size: 0.95rem;">{{ number_format($loans->others_loans_taken ?? 0) }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
 
                         {{-- 3. INTERACTIVE MAIN CASHFLOW CHART --}}
                         <div class="fin-table-card p-4">
@@ -1056,7 +1078,7 @@
                             </div>
 
                             <div class="table-responsive">
-                                <table class="table fin-table w-100 m-0">
+                                <table class="table fin-table w-100 m-0" id="finProjectAttachmentsTable">
                                     <thead>
                                         <tr>
                                             <th class="pl-3" style="width: 8%;">#</th>
@@ -1092,7 +1114,10 @@
                                                     {{ $att->created_at ? \Carbon\Carbon::parse($att->created_at)->format('d M Y') : '-' }}
                                                 </td>
                                                 <td class="pr-3 text-center">
-                                                    <a href="{{ route('attachment.view', $att->jat_id) }}" target="_blank" class="btn btn-xs btn-primary font-weight-bold px-2.5 py-1 rounded shadow-sm" title="View / Open Document">
+                                                    @php
+                                                        $fileUrl = \App\Facades\FileStorage::url($path) ?: route('attachment.view', $att->jat_id);
+                                                    @endphp
+                                                    <a href="{{ $fileUrl }}" onclick="window.openLiveDocument('{{ $fileUrl }}', '{{ addslashes($att->jat_type ?: basename($path)) }}'); return false;" class="rd-live-file-view btn btn-xs btn-primary font-weight-bold px-2.5 py-1 rounded shadow-sm" title="View Document Live">
                                                         <i class="fas fa-eye mr-1"></i> View File
                                                     </a>
                                                 </td>
@@ -1120,7 +1145,8 @@
                                 'title' => 'Project Document Uploads',
                                 'defaultSlots' => ['Project Proposal', 'URD', 'Work Order', 'PPF'],
                                 'attachments' => $allAttachments ?? $project->attachments,
-                                'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
+                                'canUpload' => Auth::check(),
+                                'canDelete' => false,
                             ])
                         </div>
                     </div>

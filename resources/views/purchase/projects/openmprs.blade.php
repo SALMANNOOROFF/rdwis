@@ -27,7 +27,11 @@
                             @forelse($projects as $project)
                             <tr>
                                 <td><span class="badge badge-secondary">{{ $project->prj_code ?? $project->prj_id }}</span></td>
-                                <td class="font-weight-bold">{{ $project->prj_title }}</td>
+                                <td>
+                                    <a href="{{ route('mpr.view', $project->prj_id) }}" class="rd-entity-title-link font-weight-bold" title="View MPR: {{ $project->prj_title }}">
+                                        {{ $project->prj_title }}
+                                    </a>
+                                </td>
                                 <td>{{ $project->prj_sponsor ?? 'N/A' }}</td>
                                 <td class="text-center">
                                     {{-- Ye button click karke Step 2 par jayenge --}}

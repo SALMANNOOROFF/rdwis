@@ -84,6 +84,65 @@
             margin: 0 !important;
             width: 100% !important;
             white-space: nowrap !important;
+            text-transform: capitalize !important;
+        }
+
+        .main-sidebar .nav-sidebar .nav-link p,
+        .main-sidebar .nav-sidebar .nav-header {
+            text-transform: capitalize !important;
+        }
+
+        /* Universal Clickable Entity Title Links (Projects, Contract Cases, Purchase Cases) */
+        a.rd-entity-title-link,
+        .rd-entity-title-link,
+        a.rd-entity-title-link:link,
+        a.rd-entity-title-link:focus,
+        a.rd-entity-title-link:active,
+        .rd-entity-title-link.is-clicked {
+            color: #111827 !important; /* solid black by default */
+            text-decoration: none !important;
+            transition: color 0.15s ease-in-out;
+            cursor: pointer !important;
+            display: inline-block;
+        }
+        /* Keep visited links as default solid black as well, but DO NOT put !important so :hover can override it seamlessly */
+        a.rd-entity-title-link:visited {
+            color: #111827;
+            text-decoration: none !important;
+        }
+
+        /* ONLY when inside truly dark themed tables */
+        .table-dark a.rd-entity-title-link,
+        .table-dark .rd-entity-title-link {
+            color: #f8fafc !important;
+        }
+        .table-dark a.rd-entity-title-link:visited {
+            color: #f8fafc;
+        }
+
+        /* Hover States (Strictly vibrant blue #2563eb, NO underline ever across any parent or state) */
+        html body a.rd-entity-title-link:hover,
+        html body a.rd-entity-title-link:visited:hover,
+        html body a.rd-entity-title-link:focus:hover,
+        html body a.rd-entity-title-link:active:hover,
+        html body .rd-entity-title-link:hover,
+        html body .rd-entity-title-link:hover *,
+        a.rd-entity-title-link:hover,
+        a.rd-entity-title-link:hover *,
+        a.rd-entity-title-link:visited:hover,
+        .rd-entity-title-link:hover,
+        .rd-entity-title-link:hover *,
+        .rd-entity-title-link:visited:hover,
+        a.rd-entity-title-link:focus:hover,
+        .rd-entity-title-link:focus:hover {
+            color: #2563eb !important; /* Clear vibrant blue */
+            text-decoration: none !important; /* Never underline */
+        }
+        html body .table-dark a.rd-entity-title-link:hover,
+        .table-dark a.rd-entity-title-link:hover,
+        .table-dark .rd-entity-title-link:hover {
+            color: #38bdf8 !important; /* Lighter bright blue for dark tables */
+            text-decoration: none !important;
         }
 
         body:not(.sidebar-collapse) .nav-sidebar .nav-link p > .badge,
@@ -433,7 +492,7 @@
             @if(Auth::check())
                 @if(session('impersonated_by_god'))
                 <a href="#" class="d-block text-danger">
-                    <i class="fas fa-radiation-alt mr-1"></i> GOD MODE<br>
+                    <i class="fas fa-radiation-alt mr-1"></i> God Mode<br>
                     <small class="text-warning">Controlling: {{ Auth::user()->acc_rank }} {{ Auth::user()->acc_name }}</small>
                 </a>
                 @else
@@ -458,7 +517,7 @@
           @endphp
           
           @if(Auth::user()->acc_username === 'superadminrdw' || session('impersonated_by_god'))
-          <li class="nav-header text-danger font-weight-bold"><i class="fas fa-radiation-alt mr-2"></i> GOD MODE</li>
+          <li class="nav-header text-danger font-weight-bold"><i class="fas fa-radiation-alt mr-2"></i> God Mode</li>
           
           {{-- Headquarters Dropdown --}}
           <li class="nav-item has-treeview">
@@ -558,14 +617,14 @@
               <a href="#" class="nav-link bg-warning text-dark font-weight-bold" style="border: 1px solid #d97706; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border-radius: 6px;">
                   <i class="nav-icon fas fa-sliders-h text-dark"></i>
                   <p class="font-weight-bold rajdhani" style="font-size: 13.5px; letter-spacing: 0.5px;">
-                      RDWIS SETTINGS <i class="right fas fa-angle-left text-dark"></i>
+                      Rdwis Settings <i class="right fas fa-angle-left text-dark"></i>
                   </p>
               </a>
               <ul class="nav nav-treeview p-1" style="background-color: #ffffff; border-radius: 6px; margin-top: 4px; border: 1px solid #e2e8f0; box-shadow: 0 3px 8px rgba(0,0,0,0.05);">
                   <li class="nav-item mb-1">
                       <a href="{{ route('admin.settings.financial') }}" class="nav-link py-2 px-2.5 rounded d-flex align-items-center {{ request()->routeIs('admin.settings.financial') ? 'bg-primary text-white font-weight-bold' : 'text-dark' }}" style="font-size: 12.5px;">
                           <i class="fas fa-coins nav-icon {{ request()->routeIs('admin.settings.financial') ? 'text-white' : 'text-warning' }} mr-2" style="font-size: 14px;"></i>
-                          <p class="mb-0 text-truncate font-weight-bold rajdhani">Financial & HR Limits</p>
+                          <p class="mb-0 text-truncate font-weight-bold rajdhani">Financial & Hr Limits</p>
                       </a>
                   </li>
                   <li class="nav-item mb-1">
@@ -577,7 +636,7 @@
                   <li class="nav-item mb-1">
                       <a href="{{ route('admin.settings.workflows_mpr') }}" class="nav-link py-2 px-2.5 rounded d-flex align-items-center {{ request()->routeIs('admin.settings.workflows_mpr') ? 'bg-primary text-white font-weight-bold' : 'text-dark' }}" style="font-size: 12.5px;">
                           <i class="fas fa-file-alt nav-icon {{ request()->routeIs('admin.settings.workflows_mpr') ? 'text-white' : 'text-info' }} mr-2" style="font-size: 14px;"></i>
-                          <p class="mb-0 text-truncate font-weight-bold rajdhani">Workflow: MPR Reports</p>
+                          <p class="mb-0 text-truncate font-weight-bold rajdhani">Workflow: Mpr Reports</p>
                       </a>
                   </li>
                   <li class="nav-item">
@@ -595,7 +654,7 @@
       {{-- ========================================================= --}}
       @if(Auth::user()->isSORD())
 
-      <li class="nav-header">SOR & D MODULE</li>
+      <li class="nav-header">Sor & D Module</li>
 
       <li class="nav-item">
           <a href="{{ route('sord.dashboard') }}" class="nav-link {{ Request::routeIs('sord.dashboard') ? 'active' : '' }}">
@@ -638,68 +697,53 @@
           <li class="nav-item">
               <a href="{{ route('view-projects') }}" class="nav-link {{ Request::routeIs('view-projects*') ? 'active' : '' }}">
                   <i class="fas fa-folder-open nav-icon"></i>
-                  <p>PROJECTS</p>
+                  <p>Projects</p>
               </a>
           </li>
 
-
-{{-- Hiding Old Purchase System as requested --}}
-          {{-- 
+          @if(!Auth::user()->isMdDdgDg())
           <li class="nav-item">
-              <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-shopping-cart"></i>
-                  <p>PURCHASE CASES <i class="right fas fa-angle-left"></i></p>
+              <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ Request::routeIs('finance.accounts.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-wallet text-cyan"></i>
+                  <p>Accounts</p>
               </a>
-              <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                      <a href="{{ route('viewpurchasecase') }}" class="nav-link">
-                          <i class="fas fa-briefcase nav-icon"></i>
-                          <p>PURCHASE CASES (PCs)</p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a href="{{ route('purchase.reports.index') }}" class="nav-link">
-                          <i class="fas fa-file-alt nav-icon"></i>
-                          <p>IT LETTER / CS</p>
-                      </a>
-                  </li>  
-              </ul>
           </li>
-          --}}
+          @endif
+
             <li class="nav-item {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-shopping-cart"></i>
-                    <p>PURCHASE CASES <span class="badge badge-blinking-red badge-pur-parent {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span> <i class="right fas fa-angle-left"></i></p>
+                    <p>Purchase Cases <span class="badge badge-blinking-red badge-pur-parent {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span> <i class="right fas fa-angle-left"></i></p>
                 </a>
                 <ul class="nav nav-treeview">
                     <li class="nav-item">
                         <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
                             <i class="fas fa-list nav-icon"></i>
-                            <p>VIEW ALL <span class="badge badge-blinking-red badge-pur-child {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span></p>
+                            <p>View All <span class="badge badge-blinking-red badge-pur-child {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span></p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('purchase.select') }}" class="nav-link {{ Request::routeIs('purchase.select') ? 'active' : '' }}">
                             <i class="fas fa-plus-circle nav-icon"></i>
-                            <p>INITIATE CASE</p>
+                            <p>Initiate Case</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('training.index') }}" class="nav-link {{ Request::routeIs('training.index') || Request::routeIs('training.create') ? 'active' : '' }}">
                             <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                            <p>TRAINING</p>
+                            <p>Training</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('training.books.index') }}" class="nav-link {{ Request::routeIs('training.books.*') ? 'active' : '' }}">
                             <i class="fas fa-book nav-icon"></i>
-                            <p>BOOKS PROCUREMENT</p>
+                            <p>Books Procurement</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('training.license.index') }}" class="nav-link {{ Request::routeIs('training.license.*') ? 'active' : '' }}">
                             <i class="fas fa-file-signature nav-icon"></i>
-                            <p>LICENCE / FEES</p>
+                            <p>Licence / Fees</p>
                         </a>
                     </li>
                 </ul>
@@ -708,60 +752,62 @@
             <li class="nav-item">
                 <a href="{{ route('division.contract-cases.index') }}" class="nav-link {{ Request::routeIs('division.contract-cases.*') ? 'active' : '' }}">
                     <i class="fas fa-file-signature nav-icon text-warning"></i>
-                    <p>CONTRACT CASES <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
+                    <p>Contract Cases <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-boxes text-info"></i>
-                    <p>INVENTORY & ASSETS</p>
+                    <p>Inventory & Assets</p>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('nrdi.firms.list') }}" class="nav-link {{ Request::routeIs('nrdi.firms.*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-building text-cyan"></i>
-                    <p>SUPPLIERS & FIRMS</p>
+                    <p>Suppliers & Firms</p>
                 </a>
             </li>
 
             <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-users text-primary"></i>
-                    <p>HUMAN RESOURCES <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
+                    <p>Human Resources <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                 </a>
                 <ul class="nav nav-treeview">
                     <li class="nav-item">
                         <a href="{{ route('divhr.employelist') }}" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') ? 'active' : '' }}">
-                            <i class="fas fa-user-tie nav-icon text-info"></i><p>HIRED EMPLOYEES <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
+                            <i class="fas fa-user-tie nav-icon text-info"></i><p>Hired Employees <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('hr.navy_civilians') }}" class="nav-link {{ Request::routeIs('hr.navy_civilians') ? 'active' : '' }}">
-                            <i class="fas fa-user-shield nav-icon text-success"></i><p>NAVY CIVILIANS</p>
+                            <i class="fas fa-user-shield nav-icon text-success"></i><p>Navy Civilians</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                            <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN OFFICERS</p>
+                            <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>Pn Officers</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                            <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / SAILORS</p>
+                            <i class="fas fa-anchor nav-icon text-cyan"></i><p>Pn Cpo / Sailors</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('division.attendance') }}" class="nav-link {{ Request::routeIs('division.attendance*') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
-                            <i class="fas fa-calendar-check nav-icon text-success"></i><p>ATTENDANCE</p>
+                            <i class="fas fa-calendar-check nav-icon text-success"></i><p>Attendance</p>
                         </a>
                     </li>
+                    @if(!Auth::user()->isMdDdgDg())
                     <li class="nav-item">
                         <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
-                            <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i><p>SALARY REQUISITIONS</p>
+                            <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i><p>Salary Requisitions</p>
                         </a>
                     </li>
+                    @endif
                 </ul>
             </li>
 
@@ -769,12 +815,12 @@
             <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-chart-line text-cyan"></i>
-                    <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+                    <p>Reports <i class="right fas fa-angle-left"></i></p>
                 </a>
                 <ul class="nav nav-treeview">
                     <li class="nav-item">
                         <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
-                            <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                            <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>Hr Reports</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -789,7 +835,7 @@
       {{-- CASE 3: HR USER (Area: 'hr') --}}
       {{-- ========================================================= --}}
       @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'hr')
-          <li class="nav-header text-info rajdhani font-weight-bold" style="letter-spacing: 1px;">HR DIRECTORATE</li>
+          <li class="nav-header text-info rajdhani font-weight-bold" style="letter-spacing: 1px;">Hr Directorate</li>
 
           <li class="nav-item">
               <a href="{{ route('hr.dashboard') }}" class="nav-link {{ Request::routeIs('hr.dashboard') ? 'active' : '' }}">
@@ -801,34 +847,34 @@
            <li class="nav-item">
                <a href="{{ route('nrdi.firms.list') }}" class="nav-link {{ Request::routeIs('nrdi.firms.*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-building text-cyan"></i>
-                   <p>SUPPLIERS & FIRMS</p>
+                   <p>Suppliers & Firms</p>
                </a>
            </li>
 
            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-users text-primary"></i>
-                   <p>HUMAN RESOURCES <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
+                   <p>Human Resources <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                </a>
                <ul class="nav nav-treeview">
                    <li class="nav-item">
                        <a href="{{ route('divhr.employelist') }}" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') ? 'active' : '' }}">
-                           <i class="fas fa-user-tie nav-icon text-info"></i><p>HIRED EMPLOYEES <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
+                           <i class="fas fa-user-tie nav-icon text-info"></i><p>Hired Employees <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.navy_civilians') }}" class="nav-link {{ Request::routeIs('hr.navy_civilians') ? 'active' : '' }}">
-                           <i class="fas fa-user-shield nav-icon text-success"></i><p>NAVY CIVILIANS</p>
+                           <i class="fas fa-user-shield nav-icon text-success"></i><p>Navy Civilians</p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN OFFICERS</p>
+                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>Pn Officers</p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / SAILORS</p>
+                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>Pn Cpo / Sailors</p>
                        </a>
                    </li>
                    <li class="nav-item">
@@ -837,12 +883,14 @@
                             <p>Attendance</p>
                         </a>
                     </li>
+                   @if(!Auth::user()->isMdDdgDg())
                    <li class="nav-item">
                        <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                            <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
                            <p>Salary Requisitions</p>
                        </a>
                    </li>
+                   @endif
                </ul>
            </li>
 
@@ -856,7 +904,7 @@
            <li class="nav-item">
                <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-chart-pie text-cyan"></i>
-                   <p>HR Reports</p>
+                   <p>Hr Reports</p>
                </a>
            </li>
 
@@ -865,7 +913,7 @@
               $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
               $isProc = in_array($area, ['proc', 'prc'], true);
           @endphp
-          <li class="nav-header">{{ $isProc ? 'PROCUREMENT DIRECTORATE' : 'COMMAND VIEW' }}</li>
+          <li class="nav-header">{{ $isProc ? 'Procurement Directorate' : 'Command View' }}</li>
 
           <li class="nav-item">
               @php
@@ -910,19 +958,28 @@
                   <p>Contract Cases <span class="badge badge-blinking-red badge-ctr-parent badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
               </a>
           </li>
+
+          @if(!Auth::user()->isMdDdgDg())
+          <li class="nav-item">
+              <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ Request::routeIs('finance.accounts.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-wallet text-cyan"></i>
+                  <p>Accounts</p>
+              </a>
+          </li>
+          @endif
           @endif
 
           <li class="nav-item">
               <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-boxes text-success"></i>
-                  <p>INVENTORY & ASSETS</p>
+                  <p>Inventory & Assets</p>
               </a>
           </li>
 
           <li class="nav-item">
               <a href="{{ route('nrdi.firms.list') }}" class="nav-link {{ Request::routeIs('nrdi.firms.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-building text-cyan"></i>
-                  <p>SUPPLIERS & FIRMS</p>
+                  <p>Suppliers & Firms</p>
               </a>
           </li>
 
@@ -931,34 +988,36 @@
            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') ? 'menu-open' : '' }}">
                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-users text-primary"></i>
-                   <p>HUMAN RESOURCES <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
+                   <p>Human Resources <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                </a>
                <ul class="nav nav-treeview">
                    <li class="nav-item">
                        <a href="{{ route('divhr.employelist') }}" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') ? 'active' : '' }}">
-                           <i class="fas fa-user-tie nav-icon text-info"></i><p>HIRED EMPLOYEES <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
+                           <i class="fas fa-user-tie nav-icon text-info"></i><p>Hired Employees <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.navy_civilians') }}" class="nav-link {{ Request::routeIs('hr.navy_civilians') ? 'active' : '' }}">
-                           <i class="fas fa-user-shield nav-icon text-success"></i><p>NAVY CIVILIANS</p>
+                           <i class="fas fa-user-shield nav-icon text-success"></i><p>Navy Civilians</p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN OFFICERS</p>
+                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>Pn Officers</p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / SAILORS</p>
+                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>Pn Cpo / Sailors</p>
                        </a>
                    </li>
+                    @if(!Auth::user()->isMdDdgDg())
                    <li class="nav-item">
                        <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
-                           <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i><p>SALARY REQUISITIONS</p>
+                           <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i><p>Salary Requisitions</p>
                        </a>
                    </li>
+                    @endif
                </ul>
            </li>
            @endif
@@ -968,7 +1027,7 @@
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
                   <p>
-                      COMMITMENTS
+                      Commitments
                       <i class="right fas fa-angle-left"></i>
                   </p>
               </a>
@@ -1000,7 +1059,7 @@
           <li class="nav-item {{ Request::routeIs('nrdi.procurement.reports.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ Request::routeIs('nrdi.procurement.reports.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-chart-line text-cyan"></i>
-                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+                  <p>Reports <i class="right fas fa-angle-left"></i></p>
               </a>
               <ul class="nav nav-treeview">
                   <li class="nav-item">
@@ -1015,13 +1074,13 @@
           <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-chart-line text-cyan"></i>
-                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+                  <p>Reports <i class="right fas fa-angle-left"></i></p>
               </a>
               <ul class="nav nav-treeview">
                   @if(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) !== 'fin')
                   <li class="nav-item">
                       <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
-                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>Hr Reports</p>
                       </a>
                   </li>
                   @endif
@@ -1034,8 +1093,9 @@
           </li>
           @endif
 
+
       @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'it')
-          <li class="nav-header">SYSTEM ADMIN</li>
+          <li class="nav-header">System Admin</li>
 
           <li class="nav-item">
               <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -1062,12 +1122,12 @@
           <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-chart-line text-cyan"></i>
-                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+                  <p>Reports <i class="right fas fa-angle-left"></i></p>
               </a>
               <ul class="nav nav-treeview">
                   <li class="nav-item">
                       <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
-                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>Hr Reports</p>
                       </a>
                   </li>
                   <li class="nav-item">
@@ -1079,7 +1139,7 @@
           </li>
 
           @elseif(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'hr')
-          <li class="nav-header">HUMAN RESOURCES</li>
+          <li class="nav-header">Human Resources</li>
 
           <li class="nav-item">
               <a href="{{ route('nrdi.dashboard') }}" class="nav-link {{ Request::routeIs('nrdi.dashboard') ? 'active' : '' }}">
@@ -1106,12 +1166,12 @@
           <li class="nav-item {{ Request::routeIs('hr.reports.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-chart-line text-cyan"></i>
-                  <p>REPORTS <i class="right fas fa-angle-left"></i></p>
+                  <p>Reports <i class="right fas fa-angle-left"></i></p>
               </a>
               <ul class="nav nav-treeview">
                   <li class="nav-item">
                       <a href="{{ route('hr.reports.index') }}" class="nav-link {{ Request::routeIs('hr.reports.*') ? 'active' : '' }}">
-                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>HR Reports</p>
+                          <i class="fas fa-users-cog nav-icon" style="color: #67e8f9;"></i><p>Hr Reports</p>
                       </a>
                   </li>
               </ul>
@@ -1153,7 +1213,7 @@
                   }
               }
           @endphp
-          <li class="nav-header" style="color: #94a3b8; font-size: 9.5px; letter-spacing: 0.8px; font-weight: 700; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; padding-bottom: 2px;">HELPDESK</li>
+          <li class="nav-header" style="color: #94a3b8; font-size: 9.5px; letter-spacing: 0.8px; font-weight: 700; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; padding-bottom: 2px;">Helpdesk</li>
           <li class="nav-item">
               <a href="{{ route('support.tickets.index') }}" class="nav-link {{ Request::routeIs('support.tickets.*') ? 'active' : '' }}" style="border-radius: 6px; margin: 1px 6px; padding: 6px 10px;">
                   <i class="nav-icon fas fa-headset text-info" style="font-size: 13px; margin-right: 6px;"></i>
@@ -1387,6 +1447,69 @@
             setTimeout(removePreloader, 1000);
         })();
     </script>
+    <!-- Universal Sidebar Title Case Normalizer -->
+    <script>
+        (function() {
+            function toTitleCase(str) {
+                return str.replace(/\b([a-zA-Z])([a-zA-Z]*)/g, function(match, first, rest) {
+                    return first.toUpperCase() + rest.toLowerCase();
+                });
+            }
+
+            function formatSidebarLabels() {
+                var items = document.querySelectorAll('.main-sidebar .nav-sidebar .nav-link p, .main-sidebar .nav-sidebar .nav-header');
+                items.forEach(function(el) {
+                    el.childNodes.forEach(function(node) {
+                        if (node.nodeType === Node.TEXT_NODE && node.nodeValue && node.nodeValue.trim().length > 0) {
+                            node.nodeValue = toTitleCase(node.nodeValue);
+                        }
+                    });
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', formatSidebarLabels);
+            } else {
+                formatSidebarLabels();
+            }
+            if (window.jQuery) {
+                $(document).on('expanded.lte.treeview shown.bs.collapse', formatSidebarLabels);
+            }
+            var sidebar = document.querySelector('.main-sidebar .nav-sidebar');
+            if (sidebar && window.MutationObserver) {
+                var observer = new MutationObserver(function() {
+                    observer.disconnect();
+                    formatSidebarLabels();
+                    observer.observe(sidebar, { childList: true, subtree: true });
+                });
+                observer.observe(sidebar, { childList: true, subtree: true });
+            }
+
+            try {
+                sessionStorage.removeItem('rd_visited_links');
+            } catch(e) {}
+
+            // Foolproof runtime hover listener for entity title links
+            document.addEventListener('mouseover', function(e) {
+                var link = e.target.closest('.rd-entity-title-link');
+                if (link) {
+                    var isDark = link.closest('.table-dark');
+                    link.style.setProperty('color', isDark ? '#38bdf8' : '#2563eb', 'important');
+                    link.style.setProperty('text-decoration', 'none', 'important');
+                }
+            }, true);
+
+            document.addEventListener('mouseout', function(e) {
+                var link = e.target.closest('.rd-entity-title-link');
+                if (link) {
+                    var isDark = link.closest('.table-dark');
+                    link.style.setProperty('color', isDark ? '#f8fafc' : '#111827', 'important');
+                    link.style.setProperty('text-decoration', 'none', 'important');
+                }
+            }, true);
+        })();
+    </script>
+    @include('partials.live_document_modal')
     @include('pwa.install-banner')
   </body>
 </html>

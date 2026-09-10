@@ -18,8 +18,13 @@
   <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
   <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
 
-  {{-- NOTE: Maine yahan se scripts hata diye hain, wo ab file ke end mein load honge --}}
   <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
+  <style>
+    .main-sidebar .nav-sidebar .nav-link p,
+    .main-sidebar .nav-sidebar .nav-header {
+      text-transform: capitalize !important;
+    }
+  </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -71,7 +76,7 @@
         <div class="image">
           </div>
         <div class="info">
-          <a href="#" class="d-block">{{ Auth::user()->acc_desig ?? 'DIRECTOR SINC' }}</a>
+          <a href="#" class="d-block">{{ Auth::user()->acc_desig ?? 'Director Sinc' }}</a>
         </div>
       </div>
 

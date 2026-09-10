@@ -466,7 +466,7 @@
                                                                     {{ $pDoc->jat_type }}
                                                                 </span>
                                                             </div>
-                                                            <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" target="_blank" class="text-primary px-0.5 hover-zoom flex-shrink-0" style="font-size: 10px;" title="View {{ $pDoc->jat_type }}">
+                                                            <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" onclick="window.openLiveDocument('{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}', '{{ addslashes($pDoc->jat_type) }}'); return false;" class="rd-live-file-view text-primary px-0.5 hover-zoom flex-shrink-0" style="font-size: 10px;" title="Live View {{ $pDoc->jat_type }}">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
                                                         </div>

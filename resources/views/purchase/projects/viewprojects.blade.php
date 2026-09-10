@@ -154,8 +154,15 @@
                             {{-- PROJECT HEADER --}}
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h3 class="mb-1 text-primary">{{ $project->prj_code }}</h3>
-                                    <div class="text-muted font-weight-bold">{{ $project->prj_title }}</div>
+                                    <div class="mb-1" style="font-size: 1.05rem;" title="Project Head: {{ $project->prj_code }}">
+                                        <span class="text-muted" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; margin-right: 4px; letter-spacing: 0.5px;">Head:</span>
+                                        <strong style="color: #4b5563;">{{ $project->prj_code }}</strong>
+                                    </div>
+                                    <div class="mb-1">
+                                        <a href="{{ route('projects.show', $project->prj_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 1.05rem;" title="View: {{ $project->prj_title }}">
+                                            {{ $project->prj_title }}
+                                        </a>
+                                    </div>
 
                                     @php
                                         $badge = match($status){

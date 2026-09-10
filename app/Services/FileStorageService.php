@@ -214,7 +214,7 @@ class FileStorageService
                     ],
                     'http' => [
                         'method' => 'GET',
-                        'timeout' => 8,
+                        'timeout' => 1,
                         'follow_location' => 1,
                         'header' => "User-Agent: RDWIS-Storage-Sync/2.0\r\n",
                     ],
