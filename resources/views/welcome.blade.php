@@ -1179,13 +1179,14 @@
 
 
           {{-- ========================================================= --}}
-          {{-- CASE 3: UNKNOWN / NO ACCESS --}}
+          {{-- CASE 3: GENERAL / OTHER DEPARTMENTS (Admin, IS, MTSS) --}}
           {{-- ========================================================= --}}
           @else
+          <li class="nav-header">{{ Auth::user()->acc_untname ?? 'General Access' }}</li>
           <li class="nav-item">
-              <a href="#" class="nav-link text-danger">
-                  <i class="nav-icon fas fa-exclamation-circle"></i>
-                  <p>No Access Assigned</p>
+              <a href="{{ route('support.tickets.index') }}" class="nav-link">
+                  <i class="nav-icon fas fa-headset text-info"></i>
+                  <p>Support & Requests</p>
               </a>
           </li>
       @endif

@@ -137,20 +137,19 @@ class User extends Authenticatable
         $auth = strtolower(trim((string) ($this->acc_auth ?? '')));
         $username = strtolower(trim((string) ($this->acc_username ?? '')));
 
+        $desigShort = strtoupper(trim((string) ($this->acc_desigshort ?? '')));
+
         if (
             str_contains($desig, 'MANAGING DIRECTOR') ||
             str_contains($desig, 'DIRECTOR GENERAL') ||
             str_contains($desig, 'DEPUTY DIRECTOR GENERAL') ||
+            in_array($desigShort, ['MD', 'DG', 'DDG', 'MD RDW', 'DG NRDI', 'DDG NRD'], true) ||
             preg_match('/\b(MD|DG|DDG)\b/i', $desig)
         ) {
             return true;
         }
 
         if (in_array($auth, ['md', 'ddg', 'dg'], true)) {
-            return true;
-        }
-
-        if (in_array($username, ['srehman', 'srrehman', 'surehman', 'sarshad', 'kmunir', 'mhussain', 'famir', 'jkhan', 'jhussain', 'aakhtar', 'mimran'], true)) {
             return true;
         }
 

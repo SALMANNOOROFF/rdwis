@@ -97,6 +97,7 @@ class SalaryController extends Controller
      */
     public function generateRequisitions(Request $request)
     {
+        $this->authorize('generate', FinSalOrder::class);
         $user = Auth::user();
         if (!$user) {
             return response()->json(['error' => 'Unauthenticated'], 401);
@@ -203,6 +204,7 @@ class SalaryController extends Controller
      */
     public function ordersIndex(Request $request)
     {
+        $this->authorize('viewAny', FinSalOrder::class);
         $user = Auth::user();
         if (!$user) {
             return redirect()->route('login');
@@ -226,6 +228,7 @@ class SalaryController extends Controller
      */
     public function createOrders(Request $request, int $srqId)
     {
+        $this->authorize('generate', FinSalOrder::class);
         $user = Auth::user();
         if (!$user) {
             return redirect()->route('login');
@@ -263,14 +266,12 @@ class SalaryController extends Controller
             return redirect()->route('login');
         }
 
-        if (strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'hr') {
-            abort(403, 'Unauthorized. HR does not have access to Salary Orders. Salary Orders are managed by Finance.');
-        }
-
         $order = $this->salaryService->getOrderDetail($sorId, $user);
         if (!$order) {
             abort(404, "Salary order #{$sorId} not found or unauthorized.");
         }
+
+        $this->authorize('view', $order);
 
         return view('hr.salary.orders.show', compact('order'));
     }
@@ -280,6 +281,8 @@ class SalaryController extends Controller
      */
     public function approveOrder(Request $request, int $sorId)
     {
+        $order = FinSalOrder::findOrFail($sorId);
+        $this->authorize('approve', $order);
         $user = Auth::user();
         if (!$user) {
             return redirect()->route('login');
@@ -289,7 +292,6 @@ class SalaryController extends Controller
             abort(403, 'Finance approver authorization required to approve salary orders.');
         }
 
-        $order = FinSalOrder::findOrFail($sorId);
         if ($order->sor_status !== 'Draft') {
             return back()->with('error', "Cannot approve order #{$sorId} with status '{$order->sor_status}'. Only 'Draft' orders can be approved.");
         }
@@ -305,16 +307,13 @@ class SalaryController extends Controller
      */
     public function cancelOrder(Request $request, int $sorId)
     {
-        $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login');
-        }
-
         $request->validate([
             'reason' => ['required', 'string', 'max:500'],
         ]);
 
         $order = FinSalOrder::findOrFail($sorId);
+        $this->authorize('override', $order);
+        $user = Auth::user();
         [$lower, $upper] = $this->getUserBounds($user);
 
         if ($order->sor_unt_id < $lower || $order->sor_unt_id > $upper) {
@@ -345,6 +344,8 @@ class SalaryController extends Controller
      */
     public function updateSalary(Request $request, int $sorId)
     {
+        $order = FinSalOrder::findOrFail($sorId);
+        $this->authorize('override', $order);
         $user = Auth::user();
         if (!$user) {
             return redirect()->route('login');

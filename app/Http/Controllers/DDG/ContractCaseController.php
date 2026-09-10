@@ -61,6 +61,8 @@ class ContractCaseController extends Controller
             'unit'
         ])->findOrFail($id);
 
+        $this->authorize('view', $case);
+
         $authorityRole = 'DDG';
         $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
         $canApprove = $this->approvalService->canApprove('DDG', $case);
@@ -71,6 +73,7 @@ class ContractCaseController extends Controller
     public function approve($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'approve']);
         $user = Auth::user();
 
         if (!$this->approvalService->canApprove('DDG', $case)) {
@@ -97,6 +100,7 @@ class ContractCaseController extends Controller
     public function forward($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'forward']);
         $user = Auth::user();
         $remarks = $request->input('remarks');
         if (empty(trim($remarks ?? ''))) {
@@ -116,6 +120,7 @@ class ContractCaseController extends Controller
     public function return($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'return']);
         $user = Auth::user();
         $remarks = $request->input('remarks');
         if (empty(trim($remarks ?? ''))) {
@@ -134,6 +139,7 @@ class ContractCaseController extends Controller
     public function reject($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'reject']);
         $user = Auth::user();
         $remarks = $request->input('remarks', 'Case rejected by DDG.');
         if (empty(trim($remarks ?? ''))) {

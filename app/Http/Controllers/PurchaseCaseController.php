@@ -244,6 +244,7 @@ class PurchaseCaseController extends Controller
         
         $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
+        $this->authorize('view', $purchase);
 
         // Fetch Live Financials from cen.heads
         $project = $purchase->project;
@@ -328,6 +329,7 @@ class PurchaseCaseController extends Controller
         ]);
 
         $purchase = Purchase::findOrFail($id);
+        $this->authorize('processAction', [$purchase, $request->action]);
         $remarks = $request->remarks ?: 'No remarks provided.';
         
         try {

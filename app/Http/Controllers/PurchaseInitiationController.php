@@ -135,12 +135,6 @@ class PurchaseInitiationController extends Controller
         $head = $fin;
 
 
-        $firms = \App\Models\Firm::orderBy('frm_name')->get();
-
-        $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
-        $pageTitle = "Initiation Details: " . $purchase->pcs_title;
-        $area = 'prj';
-
         // Recent Approved Cases for the same project/head
         $recentApproved = Purchase::withCount('items')
             ->where('pcs_hed_id', $purchase->pcs_hed_id)
@@ -166,8 +160,12 @@ class PurchaseInitiationController extends Controller
                 ->get();
         }
 
-        return view('nrdi.purchase_cases_new.show', compact('purchase', 'head', 'firms', 'pageTitle', 'canEdit', 'currentAuthority', 'nextAuthority', 'area', 'subheads', 'recentApproved'));
+        $firms = \App\Models\Firm::orderBy('frm_name')->get();
+        $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
+        $pageTitle = "Initiation Details: " . $purchase->pcs_title;
+        $area = 'prj';
 
+        return view('nrdi.purchase_cases_new.show', compact('purchase', 'head', 'firms', 'pageTitle', 'canEdit', 'currentAuthority', 'nextAuthority', 'area', 'subheads', 'recentApproved'));
     }
 
     /**
@@ -176,6 +174,7 @@ class PurchaseInitiationController extends Controller
     public function holdCase($id)
     {
         $purchase = Purchase::with('currentSubstatus')->findOrFail($id);
+        $this->authorize('update', $purchase);
         
         // Security check
         if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
@@ -266,6 +265,7 @@ class PurchaseInitiationController extends Controller
         if ($op === 'add_files' || $op === 'delete_file') {
             // Any authenticated user can upload or remove case attachments across all stages
             $purchase = Purchase::findOrFail($id);
+            $this->authorize('update', $purchase);
         } else {
             $query = Purchase::query();
             if ($isDProc) {
@@ -277,6 +277,7 @@ class PurchaseInitiationController extends Controller
             }
 
             $purchase = $query->findOrFail($id);
+            $this->authorize('update', $purchase);
 
             $status = strtolower(trim((string) $purchase->pcs_status));
             if (!in_array($status, ['draft', 'returned']) && !$isDProc) {

@@ -58,22 +58,10 @@ class ProjectController extends Controller
         return redirect()->route('login');
     }
 
-    $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
-    $isHqOrFin = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin'], true);
-
-    if ($isHqOrFin) {
-        $lower = 0;
-        $upper = 99999999;
-    } else {
-        [$lower, $upper] = $user->acc_lowers == 0
-            ? [$user->acc_lowerm, $user->acc_upperm]
-            : [$user->acc_lowers, $user->acc_uppers];
-    }
-
     $closedStatuses = ['Closed', 'Completed', 'Cancelled'];
 
-    $query = Project::with('unit')
-        ->whereBetween('prj_unt_id', [$lower, $upper]);
+    $query = Project::with('unit');
+    app(\App\Services\Auth\DataScopeService::class)->scopeProjects($query, $user);
 
     $status = (string) $request->query('status', 'open');
     if ($status === 'closed') {
@@ -520,6 +508,8 @@ class ProjectController extends Controller
     // --- 2. CREATE PROJECT PAGE (Smart Logic) ---
     public function create(Request $request)
     {
+        $this->authorize('create', Project::class);
+
         $project = null;
         $step = 1;
 
@@ -536,6 +526,8 @@ class ProjectController extends Controller
     // --- STORE (Phase 1) ---
     public function store(Request $request)
     {
+        $this->authorize('create', Project::class);
+
         $connection = config('database.default'); 
         
         $request->validate([
@@ -580,6 +572,7 @@ class ProjectController extends Controller
     public function finalizeProject(Request $request, $id)
     {
         $project = Project::findOrFail($id);
+        $this->authorize('update', $project);
 
         $request->validate([
             'prj_startdt' => 'required|date',
@@ -824,6 +817,8 @@ class ProjectController extends Controller
     {
         $milestone = Milestone::where('msn_id', $id)->firstOrFail();
         $projectId = $milestone->msn_xprj_id;
+        $project = Project::findOrFail($projectId);
+        $this->authorize('update', $project);
         $desc = $milestone->msn_desc;
 
         if (!empty($milestone->msn_cc_path)) {
@@ -983,11 +978,16 @@ class ProjectController extends Controller
 
    public function sordIndex()
 {
+    $user = Auth::user();
     // 1. Saari Divisions uthao ('prj' area wali) dropdown ke liye
     $divisions = Unit::where('unt_area', 'prj')->orderBy('unt_name', 'asc')->get();
 
-    // 2. Saare Projects uthao (Unit relation ke sath taake naam dikha sakein)
-    $projects = Project::with('unit')->orderBy('prj_id', 'desc')->get();
+    // 2. Saare Projects uthao scoped to SORD data boundaries
+    $query = Project::with('unit')->orderBy('prj_id', 'desc');
+    if ($user) {
+        app(\App\Services\Auth\DataScopeService::class)->scopeProjects($query, $user);
+    }
+    $projects = $query->get();
 
     $this->attachProjectEmployeeCounts($projects);
 

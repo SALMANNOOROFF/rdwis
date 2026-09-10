@@ -13,18 +13,26 @@ use PhpOffice\PhpWord\IOFactory;
 
 class MprController extends Controller
 {
-    // 1. SORD Inbox (UPDATED: Ab Returned files bhi dikhayega)
+    // 1. SORD Inbox (UPDATED: Organizational seat + Returned files)
     public function sordInbox()
     {
         $user = Auth::user();
-        
-        // Logic: Wo documents dikhao jo:
-        // 1. SORD (Mere) paas hain (current_owner_id = me)
-        // 2. YA jinka status 'Returned' hai (Taake wo inbox se gayab na hon)
+        if (!$user) return redirect()->route('login');
+
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        if (!$context->isSuperAdmin() && !$context->isSord()) {
+            abort(403, 'Unauthorized. SORD access required.');
+        }
+
+        // Organizational Seat Logic:
+        // Shows all documents held by current SORD or in active SORD workflow statuses
         $documents = Document::with(['project', 'creator.unit', 'latestVersion'])
                              ->where(function($query) use ($user) {
                                  $query->where('current_owner_id', $user->acc_id)
-                                       ->orWhere('status', 'Returned'); // <--- YE LINE ADD KI HAI
+                                       ->orWhere('status', 'Returned')
+                                       ->orWhere('status', 'Under Review by SORD')
+                                       ->orWhere('status', 'Submitted to SORD')
+                                       ->orWhere('status', 'Pending Review');
                              })
                              ->orderBy('updated_at', 'desc')
                              ->get();
@@ -60,10 +68,16 @@ class MprController extends Controller
         return view('SORD.review_mpr', compact('document', 'divisionVersion', 'sordVersion', 'latestVersion', 'isEditable'));
     }
 
-    // 3. Action Handler (Same as before)
+    // 3. Action Handler (With Server-side Permission Check)
     public function sordAction(Request $request)
     {
         $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        if (!$context->isSuperAdmin() && !\App\Services\Auth\RolePermissionMap::hasPermission($user, \App\Services\Auth\PermissionRegistry::MPR_REVIEW)) {
+            abort(403, 'Unauthorized to perform SORD MPR action.');
+        }
         $docId = $request->doc_id;
         $action = $request->action;
 

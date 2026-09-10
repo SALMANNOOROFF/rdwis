@@ -69,6 +69,7 @@ class ContractCaseController extends Controller
 
     public function create(Request $request)
     {
+        $this->authorize('create', HrCtrCase::class);
         $type = $request->query('type', 'Hg');
         $user = Auth::user();
         $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
@@ -224,6 +225,7 @@ class ContractCaseController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', HrCtrCase::class);
         $user = Auth::user();
         $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
 
@@ -400,6 +402,8 @@ class ContractCaseController extends Controller
             'employee'
         ])->findOrFail($id);
 
+        $this->authorize('update', $case);
+
         $user = Auth::user();
         $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
 
@@ -448,6 +452,7 @@ class ContractCaseController extends Controller
     public function update($id, Request $request)
     {
         $case = HrCtrCase::with(['currentSubstatus', 'previousContract'])->findOrFail($id);
+        $this->authorize('update', $case);
         $user = Auth::user();
         $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
 
@@ -606,6 +611,8 @@ class ContractCaseController extends Controller
             'unit'
         ])->findOrFail($id);
 
+        $this->authorize('view', $case);
+
         $authorityRole = 'Division';
         $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
         $canApprove = false;
@@ -616,6 +623,7 @@ class ContractCaseController extends Controller
     public function release($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'release']);
 
         // Enforce candidate CNIC validation before release
         $cnic = $case->candidate_cnic;
@@ -643,6 +651,7 @@ class ContractCaseController extends Controller
     public function forward($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'forward']);
         $user = Auth::user();
         $remarks = $request->input('remarks');
         if (empty(trim($remarks ?? ''))) {
@@ -678,6 +687,7 @@ class ContractCaseController extends Controller
     public function cancel($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'cancel']);
         $user = Auth::user();
         $remarks = $request->input('remarks', 'Cancelled by division');
 

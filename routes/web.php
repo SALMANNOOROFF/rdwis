@@ -458,8 +458,9 @@ Route::middleware('auth')->group(function () {
             ->name('division.finance-of-project.projects-by-division');
 
         Route::get('/milestone/{id}/edit', [ProjectController::class, 'editMilestone'])->name('milestone.edit');
-        Route::post('/milestone/{id}/update', [ProjectController::class, 'updateMilestone'])->name('milestone.update');
-        Route::get('/milestone/{id}/delete', [ProjectController::class, 'deleteMilestone'])->name('milestone.delete');
+        Route::match(['get', 'post', 'delete'], '/milestone/{id}/delete', [ProjectController::class, 'deleteMilestone'])
+            ->name('milestone.delete')
+            ->middleware('approver');
         Route::get('/gantchartpr', function () { return view('projects.gantchartpr'); })->name('gantchartpr');
 
         // --- PURCHASE & REPORTS (Project area) ---

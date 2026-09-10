@@ -107,6 +107,8 @@ class PurchaseApprovalController extends Controller
         $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
             ->findOrFail($id);
 
+        $this->authorize('view', $purchase);
+
         // Financial Intelligence (Legacy Logic)
         $finService = app(\App\Services\FinancialIntelligenceService::class);
         $head = $finService->getHeadStatus($purchase->pcs_hed_id);
@@ -174,6 +176,7 @@ class PurchaseApprovalController extends Controller
         ]);
 
         $purchase = Purchase::findOrFail($id);
+        $this->authorize('processAction', [$purchase, $request->action]);
         $remarks = $request->remarks ?: 'No remarks provided.';
         
         try {

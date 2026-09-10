@@ -44,6 +44,28 @@ class AppServiceProvider extends ServiceProvider
             $badges = \App\Services\SidebarBadgeService::getBadgesForUser();
             $view->with('sidebarBadges', $badges);
         });
+
+        // Register Dynamic Authorization Gates
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if ($user instanceof \App\Models\CenAccount && \App\Services\Auth\UserAccessContext::forUser($user)->isSuperAdmin()) {
+                return true;
+            }
+        });
+
+        foreach (\App\Services\Auth\PermissionRegistry::all() as $permission) {
+            \Illuminate\Support\Facades\Gate::define($permission, function ($user) use ($permission) {
+                if ($user instanceof \App\Models\CenAccount) {
+                    return \App\Services\Auth\RolePermissionMap::hasPermission($user, $permission);
+                }
+                return false;
+            });
+        }
+
+        // Register Model Policies
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Project::class, \App\Policies\ProjectPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Purchase::class, \App\Policies\PurchaseCasePolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\HrCtrCase::class, \App\Policies\ContractCasePolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\FinSalOrder::class, \App\Policies\SalaryOrderPolicy::class);
     }
 }
 

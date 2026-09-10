@@ -43,14 +43,9 @@ class PurchaseController extends Controller
             return redirect()->route('login');
         }
 
-        [$lower, $upper] = $user->acc_lowers == 0
-            ? [$user->acc_lowerm, $user->acc_upperm]
-            : [$user->acc_lowers, $user->acc_uppers];
-
-        $purchases = Purchase::with(['project'])
-            ->whereBetween('pcs_unt_id', [$lower, $upper])
-            ->orderBy('pcs_id', 'desc')
-            ->get();
+        $query = Purchase::with(['project'])->orderBy('pcs_id', 'desc');
+        app(\App\Services\Auth\DataScopeService::class)->scopePurchases($query, $user);
+        $purchases = $query->get();
 
         $detailsRouteName = 'nrdi.purchase_cases.show';
         $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
@@ -72,6 +67,8 @@ class PurchaseController extends Controller
                         ->where('pcs_unt_id', $userUnitId)
                         ->firstOrFail();
 
+    $this->authorize('view', $purchase);
+
     $firms = DB::table('frm.firmz')->select('frm_id as id', 'frm_name as name')->get();
 
     return view('purchase.new_case.purchasecasedetails', compact('purchase', 'firms'));
@@ -84,14 +81,10 @@ class PurchaseController extends Controller
             return redirect()->route('login');
         }
 
-        [$lower, $upper] = $user->acc_lowers == 0
-            ? [$user->acc_lowerm, $user->acc_upperm]
-            : [$user->acc_lowers, $user->acc_uppers];
-
         $purchase = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments'])
-            ->where('pcs_id', $id)
-            ->whereBetween('pcs_unt_id', [$lower, $upper])
-            ->firstOrFail();
+            ->findOrFail($id);
+
+        $this->authorize('view', $purchase);
 
         // Load account head info (which budget head is being charged)
         $head    = DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->first();
@@ -145,6 +138,8 @@ class PurchaseController extends Controller
      */
     public function unifiedCreate(Request $request, $type = 'material')
     {
+        $this->authorize('create', Purchase::class);
+
         // If type is empty or generic, default to material
         if (!$type || $type == 'all') $type = 'material';
 
@@ -179,6 +174,8 @@ class PurchaseController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Purchase::class);
+
         // 1. Validation
         $request->validate([
             'pcs_title' => 'required',
@@ -774,6 +771,7 @@ class PurchaseController extends Controller
         ]);
 
         $purchase = Purchase::findOrFail($id);
+        $this->authorize('update', $purchase);
         
         if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
             return back()->with('error', 'Unauthorized access.');
@@ -792,6 +790,7 @@ class PurchaseController extends Controller
     public function releaseCase(Request $request, $id)
     {
         $pcs = Purchase::findOrFail($id);
+        $this->authorize('update', $pcs);
         $remarks = $request->input('remarks') ?: 'Case released by Division.';
         $action = $request->input('action') ?: 'forward';
         $targetStage = $request->input('target_status') ?? $request->input('target_destination');
@@ -819,6 +818,7 @@ class PurchaseController extends Controller
     public function holdCase($id)
     {
         $purchase = Purchase::with('currentSubstatus')->findOrFail($id);
+        $this->authorize('update', $purchase);
         
         // Authorization: Only initiator can hold their own case
         if ($purchase->pcs_unt_id != Auth::user()->acc_unt_id) {
@@ -872,6 +872,7 @@ class PurchaseController extends Controller
     public function selectFirm(Request $request, $id)
     {
         $purchase = Purchase::with('quotes')->findOrFail($id);
+        $this->authorize('update', $purchase);
         $quoteId = $request->input('quote_id');
         
         $selectedQuote = $purchase->quotes->firstWhere('qte_id', $quoteId);

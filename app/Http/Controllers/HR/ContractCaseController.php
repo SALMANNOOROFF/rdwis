@@ -91,6 +91,8 @@ class ContractCaseController extends Controller
             'unit'
         ])->findOrFail($id);
 
+        $this->authorize('view', $case);
+
         $authorityRole = 'HR';
         $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
         $canApprove = false;
@@ -104,6 +106,7 @@ class ContractCaseController extends Controller
     public function addEmployee($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('update', $case);
         $user = Auth::user();
 
         // Server-side authorization check: Only HR administrators can register new employees
@@ -167,6 +170,7 @@ class ContractCaseController extends Controller
     public function forward($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'forward']);
         $user = Auth::user();
         $remarks = $request->input('remarks');
         if (empty(trim($remarks ?? ''))) {
@@ -186,6 +190,7 @@ class ContractCaseController extends Controller
     public function return($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'return']);
         $user = Auth::user();
         $remarks = $request->input('remarks');
         if (empty(trim($remarks ?? ''))) {
@@ -204,6 +209,7 @@ class ContractCaseController extends Controller
     public function fulfill($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'fulfill']);
         $user = Auth::user();
 
         try {
@@ -224,6 +230,7 @@ class ContractCaseController extends Controller
     public function reject($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'reject']);
         $user = Auth::user();
         $remarks = $request->input('remarks', 'Case rejected by HR.');
         if (empty(trim($remarks ?? ''))) {

@@ -27,28 +27,34 @@ class DocMprController extends Controller
                                 ->first();
         }
 
-        // Permissions
-        $isEditable = true;
+        // Permissions & Organizational Seat Logic
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        $isViewer = $context->isViewer();
+        $isSeatOwner = ($user->acc_unt_id == $project->prj_unt_id);
+
+        $isEditable = false;
         $isReturned = false;
         $isFinalized = false;
 
         if ($document) {
-            // Case 1: Agar file mere paas nahi hai
-            if ($document->current_owner_id != $user->acc_id) {
-                $isEditable = false;
+            // Document is editable by current owner OR active seat holder for the project unit
+            if (($document->current_owner_id == $user->acc_id || $isSeatOwner) && !$isViewer) {
+                if ($document->status === 'Draft' || $document->status === 'Returned') {
+                    $isEditable = true;
+                }
             }
-            
-            // Case 2: Status Returned Check
-            if ($document->status == 'Returned' && $document->current_owner_id == $user->acc_id) {
-                $isEditable = true;
+
+            if ($document->status === 'Returned') {
                 $isReturned = true;
             }
 
-            // Case 3: Finalized
-            if (in_array($document->status, ['Approved', 'Forwarded to MD'])) {
+            if (in_array($document->status, ['Approved', 'Forwarded to MD', 'Finalized'])) {
                 $isEditable = false;
                 $isFinalized = true;
             }
+        } elseif ($isSeatOwner && !$isViewer) {
+            // New draft MPR can be created by seat holder
+            $isEditable = true;
         }
 
         return view('projects.viewmpr', compact('project', 'document', 'isEditable', 'isReturned', 'isFinalized'));
@@ -85,9 +91,10 @@ class DocMprController extends Controller
     public function store(Request $request, $projectId)
     {
         $user = Auth::user();
-        
-        // Debugging ke liye: Agar DB update na ho to neeche wali line uncomment karein
-        // dd($request->all()); 
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        if ($context->isViewer()) {
+            abort(403, 'Unauthorized. Viewer accounts cannot submit or modify MPRs.');
+        }
 
         DB::beginTransaction();
 
@@ -115,9 +122,8 @@ class DocMprController extends Controller
             
             // --- ACTION: FORWARD TO SORD ---
             if ($request->action == 'forward') {
-                $sordUser = $this->getSordUser();
-                
-                if(!$sordUser) $sordUser = User::where('acc_username', 'nislam2')->first(); // Fallback
+                $sordUser = app(\App\Services\Auth\OfficerReplacementService::class)->activeSordOccupant()
+                    ?? $this->getSordUser();
 
                 if ($sordUser) {
                     // FORCE UPDATE
