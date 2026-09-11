@@ -75,10 +75,6 @@ class PurchaseReceiptController extends Controller
     public function create($pcs_id)
     {
         $user = auth()->user();
-        if ($user && in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true)) {
-            return redirect()->route('inventory.assets.index')->with('error', 'Director Procurement has view-only access to Inventory and Assets.');
-        }
-
         $purchase = DB::table('pur.purcases as p')
             ->leftJoin('cen.heads as h', 'p.pcs_hed_id', '=', 'h.hed_id')
             ->leftJoin('cen.units as u', 'p.pcs_unt_id', '=', 'u.unt_id')
@@ -88,6 +84,11 @@ class PurchaseReceiptController extends Controller
             ->whereIn('p.pcs_status', ['Approved', 'Fulfilled', 'Partially Fulfilled'])
             ->select('p.*', 'h.hed_code', 'h.hed_name', 'u.unt_namesh', 'iu.unt_namesh as int_unt_namesh', 'f.frm_name')
             ->firstOrFail();
+
+        $isCommand = method_exists($user, 'isMdDdgDg') && $user->isMdDdgDg();
+        $isProc = in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true);
+        $isConcernedDivision = !$isCommand && !$isProc && ($purchase->pcs_intunt_id == $user->acc_unt_id || $purchase->pcs_unt_id == $user->acc_unt_id);
+        $canReceive = $isConcernedDivision && ($purchase->pcs_fulfillment_status !== 'Fully Received') && in_array($purchase->pcs_status, ['Approved', 'Partially Fulfilled']);
 
         $items = DB::table('pur.purcaseitems')
             ->where('pci_pcs_id', $pcs_id)
@@ -107,7 +108,7 @@ class PurchaseReceiptController extends Controller
                 ->get();
         }
 
-        return view('purchase.receipts.create', compact('purchase', 'items', 'previousReceipts'));
+        return view('purchase.receipts.create', compact('purchase', 'items', 'previousReceipts', 'canReceive', 'isConcernedDivision'));
     }
 
     /**
@@ -116,8 +117,14 @@ class PurchaseReceiptController extends Controller
     public function store(Request $request, $pcs_id)
     {
         $user = auth()->user();
-        if ($user && in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true)) {
-            return back()->with('error', 'Director Procurement is not authorized to create goods receipts.');
+        $purchase = DB::table('pur.purcases')->where('pcs_id', $pcs_id)->firstOrFail();
+
+        $isCommand = method_exists($user, 'isMdDdgDg') && $user->isMdDdgDg();
+        $isProc = in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true);
+        $isConcernedDivision = !$isCommand && !$isProc && ($purchase->pcs_intunt_id == $user->acc_unt_id || $purchase->pcs_unt_id == $user->acc_unt_id);
+
+        if (!$isConcernedDivision) {
+            return back()->with('error', 'Only the concerned division holding the purchase items is authorized to create goods receipts.');
         }
 
         $request->validate([
@@ -127,8 +134,6 @@ class PurchaseReceiptController extends Controller
         ]);
 
         $prtDate = $request->filled('prt_date') ? $request->prt_date : now()->toDateString();
-
-        $purchase = DB::table('pur.purcases')->where('pcs_id', $pcs_id)->firstOrFail();
 
         // Validation 1: Re-verify case is Approved or Partially Fulfilled
         if (!in_array($purchase->pcs_status, ['Approved', 'Partially Fulfilled'])) {
@@ -279,7 +284,16 @@ class PurchaseReceiptController extends Controller
      */
     public function cancelCase(Request $request, $pcs_id)
     {
+        $user = auth()->user();
         $purchase = DB::table('pur.purcases')->where('pcs_id', $pcs_id)->firstOrFail();
+
+        $isCommand = method_exists($user, 'isMdDdgDg') && $user->isMdDdgDg();
+        $isProc = in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true);
+        $isConcernedDivision = !$isCommand && !$isProc && ($purchase->pcs_intunt_id == $user->acc_unt_id || $purchase->pcs_unt_id == $user->acc_unt_id);
+
+        if (!$isConcernedDivision) {
+            return back()->with('error', 'Only the concerned division is authorized to cancel a purchase case.');
+        }
 
         // Check for any draft receipts for this case
         $draftReceipt = DB::table('pur.purreceipts')
@@ -470,8 +484,22 @@ class PurchaseReceiptController extends Controller
     public function updateAssetStatus(Request $request, $iac_id)
     {
         $user = auth()->user();
-        if ($user && in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true)) {
-            return back()->with('error', 'Director Procurement is not authorized to perform status transitions.');
+        $asset = DB::table('ina.invatcomps as c')
+            ->join('ina.invats as a', 'c.iac_ias_id', '=', 'a.ias_id')
+            ->where('c.iac_id', $iac_id)
+            ->select('c.*', 'a.ias_unt_id')
+            ->first();
+
+        if (!$asset) {
+            return back()->with('error', 'Asset component not found.');
+        }
+
+        $isCommand = method_exists($user, 'isMdDdgDg') && $user->isMdDdgDg();
+        $isProc = in_array(strtolower(trim($user->acc_untarea ?? '')), ['proc', 'prc'], true);
+        $isConcernedDivision = !$isCommand && !$isProc && ($asset->ias_unt_id == $user->acc_unt_id);
+
+        if (!$isConcernedDivision) {
+            return back()->with('error', 'Only the concerned division holding this asset is authorized to perform status transitions.');
         }
 
         $request->validate([

@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -111,8 +111,15 @@
             </p>
         </div>
         <div>
+            @php
+                $headerUser = Auth::user();
+                $isCmdHeader = method_exists($headerUser, 'isMdDdgDg') && $headerUser->isMdDdgDg();
+                $isProcHeader = in_array(strtolower(trim($headerUser->acc_untarea ?? '')), ['proc', 'prc'], true);
+                $isFinHeader = strtolower(trim($headerUser->acc_untarea ?? '')) === 'fin';
+                $canReceiveHeader = !$isCmdHeader && !$isProcHeader && !$isFinHeader;
+            @endphp
             <a href="{{ route('purchase.receipts.index') }}" class="btn btn-sm btn-outline-info font-weight-bold">
-                <i class="fas fa-boxes mr-1"></i> Receive Goods
+                <i class="fas fa-boxes mr-1"></i> {{ $canReceiveHeader ? 'Receive Goods' : 'View Receipts' }}
             </a>
         </div>
     </div>
@@ -267,7 +274,11 @@
 
     <!-- Data Table -->
     @php
-        $isProc = in_array(strtolower(trim(Auth::user()->acc_untarea ?? '')), ['proc', 'prc'], true);
+        $currUser = Auth::user();
+        $isCmd = method_exists($currUser, 'isMdDdgDg') && $currUser->isMdDdgDg();
+        $isProc = in_array(strtolower(trim($currUser->acc_untarea ?? '')), ['proc', 'prc'], true);
+        $isFin = strtolower(trim($currUser->acc_untarea ?? '')) === 'fin';
+        $canPerformAction = !$isCmd && !$isProc && !$isFin;
     @endphp
     <div class="card card-cyber p-4 mb-4">
         <div class="table-responsive">
@@ -283,7 +294,7 @@
                         <th>Total Value</th>
                         <th>Status</th>
                         <th>Custodian / Location</th>
-                        @if(!$isProc)
+                        @if($canPerformAction)
                             <th>Actions</th>
                         @endif
                     </tr>
@@ -345,17 +356,21 @@
                                 <div class="small text-dark font-weight-bold">{{ $a->iac_person ?? 'Store Custody' }}</div>
                                 <div class="small text-muted"><i class="fas fa-map-marker-alt text-danger mr-1"></i>{{ $a->iac_location ?? 'Main Warehouse' }}</div>
                             </td>
-                            @if(!$isProc)
+                            @if($canPerformAction)
                             <td>
-                                <button type="button" class="btn btn-sm btn-outline-info" data-toggle="modal" data-target="#updateModal{{ $a->iac_id }}">
-                                    Transition
-                                </button>
+                                @if($a->ias_unt_id == $currUser->acc_unt_id)
+                                    <button type="button" class="btn btn-sm btn-outline-info font-weight-bold" data-toggle="modal" data-target="#updateModal{{ $a->iac_id }}">
+                                        Transition
+                                    </button>
+                                @else
+                                    <span class="text-muted small"><i class="fas fa-lock mr-1"></i> View Only</span>
+                                @endif
                             </td>
                             @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $isProc ? '9' : '10' }}" class="text-center py-4 text-muted">
+                            <td colspan="{{ $canPerformAction ? '10' : '9' }}" class="text-center py-4 text-muted">
                                 No inventory items or assets found matching the selected filters.
                             </td>
                         </tr>
@@ -369,9 +384,10 @@
         </div>
     </div>
 
-    @if(!$isProc)
+    @if($canPerformAction)
     <!-- Modals Section -->
     @foreach($assets as $a)
+        @if($a->ias_unt_id == $currUser->acc_unt_id)
         <div class="modal fade" id="updateModal{{ $a->iac_id }}" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-white border border-secondary text-dark">
@@ -389,14 +405,14 @@
                             </div>
 
                             <div class="form-group mb-3">
-                                <label class="text-muted small">Target Status <span class="text-danger">*</span></label>
+                                <label class="text-dark small font-weight-bold">Status Transition <span class="text-danger">*</span></label>
                                 <select name="iac_status" class="form-control form-control-cyber" required>
-                                    <optgroup label="On Charge (Store Custody)">
-                                        <option value="Held" {{ $a->iac_status === 'Held' ? 'selected' : '' }}>Held in Store</option>
-                                        <option value="Tagged" {{ $a->iac_status === 'Tagged' ? 'selected' : '' }}>Tagged</option>
+                                    <optgroup label="On Charge (In Store / Warehouse)">
                                         <option value="Untagged" {{ $a->iac_status === 'Untagged' ? 'selected' : '' }}>Untagged</option>
+                                        <option value="Tagged" {{ $a->iac_status === 'Tagged' ? 'selected' : '' }}>Tagged</option>
+                                        <option value="Held" {{ $a->iac_status === 'Held' ? 'selected' : '' }}>Held</option>
                                     </optgroup>
-                                    <optgroup label="Off Charge (Dispensed Custody)">
+                                    <optgroup label="Off Charge (Issued / Consumed / Written Off)">
                                         <option value="Issued to User" {{ $a->iac_status === 'Issued to User' ? 'selected' : '' }}>Issued to User</option>
                                         <option value="Installed" {{ $a->iac_status === 'Installed' ? 'selected' : '' }}>Installed</option>
                                         <option value="Consumed" {{ $a->iac_status === 'Consumed' ? 'selected' : '' }}>Consumed</option>
@@ -406,17 +422,17 @@
                             </div>
 
                             <div class="form-group mb-3">
-                                <label class="text-muted small">Custodian / Issued To Person</label>
-                                <input type="text" name="iac_person" class="form-control form-control-cyber" value="{{ $a->iac_person }}" placeholder="e.g. John Doe / Engr. Ali">
+                                <label class="text-dark small font-weight-bold">Custodian / Person Responsible</label>
+                                <input type="text" name="iac_person" class="form-control form-control-cyber" value="{{ $a->iac_person }}" placeholder="e.g. Engr. Ahmad / Officer In-Charge">
                             </div>
 
                             <div class="form-group mb-3">
-                                <label class="text-muted small">Location</label>
+                                <label class="text-dark small font-weight-bold">Location / Room / Lab</label>
                                 <input type="text" name="iac_location" class="form-control form-control-cyber" value="{{ $a->iac_location }}" placeholder="e.g. Lab 102 / Office 5">
                             </div>
 
                             <div class="form-group mb-3">
-                                <label class="text-muted small">Remarks</label>
+                                <label class="text-dark small font-weight-bold">Remarks</label>
                                 <textarea name="iac_remarks" class="form-control form-control-cyber" rows="2" placeholder="Notes or issue reference">{{ $a->iac_remarks }}</textarea>
                             </div>
                         </div>
@@ -427,6 +443,8 @@
                     </form>
                 </div>
             </div>
+        </div>
+        @endif
     @endforeach
     @endif
 </div>

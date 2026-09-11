@@ -131,7 +131,7 @@
             <div class="meta-item"><span class="meta-label">SST:</span> <span class="meta-value text-right">{{ number_format($sst, 2) }}</span></div>
             
             <div class="meta-item"><span class="meta-label">Date:</span> <span class="meta-value">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M y') }}</span></div>
-            <div class="meta-item"><span class="meta-label"></span> <span class="meta-value"></span></div>
+            <div class="meta-item"><span class="meta-label">Subhead:</span> <span class="meta-value" style="font-weight: 600;">{{ $purchase->subhead_display }}</span></div>
             <div class="meta-item"><span class="meta-label">GST:</span> <span class="meta-value text-right">{{ number_format($gst, 2) }}</span></div>
             
             <div class="meta-item"><span class="meta-label">Initiator:</span> <span class="meta-value">{{ $purchase->unit?->unt_namesh ?? 'Division' }}</span></div>

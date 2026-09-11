@@ -38,34 +38,51 @@ class PurchaseInitiationController extends Controller
             ->orderBy('pcs_id', 'desc')
             ->get();
 
-        $actionReqCases = $purchases->filter(function($p) {
+        $actionReqCases = $purchases->filter(function($p) use ($user, $unitId) {
             $status = strtolower(trim($p->pcs_status));
-            if ($status === 'returned') return true;
-            if ($status === 'draft') {
-                $isPs = app(\App\Services\PurchaseApprovalService::class)->isProcurementCase($p->pcs_type);
-                if (!$isPs) return true; // Non-PS draft is always Action Required for Division
-                
-                // For PS cases:
-                $hasFloated = $p->decisions->contains(fn($d) => in_array($d->pdec_action, ['float_to_proc', 'reshare_to_proc']));
-                $hasDProcSaved = $p->decisions->contains(fn($d) => $d->pdec_action === 'dproc_save');
-
-                // If not floated yet, or DProc has saved and returned, it is Action Required for Division
-                if (!$hasFloated || $hasDProcSaved) {
-                    return true;
-                }
-                return false; // Floated and waiting for DProc -> in Open / Pipeline
+            if (in_array($status, ['fulfilled', 'completed', 'cancelled', 'rejected', 'not approved', 'approved'])) {
+                return false;
             }
+
+            $latest = $p->latestDecision;
+
+            // 1. Initial Draft:
+            if ($status === 'draft') {
+                $hasFloatedOrForwarded = $p->decisions->contains(fn($d) => in_array($d->pdec_action, ['float_to_proc', 'reshare_to_proc', 'forward', 'forward_negative']));
+                if ($hasFloatedOrForwarded) {
+                    return false; // Floated / forwarded into pipeline
+                }
+                return true; // Unfloated initial draft
+            }
+
+            // 2. Active cases (Returned or Under Approval):
+            $currentStage = $p->currentSubstatus?->pss_stage;
+            $isWithDivision = ($currentStage === 'Division');
+
+            $isLatestByMyUnit = ($latest && (int)($latest->account?->acc_unt_id ?? 0) === (int)$unitId);
+            $isLatestByMe = ($latest && (int)$latest->pdec_acc_id === (int)$user->acc_id);
+            $isDivisionAction = ($isLatestByMyUnit || $isLatestByMe) && in_array($latest->pdec_action, ['forward', 'forward_negative', 'float_to_proc', 'reshare_to_proc']);
+
+            if ($isDivisionAction) {
+                return false; // Division forwarded it out -> in Open pipeline
+            }
+
+            if ($isWithDivision || $status === 'returned') {
+                return true; // In Division's hands -> Action Required!
+            }
+
             return false;
         });
 
         $initiatedCases = $purchases->filter(function($p) use ($actionReqCases) {
             $status = strtolower(trim($p->pcs_status));
-            if (in_array($status, ['fulfilled', 'completed', 'cancelled', 'rejected'])) return false;
+            if (in_array($status, ['fulfilled', 'partially fulfilled', 'completed', 'cancelled', 'rejected', 'not approved'])) return false;
             return !$actionReqCases->contains('pcs_id', $p->pcs_id);
         });
 
         $completedCases = $purchases->filter(function($p) {
-            return in_array(strtolower(trim($p->pcs_status)), ['fulfilled', 'completed', 'cancelled', 'rejected']);
+            $status = strtolower(trim($p->pcs_status));
+            return in_array($status, ['fulfilled', 'partially fulfilled', 'completed', 'cancelled', 'rejected', 'not approved']);
         });
 
         $pageTitle = "PC Initiation Hub";

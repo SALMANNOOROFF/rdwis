@@ -152,6 +152,7 @@ Route::middleware('auth')->group(function () {
         // Universal Project Financial View Route (Full Page)
         Route::get('/project/{id}/financial-view', [ProjectController::class, 'financialView'])->name('projects.financial_view');
         Route::get('/project/{id}/financial-view-page', [ProjectController::class, 'financialView'])->name('projects.financial-view');
+        Route::get('/project/{id}/print-financial-summary', [ProjectController::class, 'printFinancialSummary'])->name('projects.print_financial_summary');
         Route::get('/openprojectdetails/{id}/financial-view', [ProjectController::class, 'financialView']);
 
         Route::get('/sord/dashboard', [\App\Http\Controllers\DashboardController::class, 'sord'])
@@ -759,7 +760,7 @@ Route::middleware('auth')->group(function () {
     // ====================================================
     Route::prefix('finance/accounts')
         ->name('finance.accounts.')
-        ->middleware(['area:fin,nrdi,hqs,rdw,it,prj,rdwprj'])
+        ->middleware(['area:fin'])
         ->group(function () {
             Route::get('/', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'create'])->name('create');

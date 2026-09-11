@@ -16,6 +16,13 @@
     $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division', 'initiation']);
     $isDProcDraft = ($userArea === 'proc' && in_array(trim($purchase->pcs_status), ['Draft', 'Returned']));
 
+    $latestDecision = $purchase->latestDecision ?? $purchase->decisions->sortByDesc('pdec_id')->first();
+    $iTookLatestAction = $latestDecision 
+        && ((int) $latestDecision->pdec_acc_id === (int) $u->acc_id) 
+        && in_array($latestDecision->pdec_action, ['forward', 'forward_negative', 'return', 'float_to_proc', 'reshare_to_proc']);
+
+    $isFinalized = in_array(strtolower(trim($purchase->pcs_status)), ['approved', 'rejected', 'cancelled', 'not approved', 'fulfilled', 'completed']);
+
     $expectedStages = match($userArea) {
         'prj', 'rdwprj', 'division' => ['Division'],
         'proc' => ['DProc', 'Division'],
@@ -23,12 +30,23 @@
         'rdw'  => ['MD'],
         'hqs'  => ['DDG'],
         'nrdi' => ['DG'],
+        'is'   => ['IS'],
+        'it'   => ['IT'],
+        'adm', 'admin' => ['Admin'],
         default => ['None']
     };
 
-    $isCurrentStage = in_array($currentStage, $expectedStages) 
-        || ($userArea === 'proc' && $isDraft && $hasFloated)
-        || ($isInitiator && ($isDraft || $isReturned));
+    if ($isFinalized || $iTookLatestAction) {
+        $isCaseWithMe = false;
+    } elseif ($userArea === 'proc') {
+        $isCaseWithMe = ($currentStage === 'DProc') || ($isDraft && $hasFloated && !$hasDProcSaved);
+    } elseif ($isInitiator) {
+        $isWaitingWithProc = ($hasFloated && !$hasDProcSaved && strtolower(trim($purchase->pcs_type ?? 'ps')) === 'ps');
+        $isCaseWithMe = ($currentStage === 'Division' || $isDraft || $isReturned) && !$isWaitingWithProc;
+    } else {
+        $isCaseWithMe = in_array($currentStage, $expectedStages);
+    }
+
     $currentStatusDisplay = $purchase->current_stage_display ?? $service->getStatusDisplayName($purchase->pcs_status);
 
     // Calculate the next numbering for the list:
@@ -44,7 +62,7 @@
     $nextRemarkNumber = 4 + $liCount + 1;
 @endphp
 
-@if($isCurrentStage)
+@if($isCaseWithMe)
 <div class="mb-4 pb-3 border-bottom" style="border-bottom: 1px dashed #cbd5e1 !important;">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div class="font-weight-bold rajdhani text-dark" style="font-size: 14px;">
@@ -83,7 +101,7 @@
         {{-- Send / Forward To Destination Dropdown (Opens Downwards with Real-time Search) --}}
         <div class="form-group mb-3 position-relative" id="pcDestDropdownContainer">
             <label class="font-weight-bold text-muted small mb-1 d-flex justify-content-between" style="font-size: 10px; text-transform: uppercase;">
-                <span><i class="fas fa-paper-plane text-primary mr-1"></i> Send / Forward To Destination: <span class="text-danger">*</span></span>
+                <span><i class="fas fa-paper-plane text-primary mr-1"></i> Send / Forward To Destination: @if(!$canApprove)<span class="text-danger">*</span>@else<span class="text-muted font-italic font-weight-normal" style="font-size: 9px; text-transform: none;">(Only if forwarding)</span>@endif</span>
                 <span class="text-muted font-italic" style="font-size: 9px; text-transform: none;">Search department, division, or director</span>
             </label>
             
@@ -137,7 +155,7 @@
             </div>
         </div>
 
-        {{-- Action Buttons Row: Left = SEND CASE (Prominent), Right = Compact Approve & Compact Cancel (Expanding on hover, ONLY for Approving Authority) --}}
+        {{-- Action Buttons Row: Left = SEND CASE (Prominent), Right = Compact Approve & Compact Cancel (Expanding on hover, ONLY for Approving Authority) on SAME LINE --}}
         <div class="d-flex align-items-center" style="gap: 8px; width: 100%;">
             {{-- Left: Prominent Send Case Button --}}
             <button type="button" onclick="handleAction('forward')" id="btnForward" class="btn-action-send flex-grow-1" style="height: 40px; font-size: 13.5px; letter-spacing: 0.6px; display: inline-flex; align-items: center; justify-content: center;">
@@ -146,16 +164,16 @@
             </button>
 
             @if($canApprove)
-                {{-- Right: Compact Approve Button (Green Tick, expands on hover) --}}
+                {{-- Right: Compact Approve Button (Green Tick, expands on hover to APPROVE CASE) --}}
                 <button type="button" onclick="handleAction('approve')" id="btnApprove" class="btn-action-approve" title="Approve Purchase Case">
                     <i class="fas fa-check"></i>
-                    <span class="btn-expand-text rajdhani font-weight-bold">APPROVE</span>
+                    <span class="btn-expand-text rajdhani font-weight-bold">APPROVE CASE</span>
                 </button>
 
-                {{-- Right: Compact Cancel / Reject Button (Red Cross, expands on hover) --}}
+                {{-- Right: Compact Cancel / Reject Button (Red Cross, expands on hover to REJECT CASE) --}}
                 <button type="button" onclick="handleAction('cancel')" id="btnCancel" class="btn-action-cancel" title="Cancel / Reject Purchase Case">
                     <i class="fas fa-times"></i>
-                    <span class="btn-expand-text rajdhani font-weight-bold">REJECT</span>
+                    <span class="btn-expand-text rajdhani font-weight-bold">REJECT CASE</span>
                 </button>
             @endif
         </div>
@@ -165,7 +183,7 @@
 <style>
 /* Send Button: wide on the left */
 .btn-action-send {
-    background: #16a34a !important;
+    background: #2563eb !important;
     border: none;
     border-radius: 6px;
     color: #ffffff !important;
@@ -174,11 +192,11 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25);
 }
 .btn-action-send:hover {
-    background: #15803d !important;
-    box-shadow: 0 4px 10px rgba(21, 128, 61, 0.3);
+    background: #1d4ed8 !important;
+    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.35);
     transform: translateY(-1px);
 }
 
@@ -211,18 +229,21 @@
     transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
     overflow: hidden;
     display: inline-block;
+    white-space: nowrap;
 }
 .btn-action-approve:hover {
-    flex: 0 0 115px;
-    width: 115px;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 145px;
+    padding: 0 14px !important;
     background: #15803d !important;
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
     transform: translateY(-1px);
 }
 .btn-action-approve:hover .btn-expand-text {
-    max-width: 70px;
+    max-width: 130px;
     opacity: 1;
-    margin-left: 6px;
+    margin-left: 8px;
 }
 
 /* Compact Cancel Button: red icon on right, expands on hover */
@@ -254,18 +275,21 @@
     transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
     overflow: hidden;
     display: inline-block;
+    white-space: nowrap;
 }
 .btn-action-cancel:hover {
-    flex: 0 0 105px;
-    width: 105px;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 135px;
+    padding: 0 14px !important;
     background: #b91c1c !important;
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
     transform: translateY(-1px);
 }
 .btn-action-cancel:hover .btn-expand-text {
-    max-width: 60px;
+    max-width: 130px;
     opacity: 1;
-    margin-left: 6px;
+    margin-left: 8px;
 }
 
 .pc-dest-option-item:hover {
@@ -520,4 +544,24 @@
         }
     };
 </script>
+@elseif(!$isFinalized)
+<div class="mb-4 p-3 border rounded shadow-sm" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-left: 4px solid #64748b !important; border-radius: 8px;">
+    <div class="d-flex align-items-center">
+        <div class="mr-3 text-muted">
+            <i class="fas fa-lock" style="font-size: 24px; color: #64748b;"></i>
+        </div>
+        <div>
+            <div class="font-weight-bold text-dark rajdhani" style="font-size: 13.5px; letter-spacing: 0.5px;">
+                CASE CURRENTLY LOCKED
+            </div>
+            <div class="text-muted" style="font-size: 12px; margin-top: 2px;">
+                @if($latestDecision && $latestDecision->pdec_to_status)
+                    This case has been forwarded to <strong>{{ $latestDecision->pdec_to_status }}</strong> and is awaiting action. You cannot submit new decisions until the case is returned or forwarded back to your seat.
+                @else
+                    This case is currently with <strong>{{ $currentStatusDisplay }}</strong> awaiting action. You cannot submit new decisions until the case is returned or forwarded back to your seat.
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
 @endif

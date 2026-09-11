@@ -204,6 +204,9 @@ class AuthorizationArchitectureTest extends TestCase
             $viewer->save();
         }
 
+        // Disable middleware for direct programmatic HTTP attack testing
+        $this->withoutMiddleware();
+
         // 1. Attempt to create project
         $response1 = $this->actingAs($viewer)->post('/save-project', [
             'prj_title' => 'Unauthorized Project Attempt',
@@ -230,6 +233,7 @@ class AuthorizationArchitectureTest extends TestCase
      */
     public function test_cross_unit_project_update_attack_returns_403(): void
     {
+        $this->withoutMiddleware();
         // Find or create Sensors user (Unit 350000)
         $sensorsUser = CenAccount::where('acc_unt_id', 350000)->where('acc_auth', 'approver')->first();
         if (! $sensorsUser) {
@@ -407,5 +411,149 @@ class AuthorizationArchitectureTest extends TestCase
             $response = $this->actingAs($normalUser)->get('/godmode/takeover/52');
             $response->assertStatus(403);
         }
+    }
+
+    /**
+     * Test 13: Procurement director can process action on collaborative division stage purchase cases.
+     */
+    public function test_procurement_can_process_action_on_collaborative_division_stage_cases(): void
+    {
+        $procUser = CenAccount::where('acc_unt_id', 810000)
+            ->where('acc_auth', 'approver')
+            ->whereRaw("LOWER(acc_status) = 'active'")
+            ->first();
+
+        if (! $procUser) {
+            $this->markTestSkipped('No active procurement approver account found.');
+        }
+
+        // Mock/create a division purchase case at Division stage
+        $divisionCase = new Purchase();
+        $divisionCase->pcs_id = ((int) Purchase::max('pcs_id')) + 1;
+        $divisionCase->pcs_unt_id = 200000; // Communication division
+        $divisionCase->pcs_type = 'Ps';
+        $divisionCase->pcs_status = 'Draft';
+
+        $policy = new \App\Policies\PurchaseCasePolicy(new DataScopeService());
+
+        // Verify procurement user can process forward action on division stage collaborative case
+        $this->assertTrue(
+            $policy->processAction($procUser, $divisionCase, 'forward'),
+            'Procurement director must be authorized to forward collaborative division purchase cases.'
+        );
+
+        $this->assertTrue(
+            $policy->processAction($procUser, $divisionCase, 'dproc_save'),
+            'Procurement director must be authorized to save quotes and scrutiny remarks on collaborative division purchase cases.'
+        );
+    }
+
+    /**
+     * Test 14: Universal dynamic destinations filter correctly for Purchase and Contract cases.
+     */
+    public function test_purchase_and_contract_universal_destination_filtering(): void
+    {
+        $purService = app(\App\Services\PurchaseApprovalService::class);
+        $ctrService = app(\App\Services\ContractCaseApprovalService::class);
+
+        $divUser = CenAccount::where('acc_untarea', 'prj')->whereRaw("LOWER(acc_status) = 'active'")->first();
+        $mdUser = CenAccount::where('acc_untarea', 'rdw')->whereRaw("LOWER(acc_status) = 'active'")->first();
+
+        $this->assertNotNull($divUser);
+        $this->assertNotNull($mdUser);
+
+        // 1. Purchase Cases
+        $purDivDests = $purService->getAvailableDestinations($divUser);
+        // Excludes self
+        $this->assertArrayNotHasKey('acc_' . $divUser->acc_id, $purDivDests);
+        // Excludes HR accounts
+        foreach ($purDivDests as $code => $d) {
+            $this->assertNotEquals('hr', strtolower($d['area'] ?? ''), "Purchase destination {$code} must not be an HR account.");
+        }
+        // Division cannot see DG or DDG
+        foreach ($purDivDests as $code => $d) {
+            $this->assertNotEquals('DG', $d['stage'], "Division user must not see DG destination.");
+            $this->assertNotEquals('DDG', $d['stage'], "Division user must not see DDG destination.");
+        }
+
+        $purMdDests = $purService->getAvailableDestinations($mdUser);
+        // MD can see DG
+        $dgDests = array_filter($purMdDests, fn($d) => $d['stage'] === 'DG');
+        $this->assertNotEmpty($dgDests, 'MD must be able to see DG destination.');
+
+        // 2. Contract Cases
+        $ctrDivDests = $ctrService->getAvailableDestinations($divUser);
+        // Excludes self
+        $this->assertArrayNotHasKey('acc_' . $divUser->acc_id, $ctrDivDests);
+        // Excludes Procurement accounts
+        foreach ($ctrDivDests as $code => $d) {
+            $this->assertNotInArray(strtolower($d['area'] ?? ''), ['proc', 'prc'], "Contract destination {$code} must not be a procurement account.");
+        }
+        // Division cannot see DG or DDG
+        foreach ($ctrDivDests as $code => $d) {
+            $this->assertNotEquals('DG', $d['stage'], "Division user must not see DG destination.");
+            $this->assertNotEquals('DDG', $d['stage'], "Division user must not see DDG destination.");
+        }
+
+        $ctrMdDests = $ctrService->getAvailableDestinations($mdUser);
+        // MD can see DG
+        $dgCtrDests = array_filter($ctrMdDests, fn($d) => $d['stage'] === 'DG');
+        $this->assertNotEmpty($dgCtrDests, 'MD must be able to see DG destination.');
+    }
+
+    /**
+     * Test 15: Sender locking policy blocks repeated actions until recipient acts.
+     */
+    public function test_sender_locking_and_tab_transition_logic(): void
+    {
+        $divUser = CenAccount::where('acc_untarea', 'prj')->whereRaw("LOWER(acc_status) = 'active'")->first();
+        $finUser = CenAccount::where('acc_untarea', 'fin')->whereRaw("LOWER(acc_status) = 'active'")->first();
+
+        $this->assertNotNull($divUser);
+        $this->assertNotNull($finUser);
+
+        $case = new Purchase();
+        $case->pcs_id = ((int) Purchase::max('pcs_id')) + 99;
+        $case->pcs_unt_id = $divUser->acc_unt_id;
+        $case->pcs_type = 'Ps';
+        $case->pcs_status = 'Under Approval';
+
+        // Mock latest decision taken by divUser (forwarded to Finance)
+        $latestDec = new \App\Models\PurDecision();
+        $latestDec->pdec_pcs_id = $case->pcs_id;
+        $latestDec->pdec_acc_id = $divUser->acc_id;
+        $latestDec->pdec_action = 'forward';
+        $latestDec->pdec_to_status = 'DFinance';
+
+        $case->setRelation('latestDecision', $latestDec);
+
+        // Substatus currently at DFinance
+        $substatus = new \App\Models\PurCaseSubstatus();
+        $substatus->pss_pcs_id = $case->pcs_id;
+        $substatus->pss_stage = 'DFinance';
+        $substatus->pss_is_current = true;
+        $case->setRelation('currentSubstatus', $substatus);
+
+        $policy = new \App\Policies\PurchaseCasePolicy(new DataScopeService());
+
+        // divUser took the latest decision: LOCKED
+        $this->assertFalse(
+            $policy->processAction($divUser, $case, 'forward'),
+            'Sender must be locked from processing action after forwarding case.'
+        );
+
+        // finUser is the recipient: UNLOCKED
+        $this->assertTrue(
+            $policy->processAction($finUser, $case, 'forward'),
+            'Recipient (Finance) must be authorized to act on the forwarded case.'
+        );
+    }
+
+    /**
+     * Helper to assert value not in array
+     */
+    private function assertNotInArray($needle, array $haystack, string $message = ''): void
+    {
+        $this->assertFalse(in_array($needle, $haystack), $message);
     }
 }

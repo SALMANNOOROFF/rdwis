@@ -177,10 +177,65 @@
             font-family: 'Consolas', 'Courier New', monospace;
         }
 
+        @media screen {
+            .print-document-container {
+                display: none !important;
+            }
+        }
+
         @media print {
-            .no-print { display: none !important; }
-            .content-wrapper { background: #fff !important; color: #000 !important; }
-            .fin-hero-card, .fin-table-card, .fin-stat-card { border: 1px solid #ccc !important; box-shadow: none !important; }
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
+
+            /* Hide everything that belongs to the normal screen layout */
+            body * {
+                visibility: hidden !important;
+            }
+
+            .main-header,
+            .main-sidebar,
+            .main-footer,
+            .control-sidebar,
+            nav,
+            aside,
+            footer,
+            .no-print,
+            .modal,
+            .modal-backdrop,
+            .screen-view-container,
+            .screen-view-container * {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            html, body, .wrapper, .content-wrapper {
+                background: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                min-height: auto !important;
+            }
+
+            /* Make the printable document visible */
+            .print-document-container,
+            .print-document-container * {
+                visibility: visible !important;
+            }
+
+            .print-document-container {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
         }
     </style>
 
@@ -226,9 +281,9 @@
                 <a href="{{ route('projecthistory', ['project_id' => $project->prj_id]) }}" class="btn btn-outline-info btn-sm font-weight-bold rounded-pill px-3">
                     <i class="fas fa-history mr-1"></i> Log History
                 </a>
-                <button onclick="window.print()" class="btn btn-outline-secondary btn-sm font-weight-bold rounded-pill px-3">
+                <a href="{{ route('projects.print_financial_summary', $project->prj_id) }}" target="_blank" class="btn btn-primary btn-sm font-weight-bold rounded-pill px-3 shadow-sm" style="background: #0f172a; border-color: #0f172a;">
                     <i class="fas fa-print mr-1"></i> Print Report
-                </button>
+                </a>
             </div>
         </div>
 
@@ -1164,6 +1219,14 @@
         @endif
 
     </div>
+
+    {{-- OFFICIAL PRINTABLE DOCUMENT CONTAINER (Rendered exclusively when printing) --}}
+    @if($head)
+    <div class="print-document-container">
+        @include('projects.partials.printable_financial_summary')
+    </div>
+    @endif
+
 </div>
 
 @push('scripts')

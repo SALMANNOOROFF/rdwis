@@ -196,7 +196,7 @@ class UserAccessContext
      */
     public function isViewer(): bool
     {
-        if ($this->isSuperAdmin()) {
+        if ($this->isSuperAdmin() || $this->isCommand()) {
             return false;
         }
 

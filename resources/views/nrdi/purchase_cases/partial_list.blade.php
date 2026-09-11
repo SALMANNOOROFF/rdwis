@@ -45,15 +45,10 @@
             <i class="fas {{ $statusIcon }}"></i> {{ strtoupper($p->pcs_status) }}
         </span>
     </td>
-
-    {{-- 6. Type Badge --}}
-    <td class="text-right">
-        <div class="type-badge type-{{ strtolower($p->pcs_type ?? 'ps') }}">{{ strtoupper(substr($p->pcs_type ?? 'PS', 0, 2)) }}</div>
-    </td>
 </tr>
 @empty
 <tr class="empty-row">
-    <td colspan="6" class="text-center py-4 text-muted small rajdhani" style="opacity: 0.2; font-size: 16px;">
+    <td colspan="5" class="text-center py-4 text-muted small rajdhani" style="opacity: 0.2; font-size: 16px;">
         No cases available.
     </td>
 </tr>

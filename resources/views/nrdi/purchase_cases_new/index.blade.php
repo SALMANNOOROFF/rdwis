@@ -101,24 +101,7 @@
                         <i class="fas fa-check-circle"></i> Close ({{ $closedCount }})
                     </a>
                 </li>
-                {{-- Hidden tab anchor for Action Taken so Bootstrap tabs switch smoothly --}}
-                <li class="nav-item d-none">
-                    <a class="hub-tab-link" id="action-taken-tab" data-toggle="tab" href="#action-taken" role="tab"></a>
-                </li>
             </ul>
-
-            {{-- Extreme Right Corner Slide-Out Action Taken Box --}}
-            <div class="action-taken-corner-widget d-flex align-items-center" id="cornerActionTakenWidget">
-                <div class="action-taken-sliding-drawer" id="actionTakenSlidingDrawer">
-                    <button type="button" id="btnCornerActionTaken" class="corner-action-taken-btn">
-                        <i class="fas fa-history mr-1 text-info"></i>
-                        <span>Action Taken ({{ $actionTakenCount ?? 0 }})</span>
-                    </button>
-                </div>
-                <button type="button" id="btnCornerArrowToggle" class="corner-arrow-trigger-btn" title="Toggle Action Taken">
-                    <i class="fas fa-chevron-left" id="cornerArrowIcon"></i>
-                </button>
-            </div>
         </div>
 
         <div class="tab-content">
@@ -148,7 +131,6 @@
                         <thead>
                             <tr>
                                 <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
-                                <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
                                 <th style="width: 180px; text-align: right;">Est. Amount</th>
@@ -175,15 +157,12 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <div class="type-badge shadow-sm">{{ strtoupper(substr($p->pcs_type ?? 'PS', 0, 2)) }}</div>
-                                </td>
-                                <td>
                                     <div class="d-flex align-items-center">
                                         <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
                                             {{ $p->pcs_title }}
                                         </a>
                                     </div>
-                                    <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
+                                    <div class="text-ref">Ref: #{{ $p->pcs_id }}</div>
                                 </td>
                                 <td class="text-muted small font-weight-bold rajdhani" style="font-size: 12px;">
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
@@ -192,14 +171,24 @@
                                     <div class="text-amount rajdhani">Rs. {{ number_format($p->display_price) }}</div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="status-pill rajdhani">
-                                        <i class="fas {{ $statusIcon }}"></i> {{ strtoupper($p->current_stage_display ?? $p->pcs_status) }}
-                                    </span>
+                                    <div class="d-flex flex-column align-items-center" style="gap: 2px;">
+                                        <span class="status-pill rajdhani">
+                                            <i class="fas {{ $statusIcon }}"></i> {{ strtoupper($p->pcs_status) }}
+                                        </span>
+                                        @php
+                                            $destHolder = $p->latestDecision?->pdec_to_status ?: $p->current_stage_display;
+                                        @endphp
+                                        @if($destHolder)
+                                            <span class="text-muted small font-weight-bold" style="font-size: 10px;">
+                                                <i class="fas fa-map-marker-alt text-secondary mr-0.5"></i> {{ $destHolder }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5">
+                                <td colspan="5" class="text-center py-5">
                                     <div class="text-muted rajdhani" style="opacity: 0.6;">
                                         <i class="fas fa-check-double fa-3x mb-3 d-block text-primary" style="opacity: 0.4;"></i>
                                         NO PENDING CASES IN YOUR QUEUE
@@ -238,7 +227,6 @@
                         <thead>
                             <tr>
                                 <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
-                                <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
                                 <th style="width: 180px; text-align: right;">Amount</th>
@@ -258,15 +246,12 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <div class="type-badge shadow-sm">{{ strtoupper(substr($p->pcs_type ?? 'PT', 0, 2)) }}</div>
-                                </td>
-                                <td>
                                     <div class="d-flex align-items-center">
                                         <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
                                             {{ $p->pcs_title }}
                                         </a>
                                     </div>
-                                    <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
+                                    <div class="text-ref">Ref: #{{ $p->pcs_id }}</div>
                                 </td>
                                 <td class="text-muted small font-weight-bold rajdhani" style="font-size: 12px;">
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
@@ -275,14 +260,24 @@
                                     <div class="text-amount rajdhani">Rs. {{ number_format($p->display_price) }}</div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="status-pill rajdhani">
-                                        <i class="fas fa-hourglass-half"></i> {{ strtoupper($p->current_stage_display ?? $p->pcs_status) }}
-                                    </span>
+                                    <div class="d-flex flex-column align-items-center" style="gap: 2px;">
+                                        <span class="status-pill rajdhani">
+                                            <i class="fas fa-hourglass-half"></i> {{ strtoupper($p->pcs_status) }}
+                                        </span>
+                                        @php
+                                            $openHolder = $p->latestDecision?->pdec_to_status ?: $p->current_stage_display;
+                                        @endphp
+                                        @if($openHolder)
+                                            <span class="text-muted small font-weight-bold" style="font-size: 10px;">
+                                                <i class="fas fa-map-marker-alt text-secondary mr-0.5"></i> {{ $openHolder }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted rajdhani small italic">No open cases.</td>
+                                <td colspan="5" class="text-center py-5 text-muted rajdhani small italic">No open cases.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -316,7 +311,6 @@
                         <thead>
                             <tr>
                                 <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
-                                <th style="width: 60px;">Type</th>
                                 <th>Title / Description</th>
                                 <th style="width: 150px;">Date</th>
                                 <th style="width: 180px; text-align: right;">Amount</th>
@@ -336,15 +330,12 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <div class="type-badge shadow-sm">{{ strtoupper(substr($p->pcs_type ?? 'PS', 0, 2)) }}</div>
-                                </td>
-                                <td>
                                     <div class="d-flex align-items-center">
                                         <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
                                             {{ $p->pcs_title }}
                                         </a>
                                     </div>
-                                    <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
+                                    <div class="text-ref">Ref: #{{ $p->pcs_id }}</div>
                                 </td>
                                 <td class="text-muted small font-weight-bold rajdhani" style="font-size: 12px;">
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
@@ -360,86 +351,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted rajdhani small italic">No closed cases.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {{-- 4. ACTION TAKEN TAB --}}
-            <div class="tab-pane fade" id="action-taken" role="tabpanel">
-                @php
-                    $actionTakenList = $actionTaken ?? collect();
-                    $actionTakenGroups = $actionTakenList->groupBy(fn($p) => (int)($p->pcs_unt_id ?? 0));
-                    $firstActionDivId = $actionTakenGroups->keys()->first();
-                @endphp
-
-                @if($actionTakenGroups->count() > 0)
-                    <div class="div-filter-bar d-flex align-items-center gap-2 flex-wrap">
-                        @foreach($actionTakenGroups as $uId => $groupCases)
-                            @php
-                                $uName = $unitNameMap[$uId] ?? ($groupCases->first()->unit?->unt_namesh ?? $groupCases->first()->unit?->unt_name ?? "Division #$uId");
-                            @endphp
-                            <button type="button" class="div-pill {{ (string)$uId === (string)$firstActionDivId ? 'active' : '' }}" data-div="{{ $uId }}">
-                                <i class="fas fa-building"></i> {{ $uName }}
-                                <span class="div-badge">{{ $groupCases->count() }}</span>
-                            </button>
-                        @endforeach
-                    </div>
-                @endif
-
-                <div class="table-responsive">
-                    <table class="hub-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 70px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
-                                <th style="width: 60px;">Type</th>
-                                <th>Title / Description</th>
-                                <th style="width: 150px;">Date</th>
-                                <th style="width: 180px; text-align: right;">Amount</th>
-                                <th style="width: 160px; text-align: center;">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($actionTakenList as $idx => $p)
-                            @php
-                                $pDiv = (int)($p->pcs_unt_id ?? 0);
-                                $isShown = (string)$pDiv === (string)$firstActionDivId;
-                            @endphp
-                            <tr class="hub-row fade-up" data-div="{{ $pDiv }}" style="{{ $isShown ? '' : 'display: none;' }}">
-                                <td class="text-center">
-                                    <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; white-space: nowrap; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;" title="View Case">
-                                        <i class="fas fa-eye mr-1"></i> View
-                                    </a>
-                                </td>
-                                <td>
-                                    <div class="type-badge shadow-sm">{{ strtoupper(substr($p->pcs_type ?? 'PS', 0, 2)) }}</div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;" title="Open Case: {{ $p->pcs_title }}">
-                                            {{ $p->pcs_title }}
-                                        </a>
-                                    </div>
-                                    <div class="text-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</div>
-                                </td>
-                                <td class="text-muted small font-weight-bold rajdhani" style="font-size: 12px;">
-                                    {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
-                                </td>
-                                <td class="text-right">
-                                    <div class="text-amount rajdhani">Rs. {{ number_format($p->display_price) }}</div>
-                                </td>
-                                <td class="text-center">
-                                    <span class="status-pill rajdhani">
-                                        <i class="fas fa-check-circle"></i> {{ strtoupper($p->current_stage_display ?? $p->pcs_status) }}
-                                    </span>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted rajdhani small italic">No action taken cases yet.</td>
+                                <td colspan="5" class="text-center py-5 text-muted rajdhani small italic">No closed cases.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -506,42 +418,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize all tabs on load
     document.querySelectorAll('.tab-pane').forEach(pane => {
         filterTabByActivePill(pane);
-    });
-
-    // Extreme Right Corner Slide-Out Widget Logic
-    const cornerWidget = document.getElementById('cornerActionTakenWidget');
-    const cornerArrowBtn = document.getElementById('btnCornerArrowToggle');
-    const cornerActionTakenBtn = document.getElementById('btnCornerActionTaken');
-    const actionTakenTabLink = document.getElementById('action-taken-tab');
-    const hubMainTabs = document.querySelectorAll('#hubMainTabs .hub-tab-link:not(#action-taken-tab)');
-
-    if (cornerArrowBtn && cornerWidget) {
-        cornerArrowBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            cornerWidget.classList.toggle('is-open');
-        });
-    }
-
-    if (cornerActionTakenBtn && actionTakenTabLink) {
-        cornerActionTakenBtn.addEventListener('click', function() {
-            $(actionTakenTabLink).tab('show');
-            cornerActionTakenBtn.classList.add('active-tab');
-            hubMainTabs.forEach(t => t.classList.remove('active'));
-            const actionPane = document.getElementById('action-taken');
-            if (actionPane) filterTabByActivePill(actionPane);
-        });
-    }
-
-    hubMainTabs.forEach(t => {
-        t.addEventListener('click', function() {
-            if (cornerActionTakenBtn) cornerActionTakenBtn.classList.remove('active-tab');
-        });
-    });
-
-    document.addEventListener('click', function(e) {
-        if (cornerWidget && cornerWidget.classList.contains('is-open') && !cornerWidget.contains(e.target)) {
-            cornerWidget.classList.remove('is-open');
-        }
     });
 });
 </script>

@@ -132,9 +132,9 @@ class PurchaseCaseFlowTest extends TestCase
 
     public function test_goods_receipt_inventory_flow()
     {
-        $unit = DB::table('cen.units')->first();
-        $head = DB::table('cen.heads')->first();
         $user = CenAccount::where('acc_untarea', 'ILIKE', 'prj')->first();
+        $unit = $user ? (DB::table('cen.units')->where('unt_id', $user->acc_unt_id)->first() ?? DB::table('cen.units')->first()) : DB::table('cen.units')->first();
+        $head = DB::table('cen.heads')->first();
 
         if (!$unit || !$head || !$user) {
             $this->markTestSkipped('Required database records not found.');
@@ -207,9 +207,9 @@ class PurchaseCaseFlowTest extends TestCase
 
     public function test_full_goods_receipt_drives_case_to_fulfilled()
     {
-        $unit = DB::table('cen.units')->first();
-        $head = DB::table('cen.heads')->first();
         $user = CenAccount::where('acc_untarea', 'ILIKE', 'prj')->first();
+        $unit = $user ? (DB::table('cen.units')->where('unt_id', $user->acc_unt_id)->first() ?? DB::table('cen.units')->first()) : DB::table('cen.units')->first();
+        $head = DB::table('cen.heads')->first();
 
         if (!$unit || !$head || !$user) {
             $this->markTestSkipped('Required database records not found.');
@@ -262,9 +262,9 @@ class PurchaseCaseFlowTest extends TestCase
 
     public function test_case_cancellation_flow()
     {
-        $unit = DB::table('cen.units')->first();
-        $head = DB::table('cen.heads')->first();
         $user = CenAccount::where('acc_untarea', 'ILIKE', 'prj')->first();
+        $unit = $user ? (DB::table('cen.units')->where('unt_id', $user->acc_unt_id)->first() ?? DB::table('cen.units')->first()) : DB::table('cen.units')->first();
+        $head = DB::table('cen.heads')->first();
 
         if (!$unit || !$head || !$user) {
             $this->markTestSkipped('Required database records not found.');

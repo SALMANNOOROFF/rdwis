@@ -475,7 +475,7 @@
 
 /* Send Button: wide on the left */
 .btn-action-send {
-    background: #16a34a !important;
+    background: #2563eb !important;
     border: none;
     border-radius: 6px;
     color: #ffffff !important;
@@ -484,11 +484,11 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25);
 }
 .btn-action-send:hover {
-    background: #15803d !important;
-    box-shadow: 0 4px 10px rgba(21, 128, 61, 0.3);
+    background: #1d4ed8 !important;
+    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.35);
     transform: translateY(-1px);
 }
 
@@ -521,18 +521,21 @@
     transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
     overflow: hidden;
     display: inline-block;
+    white-space: nowrap;
 }
 .btn-action-approve:hover {
-    flex: 0 0 115px;
-    width: 115px;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 145px;
+    padding: 0 14px !important;
     background: #15803d !important;
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
     transform: translateY(-1px);
 }
 .btn-action-approve:hover .btn-expand-text {
-    max-width: 70px;
+    max-width: 130px;
     opacity: 1;
-    margin-left: 6px;
+    margin-left: 8px;
 }
 
 /* Compact Cancel Button: red icon on right, expands on hover */
@@ -564,18 +567,21 @@
     transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.3s ease;
     overflow: hidden;
     display: inline-block;
+    white-space: nowrap;
 }
 .btn-action-cancel:hover {
-    flex: 0 0 105px;
-    width: 105px;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 135px;
+    padding: 0 14px !important;
     background: #b91c1c !important;
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
     transform: translateY(-1px);
 }
 .btn-action-cancel:hover .btn-expand-text {
-    max-width: 60px;
+    max-width: 130px;
     opacity: 1;
-    margin-left: 6px;
+    margin-left: 8px;
 }
 
 .cc-dest-option-item:hover {
@@ -665,14 +671,20 @@
                                         <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Division / Directorate</span>
                                         <span class="text-dark font-weight-bold">{{ $case->division_name }}</span>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-6 mb-2">
                                         <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Allocated Project</span>
                                         <span class="text-dark font-weight-bold">{{ $projectCode }}</span>
                                     </div>
-                                    <div class="col-6">
-                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Case Status & Location</span>
-                                        <span class="text-dark font-weight-bold" style="font-size: var(--dg-value-size);">
-                                            {{ $case->ctc_status }} <span class="text-muted font-weight-normal">&bull;</span> <span class="text-muted font-weight-600">{{ $case->current_office_name }}</span>
+                                    <div class="col-6 mb-2">
+                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Case Status</span>
+                                        <span class="badge {{ $case->ctc_status === 'Approved' ? 'badge-success' : ($case->ctc_status === 'Under Revision' ? 'badge-danger' : 'badge-primary') }} font-weight-bold px-2 py-0.5" style="font-size: 11px;">
+                                            {{ $case->ctc_status }}
+                                        </span>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Current Location</span>
+                                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #e0f2fe; color: #0369a1 !important; border: 1px solid #bae6fd; font-size: 11px;">
+                                            <i class="fas fa-building mr-1 text-primary"></i> {{ $case->current_office_name }}
                                         </span>
                                     </div>
                                 </div>
@@ -1148,21 +1160,33 @@
                                                 {{-- Right: Compact Approve Button (Green Tick, expands on hover) --}}
                                                 <button type="button" onclick="handleAction('approve')" id="btnApprove" class="btn-action-approve" title="Approve Contract Case">
                                                     <i class="fas fa-check"></i>
-                                                    <span class="btn-expand-text rajdhani font-weight-bold">APPROVE</span>
+                                                    <span class="btn-expand-text rajdhani font-weight-bold">APPROVE CASE</span>
                                                 </button>
 
                                                 {{-- Right: Compact Cancel / Reject Button (Red Cross, expands on hover) --}}
                                                 <button type="button" onclick="handleAction('cancel')" id="btnCancel" class="btn-action-cancel" title="Cancel / Reject Contract Case">
                                                     <i class="fas fa-times"></i>
-                                                    <span class="btn-expand-text rajdhani font-weight-bold">REJECT</span>
+                                                    <span class="btn-expand-text rajdhani font-weight-bold">REJECT CASE</span>
                                                 </button>
                                             @endif
                                         @endif
                                     </div>
                                 </div>
-                            @elseif($role === 'Division')
-                                <div class="alert alert-light border py-2 px-2.5 mb-3" style="font-size: 11px; background: #f8fafc; border-radius: 6px;">
-                                    <i class="fas fa-info-circle text-primary mr-1"></i> Case submitted from Division. Currently with <strong>{{ $case->current_office_name }}</strong>.
+                            @elseif(!in_array($case->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']))
+                                <div class="mb-4 p-3 border rounded shadow-sm" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-left: 4px solid #64748b !important; border-radius: 8px;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3 text-muted">
+                                            <i class="fas fa-lock" style="font-size: 24px; color: #64748b;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-weight-bold text-dark rajdhani" style="font-size: 13.5px; letter-spacing: 0.5px;">
+                                                CASE CURRENTLY LOCKED
+                                            </div>
+                                            <div class="text-muted" style="font-size: 12px; margin-top: 2px;">
+                                                This case is currently held by <strong>{{ $currentStage }}</strong> awaiting action. You cannot submit new decisions until the case is returned or forwarded back to your seat.
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @else
                                 <div class="alert alert-light border py-2 px-2.5 mb-3" style="font-size: 11px; background: #f8fafc; border-radius: 6px;">

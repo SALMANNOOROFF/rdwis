@@ -210,8 +210,19 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('purchase.receipts.create', $p->pcs_id) }}" class="btn btn-cyber">
-                                    {{ $p->pcs_fulfillment_status === 'Fully Received' ? 'View Receipts' : 'Receive Items' }}
+                                @php
+                                    $currUser = Auth::user();
+                                    $isCmd = method_exists($currUser, 'isMdDdgDg') && $currUser->isMdDdgDg();
+                                    $isProcUser = in_array(strtolower(trim($currUser->acc_untarea ?? '')), ['proc', 'prc'], true);
+                                    $isConcerned = !$isCmd && !$isProcUser && ($currUser->acc_unt_id == $p->pcs_intunt_id || $currUser->acc_unt_id == $p->pcs_unt_id);
+                                    $canReceive = $isConcerned && ($p->pcs_fulfillment_status !== 'Fully Received');
+                                @endphp
+                                <a href="{{ route('purchase.receipts.create', $p->pcs_id) }}" class="btn {{ $canReceive ? 'btn-success text-white' : 'btn-outline-secondary' }} btn-sm px-3 font-weight-bold rajdhani">
+                                    @if($canReceive)
+                                        <i class="fas fa-box-open mr-1"></i> Receive Items
+                                    @else
+                                        <i class="fas fa-eye mr-1"></i> View Receipts
+                                    @endif
                                 </a>
                             </td>
                         </tr>

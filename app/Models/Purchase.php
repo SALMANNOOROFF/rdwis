@@ -91,6 +91,56 @@ class Purchase extends Model
     }
 
     /**
+     * Get the Subhead name(s) associated with this purchase case.
+     */
+    public function getSubheadDisplayAttribute(): string
+    {
+        // 1. Try pur.purcases_shd
+        $shd = \Illuminate\Support\Facades\DB::table('pur.purcases_shd')
+            ->where('pcd_pcs_id', $this->pcs_id)
+            ->whereNotNull('pcd_subhead')
+            ->where('pcd_subhead', '!=', '')
+            ->pluck('pcd_subhead')
+            ->unique()
+            ->values()
+            ->all();
+
+        if (!empty($shd)) {
+            return implode(', ', $shd);
+        }
+
+        // 2. Try purcaseitems (pci_subhead)
+        if ($this->relationLoaded('items')) {
+            $itemShds = $this->items->pluck('pci_subhead')
+                ->filter(fn($v) => !empty(trim((string)$v)))
+                ->unique()
+                ->values()
+                ->all();
+        } else {
+            $itemShds = \Illuminate\Support\Facades\DB::table('pur.purcaseitems')
+                ->where('pci_pcs_id', $this->pcs_id)
+                ->whereNotNull('pci_subhead')
+                ->where('pci_subhead', '!=', '')
+                ->pluck('pci_subhead')
+                ->unique()
+                ->values()
+                ->all();
+        }
+
+        if (!empty($itemShds)) {
+            return implode(', ', $itemShds);
+        }
+
+        // 3. Fallback based on case type
+        $type = strtolower(trim((string)($this->pcs_type ?? '')));
+        if (in_array($type, ['hr', 'sal', 'salary', 'rb', 'ta', 'tada'], true)) {
+            return 'HR / Staff';
+        }
+
+        return 'Equipment';
+    }
+
+    /**
      * Accessor: tax-inclusive case value (legacy pcs_price).
      *
      * Reads the stored cascade first - historical rates differ from today's

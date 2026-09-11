@@ -21,6 +21,9 @@ class ContractCaseApprovalService
         'MD'           => 'Under Approval',
         'DDG'          => 'Under Approval',
         'DG'           => 'Under Approval',
+        'IS'           => 'Under Approval',
+        'IT'           => 'Under Approval',
+        'Admin'        => 'Under Approval',
         'Approved'     => 'Approved',
         'Fulfilled'    => 'Fulfilled',
         'Not Approved' => 'Not Approved',
@@ -153,6 +156,40 @@ class ContractCaseApprovalService
             $currentStage = $case->currentSubstatus->css_stage ?? 'Division';
             $nextStage = $targetStage;
 
+            $targetAcc = null;
+            $targetStageName = null;
+            if (!empty($targetStage) && str_starts_with($targetStage, 'acc_')) {
+                $targetAccId = (int) substr($targetStage, 4);
+                $targetAcc = \App\Models\CenAccount::find($targetAccId);
+                if ($targetAcc) {
+                    $uArea = strtolower(trim($targetAcc->acc_untarea ?? ''));
+                    $uRole = (int) ($targetAcc->acc_role ?? 0);
+                    $desig = strtolower(trim($targetAcc->acc_desigshort ?? ''));
+
+                    if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg'))) {
+                        $nextStage = 'DG';
+                    } elseif (str_contains($desig, 'ddg')) {
+                        $nextStage = 'DDG';
+                    } elseif ($uArea === 'rdw' || $uRole === 160000 || str_contains($desig, 'md')) {
+                        $nextStage = 'MD';
+                    } elseif (in_array($uArea, ['fin', 'finance'])) {
+                        $nextStage = 'Finance';
+                    } elseif (in_array($uArea, ['hr'])) {
+                        $nextStage = 'HR';
+                    } elseif ($uArea === 'is') {
+                        $nextStage = 'IS';
+                    } elseif ($uArea === 'it') {
+                        $nextStage = 'IT';
+                    } elseif (in_array($uArea, ['admin', 'adm'])) {
+                        $nextStage = 'Admin';
+                    } else {
+                        $nextStage = 'Division';
+                    }
+
+                    $targetStageName = trim($targetAcc->acc_name) . ' (' . ($targetAcc->acc_desigshort ?: $nextStage) . ')';
+                }
+            }
+
             if (!$nextStage) {
                 switch ($currentStage) {
                     case 'Division':
@@ -177,7 +214,7 @@ class ContractCaseApprovalService
             }
 
             if ($nextStage === 'Division' || in_array($nextStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
-                $targetName = $nextStage === 'Division' ? 'Division' : $nextStage . ' Division';
+                $targetName = $targetStageName ?: ($nextStage === 'Division' ? 'Division' : $nextStage . ' Division');
                 $nextStage = 'Division';
                 $legacyStatus = 'Under Revision';
                 $actionText = 'Sent to ' . $targetName . ' (Under Revision)';
@@ -189,7 +226,6 @@ class ContractCaseApprovalService
                 $deptTitles = [
                     'HR'       => 'HR Directorate (Scrutiny)',
                     'Finance'  => 'Finance Directorate (Director Finance)',
-                    'DProc'    => 'Procurement Department',
                     'Admin'    => 'Administration Department',
                     'IS'       => 'Information System Department (IS)',
                     'IT'       => 'Information Technology Department (IT)',
@@ -198,7 +234,7 @@ class ContractCaseApprovalService
                     'DDG'      => 'DDG Office',
                     'DG'       => 'Director General (DG)',
                 ];
-                $actionText = 'Sent to ' . ($deptTitles[$nextStage] ?? $nextStage);
+                $actionText = 'Sent to ' . ($targetStageName ?: ($deptTitles[$nextStage] ?? $nextStage));
             }
 
             $this->transitionSubstatus($case, $nextStage, $legacyStatus);
@@ -266,6 +302,40 @@ class ContractCaseApprovalService
             $currentStage = $case->currentSubstatus->css_stage ?? 'HR';
             $destStage = $targetStage;
 
+            $targetAcc = null;
+            $targetStageName = null;
+            if (!empty($targetStage) && str_starts_with($targetStage, 'acc_')) {
+                $targetAccId = (int) substr($targetStage, 4);
+                $targetAcc = \App\Models\CenAccount::find($targetAccId);
+                if ($targetAcc) {
+                    $uArea = strtolower(trim($targetAcc->acc_untarea ?? ''));
+                    $uRole = (int) ($targetAcc->acc_role ?? 0);
+                    $desig = strtolower(trim($targetAcc->acc_desigshort ?? ''));
+
+                    if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg'))) {
+                        $destStage = 'DG';
+                    } elseif (str_contains($desig, 'ddg')) {
+                        $destStage = 'DDG';
+                    } elseif ($uArea === 'rdw' || $uRole === 160000 || str_contains($desig, 'md')) {
+                        $destStage = 'MD';
+                    } elseif (in_array($uArea, ['fin', 'finance'])) {
+                        $destStage = 'Finance';
+                    } elseif (in_array($uArea, ['hr'])) {
+                        $destStage = 'HR';
+                    } elseif ($uArea === 'is') {
+                        $destStage = 'IS';
+                    } elseif ($uArea === 'it') {
+                        $destStage = 'IT';
+                    } elseif (in_array($uArea, ['admin', 'adm'])) {
+                        $destStage = 'Admin';
+                    } else {
+                        $destStage = 'Division';
+                    }
+
+                    $targetStageName = trim($targetAcc->acc_name) . ' (' . ($targetAcc->acc_desigshort ?: $destStage) . ')';
+                }
+            }
+
             if (!$destStage) {
                 switch ($currentStage) {
                     case 'HR':
@@ -289,7 +359,7 @@ class ContractCaseApprovalService
 
             $legacyStatus = ($destStage === 'Division') ? 'Under Revision' : (self::STAGE_TO_LEGACY_STATUS[$destStage] ?? 'Under Revision');
             $this->transitionSubstatus($case, $destStage, $legacyStatus);
-            $this->recordRemark($case, $user, $remarks ?: 'Returned to ' . $destStage, $legacyStatus);
+            $this->recordRemark($case, $user, $remarks ?: 'Returned to ' . ($targetStageName ?: $destStage), $legacyStatus);
 
             return $destStage;
         });
@@ -319,149 +389,99 @@ class ContractCaseApprovalService
 
     /**
      * Get available destination targets for sending a contract case
+     * Dynamically fetched from active accounts in cen.accounts
      */
-    public function getAvailableDestinations(?string $currentRole = null): array
+    public function getAvailableDestinations($currentUserOrRole = null): array
     {
-        $role = strtolower(trim((string)$currentRole));
-        if (in_array($role, ['proc', 'prc'], true)) $role = 'dproc';
-        
-        $canSendToDdg = !in_array($role, ['division', 'prj', 'rdwprj', 'initiation'], true);
-        $canSendToDg = !in_array($role, ['division', 'prj', 'rdwprj', 'initiation'], true);
-        $canSendToMd = ($role !== 'rdw' && $role !== 'md');
+        $currentUser = null;
+        if ($currentUserOrRole instanceof \App\Models\CenAccount) {
+            $currentUser = $currentUserOrRole;
+        } elseif (\Illuminate\Support\Facades\Auth::check()) {
+            $currentUser = \Illuminate\Support\Facades\Auth::user();
+        }
+
+        $currArea = strtolower(trim((string) ($currentUser?->acc_untarea ?? (is_string($currentUserOrRole) ? $currentUserOrRole : ''))));
+        $currContext = $currentUser ? \App\Services\Auth\UserAccessContext::forUser($currentUser) : null;
+        $isCommand = $currContext?->isCommand() ?? in_array($currArea, ['rdw', 'hqs', 'nrdi'], true);
+
+        $accounts = \App\Models\CenAccount::whereRaw("LOWER(acc_status) = 'active'")
+            ->when($currentUser, fn($q) => $q->where('acc_id', '!=', $currentUser->acc_id))
+            ->orderBy('acc_level', 'asc')
+            ->orderBy('acc_id', 'asc')
+            ->get();
 
         $list = [];
 
-        // 1. Finance Department
-        $list['Finance'] = [
-            'code'     => 'Finance',
-            'name'     => 'Finance Department',
-            'director' => 'Cdr (R) S F Rahman',
-            'desig'    => 'Director Finance',
-            'badge'    => 'FIN',
-        ];
+        foreach ($accounts as $acc) {
+            $area = strtolower(trim((string) ($acc->acc_untarea ?? '')));
+            $accContext = \App\Services\Auth\UserAccessContext::forUser($acc);
 
-        // 2. Human Resource Department (HR)
-        $list['HR'] = [
-            'code'     => 'HR',
-            'name'     => 'Human Resource Department (HR)',
-            'director' => 'Lt PN Basim Talat',
-            'desig'    => 'Staff Officer - Human Resources',
-            'badge'    => 'HR',
-        ];
+            // Contract cases rule: Procurement accounts excluded
+            if (in_array($area, ['proc', 'prc'], true) || str_contains(strtolower($acc->acc_desig ?? ''), 'procurement')) {
+                continue;
+            }
 
-        // 3. Information System Department (IS)
-        $list['IS'] = [
-            'code'     => 'IS',
-            'name'     => 'Information System Department (IS)',
-            'director' => 'Lt Cdr (Rtd) Adnan Mustafa',
-            'desig'    => 'Director Information System',
-            'badge'    => 'IS',
-        ];
+            // Hierarchy filter:
+            // Division & departments only see up to MD (cannot see DDG or DG)
+            $isTargetDg = $accContext->isDg() || $area === 'nrdi';
+            $isTargetDdg = $accContext->isDdg() || $area === 'hqs';
+            $isTargetMd = $accContext->isMd() || $area === 'rdw';
 
-        // 4. Information Technology Department (IT)
-        $list['IT'] = [
-            'code'     => 'IT',
-            'name'     => 'Information Technology Department (IT)',
-            'director' => 'Director IT',
-            'desig'    => 'Directorate of Information Technology',
-            'badge'    => 'IT',
-        ];
+            if (! $isCommand) {
+                if ($isTargetDg || $isTargetDdg) {
+                    continue;
+                }
+            }
 
-        // 5. Administration Department (Admin)
-        $list['Admin'] = [
-            'code'     => 'Admin',
-            'name'     => 'Administration Department (Admin)',
-            'director' => 'H/Lt PN Sajid Ali Cheema',
-            'desig'    => 'Manager Admin R&D Wing',
-            'badge'    => 'ADMIN',
-        ];
+            // Determine canonical workflow stage & department display name
+            $stage = 'Division';
+            $deptName = $acc->acc_desig;
+            if ($isTargetDg) {
+                $stage = 'DG';
+                $deptName = 'Director General (DG Office)';
+            } elseif ($isTargetDdg) {
+                $stage = 'DDG';
+                $deptName = 'Deputy Director General (DDG Office)';
+            } elseif ($isTargetMd) {
+                $stage = 'MD';
+                $deptName = 'Managing Director (MD Office)';
+            } elseif ($area === 'hr') {
+                $stage = 'HR';
+                $deptName = 'Human Resource Department (HR)';
+            } elseif ($area === 'fin') {
+                $stage = 'Finance';
+                $deptName = 'Finance Department';
+            } elseif ($area === 'is') {
+                $stage = 'IS';
+                $deptName = 'Information System Department (IS)';
+            } elseif ($area === 'it') {
+                $stage = 'IT';
+                $deptName = 'Information Technology Department (IT)';
+            } elseif ($area === 'adm' || $area === 'admin') {
+                $stage = 'Admin';
+                $deptName = 'Administration Department (Admin)';
+            } elseif ($area === 'rdwprj') {
+                $stage = 'Division';
+                $deptName = 'Staff Officer R&D (SORD)';
+            } elseif ($area === 'prj') {
+                $stage = 'Division';
+                $unitName = \App\Models\Unit::where('unt_id', $acc->acc_unt_id)->value('unt_name');
+                $deptName = $unitName ?: $acc->acc_desig;
+            }
 
-        // 6. Managing Director (MD)
-        if ($canSendToMd) {
-            $list['MD'] = [
-                'code'     => 'MD',
-                'name'     => 'Managing Director (MD Office)',
-                'director' => 'Cdre Malik M Imran',
-                'desig'    => 'Managing Director RDW',
-                'badge'    => 'MD',
+            $code = 'acc_' . $acc->acc_id;
+
+            $list[$code] = [
+                'code'     => $code,
+                'stage'    => $stage,
+                'acc_id'   => $acc->acc_id,
+                'name'     => $deptName . ' — ' . $acc->acc_name,
+                'director' => $acc->acc_name,
+                'desig'    => $acc->acc_desig,
+                'badge'    => $acc->acc_desigshort ?: strtoupper($area),
+                'area'     => $area,
             ];
         }
-
-        // 8. Deputy Director General (DDG)
-        if ($canSendToDdg) {
-            $list['DDG'] = [
-                'code'     => 'DDG',
-                'name'     => 'Deputy Director General (DDG Office)',
-                'director' => 'Deputy Director General',
-                'desig'    => 'DDG HQs NRD',
-                'badge'    => 'DDG',
-            ];
-        }
-
-        // 9. Director General (DG)
-        if ($canSendToDg) {
-            $list['DG'] = [
-                'code'     => 'DG',
-                'name'     => 'Director General (DG Office)',
-                'director' => 'R/Admiral Sohail Arshad',
-                'desig'    => 'Director General NRDI',
-                'badge'    => 'DG',
-            ];
-        }
-
-        // 9. Enabling Technology Division (Enab)
-        $list['Enab'] = [
-            'code'     => 'Enab',
-            'name'     => 'Enabling Technology Division (Enab)',
-            'director' => 'Commodore Hammad Raza',
-            'desig'    => 'Director Enabling Technologies',
-            'badge'    => 'ENAB',
-        ];
-
-        // 12. Communication Division (Comm)
-        $list['Comm'] = [
-            'code'     => 'Comm',
-            'name'     => 'Communication Division (Comm)',
-            'director' => 'Capt PN Aleem Mushtaq',
-            'desig'    => 'Director Communication',
-            'badge'    => 'COMM',
-        ];
-
-        // 13. Naval Weapons System Division (NWS)
-        $list['NWS'] = [
-            'code'     => 'NWS',
-            'name'     => 'Naval Weapons System Division (NWS)',
-            'director' => 'Commodore Attaullah Memon SI(M)',
-            'desig'    => 'Director Naval Weapon Systems',
-            'badge'    => 'NWS',
-        ];
-
-        // 14. Sensors Division (Sensors)
-        $list['Sensors'] = [
-            'code'     => 'Sensors',
-            'name'     => 'Sensors Division (Sensors)',
-            'director' => 'Commodore Tariq Mairaj SI(M)',
-            'desig'    => 'Director Sensors',
-            'badge'    => 'SENS',
-        ];
-
-        // 15. Systems Division (Sys)
-        $list['Sys'] = [
-            'code'     => 'Sys',
-            'name'     => 'Systems Division (Sys)',
-            'director' => 'Capt PN Abdur Rehman Hashmi',
-            'desig'    => 'Director Systems',
-            'badge'    => 'SYS',
-        ];
-
-        // 16. System of Systems Engineering Division (SoSE)
-        $list['SoSE'] = [
-            'code'     => 'SoSE',
-            'name'     => 'System of Systems Engineering Division (SoSE)',
-            'director' => 'Capt PN M. Abdul Rehman Hashmi',
-            'desig'    => 'Director System of Systems Engineering',
-            'badge'    => 'SOSE',
-        ];
 
         return $list;
     }

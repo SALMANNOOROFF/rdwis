@@ -413,15 +413,35 @@
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-hashtag text-primary mr-2"></i>CASE ID:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">#{{ $purchase->pcs_id }}</span></div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="far fa-calendar-alt text-primary mr-2"></i>DATE:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span></div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-project-diagram text-primary mr-2"></i>PROJECT:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></div>
+                                    <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span></div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-building text-primary mr-2"></i>DIVISION:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ $purchase->unit?->unt_name ?? $purchase->pcs_unt_id }}</span></div>
-                                    <div>
-                                        <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-info-circle text-primary mr-2"></i>STATUS:</strong> 
-                                        <span class="badge badge-warning text-dark font-weight-bold px-2 py-1" style="font-size: 11px;">
+                                    @php
+                                        $latestDec = $purchase->latestDecision;
+                                        $holderDisplay = $latestDec?->pdec_to_status ?: ($purchase->current_stage_display ?: 'Division (Initiator)');
+                                        $forwardedBy = $latestDec?->account?->acc_name;
+                                        $statusClass = match(strtolower(trim($purchase->pcs_status))) {
+                                            'approved' => 'badge-success',
+                                            'returned' => 'badge-danger',
+                                            'draft'    => 'badge-secondary',
+                                            default    => 'badge-primary',
+                                        };
+                                    @endphp
+                                    <div class="d-flex align-items-center mb-1">
+                                        <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-info-circle text-primary mr-2"></i>CASE STATUS:</strong> 
+                                        <span class="badge {{ $statusClass }} font-weight-bold px-2.5 py-1" style="font-size: 11.5px; letter-spacing: 0.3px;">
                                             {{ $purchase->pcs_status }}
-                                            @if($purchase->current_stage_display)
-                                                — Currently with: {{ $purchase->current_stage_display }}
-                                            @endif
                                         </span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-map-marker-alt text-primary mr-2"></i>LOCATION:</strong> 
+                                        <span class="badge font-weight-bold px-2.5 py-1" style="background: #e0f2fe; color: #0369a1 !important; border: 1px solid #bae6fd; font-size: 11.5px;">
+                                            <i class="fas fa-building mr-1 text-primary"></i> Currently with: {{ $holderDisplay }}
+                                        </span>
+                                        @if($forwardedBy && in_array($latestDec?->pdec_action, ['forward', 'forward_negative', 'float_to_proc', 'reshare_to_proc', 'return']))
+                                            <span class="text-muted small ml-2" style="font-size: 11px;">
+                                                (Forwarded by <strong>{{ $forwardedBy }}</strong>)
+                                            </span>
+                                        @endif
                                     </div>
 
                                     {{-- Attached Documents (Project & Case Side-by-Side) --}}
@@ -813,7 +833,7 @@
                                                 <i class="fas fa-user-circle text-primary mr-1"></i> {{ $decision->account->acc_name }} 
                                                 <span class="text-muted small ml-1" style="font-weight: 600;">({{ strtoupper($decision->pdec_role) }})</span>
                                                 <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 11px; color: var(--rd-{{$color}}); letter-spacing: 0.5px;">
-                                                    <i class="fas fa-caret-right mr-1"></i>{{ strtoupper($actionVerb) }}
+                                                    <i class="fas fa-caret-right mr-1"></i>{{ strtoupper($actionVerb) }}@if(!empty($toStatusDisplay) && !in_array($act, ['approve', 'reject', 'not_approved']))<span class="ml-1" style="text-transform: none; font-size: 11px; color: #334155; font-weight: 600;"> to <strong class="text-dark">{{ $toStatusDisplay }}</strong></span>@endif
                                                 </span>
                                             </div>
                                             <span class="text-muted" style="font-size:10px; font-weight: 600;">

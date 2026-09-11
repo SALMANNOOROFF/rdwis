@@ -222,14 +222,33 @@
                                                     </td>
                                                     <td class="text-right"><span class="case-value">PKR {{ number_format((float) $p->display_price) }}</span></td>
                                                     <td class="text-center">
-                                                        <span class="badge status-badge mb-1" style="background: rgba(var(--rd-{{$b}}-rgb), 0.1); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.2);">
-                                                            <i class="fas fa-{{$i}} mr-1"></i> {{ $p->current_stage_display ?? $s }}
-                                                        </span>
-                                                        @if($latest)
-                                                            <div class="text-xs font-weight-bold text-muted" style="font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px;">
-                                                                {{ strtoupper($latest->pdec_action) }}ed BY {{ $latest->account->acc_name }}
+                                                        @php
+                                                            $targetDest = $latest?->pdec_to_status ?: ($p->current_stage_display ?: 'Division (Initiator)');
+                                                            $statusBadgeColor = match(strtolower(trim($s))) {
+                                                                'approved' => 'success',
+                                                                'returned' => 'danger',
+                                                                'draft'    => 'secondary',
+                                                                default    => 'primary'
+                                                            };
+                                                        @endphp
+                                                        <div class="d-flex flex-column align-items-center" style="gap: 3px;">
+                                                            <div>
+                                                                <span class="badge badge-{{ $statusBadgeColor }} px-2 py-0.5 font-weight-bold" style="font-size: 10px; letter-spacing: 0.3px;">
+                                                                    {{ $s }}
+                                                                </span>
                                                             </div>
-                                                        @endif
+                                                            <span class="badge status-badge" style="background: rgba(var(--rd-{{$b}}-rgb), 0.12); color: var(--rd-text-{{$b}}); border: 1px solid rgba(var(--rd-{{$b}}-rgb), 0.25); font-size: 11px;">
+                                                                <i class="fas fa-{{$i}} mr-1"></i> {{ $targetDest }}
+                                                            </span>
+                                                            @if($latest)
+                                                                <div class="text-xs font-weight-bold text-muted" style="font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; font-size: 10.5px;">
+                                                                    {{ strtoupper($latest->pdec_action) }}ed BY {{ $latest->account->acc_name }}
+                                                                    @if(!empty($latest->pdec_to_status) && !in_array($latest->pdec_action, ['approve', 'reject']))
+                                                                        &rarr; <span class="text-dark">{{ $latest->pdec_to_status }}</span>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     </td>
                                                     <td class="text-right pr-4">
                                                         <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-outline-primary btn-sm rounded-lg px-3 hub-header" style="font-size: 11px;">

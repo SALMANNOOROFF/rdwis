@@ -30,10 +30,10 @@ class ContractCaseController extends Controller
             return $stage === 'DG' && !in_array($c->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
         });
 
-        // 2. Open / Approved: Cases approved and waiting for HR fulfillment
-        $initiatedCases = $cases->filter(function ($c) {
-            $stage = $c->current_stage;
-            return $stage === 'Approved'
+        // 2. Open / In Pipeline: Cases currently with other authorities
+        $actionReqIds = $actionReqCases->pluck('ctc_id')->toArray();
+        $initiatedCases = $cases->filter(function ($c) use ($actionReqIds) {
+            return !in_array($c->ctc_id, $actionReqIds)
                 && !in_array($c->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
         });
 

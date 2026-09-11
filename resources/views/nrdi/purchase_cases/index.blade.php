@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -127,14 +127,13 @@
                     <th style="width: 120px;">Date</th>
                     <th style="width: 160px; text-align: right;">Amount</th>
                     <th style="width: 160px; text-align: center;">Status</th>
-                    <th style="width: 100px; text-align: right;">Type</th>
                 </tr>
             </thead>
 
             {{-- 1. PENDING ACTION SECTION --}}
             <tbody id="group-pending">
                 <tr class="section-group-row" onclick="toggleGroup('pending')">
-                    <td colspan="6" class="section-group-cell">
+                    <td colspan="5" class="section-group-cell">
                         <div class="section-title-wrap">
                             <i class="fas fa-chevron-down toggle-icon" id="toggle-pending"></i>
                             <span class="section-title">Pending Action</span>
@@ -148,7 +147,7 @@
             {{-- 2. OPEN SECTION --}}
             <tbody id="group-open">
                 <tr class="section-group-row" onclick="toggleGroup('open')">
-                    <td colspan="6" class="section-group-cell">
+                    <td colspan="5" class="section-group-cell">
                         <div class="section-title-wrap">
                             <i class="fas fa-chevron-down toggle-icon" id="toggle-open"></i>
                             <span class="section-title">Open</span>
@@ -162,7 +161,7 @@
             {{-- 3. CLOSE SECTION --}}
             <tbody id="group-closed">
                 <tr class="section-group-row" onclick="toggleGroup('closed')">
-                    <td colspan="6" class="section-group-cell">
+                    <td colspan="5" class="section-group-cell">
                         <div class="section-title-wrap">
                             <i class="fas fa-chevron-down toggle-icon" id="toggle-closed"></i>
                             <span class="section-title">Close</span>

@@ -118,12 +118,46 @@ class PurchaseCasePolicy
             return $this->update($user, $case);
         }
 
+        if ($action === 'approve') {
+            // Approval is strictly restricted to Command Officers (MD, DDG, DG) or SuperAdmin
+            if (! ($context->isCommand() || $context->isSuperAdmin())) {
+                return false;
+            }
+
+            // Must satisfy financial threshold limits via PurchaseApprovalService
+            $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+            if (! app(\App\Services\PurchaseApprovalService::class)->canApprove($userArea, (float)($case->pcs_price ?? 0), $case)) {
+                return false;
+            }
+        }
+
+        // Disallow actions on already finalized cases
+        $isFinalized = in_array(strtolower(trim((string) $case->pcs_status)), ['approved', 'rejected', 'cancelled', 'not approved', 'fulfilled', 'completed']);
+        if ($isFinalized) {
+            return false;
+        }
+
+        // SENDER LOCKING: If this user took the latest forwarding/returning decision on this case,
+        // it is locked for them until the recipient acts!
+        $latestDecision = $case->latestDecision ?? $case->decisions->sortByDesc('pdec_id')->first();
+        if ($latestDecision 
+            && (int) $latestDecision->pdec_acc_id === (int) $user->acc_id 
+            && in_array($latestDecision->pdec_action, ['forward', 'forward_negative', 'return', 'float_to_proc', 'reshare_to_proc'])
+        ) {
+            return false;
+        }
+
         // Determine current workflow stage
         $currentStage = $case->currentSubstatus?->pss_stage ?? ($case->pcs_status === 'Draft' ? 'Division' : 'Division');
-        $userArea = (string) ($user->acc_untarea ?? '');
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
 
         // 1. Division Stage
         if ($currentStage === 'Division') {
+            // Allow Procurement to act on collaborative draft/returned cases
+            if (AreaDefinition::isProcurement($userArea) && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_PROCUREMENT_ACTION)) {
+                return true;
+            }
+
             if (! RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_SUBMIT)) {
                 return false;
             }
@@ -148,17 +182,33 @@ class PurchaseCasePolicy
 
         // 4. MD Stage
         if ($currentStage === 'MD') {
-            return ($context->isMd() || $context->isCommand()) && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_MD_ACTION);
+            return ($context->isMd() && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_MD_ACTION))
+                || ($context->isDg() && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_DG_ACTION))
+                || $context->isSuperAdmin();
         }
 
         // 5. DDG Stage
         if ($currentStage === 'DDG') {
-            return ($context->isDdg() || $context->isCommand()) && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_DDG_ACTION);
+            return ($context->isDdg() && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_DDG_ACTION))
+                || ($context->isDg() && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_DG_ACTION))
+                || $context->isSuperAdmin();
         }
 
         // 6. DG Stage
         if ($currentStage === 'DG') {
-            return ($context->isDg() || $context->isCommand()) && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_DG_ACTION);
+            return ($context->isDg() && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_DG_ACTION))
+                || $context->isSuperAdmin();
+        }
+
+        // 7. Other Autonomous Depts (IS, IT, Admin)
+        if ($currentStage === 'IS') {
+            return $userArea === 'is' || $context->isCommand();
+        }
+        if ($currentStage === 'IT') {
+            return $userArea === 'it' || $context->isCommand();
+        }
+        if ($currentStage === 'Admin') {
+            return in_array($userArea, ['admin', 'adm']) || $context->isCommand();
         }
 
         return false;

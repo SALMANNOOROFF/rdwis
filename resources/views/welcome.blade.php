@@ -674,6 +674,13 @@
       </li>
 
       <li class="nav-item">
+          <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
+              <i class="fas fa-chart-pie nav-icon text-warning"></i>
+              <p>Project Financing</p>
+          </a>
+      </li>
+
+      <li class="nav-item">
           <a href="#" class="nav-link">
               <i class="nav-icon fas fa-list-ol"></i>
               <p>Schedule of Rates</p>
@@ -701,14 +708,14 @@
               </a>
           </li>
 
-          @if(!Auth::user()->isMdDdgDg())
           <li class="nav-item">
-              <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ Request::routeIs('finance.accounts.*') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-wallet text-cyan"></i>
-                  <p>Accounts</p>
+              <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
+                  <i class="fas fa-chart-pie nav-icon text-warning"></i>
+                  <p>Project Financing</p>
               </a>
           </li>
-          @endif
+
+
 
             <li class="nav-item {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'active' : '' }}">
@@ -788,12 +795,12 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                            <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>Pn Officers</p>
+                            <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN Officers</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                            <i class="fas fa-anchor nav-icon text-cyan"></i><p>Pn Cpo / Sailors</p>
+                            <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / Sailors</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -845,6 +852,13 @@
           </li>
 
            <li class="nav-item">
+               <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
+                   <i class="fas fa-chart-pie nav-icon text-warning"></i>
+                   <p>Project Financing</p>
+               </a>
+           </li>
+
+           <li class="nav-item">
                <a href="{{ route('nrdi.firms.list') }}" class="nav-link {{ Request::routeIs('nrdi.firms.*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-building text-cyan"></i>
                    <p>Suppliers & Firms</p>
@@ -869,12 +883,12 @@
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>Pn Officers</p>
+                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN Officers</p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>Pn Cpo / Sailors</p>
+                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / Sailors</p>
                        </a>
                    </li>
                    <li class="nav-item">
@@ -940,6 +954,13 @@
           @endif
 
           <li class="nav-item">
+              <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
+                  <i class="fas fa-chart-pie nav-icon text-warning"></i>
+                  <p>Project Financing</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
               @php
                   $purchaseRoute = 'nrdi.purchase_cases_new.index';
                   if($isProc) $purchaseRoute = 'nrdi.purchase_cases_new.procurement.index';
@@ -959,14 +980,7 @@
               </a>
           </li>
 
-          @if(!Auth::user()->isMdDdgDg())
-          <li class="nav-item">
-              <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ Request::routeIs('finance.accounts.*') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-wallet text-cyan"></i>
-                  <p>Accounts</p>
-              </a>
-          </li>
-          @endif
+
           @endif
 
           <li class="nav-item">
@@ -1003,12 +1017,12 @@
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>Pn Officers</p>
+                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN Officers</p>
                        </a>
                    </li>
                    <li class="nav-item">
                        <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>Pn Cpo / Sailors</p>
+                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / Sailors</p>
                        </a>
                    </li>
                     @if(!Auth::user()->isMdDdgDg())
@@ -1023,6 +1037,12 @@
            @endif
 
           @if(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))) === 'fin')
+          <li class="nav-item">
+              <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ Request::routeIs('finance.accounts.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-wallet text-cyan"></i>
+                  <p>Accounts</p>
+              </a>
+          </li>
           <li class="nav-item {{ Request::routeIs('fin.payments.*') || Request::routeIs('fin.commitments.*') || Request::routeIs('divhr.salary.*') ? 'menu-open' : '' }}">
               <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
@@ -1115,6 +1135,13 @@
               <a href="{{ route('admin.reversals.index') }}" class="nav-link {{ Request::routeIs('admin.reversals.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-undo-alt"></i>
                   <p>Data Reversals</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
+                  <i class="fas fa-chart-pie nav-icon text-warning"></i>
+                  <p>Project Financing</p>
               </a>
           </li>
 

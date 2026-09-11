@@ -132,6 +132,9 @@ class PurchaseApprovalService
         'MD'        => 'MD Office',
         'DDG'       => 'DDG Office',
         'DG'        => 'Director General',
+        'IS'        => 'Information Systems',
+        'IT'        => 'Information Technology',
+        'Admin'     => 'Administration Department',
         'Approved'  => 'Final Approval (Success)',
     ];
 
@@ -145,6 +148,9 @@ class PurchaseApprovalService
         'MD'        => 'rdw',
         'DDG'       => 'hqs',
         'DG'        => 'nrdi',
+        'IS'        => 'is',
+        'IT'        => 'it',
+        'Admin'     => 'adm',
         'Approved'  => null,
     ];
 
@@ -162,6 +168,10 @@ class PurchaseApprovalService
         'rdw'       => 'MD',
         'hqs'       => 'DDG',
         'nrdi'      => 'DG',
+        'is'        => 'IS',
+        'it'        => 'IT',
+        'adm'       => 'Admin',
+        'admin'     => 'Admin',
     ];
 
     /**
@@ -198,148 +208,102 @@ class PurchaseApprovalService
     /**
      * Get available destination targets for sending a purchase case
      */
-    public function getAvailableDestinations(?string $currentRole = null): array
+    public function getAvailableDestinations($currentUserOrRole = null): array
     {
-        $role = strtolower(trim((string)$currentRole));
-        if (in_array($role, ['proc', 'prc'], true)) $role = 'proc';
-        
-        $canSendToDdg = !in_array($role, ['prj', 'rdwprj', 'division', 'initiation'], true);
-        $canSendToDg = !in_array($role, ['prj', 'rdwprj', 'division', 'initiation'], true);
-        $canSendToMd = ($role !== 'rdw' && $role !== 'md');
+        $currentUser = null;
+        if ($currentUserOrRole instanceof \App\Models\CenAccount) {
+            $currentUser = $currentUserOrRole;
+        } elseif (\Illuminate\Support\Facades\Auth::check()) {
+            $currentUser = \Illuminate\Support\Facades\Auth::user();
+        }
+
+        $currArea = strtolower(trim((string) ($currentUser?->acc_untarea ?? (is_string($currentUserOrRole) ? $currentUserOrRole : ''))));
+        if (in_array($currArea, ['proc', 'prc'], true)) $currArea = 'proc';
+        $currContext = $currentUser ? \App\Services\Auth\UserAccessContext::forUser($currentUser) : null;
+        $isCommand = $currContext?->isCommand() ?? in_array($currArea, ['rdw', 'hqs', 'nrdi'], true);
+
+        $accounts = \App\Models\CenAccount::whereRaw("LOWER(acc_status) = 'active'")
+            ->when($currentUser, fn($q) => $q->where('acc_id', '!=', $currentUser->acc_id))
+            ->orderBy('acc_level', 'asc')
+            ->orderBy('acc_id', 'asc')
+            ->get();
 
         $list = [];
 
-        // 1. Finance Department
-        $list['DFinance'] = [
-            'code'     => 'DFinance',
-            'name'     => 'Finance Department',
-            'director' => 'Cdr (R) S F Rahman',
-            'desig'    => 'Director Finance',
-            'badge'    => 'FIN',
-        ];
+        foreach ($accounts as $acc) {
+            $area = strtolower(trim((string) ($acc->acc_untarea ?? '')));
+            if (in_array($area, ['proc', 'prc'], true)) $area = 'proc';
+            $accContext = \App\Services\Auth\UserAccessContext::forUser($acc);
 
-        // 2. Information System Department (IS)
-        $list['IS'] = [
-            'code'     => 'IS',
-            'name'     => 'Information System Department (IS)',
-            'director' => 'Lt Cdr (Rtd) Adnan Mustafa',
-            'desig'    => 'Director Information System',
-            'badge'    => 'IS',
-        ];
+            // Purchase cases rule: HR accounts excluded
+            if ($area === 'hr') {
+                continue;
+            }
 
-        // 3. Information Technology Department (IT)
-        $list['IT'] = [
-            'code'     => 'IT',
-            'name'     => 'Information Technology Department (IT)',
-            'director' => 'Director IT',
-            'desig'    => 'Directorate of Information Technology',
-            'badge'    => 'IT',
-        ];
+            // Hierarchy filter:
+            // Division & departments only see up to MD (cannot see DDG or DG)
+            $isTargetDg = $accContext->isDg() || $area === 'nrdi';
+            $isTargetDdg = $accContext->isDdg() || $area === 'hqs';
+            $isTargetMd = $accContext->isMd() || $area === 'rdw';
 
-        // 4. Procurement Department (DProc)
-        $list['DProc'] = [
-            'code'     => 'DProc',
-            'name'     => 'Procurement Department (DProc)',
-            'director' => 'Cdr (R) M Mudassir Muttaqi',
-            'desig'    => 'Director Procurement',
-            'badge'    => 'PROC',
-        ];
+            if (! $isCommand) {
+                if ($isTargetDg || $isTargetDdg) {
+                    continue;
+                }
+            }
 
-        // 5. Administration Department (Admin)
-        $list['Admin'] = [
-            'code'     => 'Admin',
-            'name'     => 'Administration Department (Admin)',
-            'director' => 'H/Lt PN Sajid Ali Cheema',
-            'desig'    => 'Manager Admin R&D Wing',
-            'badge'    => 'ADMIN',
-        ];
+            // Determine canonical workflow stage & department display name
+            $stage = 'Division';
+            $deptName = $acc->acc_desig;
+            if ($isTargetDg) {
+                $stage = 'DG';
+                $deptName = 'Director General (DG Office)';
+            } elseif ($isTargetDdg) {
+                $stage = 'DDG';
+                $deptName = 'Deputy Director General (DDG Office)';
+            } elseif ($isTargetMd) {
+                $stage = 'MD';
+                $deptName = 'Managing Director (MD Office)';
+            } elseif ($area === 'proc') {
+                $stage = 'DProc';
+                $deptName = 'Procurement Department (DProc)';
+            } elseif ($area === 'fin') {
+                $stage = 'DFinance';
+                $deptName = 'Finance Department';
+            } elseif ($area === 'is') {
+                $stage = 'IS';
+                $deptName = 'Information System Department (IS)';
+            } elseif ($area === 'it') {
+                $stage = 'IT';
+                $deptName = 'Information Technology Department (IT)';
+            } elseif ($area === 'adm') {
+                $stage = 'Admin';
+                $deptName = 'Administration Department (Admin)';
+            } elseif ($area === 'mtss') {
+                $stage = 'MTSS';
+                $deptName = 'MTSS Department';
+            } elseif ($area === 'rdwprj') {
+                $stage = 'Division';
+                $deptName = 'Staff Officer R&D (SORD)';
+            } elseif ($area === 'prj') {
+                $stage = 'Division';
+                $unitName = \App\Models\Unit::where('unt_id', $acc->acc_unt_id)->value('unt_name');
+                $deptName = $unitName ?: $acc->acc_desig;
+            }
 
-        // 6. Managing Director (MD)
-        if ($canSendToMd) {
-            $list['MD'] = [
-                'code'     => 'MD',
-                'name'     => 'Managing Director (MD Office)',
-                'director' => 'Cdre Malik M Imran',
-                'desig'    => 'Managing Director RDW',
-                'badge'    => 'MD',
+            $code = 'acc_' . $acc->acc_id;
+
+            $list[$code] = [
+                'code'     => $code,
+                'stage'    => $stage,
+                'acc_id'   => $acc->acc_id,
+                'name'     => $deptName . ' — ' . $acc->acc_name,
+                'director' => $acc->acc_name,
+                'desig'    => $acc->acc_desig,
+                'badge'    => $acc->acc_desigshort ?: strtoupper($area),
+                'area'     => $area,
             ];
         }
-
-        // 8. Deputy Director General (DDG)
-        if ($canSendToDdg) {
-            $list['DDG'] = [
-                'code'     => 'DDG',
-                'name'     => 'Deputy Director General (DDG Office)',
-                'director' => 'Deputy Director General',
-                'desig'    => 'DDG HQs NRD',
-                'badge'    => 'DDG',
-            ];
-        }
-
-        // 9. Director General (DG)
-        if ($canSendToDg) {
-            $list['DG'] = [
-                'code'     => 'DG',
-                'name'     => 'Director General (DG Office)',
-                'director' => 'R/Admiral Sohail Arshad',
-                'desig'    => 'Director General NRDI',
-                'badge'    => 'DG',
-            ];
-        }
-
-        // 9. Enabling Technology Division (Enab)
-        $list['Enab'] = [
-            'code'     => 'Enab',
-            'name'     => 'Enabling Technology Division (Enab)',
-            'director' => 'Commodore Hammad Raza',
-            'desig'    => 'Director Enabling Technologies',
-            'badge'    => 'ENAB',
-        ];
-
-        // 12. Communication Division (Comm)
-        $list['Comm'] = [
-            'code'     => 'Comm',
-            'name'     => 'Communication Division (Comm)',
-            'director' => 'Capt PN Aleem Mushtaq',
-            'desig'    => 'Director Communication',
-            'badge'    => 'COMM',
-        ];
-
-        // 13. Naval Weapons System Division (NWS)
-        $list['NWS'] = [
-            'code'     => 'NWS',
-            'name'     => 'Naval Weapons System Division (NWS)',
-            'director' => 'Commodore Attaullah Memon SI(M)',
-            'desig'    => 'Director Naval Weapon Systems',
-            'badge'    => 'NWS',
-        ];
-
-        // 14. Sensors Division (Sensors)
-        $list['Sensors'] = [
-            'code'     => 'Sensors',
-            'name'     => 'Sensors Division (Sensors)',
-            'director' => 'Commodore Tariq Mairaj SI(M)',
-            'desig'    => 'Director Sensors',
-            'badge'    => 'SENS',
-        ];
-
-        // 15. Systems Division (Sys)
-        $list['Sys'] = [
-            'code'     => 'Sys',
-            'name'     => 'Systems Division (Sys)',
-            'director' => 'Capt PN Abdur Rehman Hashmi',
-            'desig'    => 'Director Systems',
-            'badge'    => 'SYS',
-        ];
-
-        // 16. System of Systems Engineering Division (SoSE)
-        $list['SoSE'] = [
-            'code'     => 'SoSE',
-            'name'     => 'System of Systems Engineering Division (SoSE)',
-            'director' => 'Capt PN M. Abdul Rehman Hashmi',
-            'desig'    => 'Director System of Systems Engineering',
-            'badge'    => 'SOSE',
-        ];
 
         return $list;
     }
@@ -398,6 +362,41 @@ class PurchaseApprovalService
             $toStage = $currentStage;
             $newPcsStatus = null; // Only set when pcs_status should change
 
+            $targetAcc = null;
+            $targetStageName = null;
+            if (!empty($targetStage) && str_starts_with($targetStage, 'acc_')) {
+                $targetAccId = (int) substr($targetStage, 4);
+                $targetAcc = CenAccount::find($targetAccId);
+                if ($targetAcc) {
+                    $uArea = strtolower(trim($targetAcc->acc_untarea ?? ''));
+                    $uRole = (int) ($targetAcc->acc_role ?? 0);
+                    $desig = strtolower(trim($targetAcc->acc_desigshort ?? ''));
+
+                    if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg'))) {
+                        $resolvedStage = 'DG';
+                    } elseif (str_contains($desig, 'ddg')) {
+                        $resolvedStage = 'DDG';
+                    } elseif ($uArea === 'rdw' || $uRole === 160000 || str_contains($desig, 'md')) {
+                        $resolvedStage = 'MD';
+                    } elseif (in_array($uArea, ['proc', 'prc'])) {
+                        $resolvedStage = 'DProc';
+                    } elseif (in_array($uArea, ['fin', 'finance'])) {
+                        $resolvedStage = 'DFinance';
+                    } elseif ($uArea === 'is') {
+                        $resolvedStage = 'IS';
+                    } elseif ($uArea === 'it') {
+                        $resolvedStage = 'IT';
+                    } elseif (in_array($uArea, ['admin', 'adm'])) {
+                        $resolvedStage = 'Admin';
+                    } else {
+                        $resolvedStage = 'Division';
+                    }
+
+                    $targetStageName = trim($targetAcc->acc_name) . ' (' . ($targetAcc->acc_desigshort ?: $resolvedStage) . ')';
+                    $targetStage = $resolvedStage;
+                }
+            }
+
             if ($action === 'return') {
                 // Return to an explicitly provided target stage
                 $toStage = $targetStage ?? ($this->returnChain[$currentStage] ?? 'Division');
@@ -407,7 +406,15 @@ class PurchaseApprovalService
                 }
 
                 $this->transitionSubstatus($case, $toStage);
-                $this->notifyReturn($case, $user, $remarks, $toStage);
+                if ($targetAcc) {
+                    PurNotification::create([
+                        'pnt_acc_id' => $targetAcc->acc_id,
+                        'pnt_pcs_id' => $case->pcs_id,
+                        'pnt_message' => "Purchase Case #{$case->pcs_id} has been returned to you by {$user->acc_name}.",
+                    ]);
+                } else {
+                    $this->notifyReturn($case, $user, $remarks, $toStage);
+                }
 
             } elseif ($action === 'not_approved' || $action === 'reject' || $action === 'cancel') {
                 $newPcsStatus = 'Not Approved';
@@ -429,18 +436,41 @@ class PurchaseApprovalService
                         $this->closeSubstatus($case);
                     } elseif ($toStage === 'Division' || in_array($toStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
                         $toStage = 'Division';
-                        $newPcsStatus = ($case->pcs_status === 'Draft' ? 'Draft' : 'Returned');
+                        $newPcsStatus = 'Returned';
                         $this->transitionSubstatus($case, 'Division');
-                        $this->notifyNext($case, $user, 'prj', $remarks);
-                    } elseif ($toStage === 'DProc') {
-                        $this->transitionSubstatus($case, 'DProc');
-                        $this->notifyNext($case, $user, 'proc', $remarks);
-                    } else {
-                        if ($case->pcs_status === 'Draft' || $case->pcs_status === 'Returned') {
-                            $newPcsStatus = 'Under Approval';
+                        if ($targetAcc) {
+                            PurNotification::create([
+                                'pnt_acc_id' => $targetAcc->acc_id,
+                                'pnt_pcs_id' => $case->pcs_id,
+                                'pnt_message' => "Purchase Case #{$case->pcs_id} forwarded to you by {$user->acc_name}.",
+                            ]);
+                        } else {
+                            $this->notifyNext($case, $user, 'prj', $remarks);
                         }
+                    } elseif ($toStage === 'DProc') {
+                        $newPcsStatus = 'Under Approval';
+                        $this->transitionSubstatus($case, 'DProc');
+                        if ($targetAcc) {
+                            PurNotification::create([
+                                'pnt_acc_id' => $targetAcc->acc_id,
+                                'pnt_pcs_id' => $case->pcs_id,
+                                'pnt_message' => "New Purchase Case #{$case->pcs_id} forwarded to you by {$user->acc_name}.",
+                            ]);
+                        } else {
+                            $this->notifyNext($case, $user, 'proc', $remarks);
+                        }
+                    } else {
+                        $newPcsStatus = 'Under Approval';
                         $this->transitionSubstatus($case, $toStage);
-                        $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? 'rdw', $remarks);
+                        if ($targetAcc) {
+                            PurNotification::create([
+                                'pnt_acc_id' => $targetAcc->acc_id,
+                                'pnt_pcs_id' => $case->pcs_id,
+                                'pnt_message' => "New Purchase Case #{$case->pcs_id} forwarded to you by {$user->acc_name}.",
+                            ]);
+                        } else {
+                            $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? 'rdw', $remarks);
+                        }
                     }
                 } else {
                     $mapping = $this->resolveForwarding($case, $userArea);
@@ -450,9 +480,7 @@ class PurchaseApprovalService
                         $newPcsStatus = 'Approved';
                         $this->closeSubstatus($case);
                     } else {
-                        if ($case->pcs_status === 'Draft' || $case->pcs_status === 'Returned') {
-                            $newPcsStatus = 'Under Approval';
-                        }
+                        $newPcsStatus = 'Under Approval';
                         $this->transitionSubstatus($case, $toStage);
                         $this->notifyNext($case, $user, $this->stageToArea[$toStage] ?? $mapping['area'], $remarks);
                     }
@@ -466,17 +494,17 @@ class PurchaseApprovalService
                     ->delete();
 
                 $toStage = 'DProc';
+                $newPcsStatus = 'Under Approval';
                 $this->transitionSubstatus($case, 'DProc');
                 $defaultNote = $action === 'reshare_to_proc' ? 'Case reshared to Procurement Department for quotation correction.' : 'Case floated to Procurement Department for quotation collection.';
                 $this->notifyNext($case, $user, 'proc', $remarks ?: $defaultNote);
-                // pcs_status remains 'Draft' (newPcsStatus remains null)
 
             } elseif ($action === 'dproc_save') {
                 // DProc saves quotes & scrutiny remarks, handing action back to Division
                 $toStage = 'Division';
+                $newPcsStatus = 'Returned';
                 $this->transitionSubstatus($case, 'Division');
                 $this->notifyNext($case, $user, 'prj', $remarks ?: 'Quotes and scrutiny remarks saved by Director Procurement.');
-                // pcs_status remains 'Draft'
 
             } elseif ($action === 'save_draft') {
                 // Draft remarks save: NO substatus change, NO pcs_status change
@@ -496,7 +524,7 @@ class PurchaseApprovalService
                 'pdec_role'        => $user->acc_desigshort ?: $userArea,
                 'pdec_action'      => $action,
                 'pdec_from_status' => $fromStage,
-                'pdec_to_status'   => $toStage,
+                'pdec_to_status'   => $targetStageName ? substr($targetStageName, 0, 50) : $toStage,
                 'pdec_remarks'     => $remarks,
                 'pdec_amount'      => $case->pcs_price,
             ]);

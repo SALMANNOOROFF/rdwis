@@ -31,8 +31,7 @@
                         <table class="table table-hover table-striped mb-0 dg-case-table">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="border-0 pl-4">Type</th>
-                                    <th class="border-0">Title / Description</th>
+                                    <th class="border-0 pl-4">Title / Description</th>
                                     <th class="border-0">Date</th>
                                     <th class="border-0 text-right">Est. Amount</th>
                                     <th class="border-0 text-center">Status</th>
@@ -43,11 +42,8 @@
                                 @foreach($divPending as $p)
                                 <tr class="case-row">
                                     <td class="pl-4 align-middle">
-                                        <span class="badge badge-primary px-2 py-1">{{ strtoupper($p->pcs_type) }}</span>
-                                    </td>
-                                    <td class="align-middle">
                                         <div class="font-weight-bold text-dark case-title">{{ $p->pcs_title }}</div>
-                                        <small class="text-muted case-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</small>
+                                        <small class="text-muted case-ref">Ref: #{{ $p->pcs_id }}</small>
                                     </td>
                                     <td class="align-middle">{{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}</td>
                                     <td class="align-middle text-right font-weight-bold">Rs. <span class="case-amount">{{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>
@@ -77,8 +73,7 @@
                         <table class="table table-hover table-striped mb-0 dg-case-table">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="border-0 pl-4">Type</th>
-                                    <th class="border-0">Title / Description</th>
+                                    <th class="border-0 pl-4">Title / Description</th>
                                     <th class="border-0">Date</th>
                                     <th class="border-0 text-right">Est. Amount</th>
                                     <th class="border-0 text-center">Status</th>
@@ -94,11 +89,8 @@
                                     @endphp
                                 <tr class="case-row">
                                     <td class="pl-4 align-middle">
-                                        <span class="badge badge-secondary px-2 py-1">{{ strtoupper($p->pcs_type) }}</span>
-                                    </td>
-                                    <td class="align-middle">
                                         <div class="font-weight-bold text-dark case-title">{{ $p->pcs_title }}</div>
-                                        <small class="text-muted case-ref">Ref: {{ $p->pcs_type }}-{{ $p->pcs_id }}</small>
+                                        <small class="text-muted case-ref">Ref: #{{ $p->pcs_id }}</small>
                                     </td>
                                     <td class="align-middle">{{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}</td>
                                     <td class="align-middle text-right font-weight-bold">Rs. <span class="case-amount">{{ number_format((float) ($p->live_value ?? ($p->pcs_price ?? 0))) }}</span></td>

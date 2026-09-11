@@ -25,14 +25,8 @@ class FinanceOfProjectController extends Controller
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
-        if ($request->filled('head_id')) {
-            $head = DB::table('cen.heads')->where('hed_id', $request->head_id)->first();
-            if ($head && !empty($head->hed_prj_id)) {
-                return redirect()->route('projects.financial_view', $head->hed_prj_id);
-            }
-        }
-
-        return redirect()->route('finance.accounts.index');
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        $isGlobalViewer = $context->isCommand() || $context->isSuperAdmin() || $user->isSORD() || strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'fin';
 
         // Query heads joined with projects and units
         $headsQuery = DB::table('cen.heads as h')
@@ -50,23 +44,17 @@ class FinanceOfProjectController extends Controller
                 'p.prj_aprvdt'
             );
 
-        if (!$isGlobalViewer) {
-            // For Division users, scope to their assigned division units
-            [$lower, $upper] = $user->acc_lowers == 0
-                ? [$user->acc_lowerm, $user->acc_upperm]
-                : [$user->acc_lowers, $user->acc_uppers];
+        // Apply dynamic data scope strictly to user domain
+        app(\App\Services\Auth\DataScopeService::class)->applyScope($headsQuery, $user, 'h.hed_unt_id');
 
-            if ($lower > 0 && $upper > 0) {
-                $headsQuery->whereBetween('h.hed_unt_id', [$lower, $upper]);
-            } else {
-                $headsQuery->where('h.hed_unt_id', $user->acc_unt_id);
-            }
+        if ($request->filled('division_id') && $request->division_id !== 'all') {
+            $headsQuery->where('h.hed_unt_id', $request->division_id);
         }
 
         $heads = $headsQuery->orderBy('h.hed_code')->get();
 
         // Available divisions for dynamic AJAX / cascading filter
-        $divisions = DB::table('cen.units as u')
+        $divisionsQuery = DB::table('cen.units as u')
             ->whereExists(function($sq) {
                 $sq->select(DB::raw(1))
                    ->from('cen.heads as h')
@@ -74,8 +62,12 @@ class FinanceOfProjectController extends Controller
                    ->whereColumn('h.hed_unt_id', 'u.unt_id');
             })
             ->select('u.unt_id', 'u.unt_name', 'u.unt_namesh')
-            ->orderBy('u.unt_name')
-            ->get();
+            ->orderBy('u.unt_name');
+
+        if (!$isGlobalViewer) {
+            app(\App\Services\Auth\DataScopeService::class)->applyScope($divisionsQuery, $user, 'u.unt_id');
+        }
+        $divisions = $divisionsQuery->get();
 
         // Determine selected head and active tab
         $selectedHeadId = $request->query('head_id');
@@ -121,94 +113,11 @@ class FinanceOfProjectController extends Controller
             ];
         }
 
-        // 2. Compute detailed status for selected head
-        $selectedHead = null;
-        $finStatus = null;
-        $subheadBreakdown = [];
-        $loans = null;
-        $milestones = collect();
-        $installments = collect();
-        $transfers = collect();
-
-        if ($selectedHeadId) {
-            $selectedHead = DB::table('cen.heads as h')
-                ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
-                ->where('h.hed_id', $selectedHeadId)
-                ->select(
-                    'h.hed_id',
-                    'h.hed_prj_id',
-                    'h.hed_code',
-                    'h.hed_name',
-                    'h.hed_transtype',
-                    'p.prj_title',
-                    'p.prj_status',
-                    'p.prj_aprvdt',
-                    'p.prj_startdt',
-                    'p.prj_enddt',
-                    'p.prj_aprvcost'
-                )
-                ->first();
-
-            if ($selectedHead) {
-                // Core financials
-                $finStatus = $this->finService->getHeadStatus($selectedHeadId);
-
-                // Subheads breakdown (HR, Equipment, Operations, Misc, etc.)
-                $subheadBreakdown = $this->finService->getSubheadBreakdown($selectedHeadId);
-
-                // Loans (inter-project netting)
-                $loans = $this->finService->getLoans($selectedHeadId);
-
-                // Milestones & cost allocations
-                $milestones = DB::table('prj.milestones as m')
-                    ->leftJoin('fin.msncosts as mc', function ($join) use ($selectedHeadId) {
-                        $join->on('m.msn_idd', '=', 'mc.mct_msn_idd')
-                             ->where('mc.mct_hed_id', '=', $selectedHeadId);
-                    })
-                    ->where('m.msn_xprj_id', $selectedHead->hed_prj_id)
-                    ->select(
-                        'm.msn_id',
-                        'm.msn_idd',
-                        'm.msn_type',
-                        'm.msn_desc',
-                        'm.msn_status',
-                        'm.msn_cost',
-                        'm.msn_startdt',
-                        'm.msn_targetdt',
-                        'm.msn_achvdt',
-                        'mc.mct_cost'
-                    )
-                    ->orderBy('m.msn_id')
-                    ->get();
-
-                // Installments / Fundings history
-                $installments = DB::table('fin.sharesinstall')
-                    ->where('shi_hed_id', $selectedHeadId)
-                    ->orderBy('shi_id')
-                    ->get();
-
-                // Transfers history
-                $transfers = DB::table('fin.transfers')
-                    ->where('trf_tohed', $selectedHeadId)
-                    ->orWhere('trf_fromhed', $selectedHeadId)
-                    ->orderBy('trf_id')
-                    ->get();
-            }
-        }
-
+        // Return clean all projects view
         return view('division.finance-of-project.index', compact(
             'heads',
             'projects',
             'divisions',
-            'selectedHeadId',
-            'selectedHead',
-            'finStatus',
-            'subheadBreakdown',
-            'loans',
-            'milestones',
-            'installments',
-            'transfers',
-            'activeTab',
             'isGlobalViewer'
         ));
     }
@@ -261,10 +170,14 @@ class FinanceOfProjectController extends Controller
         $head = DB::table('cen.heads as h')
             ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
             ->where('h.hed_id', $headId)
-            ->select('h.hed_id', 'h.hed_code', 'h.hed_name', 'h.hed_transtype', 'p.prj_title', 'p.prj_id')
+            ->select('h.hed_id', 'h.hed_code', 'h.hed_name', 'h.hed_unt_id', 'h.hed_transtype', 'p.prj_title', 'p.prj_id')
             ->first();
 
         if (!$head) abort(404, 'Head not found');
+
+        if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, (int) $head->hed_unt_id)) {
+            abort(403, 'Unauthorized access to project financial head.');
+        }
 
         // Get the overall financial status for this head
         $fin = $this->finService->getHeadStatus($headId);
