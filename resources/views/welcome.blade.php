@@ -718,43 +718,11 @@
 
 
 
-            <li class="nav-item {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::routeIs('training.*') ? 'active' : '' }}">
+            <li class="nav-item">
+                <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') || Request::routeIs('purchase.select') || Request::is('pc-initiation*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-shopping-cart"></i>
-                    <p>Purchase Cases <span class="badge badge-blinking-red badge-pur-parent {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span> <i class="right fas fa-angle-left"></i></p>
+                    <p>Purchase Cases <span class="badge badge-blinking-red badge-pur-parent badge-pur-child {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span></p>
                 </a>
-                <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                        <a href="{{ route('purchase.initiation.index') }}" class="nav-link {{ Request::routeIs('purchase.initiation.*') ? 'active' : '' }}">
-                            <i class="fas fa-list nav-icon"></i>
-                            <p>View All <span class="badge badge-blinking-red badge-pur-child {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span></p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('purchase.select') }}" class="nav-link {{ Request::routeIs('purchase.select') ? 'active' : '' }}">
-                            <i class="fas fa-plus-circle nav-icon"></i>
-                            <p>Initiate Case</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('training.index') }}" class="nav-link {{ Request::routeIs('training.index') || Request::routeIs('training.create') ? 'active' : '' }}">
-                            <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                            <p>Training</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('training.books.index') }}" class="nav-link {{ Request::routeIs('training.books.*') ? 'active' : '' }}">
-                            <i class="fas fa-book nav-icon"></i>
-                            <p>Books Procurement</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('training.license.index') }}" class="nav-link {{ Request::routeIs('training.license.*') ? 'active' : '' }}">
-                            <i class="fas fa-file-signature nav-icon"></i>
-                            <p>Licence / Fees</p>
-                        </a>
-                    </li>
-                </ul>
             </li>
 
             <li class="nav-item">

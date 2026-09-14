@@ -348,9 +348,9 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <div class="col-6"><label>Head</label><input type="text" class="form-control" value="{{ $purchase->project->prj_code ?? 'N/A' }}" readonly></div>
-                                    
-                                    <div class="col-6"><label>Status</label><input type="text" class="form-control font-weight-bold text-success" value="{{ $purchase->pcs_status }}" readonly></div>
+                                    <div class="col-4"><label>Head</label><input type="text" class="form-control" value="{{ $purchase->project->prj_code ?? 'N/A' }}" readonly></div>
+                                    <div class="col-4"><label>Subhead</label><input type="text" class="form-control font-weight-bold text-primary" value="{{ $purchase->subhead_display ?? ($purchase->pcs_type === 'Ps' ? 'Equipment' : 'Misc') }}" readonly style="background:#f1f5f9; border-left: 3px solid #0d6efd;"></div>
+                                    <div class="col-4"><label>Status</label><input type="text" class="form-control font-weight-bold text-success" value="{{ $purchase->pcs_status }}" readonly></div>
                                 </div>
                                 @php
                                     $pbd = $purchase->tax_breakdown;
@@ -398,6 +398,25 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- Quotations Not Received (pur.noquotes) -->
+                            <div class="mt-4 pt-3 border-top" style="border-top: 1.5px dashed #cbd5e1 !important;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="text-danger mb-0 font-weight-bold" style="font-size: 12px; text-transform:uppercase; letter-spacing:0.5px;">
+                                        <i class="fas fa-file-excel mr-1"></i> Quotations Not Received (Contacted Firms with No Response)
+                                    </label>
+                                    <span class="badge badge-light border text-muted" style="font-size:10px;">{{ $purchase->noQuotes->count() }} Firms</span>
+                                </div>
+                                <div class="border rounded p-2 bg-light d-flex flex-wrap gap-1" style="min-height:38px;">
+                                    @forelse($purchase->noQuotes as $nq)
+                                        <span class="badge badge-white border text-dark py-1 px-2 mr-1 mb-1 shadow-sm" style="font-size: 11px; background:#ffffff;">
+                                            <i class="fas fa-times-circle text-danger mr-1"></i> {{ $nq->firm->frm_name ?? $nq->nqt_firmname ?? ('Firm #' . $nq->nqt_frm_id) }}
+                                        </span>
+                                    @empty
+                                        <span class="text-muted small font-italic px-2 py-1">No unreceived quotations recorded for this case.</span>
+                                    @endforelse
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -418,17 +437,48 @@
                     <div class="table-responsive border rounded flex-grow-1" style="max-height: 600px; overflow-y: auto;">
                         <table class="readable-table table-striped mb-0">
                             <thead>
-                                <tr><th>#</th><th>DESC</th><th>QTY</th><th class="text-right">TOTAL</th></tr>
+                                <tr>
+                                    <th style="width:30px;">#</th>
+                                    <th>ITEM & CLASSIFICATION</th>
+                                    <th style="width:70px; text-align:center;">QTY</th>
+                                    <th class="text-right" style="width:85px;">RATE</th>
+                                    <th class="text-right" style="width:95px;">TOTAL</th>
+                                </tr>
                             </thead>
                             <tbody>
-                                @foreach($purchase->items as $item)
+                                @forelse($purchase->items as $item)
+                                @php
+                                    $unitStr = $item->pci_qtyunit ?: 'num';
+                                    $typeStr = $item->type_name ?? ($item->pci_type == 7 ? 'Permanent' : ($item->pci_type == 2 ? 'Consumable' : ($item->pci_type == 3 ? 'Service' : 'Permanent')));
+                                    $shdStr = $item->pci_subhead ?: ($purchase->pcs_type === 'Ps' ? 'Equipment' : 'Misc');
+                                @endphp
                                 <tr>
-                                    <td>{{ $item->pci_serial }}</td>
-                                    <td class="small">{{ Str::limit($item->pci_desc, 30) }}</td>
-                                    <td>{{ $item->pci_qty }}</td>
-                                    <td class="text-right font-weight-bold">{{ number_format($item->pci_qty * $item->pci_price, 2) }}</td>
+                                    <td class="font-weight-bold">{{ $item->pci_serial }}</td>
+                                    <td>
+                                        <div class="font-weight-bold text-dark" style="font-size:12px; line-height:1.2;">{{ $item->pci_desc }}</div>
+                                        <div class="mt-1 d-flex flex-wrap gap-1">
+                                            <span class="badge badge-light border text-primary" style="font-size:9.5px; padding:1px 5px;">{{ $typeStr }}</span>
+                                            @if(!empty($item->pci_subtype))
+                                                <span class="badge badge-light border text-secondary" style="font-size:9.5px; padding:1px 5px;">{{ $item->pci_subtype }}</span>
+                                            @endif
+                                            <span class="badge badge-light border text-success" style="font-size:9.5px; padding:1px 5px;"><i class="fas fa-layer-group mr-1"></i>{{ $shdStr }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center font-weight-bold" style="white-space:nowrap;">
+                                        {{ $item->pci_qty }} <small class="text-muted">{{ $unitStr }}</small>
+                                    </td>
+                                    <td class="text-right font-weight-bold text-secondary" style="font-size:11px;">
+                                        {{ number_format($item->pci_price, 2) }}
+                                    </td>
+                                    <td class="text-right font-weight-bold text-primary" style="font-size:12px;">
+                                        {{ number_format($item->pci_qty * $item->pci_price, 2) }}
+                                    </td>
                                 </tr>
-                                @endforeach
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted small py-3">No line items recorded for this case.</td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -694,20 +744,61 @@
         word-break: break-word;
     }
 </style>
-<!-- 4. Modal: Full Item Details (9 Columns) -->
+<!-- 4. Modal: Full Item Details (10 Columns) -->
 <div class="modal fade" id="viewItemsModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl">
-        <div class="modal-content" style="border-top: 5px solid #007bff;">
-            <div class="modal-header bg-light py-2"><h5 class="modal-title font-weight-bold">Full Case Items</h5><button type="button" class="close" data-dismiss="modal">&times;</button></div>
-            <div class="modal-body">
-                <table class="readable-table table-bordered">
-                    <thead><tr><th>#</th><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th><th>Balance</th><th>Type</th><th>Subtype</th></tr></thead>
-                    <tbody>
-                        @foreach($purchase->items as $item)
-                        <tr><td>{{ $item->pci_serial }}</td><td class="item-description-cell">{{ $item->pci_desc }}</td><td>{{ $item->pci_qty }}</td><td>{{ $item->pci_qtyunit }}</td><td>{{ number_format($item->pci_price, 2) }}</td><td class="font-weight-bold">{{ number_format($item->pci_qty * $item->pci_price, 2) }}</td><td>{{ $item->pci_id }}</td><td>Permanent</td><td>Parts</td></tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <div class="modal-content" style="border-top: 5px solid #007bff; border-radius: 8px;">
+            <div class="modal-header bg-light py-2">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-boxes text-primary mr-2"></i>Full Case Items & Classification</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="table-responsive">
+                    <table class="readable-table table-bordered table-striped table-hover mb-0" style="font-size: 12px;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width:40px; text-align:center;">#</th>
+                                <th>Description</th>
+                                <th style="width:60px; text-align:center;">Qty</th>
+                                <th style="width:70px; text-align:center;">Unit</th>
+                                <th class="text-right" style="width:105px;">Price (PKR)</th>
+                                <th class="text-right" style="width:115px;">Total (PKR)</th>
+                                <th style="width:105px; text-align:center;">Type</th>
+                                <th style="width:125px; text-align:center;">Subtype</th>
+                                <th style="width:95px; text-align:center;">Inv/Asset</th>
+                                <th style="width:110px; text-align:center;">Budget Subhead</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($purchase->items as $item)
+                            @php
+                                $typeStr = $item->type_name ?? ($item->pci_type == 7 ? 'Permanent' : ($item->pci_type == 2 ? 'Consumable' : ($item->pci_type == 3 ? 'Service' : 'Permanent')));
+                                $invAsstStr = $item->type2_name ?? ($item->pci_type2 == 6 ? 'Asset' : ($item->pci_type2 == 5 ? 'Inventory' : '-'));
+                                $subheadStr = $item->pci_subhead ?: ($purchase->pcs_type === 'Ps' ? 'Equipment' : 'Misc');
+                            @endphp
+                            <tr>
+                                <td class="text-center font-weight-bold">{{ $item->pci_serial }}</td>
+                                <td class="item-description-cell font-weight-bold text-dark">{{ $item->pci_desc }}</td>
+                                <td class="text-center font-weight-bold">{{ $item->pci_qty }}</td>
+                                <td class="text-center"><span class="badge badge-light border">{{ $item->pci_qtyunit ?: 'num' }}</span></td>
+                                <td class="text-right font-weight-bold text-secondary">{{ number_format($item->pci_price, 2) }}</td>
+                                <td class="text-right font-weight-bold text-primary">{{ number_format($item->pci_qty * $item->pci_price, 2) }}</td>
+                                <td class="text-center"><span class="badge badge-primary px-2 py-1">{{ $typeStr }}</span></td>
+                                <td class="text-center">{{ $item->pci_subtype ?: 'N/A' }}</td>
+                                <td class="text-center">{{ $invAsstStr }}</td>
+                                <td class="text-center"><span class="badge badge-success px-2 py-1">{{ $subheadStr }}</span></td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">No items recorded.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

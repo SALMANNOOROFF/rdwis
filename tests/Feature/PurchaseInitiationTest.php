@@ -28,7 +28,7 @@ class PurchaseInitiationTest extends TestCase
         $purchase->pcs_effunt_id = $user->acc_unt_id;
         $purchase->pcs_hed_id = $head->hed_id;
         $purchase->pcs_effhed_id = $head->hed_id;
-        $purchase->pcs_type = 'mat';
+        $purchase->pcs_type = 'Ps';
         $purchase->pcs_transtype = 2;
         $purchase->pcs_status = 'Draft';
         $purchase->pcs_title = 'Test Purchase Case';
@@ -58,7 +58,7 @@ class PurchaseInitiationTest extends TestCase
         $purchase->pcs_effunt_id = $user->acc_unt_id;
         $purchase->pcs_hed_id = $head->hed_id;
         $purchase->pcs_effhed_id = $head->hed_id;
-        $purchase->pcs_type = 'mat';
+        $purchase->pcs_type = 'Ps';
         $purchase->pcs_transtype = 2;
         $purchase->pcs_status = 'Draft';
         $purchase->pcs_date = now()->toDateString();
@@ -94,7 +94,7 @@ class PurchaseInitiationTest extends TestCase
         $purchase->pcs_effunt_id = $user->acc_unt_id;
         $purchase->pcs_hed_id = $head->hed_id;
         $purchase->pcs_effhed_id = $head->hed_id;
-        $purchase->pcs_type = 'mat';
+        $purchase->pcs_type = 'Ps';
         $purchase->pcs_transtype = 2;
         $purchase->pcs_status = 'Draft';
         $purchase->pcs_date = now()->toDateString();

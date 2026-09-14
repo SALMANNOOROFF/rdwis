@@ -544,7 +544,7 @@ class PurchaseApprovalService
                 if (!$exists) {
                     DB::table('fin.commitments')->insert([
                         'cmt_docid'     => $case->pcs_id,
-                        'cmt_type'      => $this->mapToLegacyType($case->pcs_type ?? 'mat'),
+                        'cmt_type'      => $case->pcs_type,
                         'cmt_date'      => now()->toDateString(),
                         'cmt_amount'    => -1 * ($case->pcs_transtype == 1 ? ($case->pcs_midprice ?? 0) : ($case->pcs_price ?? 0)),
                         'cmt_status'    => 'Awaited',
@@ -554,6 +554,30 @@ class PurchaseApprovalService
                         'cmt_unt_id'    => $case->pcs_unt_id,
                         'cmt_sudohed'   => $case->pcs_sudohed,
                     ]);
+                }
+
+                // 3b. Create required approval attachment placeholders (legacy PurAttachment slots)
+                $requiredSlots = match($case->pcs_type) {
+                    'Ps' => ['Minute', 'Market Research Report'],
+                    'Rb' => ['Minute', 'Financial Status'],
+                    'Pt' => ['Form'],
+                    default => ['Minute', 'Market Research Report'],
+                };
+
+                foreach ($requiredSlots as $slot) {
+                    $slotExists = DB::table('pur.purattachments')
+                        ->where('pat_objtype', 'pcs')
+                        ->where('pat_objid', $case->pcs_id)
+                        ->where('pat_type', $slot)
+                        ->exists();
+                    if (!$slotExists) {
+                        DB::table('pur.purattachments')->insert([
+                            'pat_objtype' => 'pcs',
+                            'pat_objid'   => $case->pcs_id,
+                            'pat_type'    => $slot,
+                            'pat_path'    => null,
+                        ]);
+                    }
                 }
             }
 
@@ -803,18 +827,5 @@ class PurchaseApprovalService
                       ->where('acc_untarea', 'prj')
                       ->first();
         return $initiator ? $initiator->acc_id : 1; // Fallback
-    }
-
-    /**
-     * Map RDWIS purchase type code to legacy cmt_type code
-     */
-    protected function mapToLegacyType(string $pcsType): string
-    {
-        return match(strtolower(trim($pcsType))) {
-            'mat', 'civ', 'tran', 'book', 'lic', 'net', 'pub', 'stat' => 'Ps',
-            'cons', 'serv' => 'Rb',
-            'tada', 'trn'  => 'Pt',
-            default => 'Ps',
-        };
     }
 }

@@ -345,33 +345,35 @@
                                 <i class="fas fa-list-alt mr-1"></i> CASE DETAIL
                             </a>
                             @php
-                                $hasItLetter = $purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists();
-                                $isPsCase = in_array(strtolower(trim((string)($purchase->pcs_type ?? 'ps'))), ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                                $isPsCase = strtolower(trim((string)($purchase->pcs_type ?? 'ps'))) === 'ps';
+                                $hasItLetter = $isPsCase && ($purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists());
                             @endphp
 
-                            @if($isDProc)
-                                @if(!$hasItLetter)
-                                    {{-- Procurement user sees button to CREATE IT --}}
-                                    <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn-hdr-action btn-hdr-it-annex rajdhani" style="background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; cursor: pointer;">
-                                        <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
-                                    </button>
+                            @if($isPsCase)
+                                @if($isDProc)
+                                    @if(!$hasItLetter)
+                                        {{-- Procurement user sees button to CREATE IT --}}
+                                        <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn-hdr-action btn-hdr-it-annex rajdhani" style="background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; cursor: pointer;">
+                                            <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
+                                        </button>
+                                    @else
+                                        {{-- Procurement user sees button to EDIT/VIEW IT --}}
+                                        <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
+                                            <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
+                                        </a>
+                                    @endif
                                 @else
-                                    {{-- Procurement user sees button to EDIT/VIEW IT --}}
-                                    <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
-                                        <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
-                                    </a>
+                                    {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
+                                    @if($hasItLetter)
+                                        <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
+                                            <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                                        </a>
+                                    @endif
                                 @endif
-                            @else
-                                {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
-                                @if($hasItLetter)
-                                    <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
-                                        <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
-                                    </a>
-                                @endif
+                                <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-comparative-stmt rajdhani">
+                                    <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
+                                </a>
                             @endif
-                            <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-comparative-stmt rajdhani">
-                                <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
-                            </a>
                             <a href="{{ $backRoute }}" class="dg-back-btn" style="padding: 6px 15px; font-size: 12px;">
                                 <i class="fas fa-arrow-left mr-1"></i> Back
                             </a>
@@ -699,7 +701,8 @@
                             @endif
                         </div>
 
-                        {{-- 2. Quotations Section --}}
+                        {{-- 2. Quotations Section (Ps only) --}}
+                        @if($isPsCase)
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="dg-sec-label mb-0"><i class="fas fa-list-ol fa-xs"></i> Quotations</div>
@@ -727,6 +730,7 @@
                                 </div>
                                 <input type="file" id="pcDirectQuoteUploadInput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt">
                         </div>
+                        @endif
 
                         {{-- 3. Terms & Conditions Section --}}
                         <div class="mb-4">
@@ -904,7 +908,7 @@
 
 <div id="pcGlobalFirmDropdown"></div>
 
-@if($canAddQuotes)
+@if($canAddQuotes && $isPsCase)
 
 <div class="modal fade" id="pcAddQuoteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 98%;">

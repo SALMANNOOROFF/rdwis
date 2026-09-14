@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 <div class="col-md-5 text-right">
-                    <a href="{{ route('purchase.unified.create', ['type' => 'material']) }}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-lg hub-header" style="font-size: 14px; border: 2px solid rgba(255,255,255,0.1);">
+                    <a href="{{ route('purchase.select') }}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-lg hub-header" style="font-size: 14px; border: 2px solid rgba(255,255,255,0.1);">
                         <i class="fas fa-plus-circle mr-2"></i> CREATE NEW PURCHASE CASE
                     </a>
                 </div>
@@ -160,7 +160,10 @@
                                                                 </a>
                                                             </div>
                                                         </div>
-                                                        <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'General Ops' }}</div>
+                                                        <div class="text-muted small d-flex align-items-center flex-wrap gap-1 mt-1">
+                                                            <span><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'General Ops' }}</span>
+                                                            <span class="badge badge-light border ml-2 text-dark font-weight-bold" style="font-size: 10px; background: #f8fafc;"><i class="fas fa-layer-group text-primary mr-1"></i>{{ $p->subhead_display }}</span>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right"><span class="case-value">PKR {{ number_format((float) $p->display_price) }}</span></td>
                                                     <td class="text-center">
@@ -218,7 +221,10 @@
                                                                 {{ Str::limit($p->pcs_title, 50) }}
                                                             </a>
                                                         </div>
-                                                        <div class="text-muted small"><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'HQ Procurement' }}</div>
+                                                        <div class="text-muted small d-flex align-items-center flex-wrap gap-1 mt-1">
+                                                            <span><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'HQ Procurement' }}</span>
+                                                            <span class="badge badge-light border ml-2 text-dark font-weight-bold" style="font-size: 10px; background: #f8fafc;"><i class="fas fa-layer-group text-primary mr-1"></i>{{ $p->subhead_display }}</span>
+                                                        </div>
                                                     </td>
                                                     <td class="text-right"><span class="case-value">PKR {{ number_format((float) $p->display_price) }}</span></td>
                                                     <td class="text-center">
@@ -297,6 +303,10 @@
                                                             <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="rd-entity-title-link font-weight-bold" title="Open Case: {{ $p->pcs_title }}">
                                                                 {{ Str::limit($p->pcs_title, 50) }}
                                                             </a>
+                                                        </div>
+                                                        <div class="text-muted small d-flex align-items-center flex-wrap gap-1 mt-1">
+                                                            <span><i class="fas fa-project-diagram mr-1"></i> {{ $p->project->prj_code ?? 'Project' }}</span>
+                                                            <span class="badge badge-light border ml-2 text-dark font-weight-bold" style="font-size: 10px; background: #f8fafc;"><i class="fas fa-layer-group text-primary mr-1"></i>{{ $p->subhead_display }}</span>
                                                         </div>
                                                     </td>
                                                     <td class="text-right"><span class="case-value text-muted">PKR {{ number_format((float) $p->display_price) }}</span></td>

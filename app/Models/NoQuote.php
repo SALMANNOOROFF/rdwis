@@ -12,6 +12,7 @@ class NoQuote extends Model
 
     protected $fillable = [
         'nqt_pcs_id',
+        'nqt_frm_id',
         'nqt_firmname',
         'nqt_reason',
         'nqt_date'
@@ -20,5 +21,10 @@ class NoQuote extends Model
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'nqt_pcs_id', 'pcs_id');
+    }
+
+    public function firm()
+    {
+        return $this->belongsTo(Firm::class, 'nqt_frm_id', 'frm_id');
     }
 }

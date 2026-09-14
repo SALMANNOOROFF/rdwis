@@ -1,35 +1,52 @@
-<!-- Modal: Full Item Details (9 Columns) -->
+<!-- Modal: Full Item Details (10 Columns) -->
 <div class="modal fade" id="viewItemsModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content" style="background: #ffffff; border: 1px solid var(--rd-border2); border-top: 4px solid var(--rd-accent); border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.12);">
             <div class="modal-header border-bottom py-2 px-3" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
-                <h5 class="modal-title rajdhani text-dark font-weight-bold">Full Case Items</h5>
+                <h5 class="modal-title rajdhani text-dark font-weight-bold"><i class="fas fa-boxes text-primary mr-2"></i>Full Case Items & Classification</h5>
                 <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body p-3">
                 <div class="table-responsive rounded border" style="border-color: var(--rd-border) !important;">
-                    <table class="table table-sm table-hover mb-0" style="background: #ffffff;">
+                    <table class="table table-sm table-hover mb-0" style="background: #ffffff; font-size: 12px;">
                         <thead style="background: var(--rd-surface2);">
                             <tr>
-                                <th class="pl-4">#</th>
+                                <th class="pl-3" style="width: 40px;">#</th>
                                 <th>Description</th>
-                                <th class="text-right">Qty</th>
-                                <th>Unit</th>
-                                <th class="text-right">Price</th>
-                                <th class="text-right pr-4">Total</th>
+                                <th class="text-center" style="width: 60px;">Qty</th>
+                                <th class="text-center" style="width: 70px;">Unit</th>
+                                <th class="text-right" style="width: 105px;">Price (PKR)</th>
+                                <th class="text-right" style="width: 115px;">Total (PKR)</th>
+                                <th class="text-center" style="width: 105px;">Type</th>
+                                <th class="text-center" style="width: 125px;">Subtype</th>
+                                <th class="text-center" style="width: 95px;">Inv/Asset</th>
+                                <th class="text-center pr-3" style="width: 110px;">Budget Subhead</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($purchase->items as $item)
+                            @forelse($purchase->items as $item)
+                            @php
+                                $typeStr = $item->type_name ?? ($item->pci_type == 7 ? 'Permanent' : ($item->pci_type == 2 ? 'Consumable' : ($item->pci_type == 3 ? 'Service' : 'Permanent')));
+                                $invAsstStr = $item->type2_name ?? ($item->pci_type2 == 6 ? 'Asset' : ($item->pci_type2 == 5 ? 'Inventory' : '-'));
+                                $subheadStr = $item->pci_subhead ?: ($purchase->pcs_type === 'Ps' ? 'Equipment' : 'Misc');
+                            @endphp
                             <tr>
-                                <td class="pl-4">{{ $item->pci_serial }}</td>
-                                <td style="white-space: normal; min-width: 250px; font-weight: 500;">{{ $item->pci_desc }}</td>
-                                <td class="text-right font-weight-bold">{{ $item->pci_qty }}</td>
-                                <td>{{ $item->pci_qtyunit }}</td>
-                                <td class="text-right">{{ number_format($item->pci_price) }}</td>
-                                <td class="text-right pr-4 font-weight-bold text-dark">{{ number_format($item->pci_qty * $item->pci_price) }}</td>
+                                <td class="pl-3 font-weight-bold text-center">{{ $item->pci_serial }}</td>
+                                <td style="white-space: normal; min-width: 200px; font-weight: 600;" class="text-dark">{{ $item->pci_desc }}</td>
+                                <td class="text-center font-weight-bold">{{ $item->pci_qty }}</td>
+                                <td class="text-center"><span class="badge badge-light border">{{ $item->pci_qtyunit ?: 'num' }}</span></td>
+                                <td class="text-right font-weight-bold text-secondary">{{ number_format($item->pci_price, 2) }}</td>
+                                <td class="text-right font-weight-bold text-primary">{{ number_format($item->pci_qty * $item->pci_price, 2) }}</td>
+                                <td class="text-center"><span class="badge badge-primary px-2 py-1">{{ $typeStr }}</span></td>
+                                <td class="text-center">{{ $item->pci_subtype ?: 'N/A' }}</td>
+                                <td class="text-center">{{ $invAsstStr }}</td>
+                                <td class="text-center pr-3"><span class="badge badge-success px-2 py-1">{{ $subheadStr }}</span></td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">No items recorded.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -253,24 +270,143 @@
                 <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST">
                     @csrf
                     <input type="hidden" name="op" value="add_item">
+
+                    @if($purchase->pcs_type === 'Rb')
+                    <div class="form-group p-3 rounded mb-3" style="background: var(--rd-surface2); border: 1px solid var(--rd-border2);">
+                        <label class="rajdhani text-dark font-weight-bold small mb-2 d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-check text-warning mr-1"></i> SELECT EMPLOYEE (TA/DA)</span>
+                            <span class="text-muted small">Meezan Bank & Salary Auto-Check</span>
+                        </label>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <select name="emp_id" id="modal_tada_emp_id" class="form-control rajdhani" style="width: 100%;">
+                                    <option value="">-- Choose Employee (Active Division Contracts) --</option>
+                                    @forelse($employees ?? [] as $emp)
+                                        <option value="{{ $emp->emp_id }}">{{ $emp->emp_name }} ({{ $emp->emp_id }}) [{{ $emp->emp_rank ?: 'Staff' }}]</option>
+                                    @empty
+                                        <option value="" disabled>-- No active contracted employees found for this division --</option>
+                                    @endforelse
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-warning btn-block font-weight-bold rajdhani" id="modal_btn_fetch_emp" onclick="fetchModalTadaEmpDetails()">
+                                    <i class="fas fa-magic mr-1"></i> Add Emp Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="item_price" id="modal_tada_item_price" value="0">
+                    @endif
+
                     <div class="form-group">
                         <label class="rajdhani text-dark font-weight-bold small mb-2">ITEM DESCRIPTION</label>
-                        <textarea name="item_desc" class="form-control rajdhani" rows="3" required style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);"></textarea>
+                        <textarea name="item_desc" class="form-control rajdhani" rows="3" required style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);" placeholder="{{ $purchase->pcs_type === 'Rb' ? 'Select employee & click Add Emp Details...' : 'Enter item description...' }}"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="rajdhani text-dark font-weight-bold small mb-2">QUANTITY</label>
-                                <input type="number" name="item_qty" class="form-control rajdhani" step="0.0001" required style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
+                                <input type="number" name="item_qty" class="form-control rajdhani" step="0.0001" value="1" required style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="rajdhani text-dark font-weight-bold small mb-2">UNIT (e.g. Nos, Kg)</label>
-                                <input type="text" name="item_unit" class="form-control rajdhani" value="Nos" style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
+                                <label class="rajdhani text-dark font-weight-bold small mb-2">DENOMINATION (UNIT)</label>
+                                <select name="item_qtyunit" class="form-control rajdhani" style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
+                                    <option value="num" selected>num (Numbers)</option>
+                                    <option value="set">set (Sets)</option>
+                                    <option value="job">job (Job/Work)</option>
+                                    <option value="svc">svc (Service)</option>
+                                    <option value="day">day (Days)</option>
+                                    <option value="kg">kg (Kilogram)</option>
+                                    <option value="ltr">ltr (Liters)</option>
+                                    <option value="m">m (Meters)</option>
+                                    <option value="box">box (Box)</option>
+                                    <option value="pkt">pkt (Packets)</option>
+                                </select>
                             </div>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="rajdhani text-dark font-weight-bold small mb-2">ITEM TYPE</label>
+                                <select name="item_type" id="modal_item_type" class="form-control rajdhani" onchange="handleModalItemTypeChange(this)" style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
+                                    @if($purchase->pcs_type === 'Rb')
+                                        <option value="3" selected>Service (3)</option>
+                                    @elseif($purchase->pcs_type === 'Pt')
+                                        <option value="2" selected>Consumable (2)</option>
+                                        <option value="7">Permanent (7)</option>
+                                        <option value="3">Service (3)</option>
+                                    @else
+                                        <option value="7" selected>Permanent (7)</option>
+                                        <option value="2">Consumable (2)</option>
+                                        <option value="3">Service (3)</option>
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="rajdhani text-dark font-weight-bold small mb-2">SUBTYPE</label>
+                                <select name="item_subtype" id="modal_item_subtype" class="form-control rajdhani" style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
+                                    @if($purchase->pcs_type === 'Rb')
+                                        <option value="Travelling/Boarding/Lodging" selected>Travelling/Boarding/Lodging</option>
+                                        <option value="Travel">Travel</option>
+                                        <option value="Meals/Refreshments">Meals/Refreshments</option>
+                                    @else
+                                        <option value="Parts" selected>Parts</option>
+                                        <option value="Tools / Test Equipment">Tools / Test Equipment</option>
+                                        <option value="Machinery / Equipment">Machinery / Equipment</option>
+                                        <option value="IT Equipment">IT Equipment</option>
+                                        <option value="Software">Software</option>
+                                        <option value="Furniture">Furniture</option>
+                                        <option value="Appliance">Appliance</option>
+                                        <option value="Chemicals">Chemicals</option>
+                                        <option value="Raw Material">Raw Material</option>
+                                        <option value="Stationary">Stationary</option>
+                                        <option value="Cleaning Material">Cleaning Material</option>
+                                        <option value="POL">POL</option>
+                                        <option value="Equipment Installation">Equipment Installation</option>
+                                        <option value="Equipment Repairs & Maintenance">Equipment Repairs & Maintenance</option>
+                                        <option value="Other">Other</option>
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="rajdhani text-dark font-weight-bold small mb-2">INV / ASST</label>
+                                <select name="item_type2" id="modal_item_type2" class="form-control rajdhani" {{ $purchase->pcs_type === 'Rb' ? 'disabled' : '' }} style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
+                                    <option value="5" {{ $purchase->pcs_type === 'Pt' ? 'selected' : '' }}>Inventory (5)</option>
+                                    <option value="6" {{ $purchase->pcs_type === 'Ps' ? 'selected' : '' }}>Asset (6)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="rajdhani text-dark font-weight-bold small mb-2">SUBHEAD</label>
+                        @if($purchase->pcs_type === 'Ps')
+                            <div class="p-2 rounded border text-dark font-weight-bold rajdhani d-flex justify-content-between align-items-center" style="background: var(--rd-surface2); border: 1px solid var(--rd-border2) !important;">
+                                <span><i class="fas fa-microchip text-primary mr-2"></i>Equipment</span>
+                                <span class="badge badge-primary">Standard for Major Purchase</span>
+                            </div>
+                            <input type="hidden" name="item_subhead" value="Equipment">
+                        @else
+                            <select name="item_subhead" class="form-control rajdhani" style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);">
+                                <option value="Misc" {{ ($purchase->subhead_display ?? 'Misc') === 'Misc' ? 'selected' : '' }}>Misc (Default)</option>
+                                <option value="Equipment" {{ ($purchase->subhead_display ?? '') === 'Equipment' ? 'selected' : '' }}>Equipment</option>
+                                @foreach($projectSubheads ?? [] as $shd)
+                                    @if(!in_array($shd, ['Misc', 'Equipment']))
+                                        <option value="{{ $shd }}">{{ $shd }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        @endif
+                    </div>
+
                     <div class="text-right mt-3">
                         <button type="button" class="btn btn-secondary btn-sm rajdhani font-weight-bold mr-2" data-dismiss="modal">CANCEL</button>
                         <button type="submit" class="btn btn-primary btn-sm rajdhani font-weight-bold px-4">ADD ITEM</button>
@@ -340,4 +476,115 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function fetchModalTadaEmpDetails() {
+    const sel = document.getElementById('modal_tada_emp_id');
+    const empId = sel ? sel.value : '';
+    if (!empId) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Employee Required', 'Please select an employee first', 'warning');
+        } else {
+            alert('Please select an employee first');
+        }
+        return;
+    }
+
+    const btn = document.getElementById('modal_btn_fetch_emp');
+    const originalHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Fetching...';
+    }
+
+    const url = "{{ url('/purchase/tada/employee-details') }}/" + encodeURIComponent(empId);
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            const msg = data.error || data.message || 'Failed to fetch employee details';
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('TA/DA Validation Error', msg, 'error');
+            } else {
+                alert(msg);
+            }
+            return;
+        }
+
+        const descEl = document.querySelector('#addItemModal textarea[name="item_desc"]');
+        const priceEl = document.getElementById('modal_tada_item_price');
+        const qtyEl = document.querySelector('#addItemModal input[name="item_qty"]');
+        const unitEl = document.querySelector('#addItemModal input[name="item_unit"]');
+
+        if (descEl) descEl.value = data.description;
+        if (priceEl) priceEl.value = data.tada_amount;
+        if (qtyEl) qtyEl.value = 1;
+        if (unitEl) unitEl.value = 'num';
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Employee Details Added',
+                text: `${data.emp_name} (Grade: ${data.grade}) -> TA/DA PKR ${data.tada_amount}`,
+                icon: 'success',
+                timer: 1800,
+                showConfirmButton: false
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Error', 'Unable to retrieve employee TA/DA details.', 'error');
+        } else {
+            alert('Unable to retrieve employee TA/DA details.');
+        }
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml || '<i class="fas fa-magic mr-1"></i> Add Emp Details';
+        }
+    });
+}
+
+function handleModalItemTypeChange(selectEl) {
+    const val = parseInt(selectEl.value);
+    const subtypeSelect = document.getElementById('modal_item_subtype');
+    const invasstSelect = document.getElementById('modal_item_type2');
+
+    const optionsByType = {
+        7: ['Parts', 'Tools / Test Equipment', 'Machinery / Equipment', 'IT Equipment', 'Software', 'Furniture', 'Appliance', 'Other'],
+        2: ['Parts', 'Chemicals', 'Raw Material', 'Stationary', 'Cleaning Material', 'POL', 'Other'],
+        3: ['Equipment Installation', 'Equipment Repairs & Maintenance', 'Travelling/Boarding/Lodging', 'Travel', 'Meals/Refreshments', 'Consultancy', 'Other']
+    };
+
+    if (subtypeSelect) {
+        const list = optionsByType[val] || optionsByType[7];
+        const currSub = subtypeSelect.value;
+        subtypeSelect.innerHTML = '';
+        list.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.textContent = item;
+            if (item === currSub || (!currSub && list.indexOf(item) === 0)) opt.selected = true;
+            subtypeSelect.appendChild(opt);
+        });
+    }
+
+    if (invasstSelect) {
+        if (val === 3) {
+            invasstSelect.disabled = true;
+            invasstSelect.value = '';
+        } else {
+            invasstSelect.disabled = false;
+            if (!invasstSelect.value) {
+                invasstSelect.value = (val === 2 ? '5' : '6');
+            }
+        }
+    }
+}
 </script>

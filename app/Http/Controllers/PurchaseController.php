@@ -134,14 +134,47 @@ class PurchaseController extends Controller
     }
 
     /**
+     * AJAX endpoint: Get employee contract, bank account details and TA/DA calculation.
+     */
+    public function getTadaEmployeeDetails(Request $request, $empId)
+    {
+        try {
+            $pricingService = app(\App\Services\PurchasePricingService::class);
+            $details = $pricingService->getEmployeeTadaDetails((string)$empId);
+            return response()->json(array_merge(['success' => true], $details));
+        } catch (\DomainException $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => $e->getMessage()
+            ], 422);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => $e->getMessage()
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Failed to lookup TA/DA details: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * unified dynamic creation view
      */
-    public function unifiedCreate(Request $request, $type = 'material')
+    public function unifiedCreate(Request $request, $type = 'Ps')
     {
         $this->authorize('create', Purchase::class);
 
-        // If type is empty or generic, default to material
-        if (!$type || $type == 'all') $type = 'material';
+        $type = match(strtoupper(trim((string)$type))) {
+            'PS'    => 'Ps',
+            'PT'    => 'Pt',
+            'RB'    => 'Rb',
+            default => throw new \InvalidArgumentException(
+                "Invalid purchase case type [{$type}]. Expected one of: Ps, Pt, Rb."
+            ),
+        };
 
         $maxId = DB::table('pur.purcases')->max('pcs_id');
         $nextId = $maxId ? ($maxId + 1) : 1;
@@ -160,13 +193,46 @@ class PurchaseController extends Controller
         $heads = $headsQuery->get();
 
         $firms = DB::table('frm.firmz')->select('frm_id', 'frm_name')->orderBy('frm_name')->get();
-        
-        // Use the refined split-view form for consultancy and services (Outsourcing)
-        if (in_array($type, ['consultancy', 'services'])) {
-            return view('purchase.new_case.consultancy_form', compact('nextId', 'heads', 'type', 'firms'));
+
+        $employees = collect();
+        if ($type === 'Rb') {
+            $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+            $isHqOrProc = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin', 'proc', 'prc'], true);
+
+            if ($isHqOrProc || empty($user->acc_unt_id)) {
+                $lower = 0;
+                $upper = 99999999;
+            } else {
+                $lower = (int) ($user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers);
+                $upper = (int) ($user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers);
+            }
+
+            $employees = DB::table('hr.emps')
+                ->where(function($q) use ($user, $lower, $upper, $isHqOrProc) {
+                    if (!$isHqOrProc && $user->acc_unt_id) {
+                        $q->where('emp_unt_id', $user->acc_unt_id);
+                        if ($lower > 0 && $upper > 0) {
+                            $q->orWhereBetween('emp_unt_id', [$lower, $upper]);
+                        }
+                    }
+                })
+                ->where('emp_status', 'ILIKE', 'Active%')
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('hr.contracts')
+                      ->whereColumn('hr.contracts.ctr_num', 'hr.emps.emp_id');
+                })
+                ->select('emp_id', 'emp_name', 'emp_rank', 'emp_title', 'emp_status', 'emp_unt_id')
+                ->orderBy('emp_name')
+                ->get();
         }
+
+        $subheadsByHead = DB::table('fin.subheads')
+            ->select('sbh_hed_id', 'sbh_name')
+            ->get()
+            ->groupBy('sbh_hed_id');
                     
-        return view('purchase.new_case.unified_form', compact('nextId', 'heads', 'type', 'firms'));
+        return view('purchase.new_case.unified_form', compact('nextId', 'heads', 'type', 'firms', 'employees', 'subheadsByHead'));
     }
 
     /**
@@ -176,14 +242,27 @@ class PurchaseController extends Controller
     {
         $this->authorize('create', Purchase::class);
 
+        $typeNormalized = match(strtoupper(trim((string) $request->pcs_type))) {
+            'PS'    => 'Ps',
+            'PT'    => 'Pt',
+            'RB'    => 'Rb',
+            default => 'Ps',
+        };
+
         // 1. Validation
-        $request->validate([
+        $rules = [
             'pcs_title' => 'required',
             'pcs_hed_id' => 'required',
             'pcs_date' => 'required',
             'pcs_minute' => 'required',
-            'pcs_type' => 'required|string',
-        ]);
+            'pcs_type' => 'required|string|in:Ps,Pt,Rb,ps,pt,rb',
+        ];
+
+        if ($typeNormalized === 'Pt') {
+            $rules['pcs_frm_id'] = 'required';
+        }
+
+        $request->validate($rules);
 
         return DB::transaction(function () use ($request) {
             $userUnitId = Auth::user()->acc_unt_id;
@@ -193,25 +272,19 @@ class PurchaseController extends Controller
             $pcs->pcs_title = $request->pcs_title;
             $pcs->pcs_minute = $request->pcs_minute;
             
-            // Map long types to 5-char codes for DB varchar(5) limit
-            $typeMap = [
-                'material'    => 'mat',
-                'consultancy' => 'cons',
-                'services'    => 'serv',
-                'civil'       => 'civ',
-                'training'    => 'trn',
-                'tada'        => 'tada',
-                'transport'   => 'tran',
-                'books'       => 'book',
-                'license'     => 'lic',
-                'internet'    => 'net',
-                'publishing'  => 'pub',
-                'stationery'  => 'stat',
-            ];
-            $pcs->pcs_type = $typeMap[$request->pcs_type] ?? substr($request->pcs_type, 0, 5);
+            $pcs->pcs_type = match(strtoupper(trim((string) $request->pcs_type))) {
+                'PS'    => 'Ps',
+                'PT'    => 'Pt',
+                'RB'    => 'Rb',
+                default => throw new \InvalidArgumentException(
+                    "Invalid purchase case type [{$request->pcs_type}]. Expected one of: Ps, Pt, Rb."
+                ),
+            };
             
-            if ($request->has('remarks_JSON')) {
-                $pcs->pcs_remarks = json_encode($request->remarks_JSON);
+            if ($request->filled('pcs_remarks')) {
+                $pcs->pcs_remarks = trim((string) $request->pcs_remarks);
+            } elseif ($request->has('remarks_JSON')) {
+                $pcs->pcs_remarks = is_array($request->remarks_JSON) ? json_encode($request->remarks_JSON) : (string)$request->remarks_JSON;
             }
 
             $pcs->pcs_status = 'Draft';
@@ -226,6 +299,20 @@ class PurchaseController extends Controller
             $pcs->pcs_midtax = 0;
             $pcs->pcs_transtype = 1;
             $pcs->pcs_noloan = false;
+
+            // Quote type: 1 = Without Tax, 2 = With Tax
+            $quoteType = (int) $request->input('pcs_quotetype', 1);
+            if (!in_array($quoteType, [1, 2], true)) {
+                $quoteType = ($taxType === 'WITHOUT_TAX' || $taxPercent == 0) ? 1 : 2;
+            }
+            $pcs->pcs_quotetype = $quoteType;
+
+            // Determine subhead
+            if ($pcs->pcs_type === 'Ps') {
+                $subhead = 'Equipment';
+            } else {
+                $subhead = trim((string) $request->input('subhead', 'Misc')) ?: 'Misc';
+            }
             
             // Build item index map for quotation price lookup
             $itemsInput = $request->input('items', []);
@@ -239,7 +326,7 @@ class PurchaseController extends Controller
             $firmSubtotals = [];
             $firmTaxes = [];
             
-            if (!empty($quotationsInput)) {
+            if ($pcs->pcs_type === 'Ps' && !empty($quotationsInput)) {
                 foreach ($quotationsInput as $firmId => $itemPrices) {
                     $firmSub = 0;
                     foreach ($itemPrices as $idx => $price) {
@@ -257,6 +344,13 @@ class PurchaseController extends Controller
                 if (!empty($firmTotals)) {
                     $totalPrice = min($firmTotals);
                 }
+            } elseif (!empty($itemsInput)) {
+                // Direct line items calculation for Pt / Rb
+                foreach ($itemsInput as $it) {
+                    $qty = (float)($it['qty'] ?? 1);
+                    $pr = (float)($it['price'] ?? ($it['estprice'] ?? 0));
+                    $totalPrice += ($qty * $pr);
+                }
             } elseif ($request->has('remarks_JSON.items')) {
                 foreach ($request->input('remarks_JSON.items') as $item) {
                     $qty = (float)($item['qty'] ?? ($item['amount'] ?? 0));
@@ -269,7 +363,7 @@ class PurchaseController extends Controller
                 }
             }
             
-            $winningFirmId = !empty($firmTotals) ? array_keys($firmTotals, min($firmTotals))[0] : null;
+            $winningFirmId = (!empty($firmTotals) && $pcs->pcs_type === 'Ps') ? array_keys($firmTotals, min($firmTotals))[0] : null;
             $basePrice = $winningFirmId ? (float)($firmSubtotals[$winningFirmId] ?? $totalPrice) : (float)$totalPrice;
             $taxAmount = $winningFirmId ? (float)($firmTaxes[$winningFirmId] ?? 0) : 0;
 
@@ -285,8 +379,22 @@ class PurchaseController extends Controller
             $pcs->pcs_price = $totalPrice > 0 ? $totalPrice : round($midPrice + $gstAmount, 2);
             if ($winningFirmId) {
                 $pcs->pcs_frm_id = $winningFirmId;
+            } elseif ($request->filled('pcs_frm_id')) {
+                $pcs->pcs_frm_id = (int) $request->input('pcs_frm_id');
             }
             $pcs->save();
+
+            // Persist case subhead to pur.purcases_shd
+            DB::table('pur.purcases_shd')->updateOrInsert(
+                [
+                    'pcd_pcs_id' => $pcs->pcs_id,
+                    'pcd_subhead' => $subhead,
+                ],
+                [
+                    'pcd_type' => $pcs->pcs_type,
+                    'pcd_ratio' => 1.0,
+                ]
+            );
 
             // Create initial substatus row: case starts at Division (fix #1)
             PurCaseSubstatus::create([
@@ -307,30 +415,52 @@ class PurchaseController extends Controller
                     $qty = (float)($item['qty'] ?? 1);
                     $unit = $item['unit'] ?? 'num';
                     
-                    // Item price = winning firm's price for this item (if quotations exist)
+                    // Item price = winning firm's price for this item (if quotations exist on Ps) or direct price
                     $itemPrice = 0;
-                    if (!empty($firmTotals)) {
+                    $empId = !empty($item['emp_id']) ? trim((string)$item['emp_id']) : null;
+
+                    if ($pcs->pcs_type === 'Rb' && !empty($empId)) {
+                        $pricingService = app(\App\Services\PurchasePricingService::class);
+                        $tadaData = $pricingService->getEmployeeTadaDetails($empId);
+                        $itemPrice = $tadaData['tada_amount'];
+                        $desc = $tadaData['description'];
+                        $qty = 1;
+                        $unit = 'num';
+                    } elseif ($pcs->pcs_type === 'Ps' && !empty($firmTotals)) {
                         $winningFirmId = array_keys($firmTotals, min($firmTotals))[0];
                         $itemPrice = (float)($quotationsInput[$winningFirmId][$idx] ?? 0);
+                    } else {
+                        $itemPrice = (float)($item['price'] ?? ($item['estprice'] ?? 0));
                     }
+
+                    $itemType = (int)($item['type'] ?? ($pcs->pcs_type === 'Rb' ? 3 : 7));
+                    $itemSubtype = trim((string)($item['subtype'] ?? ($pcs->pcs_type === 'Rb' ? 'Travelling/Boarding/Lodging' : ($subhead === 'Equipment' ? 'Parts' : $subhead))));
+                    $itemType2 = null;
+                    if ($itemType != 3) {
+                        $itemType2 = (int)($item['inv_asst'] ?? ($itemType == 2 ? 5 : 6));
+                    }
+                    $itemSubhead = !empty(trim((string)($item['subhead'] ?? ''))) ? trim((string)$item['subhead']) : $subhead;
                     
                     $pci_id = DB::table('pur.purcaseitems')->insertGetId([
                         'pci_pcs_id' => $pcs->pcs_id,
+                        'pci_emp_id' => $empId,
                         'pci_serial' => $serial++,
                         'pci_desc' => $desc,
                         'pci_qty' => $qty,
                         'pci_qtyunit' => $unit,
                         'pci_price' => $itemPrice,
-                        'pci_type' => 1,
-                        'pci_subtype' => 1,
+                        'pci_type' => $itemType,
+                        'pci_subtype' => $itemSubtype ?: ($subhead === 'Equipment' ? 'Parts' : 'Misc'),
+                        'pci_type2' => $itemType2,
+                        'pci_subhead' => $itemSubhead,
                     ], 'pci_id');
                     
                     $itemIds[] = $pci_id;
                 }
             }
 
-            // --- Save Quotations to quotes ---
-            if (!empty($quotationsInput)) {
+            // --- Save Quotations to quotes (Ps only) ---
+            if ($pcs->pcs_type === 'Ps' && !empty($quotationsInput)) {
                 $quoteNum = 1;
                 foreach ($quotationsInput as $firmId => $itemPrices) {
                     $firmTotal = (float)($firmTotals[$firmId] ?? 0);
@@ -358,6 +488,7 @@ class PurchaseController extends Controller
                         'qte_date' => $request->pcs_date,
                         'qte_techaccept' => true,
                         'qte_recomm' => ($winningFirmId && $firmId == $winningFirmId),
+                        'qte_quotetype' => $quoteType,
                     ], 'qte_id');
 
                     // Check if quote document scan is uploaded for this firm
@@ -392,6 +523,19 @@ class PurchaseController extends Controller
                                 ]);
                             }
                         }
+                    }
+                }
+            }
+
+            // Save Quotations Not Received (pur.noquotes)
+            if ($pcs->pcs_type === 'Ps') {
+                $notReceivedFirms = (array) $request->input('not_received_firms', []);
+                foreach ($notReceivedFirms as $nqtFrmId) {
+                    $nqtFrmId = (int) $nqtFrmId;
+                    if ($nqtFrmId > 0) {
+                        DB::table('pur.noquotes')->updateOrInsert(
+                            ['nqt_pcs_id' => $pcs->pcs_id, 'nqt_frm_id' => $nqtFrmId]
+                        );
                     }
                 }
             }

@@ -481,6 +481,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase/select', [PurchaseController::class, 'select'])
             ->name('purchase.select')
             ->middleware('approver');
+        Route::get('/purchase/tada/employee-details/{empId}', [PurchaseController::class, 'getTadaEmployeeDetails'])
+            ->name('purchase.tada.employee_details');
         Route::get('/purchase/new/{type}', [PurchaseController::class, 'unifiedCreate'])
             ->name('purchase.unified.create')
             ->middleware('approver');

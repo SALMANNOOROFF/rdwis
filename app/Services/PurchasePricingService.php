@@ -493,4 +493,117 @@ class PurchasePricingService
             'balanced' => abs($total - ($base + $sst + $gst)) < 1.0,
         ];
     }
+
+    /**
+     * Get legacy TA/DA allowance based on contract salary (Modules/Standard/Salary.bas: GetTadaforSalary).
+     *
+     * Exact legacy formula:
+     *   salary < 50,000              => 2000
+     *   salary > 100,000             => 5000
+     *   50,000 <= salary <= 100,000  => 3500
+     */
+    public static function getTadaForSalary(float $salary): int
+    {
+        if ($salary < 50000) {
+            return 2000;
+        } elseif ($salary > 100000) {
+            return 5000;
+        } else {
+            return 3500;
+        }
+    }
+
+    /**
+     * Format employee complete full name using application conventions.
+     * Reuses the established pattern from SalaryGenerationService / NameComplete:
+     *   trim(trim(($title ?? '') . ' ' . ($rank ?? '')) . ' ' . $name) ?: $name
+     */
+    public static function formatNameComplete(?string $name, ?string $title = null, ?string $rank = null): string
+    {
+        $name = trim((string) $name);
+        $title = trim((string) $title);
+        $rank = trim((string) $rank);
+
+        $prefix = trim($title . ' ' . $rank);
+        return trim($prefix . ' ' . $name) ?: $name;
+    }
+
+    /**
+     * Look up employee contract and bank details for TA/DA (pur_purcasestadaitems.bas cmdAddEmpDetails).
+     *
+     * Legacy branching:
+     * 1. Looks up latest contract in hr_contracts by ctr_num = empId (ctr_grade, ctr_salary).
+     * 2. Queries hr_bnkaccounts for bac_emp_id = empId where bac_selforpay = true.
+     *    - If > 1 row: Throws \DomainException: "Multiple bank accounts are marked for salary of [empId]. Please correct bank account data."
+     *    - If 0 rows: Bank detail text = "(Pay by Cheque)"
+     *    - If 1 row:
+     *        - If bac_bnkname === "Meezan Bank Ltd" => "[bac_accnum] ([bac_bchcode])"
+     *        - Else => "(Pay by Cheque)"
+     * 3. Calculates TA/DA amount via GetTadaforSalary(ctr_salary).
+     * 4. Builds auto-filled item description:
+     *    "TA/DA for [FullName], ID: [empId], Grade: [Grade]\nMeezan Account: [BankDetail]"
+     *
+     * @throws \InvalidArgumentException If employee or contract does not exist.
+     * @throws \DomainException If multiple bank accounts are marked for salary.
+     * @return array{emp_id: string, emp_name: string, grade: string, salary: float, tada_amount: int, bank_detail: string, description: string}
+     */
+    public function getEmployeeTadaDetails(string $empId): array
+    {
+        $empId = trim($empId);
+        $emp = DB::table('hr.emps')->where('emp_id', $empId)->first();
+        if (!$emp) {
+            throw new \InvalidArgumentException("Employee not found with ID: {$empId}");
+        }
+
+        $lastContract = DB::table('hr.contracts')
+            ->where('ctr_num', $empId)
+            ->orderBy('ctr_id', 'desc')
+            ->first();
+
+        if (!$lastContract) {
+            throw new \InvalidArgumentException("No contract found for employee {$empId}. Active contract salary and grade are required for TA/DA.");
+        }
+
+        $salary = (float) ($lastContract->ctr_salary ?? 0);
+        $grade = trim((string) ($lastContract->ctr_grade ?? ''));
+        if (empty($grade)) {
+            $grade = trim((string) ($emp->emp_rank ?? 'N/A'));
+        }
+
+        // Query bank accounts marked for salary payment (hr_bnkaccountsforpay equivalent)
+        $bankAccounts = DB::table('hr.bnkaccounts')
+            ->where('bac_emp_id', $empId)
+            ->where('bac_selforpay', true)
+            ->get();
+
+        if ($bankAccounts->count() > 1) {
+            throw new \DomainException("Multiple bank accounts are marked for salary of {$empId}. Please correct bank account data.");
+        }
+
+        if ($bankAccounts->count() === 1) {
+            $bac = $bankAccounts->first();
+            if (trim((string) $bac->bac_bnkname) === 'Meezan Bank Ltd') {
+                $bankDetail = trim($bac->bac_accnum . ' (' . $bac->bac_bchcode . ')');
+            } else {
+                $bankDetail = '(Pay by Cheque)';
+            }
+        } else {
+            $bankDetail = '(Pay by Cheque)';
+        }
+
+        $fullName = self::formatNameComplete($emp->emp_name, $emp->emp_title, $emp->emp_rank);
+        $tadaAmount = self::getTadaForSalary($salary);
+
+        $description = "TA/DA for {$fullName}, ID: {$empId}, Grade: {$grade}\nMeezan Account: {$bankDetail}";
+
+        return [
+            'emp_id'      => $empId,
+            'emp_name'    => $fullName,
+            'grade'       => $grade,
+            'salary'      => $salary,
+            'tada_amount' => $tadaAmount,
+            'bank_detail' => $bankDetail,
+            'description' => $description,
+        ];
+    }
 }

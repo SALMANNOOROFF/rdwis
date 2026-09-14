@@ -141,7 +141,13 @@ class Purchase extends Model
 
         // 3. Fallback based on case type
         $type = strtolower(trim((string)($this->pcs_type ?? '')));
-        if (in_array($type, ['hr', 'sal', 'salary', 'rb', 'ta', 'tada'], true)) {
+        if ($type === 'ps') {
+            return 'Equipment';
+        }
+        if (in_array($type, ['pt', 'rb', 'ta', 'tada'], true)) {
+            return 'Misc';
+        }
+        if (in_array($type, ['hr', 'sal', 'salary'], true)) {
             return 'HR / Staff';
         }
 

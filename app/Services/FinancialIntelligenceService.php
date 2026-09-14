@@ -521,10 +521,10 @@ class FinancialIntelligenceService
             })
             ->where('ipc.hed_id', $headId)
             ->select(
-                'shd.subhead',
+                DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN ipc.doctype IN ('Ps', 'mat', 'pur') THEN 'Equipment' ELSE 'Misc' END) as subhead"),
                 DB::raw('SUM(ROUND((CASE WHEN ipc.transtype = 1 THEN ipc.amount1 ELSE ipc.amount2 END) * COALESCE(shd.ratio, 1.0), 2)) as total')
             )
-            ->groupBy('shd.subhead')
+            ->groupBy(DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN ipc.doctype IN ('Ps', 'mat', 'pur') THEN 'Equipment' ELSE 'Misc' END)"))
             ->get();
 
         $subheadInProcesses = [];

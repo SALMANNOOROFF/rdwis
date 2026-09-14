@@ -159,6 +159,8 @@
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
                         <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-project-diagram mr-1" style="color:var(--rd-accent);"></i> <span class="text-dark font-weight-bold">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></span>
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
+                        <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-layer-group mr-1" style="color:var(--rd-accent);"></i> <span class="badge badge-light border text-dark font-weight-bold" style="font-size:11px; background:#f8fafc;"><i class="fas fa-tag text-primary mr-1"></i>{{ $purchase->subhead_display }}</span></span>
+                        <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
                         <span style="color:var(--rd-text2); font-size:14px;"><i class="fas fa-building mr-1" style="color:var(--rd-accent);"></i> <span class="text-dark font-weight-bold">{{ $purchase->unit?->unt_name ?? $purchase->pcs_unt_id }}</span></span>
                         <span style="color:var(--rd-text3); font-size:14px; font-weight:500;">|</span>
                         <span style="color:var(--rd-text2); font-size:15px;"><i class="fas fa-money-bill-wave mr-1" style="color:var(--rd-accent);"></i> <span style="color:var(--rd-info); font-weight:900; font-family:'Rajdhani',sans-serif; font-size:20px;">PKR {{ number_format($caseValue) }}</span></span>
@@ -362,31 +364,133 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        {{-- Quotations Not Received (pur.noquotes) --}}
+                        @php
+                            $noQuotes = \DB::table('pur.noquotes')
+                                ->join('frm.firmz', 'frm.firmz.frm_id', '=', 'pur.noquotes.nqt_frm_id')
+                                ->where('pur.noquotes.nqt_pcs_id', $purchase->pcs_id)
+                                ->select('pur.noquotes.nqt_id', 'frm.firmz.frm_name', 'frm.firmz.frm_id')
+                                ->get();
+                        @endphp
+                        @if($noQuotes->isNotEmpty() || ($canEdit && $purchase->pcs_type === 'Ps'))
+                        <div class="p-3 border-top bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="font-weight-bold rajdhani text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <i class="fas fa-file-excel text-danger mr-1"></i> Quotations Not Received ({{ $noQuotes->count() }})
+                                </span>
+                                @if($canEdit && $purchase->pcs_type === 'Ps')
+                                <button class="btn btn-xs btn-outline-danger rajdhani" data-toggle="collapse" data-target="#addNoQuoteCollapse">
+                                    <i class="fas fa-plus mr-1"></i> ADD NO-QUOTE FIRM
+                                </button>
+                                @endif
+                            </div>
+
+                            @if($canEdit && $purchase->pcs_type === 'Ps')
+                            <div class="collapse mb-2" id="addNoQuoteCollapse">
+                                <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST" class="d-flex gap-2">
+                                    @csrf
+                                    <input type="hidden" name="op" value="add_noquote">
+                                    <select name="nqt_frm_id" class="form-control form-control-sm rajdhani mr-2" required>
+                                        <option value="">-- Choose Contacted Firm Without Response --</option>
+                                        @foreach($firms ?? [] as $f)
+                                            @if($f->frm_id > 0 && !str_contains($f->frm_name, '< Select'))
+                                                <option value="{{ $f->frm_id }}">{{ $f->frm_name }}</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="btn btn-danger btn-xs rajdhani font-weight-bold px-3">RECORD</button>
+                                </form>
+                            </div>
+                            @endif
+
+                            <div class="d-flex flex-wrap gap-1">
+                                @forelse($noQuotes as $nq)
+                                    <span class="badge badge-light border text-dark py-1 px-2 mr-1 mb-1" style="font-size: 11px;">
+                                        <i class="fas fa-times-circle text-danger mr-1"></i> {{ $nq->frm_name }}
+                                        @if($canEdit)
+                                            <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Remove {{ addslashes($nq->frm_name) }} from no-quotes?');">
+                                                @csrf
+                                                <input type="hidden" name="op" value="delete_noquote">
+                                                <input type="hidden" name="nqt_id" value="{{ $nq->nqt_id }}">
+                                                <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:0 2px; font-weight:bold;">&times;</button>
+                                            </form>
+                                        @endif
+                                    </span>
+                                @empty
+                                    <span class="text-muted small font-italic">No unreceived quotes logged.</span>
+                                @endforelse
+                            </div>
+                        </div>
+                        @endif
                     </div>
 
                     {{-- Items List --}}
                     <div class="dg-box">
                         <div class="dg-box-hdr">
                             <div class="dg-sec-label" style="margin-bottom:0;"><i class="fas fa-boxes fa-xs"></i> Items Profile</div>
-                            @if($canEdit)
-                                <button class="btn btn-outline-light btn-xs rajdhani" data-toggle="modal" data-target="#addItemModal"><i class="fas fa-plus"></i></button>
-                            @endif
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-outline-light btn-xs rajdhani" data-toggle="modal" data-target="#viewItemsModal"><i class="fas fa-expand mr-1"></i> Full View</button>
+                                @if($canEdit)
+                                    <button class="btn btn-primary btn-xs rajdhani px-2" data-toggle="modal" data-target="#addItemModal"><i class="fas fa-plus mr-1"></i> ADD ITEM</button>
+                                @endif
+                            </div>
                         </div>
                         <div class="dg-items-wrap">
                             <table class="dg-items-table">
                                 <thead>
                                     <tr>
-                                        <th class="pl-4">Description</th>
-                                        <th class="text-center pr-4">Qty</th>
+                                        <th class="pl-4">#</th>
+                                        <th>Description</th>
+                                        <th>Type / Subtype</th>
+                                        <th>Subhead</th>
+                                        <th class="text-right">Qty & Unit</th>
+                                        <th class="text-right pr-4">Unit Price (PKR)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($purchase->items as $item)
+                                    @forelse($purchase->items as $item)
+                                    @php
+                                        $typeLabel = match((int)$item->pci_type) {
+                                            7 => 'Permanent',
+                                            2 => 'Consumable',
+                                            3 => 'Service',
+                                            default => 'Item'
+                                        };
+                                        $typeBadge = match((int)$item->pci_type) {
+                                            7 => 'badge-primary',
+                                            2 => 'badge-success',
+                                            3 => 'badge-warning',
+                                            default => 'badge-secondary'
+                                        };
+                                    @endphp
                                     <tr>
-                                        <td class="pl-4">{{ $item->pci_desc }}</td>
-                                        <td class="text-center pr-4 font-weight-bold">{{ $item->pci_qty }} {{ $item->pci_qtyunit }}</td>
+                                        <td class="pl-4 text-muted small">{{ $item->pci_serial }}</td>
+                                        <td class="font-weight-500 text-dark">
+                                            {{ $item->pci_desc }}
+                                            @if(!empty($item->pci_emp_id))
+                                                <div class="small text-muted"><i class="fas fa-user-check text-warning mr-1"></i> Emp ID: {{ $item->pci_emp_id }}</div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ $typeBadge }} px-2 py-0.5" style="font-size:9px;">{{ $typeLabel }}</span>
+                                            @if(!empty($item->pci_subtype))
+                                                <span class="text-muted small ml-1">{{ $item->pci_subtype }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-light border text-dark font-weight-bold" style="font-size: 10px;">
+                                                {{ $item->pci_subhead ?: ($purchase->subhead_display ?: 'Misc') }}
+                                            </span>
+                                        </td>
+                                        <td class="text-right font-weight-bold text-dark">{{ $item->pci_qty }} <span class="text-muted font-weight-normal small">{{ $item->pci_qtyunit }}</span></td>
+                                        <td class="text-right pr-4 font-weight-bold text-dark">
+                                            {{ $item->pci_price > 0 ? number_format($item->pci_price) : '-' }}
+                                        </td>
                                     </tr>
-                                    @endforeach
+                                    @empty
+                                    <tr><td colspan="6" class="text-center py-4 text-muted small">No items defined for this case.</td></tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>

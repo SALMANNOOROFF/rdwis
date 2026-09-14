@@ -444,12 +444,11 @@ class FinanceOfProjectController extends Controller
 
         // ========================================================
         // 4. IN PROCESS BREAKDOWN
-        // ========================================================
         elseif ($figure === 'in-process') {
             $ipcQuery = DB::table('fin.docs_ipc as ipc')
                 ->leftJoin('pur.purcases as pcs', function($join) {
                     $join->on('pcs.pcs_id', '=', 'ipc.docid')
-                         ->whereIn('ipc.doctype', ['Ps', 'pt', 'mat', 'pur']);
+                         ->whereIn('ipc.doctype', ['Ps', 'Pt', 'pt', 'Rb', 'mat', 'pur']);
                 })
                 ->leftJoin('fin.docs_shd as shd', function ($join) {
                     $join->on('ipc.doctype', '=', 'shd.doc_type')
@@ -470,7 +469,23 @@ class FinanceOfProjectController extends Controller
                 $ipcQuery->where('ipc.hed_id', $headId);
             } elseif ($scope === 'subhead') {
                 $ipcQuery->where('ipc.hed_id', $headId);
-                if ($subhead && $subhead !== 'Misc') {
+                if ($subhead === 'Equipment') {
+                    $ipcQuery->where(function($q) {
+                        $q->where('shd.subhead', 'Equipment')
+                          ->orWhere(function($subQ) {
+                              $subQ->whereNull('shd.subhead')
+                                   ->whereIn('ipc.doctype', ['Ps', 'mat', 'pur']);
+                          });
+                    });
+                } elseif ($subhead === 'Misc') {
+                    $ipcQuery->where(function($q) {
+                        $q->where('shd.subhead', 'Misc')
+                          ->orWhere(function($subQ) {
+                              $subQ->whereNull('shd.subhead')
+                                   ->whereNotIn('ipc.doctype', ['Ps', 'mat', 'pur']);
+                          });
+                    });
+                } elseif ($subhead) {
                     $ipcQuery->where('shd.subhead', $subhead);
                 }
             } else {
@@ -500,12 +515,16 @@ class FinanceOfProjectController extends Controller
                 $amt1 = abs((float) ($row->amount1 ?: $row->amount2)) * $ratio;
                 $amt2 = abs((float) ($row->amount2 ?: $row->amount1)) * $ratio;
 
+                $resolvedSubhead = !empty(trim((string)$row->subhead))
+                    ? $row->subhead
+                    : (!empty(trim((string)$row->sudohed)) ? $row->sudohed : (in_array(strtolower($row->doctype), ['ps', 'mat', 'pur']) ? 'Equipment' : 'Misc'));
+
                 $items[] = (object) [
                     'id'          => $row->docid,
                     'ref_no'      => strtoupper($row->doctype) . '-' . $row->docid,
                     'date'        => $row->rdate ? \Carbon\Carbon::parse($row->rdate)->format('d M Y') : '-',
                     'title'       => $row->title ?: 'In-Process Case #' . $row->docid,
-                    'subhead'     => $row->subhead ?: ($row->sudohed ?: 'General'),
+                    'subhead'     => $resolvedSubhead,
                     'vendor'      => 'Internal / Pipeline',
                     'amount'      => round($amt1, 2),
                     'tax'         => abs((float) ($row->tax1 ?? 0)),
