@@ -40,21 +40,21 @@ class PurchaseProcurementController extends Controller
         $pageTitle = 'Director Procurement | Collaboration Hub';
         $psTypes = app(\App\Services\PurchaseApprovalService::class)->getAssignedCaseTypes('PS');
 
-        // 1. Pending: ONLY PS cases floated/reshared by divisions to Procurement that DProc has not finalized yet
+        // 1. Pending: cases where current substatus is DProc, or status is Under Scrutiny, or floated to Procurement without dproc_save
         $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
             ->whereBetween('pcs_unt_id', [$lower, $upper])
-            ->whereIn(\Illuminate\Support\Facades\DB::raw("LOWER(TRIM(COALESCE(pcs_type, 'ps')))"), $psTypes)
-            ->where(function($q) {
-                $q->where(function($sub) {
-                    $sub->whereHas('decisions', function($d) {
-                        $d->whereIn('pdec_action', ['float_to_proc', 'reshare_to_proc']);
-                    })->whereDoesntHave('decisions', function($d) {
-                        $d->where('pdec_action', 'dproc_save');
-                    });
+            ->where(function($q) use ($psTypes) {
+                $q->whereHas('currentSubstatus', function($s) {
+                    $s->where('pss_stage', 'DProc');
                 })
                 ->orWhere('pcs_status', 'Under Scrutiny')
-                ->orWhereHas('currentSubstatus', function($s) {
-                    $s->where('pss_stage', 'DProc');
+                ->orWhere(function($sub) use ($psTypes) {
+                    $sub->whereIn(\Illuminate\Support\Facades\DB::raw("LOWER(TRIM(COALESCE(pcs_type, 'ps')))"), $psTypes)
+                        ->whereHas('decisions', function($d) {
+                            $d->whereIn('pdec_action', ['float_to_proc', 'reshare_to_proc']);
+                        })->whereDoesntHave('decisions', function($d) {
+                            $d->where('pdec_action', 'dproc_save');
+                        });
                 });
             })
             ->whereNotIn('pcs_status', ['Fulfilled', 'Completed', 'Cancelled', 'Rejected'])

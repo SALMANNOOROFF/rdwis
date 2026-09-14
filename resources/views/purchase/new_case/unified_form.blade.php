@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 @section('content')
 
 @php
@@ -385,50 +385,20 @@
           <!-- FORM ACTIONS -->
           <div class="form-actions-footer">
             <div class="text-left">
-                <p class="mb-0 text-muted" style="font-size: 0.75rem;"><i class="fas fa-info-circle mr-1"></i> You can save as <strong>Draft</strong> or</p>
-                <p class="mb-0 text-muted" style="font-size: 0.75rem;"><strong>Release</strong> if ready.</p>
+                <p class="mb-0 text-muted" style="font-size: 0.75rem;"><i class="fas fa-info-circle mr-1"></i> Case will be saved as <strong>Draft</strong> in your Unit.</p>
+                <p class="mb-0 text-muted" style="font-size: 0.75rem;">You can review and forward it from the <strong>PC Initiation Hub</strong>.</p>
             </div>
             <div class="d-flex gap-2">
                 <input type="hidden" name="release_directly" id="release_directly_flag" value="0">
                 <input type="hidden" name="initiation_remarks" id="initiation_remarks_payload" value="">
 
-                <button type="submit" id="draftSubmitBtn" class="btn-action-main btn-draft">
-                   <i class="fas fa-save"></i> DRAFT
-                </button>
-
-                <button type="button" id="releaseSubmitBtn" class="btn-action-main btn-release" onclick="confirmAndRelease()">
-                   <i class="fas fa-paper-plane"></i> SAVE & FORWARD
+                <button type="submit" id="draftSubmitBtn" class="btn-action-main btn-draft" style="padding: 10px 24px;">
+                   <i class="fas fa-save mr-1"></i> SAVE AS DRAFT
                 </button>
             </div>
           </div>
         </form>
       </div>
-
-    {{-- Confirmation Modal for Direct Release --}}
-    <div class="sinc-popup-overlay" id="releaseDirectModal">
-        <div class="sinc-popup-box" style="max-width: 450px;">
-            <div class="sinc-popup-icon" style="background: rgba(0, 123, 255, 0.1); color: var(--rd-primary-600);"><i class="fas fa-paper-plane"></i></div>
-            <div class="sinc-popup-title" style="font-size: 1.2rem;">Forward to Director Procurement</div>
-            <div class="sinc-popup-text text-left mb-0">
-                You are forwarding this case to **Director Procurement** (Technical Scrutiny Unit) for formal review.
-                <br><br>
-                <div class="d-flex align-items-center mb-2">
-                    <label class="small font-weight-bold text-muted text-uppercase mb-0">Initiation Remarks (Optional)</label>
-                    <span class="badge badge-dark ml-2" style="font-size: 8px; opacity: 0.5;">OPTIONAL</span>
-                </div>
-                <textarea id="directRemarksInput" class="soft-input w-100 mb-3 p-3" rows="3" placeholder="Enter context or specific justification (optional)..." style="background: var(--rd-neutral-200); border: 1px solid var(--rd-border); border-radius:12px; color:white; font-size: 0.9rem;"></textarea>
-                
-                <div class="alert alert-info border-0 p-3 mb-4" style="background: rgba(0, 123, 255, 0.05); border-radius: 12px; border: 1px solid rgba(0,123,255,0.1) !important;">
-                    <i class="fas fa-shield-alt mr-2 text-primary"></i>
-                    <span class="small text-muted">Authority: <strong>Director Procurement</strong> will review items and specifications.</span>
-                </div>
-            </div>
-            <div class="d-flex gap-2 justify-content-center">
-                <button class="btn btn-dark px-4 py-2 mr-2" onclick="document.getElementById('releaseDirectModal').classList.remove('show')" style="border-radius:12px; border: 1px solid var(--rd-border);">CANCEL</button>
-                <button class="sinc-popup-btn px-4 py-2" id="finalReleaseBtn" onclick="executeDirectRelease()" style="border-radius:12px; width: auto !important; background: var(--rd-accent);">PROCEED & FORWARD</button>
-            </div>
-        </div>
-    </div>
 
       </div>
     </div>
@@ -483,23 +453,10 @@
   $(document).ready(function() { switchTrnMode('external'); });
   <?php endif; ?>
 
-  // ----- Direct Release Logic -----
-  function confirmAndRelease() { document.getElementById('releaseDirectModal').classList.add('show'); }
-  function executeDirectRelease() {
-      const remarks = document.getElementById('directRemarksInput').value;
-      document.getElementById('release_directly_flag').value = '1';
-      document.getElementById('initiation_remarks_payload').value = (remarks && remarks.trim().length > 0) ? remarks : "No Comments";
-      const btn = document.getElementById('finalReleaseBtn');
-      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`; btn.disabled = true;
-      document.getElementById('unifiedPurchaseForm').submit();
-  }
-
   function handleFormSubmit(e) {
-      fireToast('Synchronizing with ledger... Please wait', 'success');
-      const isDraft = document.getElementById('release_directly_flag').value === '0';
-      const btnId = isDraft ? 'draftSubmitBtn' : 'finalReleaseBtn';
-      const btn = document.getElementById(btnId);
-      if (btn) { btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`; btn.style.pointerEvents = 'none'; btn.style.opacity = '0.8'; }
+      fireToast('Saving draft... Please wait', 'success');
+      const btn = document.getElementById('draftSubmitBtn');
+      if (btn) { btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i> Saving Draft...`; btn.style.pointerEvents = 'none'; btn.style.opacity = '0.8'; }
       return true;
   }
 

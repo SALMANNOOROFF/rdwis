@@ -12,6 +12,7 @@
         'DG'  => 'Director General (DG)',
         'Finance' => 'Director Finance',
         'HR' => 'Director HR',
+        'Division' => 'Division Officer',
         default => 'Managing Director (MD)'
     };
     $routePrefix = match($role) {
@@ -19,6 +20,7 @@
         'DG'  => 'dg',
         'Finance' => 'finance',
         'HR' => 'hr',
+        'Division' => 'division',
         default => 'md'
     };
 
@@ -26,6 +28,7 @@
     $isCaseWithMe = ($currentStage === $role);
     $canActuallyApprove = ($canApprove ?? false) && ($role === 'DG' || ($authDetails['can_md_approve'] ?? false) || ($authDetails['can_ddg_approve'] ?? false));
     $nextForwardStage = match($role) {
+        'Division' => 'HR',
         'MD' => 'DDG',
         'DDG' => 'DG',
         'Finance' => 'MD',

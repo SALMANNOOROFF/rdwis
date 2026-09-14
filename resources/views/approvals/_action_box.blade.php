@@ -110,7 +110,7 @@
             @else
                 @if($isInitiator)
                     <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success w-100" style="font-size: 13px; padding: 10px 14px;">
-                        <i class="fas fa-paper-plane mr-1"></i> RELEASE TO HQ
+                        <i class="fas fa-paper-plane mr-1"></i> RELEASE TO DIRECTOR PROCUREMENT
                     </button>
                 @else
                     <button type="button" onclick="handleAction('forward')" class="dg-btn-action dg-btn-success flex-grow-1" style="font-size: 13px; padding: 10px 14px;">

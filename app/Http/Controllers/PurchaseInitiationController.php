@@ -33,8 +33,13 @@ class PurchaseInitiationController extends Controller
         $unitId = $user->acc_unt_id;
 
         // Fetch all cases initiated by this unit/division with rich context
-        $purchases = Purchase::with(['project', 'latestDecision.account', 'items', 'quotes.firm', 'decisions'])
-            ->whereBetween('pcs_unt_id', [$lower, $upper])
+        $purchases = Purchase::with(['project', 'latestDecision.account', 'items', 'quotes.firm', 'decisions', 'currentSubstatus'])
+            ->where(function($q) use ($user, $lower, $upper) {
+                if ($user->acc_unt_id) {
+                    $q->where('pcs_unt_id', $user->acc_unt_id);
+                }
+                $q->orWhereBetween('pcs_unt_id', [$lower, $upper]);
+            })
             ->orderBy('pcs_id', 'desc')
             ->get();
 

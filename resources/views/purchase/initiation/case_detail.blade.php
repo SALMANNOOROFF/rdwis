@@ -101,24 +101,36 @@
         </div>
 
         @php
-            $winnerQuote = $purchase->quotes->where('qte_recomm', true)->first()
+            $breakdown = $purchase->tax_breakdown;
+            $winnerQuote = $purchase->winning_quote
+                ?? $purchase->quotes->where('qte_recomm', true)->first()
                 ?? $purchase->quotes->sortBy('qte_price')->first();
 
-            if ($winnerQuote) {
-                $basePrice = (float)($winnerQuote->qte_intprice ?: ($winnerQuote->qte_price - (float)($winnerQuote->qte_inttax ?? 0) - (float)($winnerQuote->qte_midtax ?? 0)));
+            $basePrice = (float)($breakdown['base'] ?? 0);
+            $sst = (float)($breakdown['sst'] ?? 0);
+            $gst = (float)($breakdown['gst'] ?? 0);
+            $total = (float)($breakdown['total'] ?? ($purchase->pcs_price ?? 0));
+
+            // If case has no pricing recorded yet, but quotes exist, use winning quote
+            if ($total <= 0 && $winnerQuote) {
+                $total = (float)($winnerQuote->qte_price ?: 0);
                 $sst = (float)($winnerQuote->qte_inttax ?? 0);
                 $gst = (float)($winnerQuote->qte_midtax ?? 0);
-                if ($sst == 0 && $gst == 0 && (float)$winnerQuote->qte_price > $basePrice) {
-                    $gst = (float)$winnerQuote->qte_price - $basePrice;
+                $basePrice = (float)($winnerQuote->qte_intprice ?: ($total - $sst - $gst));
+                if ($basePrice <= 0 && $total > 0) {
+                    $basePrice = max(0, $total - $sst - $gst);
                 }
-                $total = (float)($winnerQuote->qte_price ?: ($basePrice + $sst + $gst));
-            } else {
-                $breakdown = $purchase->tax_breakdown;
-                $basePrice = $breakdown['base'];
-                $sst = $breakdown['sst'];
-                $gst = $breakdown['gst'];
-                $total = $breakdown['total'];
+            } elseif ($basePrice <= 0 && $total > 0) {
+                $basePrice = max(0, $total - $sst - $gst);
             }
+            if ($total <= 0 && $basePrice > 0) {
+                $total = $basePrice + $sst + $gst;
+            }
+
+            $firmName = $winnerQuote?->firm->frm_name
+                ?? ($winnerQuote?->qte_firmname
+                ?? ($purchase->firm?->frm_name
+                ?? ($purchase->pcs_frm_id ? \Illuminate\Support\Facades\DB::table('frm.firmz')->where('frm_id', $purchase->pcs_frm_id)->value('frm_name') : 'N/A')));
         @endphp
 
         <div class="meta-grid">
@@ -139,7 +151,7 @@
             <div class="meta-item"><span class="meta-label">Total:</span> <span class="meta-value text-right" style="font-weight: bold;">{{ number_format($total, 2) }}</span></div>
             
             <div class="meta-item" style="grid-column: span 3;">
-                <span class="meta-label">Firm:</span> <span class="meta-value">{{ $winnerQuote?->firm->frm_name ?? ($winnerQuote?->qte_firmname ?? 'N/A') }}</span>
+                <span class="meta-label">Firm:</span> <span class="meta-value">{{ $firmName }}</span>
             </div>
         </div>
 

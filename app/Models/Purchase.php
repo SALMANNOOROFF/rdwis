@@ -57,6 +57,14 @@ class Purchase extends Model
     }
 
     /**
+     * Relationship: Purchase awarded Firm
+     */
+    public function firm()
+    {
+        return $this->belongsTo(Firm::class, 'pcs_frm_id', 'frm_id');
+    }
+
+    /**
      * Get the head or project name/code associated with this purchase case
      */
     public function getHeadDisplayAttribute()

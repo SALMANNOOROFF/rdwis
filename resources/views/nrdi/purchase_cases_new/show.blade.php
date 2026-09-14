@@ -32,17 +32,20 @@
     // Variable overrides for cross-role compatibility
     $userArea = strtolower(trim((string)Auth::user()->acc_untarea));
     $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division', 'initiation']);
-    $isDProc     = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true);
+    $isDProc     = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || (Auth::user()?->acc_username === 'superadminrdw');
     $isDraft     = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
 
     $hasFloated  = $purchase->decisions->where('pdec_action', 'float_to_proc')->isNotEmpty();
     $hasDProcSaved = $purchase->decisions->where('pdec_action', 'dproc_save')->isNotEmpty();
     $dprocSaved  = $hasDProcSaved;
 
+    $currentStage = $purchase->currentSubstatus?->pss_stage ?? 'Division';
+    $isFinalized = in_array(strtolower(trim($purchase->pcs_status)), ['approved', 'rejected', 'cancelled', 'not approved', 'fulfilled', 'completed']);
+
     // Division can edit before floating or after procurement responds
     $canEdit     = $isInitiator && $isDraft && (!$hasFloated || $hasDProcSaved);
-    // DProc can add quotes when floated and NOT yet saved; Division can add quotes when not floated or after procurement responds
-    $canAddQuotes = ($isDProc && $hasFloated && !$hasDProcSaved) || ($isInitiator && $isDraft && (!$hasFloated || $hasDProcSaved));
+    // DProc can add/manage quotes when case is in Procurement stage, or floated to proc, or collaborative; Division can add quotes when not floated or after procurement responds
+    $canAddQuotes = ($isDProc && !$isFinalized) || ($isInitiator && $isDraft && (!$hasFloated || $hasDProcSaved));
 
     if (request()->is('*procurement*') || (Route::has('nrdi.purchase_cases_new.procurement.index') && ($isDProc || ($area ?? '') === 'proc'))) {
         $backRoute = route('nrdi.purchase_cases_new.procurement.index');
@@ -359,8 +362,8 @@
                                     </a>
                                 @endif
                             @else
-                                {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER for PS cases --}}
-                                @if($isPsCase || $hasItLetter)
+                                {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
+                                @if($hasItLetter)
                                     <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
                                         <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
                                     </a>
@@ -567,23 +570,26 @@
                             
                             {{-- Financial Overview & Case Cost Summary --}}
                             @php
-                                $winningQuote = $purchase->quotes->where('qte_recomm', true)->first()
+                                $breakdown = $purchase->tax_breakdown;
+                                $winningQuote = $purchase->winning_quote
+                                    ?? $purchase->quotes->where('qte_recomm', true)->first()
                                     ?? $purchase->quotes->sortBy('qte_price')->first();
 
-                                if ($winningQuote) {
-                                    $initBase = (float)($winningQuote->qte_intprice ?: ($winningQuote->qte_price - (float)($winningQuote->qte_inttax ?? 0) - (float)($winningQuote->qte_midtax ?? 0)));
+                                $initBase = (float)($breakdown['base'] ?? 0);
+                                $initSst  = (float)($breakdown['sst'] ?? 0);
+                                $initGst  = (float)($breakdown['gst'] ?? 0);
+                                $initTot  = (float)($breakdown['total'] ?? ($purchase->pcs_price ?? 0));
+
+                                if ($initTot <= 0 && $winningQuote) {
+                                    $initTot = (float)($winningQuote->qte_price ?: 0);
                                     $initSst = (float)($winningQuote->qte_inttax ?? 0);
                                     $initGst = (float)($winningQuote->qte_midtax ?? 0);
-                                    if ($initSst == 0 && $initGst == 0 && (float)$winningQuote->qte_price > $initBase) {
-                                        $initGst = (float)$winningQuote->qte_price - $initBase;
-                                    }
-                                    $initTot = (float)($winningQuote->qte_price ?: ($initBase + $initSst + $initGst));
-                                } else {
-                                    $breakdown = $purchase->tax_breakdown;
-                                    $initBase = $breakdown['base'];
-                                    $initSst = $breakdown['sst'];
-                                    $initGst = $breakdown['gst'];
-                                    $initTot = $breakdown['total'];
+                                    $initBase = (float)($winningQuote->qte_intprice ?: ($initTot - $initSst - $initGst));
+                                } elseif ($initBase <= 0 && $initTot > 0) {
+                                    $initBase = max(0, $initTot - $initSst - $initGst);
+                                }
+                                if ($initTot <= 0 && $initBase > 0) {
+                                    $initTot = $initBase + $initSst + $initGst;
                                 }
                             @endphp
                             <div class="text-right d-flex flex-column align-items-end" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; font-size: 12px; min-width: 260px;">
@@ -1012,7 +1018,7 @@
 </div>
 
 <datalist id="dbFirmsList">
-    @foreach($firms as $f)
+    @foreach($firms ?? [] as $f)
         <option value="{{ $f->frm_name }}"></option>
     @endforeach
 </datalist>
@@ -1076,7 +1082,7 @@
                     <div class="mr-3" style="font-size: 24px; color: var(--rd-accent);"><i class="fas fa-chart-line"></i></div>
                     <div>
                         <h5 class="modal-title rajdhani font-weight-bold text-dark mb-0" style="letter-spacing: 1.5px;">FINANCIAL INTELLIGENCE REPORT</h5>
-                        <div class="small text-muted rajdhani">{{ $head->head_name }} | DATED {{ date('d M y') }} <span class="ml-2 text-primary">{{ $head->trans_type == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
+                        <div class="small text-muted rajdhani">{{ $head->head_name ?? ($head->hed_name ?? ($head->prj_code ?? 'N/A')) }} | DATED {{ date('d M y') }} <span class="ml-2 text-primary">{{ ($head->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
                     </div>
                 </div>
                 <button type="button" class="close text-dark opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
@@ -1087,19 +1093,19 @@
                 <div class="row no-gutters border-bottom" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
                     <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
                         <div class="small text-muted rajdhani font-weight-bold">ALLOCATION</div>
-                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->allocation) }}</div>
+                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->allocation ?? 0) }}</div>
                     </div>
                     <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
                         <div class="small text-muted rajdhani font-weight-bold">MTSS SHARE</div>
-                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->mtss_share) }}</div>
+                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->mtss_share ?? 0) }}</div>
                     </div>
                     <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
                         <div class="small text-muted rajdhani font-weight-bold">RDW SHARE</div>
-                        <div class="h5 mb-0 text-primary font-weight-bold rajdhani">{{ number_format($head->rdw_share) }}</div>
+                        <div class="h5 mb-0 text-primary font-weight-bold rajdhani">{{ number_format($head->rdw_share ?? 0) }}</div>
                     </div>
                     <div class="col-md-3 p-3">
                         <div class="small text-muted rajdhani font-weight-bold">CSRF SHARE</div>
-                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->csrf_share) }}</div>
+                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->csrf_share ?? 0) }}</div>
                     </div>
                 </div>
 
@@ -1475,7 +1481,11 @@ document.addEventListener('DOMContentLoaded', function() {
             'pcs_id' => (int) $purchase->pcs_id,
             'pcs_title' => (string) $purchase->pcs_title,
             'pcs_remarks' => (string) ($purchase->pcs_remarks ?? ''),
-            'pcs_price' => (float) ($purchase->pcs_price ?? 0),
+            'pcs_intprice' => (float) ($purchase->pcs_intprice ?? $initBase),
+            'pcs_inttax' => (float) ($purchase->pcs_inttax ?? $initSst),
+            'pcs_midprice' => (float) ($purchase->pcs_midprice ?? ($initBase + $initSst)),
+            'pcs_midtax' => (float) ($purchase->pcs_midtax ?? $initGst),
+            'pcs_price' => (float) ($purchase->pcs_price ?? $initTot),
             'items' => $pcItems->map(fn($i) => [
                 'pci_id' => (int) $i->pci_id,
                 'pci_serial' => (int) $i->pci_serial,
@@ -1577,25 +1587,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sorted.length === 0) {
             body.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted small">No quotations added yet.</td></tr>`;
             return;
-        }
-
-        // Live update Case Financials in Header
-        const baseEl = document.getElementById('pcSummaryBasePrice');
-        const sstEl = document.getElementById('pcSummarySst');
-        const gstEl = document.getElementById('pcSummaryGst');
-        const totEl = document.getElementById('pcSummaryTotal');
-        
-        if (sorted.length > 0 && baseEl && totEl) {
-            const winner = sorted[0];
-            const bPrice = Number(winner.qte_subtotal || winner.qte_intprice || (Number(winner.qte_price || 0) - Number(winner.qte_inttax || 0) - Number(winner.qte_midtax || 0)));
-            const sstAmt = Number(winner.qte_inttax || 0);
-            const gstAmt = Number(winner.qte_midtax || (winner.qte_tax && !sstAmt ? winner.qte_tax : 0));
-            const totalAmt = Number(winner.qte_price || (bPrice + sstAmt + gstAmt));
-
-            baseEl.innerText = fmt(bPrice);
-            if (sstEl) sstEl.innerText = fmt(sstAmt);
-            if (gstEl) gstEl.innerText = fmt(gstAmt);
-            totEl.innerText = fmt(totalAmt);
         }
 
         body.innerHTML = sorted.map((q, idx) => {
@@ -1840,29 +1831,38 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderPriceBreakdown() {
         const quotes = state.quotes || [];
         const sorted = sortQuotesByPrice(quotes);
-        let basePrice = 0;
-        let sstAmount = 0;
-        let gstAmount = 0;
-        let totalPrice = 0;
+        let basePrice = parseFloat(state.pcs_intprice || 0);
+        let sstAmount = parseFloat(state.pcs_inttax || 0);
+        let gstAmount = parseFloat(state.pcs_midtax || 0);
+        let totalPrice = parseFloat(state.pcs_price || 0);
 
-        if (sorted.length > 0) {
-            const winner = sorted[0];
-            totalPrice = parseFloat(winner.qte_price || 0);
-            sstAmount = parseFloat(winner.qte_inttax || 0);
-            gstAmount = parseFloat(winner.qte_midtax || 0);
-            basePrice = parseFloat(winner.qte_subtotal || winner.qte_intprice || 0);
-            if (basePrice <= 0 && totalPrice > 0) {
-                basePrice = totalPrice - sstAmount - gstAmount;
-            }
-            if (totalPrice <= 0) {
-                totalPrice = basePrice + sstAmount + gstAmount;
+        if (totalPrice <= 0 && basePrice <= 0) {
+            if (sorted.length > 0) {
+                const winner = sorted[0];
+                totalPrice = parseFloat(winner.qte_price || 0);
+                sstAmount = parseFloat(winner.qte_inttax || 0);
+                gstAmount = parseFloat(winner.qte_midtax || 0);
+                basePrice = parseFloat(winner.qte_subtotal || winner.qte_intprice || 0);
+                if (basePrice <= 0 && totalPrice > 0) {
+                    basePrice = Math.max(0, totalPrice - sstAmount - gstAmount);
+                }
+                if (totalPrice <= 0) {
+                    totalPrice = basePrice + sstAmount + gstAmount;
+                }
+            } else {
+                const items = state.items || [];
+                basePrice = items.reduce((acc, it) => acc + (parseFloat(it.pci_qty || 1) * parseFloat(it.pci_price || 0)), 0);
+                sstAmount = parseFloat(state.pcs_inttax || 0);
+                gstAmount = parseFloat(state.pcs_midtax || 0);
+                totalPrice = (parseFloat(state.pcs_price || 0) > 0) ? parseFloat(state.pcs_price) : (basePrice + sstAmount + gstAmount);
             }
         } else {
-            const items = state.items || [];
-            basePrice = items.reduce((acc, it) => acc + (parseFloat(it.pci_qty || 1) * parseFloat(it.pci_price || 0)), 0);
-            sstAmount = parseFloat(state.pcs_inttax || 0);
-            gstAmount = parseFloat(state.pcs_midtax || 0);
-            totalPrice = (parseFloat(state.pcs_price || 0) > 0) ? parseFloat(state.pcs_price) : (basePrice + sstAmount + gstAmount);
+            if (basePrice <= 0 && totalPrice > 0) {
+                basePrice = Math.max(0, totalPrice - sstAmount - gstAmount);
+            }
+            if (totalPrice <= 0 && basePrice > 0) {
+                totalPrice = basePrice + sstAmount + gstAmount;
+            }
         }
 
         const fmt2 = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1876,15 +1876,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (elSst) elSst.textContent = fmt2(sstAmount);
         if (elGst) elGst.textContent = fmt2(gstAmount);
         if (elTot) elTot.textContent = fmt2(totalPrice);
-    }
-
-    function renderAll() {
-        renderTitle();
-        renderItems();
-        renderQuotes();
-        renderRemarks();
-        renderFiles();
-        renderPriceBreakdown();
     }
 
     function renderCs() {
@@ -1964,17 +1955,39 @@ document.addEventListener('DOMContentLoaded', function() {
             return row;
         }).join('');
 
+        const subTotals = quotes.map((q) => fmt(q.qte_subtotal || q.qte_intprice || q.qte_price));
+        const quoteTaxes = quotes.map((q) => fmt((q.qte_inttax || 0) + (q.qte_midtax || 0) || (q.qte_tax || 0)));
         const totals = quotes.map((q) => fmt(q.qte_price));
         const foot = `
                 </tbody>
                 <tfoot style="border-top: 2px solid var(--rd-accent);">
                     <tr style="background: var(--rd-neutral-50);">
+                        <td colspan="3" class="cs-sticky-1-3 text-right pr-4 text-muted small" style="background: var(--rd-neutral-200) !important; font-weight: 700;">
+                            BASE / SUB TOTAL (PKR)
+                        </td>
+                        ${subTotals.map((st) => `
+                            <td class="text-center py-2 text-dark font-weight-bold" style="border-right: 1px solid rgba(255,255,255,0.05); background: var(--rd-neutral-200) !important; font-size: 13px;">
+                                ${st}
+                            </td>
+                        `).join('')}
+                    </tr>
+                    <tr style="background: var(--rd-neutral-50);">
+                        <td colspan="3" class="cs-sticky-1-3 text-right pr-4 text-muted small" style="background: var(--rd-neutral-200) !important; font-weight: 700;">
+                            TAX AMOUNT (SST / GST)
+                        </td>
+                        ${quoteTaxes.map((tx) => `
+                            <td class="text-center py-2 text-muted" style="border-right: 1px solid rgba(255,255,255,0.05); background: var(--rd-neutral-200) !important; font-size: 12px;">
+                                ${tx}
+                            </td>
+                        `).join('')}
+                    </tr>
+                    <tr style="background: var(--rd-neutral-50); border-top: 1px solid #cbd5e1;">
                         <td colspan="3" class="cs-sticky-1-3 text-right pr-4 text-accent-clean" style="font-size: 14px; background: var(--rd-neutral-200) !important; font-weight: 800;">
                             GRAND TOTAL (PKR)
                         </td>
                         ${totals.map((t, idx) => `
                             <td class="text-center py-3 ${idx === 0 ? 'col-l1' : ''}" style="border-right: 1px solid rgba(255,255,255,0.05); background: var(--rd-neutral-200) !important;">
-                                <div class="rajdhani ${idx === 0 ? 'text-success' : 'text-dark'}" style="font-size: 20px; font-weight: 800; text-shadow: 0 0 10px rgba(0,0,0,0.5);">
+                                <div class="rajdhani ${idx === 0 ? 'text-success' : 'text-dark'}" style="font-size: 20px; font-weight: 800;">
                                     ${t}
                                 </div>
                             </td>
@@ -2000,7 +2013,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderQuotes();
         renderRemarks();
         renderFiles();
-        // Updated to use the new multi-quote rendering function if needed
+        renderPriceBreakdown();
         if (typeof renderMultiQuoteModal === 'function') {
             renderMultiQuoteModal();
         }
@@ -2812,14 +2825,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.promptCreateIt = function(pcsId) {
         if (confirm('Do you want to create IT / RFQ Letter for this purchase case?')) {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
             fetch(`/purchase/case/${pcsId}/it-letter/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': token
                 }
             })
-            .then(res => res.json())
+            .then(async res => {
+                const contentType = res.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    const text = await res.text();
+                    throw new Error(`Server returned HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+            })
             .then(data => {
                 if (data.success && data.redirect) {
                     window.open(data.redirect, '_blank');

@@ -116,7 +116,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($purchase->quotes as $idx => $q)
+                @forelse($purchase->quotes as $idx => $q)
                 @php
                     $frmId = $q->qte_frm_id ?: ($q->firm?->frm_id ?? null);
                     $firmRow = $frmId ? DB::table('frm.firmz')->where('frm_id', $frmId)->first() : null;
@@ -143,16 +143,33 @@
                     $dealer = $person?->per_name 
                         ? ($person->per_name . (!empty($person->per_desig) ? ' (' . $person->per_desig . ')' : '')) 
                         : ($firmRow?->frm_entity ?? '-');
+
+                    $qBase = (float)($q->qte_intprice ?: $q->qte_price);
+                    $qSst = (float)($q->qte_inttax ?? 0);
+                    $qGst = (float)($q->qte_midtax ?? 0);
+                    $qTot = (float)($q->qte_price ?: ($qBase + $qSst + $qGst));
                 @endphp
                 <tr>
                     <td style="text-align: center;">{{ $idx + 1 }}</td>
-                    <td style="font-weight: bold;">M/s {{ strtoupper($q->firm->frm_name ?? $q->qte_firmname) }}</td>
+                    <td style="font-weight: bold;">
+                        M/s {{ strtoupper($q->firm->frm_name ?? $q->qte_firmname) }}
+                        @if($q->qte_recomm)
+                            <span style="font-size: 8pt; color: #166534; font-weight: bold; display: block;">(Recommended)</span>
+                        @endif
+                    </td>
                     <td>
                         {{ \Carbon\Carbon::parse($q->qte_date)->format('d-M-Y') }}<br>
                         {{ $q->qte_refno ?? 'N/A' }}
                     </td>
                     <td style="text-align: right; font-weight: bold;">
-                        {{ number_format($q->qte_price, 2) }}
+                        {{ number_format($qTot, 2) }}
+                        @if($qSst > 0 || $qGst > 0)
+                            <div style="font-size: 7.5pt; font-weight: normal; color: #555;">
+                                Base: {{ number_format($qBase, 2) }}
+                                @if($qSst > 0) | SST: {{ number_format($qSst, 2) }}@endif
+                                @if($qGst > 0) | GST: {{ number_format($qGst, 2) }}@endif
+                            </div>
+                        @endif
                     </td>
                     <td>{{ $addr }}</td>
                     <td>
@@ -166,8 +183,43 @@
                     <td style="text-align: center;">{{ $dealer }}</td>
                     <td style="text-align: center;">{{ $q->qte_techaccept ? 'Accepted' : 'Rejected' }}</td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 25px; font-style: italic; color: #777;">
+                        No quotations recorded for this purchase case.
+                    </td>
+                </tr>
+                @endforelse
             </tbody>
+            @php
+                $cbd = $purchase->tax_breakdown;
+                $evalTotal = (float)($cbd['total'] ?? ($purchase->pcs_price ?? 0));
+                $evalBase = (float)($cbd['base'] ?? 0);
+                $evalSst = (float)($cbd['sst'] ?? 0);
+                $evalGst = (float)($cbd['gst'] ?? 0);
+            @endphp
+            @if($evalTotal > 0)
+            <tfoot>
+                <tr style="background-color: #f8fafc; font-weight: bold; border-top: 2px solid #000;">
+                    <td colspan="3" style="text-align: right; padding: 8px;">
+                        CASE EVALUATED TOTAL (PKR):
+                    </td>
+                    <td style="text-align: right; padding: 8px; color: #166534; font-size: 10pt;">
+                        {{ number_format($evalTotal, 2) }}
+                        @if($evalSst > 0 || $evalGst > 0)
+                            <div style="font-size: 7.5pt; font-weight: normal; color: #555;">
+                                Base: {{ number_format($evalBase, 2) }}
+                                @if($evalSst > 0) | SST: {{ number_format($evalSst, 2) }}@endif
+                                @if($evalGst > 0) | GST: {{ number_format($evalGst, 2) }}@endif
+                            </div>
+                        @endif
+                    </td>
+                    <td colspan="5" style="font-size: 8pt; color: #555; vertical-align: middle;">
+                        {{ $purchase->pcs_recomm ?: 'Evaluated as per lowest technically acceptable offer.' }}
+                    </td>
+                </tr>
+            </tfoot>
+            @endif
         </table>
 
         <div class="sig-container">

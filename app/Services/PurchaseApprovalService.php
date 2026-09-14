@@ -24,7 +24,7 @@ class PurchaseApprovalService
     {
         return [
             'forward_chain' => [
-                'Division' => ['next' => 'DFinance', 'area' => 'fin'],
+                'Division' => ['next' => 'DProc',    'area' => 'proc'],
                 'DProc'    => ['next' => 'Division', 'area' => 'prj'],
                 'DFinance' => ['next' => 'MD',       'area' => 'rdw'],
                 'MD'       => ['next' => 'DDG',      'area' => 'hqs'],
@@ -644,9 +644,9 @@ class PurchaseApprovalService
 
         // 1. Division (prj, rdwprj, etc.)
         if (in_array($currentArea, ['prj', 'rdwprj', 'division', 'initiation'])) {
-            $next = is_array($forwardChain['Division'] ?? null) ? ($forwardChain['Division']['next'] ?? 'DFinance') : ($forwardChain['Division'] ?? 'DFinance');
+            $next = is_array($forwardChain['Division'] ?? null) ? ($forwardChain['Division']['next'] ?? 'DProc') : ($forwardChain['Division'] ?? 'DProc');
             if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
-            return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'fin'];
+            return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'proc'];
         }
 
         // 2. DProc (collaborative forward / finalize)

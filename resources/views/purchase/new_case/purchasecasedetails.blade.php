@@ -352,11 +352,22 @@
                                     
                                     <div class="col-6"><label>Status</label><input type="text" class="form-control font-weight-bold text-success" value="{{ $purchase->pcs_status }}" readonly></div>
                                 </div>
+                                @php
+                                    $pbd = $purchase->tax_breakdown;
+                                    $pBase = (float)($pbd['base'] ?? 0);
+                                    $pSst = (float)($pbd['sst'] ?? 0);
+                                    $pGst = (float)($pbd['gst'] ?? 0);
+                                    $pTot = (float)($pbd['total'] ?? ($purchase->pcs_price ?? 0));
+                                    if ($pTot <= 0 && (float)($purchase->pcs_price ?? 0) > 0) {
+                                        $pTot = (float)$purchase->pcs_price;
+                                        $pBase = $pTot;
+                                    }
+                                @endphp
                                 <div class="row mb-3">
-                                    <div class="col-6"><label>GST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($purchase->pcs_midtax ?? 0, 2) }}" readonly></div>
-                                    <div class="col-6"><label>SST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($purchase->pcs_inttax ?? 0, 2) }}" readonly></div>
-                                    <div class="col-6 mt-2"><label>Sub Total</label><input type="text" class="form-control text-right" value="{{ number_format($purchase->pcs_midprice ?? 0, 2) }}" readonly></div>
-                                    <div class="col-6 mt-2"><label>Final Total</label><input type="text" class="form-control text-right font-weight-bold text-primary" value="{{ number_format($purchase->live_value ?? ($purchase->pcs_price ?? 0), 2) }}" readonly style="background-color:#eef3ff;"></div>
+                                    <div class="col-6"><label>GST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($pGst, 2) }}" readonly></div>
+                                    <div class="col-6"><label>SST</label><input type="text" class="form-control text-right text-danger" value="{{ number_format($pSst, 2) }}" readonly></div>
+                                    <div class="col-6 mt-2"><label>Sub Total</label><input type="text" class="form-control text-right" value="{{ number_format($pBase, 2) }}" readonly></div>
+                                    <div class="col-6 mt-2"><label>Final Total</label><input type="text" class="form-control text-right font-weight-bold text-primary" value="{{ number_format($pTot, 2) }}" readonly style="background-color:#eef3ff;"></div>
                                 </div>
                             </div>
                         </div>

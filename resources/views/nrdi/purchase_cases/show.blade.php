@@ -185,7 +185,7 @@
                             $hasItLetter = $purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists();
                             $isPsCase = in_array(strtolower(trim((string)($purchase->pcs_type ?? 'ps'))), ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
                         @endphp
-                        @if($isPsCase || $hasItLetter)
+                        @if($hasItLetter)
                             <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(245,158,11,0.5); color: #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                 <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
                             </a>
