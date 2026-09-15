@@ -61,6 +61,9 @@
             @if($finSummary)
             <div class="mb-4 p-3 rounded d-flex align-items-center justify-content-between" style="background: var(--rd-surface); border: 1px solid var(--rd-border);">
                 <div class="d-flex align-items-center gap-4 rajdhani">
+                    @if(isset($finSummary['allocation']))
+                    <div class="mr-4"><i class="fas fa-coins text-warning mr-2"></i> <span class="text-muted small">ALLOCATED:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['allocation']) }}</span></div>
+                    @endif
                     <div class="mr-4"><i class="fas fa-wallet text-info mr-2"></i> <span class="text-muted small">RECEIVED:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['received']) }}</span></div>
                     <div class="mr-4"><i class="fas fa-money-bill-wave text-danger mr-2"></i> <span class="text-muted small">EXPENDITURE:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['expenditure']) }}</span></div>
                     <div class="mr-4"><i class="fas fa-balance-scale mr-2" style="color: var(--rd-text2);"></i> <span class="text-muted small">BALANCE:</span> <span class="font-weight-bold ml-1" style="color: var(--rd-text1);">{{ number_format($finSummary['balance']) }}</span></div>

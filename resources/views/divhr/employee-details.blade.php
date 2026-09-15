@@ -329,15 +329,15 @@
                       {{ $detPrjTitle ?: ($detHeadCode ?: '—') }}
                     </p>
                     @if($dCount > 1 && $dPlans->isNotEmpty())
-                      <div class="relative inline-block text-left" x-data="{ open: false }">
-                        <button @click="open = !open" @click.away="open = false" type="button" class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/10 text-sky-500 border border-sky-500/30 hover:bg-sky-500/20">
+                      <div class="relative inline-block text-left" id="projectAllocationsDropdownWrap">
+                        <button type="button" id="projectAllocationsToggleBtn" class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/10 text-sky-600 border border-sky-500/30 hover:bg-sky-500/20 cursor-pointer shadow-xs transition-colors">
                           <i class="fas fa-layer-group mr-1 text-[8px]"></i>{{ $dCount }} Projects
-                          <i class="fas fa-chevron-down ml-1 text-[7px]"></i>
+                          <i class="fas fa-chevron-down ml-1 text-[7px] transition-transform duration-200" id="projectAllocationsChevron"></i>
                         </button>
-                        <div x-show="open" x-cloak class="origin-top-right absolute right-0 mt-1 w-72 rounded-xl shadow-xl bg-surface border border-border1 z-50 p-2 max-h-60 overflow-y-auto">
-                          <div class="text-[10px] font-bold text-text3 uppercase tracking-wider px-2 py-1 border-b border-border1 mb-1.5 flex justify-between items-center">
+                        <div id="projectAllocationsDropdownMenu" class="origin-top-left absolute left-0 mt-1.5 w-80 rounded-xl shadow-2xl bg-white border border-slate-200 z-50 p-2.5 max-h-60 overflow-y-auto" style="display: none;">
+                          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1 border-b border-slate-100 mb-1.5 flex justify-between items-center">
                             <span>Project Allocations</span>
-                            <span class="text-[9px] px-1.5 py-0.5 bg-sky-500/10 text-sky-500 rounded font-bold">{{ $dPlans->count() }} {{ $dPlans->count() === 1 ? 'Period' : 'Periods' }}</span>
+                            <span class="text-[9px] px-1.5 py-0.5 bg-sky-50 text-sky-600 rounded font-bold">{{ $dPlans->count() }} {{ $dPlans->count() === 1 ? 'Period' : 'Periods' }}</span>
                           </div>
                           @foreach($dPlans as $dp)
                             @php
@@ -349,18 +349,18 @@
                               $mCount = is_array($dp) ? ($dp['months_count'] ?? 1) : ($dp->months_count ?? 1);
                               $periodStr = ($pStart === $pEnd) ? $pStart . ' (1 Mo)' : "From {$pStart} To {$pEnd} ({$mCount} Mos)";
                             @endphp
-                            <div class="p-2 rounded text-[11px] mb-1 {{ $isCur ? 'bg-sky-500/10 border-l-2 border-sky-500' : 'hover:bg-surface2 border-b border-border1' }}">
+                            <div class="p-2 rounded text-[11px] mb-1 {{ $isCur ? 'bg-sky-50 border-l-2 border-sky-500' : 'hover:bg-slate-50 border-b border-slate-100' }}">
                               <div class="flex items-center justify-between gap-1.5 mb-1">
                                 <div class="flex items-center gap-1.5 truncate">
-                                  <span class="px-1.5 py-0.5 {{ $isCur ? 'bg-sky-600 text-white' : 'bg-surface3 text-text2' }} rounded text-[9px] font-bold">{{ $dispCode }}</span>
-                                  <span class="text-text1 font-medium truncate text-[10.5px]" title="{{ $dispTitle }}">{{ $dispTitle }}</span>
+                                  <span class="px-1.5 py-0.5 {{ $isCur ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700' }} rounded text-[9px] font-bold">{{ $dispCode }}</span>
+                                  <span class="text-slate-800 font-medium truncate text-[10.5px]" title="{{ $dispTitle }}">{{ $dispTitle }}</span>
                                 </div>
                                 @if($isCur)
-                                  <span class="text-[7.5px] font-bold text-emerald-500 uppercase flex-shrink-0 bg-emerald-500/10 px-1 rounded">Current</span>
+                                  <span class="text-[7.5px] font-bold text-emerald-600 uppercase flex-shrink-0 bg-emerald-50 px-1 rounded">Current</span>
                                 @endif
                               </div>
-                              <div class="text-[9.5px] text-text3 font-medium pl-1">
-                                <i class="far fa-calendar-alt mr-1"></i>{{ $periodStr }}
+                              <div class="text-[9.5px] text-slate-500 font-medium pl-1">
+                                <i class="far fa-calendar-alt mr-1 text-slate-400"></i>{{ $periodStr }}
                               </div>
                             </div>
                           @endforeach
@@ -421,17 +421,25 @@
               <h4 class="text-[10px] text-text3 uppercase tracking-widest mb-3 font-bold">Previous Contracts History
               </h4>
               <div id="contractsWrapper"
-                class="border border-border1 rounded-xl relative contracts-scroll" style="height: 155px; max-height: 155px;">
-                <table class="w-full text-left text-[11px]">
+                class="border border-border1 rounded-xl relative contracts-scroll overflow-hidden" style="height: 155px; max-height: 155px;">
+                <table class="w-full text-left text-[11px] table-fixed">
+                  <colgroup>
+                    <col style="width: 20%;">
+                    <col style="width: 32%;">
+                    <col style="width: 16%;">
+                    <col style="width: 11%;">
+                    <col style="width: 11%;">
+                    <col style="width: 10%;">
+                  </colgroup>
                   <thead
                     class="sticky top-0 z-10 bg-surface2 border-b border-border1">
                     <tr>
-                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">Role / Grade</th>
-                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">Project Head</th>
-                      <th class="px-3 py-2 font-bold text-[9px] text-text3 uppercase">Salary</th>
+                      <th class="px-2.5 py-2 font-bold text-[9px] text-text3 uppercase">Role / Grade</th>
+                      <th class="px-2.5 py-2 font-bold text-[9px] text-text3 uppercase">Project Head</th>
+                      <th class="px-2.5 py-2 font-bold text-[9px] text-text3 uppercase">Salary</th>
                       <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase">Start</th>
                       <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase">End</th>
-                      <th class="px-2 py-2 pr-12 font-bold text-[9px] text-text3 uppercase text-center relative">
+                      <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase text-center relative">
                         Status
                         <span class="absolute right-2 top-1 flex gap-1.5">
                           <button id="contractScrollUp"
@@ -457,23 +465,25 @@
                         $cPrj = $c->ctr_prj_title ?: ($c->ctr_hed_name ?: ($c->ctr_hed_code ?: ($c->ctr_prj_code ?? null)));
                       @endphp
                       <tr class="hover:bg-surface2/50 transition-colors">
-                        <td class="px-3 py-2 font-medium text-text1" style="max-width: 120px;">
-                          <span class="font-bold">{{ $c->ctr_jobtitle ?? '—' }}</span>
+                        <td class="px-2.5 py-2 font-medium text-text1 truncate">
+                          <span class="font-bold block truncate" title="{{ $c->ctr_jobtitle ?? '—' }}">{{ $c->ctr_jobtitle ?? '—' }}</span>
                           @if(!empty($c->ctr_grade))
-                            <span class="text-[9px] text-text3 block font-semibold">{{ $c->ctr_grade }}</span>
+                            <span class="text-[9px] text-text3 block font-semibold truncate">{{ $c->ctr_grade }}</span>
                           @endif
                         </td>
-                        <td class="px-3 py-2 font-medium text-text1" style="max-width: 150px;">
-                          @if($cHead)
-                            <span class="px-1.5 py-0.5 font-bold mr-1 rounded text-[9px] text-white shadow-xs" style="background-color: #0284c7;">{{ $cHead }}</span>
-                          @endif
-                          <span class="text-[10.5px] font-semibold text-text1 text-truncate" title="{{ $cPrj }}">{{ $cPrj ?: ($cHead ?: '—') }}</span>
+                        <td class="px-2.5 py-2 font-medium text-text1 truncate">
+                          <div class="flex items-center gap-1 min-w-0">
+                            @if($cHead)
+                              <span class="px-1.5 py-0.5 font-bold flex-shrink-0 rounded text-[9px] text-white shadow-xs" style="background-color: #0284c7;">{{ $cHead }}</span>
+                            @endif
+                            <span class="text-[10.5px] font-semibold text-text1 truncate block" title="{{ $cPrj }}">{{ $cPrj ?: ($cHead ?: '—') }}</span>
+                          </div>
                         </td>
-                        <td class="px-3 py-2 font-bold text-text1">{{ $c->ctr_salary ? number_format($c->ctr_salary) : '—' }}</td>
-                        <td class="px-2 py-2 text-text2">{{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('M Y') : '—' }}</td>
-                        <td class="px-2 py-2 text-text2">{{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('M Y') : '—' }}</td>
-                        <td class="px-2 py-2 text-center">
-                          <span style="margin-left: -30px;" class="px-2 py-0.5 {{ $cls }} rounded-full text-[8px] font-black uppercase tracking-wider">{{ $label }}</span>
+                        <td class="px-2.5 py-2 font-bold text-text1 whitespace-nowrap">{{ $c->ctr_salary ? number_format($c->ctr_salary) : '—' }}</td>
+                        <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('M Y') : '—' }}</td>
+                        <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('M Y') : '—' }}</td>
+                        <td class="px-2 py-2 text-center whitespace-nowrap">
+                          <span class="px-2 py-0.5 {{ $cls }} rounded-full text-[8.5px] font-black uppercase tracking-wider inline-block">{{ $label }}</span>
                         </td>
                       </tr>
                     @empty
@@ -919,6 +929,35 @@
       
       // Default to Next of Kin on load
       activate('nk');
+    });
+
+    // Project Allocations Dropdown Toggle (Closed by default, toggles on click, closes on click away)
+    document.addEventListener('DOMContentLoaded', function () {
+      var allocBtn = document.getElementById('projectAllocationsToggleBtn');
+      var allocMenu = document.getElementById('projectAllocationsDropdownMenu');
+      var allocChevron = document.getElementById('projectAllocationsChevron');
+      var allocWrap = document.getElementById('projectAllocationsDropdownWrap');
+
+      if (allocBtn && allocMenu) {
+        allocBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var isHidden = allocMenu.style.display === 'none' || allocMenu.style.display === '';
+          if (isHidden) {
+            allocMenu.style.display = 'block';
+            if (allocChevron) allocChevron.style.transform = 'rotate(180deg)';
+          } else {
+            allocMenu.style.display = 'none';
+            if (allocChevron) allocChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+
+        document.addEventListener('click', function (e) {
+          if (allocWrap && !allocWrap.contains(e.target)) {
+            allocMenu.style.display = 'none';
+            if (allocChevron) allocChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
     });
   </script>
 

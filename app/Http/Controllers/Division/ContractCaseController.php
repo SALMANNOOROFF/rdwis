@@ -31,13 +31,23 @@ class ContractCaseController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
+        $userUnitId = (int) ($user->acc_unt_id ?? 0);
+        $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: $userUnitId);
+        $isSord = strtolower(trim((string)($user->acc_untarea ?? ''))) === 'rdwprj';
 
         $query = HrCtrCase::with(['casePlans.project', 'currentSubstatus', 'employee'])
-            ->where(function ($q) use ($divisionId) {
+            ->where(function ($q) use ($divisionId, $userUnitId, $isSord) {
+                if ($isSord) {
+                    return; // SORD has visibility of all division cases
+                }
                 if ($divisionId > 0) {
                     $q->where('ctc_divisionid', $divisionId)
-                      ->orWhere('ctc_unt_id', $divisionId);
+                      ->orWhere('ctc_unt_id', $divisionId)
+                      ->orWhere('ctc_approvedunt_id', $divisionId);
+                }
+                if ($userUnitId > 0 && $userUnitId != $divisionId) {
+                    $q->orWhere('ctc_divisionid', $userUnitId)
+                      ->orWhere('ctc_unt_id', $userUnitId);
                 }
             })
             ->orderBy('ctc_id', 'desc');
@@ -414,9 +424,16 @@ class ContractCaseController extends Controller
                 ->with('error', 'This case is currently locked and undergoing scrutiny. It cannot be edited unless returned to Division.');
         }
 
-        // Division verification
-        if ($divisionId > 0 && $case->ctc_divisionid > 0 && $case->ctc_divisionid != $divisionId) {
-            abort(403, 'Unauthorized access to this contract case.');
+        // Division verification: if returned/forwarded to this division, sync ownership cleanly
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        if ($divisionId > 0 && $case->ctc_divisionid > 0 && $case->ctc_divisionid != $divisionId && !$context->isSord()) {
+            if ($currentStage === 'Division') {
+                $case->ctc_divisionid = $divisionId;
+                $case->ctc_unt_id = $divisionId;
+                $case->save();
+            } else {
+                abort(403, 'Unauthorized access to this contract case.');
+            }
         }
 
         $division = DB::table('cen.units')->where('unt_id', $case->ctc_divisionid ?: $divisionId)->first();

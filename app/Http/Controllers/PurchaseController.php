@@ -422,10 +422,11 @@ class PurchaseController extends Controller
                     if ($pcs->pcs_type === 'Rb' && !empty($empId)) {
                         $pricingService = app(\App\Services\PurchasePricingService::class);
                         $tadaData = $pricingService->getEmployeeTadaDetails($empId);
-                        $itemPrice = $tadaData['tada_amount'];
-                        $desc = $tadaData['description'];
-                        $qty = 1;
-                        $unit = 'num';
+                        $itemPrice = !empty($item['price']) ? (float)$item['price'] : (float)$tadaData['tada_amount'];
+                        $desc = !empty($item['desc']) ? $item['desc'] : $tadaData['description'];
+                        $qty = (float)($item['qty'] ?? 1);
+                        if ($qty <= 0) $qty = 1;
+                        $unit = (!empty($item['unit']) && $item['unit'] !== 'num') ? $item['unit'] : 'Days';
                     } elseif ($pcs->pcs_type === 'Ps' && !empty($firmTotals)) {
                         $winningFirmId = array_keys($firmTotals, min($firmTotals))[0];
                         $itemPrice = (float)($quotationsInput[$winningFirmId][$idx] ?? 0);
@@ -495,7 +496,7 @@ class PurchaseController extends Controller
                     if ($request->hasFile("quote_files.{$firmId}")) {
                         $qFile = $request->file("quote_files.{$firmId}");
                         if ($qFile && $qFile->isValid()) {
-                            $stored = app(\App\Services\FileStorageService::class)->store($qFile, 'pur', 'pcs-', (string) $pcs->pcs_id);
+                            $stored = app(\App\Services\FileStorageService::class)->storeQuote($qFile, (int) $pcs->pcs_id, (int) $qte_id);
 
                             DB::table('pur.purattachments')->insert([
                                 'pat_objtype' => 'qte',
@@ -583,7 +584,7 @@ class PurchaseController extends Controller
 
     public function caseDetail($id)
     {
-        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'project', 'attachments', 'decisions.account'])->findOrFail($id);
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes.firm', 'project', 'attachments', 'decisions.account'])->findOrFail($id);
         
         // Live Financials
         $project = $purchase->project;
@@ -601,13 +602,13 @@ class PurchaseController extends Controller
 
     public function marketResearch($id)
     {
-        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'decisions.account'])->findOrFail($id);
+        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes.firm', 'project', 'decisions.account'])->findOrFail($id);
         return view('purchase.initiation.market_research', compact('purchase'));
     }
 
     public function csFormal($id)
     {
-        $purchase = Purchase::with(['unit', 'quotes.firm', 'project', 'items'])->findOrFail($id);
+        $purchase = Purchase::with(['unit', 'quotes.firm', 'noQuotes.firm', 'project', 'items'])->findOrFail($id);
         return view('purchase.initiation.cs_formal', compact('purchase'));
     }
 
@@ -688,7 +689,7 @@ class PurchaseController extends Controller
 
         $user = Auth::user();
         $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
-        $isDProc = in_array($userArea, ['proc', 'prc'], true);
+        $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
 
         $canEditIt = $isDProc;
 
@@ -822,7 +823,7 @@ class PurchaseController extends Controller
     {
         $user = Auth::user();
         $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
-        $isDProc = in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
+        $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
         if (!$isDProc) {
             return response()->json(['success' => false, 'message' => 'Only Procurement Department can raise/create IT.'], 403);
         }
@@ -867,7 +868,7 @@ class PurchaseController extends Controller
     {
         $user = Auth::user();
         $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
-        $isDProc = in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
+        $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
         if (!$isDProc) {
             return response()->json(['success' => false, 'message' => 'Unauthorized. Only Procurement Department can edit and save IT.'], 403);
         }
@@ -1121,6 +1122,9 @@ class PurchaseController extends Controller
         return response()->file($fullPath, [
             'Content-Type' => $mimeType,
             'Content-Disposition' => ($download ? 'attachment' : 'inline') . '; filename="' . $fileName . '"',
+            'X-File-Extension' => $ext,
+            'X-File-Name' => $fileName,
+            'Access-Control-Expose-Headers' => 'Content-Disposition, X-File-Extension, X-File-Name',
             'Cache-Control' => 'no-store, no-cache, must-revalidate',
             'Pragma' => 'no-cache',
         ]);

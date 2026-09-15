@@ -168,9 +168,11 @@
                 </div>
             </div>
             <div class="modal-footer border-top p-3" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
+                @if(count($purchase->quotes ?? []) > 1)
                 <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn btn-outline-success rajdhani font-weight-bold px-4">
                     <i class="fas fa-file-invoice mr-2"></i> VIEW FORMAL STATEMENT
                 </a>
+                @endif
                 <button type="button" class="btn btn-secondary rajdhani font-weight-bold px-4" data-dismiss="modal">CLOSE REVIEW</button>
             </div>
         </div>

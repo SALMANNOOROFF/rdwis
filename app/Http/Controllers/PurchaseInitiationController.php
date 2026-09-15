@@ -99,7 +99,17 @@ class PurchaseInitiationController extends Controller
         $finSummary = null;
         if ($head) {
             $s = $finService->getHeadStatus($head->hed_id);
+            $alloc = (float)($s->prj_share ?? 0);
+            if ($alloc <= 0 && isset($s->rdw_share)) {
+                $rdw = (float)($s->rdw_share ?? 0);
+                $cf  = (float)($s->cf_share ?? ($s->csrf_share ?? 0));
+                if ($rdw > 0) $alloc = max(0, $rdw - $cf);
+            }
+            if ($alloc <= 0) {
+                $alloc = (float)($s->allocation ?? 0);
+            }
             $finSummary = [
+                'allocation' => $alloc,
                 'received' => $s->received,
                 'expenditure' => $s->expenditure,
                 'commitments' => $s->commitments,
@@ -123,7 +133,7 @@ class PurchaseInitiationController extends Controller
         $user = Auth::user();
         $isDProc = str_contains(strtolower(trim($user->acc_untarea)), 'proc') || str_contains(strtolower(trim($user->acc_untarea)), 'prc');
         
-        $query = Purchase::with(['items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account']);
+        $query = Purchase::with(['items.employee', 'quotes.firm', 'noQuotes.firm', 'project', 'attachments', 'decisions.account', 'firm']);
         
         $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
         $isHqOrProc = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin', 'proc', 'prc'], true);
@@ -281,25 +291,42 @@ class PurchaseInitiationController extends Controller
     {
         $op = (string) $request->input('op', '');
         $rules = [
-            'op' => 'required|in:save_title,save_remarks,add_files,delete_file,add_item,edit_item,delete_item,add_quote,delete_quote,upload_quote_file,add_noquote,delete_noquote',
+            'op' => 'required|in:save_title,save_remarks,save_metadata,add_files,delete_file,add_item,edit_item,delete_item,add_quote,delete_quote,upload_quote_file,add_noquote,delete_noquote',
         ];
 
         if ($op === 'save_title') {
             $rules['pcs_title'] = 'required|string|max:500';
         } elseif ($op === 'save_remarks') {
             $rules['pcs_remarks'] = 'nullable|string';
+        } elseif ($op === 'save_metadata') {
+            $rules['subhead'] = 'nullable|string|max:255';
+            $rules['pcs_frm_id'] = 'nullable|integer';
         } elseif ($op === 'add_files') {
             $rules['attachments'] = 'required|array';
             $rules['attachments.*'] = 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240';
         } elseif ($op === 'delete_file') {
             $rules['pat_id'] = 'required|integer';
         } elseif ($op === 'add_item') {
-            $rules['item_desc'] = 'required|string|max:2000';
-            $rules['item_qty'] = 'required|numeric|min:0.0001';
+            $rules['item_desc'] = 'nullable|string|max:2000';
+            $rules['item_qty'] = 'nullable|numeric|min:0.0001';
+            $rules['item_qtyunit'] = 'nullable|string|max:50';
+            $rules['item_price'] = 'nullable|numeric|min:0';
+            $rules['item_type'] = 'nullable|integer';
+            $rules['item_subtype'] = 'nullable|string|max:255';
+            $rules['item_type2'] = 'nullable|integer';
+            $rules['item_subhead'] = 'nullable|string|max:255';
+            $rules['emp_id'] = 'nullable|string|max:50';
         } elseif ($op === 'edit_item') {
             $rules['pci_id'] = 'required|integer';
-            $rules['item_desc'] = 'required|string|max:2000';
-            $rules['item_qty'] = 'required|numeric|min:0.0001';
+            $rules['item_desc'] = 'nullable|string|max:2000';
+            $rules['item_qty'] = 'nullable|numeric|min:0.0001';
+            $rules['item_qtyunit'] = 'nullable|string|max:50';
+            $rules['item_price'] = 'nullable|numeric|min:0';
+            $rules['item_type'] = 'nullable|integer';
+            $rules['item_subtype'] = 'nullable|string|max:255';
+            $rules['item_type2'] = 'nullable|integer';
+            $rules['item_subhead'] = 'nullable|string|max:255';
+            $rules['emp_id'] = 'nullable|string|max:50';
         } elseif ($op === 'delete_item') {
             $rules['pci_id'] = 'required|integer';
         } elseif ($op === 'add_quote') {
@@ -348,7 +375,22 @@ class PurchaseInitiationController extends Controller
             $this->authorize('update', $purchase);
         }
 
-        return DB::transaction(function () use ($request, $purchase, $op) {
+        // Restrict quote operations strictly to Procurement and the initiating Division
+        if (in_array($op, ['add_quote', 'delete_quote', 'upload_quote_file'], true)) {
+            $userArea = strtolower(trim((string)($user->acc_untarea ?? '')));
+            $isProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || ($user->acc_username === 'superadminrdw');
+            $isInitiatorDivision = ($purchase->pcs_unt_id == $user->acc_unt_id) || ($purchase->pcs_intunt_id == $user->acc_unt_id);
+
+            if (!$isProc && !$isInitiatorDivision) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Unauthorized: Quotations can only be added or modified by Procurement or the initiating Division.',
+                    'pcsId' => (int) $purchase->pcs_id
+                ], 403);
+            }
+        }
+
+        $result = DB::transaction(function () use ($request, $purchase, $op) {
             if ($op === 'save_title') {
                 $purchase->pcs_title = trim((string) $request->input('pcs_title'));
                 $purchase->save();
@@ -359,6 +401,21 @@ class PurchaseInitiationController extends Controller
                 $purchase->pcs_remarks = (string) $request->input('pcs_remarks', '');
                 $purchase->save();
                 return ['ok' => true, 'message' => 'Remarks updated.', 'pcsId' => (int) $purchase->pcs_id];
+            }
+
+            if ($op === 'save_metadata') {
+                if ($request->filled('subhead')) {
+                    $subhead = trim((string)$request->input('subhead'));
+                    DB::table('pur.purcases_shd')->updateOrInsert(
+                        ['pcd_pcs_id' => $purchase->pcs_id],
+                        ['pcd_subhead' => $subhead, 'pcd_type' => $purchase->pcs_type ?: 'Ps', 'pcd_ratio' => 1.0]
+                    );
+                }
+                if ($request->filled('pcs_frm_id')) {
+                    $purchase->pcs_frm_id = (int)$request->input('pcs_frm_id');
+                    $purchase->save();
+                }
+                return ['ok' => true, 'message' => 'Details updated successfully.', 'pcsId' => (int) $purchase->pcs_id];
             }
 
             if ($op === 'add_files') {
@@ -411,10 +468,10 @@ class PurchaseInitiationController extends Controller
                     try {
                         $pricingService = app(\App\Services\PurchasePricingService::class);
                         $tadaData = $pricingService->getEmployeeTadaDetails($empId);
-                        $itemPrice = $tadaData['tada_amount'];
-                        $desc = $tadaData['description'];
-                        $qty = 1;
-                        $unit = 'num';
+                        $itemPrice = $request->filled('item_price') ? (float)$request->input('item_price') : $tadaData['tada_amount'];
+                        $desc = $desc ?: $tadaData['description'];
+                        $qty = $qty > 0 ? $qty : 1;
+                        $unit = $unit !== 'num' ? $unit : 'Days';
                     } catch (\Throwable $e) {
                         return ['ok' => false, 'message' => $e->getMessage(), 'pcsId' => (int) $purchase->pcs_id];
                     }
@@ -489,11 +546,14 @@ class PurchaseInitiationController extends Controller
                 }
 
                 $updateData = [
-                    'pci_desc' => $desc,
-                    'pci_qty' => $qty,
-                    'pci_qtyunit' => $unit
+                    'pci_desc' => $desc ?: $item->pci_desc,
+                    'pci_qty' => $qty > 0 ? $qty : $item->pci_qty,
+                    'pci_qtyunit' => $unit ?: $item->pci_qtyunit
                 ];
 
+                if ($request->has('item_price')) {
+                    $updateData['pci_price'] = (float) $request->input('item_price');
+                }
                 if ($request->has('item_type')) {
                     $updateData['pci_type'] = (int) $request->input('item_type');
                 }
@@ -507,6 +567,24 @@ class PurchaseInitiationController extends Controller
                     $updateData['pci_subhead'] = trim((string) $request->input('item_subhead'));
                 }
 
+                if ($request->has('emp_id')) {
+                    $empId = trim((string) $request->input('emp_id'));
+                    $updateData['pci_emp_id'] = !empty($empId) ? $empId : null;
+                    if (!empty($empId) && $purchase->pcs_type === 'Rb') {
+                        try {
+                            $pricingService = app(\App\Services\PurchasePricingService::class);
+                            $tadaData = $pricingService->getEmployeeTadaDetails($empId);
+                            if (!$request->filled('item_price')) {
+                                $updateData['pci_price'] = $tadaData['tada_amount'];
+                            }
+                            if (empty($desc) || str_contains((string)($item->pci_desc), 'TA/DA')) {
+                                $updateData['pci_desc'] = $tadaData['description'];
+                                $desc = $tadaData['description'];
+                            }
+                        } catch (\Throwable $e) {}
+                    }
+                }
+
                 DB::table('pur.purcaseitems')
                     ->where('pci_pcs_id', $purchase->pcs_id)
                     ->where('pci_id', $pciId)
@@ -515,10 +593,10 @@ class PurchaseInitiationController extends Controller
                 DB::table('pur.quoteitems')
                     ->where('qti_pci_id', $pciId)
                     ->update([
-                        'qti_desc' => $desc,
-                        'qti_qty' => $qty,
-                        'qti_qtyunit' => $unit,
-                        'qti_pcsdesc' => $desc
+                        'qti_desc' => $updateData['pci_desc'],
+                        'qti_qty' => $updateData['pci_qty'],
+                        'qti_qtyunit' => $updateData['pci_qtyunit'],
+                        'qti_pcsdesc' => $updateData['pci_desc']
                     ]);
 
                 $this->recalcCasePricing($purchase->pcs_id);
@@ -642,25 +720,28 @@ class PurchaseInitiationController extends Controller
                 if ($request->hasFile('quote_file')) {
                     $qFile = $request->file('quote_file');
                     if ($qFile && $qFile->isValid()) {
-                        // Remove existing attachment for this quote
+                        $stored = app(\App\Services\FileStorageService::class)->storeQuote($qFile, (int) $purchase->pcs_id, (int) $qteId);
+
                         $existingAtt = DB::table('pur.purattachments')
                             ->where('pat_objtype', 'qte')
                             ->where('pat_objid', $qteId)
+                            ->orderBy('pat_id', 'desc')
                             ->first();
 
-                        if ($existingAtt && !empty($existingAtt->pat_path)) {
-                            app(\App\Services\FileStorageService::class)->delete($existingAtt->pat_path);
-                            DB::table('pur.purattachments')->where('pat_id', $existingAtt->pat_id)->delete();
+                        if ($existingAtt) {
+                            // Update existing record to point to new file (preserving previous file on disk)
+                            DB::table('pur.purattachments')->where('pat_id', $existingAtt->pat_id)->update([
+                                'pat_path' => $stored,
+                                'pat_type' => 'Quotation Document',
+                            ]);
+                        } else {
+                            DB::table('pur.purattachments')->insert([
+                                'pat_objtype' => 'qte',
+                                'pat_objid' => $qteId,
+                                'pat_type' => 'Quotation Document',
+                                'pat_path' => $stored,
+                            ]);
                         }
-
-                        $stored = app(\App\Services\FileStorageService::class)->store($qFile, 'pur', 'pcs-', (string) $purchase->pcs_id);
-
-                        DB::table('pur.purattachments')->insert([
-                            'pat_objtype' => 'qte',
-                            'pat_objid' => $qteId,
-                            'pat_type' => 'Quotation Document',
-                            'pat_path' => $stored,
-                        ]);
                     }
                 }
 
@@ -700,26 +781,30 @@ class PurchaseInitiationController extends Controller
                 if ($request->hasFile('quote_file')) {
                     $qFile = $request->file('quote_file');
                     if ($qFile && $qFile->isValid()) {
+                        $stored = app(\App\Services\FileStorageService::class)->storeQuote($qFile, (int) $purchase->pcs_id, (int) $qteId);
+
                         $existingAtt = DB::table('pur.purattachments')
                             ->where('pat_objtype', 'qte')
                             ->where('pat_objid', $qteId)
+                            ->orderBy('pat_id', 'desc')
                             ->first();
 
-                        if ($existingAtt && !empty($existingAtt->pat_path)) {
-                            app(\App\Services\FileStorageService::class)->delete($existingAtt->pat_path);
-                            DB::table('pur.purattachments')->where('pat_id', $existingAtt->pat_id)->delete();
+                        if ($existingAtt) {
+                            // Update record to point to new file, keeping the old file on disk as archive
+                            DB::table('pur.purattachments')->where('pat_id', $existingAtt->pat_id)->update([
+                                'pat_path' => $stored,
+                                'pat_type' => 'Quotation Document',
+                            ]);
+                        } else {
+                            DB::table('pur.purattachments')->insert([
+                                'pat_objtype' => 'qte',
+                                'pat_objid' => $qteId,
+                                'pat_type' => 'Quotation Document',
+                                'pat_path' => $stored,
+                            ]);
                         }
 
-                        $stored = app(\App\Services\FileStorageService::class)->store($qFile, 'pur', 'pcs-', (string) $purchase->pcs_id);
-
-                        DB::table('pur.purattachments')->insert([
-                            'pat_objtype' => 'qte',
-                            'pat_objid' => $qteId,
-                            'pat_type' => 'Quotation Document',
-                            'pat_path' => $stored,
-                        ]);
-
-                        return ['ok' => true, 'message' => 'Quotation document uploaded successfully.', 'pcsId' => (int) $purchase->pcs_id];
+                        return ['ok' => true, 'message' => 'Attested quotation document uploaded successfully.', 'pcsId' => (int) $purchase->pcs_id];
                     }
                 }
                 return ['ok' => false, 'message' => 'Invalid document file.', 'pcsId' => (int) $purchase->pcs_id];
@@ -764,15 +849,24 @@ class PurchaseInitiationController extends Controller
 
     protected function snapshot(int $pcsId): array
     {
-        $purchase = Purchase::with(['items', 'quotes.firm', 'attachments'])->findOrFail($pcsId);
+        $purchase = Purchase::with(['items.employee', 'quotes.firm', 'noQuotes.firm', 'attachments', 'firm'])->findOrFail($pcsId);
 
         $items = $purchase->items->sortBy('pci_serial')->values()->map(fn($i) => [
             'pci_id' => (int) $i->pci_id,
             'pci_serial' => (int) $i->pci_serial,
             'pci_desc' => (string) $i->pci_desc,
             'pci_qty' => (float) $i->pci_qty,
-            'pci_qtyunit' => (string) $i->pci_qtyunit,
+            'pci_qtyunit' => (string) ($i->pci_qtyunit ?: 'num'),
             'pci_price' => (float) ($i->pci_price ?? 0),
+            'pci_type' => (int) ($i->pci_type ?? 7),
+            'pci_type_name' => $i->type_name,
+            'pci_subtype' => (string) ($i->pci_subtype ?? ''),
+            'pci_type2' => $i->pci_type2 ? (int) $i->pci_type2 : null,
+            'pci_type2_name' => $i->type2_name,
+            'pci_subhead' => (string) ($i->pci_subhead ?? ''),
+            'pci_emp_id' => (string) ($i->pci_emp_id ?? ''),
+            'emp_name' => (string) ($i->employee?->emp_name ?? ''),
+            'emp_rank' => (string) ($i->employee?->emp_rank ?? ($i->employee?->emp_title ?? '')),
         ])->values();
 
         $quoteAttachments = DB::table('pur.purattachments')
@@ -804,6 +898,13 @@ class PurchaseInitiationController extends Controller
             ];
         })->values();
 
+        $noQuotes = $purchase->noQuotes->values()->map(fn($nq) => [
+            'nqt_id' => (int) $nq->nqt_id,
+            'nqt_frm_id' => (int) $nq->nqt_frm_id,
+            'firm_name' => (string) ($nq->firm?->frm_name ?? $nq->nqt_firmname ?? ('Firm #' . $nq->nqt_frm_id)),
+            'nqt_reason' => (string) ($nq->nqt_reason ?? 'Quotation Not Received'),
+        ])->values();
+
         $quoteIds = $quotes->pluck('qte_id')->toArray();
         $quoteItems = [];
         if (count($quoteIds) > 0) {
@@ -828,6 +929,11 @@ class PurchaseInitiationController extends Controller
         return [
             'pcs_id' => (int) $purchase->pcs_id,
             'pcs_title' => (string) $purchase->pcs_title,
+            'pcs_type' => (string) ($purchase->pcs_type ?: 'Ps'),
+            'pcs_subhead' => (string) ($purchase->subhead_display ?: 'Equipment'),
+            'pcs_frm_id' => (int) ($purchase->pcs_frm_id ?? 0),
+            'vendor_name' => (string) ($purchase->firm?->frm_name ?? ''),
+            'pcs_quotetype' => (int) ($purchase->pcs_quotetype ?? 1),
             'pcs_remarks' => (string) ($purchase->pcs_remarks ?? ''),
             'pcs_intprice' => (float) ($purchase->pcs_intprice ?? 0),
             'pcs_inttax' => (float) ($purchase->pcs_inttax ?? 0),
@@ -836,6 +942,7 @@ class PurchaseInitiationController extends Controller
             'pcs_price' => (float) ($purchase->pcs_price ?? 0),
             'items' => $items,
             'quotes' => $quotes,
+            'no_quotes' => $noQuotes,
             'attachments' => $attachments,
             'quote_items' => $quoteItems,
         ];

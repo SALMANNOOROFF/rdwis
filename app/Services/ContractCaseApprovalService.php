@@ -218,6 +218,15 @@ class ContractCaseApprovalService
                 $nextStage = 'Division';
                 $legacyStatus = 'Under Revision';
                 $actionText = 'Sent to ' . $targetName . ' (Under Revision)';
+
+                if ($targetAcc && $targetAcc->acc_unt_id) {
+                    DB::table('hr.ctrcases')->where('ctc_id', $case->ctc_id)->update([
+                        'ctc_divisionid' => $targetAcc->acc_unt_id,
+                        'ctc_unt_id' => $targetAcc->acc_unt_id,
+                    ]);
+                    $case->ctc_divisionid = $targetAcc->acc_unt_id;
+                    $case->ctc_unt_id = $targetAcc->acc_unt_id;
+                }
             } elseif ($nextStage === 'Approved') {
                 $this->approve($case, $user, [], $remarks);
                 return 'Approved';
@@ -357,6 +366,18 @@ class ContractCaseApprovalService
                 }
             }
 
+            if ($destStage === 'Division' || in_array($destStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
+                $destStage = 'Division';
+                if ($targetAcc && $targetAcc->acc_unt_id) {
+                    DB::table('hr.ctrcases')->where('ctc_id', $case->ctc_id)->update([
+                        'ctc_divisionid' => $targetAcc->acc_unt_id,
+                        'ctc_unt_id' => $targetAcc->acc_unt_id,
+                    ]);
+                    $case->ctc_divisionid = $targetAcc->acc_unt_id;
+                    $case->ctc_unt_id = $targetAcc->acc_unt_id;
+                }
+            }
+
             $legacyStatus = ($destStage === 'Division') ? 'Under Revision' : (self::STAGE_TO_LEGACY_STATUS[$destStage] ?? 'Under Revision');
             $this->transitionSubstatus($case, $destStage, $legacyStatus);
             $this->recordRemark($case, $user, $remarks ?: 'Returned to ' . ($targetStageName ?: $destStage), $legacyStatus);
@@ -402,7 +423,7 @@ class ContractCaseApprovalService
 
         $currArea = strtolower(trim((string) ($currentUser?->acc_untarea ?? (is_string($currentUserOrRole) ? $currentUserOrRole : ''))));
         $currContext = $currentUser ? \App\Services\Auth\UserAccessContext::forUser($currentUser) : null;
-        $isCommand = $currContext?->isCommand() ?? in_array($currArea, ['rdw', 'hqs', 'nrdi'], true);
+        $isDivision = in_array($currArea, ['prj', 'rdwprj']) || $currentUserOrRole === 'Division';
 
         $accounts = \App\Models\CenAccount::whereRaw("LOWER(acc_status) = 'active'")
             ->when($currentUser, fn($q) => $q->where('acc_id', '!=', $currentUser->acc_id))
@@ -422,12 +443,13 @@ class ContractCaseApprovalService
             }
 
             // Hierarchy filter:
-            // Division & departments only see up to MD (cannot see DDG or DG)
+            // Division can send to anyone EXCEPT DDG and DG
+            // HR, Finance, MD, DDG, and DG can send to ANYONE
             $isTargetDg = $accContext->isDg() || $area === 'nrdi';
             $isTargetDdg = $accContext->isDdg() || $area === 'hqs';
             $isTargetMd = $accContext->isMd() || $area === 'rdw';
 
-            if (! $isCommand) {
+            if ($isDivision) {
                 if ($isTargetDg || $isTargetDdg) {
                     continue;
                 }

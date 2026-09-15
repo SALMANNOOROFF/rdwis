@@ -335,7 +335,9 @@
                                 @if($canEdit)
                                     <button class="btn btn-primary btn-xs rajdhani px-3" data-toggle="modal" data-target="#addQuoteModal"><i class="fas fa-plus mr-1"></i> ADD VENDOR</button>
                                 @endif
+                                @if(count($purchase->quotes ?? []) > 1)
                                 <button class="dg-cs-btn" data-toggle="modal" data-target="#detailedCSModal"><i class="fas fa-balance-scale mr-1"></i> Full CS Sheet</button>
+                                @endif
                             </div>
                         </div>
                         <div class="table-responsive">

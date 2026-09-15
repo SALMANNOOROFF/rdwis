@@ -111,6 +111,63 @@ class FileStorageService
     }
 
     /**
+     * Store an uploaded quotation document inside public/purquote/{dept}/
+     * Creates folders if missing, preserves old files on re-upload, and syncs both public and storage disks.
+     *
+     * @param UploadedFile $file The uploaded quotation document
+     * @param int|string $pcsId  Purchase Case ID
+     * @param int|string $qteId  Quotation ID
+     * @param string|null $dept  Optional department code (e.g. comm, proc)
+     * @return string Relative path stored in DB (e.g. "purquote/comm/case_3002_quote_4554_1740000000.pdf")
+     */
+    public function storeQuote(UploadedFile $file, int|string $pcsId, int|string $qteId, ?string $dept = null): string
+    {
+        // 1. Resolve department code (e.g. comm, proc, avionics)
+        if (empty($dept)) {
+            $user = auth()->user();
+            $area = strtolower(trim((string)($user?->acc_untarea ?? '')));
+            if (str_contains($area, 'proc') || str_contains($area, 'prc')) {
+                $dept = 'proc';
+            } elseif ($user && $user->acc_unt_id) {
+                $unit = DB::table('cen.units')->where('unt_id', $user->acc_unt_id)->first();
+                $dept = $unit?->unt_namesh ?: ($unit?->unt_name ?: 'comm');
+            } else {
+                $pcsUnitId = DB::table('pur.purcases')->where('pcs_id', $pcsId)->value('pcs_unt_id');
+                $unit = $pcsUnitId ? DB::table('cen.units')->where('unt_id', $pcsUnitId)->first() : null;
+                $dept = $unit?->unt_namesh ?: ($unit?->unt_name ?: 'comm');
+            }
+        }
+        $dept = strtolower(preg_replace('/[^a-z0-9_-]/i', '', $dept)) ?: 'comm';
+
+        // 2. Ensure public/purquote/{dept} directory exists
+        $publicDir = public_path("purquote" . DIRECTORY_SEPARATOR . $dept);
+        if (!file_exists($publicDir)) {
+            @mkdir($publicDir, 0777, true);
+        }
+
+        // Also ensure storage/app/public/purquote/{dept} exists
+        $storageDir = storage_path("app" . DIRECTORY_SEPARATOR . "public" . DIRECTORY_SEPARATOR . "purquote" . DIRECTORY_SEPARATOR . $dept);
+        if (!file_exists($storageDir)) {
+            @mkdir($storageDir, 0777, true);
+        }
+
+        // 3. Form clean filename with timestamp to preserve file history
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'pdf');
+        $filename = "case_{$pcsId}_quote_{$qteId}_" . time() . ".{$ext}";
+        if (file_exists($publicDir . DIRECTORY_SEPARATOR . $filename)) {
+            $filename = "case_{$pcsId}_quote_{$qteId}_" . time() . "_" . mt_rand(100, 999) . ".{$ext}";
+        }
+
+        // Move to public/purquote/{dept}/
+        $file->move($publicDir, $filename);
+
+        // Copy to storage/app/public/purquote/{dept}/ so both locations are synced
+        @copy($publicDir . DIRECTORY_SEPARATOR . $filename, $storageDir . DIRECTORY_SEPARATOR . $filename);
+
+        return "purquote/{$dept}/{$filename}";
+    }
+
+    /**
      * Generate the public URL for an attachment path.
      * Handles both forward slashes and legacy Windows backslashes transparently.
      *
@@ -124,6 +181,9 @@ class FileStorageService
         }
 
         $normalized = $this->normalizePath($relativePath);
+        if (str_starts_with($normalized, 'purquote/')) {
+            return '/' . ltrim($normalized, '/');
+        }
         return '/storage/' . ltrim($normalized, '/');
     }
 

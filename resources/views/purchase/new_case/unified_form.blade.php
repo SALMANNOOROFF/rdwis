@@ -426,7 +426,7 @@
                     <select name="pcs_hed_id" id="pcs_hed_id" class="soft-select" required onchange="handleProjectHeadChange(this.value)">
                       <option value="" selected disabled>Select Project Head...</option>
                       @foreach($heads as $head)
-                        <option value="{{ $head->hed_id }}">{{ $head->hed_code }} - {{ $head->hed_name }}</option>
+                        <option value="{{ $head->hed_id }}">{{ $head->hed_code ?: $head->hed_name }}</option>
                       @endforeach
                     </select>
                   </div>
@@ -610,12 +610,12 @@
                           <textarea name="items[0][desc]" id="item_desc_0" class="soft-input item-desc" rows="2" placeholder="Select employee & click 'Add Emp Details' above..." required style="min-height:54px; font-size:12px;"></textarea>
                         </div>
                         <div class="col-md-2">
-                          <label class="soft-label mb-1" style="font-size:10px;">Qty</label>
-                          <input type="number" name="items[0][qty]" id="item_qty_0" class="soft-input item-qty" value="1" min="1" readonly oninput="calculateDirectItemTotals()">
-                          <input type="hidden" name="items[0][unit]" value="num">
+                          <label class="soft-label mb-1" style="font-size:10px;">Days (Qty) <span class="text-danger">*</span></label>
+                          <input type="number" name="items[0][qty]" id="item_qty_0" class="soft-input item-qty font-weight-bold" value="1" min="1" oninput="calculateDirectItemTotals()" required>
+                          <input type="hidden" name="items[0][unit]" value="Days">
                         </div>
                         <div class="col-md-3">
-                          <label class="soft-label mb-1" style="font-size:10px;">Price (Auto-calc)</label>
+                          <label class="soft-label mb-1" style="font-size:10px;">Daily Rate (Auto-calc) <span class="text-danger">*</span></label>
                           <input type="number" step="any" name="items[0][price]" id="item_price_0" class="soft-input item-price font-weight-bold text-success" placeholder="PKR 0" oninput="calculateDirectItemTotals()" required>
                         </div>
                       </div>
@@ -766,6 +766,19 @@
                           <input type="number" name="tax_percent" id="newCaseTaxPercent" class="soft-input" value="18" min="0" max="100" style="width:64px; height:32px; font-size:11px; padding:2px 8px; text-align:center;" oninput="calculateQuotationTotals()">
                       </div>
                   </div>
+                </div>
+
+                <div class="alert alert-warning py-2 px-3 mb-3 d-flex align-items-center justify-content-between" style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:8px; font-size:11.5px; color:#92400e;">
+                  <div class="d-flex align-items-center">
+                    <i class="fas fa-stamp text-warning mr-2" style="font-size:16px;"></i>
+                    <div>
+                      <strong>MANDATORY REQUIREMENT:</strong> Please upload <u>ONLY officially ATTESTED quotations</u> (stamped & signed by the firm).
+                     
+                    </div>
+                  </div>
+                  <span class="badge badge-warning text-dark px-2 py-1 font-weight-bold" style="font-size:9.5px; border:1px solid #f59e0b;">
+                    <i class="fas fa-check-double mr-1"></i> Attested Only
+                  </span>
                 </div>
 
                 <div class="d-flex align-items-end gap-2 mb-3">
@@ -925,13 +938,17 @@
 
   function updateSubheadDropdown(headId) {
       const subheadSelect = document.getElementById('case_subhead');
-      if (!subheadSelect) return;
+      if (!subheadSelect || subheadSelect.tagName !== 'SELECT') return;
       
       const currentVal = subheadSelect.value;
-      let available = (subheadsByHead[headId] || []).slice();
-      let options = ['Misc', 'Equipment'];
-      available.forEach(s => {
-          if (s && !options.includes(s)) options.push(s);
+      const rawList = subheadsByHead[headId] || [];
+      const options = ['Misc', 'Equipment'];
+
+      rawList.forEach(s => {
+          const name = (typeof s === 'object' && s !== null ? (s.sbh_name || s.name || '') : String(s || '')).trim();
+          if (name && !options.includes(name) && name !== 'General') {
+              options.push(name);
+          }
       });
 
       subheadSelect.innerHTML = '';
@@ -945,7 +962,15 @@
           subheadSelect.appendChild(optionEl);
       });
 
-      syncItemSubheads(options, subheadSelect.value);
+      const activeVal = subheadSelect.value || 'Misc';
+      const preview = document.getElementById('subheadPreview');
+      if (preview) preview.textContent = activeVal;
+
+      syncItemSubheads(options, activeVal);
+  }
+
+  function handleProjectHeadChange(hedId) {
+      updateSubheadDropdown(hedId);
   }
 
   function syncItemSubheads(options, selectedVal) {
@@ -1155,28 +1180,28 @@
             <div class="row align-items-end mb-2">
               <div class="col-md-8">
                 <label class="soft-label mb-1">Select Employee (Division Contracts)</label>
-                <select name="items[${newIdx}][emp_id]" id="emp_select_${newIdx}" class="soft-select emp-selector">
+                <select name="items[${newIdx}][emp_id]" id="emp_select_${newIdx}" class="soft-select emp-selector" onchange="clearEmployeePreview(${newIdx})">
                   ${empOpts}
                 </select>
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn-add-row w-100 justify-content-center" style="background:#fef3c7; color:#92400e; border-color:#fde68a; height:36px;" onclick="fetchTadaEmpDetails(${newIdx})">
-                  <i class="fas fa-magic"></i> Add Emp Details
+                <button type="button" class="btn-add-row w-100 justify-content-center" style="background:#fef3c7; color:#92400e; border-color:#fde68a; height:36px;" onclick="fetchEmployeeDetails(${newIdx})">
+                  <i class="fas fa-magic"></i> ${'Add ' + 'Emp Details'}
                 </button>
               </div>
             </div>
             <div class="row">
               <div class="col-md-7">
                 <label class="soft-label mb-1" style="font-size:10px;">Item Description (Auto-filled)</label>
-                <textarea name="items[${newIdx}][desc]" id="item_desc_${newIdx}" class="soft-input item-desc" rows="2" placeholder="Select employee & click 'Add Emp Details' above..." required style="min-height:54px; font-size:12px;"></textarea>
+                <textarea name="items[${newIdx}][desc]" id="item_desc_${newIdx}" class="soft-input item-desc" rows="2" placeholder="Select employee & click 'Load Details' above..." required style="min-height:54px; font-size:12px;"></textarea>
               </div>
               <div class="col-md-2">
-                <label class="soft-label mb-1" style="font-size:10px;">Qty</label>
-                <input type="number" name="items[${newIdx}][qty]" id="item_qty_${newIdx}" class="soft-input item-qty" value="1" min="1" readonly oninput="calculateDirectItemTotals()">
-                <input type="hidden" name="items[${newIdx}][unit]" value="num">
+                <label class="soft-label mb-1" style="font-size:10px;">Days (Qty) <span class="text-danger">*</span></label>
+                <input type="number" name="items[${newIdx}][qty]" id="item_qty_${newIdx}" class="soft-input item-qty font-weight-bold" value="1" min="1" oninput="calculateDirectItemTotals()" required>
+                <input type="hidden" name="items[${newIdx}][unit]" value="Days">
               </div>
               <div class="col-md-3">
-                <label class="soft-label mb-1" style="font-size:10px;">Price (Auto-calc)</label>
+                <label class="soft-label mb-1" style="font-size:10px;">Daily Rate (Auto-calc) <span class="text-danger">*</span></label>
                 <input type="number" step="any" name="items[${newIdx}][price]" id="item_price_${newIdx}" class="soft-input item-price font-weight-bold text-success" placeholder="PKR 0" oninput="calculateDirectItemTotals()" required>
               </div>
             </div>
@@ -1326,8 +1351,7 @@
       });
   }
 
-  @if($type === 'Rb')
-  // ---- TA/DA AJAX Helper ----
+  // ---- TA/DA AJAX & Employee Helpers ----
   function fetchTadaEmpDetails(idx) {
       const empSelect = document.getElementById(`emp_select_${idx}`);
       const empId = empSelect ? empSelect.value : '';
@@ -1338,6 +1362,14 @@
               alert('Please select an employee first');
           }
           return;
+      }
+
+      const btn = document.querySelector(`button[onclick*="fetchEmployeeDetails(${idx})"]`) || 
+                  document.querySelector(`button[onclick*="fetchTadaEmpDetails(${idx})"]`);
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Loading...';
       }
 
       const url = "{{ url('/purchase/tada/employee-details') }}/" + encodeURIComponent(empId);
@@ -1364,16 +1396,18 @@
           const priceEl = document.getElementById(`item_price_${idx}`);
           const qtyEl = document.getElementById(`item_qty_${idx}`);
 
-          if (descEl) descEl.value = data.description;
-          if (priceEl) priceEl.value = data.tada_amount;
-          if (qtyEl) qtyEl.value = 1;
+          if (descEl) descEl.value = data.description || '';
+          if (priceEl) priceEl.value = data.tada_amount || 0;
+          if (qtyEl && (!qtyEl.value || parseFloat(qtyEl.value) <= 0)) qtyEl.value = 1;
 
-          calculateDirectItemTotals();
+          if (typeof calculateDirectItemTotals === 'function') {
+              calculateDirectItemTotals();
+          }
           
           if (typeof Swal !== 'undefined') {
               Swal.fire({
                   title: 'Employee Details Added',
-                  text: `${data.emp_name} (Grade: ${data.grade}) -> TA/DA PKR ${data.tada_amount}`,
+                  text: `${data.emp_name || 'Employee'} (Grade: ${data.grade || 'N/A'}) -> TA/DA PKR ${Number(data.tada_amount || 0).toLocaleString()}`,
                   icon: 'success',
                   timer: 1800,
                   showConfirmButton: false
@@ -1383,9 +1417,32 @@
       .catch(err => {
           console.error(err);
           alert('Unable to retrieve employee TA/DA details.');
+      })
+      .finally(() => {
+          if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = originalHtml;
+          }
       });
   }
-  @endif
+
+  function fetchEmployeeDetails(idx) {
+      return fetchTadaEmpDetails(idx);
+  }
+
+  function clearEmployeePreview(idx) {
+      const descEl = document.getElementById(`item_desc_${idx}`);
+      const priceEl = document.getElementById(`item_price_${idx}`);
+      if (descEl) descEl.value = '';
+      if (priceEl) priceEl.value = '';
+      if (typeof calculateDirectItemTotals === 'function') {
+          calculateDirectItemTotals();
+      }
+  }
+
+  window.fetchTadaEmpDetails = fetchTadaEmpDetails;
+  window.fetchEmployeeDetails = fetchEmployeeDetails;
+  window.clearEmployeePreview = clearEmployeePreview;
 
   // =====================================================
   //  FIRM / QUOTATION GRID & NO-QUOTES MANAGEMENT
@@ -1464,8 +1521,8 @@
                   <button type="button" onclick="removeFirm('${f.id}')" style="background:none;border:none;color:#ef4444;font-size:11px;cursor:pointer;" title="Remove Firm"><i class="fas fa-times-circle"></i></button>
               </div>
               <div class="mt-1">
-                  <label for="qfile_${f.id}" class="badge badge-light p-1" style="cursor:pointer; font-size:9px; border: 1px solid #cbd5e1; font-weight:600;" id="qfile_lbl_${f.id}" title="Attach Quote Scan">
-                      <i class="fas fa-paperclip mr-1"></i> <span id="qfile_txt_${f.id}">Attach Quote</span>
+                  <label for="qfile_${f.id}" class="badge badge-light p-1" style="cursor:pointer; font-size:9px; border: 1px solid #cbd5e1; font-weight:600;" id="qfile_lbl_${f.id}" title="Attach Attested Quote Scan">
+                      <i class="fas fa-paperclip mr-1"></i> <span id="qfile_txt_${f.id}">Attach Attested Quote</span>
                   </label>
                   <input type="file" id="qfile_${f.id}" name="quote_files[${f.id}]" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" onchange="handleQuoteFileSelect(this, '${f.id}')">
               </div>
@@ -1519,9 +1576,9 @@
               badge.className = 'badge badge-success p-1';
               badge.title = name;
           }
-          fireToast(`Document attached for firm`, 'success');
+          fireToast(`Attested quote document attached for firm`, 'success');
       } else {
-          if (lbl) lbl.textContent = 'Attach Quote';
+          if (lbl) lbl.textContent = 'Attach Attested Quote';
           if (badge) {
               badge.className = 'badge badge-light p-1';
           }
@@ -1763,29 +1820,8 @@
   });
 
   // Project Head & Subhead Management
-  const subheadsByHead = @json($subheadsByHead ?? []);
-
   function handleProjectHeadChange(hedId) {
-      const subheadSelect = document.getElementById('case_subhead');
-      if (!subheadSelect || subheadSelect.tagName !== 'SELECT') return;
-
-      subheadSelect.innerHTML = `
-          <option value="Misc" selected>Misc (Default for {{ $type === 'Pt' ? 'Incidental' : 'TA/DA' }})</option>
-          <option value="Equipment">Equipment</option>
-      `;
-
-      if (hedId && subheadsByHead[hedId]) {
-          subheadsByHead[hedId].forEach(sh => {
-              const name = (sh.sbh_name || '').trim();
-              if (name && name !== 'Misc' && name !== 'Equipment' && name !== 'General') {
-                  const opt = document.createElement('option');
-                  opt.value = name;
-                  opt.textContent = name;
-                  subheadSelect.appendChild(opt);
-              }
-          });
-      }
-      handleSubheadChange(subheadSelect.value);
+      updateSubheadDropdown(hedId);
   }
 
   function handleSubheadChange(val) {

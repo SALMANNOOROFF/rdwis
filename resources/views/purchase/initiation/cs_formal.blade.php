@@ -33,7 +33,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         th, td {
             border: 1px solid #000;
@@ -47,7 +47,7 @@
             text-align: center;
         }
         .sig-container {
-            margin-top: 50px;
+            margin-top: 45px;
             display: flex;
             justify-content: space-around;
         }
@@ -116,7 +116,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($purchase->quotes as $idx => $q)
+                @forelse($purchase->quotes->sortBy('qte_price') as $idx => $q)
                 @php
                     $frmId = $q->qte_frm_id ?: ($q->firm?->frm_id ?? null);
                     $firmRow = $frmId ? DB::table('frm.firmz')->where('frm_id', $frmId)->first() : null;
@@ -144,17 +144,23 @@
                         ? ($person->per_name . (!empty($person->per_desig) ? ' (' . $person->per_desig . ')' : '')) 
                         : ($firmRow?->frm_entity ?? '-');
 
-                    $qBase = (float)($q->qte_intprice ?: $q->qte_price);
+                    $qTot = (float)($q->qte_price ?: 0);
                     $qSst = (float)($q->qte_inttax ?? 0);
                     $qGst = (float)($q->qte_midtax ?? 0);
-                    $qTot = (float)($q->qte_price ?: ($qBase + $qSst + $qGst));
+                    $qBase = (float)($q->qte_intprice ?: 0);
+                    if ($qBase <= 0 && $qTot > 0) {
+                        $qBase = max(0, $qTot - $qSst - $qGst);
+                    }
+                    if ($qTot <= 0 && $qBase > 0) {
+                        $qTot = $qBase + $qSst + $qGst;
+                    }
                 @endphp
                 <tr>
                     <td style="text-align: center;">{{ $idx + 1 }}</td>
                     <td style="font-weight: bold;">
                         M/s {{ strtoupper($q->firm->frm_name ?? $q->qte_firmname) }}
-                        @if($q->qte_recomm)
-                            <span style="font-size: 8pt; color: #166534; font-weight: bold; display: block;">(Recommended)</span>
+                        @if($q->qte_recomm || $idx === 0)
+                            <span style="font-size: 8pt; color: #166534; font-weight: bold; display: block;">({{ $q->qte_recomm ? 'Recommended' : 'Lowest / L-1' }})</span>
                         @endif
                     </td>
                     <td>
@@ -197,6 +203,9 @@
                 $evalBase = (float)($cbd['base'] ?? 0);
                 $evalSst = (float)($cbd['sst'] ?? 0);
                 $evalGst = (float)($cbd['gst'] ?? 0);
+                if ($evalBase <= 0 && $evalTotal > 0) {
+                    $evalBase = max(0, $evalTotal - $evalSst - $evalGst);
+                }
             @endphp
             @if($evalTotal > 0)
             <tfoot>
@@ -222,9 +231,20 @@
             @endif
         </table>
 
+        @if($purchase->noQuotes && $purchase->noQuotes->count() > 0)
+        <div style="margin-top: 15px; margin-bottom: 20px; font-size: 8.5pt;">
+            <strong>Quotes Not Received / Regret ({{ $purchase->noQuotes->count() }}):</strong>
+            <span>
+                @foreach($purchase->noQuotes as $nq)
+                    {{ $nq->firm->frm_name ?? $nq->nqt_firmname }}@if(!$loop->last), @endif
+                @endforeach
+            </span>
+        </div>
+        @endif
+
         <div class="sig-container">
             <div class="sig-box">Dir Procurement</div>
-            <div class="sig-box">Dir Comm</div>
+            <div class="sig-box">Dir {{ $purchase->unit?->unt_namesh ?: 'Initiating Div' }}</div>
             <div class="sig-box">Dir Finance</div>
             <div class="sig-box">MD(R&D)</div>
         </div>

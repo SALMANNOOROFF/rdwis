@@ -78,7 +78,7 @@ class PurchaseFinanceController extends Controller
      */
     public function show($id)
     {
-        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
+        $purchase = Purchase::with(['unit', 'items.employee', 'quotes.firm', 'noQuotes.firm', 'project', 'attachments', 'decisions.account', 'currentSubstatus', 'firm'])
             ->findOrFail($id);
 
         // Financial Intelligence (Legacy Logic)
@@ -95,8 +95,25 @@ class PurchaseFinanceController extends Controller
         $firms = \App\Models\Firm::orderBy('frm_name')->get();
         $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
 
+        $employees = collect();
+        if ($purchase->pcs_type === 'Rb') {
+            $employees = DB::table('hr.emps')
+                ->where('emp_status', 'ILIKE', 'Active%')
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('hr.contracts')
+                      ->whereColumn('hr.contracts.ctr_num', 'hr.emps.emp_id');
+                })
+                ->select('emp_id', 'emp_name', 'emp_rank', 'emp_title', 'emp_status', 'emp_unt_id')
+                ->orderBy('emp_name')
+                ->get();
+        }
+
+        $projectSubheads = DB::table('fin.subheads')->where('sbh_hed_id', $purchase->pcs_hed_id)->pluck('sbh_name')->all();
+
         return view('nrdi.purchase_cases_new.show', compact(
-            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'firms', 'canEdit', 'subheads'
+            'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'firms', 'canEdit', 'subheads',
+            'employees', 'projectSubheads'
         ));
 
     }

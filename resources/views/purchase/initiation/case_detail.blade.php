@@ -5,10 +5,14 @@
     <title>Case Detail - #{{ $purchase->pcs_id }}</title>
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
     <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
         body {
             background-color: #fff;
             margin: 0;
-            padding: 40px;
+            padding: 30px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
             font-size: 10pt;
@@ -82,12 +86,18 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--rd-primary-600);
+            background: #2563eb;
             color: white;
             border: none;
             padding: 10px 20px;
             cursor: pointer;
             border-radius: 4px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 99999;
+        }
+        .print-btn:hover {
+            background: #1d4ed8;
         }
     </style>
 </head>
@@ -96,10 +106,6 @@
     <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Report</button>
 
     <div class="container">
-        <div class="main-title">
-            Purchase Case {{ $purchase->pcs_id }} dated {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M y') }}({{ $purchase->project?->prj_code ?? 'N/A' }} Head)
-        </div>
-
         @php
             $breakdown = $purchase->tax_breakdown;
             $winnerQuote = $purchase->winning_quote
@@ -131,7 +137,22 @@
                 ?? ($winnerQuote?->qte_firmname
                 ?? ($purchase->firm?->frm_name
                 ?? ($purchase->pcs_frm_id ? \Illuminate\Support\Facades\DB::table('frm.firmz')->where('frm_id', $purchase->pcs_frm_id)->value('frm_name') : 'N/A')));
+
+            $termsText = 'Complete Payment After Delivery';
+            if (!empty($purchase->pcs_remarks)) {
+                $rawRemarks = trim((string)$purchase->pcs_remarks);
+                $decoded = json_decode($rawRemarks, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $termsText = $decoded['terms'] ?? $decoded['justification'] ?? $decoded['remarks'] ?? $rawRemarks;
+                } else {
+                    $termsText = $rawRemarks;
+                }
+            }
         @endphp
+
+        <div class="main-title">
+            Purchase Case {{ $purchase->pcs_id }} dated {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M y') }} ({{ $purchase->head_display }} Head)
+        </div>
 
         <div class="meta-grid">
             <div class="meta-item"><span class="meta-label">Title:</span> <span class="meta-value">{{ $purchase->pcs_title }}</span></div>
@@ -139,7 +160,7 @@
             <div class="meta-item"><span class="meta-label">Price:</span> <span class="meta-value text-right">{{ number_format($basePrice, 2) }}</span></div>
             
             <div class="meta-item"><span class="meta-label">Minute:</span> <span class="meta-value">{{ $purchase->pcs_minute }}</span></div>
-            <div class="meta-item"><span class="meta-label">Head:</span> <span class="meta-value">({{ $purchase->project?->prj_code ?? ($purchase->head?->hed_name ?? 'N/A') }})</span></div>
+            <div class="meta-item"><span class="meta-label">Head:</span> <span class="meta-value">({{ $purchase->head_display }})</span></div>
             <div class="meta-item"><span class="meta-label">SST:</span> <span class="meta-value text-right">{{ number_format($sst, 2) }}</span></div>
             
             <div class="meta-item"><span class="meta-label">Date:</span> <span class="meta-value">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M y') }}</span></div>
@@ -159,29 +180,41 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 40px;">S No</th>
+                    <th style="width: 40px;" class="text-center">S No</th>
                     <th>Description</th>
-                    <th style="width: 120px;">Price & Qty</th>
-                    <th style="width: 150px;">Type & SubType</th>
-                    <th style="width: 150px;">Inv-Asset & S/Head</th>
+                    <th style="width: 120px;" class="text-center">Price & Qty</th>
+                    <th style="width: 150px;" class="text-center">Type & SubType</th>
+                    <th style="width: 150px;" class="text-center">Inv-Asset & S/Head</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($purchase->items as $idx => $item)
+                @foreach($purchase->items->sortBy('pci_serial') as $idx => $item)
+                @php
+                    $itemQty = (float)($item->pci_qty ?? 1) ?: 1;
+                    $itemRate = (float)($item->pci_price ?? 0);
+                    $itemTotal = $itemRate * $itemQty;
+                    $itemType = $item->type_name;
+                    $itemSubType = $item->pci_subtype ?: '—';
+                    $itemClass = $item->type2_name;
+                    $itemSubhead = $item->pci_subhead ?: ($purchase->subhead_display ?: 'Equipment');
+                @endphp
                 <tr>
                     <td class="text-center">{{ $idx + 1 }}</td>
                     <td>{{ $item->pci_desc }}</td>
                     <td class="text-center">
-                        {{ number_format($item->pci_price, 2) }}<br>
-                        {{ $item->pci_qty }} {{ $item->pci_qtyunit }}
+                        <div>{{ number_format($itemTotal, 2) }}</div>
+                        <div style="color: #555; font-size: 8.5pt;">{{ $item->pci_qty }} {{ $item->pci_qtyunit ?: 'num' }}</div>
+                        @if($itemQty > 1)
+                            <div style="font-size: 7.5pt; color: #777;">(@ {{ number_format($itemRate, 2) }})</div>
+                        @endif
                     </td>
                     <td class="text-center">
-                        {{ $item->pci_subtype ?? 'N/A' }}<br>
-                        {{ $item->pci_type == 1 ? 'Permanent' : 'Consumable' }}
+                        <div style="font-weight: 600;">{{ $itemType }}</div>
+                        <div style="color: #555; font-size: 8.5pt;">{{ $itemSubType }}</div>
                     </td>
                     <td class="text-center">
-                        Inventory<br>
-                        {{ $item->pci_subhead ?? 'Equipment' }}
+                        <div style="font-weight: 600;">{{ $itemClass }}</div>
+                        <div style="color: #555; font-size: 8.5pt;">{{ $itemSubhead }}</div>
                     </td>
                 </tr>
                 @endforeach
@@ -189,47 +222,60 @@
         </table>
 
         <div style="margin-bottom: 20px;">
-            <strong>Terms and Conditions:</strong> {{ $purchase->pcs_remarks ?: 'Complete Payment After Delivery' }}
+            <strong>Terms and Conditions:</strong> {{ $termsText }}
         </div>
 
         <span class="section-title">Quotes: ({{ $purchase->quotes->count() }})</span>
         <table>
             <thead>
                 <tr>
-                    <th style="width: 120px;">No.</th>
+                    <th style="width: 100px;">No.</th>
                     <th style="width: 100px;">Date</th>
                     <th>Firm</th>
                     <th style="width: 120px;" class="text-right">Price</th>
-                    <th style="width: 100px;" class="text-center">Tech. Acceptable</th>
+                    <th style="width: 120px;" class="text-center">Tech. Acceptable</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($purchase->quotes as $q)
+                @forelse($purchase->quotes->sortBy('qte_price') as $q)
                 <tr>
                     <td>{{ $q->qte_id }}</td>
                     <td>{{ \Carbon\Carbon::parse($q->qte_date)->format('d M y') }}</td>
-                    <td>{{ $q->firm->frm_name ?? $q->qte_firmname }}</td>
+                    <td>
+                        {{ $q->firm->frm_name ?? $q->qte_firmname }}
+                        @if($q->qte_recomm)
+                            <span style="color: #166534; font-size: 8pt; font-weight: bold; margin-left: 5px;">(Lowest/Recommended)</span>
+                        @endif
+                    </td>
                     <td class="text-right">{{ number_format($q->qte_price, 2) }}</td>
                     <td class="text-center">{{ $q->qte_techaccept ? 'Yes' : 'No' }}</td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="5" class="text-center text-muted" style="padding: 15px; font-style: italic;">No quotes recorded for this case.</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
 
         <div style="margin-bottom: 20px;">
             <span class="section-title">Quotes Not Received: ({{ $purchase->noQuotes->count() }})</span>
             <div style="border: 1px solid #999; padding: 10px; min-height: 30px;">
-                @foreach($purchase->noQuotes as $nq)
+                @forelse($purchase->noQuotes as $nq)
                     {{ $nq->firm->frm_name ?? $nq->nqt_firmname }}@if(!$loop->last), @endif
-                @endforeach
+                @empty
+                    <span style="color: #666; font-style: italic;">None</span>
+                @endforelse
             </div>
         </div>
 
-        @if(!empty($purchase->pcs_remarks) && is_array(json_decode($purchase->pcs_remarks, true)))
-            @php $remarks = json_decode($purchase->pcs_remarks, true); @endphp
-            @if(!empty($remarks['justification']))
-                <div>
-                    <strong>Remarks:</strong> {{ $remarks['justification'] }}
+        @if(!empty($purchase->pcs_remarks))
+            @php
+                $decoded = json_decode((string)$purchase->pcs_remarks, true);
+            @endphp
+            @if(is_array($decoded) && !empty($decoded['justification']) && $decoded['justification'] !== $termsText)
+                <div style="margin-bottom: 20px;">
+                    <strong>Remarks:</strong> {{ $decoded['justification'] }}
                 </div>
             @endif
         @endif

@@ -98,9 +98,11 @@
                 <div class="glass-card mb-4 overflow-hidden">
                     <div class="card-title-bar d-flex justify-content-between align-items-center">
                         <span class="rajdhani text-white"><i class="fas fa-layer-group mr-2 text-primary"></i> Itemized Procurement Details</span>
+                        @if(count($purchase->quotes ?? []) > 1)
                         <button class="btn btn-outline-primary btn-xs rajdhani px-3" data-toggle="modal" data-target="#detailedCSModal">
                             <i class="fas fa-balance-scale mr-1"></i> FULL COMPARATIVE STATEMENT
                         </button>
+                        @endif
                     </div>
                     <div class="table-responsive">
                         <table class="table mb-0 dg-case-table" style="background: transparent;">

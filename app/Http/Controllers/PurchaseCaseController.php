@@ -258,7 +258,7 @@ class PurchaseCaseController extends Controller
         $area = strtolower(trim($user->acc_untarea));
         if (in_array($area, ['proc', 'prc'], true)) $area = 'proc';
         
-        $purchase = Purchase::with(['unit', 'items', 'quotes.firm', 'noQuotes', 'project', 'attachments', 'decisions.account', 'currentSubstatus'])
+        $purchase = Purchase::with(['unit', 'items.employee', 'quotes.firm', 'noQuotes.firm', 'project', 'attachments', 'decisions.account', 'currentSubstatus', 'firm'])
             ->findOrFail($id);
         $this->authorize('view', $purchase);
 
@@ -325,9 +325,26 @@ class PurchaseCaseController extends Controller
 
         $canEdit = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
 
+        $employees = collect();
+        if ($purchase->pcs_type === 'Rb') {
+            $employees = DB::table('hr.emps')
+                ->where('emp_status', 'ILIKE', 'Active%')
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('hr.contracts')
+                      ->whereColumn('hr.contracts.ctr_num', 'hr.emps.emp_id');
+                })
+                ->select('emp_id', 'emp_name', 'emp_rank', 'emp_title', 'emp_status', 'emp_unt_id')
+                ->orderBy('emp_name')
+                ->get();
+        }
+
+        $projectSubheads = DB::table('fin.subheads')->where('sbh_hed_id', $purchase->pcs_hed_id)->pluck('sbh_name')->all();
+
         return view('nrdi.purchase_cases_new.show', compact(
             'purchase', 'head', 'canApprove', 'area', 'pageTitle', 
-            'divisionName', 'canEdit', 'firms', 'subheads', 'currentAuthority', 'nextAuthority', 'recentApproved'
+            'divisionName', 'canEdit', 'firms', 'subheads', 'currentAuthority', 'nextAuthority', 'recentApproved',
+            'employees', 'projectSubheads'
         ));
     }
 

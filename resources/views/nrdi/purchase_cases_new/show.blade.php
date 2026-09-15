@@ -15,7 +15,21 @@
     $finInProcess   = (float)($head->in_process ?? 0);
     $finAvailable   = (float)($head->available ?? 0);
     $finCanBeSpent  = (float)($head->can_be_spent ?? 0);
-    $finAllocation  = (float)($head->allocation ?? 0);
+    // Pure Project Allocation (Excluding CSRF share)
+    $finAllocation  = (float)($head->prj_share ?? 0);
+    if ($finAllocation <= 0 && isset($head->rdw_share)) {
+        $rdw = (float)($head->rdw_share ?? 0);
+        $cf  = (float)($head->cf_share ?? ($head->csrf_share ?? 0));
+        if ($rdw > 0) {
+            $finAllocation = max(0, $rdw - $cf);
+        }
+    }
+    if ($finAllocation <= 0) {
+        $finAllocation = (float)($head->allocation ?? 0);
+    }
+    if ($finAllocation <= 0 && !empty($purchase->project)) {
+        $finAllocation = (float)($purchase->project->prj_aprvcost ?: ($purchase->project->prj_cost ?? 0));
+    }
 
     
     // For progress bar if still needed somewhere else
@@ -31,7 +45,8 @@
     
     // Variable overrides for cross-role compatibility
     $userArea = strtolower(trim((string)Auth::user()->acc_untarea));
-    $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division', 'initiation']);
+    $userUnitId = Auth::user()->acc_unt_id;
+    $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division', 'initiation']) || ($userUnitId && ($purchase->pcs_unt_id == $userUnitId || $purchase->pcs_intunt_id == $userUnitId));
     $isDProc     = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || (Auth::user()?->acc_username === 'superadminrdw');
     $isDraft     = in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
 
@@ -189,10 +204,10 @@
 .dg-items-wrap { max-height:180px; overflow-y:auto; }
 .dg-items-wrap::-webkit-scrollbar { width:3px; }
 .dg-items-wrap::-webkit-scrollbar-thumb { background:var(--rd-border); border-radius:4px; }
-.dg-items-table { width:100%; font-size:11px; border-collapse:collapse; }
-.dg-items-table th { padding:6px 10px; color:var(--rd-text3); font-weight:600; font-size:9px; letter-spacing:.6px; text-align:left; text-transform:uppercase; background:var(--rd-surface2); }
-.dg-items-table td { padding:6px 10px; border-top:1px solid var(--rd-border); color:var(--rd-text1); font-size:11px; }
-.dg-items-table tr:hover td { background:rgba(255,255,255,0.015); }
+.dg-items-table { width:100%; font-size:11px; border-collapse:collapse; white-space: nowrap; }
+.dg-items-table th { padding:5px 8px; color: #475569; font-weight:700; font-size:10px; letter-spacing:.4px; text-align:left; text-transform:uppercase; background: #f8fafc; border-bottom: 1.5px solid #cbd5e1; }
+.dg-items-table td { padding:5px 8px; border-top:1px solid #f1f5f9; color: #0f172a; font-size:11px; vertical-align: middle; }
+.dg-items-table tr:hover td { background: #f8fafc; }
 .dg-price-col { color:var(--rd-success) !important; font-weight:600; text-align:right !important; }
 .dg-qty-col { text-align:center !important; color:var(--rd-warning) !important; font-weight:600; }
 
@@ -247,7 +262,7 @@
 #pcMultiQuoteTable { border: 1px solid var(--rd-border2) !important; background: #ffffff; table-layout: fixed; border-collapse: separate; border-spacing: 0; width: auto; }
 #pcMultiQuoteTable th, #pcMultiQuoteTable td { border: 1px solid var(--rd-border) !important; font-size: 12px; vertical-align: middle; padding: 6px 10px; color: var(--rd-text1); overflow: hidden; text-overflow: ellipsis; }
 #pcMultiQuoteTable thead th { border-bottom: 2px solid var(--rd-accent) !important; background: var(--rd-surface2); color: var(--rd-text1); font-weight: 700; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 20; }
-#pcMultiQuoteBody tr:hover td { background-color: var(--rd-text1); }
+#pcMultiQuoteBody tr:hover td { background-color: #f8fafc; }
 .pc-price-input { border: 1px solid var(--rd-border2) !important; height: 30px !important; font-size: 13px !important; font-weight: 700 !important; color: var(--rd-accent) !important; padding: 2px 8px !important; width: 100% !important; border-radius: 4px !important; text-align: center; background: #ffffff; transition: all 0.2s; }
 .pc-price-input:focus { border-color: var(--rd-accent) !important; box-shadow: 0 0 0 2px rgba(95,120,88,0.15) !important; background: #ffffff !important; outline: none; }
 .pc-price-input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--rd-surface2) !important; border-color: var(--rd-border) !important; }
@@ -263,6 +278,13 @@
 .excel-table tr:hover td { background: var(--rd-surface2); }
 .excel-tab-btn { background: var(--rd-surface2); color: var(--rd-text2); border: 1px solid var(--rd-border2); border-radius: 4px; padding: 3px 12px; font-size: 11px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .excel-tab-btn:hover { background: var(--rd-accent-soft); color: var(--rd-accent); }
+/* Word Document (.docx) Live Viewer Styles */
+#pcQuoteViewerDocContent table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px; }
+#pcQuoteViewerDocContent th, #pcQuoteViewerDocContent td { border: 1px solid #cbd5e1; padding: 8px 12px; vertical-align: top; color: #1e293b; }
+#pcQuoteViewerDocContent th { background-color: #f1f5f9; font-weight: 600; color: #0f172a; }
+#pcQuoteViewerDocContent img { max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+#pcQuoteViewerDocContent p { margin-bottom: 0.85rem; }
+#pcQuoteViewerDocContent h1, #pcQuoteViewerDocContent h2, #pcQuoteViewerDocContent h3, #pcQuoteViewerDocContent h4 { color: #0f172a; font-weight: 700; margin-top: 1.2rem; margin-bottom: 0.6rem; }
 /* Searchable Firm Autocomplete Dropdown - Floating Overlay */
 .pc-firm-dropdown-wrap { position: relative; width: 100%; }
 #pcGlobalFirmDropdown {
@@ -346,30 +368,33 @@
                             </a>
                             @php
                                 $isPsCase = strtolower(trim((string)($purchase->pcs_type ?? 'ps'))) === 'ps';
-                                $hasItLetter = $isPsCase && ($purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists());
+                                $hasItLetter = (bool)($purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists());
+                                $quotesCount = count($purchase->quotes ?? []);
                             @endphp
 
-                            @if($isPsCase)
-                                @if($isDProc)
-                                    @if(!$hasItLetter)
-                                        {{-- Procurement user sees button to CREATE IT --}}
-                                        <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn-hdr-action btn-hdr-it-annex rajdhani" style="background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; cursor: pointer;">
-                                            <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
-                                        </button>
-                                    @else
-                                        {{-- Procurement user sees button to EDIT/VIEW IT --}}
-                                        <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
-                                            <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
-                                        </a>
-                                    @endif
+                            @if($isDProc)
+                                @if(!$hasItLetter)
+                                    {{-- Procurement user sees button to CREATE IT on all cases --}}
+                                    <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn-hdr-action btn-hdr-it-annex rajdhani" style="background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; cursor: pointer;">
+                                        <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
+                                    </button>
                                 @else
-                                    {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
-                                    @if($hasItLetter)
-                                        <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
-                                            <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
-                                        </a>
-                                    @endif
+                                    {{-- Procurement user sees button to EDIT/VIEW IT --}}
+                                    <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
+                                        <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
+                                    </a>
                                 @endif
+                            @else
+                                {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
+                                @if($hasItLetter)
+                                    <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
+                                        <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                                    </a>
+                                @endif
+                            @endif
+
+                            {{-- Comparative Statement visible to all users only when there is more than 1 quote in the case (for all case types) --}}
+                            @if($quotesCount > 1)
                                 <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-comparative-stmt rajdhani">
                                     <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
                                 </a>
@@ -418,7 +443,58 @@
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-hashtag text-primary mr-2"></i>CASE ID:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">#{{ $purchase->pcs_id }}</span></div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="far fa-calendar-alt text-primary mr-2"></i>DATE:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span></div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-project-diagram text-primary mr-2"></i>PROJECT:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></div>
-                                    <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span></div>
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> 
+                                        <span class="view-only text-dark font-weight-bold" id="pcSubheadView" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span>
+                                        @if($canEdit && $purchase->pcs_type !== 'Ps')
+                                            <form class="edit-only d-flex align-items-center flex-grow-1 pc-metadata-ajax-form" style="gap:6px; margin:0;" action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="op" value="save_metadata">
+                                                <input type="text" name="subhead" class="form-control form-control-sm" value="{{ $purchase->subhead_display }}" style="font-size: 11px; height: 28px; max-width: 200px;" list="subheadOptionsList" placeholder="Subhead...">
+                                                <datalist id="subheadOptionsList">
+                                                    <option value="Misc">
+                                                    <option value="Equipment">
+                                                    @foreach(($projectSubheads ?? []) as $psh)
+                                                        <option value="{{ $psh }}">
+                                                    @endforeach
+                                                </datalist>
+                                                <button type="submit" class="btn btn-primary btn-xs font-weight-bold" style="padding: 2px 8px;"><i class="fas fa-save"></i></button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-tags text-primary mr-2"></i>CASE TYPE:</strong> 
+                                        <span class="text-dark font-weight-bold" style="color: #0f172a !important;">
+                                            @if($purchase->pcs_type === 'Ps')
+                                                Ps — Major Purchase (With Quotations)
+                                            @elseif($purchase->pcs_type === 'Pt')
+                                                Pt — Incidental Expenditure (Without Quotations)
+                                            @elseif($purchase->pcs_type === 'Rb')
+                                                Rb — TA/DA Reimbursement
+                                            @else
+                                                {{ $purchase->pcs_type }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                    @if($purchase->pcs_type === 'Pt')
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-store text-primary mr-2"></i>AWARDED VENDOR:</strong> 
+                                        <span class="view-only text-dark font-weight-bold" id="pcVendorView" style="color: #0f172a !important;">{{ $purchase->firm?->frm_name ?? ($purchase->pcs_frm_id ? ('Firm #' . $purchase->pcs_frm_id) : 'Not specified') }}</span>
+                                        @if($canEdit)
+                                            <form class="edit-only d-flex align-items-center flex-grow-1 pc-metadata-ajax-form" style="gap:6px; margin:0;" action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="op" value="save_metadata">
+                                                <select name="pcs_frm_id" class="form-control form-control-sm" style="font-size: 11px; height: 28px; max-width: 250px;">
+                                                    <option value="">-- Select Awarded Vendor --</option>
+                                                    @foreach($firms as $f)
+                                                        <option value="{{ $f->frm_id }}" {{ (int)$purchase->pcs_frm_id === (int)$f->frm_id ? 'selected' : '' }}>{{ $f->frm_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="submit" class="btn btn-primary btn-xs font-weight-bold" style="padding: 2px 8px;"><i class="fas fa-save"></i></button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                    @endif
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-building text-primary mr-2"></i>DIVISION:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ $purchase->unit?->unt_name ?? $purchase->pcs_unt_id }}</span></div>
                                     @php
                                         $latestDec = $purchase->latestDecision;
@@ -548,9 +624,9 @@
                                                                 </span>
                                                             </div>
                                                             <div class="d-flex align-items-center flex-shrink-0" style="gap: 3px;">
-                                                                <a href="{{ url('/purchase/quote-attachment/' . $cDoc->pat_id . '/view') }}" target="_blank" class="text-primary px-0.5 hover-zoom" style="font-size: 10px;" title="View {{ $cName }}">
+                                                                <button type="button" class="btn btn-link text-primary p-0 pc-live-view-quote-btn hover-zoom" data-url="{{ url('/purchase/quote-attachment/' . $cDoc->pat_id . '/view') }}" data-pat-id="{{ $cDoc->pat_id }}" data-ext="{{ strtolower(pathinfo($cDoc->pat_path, PATHINFO_EXTENSION)) }}" data-file-path="{{ $cDoc->pat_path }}" data-file-name="{{ $cName }}" data-title="{{ $cName }}" style="font-size: 10px;" title="View {{ $cName }}">
                                                                     <i class="fas fa-eye"></i>
-                                                                </a>
+                                                                </button>
                                                                 @if($canEdit)
                                                                     <button type="button" class="btn btn-link text-danger p-0 pc-del-attachment-btn ml-1 edit-only" data-pat-id="{{ $cDoc->pat_id }}" title="Delete" style="font-size: 9px;">
                                                                         <i class="fas fa-trash-alt"></i>
@@ -597,7 +673,7 @@
                             <div class="text-right d-flex flex-column align-items-end" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; font-size: 12px; min-width: 260px;">
                                 <div class="d-flex justify-content-between align-items-center w-100 mb-2">
                                     <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 11px; letter-spacing: 0.8px;">
-                                        <i class="fas fa-chart-pie mr-1"></i> FINANCIAL PULSE
+                                        <i class="fas fa-chart-pie mr-1"></i> FINANCIAL REVIEW
                                     </h6>
                                     <button class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 9px; border-radius: 4px;">
                                         <i class="fas fa-expand-arrows-alt mr-1"></i> FULL REPORT
@@ -605,6 +681,9 @@
                                 </div>
                                 
                                 <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 3px 20px; text-align: left;">
+                                    <div class="text-muted small font-weight-bold">ALLOCATED</div>
+                                    <div class="text-dark font-weight-bold text-right" style="color: #0f172a !important;">{{ number_format($finAllocation) }}</div>
+                                    
                                     <div class="text-muted small font-weight-bold">RECEIVED</div>
                                     <div class="text-dark font-weight-bold text-right" style="color: #0f172a !important;">{{ number_format($finReceived) }}</div>
                                     
@@ -659,76 +738,233 @@
                         {{-- 1. Items Section --}}
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="dg-sec-label mb-0"><i class="fas fa-boxes fa-xs"></i> Items</div>
+                                <div class="dg-sec-label mb-0">
+                                    <i class="fas fa-boxes fa-xs mr-1 text-primary"></i> 
+                                    @if($purchase->pcs_type === 'Rb')
+                                        TA/DA Employee Allowance Lines
+                                    @elseif($purchase->pcs_type === 'Pt')
+                                        Incidental Expenditure Items
+                                    @else
+                                        Case Items & Specifications
+                                    @endif
+                                    <span class="badge badge-secondary badge-pill ml-2" id="pcItemCountBadge" style="font-size: 10px;">{{ $purchase->items->count() }}</span>
+                                </div>
                                 @if($canEdit)
                                     <button type="button" class="pc-plus-btn edit-only" id="pcAddItemInlineBtn" title="Add Item"><i class="fas fa-plus"></i></button>
                                 @endif
                             </div>
-                            <div class="dg-items-wrap" style="max-height: 250px; border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; overflow: hidden;">
-                                <table class="dg-items-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="pl-3" style="width: 50px;">S.No</th>
-                                            <th>Description</th>
-                                            <th class="text-center">Qty</th>
-                                            <th class="text-right pr-3">Price</th>
-                                            <th class="text-right pr-3 edit-only" style="width: 100px;">Action</th>
-                                        </tr>
+                            <div class="dg-items-wrap" style="max-height: 360px; border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; overflow-x: auto; overflow-y: auto;">
+                                <table class="dg-items-table" style="min-width: 100%;">
+                                    <thead id="pcItemsHead" style="background: #f8fafc; border-bottom: 2px solid #cbd5e1; position: sticky; top: 0; z-index: 10;">
+                                        {{-- Table Head rendered by JS according to case type (Ps, Pt, Rb) --}}
                                     </thead>
                                     <tbody id="pcItemsBody">
-                                        {{-- Items will be rendered by JS for LIFO support --}}
+                                        {{-- Items rendered by JS according to case type (Ps, Pt, Rb) --}}
                                     </tbody>
                                 </table>
                             </div>
                             @if($canEdit)
                                 <div class="edit-only mt-3 p-3 rounded" id="pcInlineItemEditor" style="display:none; background: #f8fafc; border: 1.5px solid #93c5fd; box-shadow: 0 4px 12px rgba(37,99,235,0.08);">
                                     <div class="d-flex align-items-center mb-2" style="color: var(--rd-primary-700); font-size: 11px; font-weight: 700; letter-spacing: 0.8px;">
-                                        <i class="fas fa-plus-circle mr-1 text-primary"></i> ADD NEW ITEM TO CASE
+                                        <i class="fas fa-plus-circle mr-1 text-primary"></i> 
+                                        @if($purchase->pcs_type === 'Rb')
+                                            ADD TA/DA ALLOWANCE LINE FOR EMPLOYEE
+                                        @elseif($purchase->pcs_type === 'Pt')
+                                            ADD INCIDENTAL EXPENDITURE ITEM
+                                        @else
+                                            ADD ITEM TO MAJOR PURCHASE CASE
+                                        @endif
                                     </div>
-                                    <form id="pcAddItemForm" class="d-flex align-items-center" style="gap:10px; margin:0;">
-                                        <div class="flex-grow-1">
-                                            <input name="item_desc" id="pcItemDesc" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 36px; font-size: 12px;" required placeholder="Enter item description / specification...">
-                                        </div>
-                                        <div style="width:110px;">
-                                            <input name="item_qty" id="pcItemQty" type="number" step="0.01" value="1" class="form-control form-control-sm text-center" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 36px; font-size: 12px;" required placeholder="Qty">
-                                        </div>
-                                        <div class="d-flex align-items-center" style="gap:6px;">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="pcItemCancelBtn" title="Cancel" style="height: 36px; width: 36px; padding: 0;"><i class="fas fa-times"></i></button>
-                                            <button type="submit" class="btn btn-primary btn-sm px-3 rajdhani font-weight-bold" style="height: 36px; font-size: 12px; letter-spacing: 0.5px;"><i class="fas fa-plus mr-1"></i> ADD</button>
+                                    <form id="pcAddItemForm" class="d-flex flex-column gap-2" style="margin:0;">
+                                        @if($purchase->pcs_type === 'Rb')
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-4">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Select Employee *</label>
+                                                    <select name="emp_id" id="pcAddEmpSelect" class="form-control form-control-sm" required style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;">
+                                                        <option value="">-- Choose Employee --</option>
+                                                        @foreach($employees as $emp)
+                                                            <option value="{{ $emp->emp_id }}">{{ $emp->emp_name }} ({{ $emp->emp_id }}) - {{ $emp->emp_rank ?? 'Staff' }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Purpose / Travel Details *</label>
+                                                    <input name="item_desc" id="pcAddEmpDesc" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" required placeholder="e.g. Official visit / TA/DA Allowance">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Days / Qty</label>
+                                                    <input name="item_qty" id="pcAddEmpQty" type="number" step="1" value="1" class="form-control form-control-sm text-center" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;" required>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Daily Rate (PKR)</label>
+                                                    <input name="item_price" id="pcAddEmpRate" type="number" step="0.01" class="form-control form-control-sm text-right font-weight-bold" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" placeholder="Auto-calculated">
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="item_subhead" value="Misc">
+                                            <input type="hidden" name="item_qtyunit" value="Days">
+                                            <input type="hidden" name="item_type" value="3">
+                                            <input type="hidden" name="item_subtype" value="Travelling/Boarding/Lodging">
+                                        @else
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-4">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Description / Specification *</label>
+                                                    <input name="item_desc" id="pcItemDesc" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" required placeholder="Enter item description...">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Type</label>
+                                                    <select name="item_type" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;">
+                                                        <option value="7" selected>Permanent</option>
+                                                        <option value="2">Consumable</option>
+                                                        <option value="3">Service</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Sub-Type</label>
+                                                    <input name="item_subtype" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" value="{{ $purchase->pcs_type === 'Ps' ? 'Test / Measuring Equipment' : 'Parts' }}" placeholder="Subtype...">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Class</label>
+                                                    <select name="item_type2" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;">
+                                                        <option value="6" selected>Asset</option>
+                                                        <option value="5">Inventory</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Subhead</label>
+                                                    <input name="item_subhead" class="form-control form-control-sm" value="{{ $purchase->subhead_display ?: ($purchase->pcs_type === 'Ps' ? 'Equipment' : 'Misc') }}" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;">
+                                                </div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mt-1">
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Quantity</label>
+                                                    <input name="item_qty" id="pcItemQty" type="number" step="0.01" value="1" class="form-control form-control-sm text-center" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;" required>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Unit / Deno</label>
+                                                    <input name="item_qtyunit" class="form-control form-control-sm text-center" value="num" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;" placeholder="num/set">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Price (PKR)</label>
+                                                    <input name="item_price" type="number" step="0.01" value="0" class="form-control form-control-sm text-right font-weight-bold" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <div class="d-flex justify-content-end align-items-center mt-2" style="gap:6px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="pcItemCancelBtn" title="Cancel" style="height: 28px; font-size: 11px; padding: 0 12px;">Cancel</button>
+                                            <button type="submit" class="btn btn-primary btn-sm px-3 rajdhani font-weight-bold" style="height: 28px; font-size: 11px; letter-spacing: 0.5px;"><i class="fas fa-plus mr-1"></i> ADD ITEM</button>
                                         </div>
                                     </form>
                                 </div>
                             @endif
                         </div>
 
-                        {{-- 2. Quotations Section (Ps only) --}}
+                        {{-- 2. Case Specific Sections (Ps: Quotations + No-Quotes; Pt: Single Vendor; Rb: TA/DA info) --}}
                         @if($isPsCase)
+                        {{-- Ps: Quotations Received Section --}}
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="dg-sec-label mb-0"><i class="fas fa-list-ol fa-xs"></i> Quotations</div>
+                                <div class="dg-sec-label mb-0"><i class="fas fa-list-ol fa-xs mr-1 text-primary"></i> Quotations Received (Vendor Offers)</div>
                                 <div class="d-flex align-items-center" style="gap:8px;">
                                 @if($canAddQuotes)
                                     <button type="button" class="pc-plus-btn" data-toggle="modal" data-target="#pcAddQuoteModal" title="Add Quotation"><i class="fas fa-plus"></i></button>
                                 @endif
                                 </div>
                             </div>
-                                <div class="table-responsive" style="border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; overflow: hidden;">
-                                    <table class="dg-items-table">
-                                        <thead>
-                                            <tr>
-                                                <th class="pl-3" style="width: 50px;">S.No</th>
-                                                <th>Firm Name</th>
-                                                <th class="text-right pr-3">Price (PKR)</th>
-                                                <th class="text-center" style="width: 80px;">Quote</th>
-                                                <th class="text-right pr-3 edit-only" style="width: 140px;">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="pcQuotesBody">
-                                            {{-- Rendered by JS --}}
-                                        </tbody>
-                                    </table>
+                           
+                            <div class="table-responsive" style="border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; overflow: hidden;">
+                                <table class="dg-items-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="pl-3" style="width: 50px;">S.No</th>
+                                            <th>Firm Name</th>
+                                            <th class="text-right pr-3">Price (PKR)</th>
+                                            <th class="text-center" style="width: 80px;">Quote</th>
+                                            <th class="text-right pr-3 edit-only" style="width: 140px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pcQuotesBody">
+                                        {{-- Rendered by JS --}}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <input type="file" id="pcDirectQuoteUploadInput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt">
+                        </div>
+
+                        {{-- Ps: Quotations Not Received / No-Quotes Section --}}
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="dg-sec-label mb-0" style="color: #b91c1c;">
+                                    <i class="fas fa-times-circle fa-xs mr-1 text-danger"></i> Quotations Not Received (No-Quotes)
+                                    <span class="badge badge-secondary badge-pill ml-2" id="pcNoQuotesBadge" style="font-size: 10px;">{{ $purchase->noQuotes->count() }}</span>
                                 </div>
-                                <input type="file" id="pcDirectQuoteUploadInput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt">
+                                @if($canEdit)
+                                    <button type="button" class="btn btn-outline-danger btn-xs edit-only rajdhani font-weight-bold" id="pcToggleAddNoQuoteBtn" style="font-size: 11px; padding: 2px 10px; border-radius: 6px;">
+                                        <i class="fas fa-plus mr-1"></i> Add No-Quote Firm
+                                    </button>
+                                @endif
+                            </div>
+
+                            @if($canEdit)
+                                <div class="edit-only p-3 mb-2 rounded" id="pcAddNoQuoteInline" style="display: none; background: #fff5f5; border: 1.5px dashed #fca5a5;">
+                                    <div class="small font-weight-bold text-danger mb-2"><i class="fas fa-building mr-1"></i> SELECT FIRM THAT DID NOT SUBMIT QUOTATION:</div>
+                                    <div class="d-flex align-items-center" style="gap: 8px;">
+                                        <select id="pcNoQuoteFirmSelector" class="form-control form-control-sm flex-grow-1" style="height: 34px; font-size: 12px;">
+                                            <option value="">-- Select Participating Firm --</option>
+                                            @foreach($firms as $f)
+                                                <option value="{{ $f->frm_id }}">{{ $f->frm_name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <button type="button" class="btn btn-danger btn-sm rajdhani font-weight-bold px-3" id="pcSubmitNoQuoteBtn" style="height: 34px; font-size: 12px;">
+                                            <i class="fas fa-check mr-1"></i> ADD
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="pcCancelNoQuoteBtn" style="height: 34px; width: 34px; padding: 0;">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="table-responsive" style="border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; overflow: hidden;">
+                                <table class="dg-items-table">
+                                    <thead>
+                                        <tr style="background: #fff1f2;">
+                                            <th class="pl-3" style="width: 50px; color: #9f1239;">S.No</th>
+                                            <th style="color: #9f1239;">Firm Name</th>
+                                            <th class="text-center" style="width: 200px; color: #9f1239;">Status</th>
+                                            <th class="text-right pr-3 edit-only" style="width: 100px; color: #9f1239;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pcNoQuotesBody">
+                                        {{-- Rendered by JS --}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @elseif($purchase->pcs_type === 'Pt')
+                        {{-- Pt: Incidental Single Vendor Summary Card --}}
+                        <div class="p-3 mb-4 rounded border d-flex justify-content-between align-items-center" style="background: #f0fdfa; border-color: #99f6e4 !important;">
+                            <div>
+                                <span class="badge badge-info px-2.5 py-1 mr-2" style="background: #0d9488; font-size: 11px;"><i class="fas fa-receipt mr-1"></i> Single Vendor Procurement</span>
+                                <strong class="text-dark" style="font-size: 13px;">Awarded Vendor:</strong>
+                                <span class="font-weight-bold text-primary ml-1" style="font-size: 14px;">{{ $purchase->firm?->frm_name ?? ($purchase->pcs_frm_id ? ('Firm #' . $purchase->pcs_frm_id) : 'Direct Vendor') }}</span>
+                            </div>
+                            <div>
+                                <strong class="text-muted small">Budget Subhead:</strong>
+                                <span class="badge badge-success px-2 py-1 ml-1" style="font-size: 11.5px;">{{ $purchase->subhead_display }}</span>
+                            </div>
+                        </div>
+                        @elseif($purchase->pcs_type === 'Rb')
+                        {{-- Rb: TA/DA Travel Reimbursement Summary Card --}}
+                        <div class="p-3 mb-4 rounded border d-flex justify-content-between align-items-center" style="background: #fffbeb; border-color: #fde68a !important;">
+                            <div>
+                                <span class="badge badge-warning px-2.5 py-1 mr-2" style="background: #d97706; color: #fff; font-size: 11px;"><i class="fas fa-plane-departure mr-1"></i> TA/DA Travel Reimbursement</span>
+                                <strong class="text-dark" style="font-size: 13px;">Payment Channel:</strong>
+                                <span class="font-weight-bold text-primary ml-1" style="font-size: 13px;">Meezan Bank Account / Cross Cheque</span>
+                            </div>
+                            <div>
+                                <strong class="text-muted small">Budget Subhead:</strong>
+                                <span class="badge badge-success px-2 py-1 ml-1" style="font-size: 11.5px;">{{ $purchase->subhead_display }}</span>
+                            </div>
                         </div>
                         @endif
 
@@ -943,6 +1179,19 @@
 
             </div>
 
+            <div class="px-3 py-1.5 d-flex align-items-center justify-content-between flex-shrink-0" style="background: #fffbeb; border-bottom: 1px solid #fde68a; font-size: 11.5px; color: #92400e;">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-stamp text-warning mr-2" style="font-size: 15px;"></i>
+                    <div>
+                        <strong>MANDATORY:</strong> Please ensure that <u>ONLY officially ATTESTED quotations</u>  are attached.
+                        
+                    </div>
+                </div>
+                <span class="badge badge-warning text-dark px-2 py-1 font-weight-bold" style="font-size: 9.5px; border: 1px solid #f59e0b;">
+                    <i class="fas fa-check-double mr-1"></i> Attested Only
+                </span>
+            </div>
+
             {{-- BODY: scrollable table area --}}
             <div class="flex-grow-1" style="overflow: auto; min-height: 0; background: #ffffff;">
                 <table id="pcMultiQuoteTable">
@@ -990,6 +1239,9 @@
                         <i class="fas fa-stethoscope mr-1"></i> Diagnostics
                     </button>
                     --}}
+                    <a href="#" id="pcQuoteViewerDownloadBtn" download class="btn btn-xs btn-outline-secondary px-2.5 py-1" style="font-size: 11px;" title="Download Copy">
+                        <i class="fas fa-download mr-1"></i> Download
+                    </a>
                     <a href="#" id="pcQuoteViewerOpenNewTab" target="_blank" class="btn btn-xs btn-outline-primary px-3 py-1" style="font-size: 11px;">
                         <i class="fas fa-external-link-alt mr-1"></i> Open in New Tab
                     </a>
@@ -1460,6 +1712,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const allDbFirms = @json($firms->pluck('frm_name')->filter()->unique()->values());
 
     @php
+        $empList = ($employees ?? collect())->map(fn($e) => [
+            'emp_id' => (string) $e->emp_id,
+            'emp_name' => (string) $e->emp_name,
+            'emp_rank' => (string) ($e->emp_rank ?? ($e->emp_title ?? 'Staff')),
+            'emp_grade' => (string) ($e->emp_scale ?? ($e->emp_grade ?? ''))
+        ])->values();
+        $subheadList = $projectSubheads ?? [];
+
         $pcItems = $purchase->items->sortBy('pci_serial')->values();
         $pcQuotes = $purchase->quotes->values();
         $quoteIds = $pcQuotes->pluck('qte_id')->toArray();
@@ -1484,6 +1744,11 @@ document.addEventListener('DOMContentLoaded', function() {
         $snapshot = [
             'pcs_id' => (int) $purchase->pcs_id,
             'pcs_title' => (string) $purchase->pcs_title,
+            'pcs_type' => (string) ($purchase->pcs_type ?: 'Ps'),
+            'pcs_subhead' => (string) ($purchase->subhead_display ?: 'Equipment'),
+            'pcs_frm_id' => (int) ($purchase->pcs_frm_id ?? 0),
+            'vendor_name' => (string) ($purchase->firm?->frm_name ?? ''),
+            'pcs_quotetype' => (int) ($purchase->pcs_quotetype ?? 1),
             'pcs_remarks' => (string) ($purchase->pcs_remarks ?? ''),
             'pcs_intprice' => (float) ($purchase->pcs_intprice ?? $initBase),
             'pcs_inttax' => (float) ($purchase->pcs_inttax ?? $initSst),
@@ -1495,8 +1760,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 'pci_serial' => (int) $i->pci_serial,
                 'pci_desc' => (string) $i->pci_desc,
                 'pci_qty' => (float) $i->pci_qty,
-                'pci_qtyunit' => (string) $i->pci_qtyunit,
+                'pci_qtyunit' => (string) ($i->pci_qtyunit ?: 'num'),
                 'pci_price' => (float) ($i->pci_price ?? 0),
+                'pci_type' => (int) ($i->pci_type ?? 7),
+                'pci_type_name' => $i->type_name,
+                'pci_subtype' => (string) ($i->pci_subtype ?? ''),
+                'pci_type2' => $i->pci_type2 ? (int) $i->pci_type2 : null,
+                'pci_type2_name' => $i->type2_name,
+                'pci_subhead' => (string) ($i->pci_subhead ?? ''),
+                'pci_emp_id' => (string) ($i->pci_emp_id ?? ''),
+                'emp_name' => (string) ($i->employee?->emp_name ?? ''),
+                'emp_rank' => (string) ($i->employee?->emp_rank ?? ($i->employee?->emp_title ?? '')),
             ])->values(),
             'quotes' => $pcQuotes->map(function($q) use ($quoteAttachments, $pcQuotes) {
                 $att = $quoteAttachments->get($q->qte_id);
@@ -1522,6 +1796,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     'attachment_name' => $fileName ?? 'Quote Document',
                 ];
             })->values(),
+            'no_quotes' => $purchase->noQuotes->values()->map(fn($nq) => [
+                'nqt_id' => (int) $nq->nqt_id,
+                'nqt_frm_id' => (int) $nq->nqt_frm_id,
+                'firm_name' => (string) ($nq->firm?->frm_name ?? $nq->nqt_firmname ?? ('Firm #' . $nq->nqt_frm_id)),
+                'nqt_reason' => (string) ($nq->nqt_reason ?? 'Quotation Not Received'),
+            ])->values(),
             'attachments' => $purchase->attachments->map(fn($a) => [
                 'pat_id' => (int) $a->pat_id,
                 'pat_path' => (string) $a->pat_path,
@@ -1533,9 +1813,29 @@ document.addEventListener('DOMContentLoaded', function() {
     @endphp
 
     let state = @json($snapshot);
+    const allEmployees = @json($empList);
+    const allSubheads = @json($subheadList);
     const isInitiator = @json($isInitiator);
     const isDProc     = @json($isDProc);
 
+    function updateState(json) {
+        if (!json) return;
+        if (json.data && typeof json.data === 'object') {
+            state = json.data;
+        } else if (json.pcs_title || json.pcs_id) {
+            state = json;
+        }
+    }
+
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
     function setEditing(isEditing) {
         const toggleBtn = document.getElementById('pcEditToggleBtn');
@@ -1564,27 +1864,233 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderItems() {
+        if (!state) return;
+        const head = document.getElementById('pcItemsHead');
         const body = document.getElementById('pcItemsBody');
+        const countBadge = document.getElementById('pcItemCountBadge');
         if (!body) return;
-        // Sort by ID descending for LIFO (Last In First Out)
-        const items = [...(state.items || [])].sort((a, b) => (b.pci_id ?? 0) - (a.pci_id ?? 0));
-        body.innerHTML = items.map((it, idx) => `
-            <tr data-pci-id="${it.pci_id}">
-                <td class="pl-3 text-muted">${items.length - idx}</td>
-                <td><span class="pc-desc-display font-weight-600" style="color: #0f172a;">${(it.pci_desc ?? '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</span></td>
-                <td class="text-center font-weight-bold"><span class="pc-qty-display" style="color: #0f172a;">${fmt(it.pci_qty)}</span> <span class="small text-muted pc-unit-display">${(it.pci_qtyunit ?? '')}</span></td>
-                <td class="text-right pr-3 font-weight-bold text-dark" style="color: #0f172a !important;">${fmt(it.pci_price)}</td>
+
+        const items = [...(state.items || [])].sort((a, b) => {
+            const sA = a.pci_serial !== undefined && a.pci_serial !== null ? Number(a.pci_serial) : 0;
+            const sB = b.pci_serial !== undefined && b.pci_serial !== null ? Number(b.pci_serial) : 0;
+            if (sA !== sB && sA > 0 && sB > 0) return sA - sB;
+            return (a.pci_id ?? 0) - (b.pci_id ?? 0);
+        });
+        if (countBadge) countBadge.textContent = items.length;
+
+        const caseType = String(state.pcs_type || 'Ps').trim();
+        const isPs = caseType === 'Ps';
+        const isPt = caseType === 'Pt';
+        const isRb = caseType === 'Rb';
+
+        // 1. Render Table Header based on Case Type
+        if (head) {
+            if (isRb) {
+                head.innerHTML = `
+                    <tr style="background: #fffbeb;">
+                        <th class="pl-3" style="width: 42px; color: #92400e;">S.No</th>
+                        <th style="color: #92400e; width: 220px;">Employee Details</th>
+                        <th style="color: #92400e;">Travel Purpose / Details</th>
+                        <th class="text-center" style="width: 95px; color: #92400e;">Subhead</th>
+                        <th class="text-center" style="width: 70px; color: #92400e;">Days</th>
+                        <th class="text-right pr-3" style="width: 130px; color: #92400e;">Total Allowance (PKR)</th>
+                        <th class="text-center pr-3" style="width: 120px; color: #92400e;">Payment Mode</th>
+                        <th class="text-right pr-3 edit-only" style="width: 70px; color: #92400e;">Action</th>
+                    </tr>
+                `;
+            } else if (isPt) {
+                head.innerHTML = `
+                    <tr style="background: #f0fdfa;">
+                        <th class="pl-3" style="width: 42px; color: #0f766e;">S.No</th>
+                        <th style="color: #0f766e;">Description / Specification</th>
+                        <th class="text-center" style="width: 85px; color: #0f766e;">Type</th>
+                        <th style="width: 120px; color: #0f766e;">Sub-Type</th>
+                        <th class="text-center" style="width: 75px; color: #0f766e;">Class</th>
+                        <th style="width: 95px; color: #0f766e;">Subhead</th>
+                        <th class="text-center" style="width: 50px; color: #0f766e;">Qty</th>
+                        <th class="text-center" style="width: 55px; color: #0f766e;">Unit</th>
+                        <th class="text-right pr-3" style="width: 110px; color: #0f766e;">Total (PKR)</th>
+                        <th class="text-right pr-3 edit-only" style="width: 70px; color: #0f766e;">Action</th>
+                    </tr>
+                `;
+            } else {
+                // Ps (Major Purchase with Quotations) - Single Total (PKR) column, no duplicate rate column
+                head.innerHTML = `
+                    <tr style="background: #f8fafc;">
+                        <th class="pl-3" style="width: 42px;">S.No</th>
+                        <th>Description / Specification</th>
+                        <th class="text-center" style="width: 85px;">Type</th>
+                        <th style="width: 120px;">Sub-Type</th>
+                        <th class="text-center" style="width: 75px;">Class</th>
+                        <th style="width: 95px;">Subhead</th>
+                        <th class="text-center" style="width: 50px;">Qty</th>
+                        <th class="text-center" style="width: 55px;">Unit</th>
+                        <th class="text-right pr-3" style="width: 110px;">Total (PKR)</th>
+                        <th class="text-right pr-3 edit-only" style="width: 70px;">Action</th>
+                    </tr>
+                `;
+            }
+        }
+
+        // 2. Render Table Body based on Case Type
+        if (items.length === 0) {
+            const colSpan = isRb ? 8 : 10;
+            body.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted small">No items added to this case yet.</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = items.map((it, idx) => {
+            const sNo = idx + 1;
+            const qty = Number(it.pci_qty || 1);
+            const rate = Number(it.pci_price || 0);
+            const baseTotal = qty * rate;
+
+            if (isRb) {
+                const totalAllowance = baseTotal;
+                return `
+                    <tr data-pci-id="${it.pci_id}">
+                        <td class="pl-3 text-muted font-weight-bold" style="font-size: 11px;">${sNo}</td>
+                        <td>
+                            <div class="font-weight-bold text-dark" style="font-size: 11.5px; color: #0f172a !important;">
+                                <i class="fas fa-user-circle text-primary mr-1"></i> ${escapeHtml(it.emp_name || it.pci_emp_id || 'Staff Member')}
+                            </div>
+                            <div class="small text-muted" style="font-size: 10px;">
+                                ${escapeHtml(it.emp_rank || 'Employee')} ${it.pci_emp_id ? `| ID: #${escapeHtml(it.pci_emp_id)}` : ''}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="pc-desc-display font-weight-500" style="color: #1e293b; font-size: 11.5px;">${escapeHtml(it.pci_desc || 'TA/DA Allowance')}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-light border text-dark" style="font-size: 10px; padding: 2px 5px;">${escapeHtml(it.pci_subhead || state.pcs_subhead || 'Misc')}</span>
+                        </td>
+                        <td class="text-center font-weight-bold">
+                            <span class="badge px-2 py-0.5" style="font-size: 11px; background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1;">${fmt(qty)} ${it.pci_qtyunit && it.pci_qtyunit !== 'num' ? escapeHtml(it.pci_qtyunit) : (qty > 1 ? 'Days' : 'Day')}</span>
+                        </td>
+                        <td class="text-right pr-3 font-weight-bold text-success" style="font-size: 12px; color: #16a34a !important;">
+                            ${fmt(totalAllowance)}
+                            ${qty > 1 ? `<div class="text-muted font-weight-normal" style="font-size: 9.5px;">(@ ${fmt(rate)}/day)</div>` : ''}
+                        </td>
+                        <td class="text-center pr-3">
+                            <span class="badge badge-warning px-1.5 py-0.5 text-dark" style="background: #fef3c7; border: 1px solid #fde68a; font-size: 9.5px;">
+                                <i class="fas fa-money-check mr-1 text-warning"></i> Meezan Bank
+                            </span>
+                        </td>
+                        <td class="text-right pr-3 edit-only">
+                            <div class="d-flex justify-content-end gap-1">
+                                <button type="button" class="btn btn-outline-warning btn-xs pc-item-edit-btn" data-pci-id="${it.pci_id}" title="Edit Line" style="padding: 2px 5px; font-size: 10px;"><i class="fas fa-pencil-alt"></i></button>
+                                <button type="button" class="btn btn-outline-danger btn-xs pc-item-del-btn" data-pci-id="${it.pci_id}" title="Delete" style="padding: 2px 5px; font-size: 10px;"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            // Type badge (7: Permanent, 2: Consumable, 3: Service)
+            const typeNum = Number(it.pci_type || 7);
+            let typeBadge = '<span class="badge badge-primary px-1.5 py-0.5" style="font-size: 9.5px; background: #2563eb;">Permanent</span>';
+            if (typeNum === 2) typeBadge = '<span class="badge badge-warning px-1.5 py-0.5" style="font-size: 9.5px; background: #ea580c; color:#fff;">Consumable</span>';
+            else if (typeNum === 3) typeBadge = '<span class="badge badge-info px-1.5 py-0.5" style="font-size: 9.5px; background: #0891b2; color:#fff;">Service</span>';
+
+            // Class badge (6: Asset, 5: Inventory)
+            const type2Num = Number(it.pci_type2 || 6);
+            let classBadge = '<span class="badge badge-success px-1.5 py-0.5" style="font-size: 9.5px; background: #16a34a;">Asset</span>';
+            if (type2Num === 5) classBadge = '<span class="badge badge-secondary px-1.5 py-0.5" style="font-size: 9.5px; background: #64748b;">Inventory</span>';
+
+            const subheadVal = it.pci_subhead || state.pcs_subhead || (isPt ? 'Direct' : 'Equipment');
+            const subtypeVal = it.pci_subtype || '—';
+
+            if (isPt) {
+                // Pt (Incidental Expenditure)
+                return `
+                    <tr data-pci-id="${it.pci_id}">
+                        <td class="pl-3 text-muted font-weight-bold" style="font-size: 11px;">${sNo}</td>
+                        <td>
+                            <span class="pc-desc-display font-weight-600 text-dark" style="color: #0f172a; font-size: 11.5px; line-height: 1.25; display: inline-block;">${escapeHtml(it.pci_desc)}</span>
+                        </td>
+                        <td class="text-center">${typeBadge}</td>
+                        <td><span class="text-dark font-weight-500" style="font-size: 11px;">${escapeHtml(subtypeVal)}</span></td>
+                        <td class="text-center">${classBadge}</td>
+                        <td><span class="badge badge-light border text-dark" style="font-size: 10px; padding: 2px 5px;">${escapeHtml(subheadVal)}</span></td>
+                        <td class="text-center font-weight-bold"><span class="pc-qty-display" style="color: #0f172a; font-size: 11.5px;">${fmt(qty)}</span></td>
+                        <td class="text-center"><span class="small text-muted pc-unit-display" style="font-size: 10.5px;">${escapeHtml(it.pci_qtyunit || 'num')}</span></td>
+                        <td class="text-right pr-3 font-weight-bold text-dark" style="color: #0f172a !important; font-size: 11.5px;">
+                            ${fmt(baseTotal)}
+                            ${qty > 1 ? `<div class="text-muted font-weight-normal" style="font-size: 9.5px;">(@ ${fmt(rate)})</div>` : ''}
+                        </td>
+                        <td class="text-right pr-3 edit-only">
+                            <div class="d-flex justify-content-end gap-1">
+                                <button type="button" class="btn btn-outline-warning btn-xs pc-item-edit-btn" data-pci-id="${it.pci_id}" title="Edit Item" style="padding: 2px 5px; font-size: 10px;"><i class="fas fa-pencil-alt"></i></button>
+                                <button type="button" class="btn btn-outline-danger btn-xs pc-item-del-btn" data-pci-id="${it.pci_id}" title="Delete" style="padding: 2px 5px; font-size: 10px;"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            // Ps (Major Purchase with Quotations) - Single Total (PKR) column
+            return `
+                <tr data-pci-id="${it.pci_id}">
+                    <td class="pl-3 text-muted font-weight-bold" style="font-size: 11px;">${sNo}</td>
+                    <td>
+                        <span class="pc-desc-display font-weight-600 text-dark" style="color: #0f172a; font-size: 11.5px; line-height: 1.25; display: inline-block;">${escapeHtml(it.pci_desc)}</span>
+                    </td>
+                    <td class="text-center">${typeBadge}</td>
+                    <td><span class="text-dark font-weight-500" style="font-size: 11px;">${escapeHtml(subtypeVal)}</span></td>
+                    <td class="text-center">${classBadge}</td>
+                    <td><span class="badge badge-light border text-dark" style="font-size: 10px; padding: 2px 5px;">${escapeHtml(subheadVal)}</span></td>
+                    <td class="text-center font-weight-bold"><span class="pc-qty-display" style="color: #0f172a; font-size: 11.5px;">${fmt(qty)}</span></td>
+                    <td class="text-center"><span class="small text-muted pc-unit-display" style="font-size: 10.5px;">${escapeHtml(it.pci_qtyunit || 'num')}</span></td>
+                    <td class="text-right pr-3 font-weight-bold text-dark" style="color: #0f172a !important; font-size: 11.5px;">
+                        ${fmt(baseTotal)}
+                        ${qty > 1 ? `<div class="text-muted font-weight-normal" style="font-size: 9.5px;">(@ ${fmt(rate)})</div>` : ''}
+                    </td>
+                    <td class="text-right pr-3 edit-only">
+                        <div class="d-flex justify-content-end gap-1">
+                            <button type="button" class="btn btn-outline-warning btn-xs pc-item-edit-btn" data-pci-id="${it.pci_id}" title="Edit Item" style="padding: 2px 5px; font-size: 10px;"><i class="fas fa-pencil-alt"></i></button>
+                            <button type="button" class="btn btn-outline-danger btn-xs pc-item-del-btn" data-pci-id="${it.pci_id}" title="Delete" style="padding: 2px 5px; font-size: 10px;"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function renderNoQuotes() {
+        if (!state) return;
+        const body = document.getElementById('pcNoQuotesBody');
+        const badge = document.getElementById('pcNoQuotesBadge');
+        if (!body) return;
+        const noQuotes = state.no_quotes || [];
+        if (badge) badge.textContent = noQuotes.length;
+
+        if (noQuotes.length === 0) {
+            body.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-muted small">No firms marked as 'Not Received' / Regret.</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = noQuotes.map((nq, idx) => `
+            <tr data-nqt-id="${nq.nqt_id}">
+                <td class="pl-3 text-muted font-weight-bold" style="width: 50px;">${idx + 1}</td>
+                <td class="font-weight-bold text-dark" style="color: #0f172a !important;">
+                    <i class="fas fa-building text-danger mr-1.5"></i> ${escapeHtml(nq.firm_name)}
+                </td>
+                <td class="text-center">
+                    <span class="badge badge-danger px-2.5 py-1" style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; font-size: 11px;">
+                        <i class="fas fa-times-circle mr-1"></i> Quotation Not Received
+                    </span>
+                </td>
                 <td class="text-right pr-3 edit-only">
-                    <div class="d-flex justify-content-end gap-1">
-                        <button type="button" class="btn btn-outline-warning btn-xs pc-item-edit-btn" data-pci-id="${it.pci_id}" data-desc="${(it.pci_desc ?? '').replaceAll('"', '&quot;')}" data-qty="${it.pci_qty}" data-unit="${it.pci_qtyunit ?? 'num'}" title="Edit Item" style="padding: 2px 6px;"><i class="fas fa-pencil-alt"></i></button>
-                        <button type="button" class="btn btn-outline-danger btn-xs pc-item-del-btn" data-pci-id="${it.pci_id}" title="Delete" style="padding: 2px 6px;"><i class="fas fa-trash-alt"></i></button>
-                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-xs pc-del-noquote-btn" data-nqt-id="${nq.nqt_id}" title="Remove from No-Quotes" style="padding: 2px 6px;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </td>
             </tr>
         `).join('');
     }
 
     function renderQuotes() {
+        if (!state) return;
         const body = document.getElementById('pcQuotesBody');
         if (!body) return;
         const sorted = sortQuotesByPrice(state.quotes || []);
@@ -1620,7 +2126,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                     <td class="text-center">
                         ${q.attachment_path ? `
-                            <button type="button" class="btn btn-xs btn-outline-primary pc-live-view-quote-btn" data-url="${quoteViewBase}/${q.qte_id}/view" data-qte-id="${q.qte_id}" data-title="${(q.firm_name||'').replaceAll('"','&quot;')}" style="width: 28px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 11px;" title="View Quotation Document">
+                            <button type="button" class="btn btn-xs btn-outline-primary pc-live-view-quote-btn" data-url="${quoteViewBase}/${q.qte_id}/view" data-qte-id="${q.qte_id}" data-ext="${(q.attachment_path || q.attachment_name || '').split('.').pop().toLowerCase()}" data-file-path="${q.attachment_path || ''}" data-file-name="${(q.attachment_name || q.attachment_path || '').replaceAll('"','&quot;')}" data-title="${(q.firm_name||'').replaceAll('"','&quot;')}" style="width: 28px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 11px;" title="View Quotation Document">
                                 <i class="fas fa-eye"></i>
                             </button>
                         ` : '<span class="text-muted small opacity-50">—</span>'}
@@ -1641,6 +2147,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderRemarks() {
+        if (!state) return;
         const el = document.getElementById('pcRemarksText');
         const inp = document.getElementById('pcRemarksInput');
         if (inp) inp.value = state.pcs_remarks || '';
@@ -1667,6 +2174,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderFiles() {
+        if (!state) return;
         const wrapEl = document.getElementById('pcCaseAttachmentsList');
         const countBadge = document.getElementById('pcCaseAttCountBadge');
         const files = state.attachments || [];
@@ -1687,9 +2195,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         </span>
                     </div>
                     <div class="d-flex align-items-center flex-shrink-0" style="gap: 3px;">
-                        <a href="${quoteViewBase}/${f.pat_id}/view" target="_blank" class="text-primary px-0.5 hover-zoom" style="font-size: 10px;" title="View ${name.replaceAll('"', '&quot;')}">
+                        <button type="button" class="btn btn-link text-primary p-0 pc-live-view-quote-btn hover-zoom" data-url="${quoteViewBase}/${f.pat_id}/view" data-pat-id="${f.pat_id}" data-ext="${(f.pat_path || f.pat_filename || '').split('.').pop().toLowerCase()}" data-file-path="${f.pat_path || ''}" data-file-name="${(f.pat_filename || f.pat_path || '').replaceAll('"','&quot;')}" data-title="${name.replaceAll('"', '&quot;')}" style="font-size: 10px;" title="View ${name.replaceAll('"', '&quot;')}">
                             <i class="fas fa-eye"></i>
-                        </a>
+                        </button>
                         ${canEdit ? `
                             <button type="button" class="btn btn-link text-danger p-0 pc-del-attachment-btn ml-1 edit-only" data-pat-id="${f.pat_id}" title="Delete" style="font-size: 9px;">
                                 <i class="fas fa-trash-alt"></i>
@@ -1743,9 +2251,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         </button>
                     </div>
                     <div class="mt-1 d-flex align-items-center justify-content-center">
-                        <label class="badge ${v.file || v.existing_file_path ? 'badge-success' : 'badge-dark'} p-1 mb-0" style="cursor:pointer; font-size:9px; font-weight:normal; border: 1px solid var(--rd-border);" title="${v.file ? v.file.name : (v.existing_file_name || 'Attach Quote Document')}">
+                        <label class="badge ${v.file || v.existing_file_path ? 'badge-success' : 'badge-dark'} p-1 mb-0" style="cursor:pointer; font-size:9px; font-weight:normal; border: 1px solid var(--rd-border);" title="${v.file ? v.file.name : (v.existing_file_name || 'Attach Attested Quote Document')}">
                             <i class="fas fa-paperclip mr-1"></i>
-                            <span>${v.file ? (v.file.name.length > 12 ? v.file.name.substring(0,10)+'..' : v.file.name) : (v.existing_file_name ? (v.existing_file_name.length > 12 ? v.existing_file_name.substring(0,10)+'..' : v.existing_file_name) : 'Attach Document')}</span>
+                            <span>${v.file ? (v.file.name.length > 12 ? v.file.name.substring(0,10)+'..' : v.file.name) : (v.existing_file_name ? (v.existing_file_name.length > 12 ? v.existing_file_name.substring(0,10)+'..' : v.existing_file_name) : 'Attach Attested Quote')}</span>
                             <input type="file" class="pc-modal-quote-file-input" data-idx="${idx}" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt">
                         </label>
                     </div>
@@ -1798,11 +2306,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const minTotal = Math.min(...columnTotals.filter(t => t > 0));
 
         foot.innerHTML = `
-            <tr>
-                <td class="pc-item-sticky" style="text-align:right;">
-                    <div style="font-size:10px; color:rgba(255,255,255,0.5);">SUB TOTAL</div>
-                    <div style="font-size:10px; color:rgba(255,255,255,0.5);">TAX (${taxType} ${taxPercent}%)</div>
-                    <div style="font-size:13px; color:var(--rd-accent); font-weight:800;">TOTAL (PKR)</div>
+            <tr style="background: #f8fafc;">
+                <td class="pc-item-sticky" style="text-align:right; padding: 10px 14px; background: #f8fafc !important; border-right: 1.5px solid #cbd5e1 !important;">
+                    <div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase;">SUB TOTAL</div>
+                    <div style="font-size:10.5px; font-weight:700; color:#64748b; letter-spacing:0.5px; margin-top:3px; text-transform:uppercase;">TAX (${taxType} ${taxPercent}%)</div>
+                    <div style="font-size:13.5px; color:#0f172a; font-weight:800; margin-top:4px; letter-spacing:0.5px;">TOTAL (PKR)</div>
                 </td>
                 ${modalVendors.map((v, idx) => {
                     const sub = columnSubtotals[idx];
@@ -1810,11 +2318,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const total = sub + tax;
                     const isWinner = total > 0 && total === minTotal;
                     return `
-                        <td style="width: 260px; min-width: 260px; text-align:center; padding:8px; ${isWinner ? 'background:rgba(40,167,69,0.15) !important;' : ''}">
-                            <div style="font-size:11px; color:rgba(255,255,255,0.7);">${fmt(sub)}</div>
-                            <div style="font-size:11px; color:rgba(255,255,255,0.5);">${fmt(tax)}</div>
-                            <div style="font-size:15px; font-weight:800; color:${isWinner ? '#28a745' : '#fff'};">
-                                ${fmt(total)}${isWinner ? ' <i class="fas fa-trophy ml-1" style="font-size:11px;"></i>' : ''}
+                        <td style="width: 260px; min-width: 260px; text-align:center; padding:10px 8px; ${isWinner ? 'background:#ecfdf5 !important; border-top: 2px solid #16a34a !important;' : 'background:#f8fafc !important;'}">
+                            <div style="font-size:12px; font-weight:700; color:#334155;">${fmt(sub)}</div>
+                            <div style="font-size:11px; font-weight:600; color:#64748b; margin-top:3px;">${fmt(tax)}</div>
+                            <div style="font-size:15px; font-weight:800; margin-top:4px; color:${isWinner ? '#16a34a' : '#0f172a'};">
+                                ${fmt(total)}${isWinner ? ' <i class="fas fa-trophy ml-1 text-success" style="font-size:12px;"></i>' : ''}
                             </div>
                         </td>
                     `;
@@ -1826,6 +2334,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     function renderTitle() {
+        if (!state) return;
         const view = document.getElementById('pcTitleView');
         const input = document.querySelector('#pcTitleForm input[name="pcs_title"]');
         if (view) view.textContent = state.pcs_title || '';
@@ -1833,6 +2342,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderPriceBreakdown() {
+        if (!state) return;
         const quotes = state.quotes || [];
         const sorted = sortQuotesByPrice(quotes);
         let basePrice = parseFloat(state.pcs_intprice || 0);
@@ -1924,7 +2434,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                                 ${q.attachment_path ? `
                                     <div class="mt-1">
-                                        <button type="button" class="btn btn-xs btn-outline-info pc-live-view-quote-btn" data-url="${storageBase}${q.attachment_path}" data-title="${(q.firm_name||'').replaceAll('"','&quot;')}" style="font-size: 8px; padding: 1px 6px;">
+                                        <button type="button" class="btn btn-xs btn-outline-info pc-live-view-quote-btn" data-url="${quoteViewBase}/${q.qte_id}/view" data-qte-id="${q.qte_id}" data-ext="${(q.attachment_path || q.attachment_name || '').split('.').pop().toLowerCase()}" data-file-path="${q.attachment_path || ''}" data-file-name="${(q.attachment_name || q.attachment_path || '').replaceAll('"','&quot;')}" data-title="${(q.firm_name||'').replaceAll('"','&quot;')}" style="font-size: 8px; padding: 1px 6px;">
                                             <i class="fas fa-eye mr-1"></i> View Quote
                                         </button>
                                     </div>
@@ -2004,17 +2514,12 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = head + body + foot;
     }
 
-    function renderTitle() {
-        const view = document.getElementById('pcTitleView');
-        const input = document.querySelector('#pcTitleForm input[name="pcs_title"]');
-        if (view) view.textContent = state.pcs_title || '';
-        if (input) input.value = state.pcs_title || '';
-    }
-
     function renderAll() {
+        if (!state) return;
         renderTitle();
         renderItems();
         renderQuotes();
+        renderNoQuotes();
         renderRemarks();
         renderFiles();
         renderPriceBreakdown();
@@ -2088,7 +2593,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!ensureEditing()) return;
         if (!inlineEditor) return;
         inlineEditor.style.display = '';
-        document.getElementById('pcItemDesc')?.focus();
+        if (state.pcs_type === 'Rb') {
+            document.getElementById('pcAddEmpSelect')?.focus();
+        } else {
+            document.getElementById('pcItemDesc')?.focus();
+        }
     });
 
     itemCancelBtn?.addEventListener('click', function() {
@@ -2096,26 +2605,78 @@ document.addEventListener('DOMContentLoaded', function() {
         inlineEditor.style.display = 'none';
     });
 
+    // Auto-fetch TA/DA details when employee is selected in Add Item form
+    $('#pcAddEmpSelect').on('change', async function() {
+        const empId = this.value;
+        if (!empId) return;
+        try {
+            const res = await fetch(`/purchase/tada/employee-details/${empId}`);
+            if (res.ok) {
+                const tada = await res.json();
+                const rateInput = document.getElementById('pcAddEmpRate');
+                const descInput = document.getElementById('pcAddEmpDesc');
+                if (rateInput && tada.tada_amount) rateInput.value = tada.tada_amount;
+                if (descInput && tada.description) descInput.value = tada.description;
+            }
+        } catch (e) {
+            console.warn("Could not fetch TA/DA details:", e);
+        }
+    });
+
     itemForm?.addEventListener('submit', async function(e) {
         e.preventDefault();
         if (!ensureEditing()) return;
         const fd = new FormData();
         fd.append('op', 'add_item');
-        fd.append('item_desc', document.getElementById('pcItemDesc')?.value || '');
-        fd.append('item_qty', document.getElementById('pcItemQty')?.value || '1');
         fd.append('_token', @json(csrf_token()));
+
+        if (state.pcs_type === 'Rb') {
+            const empId = document.getElementById('pcAddEmpSelect')?.value || '';
+            const desc = document.getElementById('pcAddEmpDesc')?.value || '';
+            const qty = document.getElementById('pcAddEmpQty')?.value || '1';
+            const price = document.getElementById('pcAddEmpRate')?.value || '0';
+
+            if (!empId) { toast('Please select an employee'); return; }
+
+            fd.append('emp_id', empId);
+            fd.append('item_desc', desc.trim() || 'TA/DA Official Visit');
+            fd.append('item_qty', qty);
+            fd.append('item_price', price);
+            fd.append('item_qtyunit', 'Days');
+            fd.append('item_subhead', 'Misc');
+            fd.append('item_type', '3');
+            fd.append('item_subtype', 'Travelling/Boarding/Lodging');
+        } else {
+            const desc = itemForm.querySelector('[name="item_desc"]')?.value || '';
+            const qty = itemForm.querySelector('[name="item_qty"]')?.value || '1';
+            const unit = itemForm.querySelector('[name="item_qtyunit"]')?.value || 'num';
+            const price = itemForm.querySelector('[name="item_price"]')?.value || '0';
+            const type = itemForm.querySelector('[name="item_type"]')?.value || '7';
+            const subtype = itemForm.querySelector('[name="item_subtype"]')?.value || '';
+            const type2 = itemForm.querySelector('[name="item_type2"]')?.value || '6';
+            const subhead = itemForm.querySelector('[name="item_subhead"]')?.value || '';
+
+            if (!desc.trim()) { toast('Description cannot be empty'); return; }
+
+            fd.append('item_desc', desc.trim());
+            fd.append('item_qty', qty);
+            fd.append('item_qtyunit', unit);
+            fd.append('item_price', price);
+            fd.append('item_type', type);
+            fd.append('item_subtype', subtype);
+            fd.append('item_type2', type2);
+            fd.append('item_subhead', subhead);
+        }
+
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
-            toast(json.message || 'Saved');
-            const desc = document.getElementById('pcItemDesc');
-            const qty = document.getElementById('pcItemQty');
-            if (desc) desc.value = '';
-            if (qty) qty.value = '1';
-            desc?.focus();
+            toast(json.message || 'Item added successfully');
+            itemForm.reset();
+            if (inlineEditor) inlineEditor.style.display = 'none';
         } catch (err) {
-            toast(err.message || 'Error');
+            toast(err.message || 'Error adding item');
         }
     });
 
@@ -2125,26 +2686,110 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!ensureEditing()) return;
             const tr = editBtn.closest('tr');
             const pciId = editBtn.getAttribute('data-pci-id');
-            const desc = editBtn.getAttribute('data-desc') || '';
-            const qty = editBtn.getAttribute('data-qty') || '1';
-            const unit = editBtn.getAttribute('data-unit') || 'num';
+            const it = (state.items || []).find(i => String(i.pci_id) === String(pciId));
+            if (!it) return;
 
+            const isRb = state.pcs_type === 'Rb';
+            const isPt = state.pcs_type === 'Pt';
+            const isPs = !isRb && !isPt;
+
+            if (isRb) {
+                tr.innerHTML = `
+                    <td class="pl-3 text-warning font-weight-bold" style="font-size: 11px;"><i class="fas fa-pencil-alt"></i></td>
+                    <td>
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Select Employee:</div>
+                        <select class="form-control form-control-sm pc-inline-emp-select mb-1" style="font-size: 11px; height: 26px; padding: 1px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                            <option value="">-- Select Employee --</option>
+                            ${allEmployees.map(emp => `
+                                <option value="${emp.emp_id}" ${String(emp.emp_id) === String(it.pci_emp_id) ? 'selected' : ''}>
+                                    ${escapeHtml(emp.emp_name)} (${escapeHtml(emp.emp_id)}) - ${escapeHtml(emp.emp_rank)}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Travel Purpose / Details:</div>
+                        <input type="text" class="form-control form-control-sm pc-inline-desc-input" value="${escapeHtml(it.pci_desc)}" style="font-size: 11px; height: 26px; padding: 2px 6px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;" required placeholder="Purpose...">
+                    </td>
+                    <td class="text-center">
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Subhead:</div>
+                        <input type="text" class="form-control form-control-sm pc-inline-subhead-input text-center" value="${escapeHtml(it.pci_subhead || state.pcs_subhead || 'Misc')}" style="font-size: 10.5px; height: 26px; padding: 2px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                    </td>
+                    <td class="text-center">
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Days:</div>
+                        <input type="number" step="1" class="form-control form-control-sm pc-inline-qty-input text-center" value="${it.pci_qty || 1}" style="font-size: 11px; height: 26px; width: 55px; margin: 0 auto; padding: 2px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;" required>
+                    </td>
+                    <td class="text-right pr-3">
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Daily Rate (PKR):</div>
+                        <input type="number" step="0.01" class="form-control form-control-sm pc-inline-price-input text-right font-weight-bold" value="${it.pci_price || 0}" style="font-size: 11px; height: 26px; width: 90px; margin-left: auto; padding: 2px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;" required>
+                    </td>
+                    <td class="text-center pr-3">
+                        <span class="badge badge-warning px-1.5 py-0.5 text-dark" style="background: #fef3c7; border: 1px solid #fde68a; font-size: 9.5px;">Meezan Bank</span>
+                    </td>
+                    <td class="text-right pr-3">
+                        <div class="d-flex justify-content-end gap-1">
+                            <button type="button" class="btn btn-success btn-xs pc-inline-save-btn" data-pci-id="${it.pci_id}" title="Save" style="padding: 2px 6px; font-size: 10px;"><i class="fas fa-check"></i></button>
+                            <button type="button" class="btn btn-secondary btn-xs pc-inline-cancel-btn" title="Cancel" style="padding: 2px 6px; font-size: 10px;"><i class="fas fa-times"></i></button>
+                        </div>
+                    </td>
+                `;
+
+                // Handle employee selection change inside this row to auto-update rate & desc
+                tr.querySelector('.pc-inline-emp-select')?.addEventListener('change', async function() {
+                    const empId = this.value;
+                    if (!empId) return;
+                    try {
+                        const res = await fetch(`/purchase/tada/employee-details/${empId}`);
+                        if (res.ok) {
+                            const tada = await res.json();
+                            const rateInput = tr.querySelector('.pc-inline-price-input');
+                            const descInput = tr.querySelector('.pc-inline-desc-input');
+                            if (rateInput && tada.tada_amount) rateInput.value = tada.tada_amount;
+                            if (descInput && tada.description) descInput.value = tada.description;
+                        }
+                    } catch (err) {}
+                });
+                return;
+            }
+
+            // For Ps and Pt cases:
             tr.innerHTML = `
-                <td class="pl-3 text-warning font-weight-bold"><i class="fas fa-pencil-alt"></i></td>
+                <td class="pl-3 text-warning font-weight-bold" style="font-size: 11px;"><i class="fas fa-pencil-alt"></i></td>
                 <td>
-                    <input type="text" class="form-control form-control-sm pc-inline-desc-input" value="${desc.replaceAll('"', '&quot;')}" style="background: var(--rd-neutral-200); color:#fff; border:1px solid var(--rd-accent); font-size:12px;" required>
+                    <input type="text" class="form-control form-control-sm pc-inline-desc-input" value="${escapeHtml(it.pci_desc)}" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 11px; height: 26px; min-width: 140px; padding: 2px 6px;" required>
                 </td>
                 <td class="text-center">
-                    <div class="d-flex align-items-center justify-content-center" style="gap:4px;">
-                        <input type="number" step="0.01" class="form-control form-control-sm pc-inline-qty-input text-center" value="${qty}" style="width:65px; background: var(--rd-neutral-200); color:#fff; border:1px solid var(--rd-accent); font-size:12px;" required>
-                        <input type="text" class="form-control form-control-sm pc-inline-unit-input text-center" value="${unit.replaceAll('"', '&quot;')}" style="width:45px; background: var(--rd-neutral-200); color:#fff; border:1px solid rgba(255,255,255,0.2); font-size:11px;">
-                    </div>
+                    <select class="form-control form-control-sm pc-inline-type-select" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 10.5px; height: 26px; padding: 1px 4px;">
+                        <option value="7" ${Number(it.pci_type || 7) === 7 ? 'selected' : ''}>Permanent</option>
+                        <option value="2" ${Number(it.pci_type) === 2 ? 'selected' : ''}>Consumable</option>
+                        <option value="3" ${Number(it.pci_type) === 3 ? 'selected' : ''}>Service</option>
+                    </select>
                 </td>
-                <td class="text-right pr-3 font-weight-bold text-muted">—</td>
+                <td>
+                    <input type="text" class="form-control form-control-sm pc-inline-subtype-input" value="${escapeHtml(it.pci_subtype)}" placeholder="Subtype..." style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 10.5px; height: 26px; padding: 2px 6px;">
+                </td>
+                <td class="text-center">
+                    <select class="form-control form-control-sm pc-inline-type2-select" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 10.5px; height: 26px; padding: 1px 4px;">
+                        <option value="6" ${Number(it.pci_type2 || 6) === 6 ? 'selected' : ''}>Asset</option>
+                        <option value="5" ${Number(it.pci_type2) === 5 ? 'selected' : ''}>Inventory</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm pc-inline-subhead-input" value="${escapeHtml(it.pci_subhead || state.pcs_subhead)}" list="subheadOptionsList" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 10.5px; height: 26px; padding: 2px 6px;">
+                </td>
+                <td class="text-center">
+                    <input type="number" step="0.01" class="form-control form-control-sm pc-inline-qty-input text-center" value="${it.pci_qty}" style="width: 52px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 11px; height: 26px; margin: 0 auto; padding: 2px 4px;" required>
+                </td>
+                <td class="text-center">
+                    <input type="text" class="form-control form-control-sm pc-inline-unit-input text-center" value="${escapeHtml(it.pci_qtyunit || 'num')}" style="width: 46px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 10.5px; height: 26px; margin: 0 auto; padding: 2px 4px;">
+                </td>
+                <td class="text-right pr-3">
+                    <input type="number" step="0.01" class="form-control form-control-sm pc-inline-price-input text-right font-weight-bold" value="${it.pci_price || 0}" style="width: 85px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 11px; height: 26px; margin-left: auto; padding: 2px 4px;" placeholder="Price (PKR)">
+                </td>
                 <td class="text-right pr-3">
                     <div class="d-flex justify-content-end gap-1">
-                        <button type="button" class="btn btn-success btn-xs pc-inline-save-btn" data-pci-id="${pciId}" title="Save Changes" style="padding:2px 8px;"><i class="fas fa-check"></i></button>
-                        <button type="button" class="btn btn-secondary btn-xs pc-inline-cancel-btn" title="Cancel" style="padding:2px 8px;"><i class="fas fa-times"></i></button>
+                        <button type="button" class="btn btn-success btn-xs pc-inline-save-btn" data-pci-id="${pciId}" title="Save Changes" style="padding: 2px 6px; font-size: 10px;"><i class="fas fa-check"></i></button>
+                        <button type="button" class="btn btn-secondary btn-xs pc-inline-cancel-btn" title="Cancel" style="padding: 2px 6px; font-size: 10px;"><i class="fas fa-times"></i></button>
                     </div>
                 </td>
             `;
@@ -2157,27 +2802,58 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!ensureEditing()) return;
             const tr = saveInlineBtn.closest('tr');
             const pciId = saveInlineBtn.getAttribute('data-pci-id');
-            const desc = tr.querySelector('.pc-inline-desc-input')?.value || '';
-            const qty = tr.querySelector('.pc-inline-qty-input')?.value || '1';
-            const unit = tr.querySelector('.pc-inline-unit-input')?.value || 'num';
-
-            if (!desc.trim()) { toast('Description cannot be empty'); return; }
 
             const fd = new FormData();
             fd.append('op', 'edit_item');
             fd.append('pci_id', pciId);
-            fd.append('item_desc', desc.trim());
-            fd.append('item_qty', qty);
-            fd.append('item_qtyunit', unit);
             fd.append('_token', @json(csrf_token()));
+
+            if (state.pcs_type === 'Rb') {
+                const empId = tr.querySelector('.pc-inline-emp-select')?.value || '';
+                const desc = tr.querySelector('.pc-inline-desc-input')?.value || '';
+                const subhead = tr.querySelector('.pc-inline-subhead-input')?.value || 'Misc';
+                const qty = tr.querySelector('.pc-inline-qty-input')?.value || '1';
+                const price = tr.querySelector('.pc-inline-price-input')?.value || '0';
+
+                fd.append('emp_id', empId);
+                fd.append('item_desc', desc.trim() || 'TA/DA Allowance');
+                fd.append('item_subhead', subhead);
+                fd.append('item_qty', qty);
+                fd.append('item_price', price);
+                fd.append('item_qtyunit', 'Days');
+                fd.append('item_type', '3');
+                fd.append('item_subtype', 'Travelling/Boarding/Lodging');
+            } else {
+                const desc = tr.querySelector('.pc-inline-desc-input')?.value || '';
+                const type = tr.querySelector('.pc-inline-type-select')?.value || '7';
+                const subtype = tr.querySelector('.pc-inline-subtype-input')?.value || '';
+                const type2 = tr.querySelector('.pc-inline-type2-select')?.value || '6';
+                const subhead = tr.querySelector('.pc-inline-subhead-input')?.value || '';
+                const qty = tr.querySelector('.pc-inline-qty-input')?.value || '1';
+                const unit = tr.querySelector('.pc-inline-unit-input')?.value || 'num';
+                const price = tr.querySelector('.pc-inline-price-input')?.value || '0';
+
+                if (!desc.trim()) { toast('Description cannot be empty'); return; }
+
+                fd.append('item_desc', desc.trim());
+                fd.append('item_type', type);
+                fd.append('item_subtype', subtype);
+                fd.append('item_type2', type2);
+                fd.append('item_subhead', subhead);
+                fd.append('item_qty', qty);
+                fd.append('item_qtyunit', unit);
+                fd.append('item_price', price);
+            }
 
             try {
                 const json = await postForm(fd);
-                state = json.data;
+                updateState(json);
                 renderAll();
                 toast(json.message || 'Item updated successfully');
             } catch (err) {
+                console.error("Error updating item:", err);
                 toast(err.message || 'Error updating item');
+                renderItems();
             }
             return;
         }
@@ -2200,11 +2876,93 @@ document.addEventListener('DOMContentLoaded', function() {
         fd.append('_token', @json(csrf_token()));
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
             toast(json.message || 'Deleted');
         } catch (err) {
             toast(err.message || 'Error');
+        }
+    });
+
+    // Quotations Not Received (No-Quotes) Handlers
+    $('#pcToggleAddNoQuoteBtn').on('click', function() {
+        if (!ensureEditing()) return;
+        $('#pcAddNoQuoteInline').slideToggle(200);
+    });
+
+    $('#pcCancelNoQuoteBtn').on('click', function() {
+        $('#pcAddNoQuoteInline').slideUp(200);
+    });
+
+    $('#pcSubmitNoQuoteBtn').on('click', async function() {
+        if (!ensureEditing()) return;
+        const firmId = $('#pcNoQuoteFirmSelector').val();
+        if (!firmId) {
+            toast('Please select a firm');
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('op', 'add_noquote');
+        fd.append('frm_id', firmId);
+        fd.append('nqt_reason', 'Quotation Not Received');
+        fd.append('_token', @json(csrf_token()));
+
+        try {
+            const json = await postForm(fd);
+            updateState(json);
+            renderAll();
+            toast(json.message || 'No-Quote firm added successfully');
+            $('#pcNoQuoteFirmSelector').val('');
+            $('#pcAddNoQuoteInline').slideUp(200);
+        } catch (err) {
+            toast(err.message || 'Error adding No-Quote firm');
+        }
+    });
+
+    $(document).on('click', '.pc-del-noquote-btn', async function() {
+        if (!ensureEditing()) return;
+        const nqtId = this.getAttribute('data-nqt-id');
+        if (!nqtId) return;
+        if (!confirm('Are you sure you want to remove this firm from No-Quotes?')) return;
+
+        const fd = new FormData();
+        fd.append('op', 'delete_noquote');
+        fd.append('nqt_id', nqtId);
+        fd.append('_token', @json(csrf_token()));
+
+        try {
+            const json = await postForm(fd);
+            updateState(json);
+            renderAll();
+            toast(json.message || 'Removed from No-Quotes');
+        } catch (err) {
+            toast(err.message || 'Error removing No-Quote');
+        }
+    });
+
+    // AJAX Handler for Subhead and Awarded Vendor Metadata Forms
+    $(document).on('submit', '.pc-metadata-ajax-form', async function(e) {
+        e.preventDefault();
+        if (!ensureEditing()) return;
+        const fd = new FormData(this);
+        fd.append('_token', @json(csrf_token()));
+
+        try {
+            const json = await postForm(fd);
+            updateState(json);
+            renderAll();
+            if (state.pcs_subhead) {
+                const shView = document.getElementById('pcSubheadView');
+                if (shView) shView.textContent = state.pcs_subhead;
+            }
+            if (state.vendor_name) {
+                const vView = document.getElementById('pcVendorView');
+                if (vView) vView.textContent = state.vendor_name;
+            }
+            toast(json.message || 'Details updated successfully');
+        } catch (err) {
+            toast(err.message || 'Error updating details');
         }
     });
 
@@ -2300,17 +3058,103 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    async function ensureMammoth() {
+        if (typeof mammoth !== 'undefined') return true;
+        return new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = @json(asset('plugins/mammoth/mammoth.browser.min.js'));
+            s.onload = () => resolve(typeof mammoth !== 'undefined');
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        });
+    }
+
+    async function ensureXLSX() {
+        if (typeof XLSX !== 'undefined') return true;
+        return new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = @json(asset('plugins/sheetjs/xlsx.full.min.js'));
+            s.onload = () => resolve(typeof XLSX !== 'undefined');
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        });
+    }
+
+    function renderWordFallback(container, url, qteId, title, noticeMsg) {
+        if (!container) return;
+        container.innerHTML = `
+            <div class="text-center py-5 px-4" style="max-width: 600px; margin: 0 auto;">
+                <div class="mb-3">
+                    <i class="fas fa-file-word text-primary" style="font-size: 56px;"></i>
+                </div>
+                <h5 class="text-dark font-weight-bold rajdhani" style="letter-spacing: 0.5px;">${(title || 'Document').toUpperCase()}</h5>
+                <p class="text-muted small mb-4" style="line-height: 1.6;">
+                    ${noticeMsg || 'This document cannot be rendered directly in-line. Please use the options below to view or download it.'}
+                </p>
+                <div class="d-flex justify-content-center" style="gap: 12px;">
+                    <a href="${url}" target="_blank" class="btn btn-sm btn-primary px-3 font-weight-bold">
+                        <i class="fas fa-external-link-alt mr-1"></i> Open in New Tab
+                    </a>
+                    <a href="${url.includes('?') ? url + '&download=1' : url + '?download=1'}" download class="btn btn-sm btn-outline-secondary px-3 font-weight-bold">
+                        <i class="fas fa-download mr-1"></i> Download Copy
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
     // Live preview quote document in modal
     $(document).on('click', '.pc-live-view-quote-btn', async function(e) {
         e.preventDefault();
-        const url = $(this).data('url');
-        const qteId = $(this).data('qte-id') || $(this).data('pat-id');
-        const title = $(this).data('title') || 'Quotation Document';
-        if (!url) return;
+        const btn = $(this);
+        const url = btn.data('url') || btn.attr('href');
+        const qteId = btn.data('qte-id') || btn.data('pat-id');
+        const title = btn.data('title') || 'Quotation Document';
+        if (!url || url === '#' || url === 'javascript:void(0)') return;
 
-        const ext = url.split('.').pop().toLowerCase().split('?')[0];
-        $('#pcQuoteViewerTitle').text(`${title.toUpperCase()} - QUOTATION [${ext.toUpperCase()}]`);
+        // 1. Resolve extension safely from data attributes
+        let ext = (btn.data('ext') || '').toString().toLowerCase().trim();
+        const filePath = (btn.data('file-path') || btn.data('file-name') || '').toString();
+        if (!ext && filePath) {
+            ext = filePath.split('.').pop().toLowerCase().split('?')[0];
+        }
+
+        // 2. Look up in state.quotes or state.attachments if ext is missing/invalid
+        if (!ext || ext.length > 5 || ext.includes('/') || ext.includes(':')) {
+            if (qteId && typeof state !== 'undefined' && state) {
+                const qObj = (state.quotes || []).find(x => String(x.qte_id) === String(qteId));
+                if (qObj && (qObj.attachment_path || qObj.attachment_name)) {
+                    ext = (qObj.attachment_path || qObj.attachment_name).split('.').pop().toLowerCase().split('?')[0];
+                }
+                if (!ext) {
+                    const aObj = (state.attachments || []).find(x => String(x.pat_id) === String(qteId));
+                    if (aObj && (aObj.pat_path || aObj.pat_filename)) {
+                        ext = (aObj.pat_path || aObj.pat_filename).split('.').pop().toLowerCase().split('?')[0];
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback to extracting valid extension from URL if present
+        if (!ext || ext.length > 5 || ext.includes('/') || ext.includes(':')) {
+            const cleanUrl = url.split('?')[0].split('#')[0];
+            const candidate = cleanUrl.split('.').pop().toLowerCase();
+            if (['pdf','png','jpg','jpeg','webp','gif','bmp','svg','doc','docx','xls','xlsx','csv','txt','rtf'].includes(candidate)) {
+                ext = candidate;
+            }
+        }
+
+        if (!ext || ext.length > 5 || ext.includes('/') || ext.includes(':')) {
+            ext = '';
+        }
+
+        // Configure Modal Header and Action Buttons
+        const cleanExt = (ext || '').toUpperCase();
+        const badgeHtml = cleanExt ? `<span class="badge badge-primary ml-2 px-2 py-0.5" style="font-size: 10px; font-weight: 700; letter-spacing: 0.5px;">${cleanExt}</span>` : '';
+        $('#pcQuoteViewerTitle').html(`${escapeHtml(title.toUpperCase())} - QUOTATION ${badgeHtml}`);
         $('#pcQuoteViewerOpenNewTab').attr('href', url);
+        const dlUrl = url.includes('?') ? (url + '&download=1') : (url + '?download=1');
+        $('#pcQuoteViewerDownloadBtn').attr('href', dlUrl);
         $('#pcQuoteViewerDiagBtn').data('qte-id', qteId).data('url', url).data('title', title);
 
         const iframe = document.getElementById('pcQuoteViewerIframe');
@@ -2332,61 +3176,100 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sheetWrap) { sheetWrap.style.display = 'none'; }
         if (sheetTabs) { sheetTabs.innerHTML = ''; }
         if (sheetContent) { sheetContent.innerHTML = ''; }
-        if (loading) { loading.style.display = 'none'; }
+        if (loading) { loading.style.display = 'flex'; }
 
         $('#pcQuoteViewerModal').modal('show');
 
-        // 1. Image Formats
+        // 4. If ext is still unknown, detect from server response headers
+        if (!ext) {
+            try {
+                const headRes = await fetch(url, { method: 'HEAD' });
+                const headerExt = headRes.headers.get('x-file-extension');
+                if (headerExt) {
+                    ext = headerExt.toLowerCase().trim();
+                } else {
+                    const ct = (headRes.headers.get('content-type') || '').toLowerCase();
+                    if (ct.includes('pdf')) ext = 'pdf';
+                    else if (ct.includes('word') || ct.includes('document')) ext = 'docx';
+                    else if (ct.includes('sheet') || ct.includes('excel')) ext = 'xlsx';
+                    else if (ct.includes('image/')) ext = 'png';
+                    else if (ct.includes('text/plain')) ext = 'txt';
+                }
+                if (ext) {
+                    const cleanExt = ext.toUpperCase();
+                    const badgeHtml = `<span class="badge badge-primary ml-2 px-2 py-0.5" style="font-size: 10px; font-weight: 700; letter-spacing: 0.5px;">${cleanExt}</span>`;
+                    $('#pcQuoteViewerTitle').html(`${escapeHtml(title.toUpperCase())} - QUOTATION ${badgeHtml}`);
+                }
+            } catch (headErr) {
+                console.warn('HEAD detection error:', headErr);
+            }
+        }
+
+        // 5. Render based on detected file extension
+        // A. Image Formats
         if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'tiff', 'jfif', 'ico', 'avif'].includes(ext)) {
             if (imgWrap && img) {
+                img.onload = function() {
+                    if (loading) loading.style.display = 'none';
+                    imgWrap.style.display = 'flex';
+                };
                 img.onerror = function() {
+                    if (loading) loading.style.display = 'none';
                     renderDiagnosticError(docContent, url, qteId, title, 'Image failed to load (403 Forbidden or file missing).');
                     if (imgWrap) imgWrap.style.display = 'none';
                     if (docWrap) docWrap.style.display = 'flex';
                 };
                 img.src = url;
-                imgWrap.style.display = 'flex';
+            } else {
+                if (loading) loading.style.display = 'none';
             }
         } 
-        // 2. Word Documents (DOCX / DOC)
+        // B. Word Documents (DOCX / DOC)
         else if (['docx', 'doc'].includes(ext)) {
-            if (loading) loading.style.display = 'flex';
             try {
                 const res = await fetch(url);
                 if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 const arrayBuffer = await res.arrayBuffer();
+                await ensureMammoth();
+
                 if (typeof mammoth !== 'undefined') {
-                    const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-                    if (docContent) {
-                        docContent.innerHTML = result.value || '<p class="text-muted italic">Document is empty.</p>';
+                    try {
+                        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+                        if (docContent) {
+                            docContent.innerHTML = result.value || '<p class="text-muted font-italic text-center py-4">Document content is empty.</p>';
+                        }
+                        if (docWrap) docWrap.style.display = 'flex';
+                    } catch (convErr) {
+                        console.warn('Mammoth convert failed, rendering fallback:', convErr);
+                        renderWordFallback(docContent, url, qteId, title, 'Older Word (.doc) format requires downloading or saving as .docx for live in-browser preview.');
+                        if (docWrap) docWrap.style.display = 'flex';
                     }
-                    if (docWrap) docWrap.style.display = 'flex';
                 } else {
                     renderDiagnosticError(docContent, url, qteId, title, 'Mammoth preview library unavailable.');
                     if (docWrap) docWrap.style.display = 'flex';
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Word rendering error:', err);
                 renderDiagnosticError(docContent, url, qteId, title, err.message);
                 if (docWrap) docWrap.style.display = 'flex';
             } finally {
                 if (loading) loading.style.display = 'none';
             }
         } 
-        // 3. Excel Spreadsheets (XLSX / XLS / CSV)
+        // C. Excel Spreadsheets (XLSX / XLS / CSV)
         else if (['xlsx', 'xls', 'csv'].includes(ext)) {
-            if (loading) loading.style.display = 'flex';
             try {
                 const res = await fetch(url);
                 if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 const arrayBuffer = await res.arrayBuffer();
+                await ensureXLSX();
+
                 if (typeof XLSX !== 'undefined') {
                     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
                     const sheetNames = workbook.SheetNames || [];
                     if (sheetNames.length === 0) {
                         if (sheetContent) sheetContent.innerHTML = '<div class="text-muted p-4 text-center">Workbook contains no sheets.</div>';
                     } else {
-                        // Render tabs
                         if (sheetTabs) {
                             sheetTabs.innerHTML = sheetNames.map((name, i) => `
                                 <button type="button" class="excel-tab-btn ${i === 0 ? 'active' : ''}" data-sheet-index="${i}">
@@ -2423,22 +3306,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (sheetWrap) sheetWrap.style.display = 'flex';
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Excel rendering error:', err);
                 renderDiagnosticError(sheetContent, url, qteId, title, err.message);
                 if (sheetWrap) sheetWrap.style.display = 'flex';
             } finally {
                 if (loading) loading.style.display = 'none';
             }
         } 
-        // 4. Plain Text / Code (TXT, LOG, JSON, XML)
+        // D. Plain Text / Code (TXT, LOG, JSON, XML)
         else if (['txt', 'log', 'json', 'xml'].includes(ext)) {
-            if (loading) loading.style.display = 'flex';
             try {
                 const res = await fetch(url);
                 if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 const text = await res.text();
                 if (docContent) {
-                    docContent.innerHTML = `<pre style="font-family: monospace; font-size: 13px; color: #fff; background: var(--rd-surface); padding: 20px; border-radius: 6px; white-space: pre-wrap; word-break: break-all;">${text.replaceAll('<','&lt;').replaceAll('>','&gt;')}</pre>`;
+                    docContent.innerHTML = `<pre style="font-family: monospace; font-size: 13px; color: #1e293b; background: #f8fafc; padding: 20px; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap; word-break: break-all;">${escapeHtml(text)}</pre>`;
                 }
                 if (docWrap) docWrap.style.display = 'flex';
             } catch (err) {
@@ -2448,9 +3330,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (loading) loading.style.display = 'none';
             }
         } 
-        // 5. PDF & Other browser native files
-        else {
+        // E. PDF Documents
+        else if (ext === 'pdf') {
             if (iframe) {
+                iframe.onload = function() {
+                    if (loading) loading.style.display = 'none';
+                };
+                iframe.style.display = 'block';
+                iframe.src = url;
+            } else {
+                if (loading) loading.style.display = 'none';
+            }
+        }
+        // F. Other Unknown Binary Formats - Never set iframe.src to avoid forced browser downloads!
+        else {
+            if (loading) loading.style.display = 'none';
+            if (docContent && docWrap) {
+                renderWordFallback(docContent, url, qteId, title, `File type (.${ext || 'unknown'}) cannot be rendered directly in the browser.`);
+                docWrap.style.display = 'flex';
+            } else if (iframe) {
                 iframe.style.display = 'block';
                 iframe.src = url;
             }
@@ -2472,18 +3370,46 @@ document.addEventListener('DOMContentLoaded', function() {
     $(document).on('change', '#pcDirectQuoteUploadInput', async function() {
         if (!activeDirectQteId || !this.files || !this.files[0]) return;
         const file = this.files[0];
+
+        // Ensure user confirms that quotation is officially attested
+        const confirmMsg = "IMPORTANT ATTESTATION REQUIREMENT:\n\nبرائے مہربانی یقینی بنائیں کہ صرف باقاعدہ تصدیق شدہ (Attested with stamp & signature) کوٹیشن ہی اپلوڈ کی جا رہی ہے۔\n\nPlease confirm that the quotation document being uploaded is officially ATTESTED by the vendor.\n\nDo you want to proceed?";
+        if (typeof Swal !== 'undefined') {
+            const result = await Swal.fire({
+                title: 'Attested Quotation Required',
+                html: '<div style="text-align:left; font-size:13px; line-height:1.6;">' +
+                      '<p class="mb-2 text-warning font-weight-bold"><i class="fas fa-stamp mr-1"></i> برائے مہربانی یقینی بنائیں کہ صرف باقاعدہ تصدیق شدہ (Attested) کوٹیشن ہی اپلوڈ کی جا رہی ہے۔</p>' +
+                      '<p class="mb-0 text-muted">Please confirm that this document is officially <strong>ATTESTED</strong> with vendor stamp and signature before uploading.</p>' +
+                      '</div>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fas fa-check-circle mr-1"></i> Yes, It Is Attested',
+                cancelButtonText: 'Cancel'
+            });
+            if (!result.isConfirmed) {
+                this.value = '';
+                return;
+            }
+        } else {
+            if (!confirm(confirmMsg)) {
+                this.value = '';
+                return;
+            }
+        }
+
         const fd = new FormData();
         fd.append('op', 'upload_quote_file');
         fd.append('qte_id', activeDirectQteId);
         fd.append('quote_file', file);
         fd.append('_token', @json(csrf_token()));
 
-        toast('Uploading quote document...');
+        toast('Uploading attested quote document...');
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
-            toast(json.message || 'Quote document uploaded successfully');
+            toast(json.message || 'Attested quote document uploaded successfully');
         } catch (err) {
             toast(err.message || 'Upload failed');
         }
@@ -2502,7 +3428,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fd.append('_token', @json(csrf_token()));
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
             toast(json.message || 'Deleted');
         } catch (err) {
@@ -2522,7 +3448,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fd.append('_token', @json(csrf_token()));
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
             toast(json.message || 'Deleted');
         } catch (err) {
@@ -2537,7 +3463,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fd = new FormData(form);
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
             toast(json.message || 'Saved');
         } catch (err) {
@@ -2564,7 +3490,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 const json = await postForm(fd);
-                state = json.data;
+                updateState(json);
                 renderAll();
                 toast(json.message || 'Deleted from database');
             } catch (err) {
@@ -2718,6 +3644,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const idx = parseInt(this.getAttribute('data-idx'));
         if (this.files && this.files[0]) {
             modalVendors[idx].file = this.files[0];
+            toast('Attested quotation attached. Please ensure the document is stamped & signed by the firm.');
         } else {
             modalVendors[idx].file = null;
         }
@@ -2754,7 +3681,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const json = await postForm(fd);
-                state = json.data;
+                updateState(json);
             }
             
             renderAll();
@@ -2781,7 +3708,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fd = new FormData(form);
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
             toast(json.message || 'Saved');
         } catch (err) {
@@ -2799,7 +3726,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
             toast(json.message || 'File(s) uploaded successfully');
         } catch (err) {
@@ -2819,7 +3746,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fd.append('_token', @json(csrf_token()));
         try {
             const json = await postForm(fd);
-            state = json.data;
+            updateState(json);
             renderAll();
             toast(json.message || 'Attachment deleted');
         } catch (err) {

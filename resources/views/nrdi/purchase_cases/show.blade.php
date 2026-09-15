@@ -153,7 +153,10 @@
                 $currentStatusDisplay = $purchase->current_stage_display ? ($purchase->pcs_status . ' — Currently with: ' . $purchase->current_stage_display) : $service->getStatusDisplayName($purchase->pcs_status);
                 
                 // Variable overrides for cross-role compatibility
-                $isInitiator = in_array(strtolower(trim((string)Auth::user()->acc_untarea)), ['prj', 'rdwprj', 'division']);
+                $user = Auth::user();
+                $userArea = strtolower(trim((string)($user?->acc_untarea ?? '')));
+                $isInitiator = in_array($userArea, ['prj', 'rdwprj', 'division']);
+                $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
                 $canEdit = $isInitiator && in_array(strtolower($purchase->pcs_status), ['draft', 'returned']);
                 $backRoute = $isInitiator ? route('purchase.initiation.index') : route('nrdi.purchase_cases_new.index');
             @endphp
@@ -182,17 +185,36 @@
                             <i class="fas fa-list-alt mr-1"></i> CASE DETAIL
                         </a>
                         @php
-                            $hasItLetter = $purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists();
-                            $isPsCase = in_array(strtolower(trim((string)($purchase->pcs_type ?? 'ps'))), ['ps', 'mat', 'material', 'eqp', 'equipment', 'cons', 'consultancy', 'serv', 'services'], true);
+                            $hasItLetter = (bool)($purchase->itLetter || \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->exists());
+                            $quotesCount = count($purchase->quotes ?? []);
                         @endphp
-                        @if($hasItLetter)
-                            <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(245,158,11,0.5); color: #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                        @if($isDProc)
+                            @if(!$hasItLetter)
+                                {{-- Procurement user sees button to CREATE IT on all cases --}}
+                                <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn btn-sm btn-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;">
+                                    <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
+                                </button>
+                            @else
+                                {{-- Procurement user sees button to EDIT/VIEW IT --}}
+                                <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(245,158,11,0.5); color: #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
+                                </a>
+                            @endif
+                        @else
+                            {{-- Other users see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
+                            @if($hasItLetter)
+                                <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(245,158,11,0.5); color: #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                                </a>
+                            @endif
+                        @endif
+
+                        {{-- Comparative Statement visible to all users only when there is more than 1 quote in the case (for all case types) --}}
+                        @if($quotesCount > 1)
+                            <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-success rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(40,167,69,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
                             </a>
                         @endif
-                        <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-success rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(40,167,69,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
-                        </a>
                         <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(0,123,255,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="fas fa-file-alt mr-1"></i> MINUTE VIEW
                         </a>
@@ -775,8 +797,8 @@ function toggleRemarks(id) {
 // RDWIS PREMIUM FINANCIAL INTELLIGENCE DASHBOARD LOGIC (MODAL)
 // =========================================================================
 function initFinancialIntelligenceCharts() {
-    const head = @json($head);
-    const subheads = @json($subheads);
+    const head = @json($head ?? null);
+    const subheads = @json($subheads ?? []);
     
     console.log("RDWIS Financial Intelligence: Initializing charts...", head);
     
@@ -910,5 +932,39 @@ function selectFirm(caseId, quoteId) {
         alert('Error selecting firm: ' + err.message);
     });
 }
+
+window.promptCreateIt = function(pcsId) {
+    if (confirm('Do you want to create IT / RFQ Letter for this purchase case?')) {
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+        fetch(`/purchase/case/${pcsId}/it-letter/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': token
+            }
+        })
+        .then(async res => {
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                const text = await res.text();
+                throw new Error(`Server returned HTTP ${res.status}: ${res.statusText}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success && data.redirect) {
+                window.open(data.redirect, '_blank');
+                location.reload();
+            } else {
+                alert(data.message || 'Error creating IT.');
+            }
+        })
+        .catch(err => {
+            alert('Failed to create IT: ' + err.message);
+        });
+    }
+};
 </script>
 @endsection
