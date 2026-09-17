@@ -446,7 +446,7 @@
                                     <div class="d-flex align-items-center">
                                         <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> 
                                         <span class="view-only text-dark font-weight-bold" id="pcSubheadView" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span>
-                                        @if($canEdit && $purchase->pcs_type !== 'Ps')
+                                        @if($canEdit)
                                             <form class="edit-only d-flex align-items-center flex-grow-1 pc-metadata-ajax-form" style="gap:6px; margin:0;" action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="op" value="save_metadata">
@@ -589,8 +589,7 @@
                                                 </div>
                                                 <div class="d-flex align-items-center flex-shrink-0">
                                                     <span class="badge badge-secondary badge-pill ml-1" id="pcCaseAttCountBadge" style="font-size: 8.5px; padding: 1px 4px;">{{ $caseAttachments->count() }}</span>
-                                                    <input type="file" id="pcCaseAttachDirectInput" multiple style="display: none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                                                    <button type="button" class="btn btn-xs btn-primary p-0 d-flex align-items-center justify-content-center ml-1" onclick="document.getElementById('pcCaseAttachDirectInput').click()" style="width: 18px; height: 18px; border-radius: 4px; background: var(--rd-accent, #5F7858) !important; border: none; cursor: pointer;" title="Upload Case Attachment (+)">
+                                                    <button type="button" class="btn btn-xs btn-primary p-0 d-flex align-items-center justify-content-center ml-1" data-toggle="modal" data-target="#modalAddPurchaseCaseAttachment" style="width: 18px; height: 18px; border-radius: 4px; background: var(--rd-accent, #5F7858) !important; border: none; cursor: pointer;" title="Attach Document To Purchase Case (+)">
                                                         <i class="fas fa-plus" style="font-size: 8.5px; color: #ffffff;"></i>
                                                     </button>
                                                 </div>
@@ -627,11 +626,6 @@
                                                                 <button type="button" class="btn btn-link text-primary p-0 pc-live-view-quote-btn hover-zoom" data-url="{{ url('/purchase/quote-attachment/' . $cDoc->pat_id . '/view') }}" data-pat-id="{{ $cDoc->pat_id }}" data-ext="{{ strtolower(pathinfo($cDoc->pat_path, PATHINFO_EXTENSION)) }}" data-file-path="{{ $cDoc->pat_path }}" data-file-name="{{ $cName }}" data-title="{{ $cName }}" style="font-size: 10px;" title="View {{ $cName }}">
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
-                                                                @if($canEdit)
-                                                                    <button type="button" class="btn btn-link text-danger p-0 pc-del-attachment-btn ml-1 edit-only" data-pat-id="{{ $cDoc->pat_id }}" title="Delete" style="font-size: 9px;">
-                                                                        <i class="fas fa-trash-alt"></i>
-                                                                    </button>
-                                                                @endif
                                                             </div>
                                                         </div>
                                                     @endforeach
@@ -942,11 +936,34 @@
                         </div>
                         @elseif($purchase->pcs_type === 'Pt')
                         {{-- Pt: Incidental Single Vendor Summary Card --}}
-                        <div class="p-3 mb-4 rounded border d-flex justify-content-between align-items-center" style="background: #f0fdfa; border-color: #99f6e4 !important;">
-                            <div>
-                                <span class="badge badge-info px-2.5 py-1 mr-2" style="background: #0d9488; font-size: 11px;"><i class="fas fa-receipt mr-1"></i> Single Vendor Procurement</span>
+                        @php
+                            $incidentalQuote = $purchase->quotes->first();
+                            $incidentalQuoteAtt = $incidentalQuote ? \Illuminate\Support\Facades\DB::table('pur.purattachments')->where('pat_objtype', 'qte')->where('pat_objid', $incidentalQuote->qte_id)->first() : null;
+                        @endphp
+                        <div class="p-3 mb-4 rounded border d-flex justify-content-between align-items-center flex-wrap" style="background: #f0fdfa; border-color: #99f6e4 !important; gap: 10px;">
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                <span class="badge badge-info px-2.5 py-1" style="background: #0d9488; font-size: 11px;"><i class="fas fa-receipt mr-1"></i> Single Vendor Procurement</span>
                                 <strong class="text-dark" style="font-size: 13px;">Awarded Vendor:</strong>
-                                <span class="font-weight-bold text-primary ml-1" style="font-size: 14px;">{{ $purchase->firm?->frm_name ?? ($purchase->pcs_frm_id ? ('Firm #' . $purchase->pcs_frm_id) : 'Direct Vendor') }}</span>
+                                <span class="font-weight-bold text-primary" style="font-size: 14px;">{{ $purchase->firm?->frm_name ?? ($purchase->pcs_frm_id ? ('Firm #' . $purchase->pcs_frm_id) : 'Direct Vendor') }}</span>
+
+                                {{-- Live View Eye Icon --}}
+                                @if($incidentalQuoteAtt)
+                                    <button type="button" class="btn btn-sm btn-outline-primary pc-live-view-quote-btn hover-zoom px-2.5 py-0.5 ml-1" data-url="{{ url('/purchase/quote-attachment/' . $incidentalQuoteAtt->pat_id . '/view') }}" data-pat-id="{{ $incidentalQuoteAtt->pat_id }}" data-ext="{{ strtolower(pathinfo($incidentalQuoteAtt->pat_path, PATHINFO_EXTENSION)) }}" data-file-path="{{ $incidentalQuoteAtt->pat_path }}" data-file-name="{{ $purchase->firm?->frm_name ?? 'Vendor Quote' }}" data-title="{{ $purchase->firm?->frm_name ?? 'Vendor Quote' }}" style="font-size: 11px; border-radius: 6px;" title="View Vendor Quotation Live">
+                                        <i class="fas fa-eye text-primary mr-1"></i> View Quote
+                                    </button>
+                                @endif
+
+                                {{-- Upload / Replace Quote File Button (Shown only when in edit mode) --}}
+                                @if($canEdit)
+                                    <input type="file" id="pcIncidentalQuoteFileInput" class="d-none" data-qte-id="{{ $incidentalQuote?->qte_id ?? 0 }}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
+                                    <button type="button" class="btn btn-sm text-white font-weight-bold rajdhani px-2.5 py-0.5 ml-1 edit-only" onclick="document.getElementById('pcIncidentalQuoteFileInput').click()" style="font-size: 11px; border-radius: 6px; background-color: var(--rd-accent, #5F7858) !important; border: none;">
+                                        @if($incidentalQuoteAtt)
+                                            <i class="fas fa-sync-alt mr-1"></i> Replace Quote
+                                        @else
+                                            <i class="fas fa-upload mr-1"></i> Upload Quote
+                                        @endif
+                                    </button>
+                                @endif
                             </div>
                             <div>
                                 <strong class="text-muted small">Budget Subhead:</strong>
@@ -1004,7 +1021,7 @@
                                 <span class="dg-panel-r-title" style="font-size: 12px; color: #0f172a !important;">Minute</span>
                             </div>
                              <div class="d-flex gap-2">
-                                <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                                <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold d-none" style="padding:4px 12px; font-size:11px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
                                     <i class="fas fa-eye mr-1"></i> VIEW MINUTE
                                 </a>
                             </div>
@@ -1161,15 +1178,22 @@
                 </div>
                 <div class="d-flex align-items-center gap-3 mr-4">
                     <div class="d-flex align-items-center">
-                        <label class="mb-0 mr-2 small font-weight-bold text-dark">TAX TYPE:</label>
-                        <select id="pcGlobalTaxType" class="form-control form-control-sm" style="width: 80px; height: 26px; font-size: 11px; background: #ffffff; color: var(--rd-text1); border-color: var(--rd-border2);">
+                        <label class="mb-0 mr-1.5 small font-weight-bold text-dark">TAX MODE:</label>
+                        <select id="pcGlobalTaxMode" class="form-control form-control-sm" style="width: 105px; height: 26px; font-size: 11px; background: #ffffff; color: var(--rd-text1); border-color: var(--rd-border2);">
+                            <option value="exclusive" selected>Without Tax</option>
+                            <option value="inclusive">With Tax</option>
+                        </select>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <label class="mb-0 mr-1.5 small font-weight-bold text-dark">TAX TYPE:</label>
+                        <select id="pcGlobalTaxType" class="form-control form-control-sm" style="width: 70px; height: 26px; font-size: 11px; background: #ffffff; color: var(--rd-text1); border-color: var(--rd-border2);">
                             <option value="GST">GST</option>
                             <option value="SST">SST</option>
                         </select>
                     </div>
                     <div class="d-flex align-items-center">
-                        <label class="mb-0 mr-2 small font-weight-bold text-dark">TAX %:</label>
-                        <input type="number" id="pcGlobalTaxPercent" class="form-control form-control-sm" value="18" style="width: 60px; height: 26px; font-size: 11px; background: #ffffff; color: var(--rd-text1); border-color: var(--rd-border2);">
+                        <label class="mb-0 mr-1.5 small font-weight-bold text-dark">TAX %:</label>
+                        <input type="number" id="pcGlobalTaxPercent" class="form-control form-control-sm" value="18" step="0.1" style="width: 55px; height: 26px; font-size: 11px; background: #ffffff; color: var(--rd-text1); border-color: var(--rd-border2);">
                     </div>
                 </div>
                 <div class="d-flex gap-2">
@@ -1303,30 +1327,43 @@
         </div>
     </div>
 </div>
+@endif
 
-<div class="modal fade" id="pcAddFilesModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content" style="background: #ffffff; border: 1px solid var(--rd-border2); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.12);">
-            <div class="modal-header py-2 px-3" style="background: var(--rd-surface2); border-bottom: 1px solid var(--rd-border);">
-                <h6 class="modal-title rajdhani font-weight-bold text-dark" style="letter-spacing: 1px;">UPLOAD FILES</h6>
-                <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
+{{-- MODAL: ATTACH DOCUMENT TO PURCHASE CASE (ACCESSIBLE TO ALL USERS) --}}
+<div class="modal fade" id="modalAddPurchaseCaseAttachment" tabindex="-1" role="dialog" aria-labelledby="modalAddPurchaseCaseAttachmentLabel" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 440px;">
+        <div class="modal-content" style="border-radius: 10px; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: #ffffff;">
+            <div class="modal-header py-2.5 px-3" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                <h6 class="modal-title font-weight-bold rajdhani text-dark mb-0" id="modalAddPurchaseCaseAttachmentLabel" style="font-size: 13.5px; letter-spacing: 0.5px;">
+                    <i class="fas fa-file-upload text-success mr-1.5" style="color: #5F7858 !important;"></i> ATTACH DOCUMENT TO PURCHASE CASE
+                </h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="outline: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="modal-body p-3">
-                <form action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST" enctype="multipart/form-data" id="pcFilesForm">
-                    @csrf
-                    <input type="hidden" name="op" value="add_files">
-                    <input type="file" name="attachments[]" id="pcFilesInput" multiple class="form-control" style="background: #ffffff; color: var(--rd-text1); border: 1px solid var(--rd-border2);" required>
-                    <div class="text-muted small mt-2">PDF/JPG/PNG/DOC/DOCX (max 10MB each)</div>
-                    <div class="d-flex justify-content-end mt-3" style="gap:10px;">
-                        <button type="button" class="btn btn-secondary btn-sm rajdhani font-weight-bold" data-dismiss="modal">CANCEL</button>
-                        <button type="submit" class="btn btn-primary btn-sm rajdhani font-weight-bold">UPLOAD</button>
+            <form id="formAddPurchaseCaseAttachment" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body p-3">
+                    <div class="form-group mb-2.5">
+                        <label class="font-weight-bold text-dark small mb-1" style="font-size: 11px;">DOCUMENT TITLE / NAME <span class="text-danger">*</span></label>
+                        <input type="text" name="doc_title" id="purAttDocTitle" class="form-control" placeholder="e.g., Justification Note, CNIC Copy, Degree" required style="font-size: 12px; border-radius: 6px; border-color: #cbd5e1;">
                     </div>
-                </form>
-            </div>
+                    <div class="form-group mb-1">
+                        <label class="font-weight-bold text-dark small mb-1" style="font-size: 11px;">SELECT FILE <span class="text-danger">*</span></label>
+                        <input type="file" name="file" id="purAttFile" class="form-control-file border p-1.5 rounded w-100" required style="font-size: 11.5px; border-color: #cbd5e1 !important; background: #fafafa; border-radius: 6px;">
+                        <small class="text-muted d-block mt-1" style="font-size: 10px;"><i class="fas fa-info-circle mr-1"></i> PDF, DOCX, XLSX, PNG, JPG (Max: 20MB)</small>
+                    </div>
+                </div>
+                <div class="modal-footer py-2 px-3" style="background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                    <button type="button" class="btn btn-sm btn-light border font-weight-bold" data-dismiss="modal" style="font-size: 11.5px; border-radius: 6px;">Cancel</button>
+                    <button type="submit" id="btnUploadPurAttachment" class="btn btn-sm text-white font-weight-bold rajdhani px-3" style="font-size: 12px; border-radius: 6px; background-color: var(--rd-accent, #5F7858) !important; border-color: var(--rd-accent, #5F7858) !important;">
+                        <i class="fas fa-upload mr-1"></i> UPLOAD ATTACHMENT
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-@endif
 
 {{-- ============ FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
 {{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
@@ -2198,11 +2235,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn btn-link text-primary p-0 pc-live-view-quote-btn hover-zoom" data-url="${quoteViewBase}/${f.pat_id}/view" data-pat-id="${f.pat_id}" data-ext="${(f.pat_path || f.pat_filename || '').split('.').pop().toLowerCase()}" data-file-path="${f.pat_path || ''}" data-file-name="${(f.pat_filename || f.pat_path || '').replaceAll('"','&quot;')}" data-title="${name.replaceAll('"', '&quot;')}" style="font-size: 10px;" title="View ${name.replaceAll('"', '&quot;')}">
                             <i class="fas fa-eye"></i>
                         </button>
-                        ${canEdit ? `
-                            <button type="button" class="btn btn-link text-danger p-0 pc-del-attachment-btn ml-1 edit-only" data-pat-id="${f.pat_id}" title="Delete" style="font-size: 9px;">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        ` : ''}
                     </div>
                 </div>
             `;
@@ -2289,40 +2321,51 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!foot) return;
 
         const items = state.items || [];
+        const taxMode = document.getElementById('pcGlobalTaxMode')?.value || 'exclusive';
         const taxType = document.getElementById('pcGlobalTaxType')?.value || 'GST';
         const taxPercent = parseFloat(document.getElementById('pcGlobalTaxPercent')?.value || 0);
 
-        const columnSubtotals = modalVendors.map((v) => {
-            let sub = 0;
+        const vendorCalcs = modalVendors.map((v) => {
+            let rawSum = 0;
             items.forEach(it => {
                 const p = parseFloat(v.prices[it.pci_id] || 0);
                 const q = parseFloat(it.pci_qty || 1);
-                sub += (p * q);
+                rawSum += (p * q);
             });
-            return sub;
+
+            let sub = rawSum;
+            let tax = 0;
+            let total = rawSum;
+
+            if (taxMode === 'inclusive' && taxPercent > 0) {
+                total = rawSum;
+                sub = total / (1 + (taxPercent / 100));
+                tax = total - sub;
+            } else {
+                sub = rawSum;
+                tax = sub * (taxPercent / 100);
+                total = sub + tax;
+            }
+            return { sub, tax, total, rawSum };
         });
 
-        const columnTotals = columnSubtotals.map(sub => sub + (sub * (taxPercent / 100)));
-        const minTotal = Math.min(...columnTotals.filter(t => t > 0));
+        const minTotal = Math.min(...vendorCalcs.map(c => c.total).filter(t => t > 0));
 
         foot.innerHTML = `
             <tr style="background: #f8fafc;">
                 <td class="pc-item-sticky" style="text-align:right; padding: 10px 14px; background: #f8fafc !important; border-right: 1.5px solid #cbd5e1 !important;">
-                    <div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase;">SUB TOTAL</div>
-                    <div style="font-size:10.5px; font-weight:700; color:#64748b; letter-spacing:0.5px; margin-top:3px; text-transform:uppercase;">TAX (${taxType} ${taxPercent}%)</div>
-                    <div style="font-size:13.5px; color:#0f172a; font-weight:800; margin-top:4px; letter-spacing:0.5px;">TOTAL (PKR)</div>
+                    <div style="font-size:11px; font-weight:700; color:#64748b; letter-spacing:0.5px; text-transform:uppercase;">BASE SUB TOTAL</div>
+                    <div style="font-size:10.5px; font-weight:700; color:#64748b; letter-spacing:0.5px; margin-top:3px; text-transform:uppercase;">TAX (${taxType} ${taxPercent}% ${taxMode === 'inclusive' ? 'INCL' : 'EXCL'})</div>
+                    <div style="font-size:13.5px; color:#0f172a; font-weight:800; margin-top:4px; letter-spacing:0.5px;">TOTAL COST (PKR)</div>
                 </td>
-                ${modalVendors.map((v, idx) => {
-                    const sub = columnSubtotals[idx];
-                    const tax = sub * (taxPercent / 100);
-                    const total = sub + tax;
-                    const isWinner = total > 0 && total === minTotal;
+                ${vendorCalcs.map((c, idx) => {
+                    const isWinner = c.total > 0 && c.total === minTotal;
                     return `
                         <td style="width: 260px; min-width: 260px; text-align:center; padding:10px 8px; ${isWinner ? 'background:#ecfdf5 !important; border-top: 2px solid #16a34a !important;' : 'background:#f8fafc !important;'}">
-                            <div style="font-size:12px; font-weight:700; color:#334155;">${fmt(sub)}</div>
-                            <div style="font-size:11px; font-weight:600; color:#64748b; margin-top:3px;">${fmt(tax)}</div>
+                            <div style="font-size:12px; font-weight:700; color:#334155;">${fmt(c.sub)}</div>
+                            <div style="font-size:11px; font-weight:600; color:#64748b; margin-top:3px;">${fmt(c.tax)}</div>
                             <div style="font-size:15px; font-weight:800; margin-top:4px; color:${isWinner ? '#16a34a' : '#0f172a'};">
-                                ${fmt(total)}${isWinner ? ' <i class="fas fa-trophy ml-1 text-success" style="font-size:12px;"></i>' : ''}
+                                ${fmt(c.total)}${isWinner ? ' <i class="fas fa-trophy ml-1 text-success" style="font-size:12px;"></i>' : ''}
                             </div>
                         </td>
                     `;
@@ -3636,7 +3679,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderMultiQuoteTotals();
     });
 
-    $(document).on('input change', '#pcGlobalTaxType, #pcGlobalTaxPercent', function() {
+    $(document).on('input change', '#pcGlobalTaxMode, #pcGlobalTaxType, #pcGlobalTaxPercent', function() {
         renderMultiQuoteTotals();
     });
 
@@ -3657,6 +3700,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
+        const taxMode = document.getElementById('pcGlobalTaxMode')?.value || 'exclusive';
         const taxType = document.getElementById('pcGlobalTaxType')?.value || 'GST';
         const taxPercent = parseFloat(document.getElementById('pcGlobalTaxPercent')?.value || 0);
 
@@ -3668,6 +3712,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fd.append('op', 'add_quote');
                 if (v.id) fd.append('qte_id', v.id);
                 fd.append('firm_name', v.firm_name);
+                fd.append('tax_mode', taxMode);
                 fd.append('tax_type', taxType);
                 fd.append('tax_percent', taxPercent);
                 fd.append('_token', @json(csrf_token()));
@@ -3716,42 +3761,104 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    $(document).on('change', '#pcCaseAttachDirectInput', async function() {
-        if (!this.files || !this.files.length) return;
+    $(document).on('submit', '#formAddPurchaseCaseAttachment', async function(e) {
+        e.preventDefault();
+        const docTitle = $('#purAttDocTitle').val().trim();
+        const fileInput = $('#purAttFile')[0];
+
+        if (!docTitle) {
+            if (window.Swal) {
+                Swal.fire({ icon: 'warning', title: 'Document Title Required', text: 'Please enter a name for this document.', confirmButtonColor: '#5F7858' });
+            } else {
+                alert('Please enter a Document Title / Name.');
+            }
+            return;
+        }
+
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            if (window.Swal) {
+                Swal.fire({ icon: 'warning', title: 'File Required', text: 'Please select a file to upload.', confirmButtonColor: '#5F7858' });
+            } else {
+                alert('Please select a file to upload.');
+            }
+            return;
+        }
+
+        const $btn = $('#btnUploadPurAttachment');
+        const origBtnHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Uploading...');
+
         const fd = new FormData();
         fd.append('op', 'add_files');
         fd.append('_token', @json(csrf_token()));
-        for (let i = 0; i < this.files.length; i++) {
-            fd.append('attachments[]', this.files[i]);
-        }
+        fd.append('doc_title', docTitle);
+        fd.append('file', fileInput.files[0]);
+        fd.append('attachments[]', fileInput.files[0]);
+
         try {
             const json = await postForm(fd);
-            updateState(json);
-            renderAll();
-            toast(json.message || 'File(s) uploaded successfully');
+            $btn.prop('disabled', false).html(origBtnHtml);
+            $('#modalAddPurchaseCaseAttachment').modal('hide');
+            this.reset();
+
+            if (json.ok) {
+                updateState(json);
+                renderAll();
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: json.message || 'Attachment uploaded successfully!',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    toast(json.message || 'Attachment uploaded successfully!');
+                }
+            } else {
+                throw new Error(json.message || 'Failed to upload attachment.');
+            }
         } catch (err) {
-            toast(err.message || 'Error uploading files');
+            $btn.prop('disabled', false).html(origBtnHtml);
+            if (window.Swal) {
+                Swal.fire({ icon: 'error', title: 'Upload Failed', text: err.message || 'Could not upload attachment.' });
+            } else {
+                toast(err.message || 'Error uploading file');
+            }
         }
-        this.value = '';
     });
 
-    $(document).on('click', '.pc-del-attachment-btn', async function(e) {
-        e.preventDefault();
-        const patId = this.getAttribute('data-pat-id');
-        if (!patId) return;
-        if (!confirm('Are you sure you want to delete this case attachment?')) return;
+    $(document).on('change', '#pcIncidentalQuoteFileInput', async function() {
+        if (!this.files || !this.files.length) return;
+        const qteId = this.getAttribute('data-qte-id') || 0;
+        const file = this.files[0];
         const fd = new FormData();
-        fd.append('op', 'delete_file');
-        fd.append('pat_id', patId);
+        fd.append('op', 'upload_quote_file');
         fd.append('_token', @json(csrf_token()));
+        fd.append('qte_id', qteId);
+        fd.append('quote_file', file);
+
         try {
             const json = await postForm(fd);
             updateState(json);
             renderAll();
-            toast(json.message || 'Attachment deleted');
+            if (window.Swal) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: json.message || 'Vendor quotation uploaded successfully!',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            } else {
+                toast(json.message || 'Vendor quotation uploaded successfully!');
+            }
         } catch (err) {
-            toast(err.message || 'Error deleting attachment');
+            toast(err.message || 'Error uploading vendor quotation');
         }
+        this.value = '';
     });
 
     window.promptCreateIt = function(pcsId) {

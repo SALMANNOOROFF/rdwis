@@ -399,7 +399,9 @@
                                                     @if($cp->project)
                                                         <span class="badge badge-primary px-2 py-1">{{ $cp->project->prj_code }}</span> <span class="font-weight-600 ml-1">{{ $cp->project->prj_title }}</span>
                                                     @else
-                                                        <span class="text-muted font-weight-500">Core / Non-Project</span>
+                                                        <span class="badge badge-danger text-white font-weight-bold px-2 py-1" style="border-radius: 4px;">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i> Project will be allocated on next pay
+                                                        </span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -444,11 +446,9 @@
                                     <button type="submit" class="btn-release-action"><i class="fas fa-paper-plane"></i> Release to HR</button>
                                 </form>
 
-                                @if($case->ctc_status === 'Draft')
-                                    <button type="button" class="btn-cancel-draft" id="btn-cancel-case">
-                                        <i class="fas fa-trash-alt mr-1"></i> Cancel Draft
-                                    </button>
-                                @endif
+                                <button type="button" class="btn-cancel-draft mt-2" id="btn-cancel-case">
+                                    <i class="fas fa-ban mr-1"></i> CANCEL CASE
+                                </button>
                             </div>
                         </div>
                     @else
@@ -487,7 +487,7 @@
                                             <strong class="text-dark">{{ $rm->crr_username }} ({{ $rm->crr_status }})</strong>
                                             <span>{{ \Carbon\Carbon::parse($rm->crr_dtg)->format('d M H:i') }}</span>
                                         </div>
-                                        <p class="text-dark mb-0 font-weight-500" style="line-height: 1.4;">{{ $rm->crr_remarks }}</p>
+                                        <div class="text-dark mb-0 font-weight-500" style="line-height: 1.4;">{!! $rm->crr_remarks !!}</div>
                                     </div>
                                 @endforeach
                             </div>

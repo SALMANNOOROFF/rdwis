@@ -35,16 +35,16 @@
             top: 0;
             left: 0;
             right: 0;
-            background: var(--rd-surface2);
+            background: #0f172a;
             color: #fff;
             padding: 10px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             z-index: 99999;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            border-bottom: 1px solid #1e293b;
         }
         .top-bar-left {
             display: flex;
@@ -118,6 +118,13 @@
             transition: all 0.15s ease-in-out;
             text-decoration: none;
         }
+        .btn-update-template {
+            background: #2563eb;
+            color: #fff;
+        }
+        .btn-update-template:hover {
+            background: #1d4ed8;
+        }
         .btn-save {
             background: #10b981;
             color: #fff;
@@ -142,7 +149,7 @@
             color: #fff;
         }
 
-        /* ================= DOCUMENT CANVAS (STANDARD WORD 1-INCH MARGINS) ================= */
+        /* ================= DOCUMENT CANVAS (1.0 INCH LEFT, 0.8 INCH RIGHT MARGINS) ================= */
         .document-wrapper {
             padding: 25px 15px 50px 15px;
             display: flex;
@@ -151,12 +158,12 @@
             gap: 30px;
         }
 
-        /* A4 Page Simulation on Screen with Word-Document 1 inch (25.4mm) padding */
+        /* A4 Page Simulation on Screen with Left: 1.0" (25.4mm), Right: 0.8" (20.32mm) padding */
         .a4-page {
             background: #fff;
             width: 210mm;
             min-height: 297mm;
-            padding: 25.4mm 25.4mm 25.4mm 25.4mm;
+            padding: 25.4mm 20.32mm 25.4mm 25.4mm;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             position: relative;
             box-sizing: border-box;
@@ -213,43 +220,86 @@
         /* Paragraphs with sub-bullets Tab Stop indentation */
         .para-wrapper {
             position: relative;
-            margin-bottom: 14pt;
+            margin-bottom: 8pt;
         }
         .editable-para {
             margin: 0;
             text-align: justify;
             white-space: pre-wrap;
-            tab-size: 4;
-            -moz-tab-size: 4;
+            tab-size: 36px;
+            -moz-tab-size: 36px;
             font-size: 12pt;
             line-height: 1.5;
             font-family: Arial, Helvetica, sans-serif;
+            word-break: break-word;
+        }
+        .editable-para.main-para {
+            padding-left: 0;
+            text-indent: 0;
+            margin-bottom: 12pt;
+        }
+        .editable-para.sub-para {
+            padding-left: 54px;
+            text-indent: 0;
+            margin-bottom: 8pt;
+        }
+        .para-actions-hover {
+            position: absolute;
+            top: -14px;
+            right: 0px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 2px 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+        }
+        .para-wrapper:hover .para-actions-hover {
+            opacity: 1;
+        }
+        .btn-insert-para {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #7dd3fc;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 10.5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .btn-insert-para:hover {
+            background: #0284c7;
+            color: #fff;
+            border-color: #0284c7;
         }
         .btn-del-para {
-            position: absolute;
-            top: 2px;
-            right: -24px;
             background: #fee2e2;
             color: #dc2626;
             border: 1px solid #f87171;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            border-radius: 4px;
+            padding: 3px 6px;
+            font-size: 10.5px;
+            font-weight: bold;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            cursor: pointer;
-            padding: 0;
-            opacity: 0;
-            transition: opacity 0.15s;
-        }
-        .para-wrapper:hover .btn-del-para {
-            opacity: 1;
+            gap: 3px;
+            transition: all 0.15s ease;
         }
         .btn-del-para:hover {
             background: #dc2626;
             color: #fff;
+            border-color: #dc2626;
         }
 
         .btn-add-para {
@@ -769,6 +819,8 @@
             .btn-del-firm,
             .btn-add-para,
             .btn-del-para,
+            .para-actions-hover,
+            .btn-insert-para,
             .btn-add-table-row,
             .col-act,
             .btn-del-row {
@@ -782,7 +834,7 @@
             .a4-page {
                 box-shadow: none !important;
                 border: none !important;
-                padding: 20mm 20mm 20mm 20mm !important;
+                padding: 25.4mm 20.32mm 25.4mm 25.4mm !important;
                 margin: 0 auto !important;
                 width: 100% !important;
                 min-height: auto !important;
@@ -869,7 +921,7 @@
                 <div class="header-top-row">
                     <div class="header-top-left"></div>
                     <div class="header-top-right">
-                        <div style="font-weight: bold;">Naval Research & Development Institute</div>
+                        <div style="font-weight: bold; white-space: nowrap;">Naval Research & Development Institute</div>
                         <div>R&D Wing</div>
                         <div>at PNS JAUHAR</div>
                         <div>Habib Rehmatullah Road</div>
@@ -889,7 +941,7 @@
 
                     <div class="meta-col-right">
                         <div class="meta-item">
-                            Ph (off): 021-48503038
+                            Ph (off): 48504781
                         </div>
                         <div class="meta-item">
                             <span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="letter_date" oninput="syncDate(this.innerText)">{{ $letterDate }}</span>
@@ -906,12 +958,23 @@
             <!-- BODY PARAGRAPHS -->
             <div class="letter-body" id="letterParagraphs">
                 @foreach($paragraphs as $pIndex => $pText)
-                <div class="para-wrapper">
-                    <div class="editable-para" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $pText }}</div>
-                    @if($canEdit && $pIndex > 0)
-                    <button type="button" class="btn-del-para no-print" onclick="removeParagraph(this)" title="Delete Paragraph">
-                        <i class="fas fa-times"></i>
-                    </button>
+                @php
+                    $cleanPText = preg_replace('/^(\s*[0-9a-gA-G]+\.)[ \t]+/u', "$1\t", $pText);
+                    $isSub = preg_match('/^\s*[a-g]\./i', trim($cleanPText));
+                @endphp
+                <div class="para-wrapper" data-index="{{ $pIndex }}">
+                    <div class="editable-para {{ $isSub ? 'sub-para' : 'main-para' }}" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{!! $cleanPText !!}</div>
+                    @if($canEdit)
+                    <div class="para-actions-hover no-print">
+                        <button type="button" class="btn-insert-para" onclick="insertParagraphAfter(this)" title="Insert New Paragraph Here">
+                            <i class="fas fa-plus"></i> Add Para
+                        </button>
+                        @if($pIndex > 0)
+                        <button type="button" class="btn-del-para" onclick="removeParagraph(this)" title="Delete Paragraph">
+                            <i class="fas fa-times"></i> Del
+                        </button>
+                        @endif
+                    </div>
                     @endif
                 </div>
                 @endforeach
@@ -1185,12 +1248,41 @@
             const wrap = document.createElement('div');
             wrap.className = 'para-wrapper';
             wrap.innerHTML = `
-                <div class="editable-para" contenteditable="true" oninput="markUnsaved()">${count}.\tNew paragraph text...</div>
-                <button type="button" class="btn-del-para no-print" onclick="removeParagraph(this)" title="Delete Paragraph">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="editable-para main-para" contenteditable="true" oninput="markUnsaved()">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${count}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New paragraph text...</div>
+                <div class="para-actions-hover no-print">
+                    <button type="button" class="btn-insert-para" onclick="insertParagraphAfter(this)" title="Insert New Paragraph Here">
+                        <i class="fas fa-plus"></i> Add Para
+                    </button>
+                    <button type="button" class="btn-del-para" onclick="removeParagraph(this)" title="Delete Paragraph">
+                        <i class="fas fa-times"></i> Del
+                    </button>
+                </div>
             `;
             container.appendChild(wrap);
+            markUnsaved();
+            const newEl = wrap.querySelector('.editable-para');
+            if (newEl) {
+                newEl.focus();
+            }
+        }
+
+        function insertParagraphAfter(btn) {
+            const currentWrap = btn.closest('.para-wrapper');
+            if (!currentWrap) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'para-wrapper';
+            wrap.innerHTML = `
+                <div class="editable-para main-para" contenteditable="true" oninput="markUnsaved()">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New paragraph text...</div>
+                <div class="para-actions-hover no-print">
+                    <button type="button" class="btn-insert-para" onclick="insertParagraphAfter(this)" title="Insert New Paragraph Here">
+                        <i class="fas fa-plus"></i> Add Para
+                    </button>
+                    <button type="button" class="btn-del-para" onclick="removeParagraph(this)" title="Delete Paragraph">
+                        <i class="fas fa-times"></i> Del
+                    </button>
+                </div>
+            `;
+            currentWrap.after(wrap);
             markUnsaved();
             const newEl = wrap.querySelector('.editable-para');
             if (newEl) {
@@ -1514,41 +1606,70 @@
             });
         }
 
+        function updateTemplateDefaults() {
+            const paragraphs = [];
+            document.querySelectorAll('#letterParagraphs .editable-para').forEach(el => {
+                paragraphs.push(el.innerText);
+            });
+
+            const customTemplate = {
+                paragraphs: paragraphs,
+                subject: document.getElementById('subject').innerText.trim(),
+                see_distribution: document.getElementById('see_distribution') ? document.getElementById('see_distribution').innerText.trim() : 'See distribution:',
+                signatory_name: document.getElementById('signatory_name').innerText.trim(),
+                signatory_rank: document.getElementById('signatory_rank').innerText.trim(),
+                signatory_dept: document.getElementById('signatory_dept').innerText.trim()
+            };
+
+            localStorage.setItem('rdw_it_annex_custom_template', JSON.stringify(customTemplate));
+            saveDocument();
+            showToast('Template updated & saved to Database successfully!');
+        }
+
         function resetDefaults() {
             if (!confirm('Are you sure you want to reset the letter body to default template?')) {
                 return;
             }
 
-            const p1 = `1.\tR&D Wing NRDI at PNS JAUHAR is interested for the procurement of ${defaultTitle}. In this regard, quotation are to be submitted to MD R&D at NRDI by ${defaultDeadline}.`;
-            const p2 = `2.\tQuotation will be opened on same day at 11:00 hrs in the presence of all participants or their representatives and will be accepted at lowest quotations rate basis. However, It is apprised that MD (R&D) reserves the right to reject/ accept any quotation or invite new quotation without assigning any reason.`;
-            const p3 = `3.\tFollowing terms and condition would apply:\n\n\ta.\tItems are to be delivered within 15 days after issuance of purchase order.\n\tb.\tPayment will be processed / made after delivery and acceptance by user.\n\tc.\tPart Delivery / Partial shall not be entertained.\n\td.\tWarrantee / Guarantee of one year is required.`;
-            
+            localStorage.removeItem('rdw_it_annex_custom_template');
+
+            const p1  = `1.\tR&D Wing NRDI at PNS JAUHAR is interested for the Procurement of ${defaultTitle}. In this regard, quotations are required to be submitted to MD R&D at NRDI by ${defaultDeadline}.`;
+            const p2  = `2.\tQuotation will be opened on same day at 11:00 hrs in the presence of the participants or their representatives and will be accepted at lowest quotations rate basis. However, it is apprised that MD (R&D) reserves the right to accept/ reject any quotation without assigning any reason.`;
+            const p2a = `a.\tThe envelope and the quote must bear the reference of tender number.`;
+            const p2b = `b.\tThe validity period be clearly mentioned in quote. Atleast 30 days for locally available items and incase of imported items validity be either as per OEM or 60 days whichever falls early.`;
+            const p2c = `c.\tQuote must be in conformance to the specifications given in the tender. Non-conforming or incomplete quotes will not be considered.`;
+            const p2d = `d.\tItems available locally are to be delivered within 15 days after issuance of purchase order.`;
+            const p2e = `e.\tPart Delivery / Partial payment or request for any advance payment shall not be entertained.`;
+            const p2f = `f.\tWarrantee / Guarantee of one year is required.`;
+            const p2g = `g.\tPayment will be processed / made after delivery and acceptance by user.`;
+            const p3  = `3.\tIn case of any query; kindly contact well within time on dir-pandi@paknavy.gov.pk. Furthermore, it is requested to acknowledge receipt of tender/e-mail.`;
+
+            const tplParas = [p1, p2, p2a, p2b, p2c, p2d, p2e, p2f, p2g, p3];
+
             const container = document.getElementById('letterParagraphs');
-            container.innerHTML = `
-                <div class="para-wrapper">
-                    <div class="editable-para" contenteditable="true" oninput="markUnsaved()">${p1}</div>
-                </div>
-                <div class="para-wrapper">
-                    <div class="editable-para" contenteditable="true" oninput="markUnsaved()">${p2}</div>
-                    <button type="button" class="btn-del-para no-print" onclick="removeParagraph(this)" title="Delete Paragraph">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="para-wrapper">
-                    <div class="editable-para" contenteditable="true" oninput="markUnsaved()">${p3}</div>
-                    <button type="button" class="btn-del-para no-print" onclick="removeParagraph(this)" title="Delete Paragraph">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('see_distribution').innerText = 'See distribution';
+            container.innerHTML = tplParas.map((pText, idx) => {
+                const isSub = /^\s*[a-g]\./i.test(pText.trim());
+                return `
+                    <div class="para-wrapper">
+                        <div class="editable-para ${isSub ? 'sub-para' : 'main-para'}" contenteditable="true" oninput="markUnsaved()">${pText}</div>
+                        <div class="para-actions-hover no-print">
+                            <button type="button" class="btn-insert-para" onclick="insertParagraphAfter(this)" title="Insert New Paragraph Here">
+                                <i class="fas fa-plus"></i> Add Para
+                            </button>
+                            ${idx > 0 ? `<button type="button" class="btn-del-para" onclick="removeParagraph(this)" title="Delete Paragraph"><i class="fas fa-times"></i> Del</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('subject').innerText = 'REQUEST FOR QUOTATION';
+            if (document.getElementById('see_distribution')) document.getElementById('see_distribution').innerText = 'See distribution:';
             document.getElementById('signatory_name').innerText = 'MUHAMMAD MUDASSIR';
             document.getElementById('signatory_rank').innerText = 'Cdr (R) Pakistan Navy';
-            document.getElementById('signatory_dept').innerText = 'R&D Wing, NRDI';
-            
-            markUnsaved();
-            showToast('Reset to default naval template');
+            document.getElementById('signatory_dept').innerText = 'Dir Procurement';
+
+            saveDocument();
+            showToast('Reset to default naval template & saved to Database');
         }
 
         // Save Document via AJAX
@@ -1576,7 +1697,9 @@
 
             const paragraphs = [];
             document.querySelectorAll('#letterParagraphs .editable-para').forEach(el => {
-                paragraphs.push(el.innerText.trim());
+                let pText = el.innerText.trim();
+                pText = pText.replace(/^(\s*[0-9a-zA-Z]+\.)[ \t]+/i, '$1\t');
+                paragraphs.push(pText);
             });
 
             const items = [];

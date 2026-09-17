@@ -431,9 +431,11 @@
                                                 <td>
                                                     @if($cp->project)
                                                         <span class="badge badge-primary px-2 py-1">{{ $cp->project->prj_code }}</span> <span class="font-weight-600 ml-1">{{ $cp->project->prj_title }}</span>
-                                                    @else
-                                                        <span class="text-muted font-weight-500">Core / Non-Project</span>
-                                                    @endif
+                                                     @else
+                                                         <span class="badge badge-danger text-white font-weight-bold px-2 py-1" style="border-radius: 4px;">
+                                                             <i class="fas fa-exclamation-triangle mr-1"></i> Project will be allocated on next pay
+                                                         </span>
+                                                     @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -557,7 +559,7 @@
                                             <strong class="text-dark">{{ $rm->crr_username }} ({{ $rm->crr_status }})</strong>
                                             <span>{{ \Carbon\Carbon::parse($rm->crr_dtg)->format('d M H:i') }}</span>
                                         </div>
-                                        <p class="text-dark mb-0 font-weight-500" style="line-height: 1.4;">{{ $rm->crr_remarks }}</p>
+                                        <div class="text-dark mb-0 font-weight-500" style="line-height: 1.4;">{!! $rm->crr_remarks !!}</div>
                                     </div>
                                 @endforeach
                             </div>

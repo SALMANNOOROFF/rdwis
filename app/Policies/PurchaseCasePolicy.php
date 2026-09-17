@@ -66,6 +66,17 @@ class PurchaseCasePolicy
      */
     public function update(CenAccount $user, Purchase $case): bool
     {
+        $userArea = (string) ($user->acc_untarea ?? '');
+
+        // Procurement Officers, users with PURCHASE_PROCUREMENT_ACTION, and SuperAdmin can update/manage case quotes across divisions
+        if (
+            AreaDefinition::isProcurement($userArea) ||
+            RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_PROCUREMENT_ACTION) ||
+            $user->acc_username === 'superadminrdw'
+        ) {
+            return true;
+        }
+
         if (! RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_EDIT)) {
             return false;
         }
@@ -73,10 +84,7 @@ class PurchaseCasePolicy
         // Must be in draft or returned status to be edited by division
         $status = strtolower(trim((string) ($case->pcs_status ?? '')));
         if (! in_array($status, ['draft', 'returned'], true)) {
-            $userArea = (string) ($user->acc_untarea ?? '');
-            if (! AreaDefinition::isProcurement($userArea)) {
-                return false;
-            }
+            return false;
         }
 
         return $this->scopeService->canAccessUnit($user, (int) ($case->pcs_unt_id ?? 0));

@@ -165,12 +165,12 @@ class HrCtrCase extends Model
 
     public function getDefaultProjectCodeAttribute(): string
     {
-        return $this->is_hr_admin ? 'CSRF' : 'Core';
+        return $this->is_hr_admin ? 'CSRF' : 'Project will be allocated on next pay';
     }
 
     public function getDefaultProjectNameAttribute(): string
     {
-        return $this->is_hr_admin ? 'Center Special Research Fund (CSRF)' : 'Institutional Core Budget';
+        return $this->is_hr_admin ? 'Center Special Research Fund (CSRF)' : 'Project will be allocated on next pay';
     }
 
     public function getProjectCodeAttribute(): string
@@ -186,7 +186,7 @@ class HrCtrCase extends Model
             $hedCode = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $plan->ccp_hed_id)->value('hed_code');
             if ($hedCode) return $hedCode;
         }
-        return 'Core';
+        return 'Project will be allocated on next pay';
     }
 
     public function getProjectNameAttribute(): string
@@ -202,7 +202,19 @@ class HrCtrCase extends Model
             $hedName = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $plan->ccp_hed_id)->value('hed_name');
             if ($hedName) return $hedName;
         }
-        return 'Institutional Core Budget';
+        return 'Project will be allocated on next pay';
+    }
+
+    public function getHasAssignedProjectAttribute(): bool
+    {
+        if ($this->is_hr_admin) {
+            return true;
+        }
+        $plan = $this->casePlans->first();
+        if ($plan && ($plan->project || !empty($plan->ccp_hed_id))) {
+            return true;
+        }
+        return !empty($this->ctc_prj_id);
     }
 
     // ── Sub-Status Relationships ──────────────────────────────

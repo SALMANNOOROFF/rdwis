@@ -182,7 +182,7 @@
         <div class="modal-content" style="border-radius: 8px; overflow: hidden; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: #ffffff;">
             <div class="modal-header py-3 px-4" style="background: #1e293b; color: #ffffff;">
                 <h6 class="modal-title font-weight-bold mb-0 rajdhani" id="modalLabel_{{ $widgetId }}" style="letter-spacing: 0.5px;">
-                    <i class="fas fa-file-upload mr-2 text-primary"></i> Upload Project Attachment
+                    <i class="fas fa-file-upload mr-2 text-primary"></i> ATTACH DOCUMENT TO {{ strtoupper($module === 'pur' ? 'PURCHASE CASE' : ($module === 'ctc' ? 'CONTRACT CASE' : ($module === 'prj' ? 'PROJECT' : 'CASE'))) }}
                 </h6>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity: 0.8; outline: none;">
                     <span aria-hidden="true">&times;</span>
@@ -194,8 +194,8 @@
                 <input type="hidden" name="object_id" value="{{ $objectId }}">
                 <div class="modal-body p-4">
                     <div class="form-group mb-3">
-                        <label class="font-weight-bold text-dark" style="font-size: 13px;">Document Type / Title <span class="text-danger">*</span></label>
-                        <input type="text" name="doc_type" class="form-control form-control-sm" placeholder="e.g. PPF, Minutes, Site Photos, Approval Letter" required style="border-radius: 4px;">
+                        <label class="font-weight-bold text-dark" style="font-size: 13px;">DOCUMENT TITLE / NAME <span class="text-danger">*</span></label>
+                        <input type="text" name="doc_type" class="form-control form-control-sm" placeholder="e.g., Justification Note, CNIC Copy, Degree" required style="border-radius: 4px;">
                     </div>
                     <div class="form-group mb-2">
                         <label class="font-weight-bold text-dark" style="font-size: 13px;">Select File <span class="text-danger">*</span></label>

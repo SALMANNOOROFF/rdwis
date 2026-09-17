@@ -171,6 +171,22 @@ class ContractCaseController extends Controller
             return response()->json(['success' => false, 'message' => 'Employee not found.'], 404);
         }
 
+        // Auto-fetch contact number from hr.empsexta, hr.applicants, or past cases
+        $contact = DB::table('hr.empsexta')->where('empexta_emp_id', $empId)->value('emp_mobile');
+        if (empty($contact) && !empty($emp->emp_cnic)) {
+            $contact = DB::table('hr.applicants')->where('apl_cnic', $emp->emp_cnic)->value('apl_mobile');
+        }
+        if (empty($contact)) {
+            $contact = HrCtrCase::where('ctc_emp_id', $empId)
+                ->whereNotNull('ctc_contact')
+                ->where('ctc_contact', '!=', '')
+                ->orderBy('ctc_id', 'desc')
+                ->value('ctc_contact');
+        }
+        if (empty($contact)) {
+            $contact = $emp->emp_contact ?? ($emp->emp_mobile ?? ($emp->emp_phone ?? null));
+        }
+
         // 3. Fetch latest contract
         $lastContract = HrContract::where('ctr_num', $empId)->orderBy('ctr_id', 'desc')->first();
 
@@ -224,10 +240,11 @@ class ContractCaseController extends Controller
             'success'         => true,
             'has_active_case' => false,
             'employee'        => [
-                'emp_id'     => $emp->emp_id,
-                'emp_name'   => $emp->emp_name,
-                'emp_cnic'   => $emp->emp_cnic,
-                'emp_status' => $emp->emp_status,
+                'emp_id'      => $emp->emp_id,
+                'emp_name'    => $emp->emp_name,
+                'emp_cnic'    => $emp->emp_cnic,
+                'emp_contact' => $contact,
+                'emp_status'  => $emp->emp_status,
             ],
             'last_contract'   => $contractData,
         ]);
@@ -456,6 +473,29 @@ class ContractCaseController extends Controller
             return in_array($r->crr_status, ['Under Revision', 'Not Approved']);
         }) ?? $case->remarksHistory->first();
 
+        // Auto-fill CNIC & Contact from DB if missing on case
+        $hasChanges = false;
+        if (empty($case->ctc_cnic) && !empty($case->candidate_cnic)) {
+            $case->ctc_cnic = $case->candidate_cnic;
+            $hasChanges = true;
+        }
+        if (empty($case->ctc_contact)) {
+            $contact = !empty($case->ctc_emp_id) ? DB::table('hr.empsexta')->where('empexta_emp_id', $case->ctc_emp_id)->value('emp_mobile') : null;
+            if (empty($contact) && !empty($case->ctc_cnic)) {
+                $contact = DB::table('hr.applicants')->where('apl_cnic', $case->ctc_cnic)->value('apl_mobile');
+            }
+            if (empty($contact) && !empty($case->candidate_mobile)) {
+                $contact = $case->candidate_mobile;
+            }
+            if (!empty($contact)) {
+                $case->ctc_contact = $contact;
+                $hasChanges = true;
+            }
+        }
+        if ($hasChanges) {
+            $case->save();
+        }
+
         // Existing monthly plan map
         $monthlyPlanMap = [];
         foreach ($case->casePlans as $cp) {
@@ -482,11 +522,16 @@ class ContractCaseController extends Controller
             ], 403);
         }
 
+        if (!$request->has('ctc_emp_type') || empty(trim((string)$request->input('ctc_emp_type')))) {
+            $fallbackType = $request->input('hidden_ctc_emp_type') ?: ($case->ctc_emp_type ?: 'Full Time');
+            $request->merge(['ctc_emp_type' => $fallbackType]);
+        }
+
         $validated = $request->validate([
             'ctc_empnamecomp'   => 'required|string|max:200',
             'ctc_newjobtitle'   => 'required|string|max:255',
             'ctc_newgrade'      => 'required|string|max:100',
-            'ctc_emp_type'      => 'required|string|max:50',
+            'ctc_emp_type'      => 'nullable|string|max:50',
             'ctc_newsalary'     => 'required|numeric|min:0',
             'ctc_newstartdt'    => 'required|date',
             'ctc_newenddt'      => 'required|date|after_or_equal:ctc_newstartdt',
@@ -498,6 +543,9 @@ class ContractCaseController extends Controller
             'ctc_terminremarks' => 'nullable|string',
             'remarks'           => 'nullable|string',
         ]);
+        if (empty($validated['ctc_emp_type'])) {
+            $validated['ctc_emp_type'] = $request->input('hidden_ctc_emp_type') ?: ($case->ctc_emp_type ?: 'Full Time');
+        }
 
         $type = strtoupper(trim($case->ctc_type));
 

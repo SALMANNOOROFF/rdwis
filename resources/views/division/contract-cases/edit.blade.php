@@ -380,9 +380,9 @@
                             <h5 class="font-weight-bold text-dark mb-1" style="font-size: 1.05rem;">
                                 Reviewer Feedback from {{ $latestReturnRemark->crr_username }} <span class="badge badge-warning ml-2 font-weight-bold">{{ $latestReturnRemark->crr_status }}</span>
                             </h5>
-                            <p class="text-dark mb-1 font-weight-500" style="font-size: 0.95rem; line-height: 1.5;">
-                                "{{ $latestReturnRemark->crr_remarks }}"
-                            </p>
+                            <div class="text-dark mb-1 font-weight-500 feedback-remarks-content" style="font-size: 0.95rem; line-height: 1.5;">
+                                {!! $latestReturnRemark->crr_remarks !!}
+                            </div>
                             <small class="text-muted">
                                 <i class="far fa-clock mr-1"></i> Logged on {{ \Carbon\Carbon::parse($latestReturnRemark->crr_dtg)->format('d M Y, H:i') }}
                             </small>
@@ -464,12 +464,12 @@
 
                             <div class="row mb-4">
                                 <div class="col-6">
-                                    <label class="rd-form-label">CNIC</label>
-                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" value="{{ $case->ctc_cnic }}" placeholder="99999-9999999-9">
+                                    <label class="rd-form-label">CNIC <span class="text-muted small">(Locked)</span></label>
+                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" value="{{ $case->ctc_cnic ?: $case->candidate_cnic }}" placeholder="99999-9999999-9" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
                                 </div>
                                 <div class="col-6">
                                     <label class="rd-form-label">Contact Number</label>
-                                    <input type="text" name="ctc_contact" id="ctc_contact" class="rd-form-control" value="{{ $case->ctc_contact }}" placeholder="03xx-xxxxxxx">
+                                    <input type="text" name="ctc_contact" id="ctc_contact" class="rd-form-control" value="{{ $case->ctc_contact ?: $case->candidate_mobile }}" placeholder="03xx-xxxxxxx">
                                 </div>
                             </div>
 
@@ -577,58 +577,61 @@
                                     <label for="mode-single" class="font-weight-bold text-dark mb-0 cursor-pointer">Single Project (Entire Duration)</label>
                                 </div>
                                 <div class="mode-card-body" id="body-single" style="{{ $isSingle ? '' : 'display: none;' }}">
-                                    <div class="form-group mb-0 mt-2">
-                                        <label class="rd-form-label small">Associated Project</label>
-                                        <select name="ctc_projectcode" class="rd-form-control select2" id="single-project-select" style="width: 100%;">
-                                            <option value="">Core / Non-Project</option>
-                                            @foreach($projects as $proj)
-                                                <option value="{{ $proj->prj_id }}" {{ $case->ctc_prj_id == $proj->prj_id ? 'selected' : '' }}>
-                                                    {{ $proj->prj_code }} - {{ $proj->prj_title }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                                     <div class="form-group mb-0 mt-2">
+                                         <label class="rd-form-label small">Associated Project</label>
+                                         <select name="ctc_projectcode" class="rd-form-control select2" id="single-project-select" style="width: 100%;">
+                                             <option value="">Project will be allocated on next pay</option>
+                                             @foreach($projects as $proj)
+                                                 <option value="{{ $proj->prj_id }}" {{ $case->ctc_prj_id == $proj->prj_id ? 'selected' : '' }}>
+                                                     {{ $proj->prj_code }} - {{ $proj->prj_title }}
+                                                 </option>
+                                             @endforeach
+                                         </select>
+                                     </div>
+                                 </div>
+                             </div>
 
-                            <!-- Monthly Project Card -->
-                            <div class="mode-card {{ !$isSingle ? 'active' : '' }}" id="card-monthly">
-                                <div class="d-flex align-items-center mb-2">
-                                    <input type="radio" name="project_mode" value="monthly" id="mode-monthly" class="mr-2" {{ !$isSingle ? 'checked' : '' }}>
-                                    <label for="mode-monthly" class="font-weight-bold text-dark mb-0 cursor-pointer">Split Project Allocation by Month</label>
-                                </div>
-                                <div class="mode-card-body" id="body-monthly" style="{{ !$isSingle ? '' : 'display: none;' }}">
-                                    <label class="rd-form-label small mb-2">Monthly Project Slices</label>
-                                    <div style="max-height: 260px; overflow-y: auto; padding-right: 6px;">
-                                        <table class="clean-table" id="monthly-project-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Month</th>
-                                                    <th>Assigned Project</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Dynamically populated via JS -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                             <!-- Monthly Project Card -->
+                             <div class="mode-card {{ !$isSingle ? 'active' : '' }}" id="card-monthly">
+                                 <div class="d-flex align-items-center mb-2">
+                                     <input type="radio" name="project_mode" value="monthly" id="mode-monthly" class="mr-2" {{ !$isSingle ? 'checked' : '' }}>
+                                     <label for="mode-monthly" class="font-weight-bold text-dark mb-0 cursor-pointer">Split Project Allocation by Month</label>
+                                 </div>
+                                 <div class="mode-card-body" id="body-monthly" style="{{ !$isSingle ? '' : 'display: none;' }}">
+                                     <label class="rd-form-label small mb-2">Monthly Project Slices</label>
+                                     <div style="max-height: 260px; overflow-y: auto; padding-right: 6px;">
+                                         <table class="clean-table" id="monthly-project-table">
+                                             <thead>
+                                                 <tr>
+                                                     <th>Month</th>
+                                                     <th>Assigned Project</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody>
+                                                 <!-- Dynamically populated via JS -->
+                                             </tbody>
+                                         </table>
+                                     </div>
+                                 </div>
+                             </div>
 
-                        </div>
-                    </div>
+                         </div>
+                     </div>
 
                     <!-- Footer Actions -->
                     <div class="actions-footer-bar">
                         <div class="text-muted small font-weight-500">
                             <i class="fas fa-info-circle text-warning mr-1"></i> Saving revision updates the terms in Division. You can release back to HR when ready.
                         </div>
-                        <div class="d-flex gap-3 align-items-center">
-                            <a href="{{ route('division.contract-cases.show', $case->ctc_id) }}" class="btn-action-cancel mr-2">Cancel</a>
-                            <button type="button" class="btn-action-update" id="btn-update-case">
-                                <i class="fas fa-save"></i> Save Revision
-                            </button>
-                        </div>
+                         <div class="d-flex gap-2 align-items-center">
+                             <button type="button" class="btn btn-outline-danger btn-sm font-weight-bold px-3 py-2 mr-2" id="btn-cancel-this-case" style="border-radius: 8px;">
+                                 <i class="fas fa-ban mr-1"></i> CANCEL CASE
+                             </button>
+                             <a href="{{ route('division.contract-cases.show', $case->ctc_id) }}" class="btn-action-cancel mr-2">Back to View</a>
+                             <button type="button" class="btn-action-update" id="btn-update-case">
+                                 <i class="fas fa-save"></i> Save Revision
+                             </button>
+                         </div>
                     </div>
                 </form>
             </div>
@@ -636,13 +639,13 @@
     </section>
 </div>
 
-<!-- Project Options Template for JS -->
-<template id="proj-options">
-    <option value="">Core / Non-Project</option>
-    @foreach($projects as $proj)
-        <option value="{{ $proj->prj_id }}">{{ $proj->prj_code }}</option>
-    @endforeach
-</template>
+ <!-- Project Options Template for JS -->
+ <template id="proj-options">
+     <option value="">Project will be allocated on next pay</option>
+     @foreach($projects as $proj)
+         <option value="{{ $proj->prj_id }}">{{ $proj->prj_code }}</option>
+     @endforeach
+ </template>
 
 @endsection
 
@@ -866,6 +869,45 @@ $(document).ready(function() {
                 const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Failed to save revision. Please check form inputs.';
                 Swal.fire('Error', msg, 'error');
                 $('#btn-update-case').attr('disabled', false).html('<i class="fas fa-save mr-2"></i> Save Revision');
+            }
+        });
+    });
+
+    // ── Cancel Case Handler ───────────────────────────────────
+    $('#btn-cancel-this-case').click(function() {
+        Swal.fire({
+            title: 'Cancel Contract Case #CC-{{ $case->ctc_id }}',
+            input: 'textarea',
+            inputLabel: 'Reason for Cancellation (Required)',
+            inputPlaceholder: 'Specify formal remarks for cancelling this case...',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Cancel Case',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'Cancellation remarks are mandatory!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ route("division.contract-cases.cancel", $case->ctc_id) }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value
+                    },
+                    success: function(res) {
+                        Swal.fire('Cancelled', res.message, 'success').then(() => {
+                            window.location.href = '{{ route("division.contract-cases.index") }}';
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to cancel contract case.', 'error');
+                    }
+                });
             }
         });
     });

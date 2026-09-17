@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Purchase;
 use App\Models\PurCaseSubstatus;
 use App\Models\PurItLetter;
+use App\Models\PurItTemplate;
 use App\Services\PurchaseApprovalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -346,10 +347,20 @@ class PurchaseController extends Controller
                 }
             } elseif (!empty($itemsInput)) {
                 // Direct line items calculation for Pt / Rb
+                $itemsSubtotal = 0;
                 foreach ($itemsInput as $it) {
                     $qty = (float)($it['qty'] ?? 1);
                     $pr = (float)($it['price'] ?? ($it['estprice'] ?? 0));
-                    $totalPrice += ($qty * $pr);
+                    $itemsSubtotal += ($qty * $pr);
+                }
+                if ($pcs->pcs_type === 'Pt' && $quoteType === 2 && $taxPercent > 0) {
+                    $basePrice = $itemsSubtotal;
+                    $taxAmount = $itemsSubtotal * ($taxPercent / 100);
+                    $totalPrice = $itemsSubtotal + $taxAmount;
+                } else {
+                    $basePrice = $itemsSubtotal;
+                    $taxAmount = 0;
+                    $totalPrice = $itemsSubtotal;
                 }
             } elseif ($request->has('remarks_JSON.items')) {
                 foreach ($request->input('remarks_JSON.items') as $item) {
@@ -357,15 +368,24 @@ class PurchaseController extends Controller
                     $rate = (float)($item['rate'] ?? 1);
                     $totalPrice += ($qty * $rate);
                 }
+                $basePrice = $totalPrice;
+                $taxAmount = 0;
             } elseif ($request->has('remarks_JSON.milestones')) {
                 foreach ($request->input('remarks_JSON.milestones') as $m) {
                     $totalPrice += (float)($m['amount'] ?? 0);
                 }
+                $basePrice = $totalPrice;
+                $taxAmount = 0;
             }
             
             $winningFirmId = (!empty($firmTotals) && $pcs->pcs_type === 'Ps') ? array_keys($firmTotals, min($firmTotals))[0] : null;
-            $basePrice = $winningFirmId ? (float)($firmSubtotals[$winningFirmId] ?? $totalPrice) : (float)$totalPrice;
-            $taxAmount = $winningFirmId ? (float)($firmTaxes[$winningFirmId] ?? 0) : 0;
+            if ($winningFirmId) {
+                $basePrice = (float)($firmSubtotals[$winningFirmId] ?? $totalPrice);
+                $taxAmount = (float)($firmTaxes[$winningFirmId] ?? 0);
+            } elseif ($pcs->pcs_type !== 'Pt') {
+                $basePrice = (float) $totalPrice;
+                $taxAmount = 0;
+            }
 
             $isSst = ($taxType === 'SST');
             $sstAmount = $isSst ? $taxAmount : 0.0;
@@ -524,6 +544,46 @@ class PurchaseController extends Controller
                                 ]);
                             }
                         }
+                    }
+                }
+            } elseif ($pcs->pcs_type === 'Pt' && $pcs->pcs_frm_id) {
+                $firmId = $pcs->pcs_frm_id;
+                $firmName = DB::table('frm.firmz')->where('frm_id', $firmId)->value('frm_name') ?? 'Vendor';
+                
+                $firmSub = $basePrice;
+                $firmTx = ($quoteType === 2) ? $taxAmount : 0.0;
+                $firmTotal = $pcs->pcs_price;
+                $qSst = $isSst ? $firmTx : 0.0;
+                $qGst = !$isSst ? $firmTx : 0.0;
+                $qMid = round($firmSub + $qSst, 2);
+
+                $qte_id = DB::table('pur.quotes')->insertGetId([
+                    'qte_pcs_id' => $pcs->pcs_id,
+                    'qte_frm_id' => $firmId,
+                    'qte_firmname' => $firmName,
+                    'qte_price' => $firmTotal,
+                    'qte_intprice' => $firmSub,
+                    'qte_inttax' => $qSst,
+                    'qte_midprice' => $qMid,
+                    'qte_midtax' => $qGst,
+                    'qte_num' => 1,
+                    'qte_date' => $request->pcs_date,
+                    'qte_techaccept' => true,
+                    'qte_recomm' => true,
+                    'qte_quotetype' => $quoteType,
+                ], 'qte_id');
+
+                if ($request->hasFile('pt_quote_file')) {
+                    $qFile = $request->file('pt_quote_file');
+                    if ($qFile && $qFile->isValid()) {
+                        $stored = app(\App\Services\FileStorageService::class)->storeQuote($qFile, (int) $pcs->pcs_id, (int) $qte_id);
+
+                        DB::table('pur.purattachments')->insert([
+                            'pat_objtype' => 'qte',
+                            'pat_objid' => $qte_id,
+                            'pat_type' => 'Quotation Document',
+                            'pat_path' => $stored,
+                        ]);
                     }
                 }
             }
@@ -697,28 +757,19 @@ class PurchaseController extends Controller
         $refNo = $savedLetter?->pit_refno ?: ('R&D/Projects/Proc/' . $purchase->pcs_id);
         $letterDate = $savedLetter?->pit_date ?: date('d F Y');
         $deadlineDate = date('d F Y', strtotime(($purchase->pcs_date ?: 'now') . ' + 14 days'));
-        $subject = $savedLetter?->pit_subject ?: 'REQUEST FOR QUOTATION';
 
-        // Default Paragraphs (dynamic case title with indented sub-bullets)
-        $itemTitle = $purchase->pcs_title ?: 'required items';
-        $defaultPara1 = "1.\tR&D Wing NRDI at PNS JAUHAR is interested for the procurement of " . $itemTitle . ". In this regard, quotation are to be submitted to MD R&D at NRDI by " . $deadlineDate . ".";
-        $defaultPara2 = "2.\tQuotation will be opened on same day at 11:00 hrs in the presence of all participants or their representatives and will be accepted at lowest quotations rate basis. However, It is apprised that MD (R&D) reserves the right to reject/ accept any quotation or invite new quotation without assigning any reason.";
-        $defaultPara3 = "3.\tFollowing terms and condition would apply:\n\n\ta.\tItems are to be delivered within 15 days after issuance of purchase order.\n\tb.\tPayment will be processed / made after delivery and acceptance by user.\n\tc.\tPart Delivery / Partial shall not be entertained.\n\td.\tWarrantee / Guarantee of one year is required.";
+        // Pull defaults from the global template
+        $globalTemplate = PurItTemplate::getTemplate();
+        $subject = $savedLetter?->pit_subject ?: ($globalTemplate->subject ?: 'REQUEST FOR QUOTATION');
 
-        if (!empty($savedLetter?->pit_paragraphs) && is_array($savedLetter->pit_paragraphs)) {
-            $paragraphs = $savedLetter->pit_paragraphs;
-        } else {
-            $paragraphs = [
-                $savedLetter?->pit_para1 ?: $defaultPara1,
-                $savedLetter?->pit_para2 ?: $defaultPara2,
-                $savedLetter?->pit_para3 ?: $defaultPara3,
-            ];
-        }
+        // Default Paragraphs from template with per-case replacements
+        $itemTitle = $purchase->pcs_title ?: 'Items required for HFT Project';
+        $paragraphs = $globalTemplate->applyReplacements($itemTitle, $deadlineDate);
 
-        // Default Signatory
-        $signatoryName = $savedLetter?->pit_signatory_name ?: 'MUHAMMAD MUDASSIR';
-        $signatoryRank = $savedLetter?->pit_signatory_rank ?: 'Cdr (R) Pakistan Navy';
-        $signatoryDept = $savedLetter?->pit_signatory_dept ?: 'R&D Wing, NRDI';
+        // Default Signatory from template
+        $signatoryName = $savedLetter?->pit_signatory_name ?: ($globalTemplate->signatory_name ?: 'MUHAMMAD MUDASSIR');
+        $signatoryRank = $savedLetter?->pit_signatory_rank ?: ($globalTemplate->signatory_rank ?: 'Cdr (R) Pakistan Navy');
+        $signatoryDept = $savedLetter?->pit_signatory_dept ?: ($globalTemplate->signatory_dept ?: 'Dir Procurement');
 
         // Default Selected Firms
         if (!is_null($savedLetter) && !empty($savedLetter->pit_firms)) {
@@ -833,25 +884,25 @@ class PurchaseController extends Controller
         $currentDate = now()->format('d F Y');
         $deadlineDate = now()->addDays(14)->format('d F Y');
 
-        $itemTitle = $purchase->pcs_title ?: 'required items';
-        $defaultPara1 = "1.\tR&D Wing NRDI at PNS JAUHAR is interested for the procurement of " . $itemTitle . ". In this regard, quotation are to be submitted to MD R&D at NRDI by " . $deadlineDate . ".";
-        $defaultPara2 = "2.\tQuotation will be opened on same day at 11:00 hrs in the presence of all participants or their representatives and will be accepted at lowest quotations rate basis. However, It is apprised that MD (R&D) reserves the right to reject/ accept any quotation or invite new quotation without assigning any reason.";
-        $defaultPara3 = "3.\tFollowing terms and condition would apply:\n\n\ta.\tItems are to be delivered within 15 days after issuance of purchase order.\n\tb.\tPayment will be processed / made after delivery and acceptance by user.\n\tc.\tPart Delivery / Partial shall not be entertained.\n\td.\tWarrantee / Guarantee of one year is required.";
+        // Pull defaults from the global template
+        $globalTemplate = PurItTemplate::getTemplate();
+        $itemTitle = $purchase->pcs_title ?: 'Items required for HFT Project';
+        $allDefaultParas = $globalTemplate->applyReplacements($itemTitle, $deadlineDate);
 
         $itLetter = PurItLetter::firstOrCreate(
             ['pit_pcs_id' => $purchase->pcs_id],
             [
                 'pit_refno'              => 'R&D/Projects/Proc/' . $purchase->pcs_id,
                 'pit_date'               => $currentDate,
-                'pit_subject'            => 'REQUEST FOR QUOTATION',
-                'pit_distribution_label' => 'See distribution',
-                'pit_para1'              => $defaultPara1,
-                'pit_para2'              => $defaultPara2,
-                'pit_para3'              => $defaultPara3,
-                'pit_paragraphs'         => [$defaultPara1, $defaultPara2, $defaultPara3],
-                'pit_signatory_name'     => 'MUHAMMAD MUDASSIR',
-                'pit_signatory_rank'     => 'Cdr (R) Pakistan Navy',
-                'pit_signatory_dept'     => 'R&D Wing, NRDI',
+                'pit_subject'            => $globalTemplate->subject ?: 'REQUEST FOR QUOTATION',
+                'pit_distribution_label' => $globalTemplate->see_distribution ?: 'See distribution',
+                'pit_para1'              => $allDefaultParas[0] ?? null,
+                'pit_para2'              => $allDefaultParas[1] ?? null,
+                'pit_para3'              => $allDefaultParas[2] ?? null,
+                'pit_paragraphs'         => $allDefaultParas,
+                'pit_signatory_name'     => $globalTemplate->signatory_name ?: 'MUHAMMAD MUDASSIR',
+                'pit_signatory_rank'     => $globalTemplate->signatory_rank ?: 'Cdr (R) Pakistan Navy',
+                'pit_signatory_dept'     => $globalTemplate->signatory_dept ?: 'Dir Procurement',
                 'pit_firms'              => [],
                 'pit_items'              => [],
             ]
@@ -891,11 +942,16 @@ class PurchaseController extends Controller
             'items'                  => 'nullable|array',
         ]);
 
-        $paragraphs = $validated['paragraphs'] ?? [
+        $rawParagraphs = $validated['paragraphs'] ?? [
             $validated['para1'] ?? null,
             $validated['para2'] ?? null,
             $validated['para3'] ?? null,
         ];
+
+        $paragraphs = array_map(function ($pText) {
+            if (empty($pText)) return $pText;
+            return preg_replace('/^(\s*[0-9a-zA-Z]+\.)[ \t]+/u', "$1\t", trim($pText));
+        }, $rawParagraphs);
 
         $itLetter = PurItLetter::updateOrCreate(
             ['pit_pcs_id' => $purchase->pcs_id],
@@ -920,6 +976,67 @@ class PurchaseController extends Controller
             'success' => true,
             'message' => 'IT Letter & Annex saved successfully.',
             'data'    => $itLetter,
+        ]);
+    }
+
+    /**
+     * Show the standalone IT Letter Template Editor page.
+     */
+    public function itTemplate()
+    {
+        $user = Auth::user();
+        $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
+        $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
+
+        if (!$isDProc) {
+            abort(403, 'Only Procurement Department or Super Admin can access the IT Letter Template Editor.');
+        }
+
+        $template = PurItTemplate::getTemplate();
+
+        return view('purchase.initiation.it_template_editor', compact('template'));
+    }
+
+    /**
+     * Save the global IT Letter default template via AJAX.
+     */
+    public function saveItTemplate(Request $request)
+    {
+        $user = Auth::user();
+        $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
+        $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
+
+        if (!$isDProc) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $validated = $request->validate([
+            'subject'         => 'nullable|string|max:255',
+            'paragraphs'      => 'nullable|array',
+            'signatory_name'  => 'nullable|string|max:255',
+            'signatory_rank'  => 'nullable|string|max:255',
+            'signatory_dept'  => 'nullable|string|max:255',
+        ]);
+
+        // Normalize tab characters in paragraphs
+        $rawParagraphs = $validated['paragraphs'] ?? [];
+        $paragraphs = array_map(function ($pText) {
+            if (empty($pText)) return $pText;
+            return preg_replace('/^(\s*[0-9a-zA-Z]+\.)[ \t]+/u', "$1\t", trim($pText));
+        }, $rawParagraphs);
+
+        $template = PurItTemplate::getTemplate();
+        $template->update([
+            'subject'        => $validated['subject'] ?? 'REQUEST FOR QUOTATION',
+            'paragraphs'     => $paragraphs,
+            'signatory_name' => $validated['signatory_name'] ?? 'MUHAMMAD MUDASSIR',
+            'signatory_rank' => $validated['signatory_rank'] ?? 'Cdr (R) Pakistan Navy',
+            'signatory_dept' => $validated['signatory_dept'] ?? 'Dir Procurement',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'IT Letter template saved successfully.',
         ]);
     }
 

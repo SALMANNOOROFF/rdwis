@@ -455,22 +455,30 @@
                 <!-- TYPE SPECIFIC DYNAMIC FIELDS -->
                 <div class="section-title mt-4"><i class="fas <?= $theme['icon'] ?>" style="color: <?= $theme['color'] ?>"></i> Details: <?= $theme['label'] ?></div>
 
-                {{-- BUDGET SUBHEAD SECTION (POSITIONED DIRECTLY ABOVE LINE ITEMS) --}}
+                {{-- BUDGET SUBHEAD SECTION (HIDDEN UNTIL PROJECT HEAD IS SELECTED) --}}
+                <div id="subheadAllocationWrapper" style="display: none;">
                 @if($type === 'Ps')
                   <div class="p-3 mb-3 rounded" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                      <div class="d-flex align-items-center">
-                        <span class="mr-2 text-primary" style="font-size:16px;"><i class="fas fa-layer-group"></i></span>
-                        <div>
-                          <strong style="font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px;">Budget Subhead:</strong>
-                          <span class="badge badge-primary ml-2 px-2 py-1" style="font-size:11px; font-weight:700; letter-spacing:0.5px;"><i class="fas fa-microchip mr-1"></i>Equipment</span>
+                    <div class="row align-items-center">
+                      <div class="col-md-6">
+                        <label class="soft-label mb-1" style="font-weight:700; color:#1e293b;">
+                          <i class="fas fa-layer-group text-primary mr-1"></i> Budget Subhead Allocation <span class="text-danger">*</span>
+                        </label>
+                        <select name="subhead" id="case_subhead" class="soft-select" required onchange="handleSubheadChange(this.value)">
+                          <option value="Equipment" selected>Equipment (Default for Major Purchase)</option>
+                          <option value="Misc">Misc</option>
+                          <option value="Spares">Spares</option>
+                          <option value="Software">Software</option>
+                          <option value="Consumables">Consumables</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <div style="font-size:11px; color:#64748b; line-height:1.4;">
+                          <i class="fas fa-info-circle text-primary mr-1"></i>
+                          In-process budget will deduct under <strong id="subheadPreview" class="text-dark">Equipment</strong>. You can switch to any subhead allocated under this project.
                         </div>
                       </div>
-                      <span class="text-muted" style="font-size:11px;">
-                        <i class="fas fa-info-circle mr-1 text-primary"></i> Standard for Major Purchase. In-process commitments will automatically book under <strong>Equipment</strong>.
-                      </span>
                     </div>
-                    <input type="hidden" name="subhead" id="case_subhead" value="Equipment">
                   </div>
                 @else
                   <div class="p-3 mb-3 rounded" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
@@ -482,6 +490,9 @@
                         <select name="subhead" id="case_subhead" class="soft-select" required onchange="handleSubheadChange(this.value)">
                           <option value="Misc" selected>Misc (Default for {{ $type === 'Pt' ? 'Incidental' : 'TA/DA' }})</option>
                           <option value="Equipment">Equipment</option>
+                          <option value="Spares">Spares</option>
+                          <option value="Software">Software</option>
+                          <option value="Consumables">Consumables</option>
                         </select>
                       </div>
                       <div class="col-md-6">
@@ -494,6 +505,7 @@
                     </div>
                   </div>
                 @endif
+                </div>
 
                 {{-- Line Items List (Common for all types) --}}
                 <div class="soft-group mt-2">
@@ -881,6 +893,52 @@
                 </div>
 
               </div>
+            @elseif($type === 'Pt')
+              <div class="soft-group mt-4 mb-4" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                  <div class="section-title mb-0" style="border-bottom: none; margin: 0; padding: 0;">
+                    <i class="fas fa-file-invoice-dollar" style="color: #059669;"></i> Incidental Vendor Quote & Tax Configuration
+                  </div>
+                  <div class="d-flex align-items-center flex-wrap gap-3">
+                      <div class="d-flex align-items-center mr-1">
+                          <label class="soft-label mb-0 mr-2" style="font-size: 11px; white-space:nowrap;">TAX MODE:</label>
+                          <select name="pcs_quotetype" id="ptCaseQuoteType" class="soft-select" style="min-width:145px; height:32px; font-size:11px; padding:2px 8px;" onchange="calculateDirectItemTotals()">
+                              <option value="1">1 - Without Tax (Net Quote)</option>
+                              <option value="2" selected>2 - With Tax (GST/SST)</option>
+                          </select>
+                      </div>
+                      <div class="d-flex align-items-center" id="ptTaxTypeContainer">
+                          <label class="soft-label mb-0 mr-2" style="font-size: 11px;">TAX TYPE:</label>
+                          <select name="tax_type" id="ptCaseTaxType" class="soft-select" style="width:80px; height:32px; font-size:11px; padding:2px 8px;" onchange="calculateDirectItemTotals()">
+                              <option value="GST">GST</option>
+                              <option value="SST">SST</option>
+                          </select>
+                      </div>
+                      <div class="d-flex align-items-center ml-1" id="ptTaxPercentContainer">
+                          <label class="soft-label mb-0 mr-2" style="font-size: 11px;">TAX %:</label>
+                          <input type="number" name="tax_percent" id="ptCaseTaxPercent" class="soft-input" value="18" min="0" max="100" style="width:64px; height:32px; font-size:11px; padding:2px 8px; text-align:center;" oninput="calculateDirectItemTotals()">
+                      </div>
+                  </div>
+                </div>
+
+                <div class="row align-items-center p-3 rounded" style="background:#f8fafc; border:1.5px dashed #cbd5e1;">
+                  <div class="col-md-7 mb-2 mb-md-0">
+                    <label class="soft-label mb-1" style="font-weight:700; color:#0f172a;">
+                      <i class="fas fa-paperclip text-success mr-1"></i> Attach Vendor Quotation File (PDF, DOCX, Image)
+                    </label>
+                    <input type="file" name="pt_quote_file" id="pt_quote_file" class="soft-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="padding-top:4px;">
+                    <div style="font-size:11px; color:#64748b; margin-top:4px;">
+                      Upload official vendor quote document for this incidental expenditure.
+                    </div>
+                  </div>
+                  <div class="col-md-5">
+                    <div class="p-2 bg-white rounded border text-center" style="font-size:11.5px;">
+                      <span class="text-muted">Selected Tax Breakdown:</span>
+                      <div class="font-weight-bold rajdhani text-dark mt-1" id="ptTaxBreakdownPreview" style="font-size:14px;">Subtotal + 18% Tax</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             @endif
             
             <!-- FORM ACTIONS -->
@@ -967,10 +1025,6 @@
       if (preview) preview.textContent = activeVal;
 
       syncItemSubheads(options, activeVal);
-  }
-
-  function handleProjectHeadChange(hedId) {
-      updateSubheadDropdown(hedId);
   }
 
   function syncItemSubheads(options, selectedVal) {
@@ -1331,14 +1385,41 @@
   }
 
   function calculateDirectItemTotals() {
-      let total = 0;
+      let subtotal = 0;
       document.querySelectorAll('#items-list .dyn-row').forEach(row => {
           const qty = parseFloat(row.querySelector('.item-qty')?.value || 0);
           const price = parseFloat(row.querySelector('.item-price')?.value || 0);
-          total += (qty * price);
+          subtotal += (qty * price);
       });
+
+      const quoteTypeSelect = document.getElementById('ptCaseQuoteType');
+      const taxTypeSelect = document.getElementById('ptCaseTaxType');
+      const taxPercentInput = document.getElementById('ptCaseTaxPercent');
+      const breakdownPreview = document.getElementById('ptTaxBreakdownPreview');
+
+      let grandTotal = subtotal;
+      let taxAmount = 0;
+
+      if (quoteTypeSelect) {
+          const qType = parseInt(quoteTypeSelect.value || 1);
+          const tType = taxTypeSelect ? taxTypeSelect.value : 'GST';
+          const tPct = taxPercentInput ? parseFloat(taxPercentInput.value || 0) : 0;
+
+          if (qType === 2 && tPct > 0) {
+              taxAmount = subtotal * (tPct / 100);
+              grandTotal = subtotal + taxAmount;
+              if (breakdownPreview) {
+                  breakdownPreview.innerHTML = `Subtotal: PKR ${subtotal.toLocaleString(undefined, {maximumFractionDigits: 2})} + ${tType} (${tPct}%): PKR ${taxAmount.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+              }
+          } else {
+              if (breakdownPreview) {
+                  breakdownPreview.innerHTML = `Without Tax (Net Subtotal): PKR ${subtotal.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+              }
+          }
+      }
+
       const disp = document.getElementById('live-total-display');
-      if (disp) disp.textContent = 'PKR ' + total.toLocaleString(undefined, {maximumFractionDigits: 2});
+      if (disp) disp.textContent = 'PKR ' + grandTotal.toLocaleString(undefined, {maximumFractionDigits: 2});
   }
 
   function updateItemSerials() {
@@ -1821,7 +1902,17 @@
 
   // Project Head & Subhead Management
   function handleProjectHeadChange(hedId) {
-      updateSubheadDropdown(hedId);
+      const wrapper = document.getElementById('subheadAllocationWrapper');
+      if (wrapper) {
+          if (hedId && String(hedId).trim() !== '') {
+              wrapper.style.display = 'block';
+          } else {
+              wrapper.style.display = 'none';
+          }
+      }
+      if (typeof updateSubheadDropdown === 'function') {
+          updateSubheadDropdown(hedId);
+      }
   }
 
   function handleSubheadChange(val) {
@@ -1836,6 +1927,10 @@
   // Init
   document.addEventListener('DOMContentLoaded', () => {
       updateItemSerials();
+      const headSelect = document.getElementById('pcs_hed_id');
+      if (headSelect && headSelect.value) {
+          handleProjectHeadChange(headSelect.value);
+      }
       if ("{{ $type }}" === 'Ps') {
           handleQuoteTypeChange();
       }

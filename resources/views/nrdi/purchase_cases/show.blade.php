@@ -215,7 +215,7 @@
                                 <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
                             </a>
                         @endif
-                        <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(0,123,255,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold d-none" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(0,123,255,0.4); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="fas fa-file-alt mr-1"></i> MINUTE VIEW
                         </a>
                         <a href="{{ $backRoute }}" class="dg-back-btn" style="padding: 6px 15px; font-size: 12px;">

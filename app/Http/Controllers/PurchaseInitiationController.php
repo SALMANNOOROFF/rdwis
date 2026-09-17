@@ -302,8 +302,11 @@ class PurchaseInitiationController extends Controller
             $rules['subhead'] = 'nullable|string|max:255';
             $rules['pcs_frm_id'] = 'nullable|integer';
         } elseif ($op === 'add_files') {
-            $rules['attachments'] = 'required|array';
-            $rules['attachments.*'] = 'file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240';
+            $rules['doc_title'] = 'nullable|string|max:255';
+            $rules['doc_type'] = 'nullable|string|max:255';
+            $rules['attachments'] = 'nullable|array';
+            $rules['attachments.*'] = 'file|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx|max:20480';
+            $rules['file'] = 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx|max:20480';
         } elseif ($op === 'delete_file') {
             $rules['pat_id'] = 'required|integer';
         } elseif ($op === 'add_item') {
@@ -350,28 +353,31 @@ class PurchaseInitiationController extends Controller
         $user = Auth::user();
         $isDProc = str_contains(strtolower(trim($user->acc_untarea ?? '')), 'proc') || str_contains(strtolower(trim($user->acc_untarea ?? '')), 'prc');
 
-        if ($op === 'add_files' || $op === 'delete_file') {
-            // Any authenticated user can upload or remove case attachments across all stages
+        if ($op === 'add_files') {
+            // Any authenticated user with view access can upload case attachments across all stages
             $purchase = Purchase::findOrFail($id);
-            $this->authorize('update', $purchase);
+            $this->authorize('view', $purchase);
+        } elseif ($op === 'delete_file') {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Permission denied: Deletion of attachments is permanently disabled.'
+            ], 403);
         } else {
-            $query = Purchase::query();
             if ($isDProc) {
-                $lower = $user->acc_lowerm;
-                $upper = $user->acc_upperm;
-                $query->whereBetween('pcs_unt_id', [$lower, $upper]);
+                $purchase = Purchase::findOrFail($id);
             } else {
                 $unitId = $user->acc_unt_id;
                 [$lower, $upper] = $user->acc_lowers == 0
                     ? [$user->acc_lowerm, $user->acc_upperm]
                     : [$user->acc_lowers, $user->acc_uppers];
 
+                $query = Purchase::query();
                 $query->where(function($q) use ($unitId, $lower, $upper) {
                     $q->where('pcs_unt_id', $unitId)
                       ->orWhereBetween('pcs_unt_id', [$lower, $upper]);
                 });
+                $purchase = $query->findOrFail($id);
             }
-            $purchase = $query->findOrFail($id);
             $this->authorize('update', $purchase);
         }
 
@@ -420,39 +426,53 @@ class PurchaseInitiationController extends Controller
 
             if ($op === 'add_files') {
                 $files = $request->file('attachments', []);
+                if (empty($files) && $request->hasFile('file')) {
+                    $files = [$request->file('file')];
+                }
+
+                $docTitle = trim((string) $request->input('doc_title', $request->input('doc_type', '')));
                 $count = 0;
+                $insertedAttachment = null;
                 $storage = app(\App\Services\FileStorageService::class);
+
                 foreach ($files as $file) {
                     if (!$file || !$file->isValid()) {
                         continue;
                     }
                     $storedPath = $storage->store($file, 'pur', 'pcs-', (string) $purchase->pcs_id);
+                    $finalType = $docTitle ?: ($file->getClientOriginalName() ?: 'Supporting Document');
 
-                    DB::table('pur.purattachments')->insert([
+                    $patId = DB::table('pur.purattachments')->insertGetId([
                         'pat_objtype' => 'pcs',
-                        'pat_objid' => $purchase->pcs_id,
-                        'pat_type' => 'Supporting Document',
-                        'pat_path' => $storedPath,
-                    ]);
+                        'pat_objid'   => $purchase->pcs_id,
+                        'pat_type'    => $finalType,
+                        'pat_path'    => $storedPath,
+                    ], 'pat_id');
+
+                    $insertedAttachment = [
+                        'pat_id'   => $patId,
+                        'id'       => $patId,
+                        'title'    => $finalType,
+                        'filename' => $file->getClientOriginalName(),
+                        'url'      => \App\Facades\FileStorage::url($storedPath),
+                    ];
                     $count++;
                 }
-                return ['ok' => true, 'message' => "{$count} file(s) uploaded.", 'pcsId' => (int) $purchase->pcs_id];
+
+                return [
+                    'ok'         => true,
+                    'message'    => "Attachment uploaded successfully.",
+                    'pcsId'      => (int) $purchase->pcs_id,
+                    'attachment' => $insertedAttachment
+                ];
             }
 
             if ($op === 'delete_file') {
-                $patId = (int) $request->input('pat_id');
-                $att = DB::table('pur.purattachments')
-                    ->where('pat_objtype', 'pcs')
-                    ->where('pat_objid', $purchase->pcs_id)
-                    ->where('pat_id', $patId)
-                    ->first();
-                if ($att) {
-                    if (!empty($att->pat_path)) {
-                        app(\App\Services\FileStorageService::class)->delete($att->pat_path);
-                    }
-                    DB::table('pur.purattachments')->where('pat_id', $patId)->delete();
-                }
-                return ['ok' => true, 'message' => 'Attachment deleted.', 'pcsId' => (int) $purchase->pcs_id];
+                return [
+                    'ok'      => false,
+                    'message' => 'Permission denied: Deletion of attachments is permanently disabled.',
+                    'pcsId'   => (int) $purchase->pcs_id
+                ];
             }
 
             if ($op === 'add_item') {
@@ -647,6 +667,7 @@ class PurchaseInitiationController extends Controller
                 $qteDate = $request->input('qte_date') ?: $purchase->pcs_date;
                 
                 // Tax parameters
+                $taxMode = strtolower(trim((string) $request->input('tax_mode', 'exclusive')));
                 $taxType = strtoupper(trim((string) $request->input('tax_type', 'GST')));
                 $taxPercent = (float) $request->input('tax_percent', 18);
 
@@ -657,7 +678,7 @@ class PurchaseInitiationController extends Controller
                 // Fetch case items to ensure consistency
                 $caseItems = DB::table('pur.purcaseitems')->where('pci_pcs_id', $purchase->pcs_id)->get();
                 
-                $subtotal = 0.0;
+                $rawSubtotal = 0.0;
                 foreach ($caseItems as $it) {
                     $price = 0.0;
                     if (isset($inputItems[$it->pci_id]['price'])) {
@@ -665,11 +686,18 @@ class PurchaseInitiationController extends Controller
                     } elseif (isset($flatItemPrices[$it->pci_id])) {
                         $price = (float) $flatItemPrices[$it->pci_id];
                     }
-                    $subtotal += ($price * (float)$it->pci_qty);
+                    $rawSubtotal += ($price * (float)$it->pci_qty);
                 }
 
-                $taxAmount = $subtotal * ($taxPercent / 100);
-                $total = $subtotal + $taxAmount;
+                if ($taxMode === 'inclusive' && $taxPercent > 0) {
+                    $total = $rawSubtotal;
+                    $subtotal = round($total / (1 + ($taxPercent / 100)), 2);
+                    $taxAmount = round($total - $subtotal, 2);
+                } else {
+                    $subtotal = round($rawSubtotal, 2);
+                    $taxAmount = round($subtotal * ($taxPercent / 100), 2);
+                    $total = round($subtotal + $taxAmount, 2);
+                }
 
                 // Identify Firm
                 if (!$firmId && $firmName) {
@@ -775,8 +803,21 @@ class PurchaseInitiationController extends Controller
                 $qteId = (int) $request->input('qte_id');
                 $quote = DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->where('qte_id', $qteId)->first();
                 if (!$quote) {
-                    return ['ok' => false, 'message' => 'Quotation not found.', 'pcsId' => (int) $purchase->pcs_id];
+                    $quote = DB::table('pur.quotes')->where('qte_pcs_id', $purchase->pcs_id)->first();
                 }
+                if (!$quote && $purchase->pcs_frm_id) {
+                    $qteId = DB::table('pur.quotes')->insertGetId([
+                        'qte_pcs_id' => $purchase->pcs_id,
+                        'qte_frm_id' => $purchase->pcs_frm_id,
+                        'qte_date'   => now(),
+                        'qte_price'  => $purchase->pcs_price ?? 0,
+                    ], 'qte_id');
+                    $quote = DB::table('pur.quotes')->where('qte_id', $qteId)->first();
+                }
+                if (!$quote) {
+                    return ['ok' => false, 'message' => 'Vendor quotation record not found.', 'pcsId' => (int) $purchase->pcs_id];
+                }
+                $qteId = $quote->qte_id;
 
                 if ($request->hasFile('quote_file')) {
                     $qFile = $request->file('quote_file');

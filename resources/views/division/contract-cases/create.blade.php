@@ -564,7 +564,7 @@
                                     <div class="form-group mb-0 mt-2">
                                         <label class="rd-form-label small">Associated Project</label>
                                         <select name="ctc_projectcode" class="rd-form-control select2" id="single-project-select" style="width: 100%;">
-                                            <option value="">Core / Non-Project</option>
+                                            <option value="">Project will be allocated on next pay</option>
                                             @foreach($projects as $proj)
                                                 <option value="{{ $proj->prj_id }}">{{ $proj->prj_code }} - {{ $proj->prj_title }}</option>
                                             @endforeach
@@ -620,7 +620,7 @@
 
 <!-- Project Options Template for JS -->
 <template id="proj-options">
-    <option value="">Core / Non-Project</option>
+    <option value="">Project will be allocated on next pay</option>
     @foreach($projects as $proj)
         <option value="{{ $proj->prj_id }}">{{ $proj->prj_code }}</option>
     @endforeach
@@ -642,6 +642,50 @@ $(document).ready(function() {
 
     let defaultExpectedStart = null;
 
+    // ── Cancel Active Case Modal Functionality ────────────────
+    function cancelActiveCase(caseId) {
+        Swal.fire({
+            title: `Cancel Case #CC-${caseId}`,
+            input: 'textarea',
+            inputLabel: 'Reason for Cancellation (Required)',
+            inputPlaceholder: 'State reason for cancelling open case to start new contract case...',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Cancellation',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'Cancellation remarks are mandatory!';
+                }
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                $.ajax({
+                    url: `{{ url('division/contract-cases') }}/${caseId}/cancel`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: res.value
+                    },
+                    success: function(resp) {
+                        Swal.fire('Case Cancelled', `Contract case #CC-${caseId} has been cancelled successfully. You can now initiate a new case.`, 'success').then(() => {
+                            $('#emp-selector').trigger('change');
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to cancel case.', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    $(document).on('click', '.btn-cancel-active-case', function() {
+        const caseId = $(this).data('id');
+        cancelActiveCase(caseId);
+    });
+
     // ── Employee Selector AJAX Handler (Cr, Ce, Rh) ───────────
     $('#emp-selector').on('change', function() {
         const empId = $(this).val();
@@ -659,10 +703,34 @@ $(document).ready(function() {
             method: 'GET',
             success: function(res) {
                 if (res.has_active_case) {
-                    $('#active-case-message').text(res.message);
+                    const activeCaseId = res.active_case_id;
+                    const msg = res.message;
+
+                    $('#active-case-message').html(`
+                        ${msg}
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-danger btn-sm font-weight-bold btn-cancel-active-case" data-id="${activeCaseId}" style="border-radius: 6px;">
+                                <i class="fas fa-ban mr-1"></i> CANCEL OPEN CASE #CC-${activeCaseId}
+                            </button>
+                        </div>
+                    `);
                     $('#active-case-alert').removeClass('d-none');
                     $('#btn-save-draft').attr('disabled', true);
-                    Swal.fire('Active Case In Progress', res.message, 'warning');
+
+                    Swal.fire({
+                        title: 'Active Case In Progress',
+                        html: `${msg}<br><br><strong class="text-danger">Would you like to cancel open case #CC-${activeCaseId} now to initiate a new case?</strong>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: `<i class="fas fa-ban mr-1"></i> Cancel Case #CC-${activeCaseId}`,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonText: 'Keep Existing Case',
+                        cancelButtonColor: '#94a3b8'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            cancelActiveCase(activeCaseId);
+                        }
+                    });
                     return;
                 }
 
@@ -673,7 +741,10 @@ $(document).ready(function() {
                     $('#ctc_emp_id').val(res.employee.emp_id);
                     $('#ctc_empnamecomp').val(res.employee.emp_name);
                     if (res.employee.emp_cnic) {
-                        $('#ctc_cnic').val(res.employee.emp_cnic);
+                        $('#ctc_cnic').val(res.employee.emp_cnic).attr('readonly', true).css({'background-color': '#f1f5f9', 'cursor': 'not-allowed'});
+                    }
+                    if (res.employee.emp_contact) {
+                        $('#ctc_contact').val(res.employee.emp_contact);
                     }
                 }
 

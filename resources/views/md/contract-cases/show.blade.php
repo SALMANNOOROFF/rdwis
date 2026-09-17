@@ -704,12 +704,16 @@
                                         </div>
                                         <div class="px-2.5 py-1" style="font-size: 10px;">
                                             @forelse($projectAttachments as $pIdx => $pDoc)
+                                                @php
+                                                    $pUrl = \App\Facades\FileStorage::url($pDoc->jat_path);
+                                                    $pTitle = addslashes($pDoc->jat_type ?: 'Project Attachment');
+                                                @endphp
                                                 <div class="d-flex justify-content-between align-items-center py-1 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f8fafc !important;">
-                                                    <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
+                                                    <a href="{{ $pUrl }}" onclick="window.openLiveDocument('{{ $pUrl }}', '{{ $pTitle }}'); return false;" class="d-flex align-items-center overflow-hidden mr-1 text-decoration-none rd-live-file-view" style="flex: 1; min-width: 0; cursor: pointer;" title="View {{ $pDoc->jat_type }} Live">
                                                         <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 14px;">{{ $pIdx + 1 }}.</span>
-                                                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;" title="{{ $pDoc->jat_type }}">{{ $pDoc->jat_type }}</span>
-                                                    </div>
-                                                    <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" onclick="window.openLiveDocument('{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}', '{{ addslashes($pDoc->jat_type) }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live"><i class="fas fa-eye"></i></a>
+                                                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;">{{ $pDoc->jat_type }}</span>
+                                                    </a>
+                                                    <a href="{{ $pUrl }}" onclick="window.openLiveDocument('{{ $pUrl }}', '{{ $pTitle }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live" style="cursor: pointer;"><i class="fas fa-eye"></i></a>
                                                 </div>
                                             @empty
                                                 <div class="text-center py-1 text-muted" style="font-size: 9px;">No files.</div>
@@ -732,12 +736,16 @@
                                         </div>
                                         <div id="caseAttachmentsList" class="px-2.5 py-1" style="font-size: 10px;">
                                             @forelse($caseAttachments as $cIdx => $cDoc)
+                                                @php
+                                                    $cUrl = \App\Facades\FileStorage::url($cDoc->cat_path);
+                                                    $cTitle = addslashes($cDoc->cat_type ?: 'Case Attachment');
+                                                @endphp
                                                 <div class="d-flex justify-content-between align-items-center py-1 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f8fafc !important;">
-                                                    <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
+                                                    <a href="{{ $cUrl }}" onclick="window.openLiveDocument('{{ $cUrl }}', '{{ $cTitle }}'); return false;" class="d-flex align-items-center overflow-hidden mr-1 text-decoration-none rd-live-file-view" style="flex: 1; min-width: 0; cursor: pointer;" title="View {{ $cDoc->cat_type ?: 'Attachment' }} Live">
                                                         <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 14px;">{{ $cIdx + 1 }}.</span>
-                                                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;" title="{{ $cDoc->cat_type ?: 'Attachment' }}">{{ $cDoc->cat_type ?: 'Attachment' }}</span>
-                                                    </div>
-                                                    <a href="{{ \App\Facades\FileStorage::url($cDoc->cat_path) }}" onclick="window.openLiveDocument('{{ \App\Facades\FileStorage::url($cDoc->cat_path) }}', '{{ addslashes($cDoc->cat_type ?: 'Case Attachment') }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live"><i class="fas fa-eye"></i></a>
+                                                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;">{{ $cDoc->cat_type ?: 'Attachment' }}</span>
+                                                    </a>
+                                                    <a href="{{ $cUrl }}" onclick="window.openLiveDocument('{{ $cUrl }}', '{{ $cTitle }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live" style="cursor: pointer;"><i class="fas fa-eye"></i></a>
                                                 </div>
                                             @empty
                                                 <div id="noCaseAttPlaceholder" class="text-center py-1 text-muted" style="font-size: 9px;">No files.</div>
@@ -1576,13 +1584,14 @@ $(document).ready(function() {
                     const nextNum = curCount + 1;
                     $('#caseAttachmentsCount').text(nextNum);
 
+                    const safeTitle = (resp.attachment.title || 'Attachment').replace(/'/g, "\\'");
                     const newRow = `
                         <div class="d-flex justify-content-between align-items-center py-1 border-top" style="border-color: #f1f5f9 !important;">
-                            <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
+                            <a href="${resp.attachment.url}" onclick="window.openLiveDocument('${resp.attachment.url}', '${safeTitle}'); return false;" class="d-flex align-items-center overflow-hidden mr-1 text-decoration-none rd-live-file-view" style="flex: 1; min-width: 0; cursor: pointer;" title="View ${resp.attachment.title} Live">
                                 <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 14px;">${nextNum}.</span>
-                                <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;" title="${resp.attachment.title}">${resp.attachment.title}</span>
-                            </div>
-                            <a href="${resp.attachment.url}" target="_blank" class="text-primary flex-shrink-0"><i class="fas fa-eye"></i></a>
+                                <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;">${resp.attachment.title}</span>
+                            </a>
+                            <a href="${resp.attachment.url}" onclick="window.openLiveDocument('${resp.attachment.url}', '${safeTitle}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live" style="cursor: pointer;"><i class="fas fa-eye"></i></a>
                         </div>
                     `;
                     $('#caseAttachmentsList').append(newRow);

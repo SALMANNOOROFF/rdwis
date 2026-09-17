@@ -210,7 +210,14 @@
                                                         </div>
                                                         <div class="text-muted small">
                                                             <span class="badge badge-primary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
-                                                            {{ $p->ctc_newjobtitle }} &bull; {{ $p->project_code }}
+                                                            {{ $p->ctc_newjobtitle }} &bull; 
+                                                            @if($p->has_assigned_project)
+                                                                <span class="badge badge-light border text-dark">{{ $p->project_code }}</span>
+                                                            @else
+                                                                <span class="badge badge-danger text-white font-weight-bold" style="font-size: 10px; border-radius: 4px;">
+                                                                    <i class="fas fa-exclamation-triangle mr-1"></i> Project will be allocated on next pay
+                                                                </span>
+                                                            @endif
                                                         </div>
                                                     </td>
                                                     <td class="text-right">
@@ -228,6 +235,9 @@
                                                             <a href="{{ route('division.contract-cases.edit', $p->ctc_id) }}" class="btn btn-outline-warning btn-sm font-weight-bold mr-1" style="border-radius: 6px; font-size: 11px;">
                                                                 <i class="fas fa-edit mr-1"></i> REVISE
                                                             </a>
+                                                            <button type="button" class="btn btn-outline-danger btn-sm font-weight-bold mr-1 btn-cancel-row-case" data-id="{{ $p->ctc_id }}" style="border-radius: 6px; font-size: 11px;">
+                                                                <i class="fas fa-ban mr-1"></i> CANCEL
+                                                            </button>
                                                         @endif
                                                         <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="btn btn-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
                                                             <i class="fas fa-external-link-alt mr-1"></i> OPEN & RELEASE
@@ -278,7 +288,14 @@
                                                         </div>
                                                         <div class="text-muted small">
                                                             <span class="badge badge-secondary mr-1" style="font-size: 9px;">{{ strtoupper($p->ctc_type) }}</span>
-                                                            {{ $p->ctc_newjobtitle }} &bull; {{ $p->project_code }}
+                                                            {{ $p->ctc_newjobtitle }} &bull; 
+                                                            @if($p->has_assigned_project)
+                                                                <span class="badge badge-light border text-dark">{{ $p->project_code }}</span>
+                                                            @else
+                                                                <span class="badge badge-danger text-white font-weight-bold" style="font-size: 10px; border-radius: 4px;">
+                                                                    <i class="fas fa-exclamation-triangle mr-1"></i> Project will be allocated on next pay
+                                                                </span>
+                                                            @endif
                                                         </div>
                                                     </td>
                                                     <td class="text-right">
@@ -378,3 +395,51 @@
     </section>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.btn-cancel-row-case').click(function(e) {
+        e.preventDefault();
+        const caseId = $(this).data('id');
+
+        Swal.fire({
+            title: `Cancel Contract Case #CC-${caseId}`,
+            input: 'textarea',
+            inputLabel: 'Reason for Cancellation (Required)',
+            inputPlaceholder: 'Specify formal remarks for cancelling this case...',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Cancel Case',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'Cancellation remarks are mandatory!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `{{ url('division/contract-cases') }}/${caseId}/cancel`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value
+                    },
+                    success: function(res) {
+                        Swal.fire('Cancelled', res.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to cancel contract case.', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+@endpush

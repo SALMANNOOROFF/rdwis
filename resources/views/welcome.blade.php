@@ -646,6 +646,12 @@
                           <p class="mb-0 text-truncate font-weight-bold rajdhani">Workflow: Hiring & Contracts</p>
                       </a>
                   </li>
+                  <li class="nav-item">
+                      <a href="{{ route('nrdi.purchase_cases_new.it_template') }}" class="nav-link py-2 px-2.5 rounded d-flex align-items-center {{ Request::is('*/it-template*') ? 'bg-primary text-white font-weight-bold' : 'text-dark' }}" style="font-size: 12.5px;">
+                          <i class="fas fa-file-alt nav-icon {{ Request::is('*/it-template*') ? 'text-white' : 'text-warning' }} mr-2" style="font-size: 14px;"></i>
+                          <p class="mb-0 text-truncate font-weight-bold rajdhani">IT Letter Template</p>
+                      </a>
+                  </li>
               </ul>
           </li>
           @endif
@@ -1045,8 +1051,8 @@
 
           @if($isProc)
           <!-- Dedicated REPORTS Dropdown for Procurement -->
-          <li class="nav-item {{ Request::routeIs('nrdi.procurement.reports.*') ? 'menu-open' : '' }}">
-              <a href="#" class="nav-link {{ Request::routeIs('nrdi.procurement.reports.*') ? 'active' : '' }}">
+          <li class="nav-item {{ Request::routeIs('nrdi.procurement.reports.*') || Request::is('*/it-template*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('nrdi.procurement.reports.*') || Request::is('*/it-template*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-chart-line text-cyan"></i>
                   <p>Reports <i class="right fas fa-angle-left"></i></p>
               </a>
@@ -1054,6 +1060,11 @@
                   <li class="nav-item">
                       <a href="{{ route('nrdi.procurement.reports.index') }}" class="nav-link {{ Request::routeIs('nrdi.procurement.reports.*') ? 'active' : '' }}">
                           <i class="fas fa-boxes nav-icon text-info"></i><p>Inventory & Asset Reports</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('nrdi.purchase_cases_new.it_template') }}" class="nav-link {{ Request::is('*/it-template*') ? 'active' : '' }}">
+                          <i class="fas fa-file-alt nav-icon text-warning"></i><p>IT Letter Template</p>
                       </a>
                   </li>
               </ul>

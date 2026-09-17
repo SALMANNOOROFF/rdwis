@@ -252,7 +252,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold" style="padding:1px 6px; font-size:10px; border-radius: 4px;">
+                            <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold d-none" style="padding:1px 6px; font-size:10px; border-radius: 4px;">
                                 <i class="fas fa-file-alt mr-1"></i> MINUTE VIEW
                             </a>
                         </div>
