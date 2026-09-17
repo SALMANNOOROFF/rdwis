@@ -640,7 +640,12 @@ class SalaryGenerationService
     public function cancelOrder(int $sorId): array
     {
         $initialOrder = FinSalOrder::findOrFail($sorId);
-        $targetId = ($initialOrder->sor_parent && $initialOrder->sor_parent > 0) ? (int)$initialOrder->sor_parent : (int)$initialOrder->sor_id;
+
+        if ($initialOrder->sor_parent && $initialOrder->sor_parent > 0) {
+            abort(422, 'This requisition cannot be cancelled directly. Please cancel the parent requisition.');
+        }
+
+        $targetId = (int) $initialOrder->sor_id;
 
         return DB::transaction(function () use ($targetId) {
             $orders = FinSalOrder::where(function ($q) use ($targetId) {

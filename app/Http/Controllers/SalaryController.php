@@ -320,6 +320,14 @@ class SalaryController extends Controller
             abort(403, 'Unauthorized unit access.');
         }
 
+        if ($order->sor_parent && $order->sor_parent > 0) {
+            $msg = 'This requisition cannot be cancelled directly. Please cancel the parent requisition.';
+            if ($request->expectsJson()) {
+                return response()->json(['error' => $msg, 'message' => $msg], 422);
+            }
+            abort(422, $msg);
+        }
+
         if ($order->sor_status === 'Cancelled') {
             return back()->with('error', "Salary order #{$sorId} is already cancelled.");
         }

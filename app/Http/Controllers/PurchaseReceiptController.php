@@ -312,6 +312,40 @@ class PurchaseReceiptController extends Controller
             ->exists();
 
         DB::transaction(function () use ($pcs_id, $hasFinalizedReceipts) {
+            // Reversal of requisition fulfilment for linked case items (CancelPC equivalent)
+            $caseItems = DB::table('pur.purcaseitems')
+                ->where('pci_pcs_id', $pcs_id)
+                ->whereNotNull('pci_pri_id')
+                ->get();
+
+            $reqIds = [];
+            foreach ($caseItems as $item) {
+                $qty = (float) $item->pci_qty;
+                $fulfilled = (float) ($item->pci_fulfilment ?? 0);
+                $delta = $qty - $fulfilled;
+
+                if ($delta > 0) {
+                    DB::statement(
+                        'UPDATE pur.purreqitems SET pri_fulfilment = GREATEST(0, COALESCE(pri_fulfilment, 0) - ?) WHERE pri_id = ?',
+                        [$delta, $item->pci_pri_id]
+                    );
+
+                    $reqItem = DB::table('pur.purreqitems')
+                        ->where('pri_id', $item->pci_pri_id)
+                        ->first(['pri_prq_id']);
+
+                    if ($reqItem && $reqItem->pri_prq_id) {
+                        $reqIds[$reqItem->pri_prq_id] = true;
+                    }
+                }
+            }
+
+            if (!empty($reqIds)) {
+                DB::table('pur.purreqs')
+                    ->whereIn('prq_id', array_keys($reqIds))
+                    ->update(['prq_fulfilled' => false]);
+            }
+
             if ($hasFinalizedReceipts) {
                 // Partially fulfilled history -> closed as Partially Fulfilled
                 DB::table('pur.purcases')
