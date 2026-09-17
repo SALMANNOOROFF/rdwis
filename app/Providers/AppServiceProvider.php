@@ -66,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Purchase::class, \App\Policies\PurchaseCasePolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\App\Models\HrCtrCase::class, \App\Policies\ContractCasePolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\App\Models\FinSalOrder::class, \App\Policies\SalaryOrderPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\AudRev::class, \App\Policies\DataRevisionPolicy::class);
     }
 }
 

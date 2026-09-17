@@ -66,12 +66,26 @@ class PermissionRegistry
     public const SUPPORT_TICKET_REPLY = 'support.ticket.reply';
     public const SUPPORT_TICKET_MANAGE = 'support.ticket.manage';
 
+    // Reversal / Data Revision permissions
+    public const REVERSAL_VIEW = 'reversal.view';
+    public const REVERSAL_INITIATE = 'reversal.initiate';
+    public const REVERSAL_RELEASE = 'reversal.release';
+    public const REVERSAL_EXECUTE = 'reversal.execute';
+    public const REVERSAL_RETURN = 'reversal.return';
+    public const REVERSAL_CANCEL = 'reversal.cancel';
+
     /**
      * All registered permissions in the system.
      */
     public static function all(): array
     {
         return [
+            self::REVERSAL_VIEW,
+            self::REVERSAL_INITIATE,
+            self::REVERSAL_RELEASE,
+            self::REVERSAL_EXECUTE,
+            self::REVERSAL_RETURN,
+            self::REVERSAL_CANCEL,
             self::PROJECT_VIEW,
             self::PROJECT_CREATE,
             self::PROJECT_EDIT,

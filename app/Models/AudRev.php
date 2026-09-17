@@ -62,26 +62,28 @@ class AudRev extends Model
 
     public function isDraft(): bool
     {
-        return $this->rev_status === 'Draft';
+        return strcasecmp(trim((string) $this->rev_status), 'Draft') === 0;
     }
 
     public function isInProcess(): bool
     {
-        return $this->rev_status === 'In-process';
+        $status = strtolower(str_replace('-', ' ', trim((string) $this->rev_status)));
+        return in_array($status, ['in process', 'released'], true);
     }
 
     public function isFulfilled(): bool
     {
-        return $this->rev_status === 'Fulfilled';
+        return strcasecmp(trim((string) $this->rev_status), 'Fulfilled') === 0;
     }
 
     public function isCancelled(): bool
     {
-        return $this->rev_status === 'Cancelled';
+        return strcasecmp(trim((string) $this->rev_status), 'Cancelled') === 0;
     }
 
     public function isUnderRevision(): bool
     {
-        return $this->rev_status === 'Under-Revision';
+        $status = strtolower(str_replace('-', ' ', trim((string) $this->rev_status)));
+        return $status === 'under revision';
     }
 }

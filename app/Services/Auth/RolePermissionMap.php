@@ -34,6 +34,7 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
             ],
 
             'COMMAND_MD' => [
@@ -48,6 +49,7 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
             ],
 
             'COMMAND_DDG' => [
@@ -62,6 +64,7 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
             ],
 
             'SORD' => [
@@ -75,6 +78,7 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
             ],
 
             'DEPT_DIRECTOR_RD' => [
@@ -92,6 +96,10 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_RELEASE,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'DIV_DIRECTOR' => [
@@ -117,6 +125,10 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_RELEASE,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'DIV_OFFICER' => [
@@ -136,6 +148,8 @@ class RolePermissionMap
                 PermissionRegistry::ATTENDANCE_RECORD,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
             ],
 
             'DEPT_DIRECTOR_FIN' => [
@@ -152,6 +166,10 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_RELEASE,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'FIN_OFFICER' => [
@@ -167,6 +185,9 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'PROC_DIRECTOR' => [
@@ -175,6 +196,10 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_RELEASE,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'PROC_OFFICER' => [
@@ -182,6 +207,8 @@ class RolePermissionMap
                 PermissionRegistry::PURCHASE_PROCUREMENT_ACTION,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
             ],
 
             'HR_MANAGER' => [
@@ -194,6 +221,10 @@ class RolePermissionMap
                 PermissionRegistry::REPORTS_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_RELEASE,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'HR_OFFICER' => [
@@ -205,6 +236,8 @@ class RolePermissionMap
                 PermissionRegistry::ATTENDANCE_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
             ],
 
             'IT_ADMIN' => [
@@ -215,12 +248,24 @@ class RolePermissionMap
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
                 PermissionRegistry::SUPPORT_TICKET_MANAGE,
                 PermissionRegistry::REPORTS_VIEW,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_RELEASE,
+                PermissionRegistry::REVERSAL_EXECUTE,
+                PermissionRegistry::REVERSAL_RETURN,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'IT_OFFICER' => [
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
                 PermissionRegistry::SUPPORT_TICKET_REPLY,
                 PermissionRegistry::SUPPORT_TICKET_MANAGE,
+                PermissionRegistry::REVERSAL_VIEW,
+                PermissionRegistry::REVERSAL_INITIATE,
+                PermissionRegistry::REVERSAL_RELEASE,
+                PermissionRegistry::REVERSAL_EXECUTE,
+                PermissionRegistry::REVERSAL_RETURN,
+                PermissionRegistry::REVERSAL_CANCEL,
             ],
 
             'ADMIN_DEPT' => [
@@ -311,7 +356,11 @@ class RolePermissionMap
                     str_ends_with($perm, '.approve') ||
                     str_ends_with($perm, '.settle') ||
                     str_ends_with($perm, '.record') ||
-                    str_ends_with($perm, '.cancel')
+                    str_ends_with($perm, '.cancel') ||
+                    str_ends_with($perm, '.initiate') ||
+                    str_ends_with($perm, '.release') ||
+                    str_ends_with($perm, '.execute') ||
+                    str_ends_with($perm, '.return')
                 );
             }));
         }
