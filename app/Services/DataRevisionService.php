@@ -36,6 +36,74 @@ class DataRevisionService
         'aud_revs'            => 'aud.revs',
         'aud_revcomps'        => 'aud.revcomps',
         'aud_revdata'         => 'aud.revdata',
+        'hr_contractplans'    => 'hr.contractplans',
+        'hr_attendance'       => 'hr.attendance',
+        'fin_subheads'        => 'fin.subheads',
+        'fin_msncosts'        => 'fin.msncosts',
+        'fin_contractsverif'  => 'fin.contractsverif',
+        'cen_heads'           => 'cen.heads',
+        'cen_units'           => 'cen.units',
+        'prj_projects'        => 'prj.projects',
+    ];
+
+    /**
+     * Allowed table list for field-level updates in executeDRData.
+     */
+    protected static array $allowedDataTables = [
+        'pur.purcases',
+        'pur.purcaseitems',
+        'pur.quotes',
+        'pur.quoteitems',
+        'pur.purreceipts',
+        'pur.purreceiptitems',
+        'pur.purattachments',
+        'fin.commitments',
+        'fin.transactions',
+        'fin.transfers',
+        'fin.salorders',
+        'fin.sharesalloc',
+        'fin.sharesinstall',
+        'fin.subheads',
+        'fin.msncosts',
+        'fin.contractsverif',
+        'hr.contracts',
+        'hr.emps',
+        'hr.salreqs',
+        'hr.contractplans',
+        'hr.attendance',
+        'prj.milestones',
+        'cen.heads',
+        'cen.units',
+    ];
+
+    /**
+     * Legacy primary key mappings per table (Audit.bas:579-594).
+     */
+    protected static array $primaryKeyMap = [
+        'cen.heads'           => 'hed_id',
+        'cen.units'           => 'unt_id',
+        'hr.emps'             => 'emp_id',
+        'hr.contracts'        => 'ctr_id',
+        'hr.contractplans'    => 'cpn_id',
+        'hr.attendance'       => 'att_id',
+        'hr.salreqs'          => 'srq_id',
+        'pur.purcases'        => 'pcs_id',
+        'pur.purcaseitems'    => 'pci_id',
+        'pur.quotes'          => 'qte_id',
+        'pur.quoteitems'      => 'qti_id',
+        'pur.purreceipts'     => 'prt_id',
+        'pur.purreceiptitems' => 'pti_id',
+        'pur.purattachments'  => 'pat_id',
+        'fin.salorders'       => 'sor_id',
+        'fin.transfers'       => 'trf_id',
+        'fin.commitments'     => 'cmt_id',
+        'fin.transactions'    => 'trn_id',
+        'fin.sharesalloc'     => 'sha_id',
+        'fin.sharesinstall'   => 'shi_id',
+        'fin.contractsverif'  => 'cvf_ctr_id',
+        'fin.subheads'        => 'sbh_id',
+        'fin.msncosts'        => 'mct_msn_idd',
+        'prj.milestones'      => 'msn_idd',
     ];
 
     /**
@@ -464,5 +532,299 @@ class DataRevisionService
         }
 
         return (string) $val;
+    }
+
+    /**
+     * Resolve default primary key for a table.
+     */
+    public function primaryKeyForTable(string $table): string
+    {
+        $resolved = $this->resolveTable($table);
+        return self::$primaryKeyMap[$resolved] ?? 'id';
+    }
+
+    /**
+     * Execute a data revision, fulfilling either its cascade components or field-level data.
+     * Corresponds to aud_revs_detail cmdExecute_Click (aud_revs_detail.bas:132-153).
+     */
+    public function executeDataRevision($revision): AudRev
+    {
+        $rev = $revision instanceof AudRev ? $revision : AudRev::findOrFail($revision);
+
+        if ($rev->rev_status === 'Fulfilled') {
+            throw new \LogicException("Data revision #{$rev->rev_id} is already fulfilled.");
+        }
+
+        return DB::transaction(function () use ($rev) {
+            $type = $rev->rev_type instanceof RevType ? $rev->rev_type : RevType::from($rev->rev_type);
+
+            if ($type->isCascade()) {
+                $this->executeDRComps($rev->rev_id);
+            } elseif ($type === RevType::FIELD_LEVEL) {
+                $this->executeDRData($rev->rev_id);
+            }
+
+            $rev->update([
+                'rev_status'   => 'Fulfilled',
+                'rev_closedtg' => now(),
+            ]);
+
+            return $rev;
+        });
+    }
+
+    /**
+     * 6. ExecuteDRComps (Audit.bas:433-540)
+     *
+     * Executes component reversals across the 13 supported legacy actions.
+     * Mirrors the legacy fallback: throws LogicException on unhandled actions (Audit.bas:533-535).
+     */
+    public function executeDRComps(int $revId): void
+    {
+        $comps = AudRevComp::where('rvc_rev_id', $revId)
+            ->orderBy('rvc_id')
+            ->get();
+
+        $commitDeleted = false;
+
+        foreach ($comps as $comp) {
+            $action = $comp->rvc_action;
+            $rowId = $comp->rvc_rowid;
+
+            switch ($action) {
+                case 'pcs_rev':
+                    DB::table('pur.purcases')->where('pcs_id', $rowId)->update([
+                        'pcs_status'     => 'Under Revision',
+                        'pcs_approvedtg' => null,
+                        'pcs_closedtg'   => null,
+                    ]);
+                    DB::table('pur.purcases_shd')->where('pcd_pcs_id', $rowId)->delete();
+                    DB::table('pur.purcaseitems')->where('pci_pcs_id', $rowId)->update([
+                        'pci_fulfilment' => null,
+                    ]);
+                    break;
+
+                case 'prt_del':
+                    // In PostgreSQL, purreceiptitems.pti_prt_id has ON DELETE CASCADE to purreceipts
+                    DB::table('pur.purreceipts')->where('prt_id', $rowId)->delete();
+                    break;
+
+                case 'sor_rev':
+                    DB::table('fin.salorders')->where('sor_id', $rowId)->update([
+                        'sor_status'   => 'Under Revision',
+                        'sor_closedtg' => null,
+                    ]);
+                    break;
+
+                case 'srq_rev':
+                    DB::table('hr.salreqs')->where('srq_id', $rowId)->update([
+                        'srq_fulfilment' => 0,
+                        'srq_status'     => 'In Process',
+                        'srq_closedtg'   => null,
+                    ]);
+                    break;
+
+                case 'trf_del':
+                    DB::table('fin.transfers')->where('trf_id', $rowId)->delete();
+                    break;
+
+                case 'alc_del':
+                    DB::table('fin.sharesalloc')->where('sha_id', $rowId)->delete();
+                    break;
+
+                case 'fnd_del':
+                    DB::table('fin.sharesinstall')->where('shi_id', $rowId)->delete();
+                    break;
+
+                case 'cmt_rev':
+                    DB::table('fin.commitments')->where('cmt_id', $rowId)->update([
+                        'cmt_status' => 'Awaited',
+                    ]);
+                    break;
+
+                case 'cmt_del':
+                    DB::table('fin.commitments')->where('cmt_id', $rowId)->delete();
+                    $commitDeleted = true;
+                    break;
+
+                case 'trn_del':
+                    if (! $commitDeleted) {
+                        DB::table('fin.transactions')->where('trn_id', $rowId)->delete();
+                    }
+                    break;
+
+                case 'pat_del':
+                    DB::table('pur.purattachments')->where('pat_id', $rowId)->delete();
+                    break;
+
+                case 'ctr_del':
+                    DB::table('hr.contracts')->where('ctr_id', $rowId)->delete();
+                    break;
+
+                case 'msn_idd':
+                    $msn = DB::table('prj.milestones')->where('msn_idd', $rowId)->first(['msn_type']);
+                    $updates = ['msn_status' => 'In progress'];
+                    if ($msn && $msn->msn_type === 'Activity') {
+                        $updates['msn_comp'] = 50;
+                    }
+                    DB::table('prj.milestones')->where('msn_idd', $rowId)->update($updates);
+                    break;
+
+                default:
+                    // Legacy Audit.bas:533-535 MsgBox "Error - Some reversals not done. Report to IS Department"
+                    throw new \LogicException("Action '{$action}' is not supported for execution in legacy reversal engine.");
+            }
+        }
+    }
+
+    /**
+     * 7. ExecuteDRData (Audit.bas:542-577)
+     *
+     * Applies field-level updates with table whitelist, _x suffix stripping,
+     * and applyConversion.
+     */
+    public function executeDRData(int $revId): void
+    {
+        $rows = AudRevData::where('rvd_rev_id', $revId)
+            ->orderBy('rvd_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $tableName = trim($row->rvd_table ?? '');
+            if ($tableName === '' || $tableName === '(none)') {
+                continue;
+            }
+
+            $resolvedTable = $this->resolveTable($tableName);
+            if (! in_array($resolvedTable, self::$allowedDataTables, true)) {
+                throw new \InvalidArgumentException("Table '{$tableName}' is not permitted for field-level revision execution.");
+            }
+
+            $attribName = trim($row->rvd_attrib ?? '');
+            if (str_contains($attribName, '_x')) {
+                $attribName = substr($attribName, 0, strpos($attribName, '_x'));
+            }
+
+            if (! preg_match('/^[a-z0-9_]+$/i', $attribName)) {
+                throw new \InvalidArgumentException("Invalid column name: {$attribName}");
+            }
+
+            $primKey = trim($row->rvd_colname ?? '');
+            if ($primKey === '' || $primKey === '(none)') {
+                $primKey = $this->primaryKeyForTable($resolvedTable);
+            }
+
+            if (! preg_match('/^[a-z0-9_]+$/i', $primKey)) {
+                throw new \InvalidArgumentException("Invalid primary key column: {$primKey}");
+            }
+
+            $rowId = $row->rvd_rowid;
+            $newVal = $row->rvd_newvalue;
+
+            if ($newVal === 'Null' || $newVal === null) {
+                $newVal = null;
+            }
+
+            if (! empty($row->rvd_conversion)) {
+                $newVal = $this->applyConversion($newVal, $row->rvd_conversion, $attribName);
+                if ($newVal === 'Null') {
+                    $newVal = null;
+                }
+            }
+
+            DB::table($resolvedTable)
+                ->where($primKey, $rowId)
+                ->update([$attribName => $newVal]);
+        }
+    }
+
+    /**
+     * 8. ApplyConversion (Audit.bas:614-680)
+     *
+     * Applies data conversions (negate, project code/id lookup, GST type, attendance code/label).
+     */
+    public function applyConversion($attribValue, ?string $operation, ?string $attribName = null)
+    {
+        if ($attribValue === null || $attribValue === 'Null' || $attribValue === '') {
+            return $attribValue;
+        }
+
+        if ($attribName !== null && str_starts_with($attribName, 'att_')) {
+            $attribName = 'att';
+        }
+
+        switch ($operation) {
+            case 'n': // Negate (Audit.bas:629-630)
+                return is_numeric($attribValue) ? (-1 * $attribValue) : $attribValue;
+
+            case 'i': // Insert id / code / name (Audit.bas:631-678)
+                switch ($attribName) {
+                    case 'emp_hed_id':
+                    case 'ctr_hed_id':
+                    case 'cpn_hed_id':
+                        if (is_numeric($attribValue)) {
+                            return DB::table('prj.projects')->where('prj_id', (int) $attribValue)->value('prj_code') ?? $attribValue;
+                        } else {
+                            return DB::table('prj.projects')->where('prj_code', (string) $attribValue)->value('prj_id') ?? $attribValue;
+                        }
+
+                    case 'pcs_hed_id':
+                    case 'srq_hed_id':
+                    case 'sor_hed_id':
+                        if (is_numeric($attribValue)) {
+                            // Legacy Audit.bas:643 placeholder comment 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+                            return $attribValue;
+                        } else {
+                            return DB::table('cen.heads')->where('hed_code', (string) $attribValue)->value('hed_id') ?? $attribValue;
+                        }
+
+                    case 'emp_unt_id':
+                    case 'ctr_unt_id':
+                        if (is_numeric($attribValue)) {
+                            // Legacy Audit.bas:649 placeholder comment 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+                            return $attribValue;
+                        } else {
+                            return DB::table('cen.units')->where('unt_namesh', (string) $attribValue)->value('unt_id') ?? $attribValue;
+                        }
+
+                    case 'hed_transtype':
+                    case 'sha_transtype':
+                    case 'pcs_transtype':
+                    case 'sor_transtype':
+                    case 'trn_transtype':
+                        return match ((string) $attribValue) {
+                            'Without GST' => 1,
+                            'With GST'    => 2,
+                            '1'           => 'Without GST',
+                            '2'           => 'With GST',
+                            default       => $attribValue,
+                        };
+
+                    case 'att':
+                        return match ((string) $attribValue) {
+                            'P'               => 'Present',
+                            'W'               => 'Work from home',
+                            'T'               => 'Ty Duty',
+                            'L'               => 'Leave',
+                            'A'               => 'Absent',
+                            'U'               => 'Unpaid Leave',
+                            'N'               => 'Not Applicable',
+                            'Present'         => 'P',
+                            'Work from home'  => 'W',
+                            'Ty Duty'         => 'T',
+                            'Leave'           => 'L',
+                            'Absent'          => 'A',
+                            'Unpaid Leave'    => 'U',
+                            'Not Applicable'  => 'N',
+                            default           => 'xxxxx',
+                        };
+
+                    default:
+                        return $attribValue;
+                }
+
+            default:
+                return $attribValue;
+        }
     }
 }
