@@ -715,8 +715,21 @@ Route::middleware('auth')->group(function () {
         ->middleware(['area:it', 'approver'])
         ->group(function () {
             Route::get('/', [SystemAdminAccountController::class, 'dashboard'])->name('dashboard');
-            Route::get('/reversals', [SystemAdminAccountController::class, 'reversalsIndex'])->name('reversals.index');
             Route::get('/crypto-test', [SystemAdminAccountController::class, 'cryptoTest'])->name('crypto.test');
+        });
+
+    Route::prefix('admin/reversals')
+        ->name('admin.reversals.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\AdminReversalController::class, 'index'])->name('index');
+            Route::get('/draft', [\App\Http\Controllers\AdminReversalController::class, 'draft'])->name('draft');
+            Route::get('/open', [\App\Http\Controllers\AdminReversalController::class, 'open'])->name('open');
+            Route::get('/closed', [\App\Http\Controllers\AdminReversalController::class, 'closed'])->name('closed');
+            Route::get('/{rev}', [\App\Http\Controllers\AdminReversalController::class, 'show'])->name('show')->whereNumber('rev');
+            Route::post('/{rev}/release', [\App\Http\Controllers\AdminReversalController::class, 'release'])->name('release')->whereNumber('rev');
+            Route::post('/{rev}/execute', [\App\Http\Controllers\AdminReversalController::class, 'execute'])->name('execute')->whereNumber('rev');
+            Route::post('/{rev}/return', [\App\Http\Controllers\AdminReversalController::class, 'return'])->name('return')->whereNumber('rev');
+            Route::post('/{rev}/cancel', [\App\Http\Controllers\AdminReversalController::class, 'cancel'])->name('cancel')->whereNumber('rev');
         });
 
     Route::prefix('admin/accounts')

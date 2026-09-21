@@ -142,7 +142,7 @@ class SystemAdminAccountController extends Controller
         $acc_lowers = $unit->unt_lowers;
         $acc_uppers = $unit->unt_uppers;
 
-        if (in_array($role->rol_desigshort, ['MD', 'DG', 'SME', 'DP&C'], true)) {
+        if (in_array($role->rol_desigshort, ['MD', 'DG', 'SME', 'DP&C', 'DDG', 'DDG NRDI'], true)) {
             $acc_lowers = 0;
             $acc_uppers = 0;
         }
@@ -213,36 +213,7 @@ class SystemAdminAccountController extends Controller
 
     public function reversalsIndex(Request $request)
     {
-        $status = strtolower(trim((string) $request->query('status', 'open')));
-
-        $query = DB::table('aud.revs');
-        if ($status === 'closed') {
-            $query->whereNotNull('rev_closedtg');
-        } elseif ($status === 'all') {
-        } else {
-            $status = 'open';
-            $query->whereNull('rev_closedtg');
-        }
-
-        $reversals = $query
-            ->orderByDesc('rev_id')
-            ->paginate(25);
-
-        $reversals->appends(['status' => $status]);
-
-        $reversalsOpenCount = DB::table('aud.revs')->whereNull('rev_closedtg')->count();
-        $reversalsClosedCount = DB::table('aud.revs')->whereNotNull('rev_closedtg')->count();
-        $reversalsFulfilledCount = DB::table('aud.revs')->where('rev_status', 'Fulfilled')->count();
-        $reversalsCancelledCount = DB::table('aud.revs')->where('rev_status', 'Cancelled')->count();
-
-        return view('admin.reversals.index', compact(
-            'reversals',
-            'status',
-            'reversalsOpenCount',
-            'reversalsClosedCount',
-            'reversalsFulfilledCount',
-            'reversalsCancelledCount'
-        ));
+        return redirect()->route('admin.reversals.index');
     }
 
     public function cryptoTest(Request $request)

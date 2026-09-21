@@ -574,6 +574,81 @@ class DataRevisionService
     }
 
     /**
+     * Release a data revision case to IT for execution.
+     * Corresponds to legacy cmdRelease_Click (aud_revs_detail.bas:84-104).
+     */
+    public function release(AudRev $rev): AudRev
+    {
+        if (trim((string) ($rev->rev_reason ?? '')) === '') {
+            throw new \InvalidArgumentException('Please enter reason for data revision before releasing.');
+        }
+
+        if ($rev->rev_status === 'Draft') {
+            $rev->rev_releasedtg = now();
+        }
+        $rev->rev_status = 'In Process';
+        $rev->save();
+
+        return $rev;
+    }
+
+    /**
+     * Return a data revision case back to the initiating unit for review/amendment.
+     * Corresponds to legacy cmdReturn_Click (aud_revs_detail.bas:126-130).
+     * Note: Legacy does NOT clear rev_releasedtg.
+     */
+    public function return(AudRev $rev, ?string $remarks = null): AudRev
+    {
+        $rev->rev_status = 'Under Revision';
+        if ($remarks !== null && trim($remarks) !== '') {
+            $timestamp = now()->format('d-M-Y H:i');
+            $note = "\r\n[Returned by IT on {$timestamp}: " . trim($remarks) . "]";
+            $rev->rev_reason = ($rev->rev_reason ?? '') . $note;
+        }
+        $rev->save();
+
+        return $rev;
+    }
+
+    /**
+     * Alias for return().
+     */
+    public function returnRevision(AudRev $rev, ?string $remarks = null): AudRev
+    {
+        return $this->return($rev, $remarks);
+    }
+
+    /**
+     * Cancel a data revision case.
+     * Corresponds to legacy cmdCancel_Click (aud_revs_detail.bas:106-124).
+     * If Draft: permanently hard-deletes the revision and any associated comps/data.
+     * Otherwise: marks as Cancelled and sets rev_closedtg = now().
+     */
+    public function cancel(AudRev $rev, ?string $reason = null): ?AudRev
+    {
+        if ($rev->rev_status === 'Draft') {
+            DB::transaction(function () use ($rev) {
+                DB::table('aud.revcomps')->where('rvc_rev_id', $rev->rev_id)->delete();
+                DB::table('aud.revdata')->where('rvd_rev_id', $rev->rev_id)->delete();
+                $rev->delete();
+            });
+
+            return null;
+        }
+
+        $rev->rev_status = 'Cancelled';
+        $rev->rev_closedtg = now();
+        if ($reason !== null && trim($reason) !== '') {
+            $timestamp = now()->format('d-M-Y H:i');
+            $note = "\r\n[Cancellation Reason on {$timestamp}: " . trim($reason) . "]";
+            $rev->rev_reason = ($rev->rev_reason ?? '') . $note;
+        }
+        $rev->save();
+
+        return $rev;
+    }
+
+    /**
      * 6. ExecuteDRComps (Audit.bas:433-540)
      *
      * Executes component reversals across the 13 supported legacy actions.
