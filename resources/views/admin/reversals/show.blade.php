@@ -260,35 +260,71 @@
                 </div>
             @endif
 
-            {{-- Attachments Slot (if any) --}}
-            @if($rev->attachments && $rev->attachments->count() > 0)
-                <div class="card card-outline card-light shadow-sm mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-paperclip mr-1 text-secondary"></i> Associated Attachments
+            {{-- Attachments Panel (Fulfilled status & Authorized Roles only - legacy aud_revs_detail.bas:55-60) --}}
+            @if($rev->isFulfilled() && auth()->user()->can('viewAttachments', $rev))
+                <div class="card card-outline card-success shadow-sm mb-4" id="reversalAttachmentsPanel">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title font-weight-bold mb-0">
+                            <i class="fas fa-paperclip mr-1 text-success"></i> Reversal Attachments &amp; Evidence
                         </h3>
-                        <span class="badge badge-light float-right">{{ $rev->attachments->count() }} slots</span>
+                        <span class="badge badge-success float-right">{{ $rev->attachments->count() }} attached</span>
                     </div>
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
-                            @foreach($rev->attachments as $att)
+                            @forelse($rev->attachments as $att)
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <i class="fas fa-file mr-2 text-muted"></i>
+                                    <div>
+                                        <i class="fas {{ !empty($att->aat_path) ? 'fa-file-alt text-success' : 'fa-clock text-warning' }} mr-2"></i>
+                                        <span class="font-weight-bold mr-2">{{ $att->aat_type ?? 'Document' }}</span>
                                         @if(!empty($att->aat_path))
-                                            <a href="{{ asset($att->aat_path) }}" target="_blank" class="font-weight-bold text-primary">
-                                                {{ basename($att->aat_path) }}
-                                            </a>
+                                            <span class="text-muted small font-monospace">({{ basename($att->aat_path) }})</span>
                                         @else
-                                            <span class="text-muted font-italic">Attachment Slot #{{ $att->aat_id }}</span>
+                                            <span class="badge badge-warning text-dark font-weight-normal">Pending Upload (Slot #{{ $att->aat_id }})</span>
                                         @endif
-                                    </span>
-                                    @if(!empty($att->aat_type))
-                                        <span class="badge badge-secondary">{{ $att->aat_type }}</span>
-                                    @endif
+                                    </div>
+                                    <div>
+                                        @if(!empty($att->aat_path))
+                                            <a href="{{ route('universal.attachment.view', ['module' => 'aud', 'id' => $att->aat_id]) }}" target="_blank" class="btn btn-xs btn-outline-primary mr-1" title="View Document">
+                                                <i class="fas fa-eye mr-1"></i> View
+                                            </a>
+                                            <a href="{{ route('universal.attachment.view', ['module' => 'aud', 'id' => $att->aat_id, 'download' => 1]) }}" class="btn btn-xs btn-outline-secondary" title="Download Document">
+                                                <i class="fas fa-download mr-1"></i> Download
+                                            </a>
+                                        @endif
+                                    </div>
                                 </li>
-                            @endforeach
+                            @empty
+                                <li class="list-group-item text-center text-muted py-3">
+                                    No attachment records or slots attached.
+                                </li>
+                            @endforelse
                         </ul>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <h6 class="font-weight-bold mb-2 text-muted" style="font-size: 0.85rem;">
+                            <i class="fas fa-upload mr-1 text-primary"></i> Upload Attachment Document
+                        </h6>
+                        <form action="{{ route('universal.attachment.upload') }}" method="POST" enctype="multipart/form-data" class="form-inline" id="reversalAttachmentUploadForm">
+                            @csrf
+                            <input type="hidden" name="module" value="aud">
+                            <input type="hidden" name="object_id" value="{{ $rev->rev_id }}">
+                            
+                            <div class="form-group mr-2 mb-2">
+                                <label for="doc_type" class="sr-only">Document Type</label>
+                                <select name="doc_type" id="doc_type" class="custom-select custom-select-sm" required>
+                                    <option value="Data Revision Case" selected>Data Revision Case</option>
+                                    <option value="Minute">Minute</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group mr-2 mb-2">
+                                <input type="file" name="file" id="reversalFile" class="form-control-file form-control-sm" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-sm btn-success mb-2" id="btnUploadAttachment">
+                                <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Document
+                            </button>
+                        </form>
                     </div>
                 </div>
             @endif

@@ -165,7 +165,7 @@ Every one of the 19 currently Active accounts in `cen.accounts` resolves determi
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **20** | `dg` | Director General | 10000 | `hqs` | approver | `COMMAND_DG` | Organization-wide | DG Final Approval |
 | **21** | `md` | Managing Director | 10000 | `hqs` | approver | `COMMAND_MD` | Organization-wide | MD Approval (≤400k) / Forward |
-| **22** | `dnrd` | Director NRD | 10000 | `hqs` | approver | `COMMAND_DDG` | Organization-wide | DDG Approval (≤1M) / Forward |
+| **22** | `ddg` / `dnrd` | Deputy Director General NRDI | 10000 | `hqs` | approver | `COMMAND_DDG` | Organization-wide | DDG Approval (≤1M) / Forward |
 | **23** | `sord` | Senior Officer RD | 180000| `sord`| approver | `SORD` | All Project Divisions | SORD MPR Review, Scrutiny, Compilation |
 | **24** | `dproc` | Director Procurement| 810000| `proc`| approver | `PROC_DIRECTOR` | All Procurement Cases | DProc Scrutiny, Tender, Firm Selection |
 | **25** | `dfin` | Director Finance | 820000| `fin` | approver | `DEPT_DIRECTOR_FIN` | All Financial Cases | Finance Scrutiny, Budget Release |
@@ -286,7 +286,7 @@ All raw magic IDs and hardcoded usernames have been audited across the entire re
    - Enhanced `resolveScope()` to support section lower/upper bounds for single-access accounts.
 6. `app/Services/Auth/UserAccessContext.php`:
    - Fixed evaluation order so Unit 810000 `DProc` resolves to `PROC_DIRECTOR`.
-   - Added `Director NRD` and `DNRD` in HQS (Unit 10000) for `isDdg()` and `isCommand()`.
+   - Added `Deputy Director General NRDI`, `DDG NRDI`, and `Director NRD` / `DNRD` in HQS (Unit 10000) for `isDdg()` and `isCommand()`.
 7. `app/Services/Auth/RolePermissionMap.php`:
    - Added `CONTRACT_VIEW`, `SALARY_OVERRIDE`, and `SALARY_APPROVE` to Finance roles.
    - Added `SALARY_GENERATE` to `DIV_DIRECTOR`.

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\RevType;
+use App\Models\AudAttachment;
 use App\Models\AudRev;
 use App\Models\AudRevComp;
 use App\Models\AudRevData;
@@ -568,6 +569,19 @@ class DataRevisionService
                 'rev_status'   => 'Fulfilled',
                 'rev_closedtg' => now(),
             ]);
+
+            // Legacy parity: CreateAttachmentSlot "rev", Me!rev_id, strRevType (aud_revs_detail.bas:149)
+            // Creates the initial attachment slot at execution time for aud.audattachments
+            AudAttachment::firstOrCreate(
+                [
+                    'aat_objtype' => 'rev',
+                    'aat_objid'   => $rev->rev_id,
+                    'aat_type'    => 'Data Revision Case',
+                ],
+                [
+                    'aat_path'    => null,
+                ]
+            );
 
             return $rev;
         });

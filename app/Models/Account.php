@@ -31,7 +31,7 @@ class Account extends Model
             return true;
         }
 
-        if (in_array($desigShort, ['MD', 'DDG', 'DG'], true)) {
+        if (in_array($desigShort, ['MD', 'DDG', 'DG', 'DDG NRDI'], true)) {
             return true;
         }
 

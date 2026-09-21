@@ -151,6 +151,13 @@ class AttachmentController extends Controller
         $docType = trim($request->input('doc_type'));
         $file = $request->file('file');
 
+        if ($module === 'aud') {
+            $rev = \App\Models\AudRev::find($objectId);
+            if (! $rev || ! $rev->isFulfilled() || ! auth()->user()?->can('viewAttachments', $rev)) {
+                abort(403, 'Unauthorized. Attachments are restricted to fulfilled reversals and authorized roles.');
+            }
+        }
+
         $cfg = $this->getModuleConfig($module);
 
         // Determine prefix
@@ -217,6 +224,13 @@ class AttachmentController extends Controller
 
         if (!$record || empty($record->{$cfg['path']})) {
             abort(404, 'Attachment record or file path not found.');
+        }
+
+        if ($module === 'aud') {
+            $rev = \App\Models\AudRev::find($record->aat_objid);
+            if (! $rev || ! $rev->isFulfilled() || ! auth()->user()?->can('viewAttachments', $rev)) {
+                abort(403, 'Unauthorized. Attachment viewing is restricted to fulfilled reversals and authorized roles.');
+            }
         }
 
         $download = $request->query('download') === '1';

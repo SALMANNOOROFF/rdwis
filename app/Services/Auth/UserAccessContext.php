@@ -81,7 +81,7 @@ class UserAccessContext
             str_contains($desig, 'DIRECTOR GENERAL') ||
             str_contains($desig, 'DEPUTY DIRECTOR GENERAL') ||
             ($desig === 'DIRECTOR NRD' && strtolower(trim((string)($this->user->acc_untarea ?? ''))) === 'hqs') ||
-            in_array($desigShort, ['MD', 'DG', 'DDG', 'DG NRDI', 'MD RDW', 'DDG NRD', 'DNRD'], true) ||
+            in_array($desigShort, ['MD', 'DG', 'DDG', 'DG NRDI', 'MD RDW', 'DDG NRD', 'DDG NRDI', 'DNRD'], true) ||
             preg_match('/\b(MD|DG|DDG)\b/i', $desig)
         ) {
             return true;
@@ -118,7 +118,7 @@ class UserAccessContext
         $desigShort = strtoupper(trim((string) ($this->user->acc_desigshort ?? '')));
         $area = strtolower(trim((string) ($this->user->acc_untarea ?? '')));
         return str_contains($desig, 'DEPUTY DIRECTOR GENERAL')
-            || in_array($desigShort, ['DDG', 'DDG NRD', 'DNRD'], true)
+            || in_array($desigShort, ['DDG', 'DDG NRDI', 'DDG NRD', 'DNRD'], true)
             || ($desig === 'DIRECTOR NRD' && $area === 'hqs');
     }
 

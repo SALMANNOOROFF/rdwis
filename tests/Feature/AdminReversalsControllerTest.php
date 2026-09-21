@@ -8,7 +8,9 @@ use App\Models\AudRevComp;
 use App\Models\AudRevData;
 use App\Models\CenAccount;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminReversalsControllerTest extends TestCase
@@ -234,7 +236,7 @@ class AdminReversalsControllerTest extends TestCase
             'rev_type'      => 2,
             'rev_obj'       => 'Purchase Case',
             'rev_objid'     => '90099',
-            'rev_status'    => 'In Process',
+            'rev_status'    => 'Fulfilled',
             'rev_unt_id'    => 860000,
             'rev_intunt_id' => 860000,
             'rev_date'      => now()->toDateString(),
@@ -619,5 +621,194 @@ class AdminReversalsControllerTest extends TestCase
 
         $response->assertStatus(403);
         $this->assertSame('Under Revision', $rev->fresh()->rev_status);
+    }
+
+    /**
+     * Test 18: Reversal execution creates attachment slot, renders live upload form, and enables document viewing/downloading.
+     */
+    public function test_execute_creates_attachment_slot_and_allows_upload_and_download_on_fulfilled_reversal(): void
+    {
+        Storage::fake('public');
+
+        // Create an in-process reversal ready for execution
+        $rev = AudRev::create([
+            'rev_type'      => 1,
+            'rev_obj'       => 'Purchase Case',
+            'rev_objid'     => '90018',
+            'rev_status'    => 'In Process',
+            'rev_unt_id'    => 860000,
+            'rev_intunt_id' => 860000,
+            'rev_date'      => now()->toDateString(),
+            'rev_releasedtg'=> now(),
+            'rev_reason'    => 'Test Attachment Execution Flow',
+        ]);
+
+        // Execute reversal as IT Approver
+        $execResp = $this->actingAs($this->itApprover)
+            ->post(route('admin.reversals.execute', $rev->rev_id));
+
+        $execResp->assertRedirect(route('admin.reversals.show', $rev->rev_id));
+        $this->assertSame('Fulfilled', $rev->fresh()->rev_status);
+
+        // 1. Confirm initial attachment slot created in DB with null path
+        $slot = AudAttachment::where('aat_objtype', 'rev')
+            ->where('aat_objid', $rev->rev_id)
+            ->where('aat_type', 'Data Revision Case')
+            ->first();
+
+        $this->assertNotNull($slot);
+        $this->assertNull($slot->aat_path);
+
+        // 2. Load show page: attachment panel rendered with pending slot and upload form
+        $showResp = $this->actingAs($this->itApprover)
+            ->get(route('admin.reversals.show', $rev->rev_id));
+
+        $showResp->assertStatus(200);
+        $showResp->assertSee('Reversal Attachments');
+        $showResp->assertSee('Pending Upload (Slot #' . $slot->aat_id . ')');
+        $showResp->assertSee(route('universal.attachment.upload'));
+
+        // 3. Upload file via universal attachment route
+        $fakeFile = UploadedFile::fake()->create('reversal_justification.pdf', 250, 'application/pdf');
+
+        $uploadResp = $this->actingAs($this->itApprover)
+            ->post(route('universal.attachment.upload'), [
+                'module'    => 'aud',
+                'object_id' => $rev->rev_id,
+                'doc_type'  => 'Data Revision Case',
+                'file'      => $fakeFile,
+            ]);
+
+        $uploadResp->assertRedirect();
+
+        // 4. Confirm slot updated with physical path and stored on disk
+        $slot->refresh();
+        $this->assertNotNull($slot->aat_path);
+        Storage::disk('public')->assertExists($slot->aat_path);
+
+        // 5. Fresh page load confirms live view and download links
+        $showRespFresh = $this->actingAs($this->itApprover)
+            ->get(route('admin.reversals.show', $rev->rev_id));
+
+        $showRespFresh->assertStatus(200);
+        $showRespFresh->assertSee(basename($slot->aat_path));
+        $showRespFresh->assertSee(route('universal.attachment.view', ['module' => 'aud', 'id' => $slot->aat_id]));
+        $showRespFresh->assertSee(route('universal.attachment.view', ['module' => 'aud', 'id' => $slot->aat_id, 'download' => 1]));
+
+        // 6. View route streams file inline
+        $viewResp = $this->actingAs($this->itApprover)
+            ->get(route('universal.attachment.view', ['module' => 'aud', 'id' => $slot->aat_id]));
+
+        $viewResp->assertStatus(200);
+
+        // 7. Download route serves attachment disposition
+        $downloadResp = $this->actingAs($this->itApprover)
+            ->get(route('universal.attachment.view', ['module' => 'aud', 'id' => $slot->aat_id, 'download' => 1]));
+
+        $downloadResp->assertStatus(200);
+        $downloadResp->assertHeader('content-disposition');
+        $this->assertStringContainsString('attachment', (string) $downloadResp->headers->get('content-disposition'));
+    }
+
+    /**
+     * Test 19: Attachment panel is absent and direct upload/view blocked for non-fulfilled reversal.
+     */
+    public function test_attachment_panel_absent_and_upload_blocked_for_non_fulfilled_reversal(): void
+    {
+        Storage::fake('public');
+
+        $rev = AudRev::create([
+            'rev_type'      => 1,
+            'rev_obj'       => 'Purchase Case',
+            'rev_objid'     => '90019',
+            'rev_status'    => 'In Process',
+            'rev_unt_id'    => 860000,
+            'rev_intunt_id' => 860000,
+            'rev_date'      => now()->toDateString(),
+            'rev_releasedtg'=> now(),
+            'rev_reason'    => 'Non-Fulfilled Attachment Test',
+        ]);
+
+        // Panel must not be rendered on In Process reversal
+        $showResp = $this->actingAs($this->itApprover)
+            ->get(route('admin.reversals.show', $rev->rev_id));
+
+        $showResp->assertStatus(200);
+        $showResp->assertDontSee('Reversal Attachments');
+        $showResp->assertDontSee('reversalAttachmentUploadForm');
+
+        // Direct upload attempt must be rejected with 403
+        $fakeFile = UploadedFile::fake()->create('blocked.pdf', 50, 'application/pdf');
+
+        $uploadResp = $this->actingAs($this->itApprover)
+            ->post(route('universal.attachment.upload'), [
+                'module'    => 'aud',
+                'object_id' => $rev->rev_id,
+                'doc_type'  => 'Data Revision Case',
+                'file'      => $fakeFile,
+            ]);
+
+        $uploadResp->assertStatus(403);
+    }
+
+    /**
+     * Test 20: Attachment panel is absent and direct upload blocked for role outside allowed set.
+     */
+    public function test_attachment_panel_absent_and_upload_blocked_for_unauthorized_role(): void
+    {
+        Storage::fake('public');
+
+        // Division staff with viewer role (can view cases in their unit, but NOT approver-s/editor-s)
+        $divisionViewer = new CenAccount();
+        $divisionViewer->acc_id = 99991;
+        $divisionViewer->acc_username = 'div_viewer_test';
+        $divisionViewer->acc_name = 'Division Viewer';
+        $divisionViewer->acc_auth = 'viewer';
+        $divisionViewer->acc_access = 'single';
+        $divisionViewer->acc_unt_id = 350000;
+        $divisionViewer->acc_untarea = 'prj';
+        $divisionViewer->acc_desigtype = 'staff';
+        $divisionViewer->acc_status = 'active';
+
+        $rev = AudRev::create([
+            'rev_type'      => 1,
+            'rev_obj'       => 'Purchase Case',
+            'rev_objid'     => '90020',
+            'rev_status'    => 'Fulfilled',
+            'rev_unt_id'    => 350000,
+            'rev_intunt_id' => 350000,
+            'rev_date'      => now()->toDateString(),
+            'rev_releasedtg'=> now(),
+            'rev_closedtg'  => now(),
+            'rev_reason'    => 'Unauthorized Role Attachment Test',
+        ]);
+
+        AudAttachment::create([
+            'aat_objtype' => 'rev',
+            'aat_objid'   => $rev->rev_id,
+            'aat_type'    => 'Data Revision Case',
+            'aat_path'    => null,
+        ]);
+
+        // Viewer can see the reversal (unit scope), but attachment panel is absent
+        $showResp = $this->actingAs($divisionViewer)
+            ->get(route('admin.reversals.show', $rev->rev_id));
+
+        $showResp->assertStatus(200);
+        $showResp->assertDontSee('Reversal Attachments');
+        $showResp->assertDontSee('reversalAttachmentUploadForm');
+
+        // Direct upload attempt by viewer must return 403
+        $fakeFile = UploadedFile::fake()->create('unauthorized.pdf', 50, 'application/pdf');
+
+        $uploadResp = $this->actingAs($divisionViewer)
+            ->post(route('universal.attachment.upload'), [
+                'module'    => 'aud',
+                'object_id' => $rev->rev_id,
+                'doc_type'  => 'Data Revision Case',
+                'file'      => $fakeFile,
+            ]);
+
+        $uploadResp->assertStatus(403);
     }
 }

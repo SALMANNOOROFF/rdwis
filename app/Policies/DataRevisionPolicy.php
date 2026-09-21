@@ -270,4 +270,50 @@ class DataRevisionPolicy
 
         return false;
     }
+
+    /**
+     * Determine whether the user can view/upload attachments for a fulfilled reversal.
+     * Legacy aud_revs_detail.bas:55-60:
+     * Gated to Fulfilled status only, and:
+     * - IT side: viewer-m / approver-m (SuperAdmin, IT_ADMIN, IT_OFFICER, Unit 860000)
+     * - Initiating division side: approver-s / editor-s (approver or editor within initiating unit scope)
+     */
+    public function viewAttachments(CenAccount $user, AudRev $rev): bool
+    {
+        if (! $rev->isFulfilled()) {
+            return false;
+        }
+
+        if (! $this->view($user, $rev)) {
+            return false;
+        }
+
+        $context = UserAccessContext::forUser($user);
+
+        if ($context->isSuperAdmin()) {
+            return true;
+        }
+
+        $userUnitId = (int) ($user->acc_unt_id ?? 0);
+        $userArea = (string) ($user->acc_untarea ?? '');
+        $isItStaff = ($userUnitId === 860000 || AreaDefinition::isIt($userArea) || in_array($context->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
+
+        if ($isItStaff) {
+            return true;
+        }
+
+        // Initiating division side: approver-s / editor-s
+        if ($context->isEditor()) {
+            $initUnitId = (int) ($rev->rev_intunt_id ?? 0);
+            if ($initUnitId <= 0) {
+                $initUnitId = (int) ($rev->rev_unt_id ?? 0);
+            }
+
+            if ($initUnitId > 0 && $this->scopeService->canAccessUnit($user, $initUnitId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
