@@ -1533,253 +1533,253 @@
 {{-- ============ FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
 {{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
 <div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%; width: 1380px;">
-        <div class="modal-content" style="background: #ffffff; border: 1px solid var(--rd-border2); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.12);">
-            <div class="modal-header border-bottom py-2 px-4 d-flex align-items-center justify-content-between" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 96%; width: 1440px;">
+        <div class="modal-content" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.15);">
+            <div class="modal-header border-bottom py-3 px-4 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-color: #e2e8f0 !important;">
                 <div class="d-flex align-items-center">
-                    <div class="mr-3" style="font-size: 24px; color: var(--rd-accent);"><i class="fas fa-chart-line"></i></div>
+                    <div class="mr-3" style="font-size: 26px; color: #1e3a8a;"><i class="fas fa-chart-line"></i></div>
                     <div>
-                        <h5 class="modal-title rajdhani font-weight-bold text-dark mb-0" style="letter-spacing: 1.5px;">FINANCIAL INTELLIGENCE REPORT</h5>
-                        <div class="small text-muted rajdhani">{{ $head->head_name ?? ($head->hed_name ?? ($head->prj_code ?? 'N/A')) }} | DATED {{ date('d M y') }} <span class="ml-2 text-primary">{{ ($head->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
+                        <h5 class="modal-title rajdhani font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 19px; color: #0f172a;">FINANCIAL INTELLIGENCE REPORT</h5>
+                        <div class="small rajdhani" style="font-size: 13px; font-weight: 600; color: #475569;">{{ $head->head_name ?? ($head->hed_name ?? ($head->prj_code ?? 'N/A')) }} | DATED {{ date('d M y') }} <span class="ml-2 font-weight-bold" style="color: #2563eb;">{{ ($head->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
                     </div>
-                    <div class="ml-auto d-flex align-items-center mr-4" style="gap: 6px;">
+                    <div class="ml-auto d-flex align-items-center mr-4" style="gap: 8px;">
                         @if($prjId)
-                        <a href="{{ route('projects.show', $prjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 10.5px; border-radius: 6px; gap: 5px; padding: 4px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(37,99,235,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(37,99,235,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(37,99,235,0.25)';">
+                        <a href="{{ route('projects.show', $prjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(37,99,235,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(37,99,235,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(37,99,235,0.25)';">
                             <i class="fas fa-project-diagram"></i> Project Details
                         </a>
                         @endif
-                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 10.5px; border-radius: 6px; gap: 5px; padding: 4px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(22,163,74,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(22,163,74,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(22,163,74,0.25)';">
+                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(22,163,74,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(22,163,74,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(22,163,74,0.25)';">
                             <i class="fas fa-paperclip"></i> Files & Attachments
                         </a>
-                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 10.5px; border-radius: 6px; gap: 5px; padding: 4px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(217,119,6,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(217,119,6,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(217,119,6,0.25)';">
+                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(217,119,6,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(217,119,6,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(217,119,6,0.25)';">
                             <i class="fas fa-coins"></i> Milestone Costs
                         </a>
                     </div>
                 </div>
-                <button type="button" class="close text-dark opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
+                <button type="button" class="close text-dark opacity-50 hover-opacity-100" data-dismiss="modal" style="font-size: 24px; padding: 12px 18px;">&times;</button>
             </div>
             
             <div class="modal-body p-0" style="background: #ffffff;">
                 {{-- Top Summary bar --}}
-                <div class="row no-gutters border-bottom" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
-                    <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
-                        <div class="small text-muted rajdhani font-weight-bold">ALLOCATION</div>
-                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->allocation ?? 0) }}</div>
+                <div class="row no-gutters border-bottom" style="background: #f1f5f9; border-color: #cbd5e1 !important;">
+                    <div class="col-md-3 border-right p-3" style="border-color: #cbd5e1 !important;">
+                        <div class="small rajdhani font-weight-bold" style="font-size: 13px; letter-spacing: 1px; color: #475569;">ALLOCATION</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani" style="font-size: 23px; color: #0f172a; font-weight: 900;">{{ number_format($head->allocation ?? 0) }}</div>
                     </div>
-                    <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
-                        <div class="small text-muted rajdhani font-weight-bold">MTSS SHARE</div>
-                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->mtss_share ?? 0) }}</div>
+                    <div class="col-md-3 border-right p-3" style="border-color: #cbd5e1 !important;">
+                        <div class="small rajdhani font-weight-bold" style="font-size: 13px; letter-spacing: 1px; color: #475569;">MTSS SHARE</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani" style="font-size: 23px; color: #0f172a; font-weight: 900;">{{ number_format($head->mtss_share ?? 0) }}</div>
                     </div>
-                    <div class="col-md-3 border-right p-3" style="border-color: var(--rd-border) !important;">
-                        <div class="small text-muted rajdhani font-weight-bold">RDW SHARE</div>
-                        <div class="h5 mb-0 text-primary font-weight-bold rajdhani">{{ number_format($head->rdw_share ?? 0) }}</div>
+                    <div class="col-md-3 border-right p-3" style="border-color: #cbd5e1 !important;">
+                        <div class="small rajdhani font-weight-bold" style="font-size: 13px; letter-spacing: 1px; color: #475569;">RDW SHARE</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani" style="font-size: 23px; color: #1e40af; font-weight: 900;">{{ number_format($head->rdw_share ?? 0) }}</div>
                     </div>
                     <div class="col-md-3 p-3">
-                        <div class="small text-muted rajdhani font-weight-bold">CSRF SHARE</div>
-                        <div class="h5 mb-0 text-dark font-weight-bold rajdhani">{{ number_format($head->csrf_share ?? 0) }}</div>
+                        <div class="small rajdhani font-weight-bold" style="font-size: 13px; letter-spacing: 1px; color: #475569;">CSRF SHARE</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani" style="font-size: 23px; color: #0f172a; font-weight: 900;">{{ number_format($head->csrf_share ?? 0) }}</div>
                     </div>
                 </div>
 
                 <div class="row no-gutters">
                     {{-- Left Pane: Detailed Metrics Table --}}
-                    <div class="col-xl-4 col-lg-5 border-right p-4" style="background: #fbfcfe; border-color: var(--rd-border) !important;">
+                    <div class="col-xl-4 col-lg-5 border-right p-4" style="background: #f8fafc; border-color: #cbd5e1 !important;">
                         <div class="d-flex justify-content-between align-items-end mb-3">
-                            <h6 class="rajdhani text-primary font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
-                            <div class="small text-muted rajdhani">FIGURES IN PKR</div>
+                            <h6 class="rajdhani font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 16px; font-weight: 800; color: #1e3a8a;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
+                            <div class="small rajdhani" style="font-size: 12.5px; font-weight: 700; color: #475569;">FIGURES IN PKR</div>
                         </div>
 
-                        <div class="fin-table-modern table-responsive rounded border overflow-auto" style="border-color: var(--rd-border) !important; background: #ffffff;">
-                            <table class="table table-sm mb-0 rajdhani" style="font-size: 13px;">
-                                <thead style="background: var(--rd-surface2);">
-                                    <tr class="text-muted">
-                                        <th class="pl-3 border-0">METRIC</th>
-                                        <th class="text-right border-0" style="color: var(--rd-primary-700);">PROJECT</th>
-                                        <th class="text-right border-0" style="color: #d97706;">CSRF</th>
-                                        <th class="text-right pr-3 border-0" style="color: #16a34a;">ACTUAL</th>
+                        <div class="fin-table-modern table-responsive rounded border overflow-auto" style="border-color: #cbd5e1 !important; background: #ffffff;">
+                            <table class="table table-sm mb-0 rajdhani" style="font-size: 14.5px;">
+                                <thead style="background: #e2e8f0; font-size: 13.5px; font-weight: 800; color: #1e293b;">
+                                    <tr>
+                                        <th class="pl-3 py-2 border-0">METRIC</th>
+                                        <th class="text-right py-2 border-0" style="color: #1e40af;">PROJECT</th>
+                                        <th class="text-right py-2 border-0" style="color: #b45309;">CSRF</th>
+                                        <th class="text-right pr-3 py-2 border-0" style="color: #15803d;">ACTUAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr style="background: rgba(37,99,235,0.04); border-bottom: 1px solid var(--rd-border);">
-                                        <td class="pl-3 font-weight-bold text-dark"><i class="fas fa-coins text-warning mr-1"></i> Allocated</td>
-                                        <td class="text-right font-weight-bold" style="color: var(--rd-primary-700);">{{ number_format($head->pcc_share ?? 0) }}</td>
-                                        <td class="text-right font-weight-bold" style="color: #d97706;">{{ number_format($head->csrf_share ?? 0) }}</td>
-                                        <td class="text-right pr-3 font-weight-bold" style="color: #16a34a;">{{ number_format($head->allocation ?? 0) }}</td>
+                                    <tr style="background: rgba(37,99,235,0.06); border-bottom: 1.5px solid #cbd5e1;">
+                                        <td class="pl-3 py-2 font-weight-bold text-dark" style="font-size: 15px;"><i class="fas fa-coins text-warning mr-1"></i> Allocated</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #1e40af; font-size: 15px;">{{ number_format($head->pcc_share ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #b45309; font-size: 15px;">{{ number_format($head->csrf_share ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d; font-size: 15px;">{{ number_format($head->allocation ?? 0) }}</td>
                                     </tr>
-                                    <tr>
-                                        <td class="pl-3 text-muted">Received</td>
-                                        <td class="text-right" style="color: var(--rd-primary-700);">{{ number_format($head->pcc_received ?? 0) }}</td>
-                                        <td class="text-right" style="color: #d97706;">{{ number_format($head->cf_received ?? 0) }}</td>
-                                        <td class="text-right pr-3 text-muted">--</td>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold text-secondary">Received</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #1e40af;">{{ number_format($head->pcc_received ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #b45309;">{{ number_format($head->cf_received ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
                                     </tr>
-                                    <tr>
-                                        <td class="pl-3 text-muted">Expenditure</td>
-                                        <td class="text-right text-danger">
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold text-danger">Expenditure</td>
+                                        <td class="text-right py-2 text-danger font-weight-bold">
                                             <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View Project Expenditure Breakdown">
                                                 {{ number_format($head->pcc_expenditure ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View Project Expenditure Breakdown">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="View Project Expenditure Breakdown">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
-                                        <td class="text-right text-danger">
+                                        <td class="text-right py-2 text-danger font-weight-bold">
                                             <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View CSRF Expenditure Breakdown">
                                                 {{ number_format($head->cf_expenditure ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View CSRF Expenditure Breakdown">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF Expenditure Breakdown">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
-                                        <td class="text-right pr-3" style="color: #16a34a;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #16a34a;" title="View Total Expenditure Breakdown">
+                                        <td class="text-right pr-3 py-2" style="color: #15803d; font-weight: 800;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Expenditure Breakdown">
                                                 {{ number_format($head->prj_expenditure ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total Expenditure Breakdown">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total Expenditure Breakdown">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
                                     </tr>
-                                    <tr style="background: rgba(37,99,235,0.03);">
-                                        <td class="pl-3 text-primary font-weight-bold">Balance</td>
-                                        <td class="text-right text-primary font-weight-bold">{{ number_format($head->pcc_balance ?? 0) }}</td>
-                                        <td class="text-right text-primary font-weight-bold">{{ number_format($head->cf_balance ?? 0) }}</td>
-                                        <td class="text-right pr-3 text-muted">--</td>
+                                    <tr style="background: rgba(37,99,235,0.05); border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 text-primary font-weight-bold" style="font-size: 15px;">Balance</td>
+                                        <td class="text-right py-2 font-weight-bold text-primary" style="font-size: 15px;">{{ number_format($head->pcc_balance ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold text-primary" style="font-size: 15px;">{{ number_format($head->cf_balance ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
                                     </tr>
-                                    <tr>
-                                        <td class="pl-3 text-muted">Commitments</td>
-                                        <td class="text-right text-warning">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="text-warning text-decoration-none font-weight-bold" title="View Project Commitments Breakdown">
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold" style="color: #b45309;">Commitments</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #b45309;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View Project Commitments Breakdown">
                                                 {{ number_format($head->pcc_commitments ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View Project Commitments Breakdown">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="View Project Commitments Breakdown">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
-                                        <td class="text-right text-warning">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="text-warning text-decoration-none font-weight-bold" title="View CSRF Commitments Breakdown">
+                                        <td class="text-right py-2 font-weight-bold" style="color: #b45309;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View CSRF Commitments Breakdown">
                                                 {{ number_format($head->cf_commitments ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View CSRF Commitments Breakdown">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF Commitments Breakdown">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
-                                        <td class="text-right pr-3" style="color: #16a34a;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #16a34a;" title="View Total Commitments Breakdown">
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Commitments Breakdown">
                                                 {{ number_format($head->prj_commitments ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total Commitments Breakdown">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total Commitments Breakdown">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="pl-3 text-muted">In Process</td>
-                                        <td class="text-right text-muted">
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold text-secondary">In Process</td>
+                                        <td class="text-right py-2 font-weight-bold text-secondary">
                                             <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View Project In-Process Cases">
                                                 {{ number_format($head->pcc_in_process ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project In-Process Cases">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="View Project In-Process Cases">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
-                                        <td class="text-right text-muted">
+                                        <td class="text-right py-2 font-weight-bold text-secondary">
                                             <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View CSRF In-Process Cases">
                                                 {{ number_format($head->cf_in_process ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View CSRF In-Process Cases">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF In-Process Cases">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
-                                        <td class="text-right pr-3" style="color: #16a34a;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #16a34a;" title="View Total In-Process Cases">
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total In-Process Cases">
                                                 {{ number_format($head->prj_in_process ?? 0) }}
                                             </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total In-Process Cases">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total In-Process Cases">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </td>
                                     </tr>
-                                    <tr style="background: rgba(22,163,74,0.05);">
-                                        <td class="pl-3 font-weight-bold text-success">Available</td>
-                                        <td class="text-right font-weight-bold text-success">{{ number_format($head->pcc_available ?? 0) }}</td>
-                                        <td class="text-right font-weight-bold text-success">{{ number_format($head->cf_available ?? 0) }}</td>
-                                        <td class="text-right pr-3 text-muted">--</td>
+                                    <tr style="background: rgba(22,163,74,0.08); border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold text-success" style="font-size: 15px;">Available</td>
+                                        <td class="text-right py-2 font-weight-bold text-success" style="font-size: 15px;">{{ number_format($head->pcc_available ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold text-success" style="font-size: 15px;">{{ number_format($head->cf_available ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
                                     </tr>
-                                    <tr>
-                                        <td class="pl-3 text-muted">Yet to be Rec</td>
-                                        <td class="text-right text-muted">{{ number_format($head->pcc_yet_to_be_received ?? 0) }}</td>
-                                        <td class="text-right text-muted">{{ number_format($head->cf_yet_to_be_received ?? 0) }}</td>
-                                        <td class="text-right pr-3 text-muted">--</td>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold text-secondary">Yet to be Rec</td>
+                                        <td class="text-right py-2 font-weight-bold text-secondary">{{ number_format($head->pcc_yet_to_be_received ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold text-secondary">{{ number_format($head->cf_yet_to_be_received ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
                                     </tr>
-                                    <tr style="background: rgba(220,38,38,0.05);">
-                                        <td class="pl-3 text-danger font-weight-bold">Remaining</td>
-                                        <td class="text-right text-danger font-weight-bold">{{ number_format($head->pcc_can_be_spent ?? 0) }}</td>
-                                        <td class="text-right text-danger font-weight-bold">{{ number_format($head->cf_can_be_spent ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #16a34a;">{{ number_format($head->prj_remaining ?? 0) }}</td>
+                                    <tr style="background: rgba(220,38,38,0.08);">
+                                        <td class="pl-3 py-2 text-danger font-weight-bold" style="font-size: 15px;">Remaining</td>
+                                        <td class="text-right py-2 text-danger font-weight-bold" style="font-size: 15px;">{{ number_format($head->pcc_can_be_spent ?? 0) }}</td>
+                                        <td class="text-right py-2 text-danger font-weight-bold" style="font-size: 15px;">{{ number_format($head->cf_can_be_spent ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d; font-size: 15px;">{{ number_format($head->prj_remaining ?? 0) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
                         {{-- Receivables section --}}
-                        <div class="mt-4 pt-4 border-top" style="border-color: var(--rd-border) !important;">
-                            <h6 class="rajdhani text-muted mb-3" style="font-size: 12px; letter-spacing: 2px;">RECEIVABLES</h6>
+                        <div class="mt-4 pt-4 border-top" style="border-color: #cbd5e1 !important;">
+                            <h6 class="rajdhani font-weight-bold mb-3" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 1.5px;">RECEIVABLES</h6>
                             <div class="receivable-item d-flex justify-content-between mb-2">
-                                <span class="text-muted small rajdhani">Comp. Milestones</span>
-                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->receivable_completed) }}</span>
+                                <span class="rajdhani font-weight-bold" style="font-size: 14px; color: #475569;">Comp. Milestones</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($head->receivable_completed) }}</span>
                             </div>
                             <div class="receivable-item d-flex justify-content-between mb-2">
-                                <span class="text-muted small rajdhani">Current Milestone</span>
-                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->receivable_current) }}</span>
+                                <span class="rajdhani font-weight-bold" style="font-size: 14px; color: #475569;">Current Milestone</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($head->receivable_current) }}</span>
                             </div>
-                            <div class="receivable-item d-flex justify-content-between mt-3 p-2 rounded" style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2);">
-                                <span class="text-primary small rajdhani font-weight-bold">Available after Rcv.</span>
-                                <span class="text-primary rajdhani font-weight-bold">{{ number_format($head->available_after_receivables) }}</span>
+                            <div class="receivable-item d-flex justify-content-between mt-3 p-3 rounded" style="background: rgba(37,99,235,0.08); border: 1.5px solid rgba(37,99,235,0.3);">
+                                <span class="rajdhani font-weight-bold" style="color: #1e40af; font-size: 14.5px;">Available after Rcv.</span>
+                                <span class="rajdhani font-weight-bold" style="color: #1e40af; font-size: 16px;">{{ number_format($head->available_after_receivables) }}</span>
                             </div>
                         </div>
 
                         {{-- Exp Sources --}}
-                        <div class="mt-4 pt-4 border-top" style="border-color: var(--rd-border) !important;">
-                            <h6 class="rajdhani text-muted mb-3" style="font-size: 12px; letter-spacing: 2px;">EXP. SOURCES</h6>
-                            <div class="small d-flex justify-content-between mb-1">
-                                <span class="text-muted rajdhani">From this account</span>
-                                <span class="text-dark rajdhani">{{ number_format($head->exp_this_account) }}</span>
+                        <div class="mt-4 pt-4 border-top" style="border-color: #cbd5e1 !important;">
+                            <h6 class="rajdhani font-weight-bold mb-3" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 1.5px;">EXP. SOURCES</h6>
+                            <div class="d-flex justify-content-between mb-1.5" style="font-size: 13.5px;">
+                                <span class="rajdhani font-weight-bold" style="color: #475569;">From this account</span>
+                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->exp_this_account) }}</span>
                             </div>
-                            <div class="small d-flex justify-content-between mb-1">
-                                <span class="text-muted rajdhani">From other accounts</span>
-                                <span class="text-dark rajdhani">{{ number_format($head->exp_other_accounts) }}</span>
+                            <div class="d-flex justify-content-between mb-1.5" style="font-size: 13.5px;">
+                                <span class="rajdhani font-weight-bold" style="color: #475569;">From other accounts</span>
+                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->exp_other_accounts) }}</span>
                             </div>
-                            <div class="small d-flex justify-content-between">
-                                <span class="text-muted rajdhani">Other's exp. this acc.</span>
-                                <span class="text-dark rajdhani">{{ number_format($head->others_exp_this_account) }}</span>
+                            <div class="d-flex justify-content-between" style="font-size: 13.5px;">
+                                <span class="rajdhani font-weight-bold" style="color: #475569;">Other's exp. this acc.</span>
+                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->others_exp_this_account) }}</span>
                             </div>
                         </div>
                     </div>
 
                     {{-- Right Pane: Full Subheads Breakdown (With Live Drilldown) --}}
                     <div class="col-xl-8 col-lg-7 p-4" style="background: #ffffff;">
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--rd-border) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #cbd5e1 !important;">
                             <div>
-                                <h6 class="rajdhani text-primary font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 15px;">
+                                <h6 class="rajdhani font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 17.5px; font-weight: 800; color: #1e3a8a;">
                                     <i class="fas fa-layer-group mr-2"></i> SUBHEAD FINANCIAL BREAKDOWN
                                 </h6>
-                                <div class="small text-muted rajdhani mt-0.5">DETAILED ALLOCATION, EXPENDITURE, COMMITMENTS, IN PROCESS & REMAINING</div>
+                                <div class="small rajdhani mt-0.5" style="font-size: 13px; font-weight: 600; color: #475569;">DETAILED ALLOCATION, EXPENDITURE, COMMITMENTS, IN PROCESS & REMAINING</div>
                             </div>
-                            <span class="badge badge-primary px-3 py-1 rajdhani font-weight-bold" style="font-size: 11px; background: rgba(37,99,235,0.1); color: var(--rd-primary-700); border: 1px solid rgba(37,99,235,0.2);">
+                            <span class="badge badge-primary px-3 py-1.5 rajdhani font-weight-bold" style="font-size: 13px; background: rgba(37,99,235,0.12); color: #1d4ed8; border: 1.5px solid rgba(37,99,235,0.3);">
                                 {{ count($subheads ?? []) }} SUBHEADS
                             </span>
                         </div>
 
-                        <div class="table-responsive rounded border" style="border-color: var(--rd-border) !important;">
-                            <table class="table table-sm table-hover mb-0 rajdhani" style="font-size: 12.5px; background: #ffffff;">
-                                <thead style="background: var(--rd-surface2);">
-                                    <tr class="text-muted small font-weight-bold">
-                                        <th class="pl-3 py-2" style="white-space: nowrap;">SUBHEAD</th>
-                                        <th class="text-right py-2" style="white-space: nowrap;">ALLOCATED</th>
-                                        <th class="text-right py-2" style="white-space: nowrap;">EXPENDITURE</th>
-                                        <th class="text-right py-2" style="white-space: nowrap;">COMMITMENTS</th>
-                                        <th class="text-right py-2" style="white-space: nowrap;">IN PROCESS</th>
-                                        <th class="text-right py-2" style="white-space: nowrap;">REMAINING</th>
-                                        <th class="text-center pr-3 py-2" style="width: 90px; white-space: nowrap;">ACTION</th>
+                        <div class="table-responsive rounded border" style="border-color: #cbd5e1 !important;">
+                            <table class="table table-sm table-hover mb-0 rajdhani" style="font-size: 14.5px; background: #ffffff;">
+                                <thead style="background: #e2e8f0;">
+                                    <tr class="font-weight-bold" style="font-size: 13.5px; color: #1e293b;">
+                                        <th class="pl-3 py-2.5" style="white-space: nowrap;">SUBHEAD</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">ALLOCATED</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">EXPENDITURE</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">COMMITMENTS</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">IN PROCESS</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">REMAINING</th>
+                                        <th class="text-center pr-3 py-2.5" style="width: 90px; white-space: nowrap;">ACTION</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1804,69 +1804,76 @@
                                         $totCmt += $sCmt;
                                         $totIpc += $sIpc;
                                         $totRem += $sRem;
+
+                                        $isCaseSubhead = !empty($purchase->subhead_display) && strcasecmp(trim($sName), trim($purchase->subhead_display)) === 0;
                                     @endphp
-                                    <tr>
-                                        <td class="pl-3 py-2 font-weight-bold text-dark align-middle" style="white-space: nowrap;">
+                                    <tr style="{{ $isCaseSubhead ? 'background: #fef9c3 !important; border-left: 5px solid #eab308 !important; box-shadow: inset 0 0 0 1px #fde047;' : 'border-bottom: 1px solid #e2e8f0;' }}">
+                                        <td class="pl-3 py-2 font-weight-bold text-dark align-middle" style="white-space: nowrap; font-size: 14.5px;">
                                             <i class="fas fa-folder-open text-primary mr-1"></i> {{ $sName }}
+                                            @if($isCaseSubhead)
+                                                <span class="badge text-dark ml-2 px-2 py-0.5 rajdhani font-weight-bold" style="font-size: 11px; background: #eab308; color: #713f12 !important; border: 1px solid #ca8a04;">
+                                                    <i class="fas fa-check-circle mr-1"></i> ACTIVE CASE SUBHEAD
+                                                </span>
+                                            @endif
                                         </td>
-                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #0f172a; white-space: nowrap;">
+                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #0f172a; white-space: nowrap; font-size: 14.5px;">
                                             {{ number_format($sAlloc) }}
                                         </td>
-                                        <td class="text-right py-2 font-weight-bold text-danger align-middle" style="white-space: nowrap;">
+                                        <td class="text-right py-2 font-weight-bold text-danger align-middle" style="white-space: nowrap; font-size: 14.5px;">
                                             <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="text-danger text-decoration-none" title="Drilldown {{ $sName }} Expenditure">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="Drilldown {{ $sName }} Expenditure">
                                                     {{ number_format($sExp) }}
                                                 </a>
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-red" title="Drilldown {{ $sName }} Expenditure">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} Expenditure">
                                                     <i class="fas fa-search"></i>
                                                 </a>
                                             </div>
                                         </td>
-                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #d97706; white-space: nowrap;">
+                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #d97706; white-space: nowrap; font-size: 14.5px;">
                                             <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="text-decoration-none" style="color: #d97706;" title="Drilldown {{ $sName }} Commitments">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #d97706;" title="Drilldown {{ $sName }} Commitments">
                                                     {{ number_format($sCmt) }}
                                                 </a>
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="Drilldown {{ $sName }} Commitments">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} Commitments">
                                                     <i class="fas fa-search"></i>
                                                 </a>
                                             </div>
                                         </td>
-                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #64748b; white-space: nowrap;">
+                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #475569; white-space: nowrap; font-size: 14.5px;">
                                             <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="text-decoration-none" style="color: #64748b;" title="Drilldown {{ $sName }} In-Process">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #475569;" title="Drilldown {{ $sName }} In-Process">
                                                     {{ number_format($sIpc) }}
                                                 </a>
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="Drilldown {{ $sName }} In-Process">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} In-Process">
                                                     <i class="fas fa-search"></i>
                                                 </a>
                                             </div>
                                         </td>
-                                        <td class="text-right py-2 font-weight-bold align-middle {{ $sRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap;">
+                                        <td class="text-right py-2 font-weight-bold align-middle {{ $sRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap; font-size: 14.5px;">
                                             {{ number_format($sRem) }}
                                         </td>
                                         <td class="text-center pr-3 py-2 align-middle" style="white-space: nowrap;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-1 px-2" title="View Full {{ $sName }} Breakdown">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-1 px-2.5" style="font-size: 12px; font-weight: 800; border-radius: 4px;" title="View Full {{ $sName }} Breakdown">
                                                 <i class="fas fa-external-link-alt mr-1"></i> VIEW
                                             </a>
                                         </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-4 text-muted">No subheads available.</td>
+                                        <td colspan="7" class="text-center py-4 font-weight-bold text-muted" style="font-size: 14px;">No subheads available.</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
                                 @if(count($subheads ?? []) > 0)
-                                <tfoot style="background: rgba(37,99,235,0.05); font-weight: 800; border-top: 2px solid var(--rd-border);">
+                                <tfoot style="background: #e0f2fe; font-weight: 900; border-top: 2px solid #94a3b8;">
                                     <tr>
-                                        <td class="pl-3 py-2 font-weight-bold text-dark" style="white-space: nowrap;">TOTAL</td>
-                                        <td class="text-right py-2 font-weight-bold" style="color: #0f172a; white-space: nowrap;">{{ number_format($totAlloc) }}</td>
-                                        <td class="text-right py-2 font-weight-bold text-danger" style="white-space: nowrap;">{{ number_format($totExp) }}</td>
-                                        <td class="text-right py-2 font-weight-bold" style="color: #d97706; white-space: nowrap;">{{ number_format($totCmt) }}</td>
-                                        <td class="text-right py-2 font-weight-bold" style="color: #64748b; white-space: nowrap;">{{ number_format($totIpc) }}</td>
-                                        <td class="text-right py-2 font-weight-bold {{ $totRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap;">{{ number_format($totRem) }}</td>
-                                        <td class="text-center pr-3 py-2 text-muted" style="white-space: nowrap;">--</td>
+                                        <td class="pl-3 py-2.5 font-weight-bold text-dark" style="white-space: nowrap; font-size: 15.5px;">TOTAL</td>
+                                        <td class="text-right py-2.5 font-weight-bold" style="color: #0f172a; white-space: nowrap; font-size: 15.5px;">{{ number_format($totAlloc) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold text-danger" style="white-space: nowrap; font-size: 15.5px;">{{ number_format($totExp) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold" style="color: #d97706; white-space: nowrap; font-size: 15.5px;">{{ number_format($totCmt) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold" style="color: #475569; white-space: nowrap; font-size: 15.5px;">{{ number_format($totIpc) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold {{ $totRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap; font-size: 15.5px;">{{ number_format($totRem) }}</td>
+                                        <td class="text-center pr-3 py-2.5 text-muted font-weight-bold" style="white-space: nowrap; font-size: 14px;">--</td>
                                     </tr>
                                 </tfoot>
                                 @endif
@@ -1876,10 +1883,10 @@
                 </div>
             </div>
             
-            <div class="modal-footer border-top py-2 px-4 d-flex justify-content-between" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
-                <div class="small text-muted rajdhani"><i class="fas fa-shield-alt text-success mr-1"></i> RDWIS FINANCIAL AUDIT ENGINE ACTIVE</div>
+            <div class="modal-footer border-top py-2 px-4 d-flex justify-content-between" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                <div class="small rajdhani font-weight-bold" style="color: #475569; font-size: 13px;"><i class="fas fa-shield-alt text-success mr-1"></i> RDWIS FINANCIAL AUDIT ENGINE ACTIVE</div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-secondary btn-xs rajdhani font-weight-bold px-4" data-dismiss="modal">CLOSE REPORT</button>
+                    <button type="button" class="btn btn-secondary btn-sm rajdhani font-weight-bold px-4" data-dismiss="modal" style="font-size: 13px;">CLOSE REPORT</button>
                 </div>
             </div>
         </div>

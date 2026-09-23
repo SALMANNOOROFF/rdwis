@@ -50,11 +50,8 @@ class ContractCaseProjectPanelTest extends TestCase
         foreach ($allocations as $allocation) {
             foreach (['financial', 'attachments', 'milestones'] as $section) {
                 $response = $this->get(route('contract-cases.project-panel', [$case->ctc_id, $allocation->hed_id]).'?section='.$section);
-                $response->assertOk()->assertSee($allocation->prj_code ?: $allocation->hed_code);
-                $response->assertDontSee('<html', false);
-                if ($section === 'financial') {
-                    $response->assertSee('Available Funds')->assertSee('Commitments');
-                }
+                $response->assertOk();
+                $response->assertJsonStructure(['allocation', 'section', 'financial', 'attachments', 'milestones']);
             }
         }
     }
@@ -78,11 +75,14 @@ class ContractCaseProjectPanelTest extends TestCase
         $this->signIn();
         $case = $this->caseWithProjects();
         $response = $this->get(route('dg.contract-cases.show', $case->ctc_id));
-        $response->assertOk()->assertSee('Already Hired')->assertSee('contractProjectPanel')
-            ->assertSee('contract-case-projects.js')->assertSee('Case ID &amp; Date', false);
+        $response->assertOk()
+            ->assertSee('ALLOCATED PROJECTS')
+            ->assertSee('FINANCIAL REVIEW')
+            ->assertSee('ALREADY HIRED STAFF')
+            ->assertSee('selectProject');
         $allocations = app(ContractCaseProjectService::class)->allocations($case);
         foreach ($allocations as $allocation) {
-            $response->assertSee('data-allocation-row="'.$allocation->hed_id.'"', false);
+            $response->assertSee($allocation->prj_code ?: $allocation->hed_code);
         }
     }
 }

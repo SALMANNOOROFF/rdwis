@@ -837,7 +837,7 @@
             <li class="nav-item">
                 <a href="{{ route('division.contract-cases.index') }}" class="nav-link {{ Request::routeIs('division.contract-cases.*') ? 'active' : '' }}">
                     <i class="fas fa-file-signature nav-icon text-warning"></i>
-                    <p>Contract Cases <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
+                    <p>Hiring Cases <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
                 </a>
             </li>
 
@@ -989,7 +989,7 @@
            <li class="nav-item">
                <a href="{{ route('hr.contract-cases.index') }}" class="nav-link {{ Request::routeIs('hr.contract-cases.*') || Request::routeIs('divhr.contract.*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-file-signature text-warning"></i>
-                   <p>Contract Cases <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
+                   <p>Hiring Cases <span class="badge badge-blinking-red badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
                </a>
            </li>
 
@@ -1054,7 +1054,7 @@
           <li class="nav-item">
               <a href="{{ route('nrdi.contract_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases_new.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-file-signature text-warning"></i>
-                  <p>Contract Cases <span class="badge badge-blinking-red badge-ctr-parent badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
+                  <p>Hiring Cases <span class="badge badge-blinking-red badge-ctr-parent badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
               </a>
           </li>
 
@@ -1272,7 +1272,7 @@
           <li class="nav-item">
               <a href="{{ route('nrdi.contract_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases_new.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-file-signature"></i>
-                  <p>Contract Cases</p>
+                  <p>Hiring Cases</p>
               </a>
           </li>
 

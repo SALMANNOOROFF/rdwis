@@ -32,9 +32,13 @@ class ContractCaseController extends Controller
                 ->orderBy('msn_id')->get();
         }
 
-        return response()->view('md.contract-cases._project_panel', compact(
-            'allocation', 'section', 'financial', 'attachments', 'milestones'
-        ))->header('Cache-Control', 'no-store');
+        return response()->json([
+            'allocation' => $allocation,
+            'section' => $section,
+            'financial' => $financial,
+            'attachments' => $attachments,
+            'milestones' => $milestones,
+        ])->header('Cache-Control', 'no-store');
     }
 
     public function index(Request $request)

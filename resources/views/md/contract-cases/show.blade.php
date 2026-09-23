@@ -1,7 +1,6 @@
 @extends('welcome')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/contract-case-projects.css') }}?v={{ filemtime(public_path('css/contract-case-projects.css')) }}">
 <!-- SweetAlert2 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
@@ -159,6 +158,90 @@
             'end_dt' => $case->ctc_newenddt,
             'month_count' => 12,
         ]);
+    }
+
+    // Build full Project Cards with Financial Review metrics & drilldown links
+    $finService = app(\App\Services\FinancialIntelligenceService::class);
+    $allocatedProjects = $allocatedProjects ?? collect();
+    $projectHiredCounts = $projectHiredCounts ?? collect();
+    $projectCards = [];
+
+    foreach ($allocatedGroups as $agIdx => $ag) {
+        $hId = $ag['hed_id'];
+        $alloc = $hId ? $allocatedProjects->firstWhere('hed_id', $hId) : null;
+        $headRecord = $alloc ?: ($hId ? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $hId)->first() : null);
+        $prjId = $alloc->hed_prj_id ?? ($headRecord->hed_prj_id ?? null);
+        $prjCode = $ag['prj_code'] ?? ($alloc->prj_code ?? ($headRecord->hed_code ?? 'PRJ'));
+        $prjName = $ag['prj_name'] ?? ($alloc->prj_name ?? ($headRecord->hed_name ?? 'Project'));
+        $hiredCount = $hId ? (int)($projectHiredCounts->get($hId, 0)) : 0;
+
+        $fin = $hId ? $finService->getHeadStatus($hId) : null;
+        $fAlloc = (float)($fin->pcc_share ?? ($fin->prj_share ?? ($fin->allocation ?? 0)));
+        $fRec = (float)($fin->pcc_received ?? ($fin->received ?? 0));
+        $fExp = (float)($fin->pcc_expenditure ?? ($fin->expenditure ?? 0));
+        $fBal = (float)($fin->pcc_balance ?? ($fRec - $fExp));
+        $fCmt = (float)($fin->pcc_commitments ?? ($fin->commitments ?? 0));
+        $fInp = (float)($fin->pcc_in_process ?? ($fin->in_process ?? 0));
+        $fAvail = (float)($fin->pcc_available ?? ($fBal - $fCmt - $fInp));
+        $fSpent = (float)($fin->pcc_can_be_spent ?? ($fAlloc - $fExp - $fCmt - $fInp));
+
+        $startFmt = $ag['start_dt'] ? \Carbon\Carbon::parse($ag['start_dt'])->format('d M, Y') : '';
+        $endFmt = $ag['end_dt'] ? \Carbon\Carbon::parse($ag['end_dt'])->format('d M, Y') : '';
+        $mCount = $ag['month_count'] ?? 1;
+        $tenureDisplay = ($startFmt && $endFmt)
+            ? "{$startFmt} – {$endFmt} ({$mCount} " . Str::plural('Month', $mCount) . ")"
+            : "{$mCount} " . Str::plural('Month', $mCount);
+
+        $cardKey = $hId ? (string)$hId : 'alloc_' . $agIdx;
+
+        $projectCards[] = [
+            'card_key' => $cardKey,
+            'hed_id' => $hId,
+            'prj_id' => $prjId,
+            'prj_code' => $prjCode,
+            'prj_name' => $prjName,
+            'start_dt' => $ag['start_dt'],
+            'end_dt' => $ag['end_dt'],
+            'month_count' => $mCount,
+            'tenure_display' => $tenureDisplay,
+            'hired_count' => $hiredCount,
+            'subhead' => 'HR',
+            'allocation' => $fAlloc,
+            'received' => $fRec,
+            'expenditure' => $fExp,
+            'balance' => $fBal,
+            'commitments' => $fCmt,
+            'in_process' => $fInp,
+            'available' => $fAvail,
+            'can_be_spent' => $fSpent,
+            'expenditure_drilldown' => $hId ? route('division.finance-of-project.drilldown', [$hId, 'pcc', 'expenditure']) : '#',
+            'commitments_drilldown' => $hId ? route('division.finance-of-project.drilldown', [$hId, 'pcc', 'commitments']) : '#',
+            'in_process_drilldown' => $hId ? route('division.finance-of-project.drilldown', [$hId, 'pcc', 'in-process']) : '#',
+            'subhead_drilldown' => $hId ? route('division.finance-of-project.drilldown', [$hId, 'subhead', 'expenditure', 'HR']) : '#',
+            'full_report_url' => $prjId ? route('projects.financial_view', $hId) : ($hId ? route('projects.financial_view', $hId) : '#'),
+            'project_details_url' => $prjId ? route('projects.show', $prjId) : '#',
+            'attachments_url' => $hId ? route('projects.financial_view', $hId) . '#tab-docs' : '#',
+            'milestones_url' => $hId ? route('projects.financial_view', $hId) . '#tab-milestones' : '#',
+        ];
+    }
+
+    $activeProjectCard = $projectCards[0] ?? null;
+    $totalContractMonths = $case->casePlans->count() ?: 12;
+    $totalContractValue = (float)($case->ctc_price ?: ($proposedSalary * $totalContractMonths));
+
+    // Prepare Financial Intelligence Data & Subheads Breakdown for project modals
+    $projectModalsData = [];
+    foreach ($projectCards as $pCard) {
+        $pHeadId = $pCard['hed_id'] ?? null;
+        if (!empty($pHeadId)) {
+            $pHeadStatus = $finService->getHeadStatus($pHeadId);
+            $pSubheadList = $finService->getSubheadBreakdown($pHeadId);
+            $projectModalsData[$pCard['card_key']] = [
+                'head' => $pHeadStatus,
+                'subheads' => $pSubheadList,
+                'pCard' => $pCard,
+            ];
+        }
     }
 @endphp
 
@@ -401,30 +484,31 @@ textarea::-webkit-scrollbar-thumb:hover {
 /* Clean Spec & Data Tables */
 .spec-data-table {
     width: 100%;
-    font-size: 11.5px;
+    font-size: 13.5px;
     border-collapse: collapse;
     margin-bottom: 0;
 }
 .spec-data-table th {
-    padding: 9px 12px;
-    color: #64748b;
-    font-weight: 700;
-    font-size: 9.5px;
+    padding: 10px 14px;
+    color: #334155;
+    font-weight: 800;
+    font-size: 11.5px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background: #f1f5f9;
+    border-bottom: 1.5px solid #cbd5e1;
     font-family: 'Rajdhani', sans-serif;
     white-space: nowrap;
 }
 .spec-data-table td {
-    padding: 10px 12px;
-    border-top: 1px solid #f1f5f9;
+    padding: 11px 14px;
+    border-top: 1px solid #e2e8f0;
     color: #0f172a;
+    font-weight: 600;
     vertical-align: middle;
 }
 .spec-data-table tr:hover td {
-    background: #fbfcfe;
+    background: #f8fafc;
 }
 
 /* Clean Minimal Horizontal Info Strip (No redundant nested badge boxes) */
@@ -671,28 +755,64 @@ textarea::-webkit-scrollbar-thumb:hover {
 .cc-dest-option-item.selected {
     background: #e2e8f0;
 }
+
+/* Project Allocation Badges */
+.project-badge-btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #f8fafc;
+    color: #0f172a;
+    border: 1.5px solid #cbd5e1;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+}
+.project-badge-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+}
+.project-badge-btn.active {
+    background: var(--rd-accent, #5F7858) !important;
+    color: #ffffff !important;
+    border-color: #4d6247 !important;
+    box-shadow: 0 2px 6px rgba(95, 120, 88, 0.35);
+}
+
+/* Drilldown Buttons */
+.btn-drill-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    margin-left: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+}
+.btn-drill-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.btn-drill-red { background: #fee2e2; color: #dc2626 !important; border: 1px solid #fca5a5; }
+.btn-drill-red:hover { background: #dc2626; color: #fff !important; }
+.btn-drill-amber { background: #fef3c7; color: #d97706 !important; border: 1px solid #fcd34d; }
+.btn-drill-amber:hover { background: #d97706; color: #fff !important; }
+.btn-drill-gray { background: #f1f5f9; color: #64748b !important; border: 1px solid #cbd5e1; }
+.btn-drill-gray:hover { background: #64748b; color: #fff !important; }
 </style>
 
 <div class="content-wrapper dg-page">
     <div class="p-3 pt-3">
         <div class="container-fluid">
-
-            {{-- Top Header Bar --}}
-            <div class="dg-hdr">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="dg-sec-label mb-0"><i class="fas fa-file-contract mr-1"></i> CONTRACT CASE</span>
-                    <span class="text-muted" style="font-size: 12px;">|</span>
-                    <span class="font-weight-bold text-dark" style="font-size: 13px;">{{ $empName }}</span>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge badge-light border text-dark font-weight-bold px-2 py-1 rajdhani" style="font-size: 11.5px;">
-                        CASE #CC-{{ $case->ctc_id }} &bull; {{ $caseTypeRaw }}
-                    </span>
-                    <a href="{{ route("{$routePrefix}.contract-cases.index") }}" class="dg-back-btn">
-                        <i class="fas fa-arrow-left mr-1"></i> Back
-                    </a>
-                </div>
-            </div>
 
             {{-- 2-Column Grid (Left: Case Details & Financials | Right: Minute & Trail) --}}
             <div class="dg-grid">
@@ -704,134 +824,344 @@ textarea::-webkit-scrollbar-thumb:hover {
 
                     {{-- Box Header --}}
                     <div class="dg-box-hdr">
-                        <div class="dg-sec-label mb-0">
-                            <i class="fas fa-file-contract mr-1"></i> Contract Case Information
+                        <div class="d-flex align-items-center gap-2" style="margin-bottom:0;">
+                            <span class="dg-sec-label mb-0" style="font-size: 13.5px; font-weight: 800; letter-spacing: 0.8px;">
+                                <i class="fas fa-file-signature text-primary mr-1.5"></i> HIRING CASE
+                            </span>
+                            <span class="text-muted mx-1" style="font-size: 14px; font-weight: 400;">|</span>
+                            <span class="font-weight-bold text-dark rajdhani" style="font-size: 16.5px; letter-spacing: 0.5px;">{{ $empName }}</span>
                         </div>
-                        <div>
-                            @if($isHiring)
-                                <span class="badge badge-success font-weight-bold px-2 py-1" style="font-size: 10px; border-radius: 5px;">
-                                    <i class="fas fa-user-plus mr-1"></i> NEW HIRING (HG)
-                                </span>
-                            @elseif($isRenewal)
-                                <span class="badge badge-primary font-weight-bold px-2 py-1" style="font-size: 10px; border-radius: 5px; background: #1e3a8a;">
-                                    <i class="fas fa-sync-alt mr-1"></i> CONTRACT RENEWAL (CR)
-                                </span>
-                            @elseif($isExtension)
-                                <span class="badge badge-info font-weight-bold px-2 py-1 text-white" style="font-size: 10px; border-radius: 5px; background: #0284c7;">
-                                    <i class="fas fa-clock mr-1"></i> CONTRACT EXTENSION (CE)
-                                </span>
-                            @else
-                                <span class="badge badge-secondary font-weight-bold px-2 py-1" style="font-size: 10px; border-radius: 5px;">
-                                    <i class="fas fa-user-check mr-1"></i> {{ $caseTypeRaw }}
-                                </span>
-                            @endif
+                        <div class="dg-box-hdr-right d-flex align-items-center gap-2">
+                            <span class="badge border font-weight-bold px-3 py-1.5 rajdhani" style="font-size: 13px; letter-spacing: 0.5px; background: #ffffff; color: #0f172a; border-color: #cbd5e1 !important;">
+                                <i class="fas fa-tags text-primary mr-1"></i>
+                                @if($isHiring)
+                                    Hg — New Hiring
+                                @elseif($isRenewal)
+                                    Cr — Contract Renewal
+                                @elseif($isExtension)
+                                    Ce — Contract Extension
+                                @elseif($isRehiring)
+                                    Rh — Re-Hiring
+                                @else
+                                    {{ $caseTypeRaw }}
+                                @endif
+                            </span>
                         </div>
                     </div>
 
-                    <div class="p-4">
+                    <div class="p-4" style="flex: 1; overflow-y: auto;">
+                        
+                        {{-- Top Header Section: Case Metadata on Left & Financial Review + Case Financials on Right (Exact Purchase Case Layout) --}}
+                        <div class="mb-4 d-flex align-items-start gap-4">
+                            <div style="flex: 1;">
+                                <div class="d-flex flex-column" style="gap: 8px; font-size: 13px;">
+                                    <div><strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;"><i class="fas fa-hashtag text-primary mr-2"></i>CASE ID:</strong> <span class="text-dark font-weight-bold rajdhani" style="font-size: 16px; color: #0f172a !important; font-weight: 800;">#CC-{{ $case->ctc_id }}</span></div>
+                                    <div><strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;"><i class="far fa-calendar-alt text-primary mr-2"></i>DATE:</strong> <span class="text-dark font-weight-bold rajdhani" style="font-size: 14.5px; color: #0f172a !important; font-weight: 700;">{{ $case->ctc_date ? \Carbon\Carbon::parse($case->ctc_date)->format('d M, Y') : '—' }}</span></div>
 
-                        @include('md.contract-cases._project_overview')
-                        <div class="mb-3">
-                                    {{-- 2. CASE ATTACHMENTS (WITH + UPLOAD BUTTON) --}}
-                                    <div class="border rounded" style="flex: 1; border-color: #e2e8f0 !important; background: #ffffff; border-radius: 7px;">
-                                        <div class="py-1.5 px-2.5 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; min-height: 26px;">
-                                            <span class="font-weight-bold text-truncate" style="font-size: 9px; color: #475569; text-transform: uppercase;">
-                                                <i class="fas fa-file-invoice text-primary mr-1"></i> CASE ATTACHMENTS
-                                            </span>
-                                            <div class="d-flex align-items-center gap-1">
-                                                <span id="caseAttachmentsCount" class="badge badge-secondary badge-pill mr-1" style="font-size: 8px; padding: 2px 5px;">{{ $caseAttachments->count() }}</span>
-                                                <button type="button" class="btn btn-xs btn-primary p-0 d-flex align-items-center justify-content-center" style="width: 17px; height: 17px; border-radius: 4px; background: var(--rd-accent, #5F7858); border: none; cursor: pointer;" data-toggle="modal" data-target="#modalAddCaseAttachment" title="Add Document">
-                                                    <i class="fas fa-plus" style="font-size: 8px; color: #ffffff;"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div id="caseAttachmentsList" class="px-2.5 py-1" style="font-size: 10px;">
-                                            @forelse($caseAttachments as $cIdx => $cDoc)
-                                                @php
-                                                    $cUrl = \App\Facades\FileStorage::url($cDoc->cat_path);
-                                                    $cTitle = addslashes($cDoc->cat_type ?: 'Case Attachment');
-                                                @endphp
-                                                <div class="d-flex justify-content-between align-items-center py-1 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f8fafc !important;">
-                                                    <a href="{{ $cUrl }}" onclick="window.openLiveDocument('{{ $cUrl }}', '{{ $cTitle }}'); return false;" class="d-flex align-items-center overflow-hidden mr-1 text-decoration-none rd-live-file-view" style="flex: 1; min-width: 0; cursor: pointer;" title="View {{ $cDoc->cat_type ?: 'Attachment' }} Live">
-                                                        <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 14px;">{{ $cIdx + 1 }}.</span>
-                                                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;">{{ $cDoc->cat_type ?: 'Attachment' }}</span>
-                                                    </a>
-                                                    <a href="{{ $cUrl }}" onclick="window.openLiveDocument('{{ $cUrl }}', '{{ $cTitle }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live" style="cursor: pointer;"><i class="fas fa-eye"></i></a>
-                                                </div>
+                                    <div><strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;"><i class="fas fa-building text-primary mr-2"></i>DIVISION:</strong> <span class="text-dark font-weight-bold" style="font-size: 14px; color: #0f172a !important; font-weight: 700;">{{ $case->division_name }}</span></div>
+
+                                    @php
+                                        $statusClass = match(strtolower(trim($case->ctc_status))) {
+                                            'approved'  => 'badge-success',
+                                            'returned'  => 'badge-danger',
+                                            'cancelled' => 'badge-danger',
+                                            'draft'     => 'badge-secondary',
+                                            default     => 'badge-primary',
+                                        };
+                                    @endphp
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;"><i class="fas fa-info-circle text-primary mr-2"></i>CASE STATUS:</strong> 
+                                        <span class="badge {{ $statusClass }} font-weight-bold px-3 py-1.5 rajdhani" style="font-size: 13px; letter-spacing: 0.5px; border-radius: 6px;">
+                                            {{ $case->ctc_status }}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;"><i class="fas fa-map-marker-alt text-primary mr-2"></i>LOCATION:</strong> 
+                                        <span class="badge font-weight-bold px-3 py-1.5 rajdhani" style="background: #e0f2fe; color: #0369a1 !important; border: 1.5px solid #bae6fd; font-size: 13px; letter-spacing: 0.4px; border-radius: 6px;">
+                                            <i class="fas fa-building mr-1.5 text-primary"></i> Currently with: {{ $case->current_office_name ?? $currentStage }}
+                                        </span>
+                                    </div>
+
+                                    {{-- Allocated Projects: Badges (Comma-separated) --}}
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                        <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;">
+                                            <i class="fas fa-project-diagram text-primary mr-2"></i>ALLOCATED PROJECTS:
+                                        </strong>
+                                        <div class="d-inline-flex align-items-center flex-wrap" style="gap: 5px;">
+                                            @forelse($projectCards as $idx => $pCard)
+                                                <span class="badge project-badge-btn {{ $idx === 0 ? 'active' : '' }}" 
+                                                      onclick="selectProject('{{ $pCard['card_key'] }}')"
+                                                      data-card-key="{{ $pCard['card_key'] }}"
+                                                      title="Click to view details for {{ $pCard['prj_code'] }}">
+                                                    <i class="fas fa-folder-open mr-1.5"></i>{{ $pCard['prj_code'] }}
+                                                </span>
+                                                @if(!$loop->last)
+                                                    <span class="text-dark font-weight-bold mr-1" style="font-size: 14px;">,</span>
+                                                @endif
                                             @empty
-                                                <div id="noCaseAttPlaceholder" class="text-center py-1 text-muted" style="font-size: 9px;">No files.</div>
+                                                <span class="text-muted small">None</span>
                                             @endforelse
                                         </div>
                                     </div>
+
+                                    {{-- Dynamic Vertical Details of Selected Project --}}
+                                    <div>
+                                        <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;">
+                                            <i class="far fa-calendar-alt text-primary mr-2"></i>DATE (FROM - TO):
+                                        </strong>
+                                        <span class="text-dark font-weight-bold rajdhani" id="activeProjectTenure" style="color: #0f172a !important; font-size: 14.5px; font-weight: 700;">
+                                            {{ $activeProjectCard['tenure_display'] ?? ($activeProjectCard['period_formatted'] ?? '—') }}
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;">
+                                            <i class="fas fa-users text-primary mr-2"></i>ALREADY HIRED STAFF:
+                                        </strong>
+                                        <span class="badge badge-light border text-dark font-weight-bold rajdhani px-2.5 py-1" id="activeProjectHiredStaff" style="font-size: 13.5px; color: #0f172a !important; background: #f8fafc; border-color: #cbd5e1 !important; border-radius: 6px;">
+                                            <i class="fas fa-users text-primary mr-1"></i> {{ $activeProjectCard['hired_count'] ?? 0 }} Staff
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;">
+                                            <i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:
+                                        </strong>
+                                        <div class="d-inline-flex align-items-center border bg-white shadow-sm px-3 py-1" style="border: 1.5px solid #cbd5e1 !important; height: 30px; gap: 8px; border-radius: 6px;">
+                                            <span class="font-weight-bold text-dark rajdhani" id="activeProjectSubhead" style="font-size: 13.5px; font-weight: 800; letter-spacing: 0.5px;">HR</span>
+                                            <a id="activeSubheadDrilldownLink" 
+                                               href="{{ $activeProjectCard['subhead_drilldown'] ?? '#' }}" 
+                                               target="_blank" 
+                                               class="btn btn-xs btn-primary p-0 d-inline-flex align-items-center justify-content-center" 
+                                               style="width: 22px; height: 22px; font-size: 11px; border-radius: 4px; background: #2563eb; border: none; box-shadow: 0 1px 3px rgba(37,99,235,0.3);" 
+                                               title="View HR Subhead Breakdown">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                        <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;">
+                                            <i class="fas fa-paperclip text-primary mr-2"></i>PROJECT ATTACHMENTS:
+                                        </strong>
+                                        <div class="d-inline-flex align-items-center flex-wrap" style="gap: 8px;">
+                                            <a id="activeProjectDocsLink" 
+                                               href="{{ $activeProjectCard['attachments_url'] ?? '#' }}" 
+                                               target="_blank" 
+                                               class="btn btn-sm btn-outline-success font-weight-bold rajdhani px-3 py-1 d-inline-flex align-items-center shadow-sm" 
+                                               style="font-size: 12.5px; height: 30px; border-radius: 6px; gap: 6px; border-width: 1.5px;" 
+                                               title="Files & Attachments">
+                                                <i class="fas fa-paperclip"></i> Files & Attachments
+                                            </a>
+                                            <a id="activeProjectMilestonesLink" 
+                                               href="{{ $activeProjectCard['milestones_url'] ?? '#' }}" 
+                                               target="_blank" 
+                                               class="btn btn-sm btn-outline-warning font-weight-bold rajdhani px-3 py-1 d-inline-flex align-items-center shadow-sm" 
+                                               style="font-size: 12.5px; height: 30px; border-radius: 6px; gap: 6px; color: #b45309; border-color: #f59e0b; border-width: 1.5px;" 
+                                               title="Milestone Costs">
+                                                <i class="fas fa-coins"></i> Milestone Costs
+                                            </a>
+                                            <a id="activeProjectDetailsLink" 
+                                               href="{{ !empty($activeProjectCard['prj_id']) ? route('projects.show', $activeProjectCard['prj_id']) : '#' }}" 
+                                               target="_blank" 
+                                               class="btn btn-sm btn-outline-primary font-weight-bold rajdhani px-3 py-1 align-items-center shadow-sm" 
+                                               style="font-size: 12.5px; height: 30px; border-radius: 6px; gap: 6px; border-width: 1.5px; {{ !empty($activeProjectCard['prj_id']) ? 'display: inline-flex;' : 'display: none;' }}" 
+                                               title="Project Details">
+                                                <i class="fas fa-project-diagram"></i> Project Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Financial Overview & Case Cost Summary (Enlarged) --}}
+                            <div class="text-right d-flex flex-column align-items-end" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 18px 24px; font-size: 14px; min-width: 370px; max-width: 410px; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
+                                <div class="d-flex justify-content-between align-items-center w-100 mb-2.5 pb-2" style="border-bottom: 1.5px solid #e2e8f0;">
+                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 15px; font-weight: 800; letter-spacing: 1px;">
+                                        <i class="fas fa-chart-pie mr-1"></i> FINANCIAL REVIEW
+                                    </h6>
+                                    @if(!empty($activeProjectCard['hed_id']))
+                                    <button id="finReviewFullReportBtn" type="button" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0.5 px-2" data-toggle="modal" data-target="#financialIntelligenceModal_{{ $activeProjectCard['card_key'] }}" style="font-size: 11px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px;">
+                                        <i class="fas fa-expand-arrows-alt mr-1"></i> FULL REPORT
+                                    </button>
+                                    @else
+                                    <button id="finReviewFullReportBtn" type="button" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0.5 px-2" style="font-size: 11px; border-radius: 4px; display: none;">
+                                        <i class="fas fa-expand-arrows-alt mr-1"></i> FULL REPORT
+                                    </button>
+                                    @endif
+                                </div>
+                                
+                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 6px 28px; text-align: left;">
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px; letter-spacing: 0.6px;">ALLOCATED</div>
+                                    <div class="text-dark font-weight-bold text-right" id="finReviewAllocated" style="font-size: 17px; color: #0f172a !important;">{{ number_format($activeProjectCard['allocation'] ?? 0) }}</div>
+                                    
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px; letter-spacing: 0.6px;">RECEIVED</div>
+                                    <div class="text-dark font-weight-bold text-right" id="finReviewReceived" style="font-size: 17px; color: #0f172a !important;">{{ number_format($activeProjectCard['received'] ?? 0) }}</div>
+                                    
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px; letter-spacing: 0.6px;">EXPENDITURE</div>
+                                    <div class="text-right d-flex justify-content-end align-items-center">
+                                        <a id="finReviewExpenditure" href="{{ $activeProjectCard['expenditure_drilldown'] ?? '#' }}" target="_blank" class="text-danger font-weight-bold text-decoration-none" style="font-size: 17px; color: #dc2626 !important;" title="View Project Expenditure Breakdown">
+                                            {{ number_format($activeProjectCard['expenditure'] ?? 0) }}
+                                        </a>
+                                        <a id="finReviewExpDrillLink" href="{{ $activeProjectCard['expenditure_drilldown'] ?? '#' }}" target="_blank" class="btn-drill-link btn-drill-red" title="View Project Expenditure Breakdown">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px; letter-spacing: 0.6px;">BALANCE</div>
+                                    <div class="text-primary font-weight-bold text-right" id="finReviewBalance" style="font-size: 17px; color: #2563eb !important;">{{ number_format($activeProjectCard['balance'] ?? 0) }}</div>
+                                    
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px; letter-spacing: 0.6px;">COMMITMENTS</div>
+                                    <div class="text-right d-flex justify-content-end align-items-center">
+                                        <a id="finReviewCommitments" href="{{ $activeProjectCard['commitments_drilldown'] ?? '#' }}" target="_blank" class="text-warning font-weight-bold text-decoration-none" style="font-size: 17px; color: #d97706 !important;" title="View Project Commitments Breakdown">
+                                            {{ number_format($activeProjectCard['commitments'] ?? 0) }}
+                                        </a>
+                                        <a id="finReviewCmtDrillLink" href="{{ $activeProjectCard['commitments_drilldown'] ?? '#' }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View Project Commitments Breakdown">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px; letter-spacing: 0.6px;">IN PROCESS</div>
+                                    <div class="text-right d-flex justify-content-end align-items-center">
+                                        <a id="finReviewInProcess" href="{{ $activeProjectCard['in_process_drilldown'] ?? '#' }}" target="_blank" class="text-muted font-weight-bold text-decoration-none" style="font-size: 17px; color: #64748b !important;" title="View Project In-Process Cases">
+                                            {{ number_format($activeProjectCard['in_process'] ?? 0) }}
+                                        </a>
+                                        <a id="finReviewInpDrillLink" href="{{ $activeProjectCard['in_process_drilldown'] ?? '#' }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project In-Process Cases">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                    
+                                    {{-- Full-width clean divider --}}
+                                    <div style="grid-column: 1 / -1; border-top: 1.5px solid #cbd5e1; margin: 3px 0 2px 0;"></div>
+
+                                    <div class="text-success font-weight-bold" style="font-size: 14.5px; color: #16a34a !important; letter-spacing: 0.6px;">AVAILABLE</div>
+                                    <div class="text-success font-weight-bold text-right" id="finReviewAvailable" style="font-size: 18px; color: #16a34a !important;">{{ number_format($activeProjectCard['available'] ?? 0) }}</div>
+                                    
+                                    <div class="text-warning font-weight-bold" style="font-size: 14.5px; color: #d97706 !important; letter-spacing: 0.6px;">CAN BE SPENT</div>
+                                    <div class="text-warning font-weight-bold text-right" id="finReviewCanBeSpent" style="font-size: 19px; font-weight: 900; color: #d97706 !important;">{{ number_format($activeProjectCard['can_be_spent'] ?? 0) }}</div>
+                                </div>
+
+                                {{-- Separator --}}
+                                <div class="w-100 my-2.5" style="border-top: 1.5px dashed #cbd5e1;"></div>
+
+                                {{-- Case Cost Summary Header --}}
+                                <div class="d-flex justify-content-between align-items-center w-100 mb-2">
+                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 14px; font-weight: 800; letter-spacing: 0.8px;">
+                                        <i class="fas fa-file-invoice-dollar mr-1"></i> CASE FINANCIALS
+                                    </h6>
+                                </div>
+
+                                {{-- Structured Case Cost Grid --}}
+                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 5px 24px; text-align: left;">
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">Monthly Salary</div>
+                                    <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">{{ number_format($proposedSalary, 2) }}</div>
+                                    
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">Probation Period</div>
+                                    <div class="font-weight-bold text-right {{ $probationMonths ? 'text-warning' : 'text-muted' }}" style="font-size: 14px;">
+                                        {{ $probationMonths ? $probationMonths . ' ' . Str::plural('Month', $probationMonths) : 'N/A' }}
+                                    </div>
+
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">Probation Salary</div>
+                                    <div class="font-weight-bold text-right {{ $probationSalary ? 'text-dark' : 'text-muted' }}" style="font-size: 14px; {{ $probationSalary ? 'color: #0f172a !important;' : '' }}">
+                                        {{ $probationSalary ? number_format($probationSalary, 2) : 'N/A' }}
+                                    </div>
+
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">Hiring Tenure</div>
+                                    <div class="text-dark font-weight-bold text-right" style="font-size: 14.5px; color: #0f172a !important;">
+                                        {{ $totalContractMonths }} {{ Str::plural('Month', $totalContractMonths) }}
+                                    </div>
+
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">Increment</div>
+                                    <div class="font-weight-bold text-right" style="font-size: 14px;">
+                                        @if($salaryDiff > 0)
+                                            <span class="text-success font-weight-bold">+{{ $incrementPct }}% (+Rs. {{ number_format($salaryDiff) }})</span>
+                                        @else
+                                            <span class="text-muted font-weight-bold">0%</span>
+                                        @endif
+                                    </div>
+
+                                    {{-- Full-width clean divider for TOTAL PACKAGE --}}
+                                    <div style="grid-column: 1 / -1; border-top: 1.5px solid #cbd5e1; margin: 4px 0 2px 0;"></div>
+
+                                    <div class="text-success font-weight-bold" style="font-size: 14.5px; color: #16a34a !important; letter-spacing: 0.6px;">TOTAL PACKAGE</div>
+                                    <div class="text-success font-weight-bold text-right" style="font-size: 18px; font-weight: 900; color: #16a34a !important;">{{ number_format($totalContractValue, 2) }}</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="dg-divider"></div>
+
+                        <div class="dg-divider mb-4 mt-2" style="background: #e2e8f0;"></div>
 
                         {{-- ===================================================== --}}
-                        {{-- 2. CANDIDATE DETAILS (CLEAN & FLAT)                   --}}
+                        {{-- CANDIDATE DETAILS (PROMINENT & BOLD)                  --}}
                         {{-- ===================================================== --}}
-                        <div class="mb-3">
-                            <div class="dg-sec-label">
-                                <i class="fas fa-id-card fa-xs"></i> CANDIDATE DETAILS
+                        <div class="mb-4">
+                            <div class="dg-sec-label mb-2" style="font-size: 13px; font-weight: 800; color: #1e293b; letter-spacing: 0.7px;">
+                                <i class="fas fa-id-card text-primary mr-1.5"></i> CANDIDATE DETAILS
                             </div>
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 py-1 px-1">
-                                <div>
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;"><i class="fas fa-user text-primary mr-1"></i> CANDIDATE NAME</span>
-                                    <span class="text-dark font-weight-bold" style="font-size: 13.5px;">{{ $empName }}</span>
-                                </div>
-                                <div>
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;">FATHER'S NAME</span>
-                                    <span class="text-dark font-weight-600" style="font-size: 13px;">{{ $case->father_name ?: 'N/A' }}</span>
-                                </div>
-                                <div>
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;">CNIC #</span>
-                                    <span class="rajdhani font-weight-bold text-dark" style="font-size: 13px;">{{ $case->candidate_cnic ?: 'N/A' }}</span>
-                                </div>
-                                <div>
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;">CONTACT / MOBILE</span>
-                                    <span class="text-dark font-weight-600" style="font-size: 13px;">{{ $case->candidate_mobile ?: 'N/A' }}</span>
-                                </div>
-                                <div>
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;">EMPLOYEE / SYSTEM ID</span>
-                                    <span class="text-primary font-weight-bold rajdhani" style="font-size: 13.5px;">{{ $case->ctc_emp_id ? '#' . $case->ctc_emp_id : '#New Candidate' }}</span>
+                            <div class="p-3 rounded border" style="background: #ffffff; border-color: #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                    <div>
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;"><i class="fas fa-user text-primary mr-1"></i> CANDIDATE NAME</span>
+                                        <span class="text-dark font-weight-bold rajdhani" style="font-size: 16.5px; letter-spacing: 0.3px;">{{ $empName }}</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;">FATHER'S NAME</span>
+                                        <span class="text-dark font-weight-bold" style="font-size: 15px;">{{ $case->father_name ?: 'N/A' }}</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;">CNIC #</span>
+                                        <span class="rajdhani font-weight-bold text-dark" style="font-size: 16px; letter-spacing: 0.5px;">{{ $case->candidate_cnic ?: 'N/A' }}</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;">CONTACT / MOBILE</span>
+                                        <span class="text-dark font-weight-bold rajdhani" style="font-size: 15px; letter-spacing: 0.3px;">{{ $case->candidate_mobile ?: 'N/A' }}</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;">EMPLOYEE / SYSTEM ID</span>
+                                        <span class="text-primary font-weight-bold rajdhani" style="font-size: 16px; letter-spacing: 0.5px;">{{ $case->ctc_emp_id ? '#' . $case->ctc_emp_id : '#New Candidate' }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="dg-divider"></div>
+                        <div class="dg-divider mb-4 mt-2" style="background: #e2e8f0;"></div>
 
                         {{-- ===================================================== --}}
                         {{-- 3. CONTRACT DETAILS (TYPE, PROBATION, TERMS TABLE)    --}}
                         {{-- ===================================================== --}}
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="dg-sec-label mb-0">
-                                    <i class="fas fa-file-signature fa-xs"></i>
+                                <div class="dg-sec-label mb-0" style="font-size: 13px; font-weight: 800; color: #1e293b; letter-spacing: 0.7px;">
+                                    <i class="fas fa-file-contract text-primary mr-1.5"></i>
                                     {{ $isRenewalOrExt ? 'CONTRACT DETAILS & TERMS COMPARISON' : 'CONTRACT DETAILS & PROPOSED TERMS' }}
                                 </div>
                             </div>
 
-                            {{-- Contract Metadata Sub-Row (Flat, No box wrapper) --}}
-                            <div class="d-flex align-items-center justify-content-start flex-wrap gap-4 py-1 px-1 mb-2">
-                                <div style="min-width: 150px;">
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;"><i class="fas fa-briefcase text-primary mr-1"></i> EMPLOYMENT TYPE</span>
-                                    <span class="text-dark font-weight-bold" style="font-size: 13px;">{{ $empType }}</span>
-                                </div>
-                                <div style="min-width: 150px;">
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;"><i class="fas fa-stopwatch text-warning mr-1"></i> PROBATION PERIOD</span>
-                                    <span class="font-weight-bold {{ $probationMonths ? 'text-warning' : 'text-muted' }}" style="font-size: 13px;">
-                                        {{ $probationMonths ? $probationMonths . ' Months' : 'N/A' }}
-                                    </span>
-                                </div>
-                                <div style="min-width: 150px;">
-                                    <span style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block;"><i class="fas fa-money-bill-wave text-success mr-1"></i> PROBATION SALARY</span>
-                                    <span class="rajdhani font-weight-bold {{ $probationSalary ? 'text-success' : 'text-muted' }}" style="font-size: 13.5px;">
-                                        {{ $probationSalary ? 'Rs. ' . number_format($probationSalary) : 'N/A' }}
-                                    </span>
+                            {{-- Contract Metadata Sub-Row (Prominent & Bold) --}}
+                            <div class="p-3 rounded border mb-3" style="background: #ffffff; border-color: #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div class="d-flex align-items-center justify-content-start flex-wrap gap-5">
+                                    <div style="min-width: 170px;">
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;"><i class="fas fa-briefcase text-primary mr-1"></i> EMPLOYMENT TYPE</span>
+                                        <span class="text-dark font-weight-bold" style="font-size: 15px;">{{ $empType }}</span>
+                                    </div>
+                                    <div style="min-width: 170px;">
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;"><i class="fas fa-stopwatch text-warning mr-1"></i> PROBATION PERIOD</span>
+                                        <span class="font-weight-bold {{ $probationMonths ? 'text-dark' : 'text-muted' }}" style="font-size: 15px;">
+                                            {{ $probationMonths ? $probationMonths . ' Months' : 'N/A' }}
+                                        </span>
+                                    </div>
+                                    <div style="min-width: 170px;">
+                                        <span style="font-size: 11.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 3px;"><i class="fas fa-money-bill-wave text-success mr-1"></i> PROBATION SALARY</span>
+                                        <span class="rajdhani font-weight-bold {{ $probationSalary ? 'text-success' : 'text-muted' }}" style="font-size: 16px;">
+                                            {{ $probationSalary ? 'Rs. ' . number_format($probationSalary) : 'N/A' }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
                             {{-- Terms & Comparison Table --}}
-                            <div class="table-responsive border rounded" style="background: #ffffff; border-color: #e2e8f0 !important; border-radius: 8px;">
+                            <div class="table-responsive border rounded" style="background: #ffffff; border-color: #cbd5e1 !important; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
                                 @if($isRenewalOrExt)
                                     {{-- Renewal / Extension Comparative View --}}
                                     <table class="spec-data-table">
@@ -848,20 +1178,22 @@ textarea::-webkit-scrollbar-thumb:hover {
                                             {{-- Row 1: Previous Terms --}}
                                             <tr style="background: #ffffff;">
                                                 <td>
-                                                    <span class="text-muted font-weight-bold" style="font-size: 11px;">Previous Contract</span>
+                                                    <span class="text-muted font-weight-bold" style="font-size: 12.5px;">Previous Contract</span>
                                                 </td>
-                                                <td class="text-muted">
-                                                    {{ $prevJobtitle }} <span class="text-muted">({{ $prevGrade }})</span>
+                                                <td>
+                                                    <span class="text-muted font-weight-bold" style="font-size: 13.5px;">{{ $prevJobtitle }} ({{ $prevGrade }})</span>
                                                 </td>
-                                                <td class="rajdhani text-muted">
-                                                    {{ $prevStart ? \Carbon\Carbon::parse($prevStart)->format('d M, Y') : 'N/A' }}
-                                                    &mdash;
-                                                    {{ $prevEnd ? \Carbon\Carbon::parse($prevEnd)->format('d M, Y') : 'N/A' }}
+                                                <td>
+                                                    <span class="rajdhani text-muted font-weight-bold" style="font-size: 14px;">
+                                                        {{ $prevStart ? \Carbon\Carbon::parse($prevStart)->format('d M, Y') : 'N/A' }}
+                                                        &mdash;
+                                                        {{ $prevEnd ? \Carbon\Carbon::parse($prevEnd)->format('d M, Y') : 'N/A' }}
+                                                    </span>
                                                 </td>
-                                                <td class="text-right rajdhani text-muted font-weight-bold">
+                                                <td class="text-right rajdhani text-muted font-weight-bold" style="font-size: 15px;">
                                                     {{ $previousSalary > 0 ? 'Rs. ' . number_format($previousSalary) : 'N/A' }}
                                                 </td>
-                                                <td class="text-right rajdhani text-muted font-weight-bold">
+                                                <td class="text-right rajdhani text-muted font-weight-bold" style="font-size: 15px;">
                                                     {{ $previousSalary > 0 ? 'Rs. ' . number_format($previousSalary * 12) : 'N/A' }}
                                                 </td>
                                             </tr>
@@ -869,20 +1201,20 @@ textarea::-webkit-scrollbar-thumb:hover {
                                             {{-- Row 2: Proposed / Renewed Terms --}}
                                             <tr style="background: #f6faf7;">
                                                 <td>
-                                                    <strong class="text-primary font-weight-bold" style="font-size: 11px;">Proposed Renewal</strong>
+                                                    <strong class="text-primary font-weight-bold" style="font-size: 13px;">Proposed Renewal</strong>
                                                 </td>
                                                 <td>
-                                                    <strong class="text-dark">{{ $empDesignation }} ({{ $empGrade }})</strong>
+                                                    <strong class="text-dark font-weight-bold" style="font-size: 15px;">{{ $empDesignation }} ({{ $empGrade }})</strong>
                                                 </td>
-                                                <td class="rajdhani font-weight-bold text-dark">
+                                                <td class="rajdhani font-weight-bold text-dark" style="font-size: 15px;">
                                                     {{ $case->ctc_newstartdt ? \Carbon\Carbon::parse($case->ctc_newstartdt)->format('d M, Y') : 'N/A' }}
                                                     &mdash;
                                                     {{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M, Y') : 'N/A' }}
                                                 </td>
-                                                <td class="text-right font-weight-bold text-dark rajdhani" style="font-size: 12.5px;">
+                                                <td class="text-right font-weight-bold text-dark rajdhani" style="font-size: 16px;">
                                                     Rs. {{ number_format($proposedSalary) }}
                                                 </td>
-                                                <td class="text-right font-weight-bold text-primary rajdhani" style="font-size: 12.5px;">
+                                                <td class="text-right font-weight-bold text-primary rajdhani" style="font-size: 16px;">
                                                     Rs. {{ number_format($annualImpact) }}
                                                 </td>
                                             </tr>
@@ -890,20 +1222,20 @@ textarea::-webkit-scrollbar-thumb:hover {
                                     </table>
 
                                     {{-- 1-Line Increment Summary Strip --}}
-                                    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top" style="background: #f0fdf4; border-color: #bbf7d0 !important; font-size: 11px;">
+                                    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top" style="background: #f0fdf4; border-color: #86efac !important; font-size: 12px;">
                                         <div class="d-flex align-items-center gap-2">
-                                            <strong class="text-success rajdhani font-weight-bold" style="font-size: 12px;">
+                                            <strong class="text-success rajdhani font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">
                                                 INCREMENT: +Rs. {{ number_format($salaryDiff) }} ({{ $incrementPct > 0 ? '+' . $incrementPct : $incrementPct }}%)
                                             </strong>
-                                            <span class="text-muted ml-2">
+                                            <span class="text-dark font-weight-bold ml-3" style="font-size: 13px;">
                                                 @if($prevGrade !== $empGrade)
-                                                    Grade: <strong>{{ $prevGrade }}</strong> &rarr; <strong>{{ $empGrade }}</strong>
+                                                    Grade: <span class="text-muted">{{ $prevGrade }}</span> &rarr; <span class="text-primary">{{ $empGrade }}</span>
                                                 @else
-                                                    Grade: <strong>{{ $empGrade }}</strong>
+                                                    Grade: <span class="text-dark">{{ $empGrade }}</span>
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="rajdhani font-weight-bold text-success" style="font-size: 12px;">
+                                        <div class="rajdhani font-weight-bold text-success" style="font-size: 14px;">
                                             Annual Delta: +Rs. {{ number_format($salaryDiff * 12) }}
                                         </div>
                                     </div>
@@ -912,7 +1244,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                                     <table class="spec-data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40px;">S.NO</th>
+                                                <th style="width: 50px;">S.NO</th>
                                                 <th>PROPOSED POSITION</th>
                                                 <th>PAY SCALE / GRADE</th>
                                                 <th>TENURE (START & END)</th>
@@ -922,74 +1254,27 @@ textarea::-webkit-scrollbar-thumb:hover {
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td class="font-weight-bold text-muted">1</td>
-                                                <td class="font-weight-bold text-dark">{{ $empDesignation }}</td>
-                                                <td class="font-weight-bold text-dark">{{ $empGrade }}</td>
-                                                <td class="rajdhani font-weight-bold">
+                                                <td class="font-weight-bold text-dark" style="font-size: 14px;">1</td>
+                                                <td class="font-weight-bold text-dark" style="font-size: 15px;">{{ $empDesignation }}</td>
+                                                <td class="font-weight-bold text-dark" style="font-size: 15px;">{{ $empGrade }}</td>
+                                                <td class="rajdhani font-weight-bold text-dark" style="font-size: 15px;">
                                                     {{ $case->ctc_newstartdt ? \Carbon\Carbon::parse($case->ctc_newstartdt)->format('d M, Y') : 'N/A' }}
                                                     &mdash;
                                                     {{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M, Y') : 'N/A' }}
                                                 </td>
-                                                <td class="text-right font-weight-bold text-dark rajdhani" style="font-size: 12.5px;">Rs. {{ number_format($proposedSalary) }}</td>
-                                                <td class="text-right font-weight-bold text-primary rajdhani" style="font-size: 12.5px;">Rs. {{ number_format($annualImpact) }}</td>
+                                                <td class="text-right font-weight-bold text-dark rajdhani" style="font-size: 16px;">Rs. {{ number_format($proposedSalary) }}</td>
+                                                <td class="text-right font-weight-bold text-primary rajdhani" style="font-size: 16px;">Rs. {{ number_format($annualImpact) }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 @endif
                             </div>
                         </div>
-
-                        <div class="dg-divider"></div>
-
-                        {{-- ===================================================== --}}
-                        {{-- 4. PROJECT ALLOCATIONS (HR HEAD SPECIFIC)             --}}
-                        {{-- ===================================================== --}}
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="dg-sec-label mb-0">
-                                    <i class="fas fa-layer-group fa-xs"></i> PROJECT ALLOCATIONS (HR HEAD)
-                                </div>
-                                <span class="badge badge-light border text-muted font-weight-bold" style="font-size: 9.5px;">
-                                    {{ $allocatedGroups->count() }} {{ Str::plural('ALLOCATION', $allocatedGroups->count()) }}
-                                </span>
-                            </div>
-                            <div class="table-responsive border rounded" style="background: #ffffff; border-color: #e2e8f0 !important; border-radius: 8px;">
-                                <table class="spec-data-table" id="projectAllocationTable">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 35px;">#</th>
-                                            <th>PROJECT CODE</th>
-                                            <th>PERIOD / DURATION</th>
-                                            <th>SUB HEAD</th>
-                                            <th class="text-right">MONTHLY SALARY</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($allocatedGroups as $agIdx => $ag)
-                                        @php
-                                            $startFormatted = $ag['start_dt'] ? \Carbon\Carbon::parse($ag['start_dt'])->format('d M, Y') : '';
-                                            $endFormatted = $ag['end_dt'] ? \Carbon\Carbon::parse($ag['end_dt'])->format('d M, Y') : '';
-                                            $monthCount = $ag['month_count'] ?? 1;
-                                            $durationStr = ($startFormatted && $endFormatted) 
-                                                ? "{$startFormatted} – {$endFormatted} ({$monthCount} " . Str::plural('Month', $monthCount) . ")"
-                                                : "{$monthCount} " . Str::plural('Month', $monthCount);
-                                        @endphp
-                                        <tr>
-                                            <td class="font-weight-bold text-muted">{{ $agIdx + 1 }}</td>
-                                            <td class="font-weight-bold text-dark">{{ $ag['prj_code'] }}</td>
-                                            <td class="rajdhani font-weight-600 text-dark">{{ $durationStr }}</td>
-                                            <td class="text-muted font-weight-600">Pay & Allowances (HR)</td>
-                                            <td class="text-right font-weight-bold text-dark rajdhani" style="font-size: 13px;">Rs. {{ number_format($proposedSalary) }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        <div class="dg-divider mb-3 mt-2" style="background: #e2e8f0;"></div>
 
                         {{-- Terms & Conditions Banner Note --}}
-                        <div class="p-2.5 rounded border" style="background: #f8fafc; border-color: #e2e8f0 !important; font-size: 11px; color: #475569; line-height: 1.45; border-radius: 7px;">
-                            <i class="fas fa-info-circle text-primary mr-1"></i> Salary and monthly allowances will be disbursed from project funds allocated under <strong>{{ $projectCode }}</strong> (Pay & Allowances HR Head). Contract renewal/extension is subject to executive approval and institutional rules.
+                        <div class="p-3 rounded border" style="background: #f8fafc; border-color: #e2e8f0 !important; font-size: 12.5px; font-weight: 600; color: #334155; line-height: 1.5; border-radius: 7px;">
+                            <i class="fas fa-info-circle text-primary mr-1"></i> Salary and monthly allowances will be disbursed from project funds allocated under <strong>{{ $activeProjectCard['prj_code'] ?? $projectCode }}</strong> (Pay & Allowances HR Head). Contract renewal/extension is subject to executive approval and institutional rules.
                         </div>
 
                     </div>
@@ -1001,15 +1286,87 @@ textarea::-webkit-scrollbar-thumb:hover {
                 <div class="dg-right">
 
                     {{-- 1. Scrutiny & Minute Trail (Matches Purchase Cases Design) --}}
-                    <div class="dg-panel-r">
-                        <div class="dg-panel-r-hdr py-2 px-3 d-flex align-items-center justify-content-between">
-                            <span class="dg-panel-r-title font-weight-bold rajdhani" style="font-size: 13px; color: #0f172a !important; letter-spacing: 0.5px;">
-                                <i class="fas fa-file-signature text-primary mr-1"></i> SCRUTINY & MINUTE TRAIL
-                            </span>
+                    @php
+                        $caseAttachments = $case->attachments ?? collect();
+                    @endphp
+                    <div class="dg-panel-r" style="overflow: visible;">
+                        <div class="dg-panel-r-hdr py-2 px-3 d-flex align-items-center justify-content-between" style="position: relative; border-top-left-radius: 9px; border-top-right-radius: 9px;">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="badge badge-primary px-2 py-1 rajdhani" style="font-size: 10px; font-weight: 700; letter-spacing: 0.5px; border-radius: 4px; background: var(--rd-accent, #5F7858);">
-                                    {{ $case->current_office_name ?? $case->ctc_status }}
-                                </span>
+                                <i class="fas fa-file-alt text-primary" style="font-size: 13px;"></i>
+                                <span class="dg-panel-r-title font-weight-bold rajdhani" style="font-size: 12px; font-weight: 700; color: #0f172a !important; letter-spacing: 0.5px; text-transform: uppercase;">Minute</span>
+                            </div>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                {{-- Case Attachments Dropdown Trigger on Far Right of Minute Header (Matches Purchase Cases Design) --}}
+                                <div class="dropdown" id="ctcCaseAttachmentsDropdownWrap">
+                                    <button type="button" class="btn btn-xs font-weight-bold rajdhani px-2 py-1 d-flex align-items-center dropdown-toggle shadow-none" id="btnCaseAttachmentsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 11px; height: 26px; border-radius: 6px; gap: 5px; background: #ffffff; border: 1.5px solid #cbd5e1; color: #1e293b; cursor: pointer;" title="View or Add Case Attachments">
+                                        <i class="fas fa-paperclip text-primary" style="font-size: 11.5px;"></i>
+                                        <span>CASE ATTACHMENTS</span>
+                                        <span class="badge badge-primary badge-pill ml-1" id="ctcCaseAttCountBadge" style="font-size: 9.5px; padding: 2px 6px;">{{ $caseAttachments->count() }}</span>
+                                    </button>
+
+                                    <div class="dropdown-menu dropdown-menu-right shadow-lg p-0" aria-labelledby="btnCaseAttachmentsDropdown" style="width: 380px; max-width: 92vw; border-radius: 8px; border: 1.5px solid #cbd5e1; z-index: 1060; margin-top: 5px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;">
+                                        {{-- Dropdown Header with Add Button --}}
+                                        <div class="d-flex justify-content-between align-items-center py-2 px-3 border-bottom" style="background: #f8fafc;">
+                                            <div class="d-flex align-items-center font-weight-bold text-dark rajdhani" style="font-size: 12px; gap: 6px;">
+                                                <i class="fas fa-paperclip text-primary"></i>
+                                                <span>ATTACHED CASE FILES</span>
+                                            </div>
+                                            <button type="button" class="btn btn-xs btn-primary font-weight-bold rajdhani px-2 py-0.5 d-flex align-items-center" data-toggle="modal" data-target="#modalAddContractCaseAttachment" style="font-size: 11px; height: 23px; border-radius: 4px; background: var(--rd-accent, #5F7858) !important; border: none; gap: 4px;" title="Upload New Case Attachment">
+                                                <i class="fas fa-plus"></i> <span>ADD</span>
+                                            </button>
+                                        </div>
+
+                                        {{-- Dropdown Body: Attachments List --}}
+                                        <div class="px-3 py-2" id="ctcCaseAttachmentsList" style="font-size: 11.5px; max-height: 250px; overflow-y: auto;">
+                                            @if($caseAttachments->count() > 0)
+                                                @foreach($caseAttachments as $cIdx => $cDoc)
+                                                    @php
+                                                        $cName = trim((string)($cDoc->cat_type ?: ''));
+                                                        if (empty($cName)) {
+                                                            $cName = basename(str_replace('\\', '/', $cDoc->cat_path));
+                                                        }
+                                                        $ext = strtolower(pathinfo($cDoc->cat_path, PATHINFO_EXTENSION));
+                                                    @endphp
+                                                    <div class="d-flex justify-content-between align-items-center py-1.5 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f1f5f9 !important;">
+                                                        <div class="d-flex align-items-center overflow-hidden mr-2" style="flex: 1; min-width: 0; gap: 6px;">
+                                                            <span class="text-muted font-weight-bold flex-shrink-0" style="font-size: 10px; width: 16px;">{{ $cIdx + 1 }}.</span>
+                                                            @if(in_array($ext, ['pdf']))
+                                                                <i class="far fa-file-pdf text-danger flex-shrink-0" style="font-size: 12px;"></i>
+                                                            @elseif(in_array($ext, ['doc', 'docx']))
+                                                                <i class="far fa-file-word text-primary flex-shrink-0" style="font-size: 12px;"></i>
+                                                            @elseif(in_array($ext, ['xls', 'xlsx']))
+                                                                <i class="far fa-file-excel text-success flex-shrink-0" style="font-size: 12px;"></i>
+                                                            @elseif(in_array($ext, ['png', 'jpg', 'jpeg']))
+                                                                <i class="far fa-file-image text-info flex-shrink-0" style="font-size: 12px;"></i>
+                                                            @else
+                                                                <i class="far fa-file-alt text-secondary flex-shrink-0" style="font-size: 12px;"></i>
+                                                            @endif
+                                                            <span class="text-truncate font-weight-bold text-dark" style="font-size: 11.5px;" title="{{ $cName }}">
+                                                                {{ $cName }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                                                            <a href="{{ route('universal.attachment.view', ['module' => 'ctc', 'id' => $cDoc->cat_id]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 font-weight-bold d-inline-flex align-items-center" style="font-size: 11px; height: 22px; border-radius: 4px; gap: 4px;" title="View {{ $cName }}">
+                                                                <i class="fas fa-eye"></i> View
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="text-center py-3 text-muted" id="ctcNoAttachmentsMsg" style="font-size: 11px;">
+                                                    <i class="fas fa-folder-open text-muted mr-1"></i> No case attachments uploaded yet.
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        {{-- Dropdown Footer: Quick Action to Attach Document --}}
+                                        <div class="p-2 border-top bg-light text-center" style="border-color: #e2e8f0 !important;">
+                                            <button type="button" class="btn btn-xs btn-outline-success font-weight-bold w-100 py-1 d-flex align-items-center justify-content-center" data-toggle="modal" data-target="#modalAddContractCaseAttachment" style="font-size: 11px; border-radius: 4px; gap: 5px;">
+                                                <i class="fas fa-plus"></i> <span>ATTACH NEW DOCUMENT</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1266,7 +1623,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                     <div class="dg-panel-r">
                         <div class="dg-panel-r-hdr py-2 px-3">
                             <span class="dg-panel-r-title" style="font-size: 12px; color: #0f172a !important;">
-                                <i class="fas fa-list-alt text-success mr-1"></i> RECENT CONTRACT CASES
+                                <i class="fas fa-list-alt text-success mr-1"></i> RECENT HIRING CASES
                             </span>
                         </div>
                         <div class="table-responsive">
@@ -1311,33 +1668,33 @@ textarea::-webkit-scrollbar-thumb:hover {
 </div>
 
 {{-- MODAL: ADD CASE ATTACHMENT --}}
-<div class="modal fade" id="modalAddCaseAttachment" tabindex="-1" role="dialog" aria-labelledby="modalAddCaseAttachmentLabel" aria-hidden="true">
+<div class="modal fade" id="modalAddContractCaseAttachment" tabindex="-1" role="dialog" aria-labelledby="modalAddContractCaseAttachmentLabel" aria-hidden="true" style="z-index: 1065;">
     <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 440px;">
         <div class="modal-content" style="border-radius: 10px; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
             <div class="modal-header py-2.5 px-3" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                <h6 class="modal-title font-weight-bold rajdhani text-dark mb-0" id="modalAddCaseAttachmentLabel" style="font-size: 13.5px; letter-spacing: 0.5px;">
-                    <i class="fas fa-file-upload text-primary mr-1.5"></i> ATTACH DOCUMENT TO CONTRACT CASE
+                <h6 class="modal-title font-weight-bold rajdhani text-dark mb-0" id="modalAddContractCaseAttachmentLabel" style="font-size: 13.5px; letter-spacing: 0.5px;">
+                    <i class="fas fa-file-upload text-success mr-1.5" style="color: var(--rd-accent, #5F7858) !important;"></i> ATTACH DOCUMENT TO CASE
                 </h6>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="outline: none;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="formAddCaseAttachment" enctype="multipart/form-data">
+            <form id="formAddContractCaseAttachment" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body p-3">
                     <div class="form-group mb-2.5">
                         <label class="font-weight-bold text-dark small mb-1" style="font-size: 11px;">DOCUMENT TITLE / NAME <span class="text-danger">*</span></label>
-                        <input type="text" name="doc_title" id="attDocTitle" class="form-control" placeholder="e.g., Justification Note, CNIC Copy, Degree" required style="font-size: 12px; border-radius: 6px; border-color: #cbd5e1;">
+                        <input type="text" name="doc_title" id="ctcAttDocTitle" class="form-control" placeholder="e.g., Justification Note, CNIC Copy, Degree" required style="font-size: 12px; border-radius: 6px; border-color: #cbd5e1;">
                     </div>
                     <div class="form-group mb-1">
                         <label class="font-weight-bold text-dark small mb-1" style="font-size: 11px;">SELECT FILE <span class="text-danger">*</span></label>
-                        <input type="file" name="file" id="attFile" class="form-control-file border p-1.5 rounded w-100" required style="font-size: 11.5px; border-color: #cbd5e1 !important; background: #fafafa; border-radius: 6px;">
+                        <input type="file" name="file" id="ctcAttFile" class="form-control-file border p-1.5 rounded w-100" required style="font-size: 11.5px; border-color: #cbd5e1 !important; background: #fafafa; border-radius: 6px;">
                         <small class="text-muted d-block mt-1" style="font-size: 10px;"><i class="fas fa-info-circle mr-1"></i> PDF, DOCX, XLSX, PNG, JPG (Max: 20MB)</small>
                     </div>
                 </div>
                 <div class="modal-footer py-2 px-3" style="background: #f8fafc; border-top: 1px solid #e2e8f0;">
                     <button type="button" class="btn btn-sm btn-light border font-weight-bold" data-dismiss="modal" style="font-size: 11.5px; border-radius: 6px;">Cancel</button>
-                    <button type="submit" id="btnUploadAttachment" class="btn btn-sm btn-primary font-weight-bold rajdhani px-3" style="font-size: 12px; border-radius: 6px; background-color: var(--rd-accent, #5F7858) !important; border-color: var(--rd-accent, #5F7858) !important;">
+                    <button type="submit" id="btnUploadCtcAttachment" class="btn btn-sm font-weight-bold rajdhani px-3 text-white" style="font-size: 12px; border-radius: 6px; background-color: var(--rd-accent, #5F7858) !important; border-color: var(--rd-accent, #5F7858) !important;">
                         <i class="fas fa-upload mr-1"></i> UPLOAD ATTACHMENT
                     </button>
                 </div>
@@ -1345,6 +1702,379 @@ textarea::-webkit-scrollbar-thumb:hover {
         </div>
     </div>
 </div>
+
+{{-- Financial Intelligence Report Modals for Allocated Projects --}}
+@foreach($projectModalsData as $mKey => $mData)
+@php
+    $mHead = $mData['head'] ?? null;
+    $mSubheads = $mData['subheads'] ?? [];
+    $mCard = $mData['pCard'] ?? [];
+    $mPrjId = $mCard['prj_id'] ?? null;
+    $mHedId = $mCard['hed_id'] ?? null;
+@endphp
+<div class="modal fade" id="financialIntelligenceModal_{{ $mKey }}" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%; width: 1420px;">
+        <div class="modal-content shadow-2xl" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.18);">
+            <div class="modal-header border-bottom py-3 px-4 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+                <div class="d-flex align-items-center">
+                    <div class="mr-3" style="font-size: 28px; color: var(--rd-accent, #5F7858);"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <h4 class="modal-title rajdhani font-weight-bold text-dark mb-0" style="letter-spacing: 1.5px; font-size: 19px; font-weight: 800;">FINANCIAL INTELLIGENCE REPORT</h4>
+                        <div class="text-muted rajdhani font-weight-bold mt-0.5" style="font-size: 13px;">{{ $mHead->head_name ?? ($mHead->hed_name ?? ($mCard['prj_code'] ?? 'N/A')) }} | DATED {{ date('d M Y') }} <span class="ml-2 font-weight-bold text-primary">{{ ($mHead->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
+                    </div>
+                    <div class="ml-auto d-flex align-items-center mr-4" style="gap: 8px;">
+                        @if(!empty($mPrjId))
+                        <a href="{{ route('projects.show', $mPrjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none;">
+                            <i class="fas fa-project-diagram"></i> Project Details
+                        </a>
+                        @endif
+                        @if(!empty($mHedId))
+                        <a href="{{ route('projects.financial_view', $mHedId) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none;">
+                            <i class="fas fa-paperclip"></i> Files & Attachments
+                        </a>
+                        <a href="{{ route('projects.financial_view', $mHedId) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none;">
+                            <i class="fas fa-coins"></i> Milestone Costs
+                        </a>
+                        @endif
+                    </div>
+                </div>
+                <button type="button" class="close text-dark opacity-60 hover-opacity-100" data-dismiss="modal" style="font-size: 26px;">&times;</button>
+            </div>
+            
+            <div class="modal-body p-0" style="background: #ffffff;">
+                {{-- Top Summary bar --}}
+                <div class="row no-gutters border-bottom" style="background: #f1f5f9; border-color: #e2e8f0 !important;">
+                    <div class="col-md-3 border-right p-3.5" style="border-color: #cbd5e1 !important;">
+                        <div class="rajdhani font-weight-bold" style="font-size: 13px; color: #475569; letter-spacing: 0.8px;">ALLOCATION</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani" style="color: #0f172a; font-weight: 900; font-size: 22px;">{{ number_format($mHead->allocation ?? 0) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right p-3.5" style="border-color: #cbd5e1 !important;">
+                        <div class="rajdhani font-weight-bold" style="font-size: 13px; color: #475569; letter-spacing: 0.8px;">MTSS SHARE</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani" style="color: #0f172a; font-weight: 900; font-size: 22px;">{{ number_format($mHead->mtss_share ?? 0) }}</div>
+                    </div>
+                    <div class="col-md-3 border-right p-3.5" style="border-color: #cbd5e1 !important;">
+                        <div class="rajdhani font-weight-bold" style="font-size: 13px; color: #1d4ed8; letter-spacing: 0.8px;">RDW SHARE</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani text-primary" style="font-weight: 900; font-size: 22px;">{{ number_format($mHead->rdw_share ?? 0) }}</div>
+                    </div>
+                    <div class="col-md-3 p-3.5">
+                        <div class="rajdhani font-weight-bold" style="font-size: 13px; color: #475569; letter-spacing: 0.8px;">CSRF SHARE</div>
+                        <div class="h4 mb-0 font-weight-bold rajdhani" style="color: #0f172a; font-weight: 900; font-size: 22px;">{{ number_format($mHead->csrf_share ?? 0) }}</div>
+                    </div>
+                </div>
+
+                <div class="row no-gutters">
+                    {{-- Left Pane: Detailed Metrics Table --}}
+                    <div class="col-xl-4 col-lg-5 border-right p-4" style="background: #fbfcfe; border-color: #e2e8f0 !important;">
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <h5 class="rajdhani text-primary font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 16px; font-weight: 800;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h5>
+                            <div class="rajdhani font-weight-bold text-muted" style="font-size: 12px; letter-spacing: 0.5px;">FIGURES IN PKR</div>
+                        </div>
+
+                        <div class="fin-table-modern table-responsive rounded border overflow-auto shadow-sm" style="border-color: #cbd5e1 !important; background: #ffffff;">
+                            <table class="table table-sm mb-0 rajdhani" style="font-size: 14.5px; font-weight: 700;">
+                                <thead style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                                    <tr style="color: #334155; font-size: 13.5px; font-weight: 800;">
+                                        <th class="pl-3 py-2 border-0">METRIC</th>
+                                        <th class="text-right py-2 border-0" style="color: #1d4ed8;">PROJECT</th>
+                                        <th class="text-right py-2 border-0" style="color: #b45309;">CSRF</th>
+                                        <th class="text-right pr-3 py-2 border-0" style="color: #15803d;">ACTUAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="background: rgba(37,99,235,0.05); border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold text-dark"><i class="fas fa-coins text-warning mr-1"></i> Allocated</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #1d4ed8; font-size: 15px;">{{ number_format($mHead->pcc_share ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #b45309; font-size: 15px;">{{ number_format($mHead->csrf_share ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d; font-size: 15px;">{{ number_format($mHead->allocation ?? 0) }}</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 text-dark font-weight-bold">Received</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #1d4ed8; font-size: 15px;">{{ number_format($mHead->pcc_received ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #b45309; font-size: 15px;">{{ number_format($mHead->cf_received ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 text-danger font-weight-bold">Expenditure</td>
+                                        <td class="text-right py-2 text-danger font-weight-bold" style="font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'pcc', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View Project Expenditure Breakdown">
+                                                {{ number_format($mHead->pcc_expenditure ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View Project Expenditure Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right py-2 text-danger font-weight-bold" style="font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'csrf', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View CSRF Expenditure Breakdown">
+                                                {{ number_format($mHead->cf_expenditure ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'csrf', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View CSRF Expenditure Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d; font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'acc', 'expenditure']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Expenditure Breakdown">
+                                                {{ number_format($mHead->prj_expenditure ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'acc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total Expenditure Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr style="background: rgba(37,99,235,0.05); border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 text-primary font-weight-bold">Balance</td>
+                                        <td class="text-right py-2 text-primary font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->pcc_balance ?? 0) }}</td>
+                                        <td class="text-right py-2 text-primary font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->cf_balance ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 text-dark font-weight-bold">Commitments</td>
+                                        <td class="text-right py-2 text-warning font-weight-bold" style="color: #b45309 !important; font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'pcc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View Project Commitments Breakdown">
+                                                {{ number_format($mHead->pcc_commitments ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View Project Commitments Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right py-2 text-warning font-weight-bold" style="color: #b45309 !important; font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'csrf', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View CSRF Commitments Breakdown">
+                                                {{ number_format($mHead->cf_commitments ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'csrf', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View CSRF Commitments Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d; font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'acc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Commitments Breakdown">
+                                                {{ number_format($mHead->prj_commitments ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'acc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total Commitments Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 text-dark font-weight-bold">In Process</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #475569; font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'pcc', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View Project In-Process Cases">
+                                                {{ number_format($mHead->pcc_in_process ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project In-Process Cases">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #475569; font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'csrf', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View CSRF In-Process Cases">
+                                                {{ number_format($mHead->cf_in_process ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'csrf', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View CSRF In-Process Cases">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d; font-size: 15px;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'acc', 'in-process']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total In-Process Cases">
+                                                {{ number_format($mHead->prj_in_process ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'acc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total In-Process Cases">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr style="background: rgba(22,163,74,0.07); border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 font-weight-bold text-success" style="font-size: 15px;">Available</td>
+                                        <td class="text-right py-2 font-weight-bold text-success" style="font-size: 16px;">{{ number_format($mHead->pcc_available ?? 0) }}</td>
+                                        <td class="text-right py-2 font-weight-bold text-success" style="font-size: 16px;">{{ number_format($mHead->cf_available ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td class="pl-3 py-2 text-muted font-weight-bold">Yet to be Rec</td>
+                                        <td class="text-right py-2 text-dark font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->pcc_yet_to_be_received ?? 0) }}</td>
+                                        <td class="text-right py-2 text-dark font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->cf_yet_to_be_received ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 text-muted font-weight-bold">--</td>
+                                    </tr>
+                                    <tr style="background: rgba(220,38,38,0.07);">
+                                        <td class="pl-3 py-2 text-danger font-weight-bold" style="font-size: 15px;">Remaining</td>
+                                        <td class="text-right py-2 text-danger font-weight-bold" style="font-size: 16px;">{{ number_format($mHead->pcc_can_be_spent ?? 0) }}</td>
+                                        <td class="text-right py-2 text-danger font-weight-bold" style="font-size: 16px;">{{ number_format($mHead->cf_can_be_spent ?? 0) }}</td>
+                                        <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d; font-size: 16px;">{{ number_format($mHead->prj_remaining ?? 0) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Receivables section --}}
+                        <div class="mt-4 pt-3 border-top" style="border-color: #cbd5e1 !important;">
+                            <h6 class="rajdhani font-weight-bold mb-3" style="font-size: 13.5px; letter-spacing: 1px; color: #475569;">RECEIVABLES</h6>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="font-weight-bold rajdhani" style="font-size: 13.5px; color: #475569;">Comp. Milestones</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->receivable_completed ?? 0) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mb-2">
+                                <span class="font-weight-bold rajdhani" style="font-size: 13.5px; color: #475569;">Current Milestone</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->receivable_current ?? 0) }}</span>
+                            </div>
+                            <div class="receivable-item d-flex justify-content-between mt-3 p-2.5 rounded shadow-sm" style="background: rgba(37,99,235,0.08); border: 1.5px solid rgba(37,99,235,0.3);">
+                                <span class="text-primary rajdhani font-weight-bold" style="font-size: 14px;">Available after Rcv.</span>
+                                <span class="text-primary rajdhani font-weight-bold" style="font-size: 17px; font-weight: 900;">{{ number_format($mHead->available_after_receivables ?? 0) }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Exp Sources --}}
+                        <div class="mt-4 pt-3 border-top" style="border-color: #cbd5e1 !important;">
+                            <h6 class="rajdhani font-weight-bold mb-3" style="font-size: 13.5px; letter-spacing: 1px; color: #475569;">EXP. SOURCES</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="rajdhani font-weight-bold" style="font-size: 13.5px; color: #475569;">From this account</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->exp_this_account ?? 0) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="rajdhani font-weight-bold" style="font-size: 13.5px; color: #475569;">From other accounts</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->exp_other_accounts ?? 0) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="rajdhani font-weight-bold" style="font-size: 13.5px; color: #475569;">Other's exp. this acc.</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 15px;">{{ number_format($mHead->others_exp_this_account ?? 0) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Right Pane: Full Subheads Breakdown (With Live Drilldown) --}}
+                    <div class="col-xl-8 col-lg-7 p-4" style="background: #ffffff;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: #e2e8f0 !important;">
+                            <div>
+                                <h5 class="rajdhani text-primary font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 17.5px; font-weight: 800;">
+                                    <i class="fas fa-layer-group mr-2"></i> SUBHEAD FINANCIAL BREAKDOWN
+                                </h5>
+                                <div class="text-muted rajdhani font-weight-bold mt-1" style="font-size: 12.5px;">DETAILED ALLOCATION, EXPENDITURE, COMMITMENTS, IN PROCESS & REMAINING</div>
+                            </div>
+                            <span class="badge badge-primary px-3 py-1.5 rajdhani font-weight-bold" style="font-size: 12.5px; background: rgba(37,99,235,0.12); color: #1d4ed8; border: 1.5px solid rgba(37,99,235,0.3); border-radius: 6px;">
+                                {{ count($mSubheads ?? []) }} SUBHEADS
+                            </span>
+                        </div>
+
+                        <div class="table-responsive rounded border shadow-sm" style="border-color: #cbd5e1 !important;">
+                            <table class="table table-sm table-hover mb-0 rajdhani" style="font-size: 14px; background: #ffffff;">
+                                <thead style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                                    <tr style="color: #0f172a; font-size: 13.5px; font-weight: 800;">
+                                        <th class="pl-3 py-2.5" style="white-space: nowrap;">SUBHEAD</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">ALLOCATED</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">EXPENDITURE</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">COMMITMENTS</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">IN PROCESS</th>
+                                        <th class="text-right py-2.5" style="white-space: nowrap;">REMAINING</th>
+                                        <th class="text-center pr-3 py-2.5" style="width: 100px; white-space: nowrap;">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $totAlloc = 0;
+                                        $totExp = 0;
+                                        $totCmt = 0;
+                                        $totIpc = 0;
+                                        $totRem = 0;
+                                    @endphp
+                                    @forelse($mSubheads ?? [] as $sh)
+                                    @php
+                                        $sName = is_array($sh) ? ($sh['name'] ?? '') : ($sh->name ?? '');
+                                        $sAlloc = (float)(is_array($sh) ? ($sh['allocation'] ?? 0) : ($sh->allocation ?? 0));
+                                        $sExp = (float)(is_array($sh) ? ($sh['expenditure'] ?? 0) : ($sh->expenditure ?? 0));
+                                        $sCmt = (float)(is_array($sh) ? ($sh['commitments'] ?? 0) : ($sh->commitments ?? 0));
+                                        $sIpc = (float)(is_array($sh) ? ($sh['in_process'] ?? 0) : ($sh->in_process ?? 0));
+                                        $sRem = (float)(is_array($sh) ? ($sh['remaining'] ?? ($sh['can_be_spent'] ?? 0)) : ($sh->remaining ?? ($sh->can_be_spent ?? 0)));
+
+                                        $totAlloc += $sAlloc;
+                                        $totExp += $sExp;
+                                        $totCmt += $sCmt;
+                                        $totIpc += $sIpc;
+                                        $totRem += $sRem;
+
+                                        $isCaseSubhead = strcasecmp(trim($sName), 'HR') === 0;
+                                    @endphp
+                                    <tr style="{{ $isCaseSubhead ? 'background: #fef9c3 !important; border-left: 5px solid #eab308 !important;' : '' }}; border-bottom: 1px solid #f1f5f9;">
+                                        <td class="pl-3 py-2.5 font-weight-bold text-dark align-middle" style="white-space: nowrap; font-size: 14.5px;">
+                                            <i class="fas fa-folder-open text-primary mr-1.5"></i> {{ $sName }}
+                                            @if($isCaseSubhead)
+                                                <span class="badge badge-warning text-dark ml-2 px-2 py-0.5 rajdhani font-weight-bold" style="font-size: 11px; background: #facc15; color: #713f12 !important; border: 1px solid #eab308; border-radius: 4px;">
+                                                    <i class="fas fa-check-circle mr-1"></i> ACTIVE HIRING SUBHEAD
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="text-right py-2.5 font-weight-bold align-middle" style="color: #0f172a; white-space: nowrap; font-size: 15px;">
+                                            {{ number_format($sAlloc) }}
+                                        </td>
+                                        <td class="text-right py-2.5 font-weight-bold text-danger align-middle" style="white-space: nowrap; font-size: 15px;">
+                                            <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="text-danger text-decoration-none" title="Drilldown {{ $sName }} Expenditure">
+                                                    {{ number_format($sExp) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-red" title="Drilldown {{ $sName }} Expenditure">
+                                                    <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="text-right py-2.5 font-weight-bold align-middle" style="color: #b45309; white-space: nowrap; font-size: 15px;">
+                                            <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'subhead', 'commitments', $sName]) }}" target="_blank" class="text-decoration-none" style="color: #b45309;" title="Drilldown {{ $sName }} Commitments">
+                                                    {{ number_format($sCmt) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'subhead', 'commitments', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="Drilldown {{ $sName }} Commitments">
+                                                    <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="text-right py-2.5 font-weight-bold align-middle" style="color: #475569; white-space: nowrap; font-size: 15px;">
+                                            <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'subhead', 'in-process', $sName]) }}" target="_blank" class="text-decoration-none" style="color: #475569;" title="Drilldown {{ $sName }} In-Process">
+                                                    {{ number_format($sIpc) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'subhead', 'in-process', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="Drilldown {{ $sName }} In-Process">
+                                                    <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="text-right py-2.5 font-weight-bold align-middle {{ $sRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap; font-size: 15px;">
+                                            {{ number_format($sRem) }}
+                                        </td>
+                                        <td class="text-center pr-3 py-2.5 align-middle" style="white-space: nowrap;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$mHedId, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-1 px-2.5 shadow-sm" style="font-size: 12px; border-radius: 4px; border-width: 1.5px;" title="View Full {{ $sName }} Breakdown">
+                                                <i class="fas fa-external-link-alt mr-1"></i> VIEW
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted font-weight-bold" style="font-size: 14px;">No subheads available.</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                                @if(count($mSubheads ?? []) > 0)
+                                <tfoot style="background: rgba(37,99,235,0.08); font-weight: 900; border-top: 2.5px solid #cbd5e1; font-size: 15.5px;">
+                                    <tr>
+                                        <td class="pl-3 py-2.5 font-weight-bold text-dark" style="white-space: nowrap;">TOTAL</td>
+                                        <td class="text-right py-2.5 font-weight-bold" style="color: #0f172a; white-space: nowrap;">{{ number_format($totAlloc) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold text-danger" style="white-space: nowrap;">{{ number_format($totExp) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold" style="color: #b45309; white-space: nowrap;">{{ number_format($totCmt) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold" style="color: #475569; white-space: nowrap;">{{ number_format($totIpc) }}</td>
+                                        <td class="text-right py-2.5 font-weight-bold {{ $totRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap;">{{ number_format($totRem) }}</td>
+                                        <td class="text-center pr-3 py-2.5 text-muted" style="white-space: nowrap;">--</td>
+                                    </tr>
+                                </tfoot>
+                                @endif
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer border-top py-2.5 px-4 d-flex justify-content-between" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+                <div class="rajdhani font-weight-bold" style="font-size: 13px; color: #475569;"><i class="fas fa-shield-alt text-success mr-1.5"></i> RDWIS FINANCIAL AUDIT ENGINE ACTIVE</div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm rajdhani font-weight-bold px-4" data-dismiss="modal" style="font-size: 12.5px; border-radius: 6px;">CLOSE REPORT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
 
 @push('scripts')
 <script>
@@ -1739,6 +2469,191 @@ window.handleAction = function(actionType, targetStage = null) {
         }
     });
 };
+
+// Interactive Allocated Project Switcher
+const projectCardsMap = @json(collect($projectCards)->keyBy('card_key'));
+
+window.selectProject = function(cardKey) {
+    const data = projectCardsMap[cardKey];
+    if (!data) return;
+
+    // Update active badge visual highlight
+    document.querySelectorAll('.project-badge-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-card-key') === String(cardKey)) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Update dynamic vertical fields
+    const prjTenureEl = document.getElementById('activeProjectTenure');
+    if (prjTenureEl) prjTenureEl.textContent = data.tenure_display || data.period_formatted || '—';
+
+    const prjHiredEl = document.getElementById('activeProjectHiredStaff');
+    if (prjHiredEl) prjHiredEl.innerHTML = '<i class="fas fa-users text-primary mr-1"></i> ' + (data.hired_count || 0) + ' Staff';
+
+    const subheadEl = document.getElementById('activeProjectSubhead');
+    if (subheadEl) subheadEl.textContent = data.subhead || 'HR';
+
+    const subheadDrill = document.getElementById('activeSubheadDrilldownLink');
+    if (subheadDrill) subheadDrill.href = data.subhead_drilldown || '#';
+
+    const prjDocs = document.getElementById('activeProjectDocsLink');
+    if (prjDocs) prjDocs.href = data.attachments_url || '#';
+
+    const prjMilestones = document.getElementById('activeProjectMilestonesLink');
+    if (prjMilestones) prjMilestones.href = data.milestones_url || '#';
+
+    const prjDetails = document.getElementById('activeProjectDetailsLink');
+    if (prjDetails) {
+        prjDetails.href = data.project_details_url || '#';
+        prjDetails.style.display = data.prj_id ? 'inline-flex' : 'none';
+    }
+
+    // Update FULL REPORT button in FINANCIAL REVIEW card
+    const fullReportBtn = document.getElementById('finReviewFullReportBtn');
+    if (fullReportBtn) {
+        if (data.hed_id) {
+            fullReportBtn.setAttribute('data-target', '#financialIntelligenceModal_' + data.card_key);
+            fullReportBtn.style.display = 'inline-block';
+        } else {
+            fullReportBtn.style.display = 'none';
+        }
+    }
+
+    // Update FINANCIAL REVIEW values
+    const allocEl = document.getElementById('finReviewAllocated');
+    if (allocEl) allocEl.textContent = Number(data.allocation).toLocaleString('en-US');
+
+    const recEl = document.getElementById('finReviewReceived');
+    if (recEl) recEl.textContent = Number(data.received).toLocaleString('en-US');
+    
+    const expEl = document.getElementById('finReviewExpenditure');
+    if (expEl) {
+        expEl.textContent = Number(data.expenditure).toLocaleString('en-US');
+        expEl.href = data.expenditure_drilldown;
+    }
+    const expLink = document.getElementById('finReviewExpDrillLink');
+    if (expLink) expLink.href = data.expenditure_drilldown;
+
+    const balEl = document.getElementById('finReviewBalance');
+    if (balEl) balEl.textContent = Number(data.balance).toLocaleString('en-US');
+    
+    const cmtEl = document.getElementById('finReviewCommitments');
+    if (cmtEl) {
+        cmtEl.textContent = Number(data.commitments).toLocaleString('en-US');
+        cmtEl.href = data.commitments_drilldown;
+    }
+    const cmtLink = document.getElementById('finReviewCmtDrillLink');
+    if (cmtLink) cmtLink.href = data.commitments_drilldown;
+
+    const inpEl = document.getElementById('finReviewInProcess');
+    if (inpEl) {
+        inpEl.textContent = Number(data.in_process).toLocaleString('en-US');
+        inpEl.href = data.in_process_drilldown;
+    }
+    const inpLink = document.getElementById('finReviewInpDrillLink');
+    if (inpLink) inpLink.href = data.in_process_drilldown;
+
+    const availEl = document.getElementById('finReviewAvailable');
+    if (availEl) availEl.textContent = Number(data.available).toLocaleString('en-US');
+
+    const spentEl = document.getElementById('finReviewCanBeSpent');
+    if (spentEl) spentEl.textContent = Number(data.can_be_spent).toLocaleString('en-US');
+};
+
+// Contract Case Attachment Upload Handler
+$(document).on('submit', '#formAddContractCaseAttachment', async function(e) {
+    e.preventDefault();
+    const $btn = $('#btnUploadCtcAttachment');
+    const origHtml = $btn.html();
+    const fileInput = document.getElementById('ctcAttFile');
+    if (!fileInput.files || !fileInput.files.length) {
+        alert('Please select a file to upload.');
+        return;
+    }
+
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Uploading...');
+
+    const fd = new FormData(this);
+
+    try {
+        const res = await fetch("{{ route('contract-cases.attachments.store', $case->ctc_id) }}", {
+            method: 'POST',
+            body: fd,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        const data = await res.json();
+        $btn.prop('disabled', false).html(origHtml);
+
+        if (data.success) {
+            $('#modalAddContractCaseAttachment').modal('hide');
+            this.reset();
+
+            // Increment badge count
+            const $badge = $('#ctcCaseAttCountBadge');
+            const currentCount = parseInt($badge.text().trim(), 10) || 0;
+            $badge.text(currentCount + 1);
+
+            // Remove empty state placeholder if present
+            $('#ctcNoAttachmentsMsg').remove();
+
+            // Append new item to dropdown list
+            const att = data.attachment;
+            const viewUrl = "{{ url('/universal-attachment/ctc') }}/" + att.id + "/view";
+            const ext = (att.filename.split('.').pop() || '').toLowerCase();
+            let iconClass = 'far fa-file-alt text-secondary';
+            if (ext === 'pdf') iconClass = 'far fa-file-pdf text-danger';
+            else if (['doc', 'docx'].includes(ext)) iconClass = 'far fa-file-word text-primary';
+            else if (['xls', 'xlsx'].includes(ext)) iconClass = 'far fa-file-excel text-success';
+            else if (['png', 'jpg', 'jpeg'].includes(ext)) iconClass = 'far fa-file-image text-info';
+
+            const newIndex = currentCount + 1;
+            const itemHtml = `
+                <div class="d-flex justify-content-between align-items-center py-1.5 border-bottom" style="border-color: #f1f5f9 !important;">
+                    <div class="d-flex align-items-center overflow-hidden mr-2" style="flex: 1; min-width: 0; gap: 6px;">
+                        <span class="text-muted font-weight-bold flex-shrink-0" style="font-size: 10px; width: 16px;">${newIndex}.</span>
+                        <i class="${iconClass} flex-shrink-0" style="font-size: 12px;"></i>
+                        <span class="text-truncate font-weight-bold text-dark" style="font-size: 11.5px;" title="${att.title}">
+                            ${att.title}
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                        <a href="${viewUrl}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 font-weight-bold d-inline-flex align-items-center" style="font-size: 11px; height: 22px; border-radius: 4px; gap: 4px;" title="View ${att.title}">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+            `;
+            $('#ctcCaseAttachmentsList').append(itemHtml);
+
+            if (window.Swal) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: data.message || 'Attachment uploaded successfully!',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            } else {
+                alert(data.message || 'Attachment uploaded successfully!');
+            }
+        } else {
+            throw new Error(data.message || 'Failed to upload attachment.');
+        }
+    } catch (err) {
+        $btn.prop('disabled', false).html(origHtml);
+        if (window.Swal) {
+            Swal.fire({ icon: 'error', title: 'Upload Failed', text: err.message || 'Could not upload attachment.' });
+        } else {
+            alert(err.message || 'Error uploading file');
+        }
+    }
+});
 </script>
 @endpush
 @endsection
