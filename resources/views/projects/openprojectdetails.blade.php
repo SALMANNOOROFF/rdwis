@@ -835,7 +835,7 @@
 <div class="row mt-4">
 
     <!-- LEFT & MIDDLE (Milestones Detail - Wide & Open) -->
-    <div class="col-xl-9 col-lg-8 col-md-12 mb-4">
+    <div class="col-xl-9 col-lg-8 col-md-12 mb-4" id="milestones">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="font-weight-bold m-0 text-dark" style="font-size: 0.96rem;">
@@ -916,7 +916,7 @@
     </div>
 
     <!-- FAR RIGHT (Attachments Widget - Corner Pinned) -->
-    <div class="col-xl-3 col-lg-4 col-md-12 mb-4">
+    <div class="col-xl-3 col-lg-4 col-md-12 mb-4" id="attachments">
 
         <div class="sticky-top" style="top:20px;">
             <div class="attachments-wrapper">
@@ -1422,6 +1422,21 @@ function initFinancialIntelligenceCharts() {
 
 $(document).on('shown.bs.modal', '#financialIntelligenceModal', function () {
     setTimeout(initFinancialIntelligenceCharts, 300);
+});
+
+$(document).ready(function() {
+    if (window.location.hash) {
+        const target = $(window.location.hash);
+        if (target.length) {
+            setTimeout(function() {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 70
+                }, 500);
+                target.css('outline', '3px solid rgba(37, 99, 235, 0.5)').css('border-radius', '8px');
+                setTimeout(() => { target.css('outline', ''); }, 3000);
+            }, 200);
+        }
+    }
 });
 </script>
 @endsection

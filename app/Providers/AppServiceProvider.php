@@ -26,6 +26,13 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFour();
 
+        view()->composer('md.contract-cases.show', function ($view) {
+            $service = app(\App\Services\ContractCaseProjectService::class);
+            $projects = $service->allocations($view->getData()['case']);
+            $view->with('allocatedProjects', $projects)
+                ->with('projectHiredCounts', $service->hiredCounts($projects));
+        });
+
         if (str_starts_with((string) config('app.url'), 'https://') || request()->server('HTTP_X_FORWARDED_PROTO') === 'https') {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
@@ -69,4 +76,3 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::policy(\App\Models\AudRev::class, \App\Policies\DataRevisionPolicy::class);
     }
 }
-

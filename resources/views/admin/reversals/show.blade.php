@@ -1,70 +1,106 @@
 @extends('welcome')
 
 @section('content')
+<style>
+    /* Clean Light Header (Not Dark) */
+    .rev-card-header {
+        background-color: #ffffff;
+        color: #1e293b;
+        padding: 16px 22px;
+        border-bottom: 2px solid #e2e8f0;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .rev-card-title {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.2px;
+    }
+    .rev-form-label {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .rev-form-val {
+        font-size: 14px;
+        color: #0f172a;
+        font-weight: 500;
+    }
+    .rev-id-box {
+        display: inline-block;
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        padding: 3px 12px;
+        font-weight: 700;
+        font-size: 14px;
+        color: #1e293b;
+        border-radius: 4px;
+    }
+    .rev-subtable-header th {
+        background-color: #f1f5f9 !important;
+        color: #334155 !important;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 10px 14px;
+        border-top: none;
+        border-bottom: 1px solid #cbd5e1;
+    }
+    .rev-subtable td {
+        padding: 9px 14px;
+        font-size: 13px;
+        vertical-align: middle;
+        border-top: 1px solid #e2e8f0;
+    }
+    .rev-subtable tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+    .rev-subtable tr:nth-of-type(even) {
+        background-color: #f8fafc;
+    }
+    .rev-action-btn {
+        min-width: 90px;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 6px 16px;
+        border-radius: 4px;
+    }
+    .rev-attach-box {
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 10px 14px;
+    }
+</style>
+
 <div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap" style="gap: 15px;">
+    <div class="content-header pb-2">
+        <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap" style="gap: 10px;">
             <div>
-                <ol class="breadcrumb float-sm-left bg-transparent p-0 mb-1">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.reversals.open') }}">Reversals</a></li>
-                    <li class="breadcrumb-item active">Case #{{ $rev->rev_id }}</li>
-                </ol>
-                <h1 class="m-0 font-weight-bold text-dark" style="font-family: 'Rajdhani', sans-serif;">
-                    <i class="fas fa-file-invoice mr-2 text-primary"></i>Reversal Request #{{ $rev->rev_id }}
-                    @if($rev->rev_status === 'Draft')
-                        <span class="badge badge-secondary ml-2 font-weight-normal"><i class="fas fa-pencil-alt mr-1"></i>Draft</span>
-                    @elseif($rev->rev_status === 'In Process')
-                        <span class="badge badge-primary ml-2 font-weight-normal"><i class="fas fa-cog fa-spin mr-1"></i>In Process</span>
-                    @elseif($rev->rev_status === 'Under Revision')
-                        <span class="badge badge-warning ml-2 font-weight-normal"><i class="fas fa-undo mr-1"></i>Under Revision</span>
-                    @elseif($rev->rev_status === 'Fulfilled')
-                        <span class="badge badge-success ml-2 font-weight-normal"><i class="fas fa-check mr-1"></i>Fulfilled</span>
-                    @elseif($rev->rev_status === 'Cancelled')
-                        <span class="badge badge-danger ml-2 font-weight-normal"><i class="fas fa-times mr-1"></i>Cancelled</span>
-                    @else
-                        <span class="badge badge-light ml-2 font-weight-normal">{{ $rev->rev_status }}</span>
-                    @endif
-                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent p-0 mb-1" style="font-size: 12px;">
+                        <li class="breadcrumb-item"><a href="{{ url('/') }}" class="text-muted">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.reversals.open') }}" class="text-muted">Data Reversals</a></li>
+                        <li class="breadcrumb-item active text-dark font-weight-bold">Case #{{ $rev->rev_id }}</li>
+                    </ol>
+                </nav>
             </div>
-            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
-                <a href="{{ route('admin.reversals.open') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                    <i class="fas fa-arrow-left mr-1"></i> Back to Reversals
+            <div>
+                <a href="{{ route('admin.reversals.index', ['tab' => $rev->isDraft() ? 'draft' : ($rev->isFulfilled() || $rev->isCancelled() ? 'closed' : 'open')]) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Listing
                 </a>
-
-                {{-- Action Buttons Gated Strictly via DataRevisionPolicy --}}
-                @can('release', $rev)
-                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-toggle="modal" data-target="#releaseModal">
-                        <i class="fas fa-paper-plane mr-1"></i> Release Case
-                    </button>
-                @endcan
-
-                @can('execute', $rev)
-                    <button type="button" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm" data-toggle="modal" data-target="#executeModal">
-                        <i class="fas fa-cogs mr-1"></i> Execute Reversal
-                    </button>
-                @endcan
-
-                @can('return', $rev)
-                    <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 shadow-sm text-dark font-weight-bold" data-toggle="modal" data-target="#returnModal">
-                        <i class="fas fa-undo mr-1"></i> Return Case
-                    </button>
-                @endcan
-
-                @can('cancel', $rev)
-                    <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm" data-toggle="modal" data-target="#cancelModal">
-                        <i class="fas fa-times-circle mr-1"></i> Cancel Case
-                    </button>
-                @endcan
             </div>
         </div>
     </div>
 
-    <section class="content">
+    <section class="content pt-1">
         <div class="container-fluid">
             {{-- Flash Messages --}}
             @if(session('status'))
-                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-left: 4px solid #10b981;">
                     <i class="fas fa-check-circle mr-2"></i>{{ session('status') }}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -72,8 +108,8 @@
                 </div>
             @endif
 
-            @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            @if(isset($errors) && $errors->any())
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-left: 4px solid #ef4444;">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
                     <strong>Action could not be completed:</strong>
                     <ul class="mb-0 mt-1 pl-3">
@@ -87,386 +123,434 @@
                 </div>
             @endif
 
-            {{-- Reversal Header & Metadata Card --}}
             @php
                 $typeVal = $rev->rev_type instanceof \App\Enums\RevType ? $rev->rev_type->value : (int) $rev->rev_type;
+                $displayType = ($typeVal === 2) ? 'Data Change' : 'Data Reversal';
+                $displayDate = $rev->rev_date ? \Carbon\Carbon::parse($rev->rev_date)->format('d M y') : '—';
+                $initiatorName = $rev->initiatingUnit->unt_namesh ?? ($rev->rev_intunt_id ?? '');
+                $targetDivName = $rev->unit->unt_namesh ?? ($rev->rev_unt_id ?? '');
+                $isDraftOrUnderRev = ($rev->isDraft() || $rev->isUnderRevision());
+                $isClosedCase = ($rev->isFulfilled() || $rev->isCancelled());
             @endphp
-            <div class="card card-outline card-primary shadow-sm mb-4">
-                <div class="card-header">
-                    <h3 class="card-title font-weight-bold">
-                        <i class="fas fa-info-circle mr-1 text-primary"></i> Case Header Details (aud.revs)
-                    </h3>
+
+            <div class="card shadow-sm border mb-4" style="border-radius: 8px; border-color: #e2e8f0 !important; overflow: hidden; background: #ffffff;">
+                {{-- Clean Light Header Banner (Not Dark) --}}
+                <div class="rev-card-header d-flex justify-content-between align-items-center flex-wrap" style="gap: 12px;">
+                    <div class="d-flex align-items-center" style="gap: 10px;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #eff6ff; color: #2563eb;">
+                            <i class="fas fa-file-invoice" style="font-size: 16px;"></i>
+                        </div>
+                        <h2 class="rev-card-title">Data Revision Case #{{ $rev->rev_id }}</h2>
+                    </div>
+                    <div>
+                        @if($rev->rev_status === 'Draft')
+                            <span class="badge badge-secondary px-3 py-1 font-weight-bold" style="font-size: 13px;">Draft</span>
+                        @elseif($rev->rev_status === 'In Process')
+                            <span class="badge badge-primary px-3 py-1 font-weight-bold" style="font-size: 13px;"><i class="fas fa-cog fa-spin mr-1"></i>In Process</span>
+                        @elseif($rev->rev_status === 'Under Revision')
+                            <span class="badge badge-warning px-3 py-1 font-weight-bold text-dark" style="font-size: 13px;"><i class="fas fa-undo mr-1"></i>Under Revision</span>
+                        @elseif($rev->rev_status === 'Fulfilled')
+                            <span class="badge badge-success px-3 py-1 font-weight-bold" style="font-size: 13px;"><i class="fas fa-check mr-1"></i>Fulfilled</span>
+                        @elseif($rev->rev_status === 'Cancelled')
+                            <span class="badge badge-danger px-3 py-1 font-weight-bold" style="font-size: 13px;"><i class="fas fa-times mr-1"></i>Cancelled</span>
+                        @else
+                            <span class="badge badge-light px-3 py-1" style="font-size: 13px;">{{ $rev->rev_status }}</span>
+                        @endif
+                    </div>
                 </div>
-                <div class="card-body">
+
+                <div class="card-body p-4" style="background-color: #ffffff;">
                     <div class="row">
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Reversal ID</label>
-                            <span class="font-weight-bold h5 text-dark">#{{ $rev->rev_id }}</span>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Reversal Type</label>
-                            @if($typeVal === 1)
-                                <span class="badge badge-info px-2 py-1">Type 1 — Full Cascade Reversal</span>
-                            @elseif($typeVal === 2)
-                                <span class="badge badge-secondary px-2 py-1">Type 2 — Field-Level Revision</span>
-                            @elseif($typeVal === 3)
-                                <span class="badge badge-warning px-2 py-1">Type 3 — Linked Cascade Reversal</span>
-                            @else
-                                <span class="badge badge-light px-2 py-1">Type {{ $typeVal }}</span>
-                            @endif
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Target Object</label>
-                            <span class="font-weight-bold text-dark">{{ $rev->rev_obj ?? '—' }}</span>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Target Object ID</label>
-                            <code>{{ $rev->rev_objid ?? '—' }}</code>
-                        </div>
-                    </div>
+                        {{-- Left Form Metadata --}}
+                        <div class="{{ ($isClosedCase && auth()->user()->can('viewAttachments', $rev)) ? 'col-lg-8' : 'col-lg-9' }} col-md-12">
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-sm-2 col-4 rev-form-label">Rev. ID</div>
+                                <div class="col-sm-3 col-8">
+                                    <span class="rev-id-box">#{{ $rev->rev_id }}</span>
+                                </div>
 
-                    <hr class="my-2">
+                                <div class="col-sm-2 col-4 rev-form-label">Date</div>
+                                <div class="col-sm-2 col-8 rev-form-val">{{ $displayDate }}</div>
 
-                    <div class="row pt-2">
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Current Status</label>
-                            <span class="font-weight-bold">{{ $rev->rev_status }}</span>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Target Unit</label>
-                            <span class="font-weight-bold">{{ $rev->unit ? $rev->unit->unt_namesh . ' (' . $rev->unit->unt_name . ')' : $rev->rev_unt_id }}</span>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Initiating Unit</label>
-                            <span class="font-weight-bold">{{ $rev->initiatingUnit ? $rev->initiatingUnit->unt_namesh . ' (' . $rev->initiatingUnit->unt_name . ')' : ($rev->rev_intunt_id ?? '—') }}</span>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Initiation Date</label>
-                            <span>{{ $rev->rev_date ? \Carbon\Carbon::parse($rev->rev_date)->format('d-M-Y') : '—' }}</span>
-                        </div>
-                    </div>
+                                <div class="col-sm-1 col-4 rev-form-label">Initiator</div>
+                                <div class="col-sm-2 col-8 rev-form-val">{{ $initiatorName ?: '—' }}</div>
+                            </div>
 
-                    <div class="row">
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Released Timestamp</label>
-                            <span>{{ $rev->rev_releasedtg ? \Carbon\Carbon::parse($rev->rev_releasedtg)->format('d-M-Y H:i:s') : 'Not yet released' }}</span>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Closed Timestamp</label>
-                            <span>{{ $rev->rev_closedtg ? \Carbon\Carbon::parse($rev->rev_closedtg)->format('d-M-Y H:i:s') : 'Open / Unclosed' }}</span>
-                        </div>
-                        <div class="col-md-6 col-12 mb-3">
-                            <label class="text-muted small text-uppercase font-weight-bold mb-1 d-block">Audit Reason & Remarks</label>
-                            <div class="bg-light p-2 rounded border" style="white-space: pre-wrap; font-family: monospace; font-size: 0.88rem; max-height: 120px; overflow-y: auto;">
-                                {{ $rev->rev_reason ?? 'No reason recorded.' }}
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-sm-2 col-4 rev-form-label">Data</div>
+                                <div class="col-sm-3 col-8 rev-form-val text-primary font-weight-bold">
+                                    {{ $rev->rev_obj }} ({{ $rev->rev_objid }})
+                                </div>
+
+                                <div class="col-sm-2 col-4 rev-form-label">Type</div>
+                                <div class="col-sm-2 col-8 rev-form-val">
+                                    <span class="badge {{ $typeVal === 2 ? 'badge-secondary' : 'badge-info' }} px-2 py-1">
+                                        {{ $displayType }}
+                                    </span>
+                                </div>
+
+                                <div class="col-sm-1 col-4 rev-form-label">Division</div>
+                                <div class="col-sm-2 col-8 rev-form-val">{{ $targetDivName ?: '—' }}</div>
+                            </div>
+
+                            {{-- Reason Section --}}
+                            <div class="row mb-3 align-items-start">
+                                <div class="col-sm-2 col-4 rev-form-label pt-1">Reason</div>
+                                <div class="col-sm-10 col-8">
+                                    @if($isDraftOrUnderRev && auth()->user()->can('release', $rev))
+                                        <form id="reasonUpdateForm" method="POST" action="{{ route('admin.reversals.update', $rev->rev_id) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="input-group">
+                                                <input type="text" name="rev_reason" id="rev_reason_input" class="form-control form-control-sm bg-white" 
+                                                       value="{{ old('rev_reason', $rev->rev_reason) }}" 
+                                                       placeholder="Enter reason for data revision..." style="border: 1px solid #cbd5e1; border-radius: 4px;" required>
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary" title="Save Reason">
+                                                        <i class="fas fa-save mr-1"></i> Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <div class="p-2 bg-light rounded" style="border: 1px solid #e2e8f0; min-height: 32px; font-size: 13.5px; color: #1e293b;">
+                                            {{ $rev->rev_reason ?: '—' }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-sm-2 col-4 rev-form-label">Status</div>
+                                <div class="col-sm-10 col-8 rev-form-val">
+                                    {{ $rev->rev_status }}
+                                </div>
                             </div>
                         </div>
+
+                        {{-- Right Action Buttons / Attachments Box --}}
+                        <div class="{{ ($isClosedCase && auth()->user()->can('viewAttachments', $rev)) ? 'col-lg-4' : 'col-lg-3' }} col-md-12 text-lg-right text-left mb-3">
+                            {{-- Draft Actions: Release & Cancel --}}
+                            @if($isDraftOrUnderRev)
+                                <div class="d-flex justify-content-lg-end justify-content-start flex-wrap" style="gap: 8px;">
+                                    @can('release', $rev)
+                                        <form method="POST" action="{{ route('admin.reversals.release', $rev->rev_id) }}" id="formReleaseCase" style="display: inline;">
+                                            @csrf
+                                            <input type="hidden" name="rev_reason" id="hidden_release_reason" value="{{ $rev->rev_reason }}">
+                                            <button type="button" class="btn btn-sm btn-primary rev-action-btn shadow-sm" onclick="handleReleaseSubmit()">
+                                                <i class="fas fa-paper-plane mr-1"></i> Release
+                                            </button>
+                                        </form>
+                                    @endcan
+
+                                    @can('cancel', $rev)
+                                        <form method="POST" action="{{ route('admin.reversals.cancel', $rev->rev_id) }}" id="formCancelCase" style="display: inline;">
+                                            @csrf
+                                            <button type="button" class="btn btn-sm btn-outline-danger rev-action-btn shadow-sm" onclick="handleCancelSubmit()">
+                                                <i class="fas fa-trash-alt mr-1"></i> Cancel
+                                            </button>
+                                        </form>
+                                    @endcan
+                                </div>
+                            @endif
+
+                            {{-- Open / In Process Actions for SO IT --}}
+                            @if($rev->isInProcess())
+                                <div class="d-flex justify-content-lg-end justify-content-start flex-wrap" style="gap: 8px;">
+                                    @can('execute', $rev)
+                                        <form method="POST" action="{{ route('admin.reversals.execute', $rev->rev_id) }}" id="formExecuteCase" style="display: inline;">
+                                            @csrf
+                                            <button type="button" class="btn btn-sm btn-success rev-action-btn shadow-sm" onclick="handleExecuteSubmit()">
+                                                <i class="fas fa-check-double mr-1"></i> Execute
+                                            </button>
+                                        </form>
+                                    @endcan
+
+                                    @can('return', $rev)
+                                        <button type="button" class="btn btn-sm btn-warning rev-action-btn shadow-sm text-dark" data-toggle="modal" data-target="#returnModal">
+                                            <i class="fas fa-undo mr-1"></i> Return
+                                        </button>
+                                    @endcan
+
+                                    @can('cancel', $rev)
+                                        <form method="POST" action="{{ route('admin.reversals.cancel', $rev->rev_id) }}" id="formCancelCase" style="display: inline;">
+                                            @csrf
+                                            <button type="button" class="btn btn-sm btn-outline-danger rev-action-btn shadow-sm" onclick="handleCancelSubmit()">
+                                                <i class="fas fa-times mr-1"></i> Cancel
+                                            </button>
+                                        </form>
+                                    @endcan
+                                </div>
+                            @endif
+
+                            {{-- Closed Attachments Box (Live Document & Upload for SO IT) --}}
+                            @if($isClosedCase && auth()->user()->can('viewAttachments', $rev))
+                                <div class="rev-attach-box text-left shadow-sm mt-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                        <span class="font-weight-bold" style="font-size: 13px; color: #1e293b;">
+                                            <i class="fas fa-paperclip text-primary mr-1"></i> Attached Documents
+                                        </span>
+                                        <button type="button" class="btn btn-xs btn-primary font-weight-bold" data-toggle="modal" data-target="#uploadAttachmentModal" title="Upload / Attach Document">
+                                            <i class="fas fa-upload mr-1"></i> Attach
+                                        </button>
+                                    </div>
+                                    <div style="font-size: 12.5px;">
+                                        @php
+                                            $hasAnyFile = false;
+                                        @endphp
+                                        @foreach($rev->attachments as $att)
+                                            @if(!empty($att->aat_path))
+                                                @php $hasAnyFile = true; @endphp
+                                                <div class="d-flex justify-content-between align-items-center py-2 px-2 mb-1 bg-white rounded border">
+                                                    <span class="font-weight-600 text-dark">
+                                                        <i class="far fa-file-pdf mr-1 text-danger"></i>
+                                                        {{ $att->aat_type ?? 'Data Revision Case' }}
+                                                    </span>
+                                                    @php
+                                                        $docExt = strtolower(pathinfo($att->aat_path ?? '', PATHINFO_EXTENSION) ?: 'pdf');
+                                                        $docTitle = ($att->aat_type ?? 'Data Revision Case') . ' #' . $rev->rev_id;
+                                                        $docUrl = route('universal.attachment.view', ['module' => 'aud', 'id' => $att->aat_id]);
+                                                    @endphp
+                                                    <button type="button" 
+                                                            class="btn btn-xs btn-success font-weight-bold shadow-sm" 
+                                                            style="border-radius: 4px; padding: 2px 8px; cursor: pointer;"
+                                                            onclick="openReversalLiveDoc('{{ $docUrl }}', '{{ addslashes($docTitle) }}', '{{ $docExt }}')"
+                                                            title="View Document Live on Screen">
+                                                        <i class="fas fa-eye mr-1"></i> Live View
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        @endforeach
+
+                                        @if(!$hasAnyFile)
+                                            <div class="py-2 px-2 text-center rounded" style="background-color: #fef3c7; border: 1px solid #fde68a;">
+                                                <div class="text-warning font-weight-bold mb-1" style="color: #b45309 !important; font-size: 12px;">
+                                                    <i class="fas fa-exclamation-triangle mr-1"></i> No Document Attached
+                                                </div>
+                                                <button type="button" class="btn btn-xs btn-primary font-weight-bold" data-toggle="modal" data-target="#uploadAttachmentModal">
+                                                    <i class="fas fa-plus mr-1"></i> Upload Document Now
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Sub-table section --}}
+                    @if($typeVal === 2)
+                        {{-- Type 2: Data Changes --}}
+                        <div class="mt-4">
+                            <h4 class="font-weight-600 mb-2 text-dark" style="font-size: 15px;">
+                                <i class="fas fa-exchange-alt mr-1 text-primary"></i> Data Changes
+                            </h4>
+                            <div class="table-responsive border" style="background: #ffffff; border-radius: 6px; max-height: 380px; overflow-y: auto;">
+                                <table class="table rev-subtable mb-0 text-nowrap">
+                                    <thead class="rev-subtable-header">
+                                        <tr>
+                                            <th style="width: 80px;">Id</th>
+                                            <th>Field</th>
+                                            <th>Old Value</th>
+                                            <th>New Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @forelse($rev->data as $item)
+                                        <tr>
+                                            <td class="font-weight-bold text-muted">{{ $item->rvd_id }}</td>
+                                            <td class="font-weight-600">{{ $item->rvd_colname ?? $item->rvd_attrib }}</td>
+                                            <td class="text-danger font-monospace">{{ $item->rvd_oldvalue ?? '(Blank)' }}</td>
+                                            <td class="text-success font-weight-bold font-monospace">{{ $item->rvd_newvalue ?? '(Blank)' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-muted">
+                                                No field change records found for this revision.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @else
+                        {{-- Type 1 or 3: Data Reversals --}}
+                        <div class="mt-4">
+                            <h4 class="font-weight-600 mb-2 text-dark" style="font-size: 15px;">
+                                <i class="fas fa-list mr-1 text-primary"></i> Data Reversals
+                            </h4>
+                            <div class="table-responsive border" style="background: #ffffff; border-radius: 6px; max-height: 420px; overflow-y: auto;">
+                                <table class="table rev-subtable mb-0">
+                                    <thead class="rev-subtable-header">
+                                        <tr>
+                                            <th style="width: 100px;">Data ID</th>
+                                            <th>Detail</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @forelse($rev->comps as $comp)
+                                        <tr>
+                                            <td class="font-weight-bold text-muted align-top">{{ $comp->rvc_rowid }}</td>
+                                            <td>
+                                                <div class="font-weight-bold text-dark mb-1" style="font-size: 13.5px;">
+                                                    {{ $comp->rvc_table }}
+                                                </div>
+                                                <div class="text-secondary small font-monospace" style="word-break: break-all; line-height: 1.45;">
+                                                    {{ $comp->rvc_detail }}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="2" class="text-center py-4 text-muted">
+                                                No reversal component records registered for this case.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Bottom: Implementation DTG --}}
+                    <div class="mt-4 pt-2 d-flex align-items-center" style="font-size: 13px; color: #475569;">
+                        <span class="mr-3 font-weight-600">Implementation DTG:</span>
+                        <span class="font-weight-bold text-dark font-monospace">
+                            {{ $rev->rev_closedtg ? \Carbon\Carbon::parse($rev->rev_closedtg)->format('d M y H:i') : '—' }}
+                        </span>
                     </div>
                 </div>
             </div>
-
-            {{-- Type 1 & 3: Component Reversal Breakdown (aud.revcomps) --}}
-            @if($typeVal === 1 || $typeVal === 3)
-                <div class="card card-outline card-info shadow-sm mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-layer-group mr-1 text-info"></i> Component Reversals Cascade Breakdown (aud.revcomps)
-                        </h3>
-                        <span class="badge badge-info float-right">{{ $rev->comps->count() }} components</span>
-                    </div>
-                    <div class="card-body table-responsive p-0">
-                        <table class="table table-hover table-striped table-sm mb-0">
-                            <thead class="thead-light">
-                            <tr>
-                                <th style="width: 70px;">RVC ID</th>
-                                <th>Action Code</th>
-                                <th>Target Table</th>
-                                <th>Row ID</th>
-                                <th>Type</th>
-                                <th>Snapshot / Row Detail</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @forelse($rev->comps as $comp)
-                                <tr>
-                                    <td><strong>{{ $comp->rvc_id }}</strong></td>
-                                    <td><code>{{ $comp->rvc_action }}</code></td>
-                                    <td><code>{{ $comp->rvc_table }}</code></td>
-                                    <td><code>{{ $comp->rvc_rowid }}</code></td>
-                                    <td><span class="badge badge-light">Type {{ $comp->rvc_type }}</span></td>
-                                    <td style="max-width: 480px;">
-                                        <div class="text-monospace small" style="white-space: pre-wrap; word-break: break-all; max-height: 80px; overflow-y: auto;">
-                                            {{ $comp->rvc_detail }}
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">No component reversal records attached.</td>
-                                </tr>
-                            @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Type 2: Field-Level Data Revisions (aud.revdata) --}}
-            @if($typeVal === 2)
-                <div class="card card-outline card-secondary shadow-sm mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title font-weight-bold">
-                            <i class="fas fa-edit mr-1 text-secondary"></i> Field-Level Data Revisions (aud.revdata)
-                        </h3>
-                        <span class="badge badge-secondary float-right">{{ $rev->data->count() }} field diffs</span>
-                    </div>
-                    <div class="card-body table-responsive p-0">
-                        <table class="table table-hover table-striped table-sm mb-0">
-                            <thead class="thead-light">
-                            <tr>
-                                <th style="width: 70px;">RVD ID</th>
-                                <th>Target Table</th>
-                                <th>Row ID</th>
-                                <th>Attribute / Column</th>
-                                <th>Old Value</th>
-                                <th>New Value</th>
-                                <th>Operation / Conversion</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @forelse($rev->data as $item)
-                                <tr>
-                                    <td><strong>{{ $item->rvd_id }}</strong></td>
-                                    <td><code>{{ $item->rvd_table }}</code></td>
-                                    <td><code>{{ $item->rvd_rowid }}</code></td>
-                                    <td>
-                                        <strong>{{ $item->rvd_attrib ?? '—' }}</strong>
-                                        @if($item->rvd_colname && $item->rvd_colname !== $item->rvd_attrib)
-                                            <small class="text-muted">({{ $item->rvd_colname }})</small>
-                                        @endif
-                                    </td>
-                                    <td><span class="text-danger font-weight-bold">{{ $item->rvd_oldvalue ?? '—' }}</span></td>
-                                    <td><span class="text-success font-weight-bold">{{ $item->rvd_newvalue ?? '—' }}</span></td>
-                                    <td><code>{{ $item->rvd_conversion ?? '—' }}</code></td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">No field revision records attached.</td>
-                                </tr>
-                            @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Attachments Panel (Fulfilled status & Authorized Roles only - legacy aud_revs_detail.bas:55-60) --}}
-            @if($rev->isFulfilled() && auth()->user()->can('viewAttachments', $rev))
-                <div class="card card-outline card-success shadow-sm mb-4" id="reversalAttachmentsPanel">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title font-weight-bold mb-0">
-                            <i class="fas fa-paperclip mr-1 text-success"></i> Reversal Attachments &amp; Evidence
-                        </h3>
-                        <span class="badge badge-success float-right">{{ $rev->attachments->count() }} attached</span>
-                    </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            @forelse($rev->attachments as $att)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="fas {{ !empty($att->aat_path) ? 'fa-file-alt text-success' : 'fa-clock text-warning' }} mr-2"></i>
-                                        <span class="font-weight-bold mr-2">{{ $att->aat_type ?? 'Document' }}</span>
-                                        @if(!empty($att->aat_path))
-                                            <span class="text-muted small font-monospace">({{ basename($att->aat_path) }})</span>
-                                        @else
-                                            <span class="badge badge-warning text-dark font-weight-normal">Pending Upload (Slot #{{ $att->aat_id }})</span>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        @if(!empty($att->aat_path))
-                                            <a href="{{ route('universal.attachment.view', ['module' => 'aud', 'id' => $att->aat_id]) }}" target="_blank" class="btn btn-xs btn-outline-primary mr-1" title="View Document">
-                                                <i class="fas fa-eye mr-1"></i> View
-                                            </a>
-                                            <a href="{{ route('universal.attachment.view', ['module' => 'aud', 'id' => $att->aat_id, 'download' => 1]) }}" class="btn btn-xs btn-outline-secondary" title="Download Document">
-                                                <i class="fas fa-download mr-1"></i> Download
-                                            </a>
-                                        @endif
-                                    </div>
-                                </li>
-                            @empty
-                                <li class="list-group-item text-center text-muted py-3">
-                                    No attachment records or slots attached.
-                                </li>
-                            @endforelse
-                        </ul>
-                    </div>
-                    <div class="card-footer bg-light">
-                        <h6 class="font-weight-bold mb-2 text-muted" style="font-size: 0.85rem;">
-                            <i class="fas fa-upload mr-1 text-primary"></i> Upload Attachment Document
-                        </h6>
-                        <form action="{{ route('universal.attachment.upload') }}" method="POST" enctype="multipart/form-data" class="form-inline" id="reversalAttachmentUploadForm">
-                            @csrf
-                            <input type="hidden" name="module" value="aud">
-                            <input type="hidden" name="object_id" value="{{ $rev->rev_id }}">
-                            
-                            <div class="form-group mr-2 mb-2">
-                                <label for="doc_type" class="sr-only">Document Type</label>
-                                <select name="doc_type" id="doc_type" class="custom-select custom-select-sm" required>
-                                    <option value="Data Revision Case" selected>Data Revision Case</option>
-                                    <option value="Minute">Minute</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group mr-2 mb-2">
-                                <input type="file" name="file" id="reversalFile" class="form-control-file form-control-sm" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-sm btn-success mb-2" id="btnUploadAttachment">
-                                <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Document
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @endif
         </div>
     </section>
 </div>
 
-{{-- MODALS FOR WORKFLOW ACTIONS --}}
-
-{{-- 1. Release Modal --}}
-@can('release', $rev)
-<div class="modal fade" id="releaseModal" tabindex="-1" role="dialog" aria-labelledby="releaseModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <form method="POST" action="{{ route('admin.reversals.release', $rev->rev_id) }}" class="modal-content">
-            @csrf
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title font-weight-bold" id="releaseModalLabel">
-                    <i class="fas fa-paper-plane mr-2"></i>Release Reversal Case #{{ $rev->rev_id }}
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>The data revision case will be released to the IT department for execution.</p>
-                <div class="alert alert-info py-2">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    <strong>Release Confirmation:</strong> Are you sure you want to release this request?
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary rounded-pill px-4 font-weight-bold">
-                    <i class="fas fa-paper-plane mr-1"></i> Yes, Release Case
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-@endcan
-
-{{-- 2. Execute Modal --}}
-@can('execute', $rev)
-<div class="modal fade" id="executeModal" tabindex="-1" role="dialog" aria-labelledby="executeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <form method="POST" action="{{ route('admin.reversals.execute', $rev->rev_id) }}" class="modal-content">
-            @csrf
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title font-weight-bold" id="executeModalLabel">
-                    <i class="fas fa-cogs mr-2"></i>Execute Reversal Case #{{ $rev->rev_id }}
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>The data revision case will be implemented and data will be reversed in the live system.</p>
-                <div class="alert alert-warning py-2">
-                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                    <strong>Execution Warning:</strong> Are you sure you want to execute this request? This action cannot be automatically undone.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-success rounded-pill px-4 font-weight-bold">
-                    <i class="fas fa-check-double mr-1"></i> Yes, Execute Reversal
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-@endcan
-
-{{-- 3. Return Modal --}}
+{{-- Return Modal for SO IT --}}
 @can('return', $rev)
 <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog" role="document">
         <form method="POST" action="{{ route('admin.reversals.return', $rev->rev_id) }}" class="modal-content">
             @csrf
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title font-weight-bold" id="returnModalLabel">
-                    <i class="fas fa-undo mr-2"></i>Return Reversal Case #{{ $rev->rev_id }}
+            <div class="modal-header bg-white border-bottom">
+                <h5 class="modal-title font-weight-bold text-dark" id="returnModalLabel">
+                    <i class="fas fa-undo text-warning mr-1"></i> Return Data Revision Case #{{ $rev->rev_id }}
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-muted" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Return this revision case to the initiating unit (status will become <strong>Under Revision</strong>).</p>
-                <div class="form-group mb-0">
-                    <label for="returnRemarks" class="font-weight-bold small text-uppercase">Return Instructions / Remarks (Optional):</label>
-                    <textarea name="remarks" id="returnRemarks" class="form-control" rows="3" placeholder="Enter reason or instructions for the initiator..."></textarea>
+                <p class="text-secondary">The data revision case will be returned to the initiating division for review/amendment.</p>
+                <div class="form-group">
+                    <label for="return_remarks" class="font-weight-bold text-dark" style="font-size: 13px;">Return Remarks / Reason:</label>
+                    <textarea name="remarks" id="return_remarks" rows="3" class="form-control" placeholder="Optional notes for initiating division..."></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-warning rounded-pill px-4 font-weight-bold text-dark">
-                    <i class="fas fa-undo mr-1"></i> Return Case
-                </button>
+            <div class="modal-footer bg-light border-top">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning btn-sm text-dark font-weight-bold">Confirm Return</button>
             </div>
         </form>
     </div>
 </div>
 @endcan
 
-{{-- 4. Cancel Modal --}}
-@can('cancel', $rev)
-<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <form method="POST" action="{{ route('admin.reversals.cancel', $rev->rev_id) }}" class="modal-content">
+{{-- Upload Attachment Modal (for closed cases) --}}
+@if($isClosedCase && auth()->user()->can('viewAttachments', $rev))
+<div class="modal fade" id="uploadAttachmentModal" tabindex="-1" role="dialog" aria-labelledby="uploadAttModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form action="{{ route('universal.attachment.upload') }}" method="POST" enctype="multipart/form-data" class="modal-content">
             @csrf
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title font-weight-bold" id="cancelModalLabel">
-                    <i class="fas fa-times-circle mr-2"></i>Cancel Reversal Case #{{ $rev->rev_id }}
+            <input type="hidden" name="module" value="aud">
+            <input type="hidden" name="object_id" value="{{ $rev->rev_id }}">
+            <div class="modal-header bg-white border-bottom">
+                <h5 class="modal-title font-weight-bold text-dark" id="uploadAttModalLabel">
+                    <i class="fas fa-paperclip text-primary mr-1"></i> Upload Attachment Document
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-muted" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                @if($rev->isDraft())
-                    <div class="alert alert-danger py-2">
-                        <i class="fas fa-trash-alt mr-1"></i>
-                        <strong>Permanent Deletion:</strong> This draft reversal has not been released. Cancelling will permanently remove this case and all associated component snapshots from the database.
-                    </div>
-                @else
-                    <p>The data revision case will be marked as <strong>Cancelled</strong> and closed.</p>
-                    <div class="form-group mb-0">
-                        <label for="cancelReason" class="font-weight-bold small text-uppercase">Cancellation Reason (Optional):</label>
-                        <textarea name="reason" id="cancelReason" class="form-control" rows="3" placeholder="Enter reason for cancelling..."></textarea>
-                    </div>
-                @endif
+                <div class="form-group">
+                    <label for="doc_type" class="font-weight-bold text-dark" style="font-size: 13px;">Document Type</label>
+                    <select name="doc_type" id="doc_type" class="custom-select custom-select-sm" required>
+                        <option value="Data Revision Case" selected>Data Revision Case</option>
+                        <option value="Minute">Minute</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="file_upload" class="font-weight-bold text-dark" style="font-size: 13px;">Choose Document File (PDF / Image)</label>
+                    <input type="file" name="file" id="file_upload" class="form-control-file" required>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-danger rounded-pill px-4 font-weight-bold">
-                    <i class="fas fa-times mr-1"></i> {{ $rev->isDraft() ? 'Permanently Delete Draft' : 'Confirm Cancellation' }}
+            <div class="modal-footer bg-light border-top">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm font-weight-bold">
+                    <i class="fas fa-upload mr-1"></i> Upload Document
                 </button>
             </div>
         </form>
     </div>
 </div>
-@endcan
+@endif
 
+<script>
+    function openReversalLiveDoc(url, title, ext) {
+        if (!url) return;
+        if (typeof window.openLiveDocument === 'function') {
+            window.openLiveDocument(url, title || 'Data Revision Case Document', ext || 'pdf');
+        } else {
+            var modal = $('#rdLiveDocViewerModal');
+            $('#rdLiveDocViewerTitle').text((title || 'Document').toUpperCase());
+            $('#rdLiveDocExtBadge').text((ext || 'pdf').toUpperCase());
+            $('#rdLiveDocOpenNewTab').attr('href', url);
+            var dlUrl = url.includes('?') ? (url + '&download=1') : (url + '?download=1');
+            $('#rdLiveDocDownloadBtn').attr('href', dlUrl);
+            
+            var iframe = document.getElementById('rdLiveDocIframe');
+            if (iframe) {
+                iframe.src = url;
+                iframe.style.display = 'block';
+            }
+            modal.modal('show');
+        }
+    }
+
+    function handleReleaseSubmit() {
+        var reasonInput = document.getElementById('rev_reason_input');
+        var reasonVal = reasonInput ? reasonInput.value.trim() : "{{ addslashes($rev->rev_reason ?? '') }}";
+        
+        if (!reasonVal) {
+            alert('Please enter reason for data revision');
+            if (reasonInput) reasonInput.focus();
+            return;
+        }
+
+        var confirmed = confirm("The data revision case will be released. Are you sure you want to release this request?");
+        if (confirmed) {
+            var hiddenReason = document.getElementById('hidden_release_reason');
+            if (hiddenReason) {
+                hiddenReason.value = reasonVal;
+            }
+            document.getElementById('formReleaseCase').submit();
+        }
+    }
+
+    function handleCancelSubmit() {
+        var confirmed = confirm("The data revision case will be cancelled. Are you sure you want to cancel this request?");
+        if (confirmed) {
+            document.getElementById('formCancelCase').submit();
+        }
+    }
+
+    function handleExecuteSubmit() {
+        var confirmed = confirm("The data revision case will be implemented and data will be reversed. Are you sure you want to execute this request?");
+        if (confirmed) {
+            document.getElementById('formExecuteCase').submit();
+        }
+    }
+</script>
 @endsection

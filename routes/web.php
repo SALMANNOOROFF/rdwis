@@ -102,6 +102,8 @@ Route::middleware('auth')->group(function () {
         ->name('contract-cases.attachments.store');
 
     Route::middleware('force_password_change')->group(function () {
+        Route::get('/contract-cases/{id}/projects/{headId}/panel', [\App\Http\Controllers\ContractCaseController::class, 'projectPanel'])
+            ->whereNumber(['id', 'headId'])->name('contract-cases.project-panel');
         Route::get('/', function () {
             $u = Auth::user();
             if (method_exists($u, 'isSORD') && $u->isSORD()) {
@@ -726,13 +728,46 @@ Route::middleware('auth')->group(function () {
             Route::get('/open', [\App\Http\Controllers\AdminReversalController::class, 'open'])->name('open');
             Route::get('/closed', [\App\Http\Controllers\AdminReversalController::class, 'closed'])->name('closed');
             Route::get('/{rev}', [\App\Http\Controllers\AdminReversalController::class, 'show'])->name('show')->whereNumber('rev');
+            Route::put('/{rev}', [\App\Http\Controllers\AdminReversalController::class, 'update'])->name('update')->whereNumber('rev');
             Route::post('/{rev}/release', [\App\Http\Controllers\AdminReversalController::class, 'release'])->name('release')->whereNumber('rev');
             Route::post('/{rev}/execute', [\App\Http\Controllers\AdminReversalController::class, 'execute'])->name('execute')->whereNumber('rev');
             Route::post('/{rev}/return', [\App\Http\Controllers\AdminReversalController::class, 'return'])->name('return')->whereNumber('rev');
             Route::post('/{rev}/cancel', [\App\Http\Controllers\AdminReversalController::class, 'cancel'])->name('cancel')->whereNumber('rev');
         });
 
+    // ====================================================
+    // DATA REVISION INITIATION TOUCHPOINTS (PHASE 7)
+    // ====================================================
+    // Procurement Touchpoints
+    Route::post('/purchase/case/{id}/reverse', [\App\Http\Controllers\PurchaseController::class, 'reverseCase'])->name('purchase.case.reverse');
+    Route::post('/purchase/petty/{id}/reverse', [\App\Http\Controllers\PurchaseInitiationController::class, 'reversePetty'])->name('purchase.petty.reverse');
+    Route::post('/purchase/tada/{id}/reverse', [\App\Http\Controllers\PurchaseInitiationController::class, 'reverseTada'])->name('purchase.tada.reverse');
+    Route::post('/finance/payments/commitments/{id}/reverse', [\App\Http\Controllers\Finance\PaymentController::class, 'reverseCommitment'])->name('finance.payments.commitments.reverse');
+    Route::post('/finance/payments/transactions/{id}/reverse', [\App\Http\Controllers\Finance\PaymentController::class, 'reversePayment'])->name('finance.payments.transactions.reverse');
+
+    // Finance Touchpoints
+    Route::post('/salary/orders/{id}/reverse', [\App\Http\Controllers\SalaryController::class, 'reverseOrder'])->name('salary.orders.reverse');
+    Route::post('/salary/requisitions/{id}/reverse', [\App\Http\Controllers\SalaryController::class, 'reverseRequisition'])->name('salary.requisitions.reverse');
+    Route::post('/finance/allocations/{id}/reverse', [\App\Http\Controllers\Finance\FinanceAllocationController::class, 'reverseAllocation'])->name('finance.allocations.reverse');
+    Route::post('/finance-of-project/funding/{id}/reverse', [\App\Http\Controllers\Division\FinanceOfProjectController::class, 'reverseFunding'])->name('finance_of_project.funding.reverse');
+    Route::post('/finance/account-opening/milestones/{id}/reverse', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'reverseMilestoneCost'])->name('finance.account_opening.milestones.reverse');
+    Route::post('/finance/account-opening/heads/{id}/reverse', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'reverseHead'])->name('finance.account_opening.heads.reverse');
+
+    // HR Touchpoints
+    Route::post('/contract-cases/{id}/reverse', [\App\Http\Controllers\Division\ContractCaseController::class, 'reverseContract'])->name('contract_cases.reverse');
+    Route::post('/contract-cases/plans/{id}/reverse', [\App\Http\Controllers\Division\ContractCaseController::class, 'reversePlan'])->name('contract_cases.plans.reverse');
+    Route::post('/divhr/employees/{id}/reverse-full', [\App\Http\Controllers\DivHrController::class, 'reverseEmployeeFull'])->name('divhr.employees.reverse-full');
+    Route::post('/divhr/employees/{id}/reverse-field', [\App\Http\Controllers\DivHrController::class, 'reverseEmployeeField'])->name('divhr.employees.reverse-field');
+    Route::post('/attendance/reverse-monthly', [\App\Http\Controllers\AttendanceController::class, 'reverseMonthly'])->name('attendance.reverse_monthly');
+    Route::post('/attendance/monthly/{id}/reverse', [\App\Http\Controllers\AttendanceController::class, 'reverseMonthly'])->name('attendance.monthly.reverse');
+    Route::post('/attendance/reverse-daily', [\App\Http\Controllers\AttendanceController::class, 'reverseDaily'])->name('attendance.reverse_daily');
+    Route::post('/attendance/daily/{id}/reverse', [\App\Http\Controllers\AttendanceController::class, 'reverseDaily'])->name('attendance.daily.reverse');
+
+    // Projects Touchpoint (Unified RevType 1 or 2)
+    Route::post('/projects/milestones/{id}/reverse', [\App\Http\Controllers\ProjectController::class, 'reverseMilestone'])->name('projects.milestones.reverse');
+
     Route::prefix('admin/accounts')
+
         ->name('admin.accounts.')
         ->middleware(['area:it', 'approver'])
         ->group(function () {
@@ -821,4 +856,3 @@ Route::middleware('auth')->group(function () {
 Route::get('/storage/{path}', [\App\Http\Controllers\AttachmentController::class, 'serveStorageFile'])
     ->where('path', '.*')
     ->name('storage.serve');
-

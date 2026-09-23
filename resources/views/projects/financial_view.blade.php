@@ -361,13 +361,13 @@
                 </li>
                 @endif
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-mtss-link" data-toggle="pill" href="#tab-mtss" role="tab">
-                        <i class="fas fa-university"></i> MTSS Breakdown
+                    <a class="nav-link" id="tab-docs-link" data-toggle="pill" href="#tab-docs" role="tab">
+                        <i class="fas fa-paperclip"></i> Files & Attachments ({{ count($allAttachments ?? []) }})
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="tab-docs-link" data-toggle="pill" href="#tab-docs" role="tab">
-                        <i class="fas fa-paperclip"></i> Files & Attachments ({{ count($allAttachments ?? []) }})
+                    <a class="nav-link" id="tab-charts-link" data-toggle="pill" href="#tab-charts" role="tab">
+                        <i class="fas fa-chart-pie"></i> Charts & Analytics
                     </a>
                 </li>
             </ul>
@@ -401,9 +401,9 @@
                                     <thead>
                                         <tr>
                                             <th class="pl-3" style="width: 28%;">METRIC</th>
-                                            <th class="text-right" style="color: #0f172a; width: 24%;">ACCOUNT (TOTAL)</th>
-                                            <th class="text-right" style="color: #0284c7; width: 24%;">PROJECT (PCC)</th>
-                                            <th class="text-right pr-3" style="color: #d97706; width: 24%;">CSRF (CF)</th>
+                                            <th class="text-right" style="color: #0f172a; width: 24%;">PROJECT TOTAL AMOUNT</th>
+                                            <th class="text-right" style="color: #0284c7; width: 24%;">PROJECT SHARE</th>
+                                            <th class="text-right pr-3" style="color: #d97706; width: 24%;">CSRF SHARE</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -545,10 +545,10 @@
                             </div>
                         </div>
 
-                        {{-- 2. MISSION-BASED RECEIVABLES CARD --}}
+                        {{-- 2. MILESTONE-BASED RECEIVABLES CARD --}}
                         <div class="fin-table-card p-4">
                             <h5 class="font-weight-bold text-dark mb-3 rajdhani" style="letter-spacing: 1px;">
-                                <i class="fas fa-hand-holding-usd text-warning mr-2"></i> MISSION-BASED RECEIVABLES
+                                <i class="fas fa-hand-holding-usd text-warning mr-2"></i> MILESTONE-BASED RECEIVABLES
                             </h5>
                             <div class="row align-items-center">
                                 <div class="col-md-4 mb-3 mb-md-0 border-right" style="border-color: #e2e8f0 !important;">
@@ -600,17 +600,30 @@
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
-                                                <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['equip'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['equip'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'Equipment']) }}" target="_blank" class="btn-drill-link btn-drill-red ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Equipment Expenditure"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @if(($finData['equip_cmt'] ?? 0) > 0)
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
-                                                <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['equip_cmt'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['equip_cmt'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'commitments', 'Equipment']) }}" target="_blank" class="btn-drill-link btn-drill-amber ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Equipment Commitments"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @endif
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
-                                                <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['equip_ipc'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['equip_ipc'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'in-process', 'Equipment']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Equipment In Process"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
@@ -644,17 +657,30 @@
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
-                                                <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['hr'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['hr'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'HR']) }}" target="_blank" class="btn-drill-link btn-drill-red ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View HR Expenditure"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @if(($finData['hr_cmt'] ?? 0) > 0)
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
-                                                <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['hr_cmt'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['hr_cmt'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'commitments', 'HR']) }}" target="_blank" class="btn-drill-link btn-drill-amber ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View HR Commitments"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @endif
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
-                                                <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['hr_ipc'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['hr_ipc'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'in-process', 'HR']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View HR In Process"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
@@ -688,17 +714,30 @@
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
-                                                <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['misc'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['misc'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'Misc']) }}" target="_blank" class="btn-drill-link btn-drill-red ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Misc Expenditure"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @if(($finData['misc_cmt'] ?? 0) > 0)
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
-                                                <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['misc_cmt'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['misc_cmt'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'commitments', 'Misc']) }}" target="_blank" class="btn-drill-link btn-drill-amber ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Misc Commitments"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @endif
                                             <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
-                                                <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['misc_ipc'] ?? 0) }}</span>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['misc_ipc'] ?? 0) }}</span>
+                                                    @if($headRecord)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'in-process', 'Misc']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Misc In Process"><i class="fas fa-search"></i></a>
+                                                    @endif
+                                                </div>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
                                                 <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
@@ -709,16 +748,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {{-- 3. INTERACTIVE MAIN CASHFLOW CHART --}}
-                        <div class="fin-table-card p-4">
-                            <h5 class="font-weight-bold text-dark mb-3 rajdhani" style="letter-spacing: 1px;">
-                                <i class="fas fa-chart-bar text-primary mr-2"></i> CASH FLOW & BUDGET DISTRIBUTION
-                            </h5>
-                            <div class="chart-box-main">
-                                <canvas id="finDetailedChart"></canvas>
                             </div>
                         </div>
 
@@ -812,19 +841,207 @@
                                     </tr>
                                 @endforelse
                             </tbody>
+                            @php
+                                $totSubAlloc = collect($subheads)->sum(fn($s) => (float)(is_array($s) ? ($s['allocation'] ?? 0) : ($s->allocation ?? 0)));
+                                $totSubExp = collect($subheads)->sum(fn($s) => (float)(is_array($s) ? ($s['expenditure'] ?? 0) : ($s->expenditure ?? 0)));
+                                $totSubCmt = collect($subheads)->sum(fn($s) => (float)(is_array($s) ? ($s['commitments'] ?? 0) : ($s->commitments ?? 0)));
+                                $totSubIpc = collect($subheads)->sum(fn($s) => (float)(is_array($s) ? ($s['in_process'] ?? 0) : ($s->in_process ?? 0)));
+                                $totSubRem = collect($subheads)->sum(fn($s) => (float)(is_array($s) ? ($s['can_be_spent'] ?? ($s['remaining'] ?? 0)) : ($s->can_be_spent ?? ($s->remaining ?? 0))));
+                                $totSubPct = $totSubAlloc > 0 ? min(100, round(($totSubExp / $totSubAlloc) * 100, 1)) : 0;
+                            @endphp
+                            @if(count($subheads) > 0)
+                            <tfoot>
+                                <tr style="background: #f8fafc; border-top: 2.5px solid #cbd5e1; border-bottom: 2px solid #cbd5e1;">
+                                    <td class="pl-3 font-weight-bold text-dark text-uppercase rajdhani" style="font-size: 1.15rem; letter-spacing: 0.5px;">
+                                        <i class="fas fa-calculator text-primary mr-1.5"></i> TOTAL
+                                    </td>
+                                    <td class="text-right font-weight-bold" style="color: #0284c7; font-size: 1.12rem;">
+                                        {{ number_format($totSubAlloc, 2) }}
+                                    </td>
+                                    <td class="text-right font-weight-bold text-danger" style="font-size: 1.12rem;">
+                                        {{ number_format($totSubExp, 2) }}
+                                    </td>
+                                    <td class="text-right font-weight-bold" style="color: #d97706; font-size: 1.12rem;">
+                                        {{ number_format($totSubCmt, 2) }}
+                                    </td>
+                                    <td class="text-right font-weight-bold text-secondary" style="font-size: 1.12rem;">
+                                        {{ number_format($totSubIpc, 2) }}
+                                    </td>
+                                    <td class="text-right font-weight-bold {{ $totSubRem >= 0 ? 'text-success' : 'text-danger' }}" style="font-size: 1.15rem;">
+                                        {{ number_format($totSubRem, 2) }}
+                                    </td>
+                                    <td class="pr-3 text-center">
+                                        <div class="progress" style="height: 18px; border-radius: 9px; background: #e2e8f0;">
+                                            <div class="progress-bar font-weight-bold {{ $totSubPct > 90 ? 'bg-danger' : ($totSubPct > 60 ? 'bg-warning' : 'bg-success') }}"
+                                                 role="progressbar" style="width: {{ $totSubPct }}%; font-size: 0.75rem;">
+                                                {{ $totSubPct }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                            @endif
                         </table>
                     </div>
                 </div>
+            </div>
 
-                {{-- SUBHEADS COMPARISON BAR CHART --}}
-                <div class="fin-table-card p-4">
-                    <h5 class="font-weight-bold text-dark mb-3 rajdhani" style="letter-spacing: 1px;">
-                        <i class="fas fa-chart-bar text-primary mr-2"></i> SUBHEAD DISTRIBUTION (ALLOCATION vs EXPENDITURE)
-                    </h5>
-                    <div style="height: 280px; position: relative;">
-                        <canvas id="subheadComparisonChart"></canvas>
+            {{-- ======================================================== --}}
+            {{-- TAB 3: CHARTS & FINANCIAL ANALYTICS (COMPREHENSIVE SUITE) --}}
+            {{-- ======================================================== --}}
+            <div class="tab-pane fade" id="tab-charts" role="tabpanel">
+                
+                {{-- QUICK KPI SUMMARY ROW --}}
+                <div class="row mb-4">
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #0284c7; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #0284c7;">Allocation</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #0284c7;">Rs. {{ number_format($head->allocation ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">Sanctioned Budget</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #0369a1; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #0369a1;">Received</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #0369a1;">Rs. {{ number_format($head->received ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">{{ ($head->allocation ?? 0) > 0 ? round((($head->received ?? 0) / $head->allocation) * 100, 1) : 0 }}% Inflow</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #dc2626; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #dc2626;">Expenditure</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #dc2626;">Rs. {{ number_format($head->expenditure ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">{{ ($head->allocation ?? 0) > 0 ? round((($head->expenditure ?? 0) / $head->allocation) * 100, 1) : 0 }}% Spent</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #d97706; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #d97706;">Commitments</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #d97706;">Rs. {{ number_format($head->commitments ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">Active Orders</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #64748b; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #64748b;">In Process</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #64748b;">Rs. {{ number_format($head->in_process ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">Pending Approval</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #16a34a; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #16a34a;">Spendable</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #16a34a;">Rs. {{ number_format($head->pcc_can_be_spent ?? ($head->remaining ?? 0)) }}</div>
+                            <small class="text-muted font-weight-bold">Net Remaining</small>
+                        </div>
                     </div>
                 </div>
+
+                {{-- ROW 1: MACRO CASH FLOW & BUDGET STATUS DOUGHNUT --}}
+                <div class="row">
+                    <div class="col-xl-7 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-chart-bar text-primary mr-2"></i> MACRO CASH FLOW & FINANCIAL BALANCE
+                                </h5>
+                                <span class="badge badge-light border text-primary px-2.5 py-1 font-weight-bold">
+                                    Inflow vs Outflow
+                                </span>
+                            </div>
+                            <div style="height: 310px; position: relative;">
+                                <canvas id="finDetailedChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-5 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-chart-pie text-success mr-2"></i> BUDGET UTILIZATION BREAKDOWN
+                                </h5>
+                                <span class="badge badge-light border text-success px-2.5 py-1 font-weight-bold">
+                                    Allocation %
+                                </span>
+                            </div>
+                            <div style="height: 310px; position: relative;">
+                                <canvas id="budgetUtilizationDoughnutChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ROW 2: SUBHEADS MULTI-BAR COMPARISON & EXPENDITURE SHARE PIE --}}
+                <div class="row">
+                    <div class="col-xl-8 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-layer-group text-primary mr-2"></i> SUBHEADS MULTI-DIMENSIONAL COMPARISON
+                                </h5>
+                                <span class="badge badge-light border text-info px-2.5 py-1 font-weight-bold">
+                                    Alloc vs Spent vs Commit vs Remaining
+                                </span>
+                            </div>
+                            <div style="height: 330px; position: relative;">
+                                <canvas id="subheadComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-chart-pie text-danger mr-2"></i> SUBHEAD EXPENDITURE SHARE
+                                </h5>
+                                <span class="badge badge-light border text-danger px-2.5 py-1 font-weight-bold">
+                                    Spent Distribution
+                                </span>
+                            </div>
+                            <div style="height: 330px; position: relative;">
+                                <canvas id="subheadExpenditurePieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ROW 3: FUNDING SHARES & SUBHEAD UTILIZATION RATES --}}
+                <div class="row">
+                    <div class="col-xl-6 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-university text-warning mr-2"></i> MULTI-SCOPE FUNDING SHARES
+                                </h5>
+                                <span class="badge badge-light border text-warning px-2.5 py-1 font-weight-bold">
+                                    MTSS vs RDW vs CSRF
+                                </span>
+                            </div>
+                            <div style="height: 290px; position: relative;">
+                                <canvas id="fundingSharesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-tasks text-success mr-2"></i> SUBHEAD BUDGET UTILIZATION RATES (%)
+                                </h5>
+                                <span class="badge badge-light border text-success px-2.5 py-1 font-weight-bold">
+                                    Burn Rates %
+                                </span>
+                            </div>
+                            <div style="height: 290px; position: relative;">
+                                <canvas id="subheadUtilizationBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             {{-- ======================================================== --}}
@@ -888,28 +1105,60 @@
                         </span>
                     </div>
 
+                    @php
+                        $grossAlloc = (float)($head->allocation ?? 0);
+                        $rdwShareRatio = $grossAlloc > 0 ? ((float)($head->rdw_share ?? 0) / $grossAlloc) : 0;
+                        $mtssShareRatio = $grossAlloc > 0 ? ((float)($head->mtss_share ?? 0) / $grossAlloc) : 0;
+                        $csrfShareRatio = $grossAlloc > 0 ? ((float)($head->csrf_share ?? 0) / $grossAlloc) : 0;
+
+                        $totMilestoneAmt = 0;
+                        $totRdwShare = 0;
+                        $totMtssShare = 0;
+                        $totCsrfShare = 0;
+                    @endphp
                     <div class="table-responsive">
                         <table class="table fin-table w-100 m-0">
                             <thead>
                                 <tr>
-                                    <th class="pl-3" style="width: 8%;">ID</th>
-                                    <th style="width: 38%;">DESCRIPTION</th>
-                                    <th style="width: 14%;">TYPE</th>
-                                    <th class="text-right" style="width: 15%; color: #0284c7;">COST ALLOCATION</th>
-                                    <th style="width: 12%;">TARGET DATE</th>
-                                    <th class="pr-3 text-center" style="width: 13%;">STATUS</th>
+                                    <th class="pl-3" style="width: 7%;">MS #</th>
+                                    <th style="width: 27%;">DESCRIPTION</th>
+                                    <th class="text-right" style="width: 14%; color: #0284c7;">MILESTONE AMOUNT</th>
+                                    <th class="text-right" style="width: 12%; color: #16a34a;">RDW SHARE</th>
+                                    <th class="text-right" style="width: 11%; color: #dc2626;">MTSS SHARE</th>
+                                    <th class="text-right" style="width: 11%; color: #d97706;">CSRF SHARE</th>
+                                    <th style="width: 9%;">TARGET DATE</th>
+                                    <th class="pr-3 text-center" style="width: 9%;">STATUS</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($milestones as $m)
+                                    @php
+                                        $mCost = (float)($m->mct_cost ?: $m->msn_cost);
+                                        $mRdw = $mCost * $rdwShareRatio;
+                                        $mMtss = $mCost * $mtssShareRatio;
+                                        $mCsrf = $mCost * $csrfShareRatio;
+
+                                        $totMilestoneAmt += $mCost;
+                                        $totRdwShare += $mRdw;
+                                        $totMtssShare += $mMtss;
+                                        $totCsrfShare += $mCsrf;
+                                    @endphp
                                     <tr>
-                                        <td class="pl-3 font-weight-bold text-primary">#{{ $m->msn_id }}</td>
+                                        <td class="pl-3 font-weight-bold text-primary">MS-{{ $loop->iteration }}</td>
                                         <td class="font-weight-bold text-dark">{{ $m->msn_desc }}</td>
-                                        <td class="text-muted font-weight-bold">{{ $m->msn_type ?? 'Standard' }}</td>
-                                        <td class="text-right font-weight-bold text-primary" style="font-size: 1.05rem;">
-                                            Rs. {{ number_format($m->mct_cost ?: $m->msn_cost, 2) }}
+                                        <td class="text-right font-weight-bold text-primary" style="font-size: 1.02rem;">
+                                            Rs. {{ number_format($mCost, 2) }}
                                         </td>
-                                        <td class="text-dark font-weight-bold">
+                                        <td class="text-right font-weight-bold text-success">
+                                            Rs. {{ number_format($mRdw, 2) }}
+                                        </td>
+                                        <td class="text-right font-weight-bold text-danger">
+                                            Rs. {{ number_format($mMtss, 2) }}
+                                        </td>
+                                        <td class="text-right font-weight-bold" style="color: #d97706;">
+                                            Rs. {{ number_format($mCsrf, 2) }}
+                                        </td>
+                                        <td class="text-dark font-weight-bold small">
                                             {{ $m->msn_targetdt ? \Carbon\Carbon::parse($m->msn_targetdt)->format('d M Y') : 'N/A' }}
                                         </td>
                                         <td class="pr-3 text-center">
@@ -924,10 +1173,22 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4 font-weight-bold">No milestones recorded for this project.</td>
+                                        <td colspan="8" class="text-center text-muted py-4 font-weight-bold">No milestones recorded for this project.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
+                            @if(count($milestones) > 0)
+                            <tfoot style="background: #f8fafc; border-top: 2px solid #cbd5e1;">
+                                <tr class="font-weight-bold">
+                                    <td colspan="2" class="pl-3 text-dark text-uppercase rajdhani" style="font-size: 1rem; letter-spacing: 0.5px;">TOTAL MILESTONES COST</td>
+                                    <td class="text-right text-primary" style="font-size: 1.05rem;">Rs. {{ number_format($totMilestoneAmt, 2) }}</td>
+                                    <td class="text-right text-success" style="font-size: 1.05rem;">Rs. {{ number_format($totRdwShare, 2) }}</td>
+                                    <td class="text-right text-danger" style="font-size: 1.05rem;">Rs. {{ number_format($totMtssShare, 2) }}</td>
+                                    <td class="text-right" style="color: #d97706; font-size: 1.05rem;">Rs. {{ number_format($totCsrfShare, 2) }}</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
+                            @endif
                         </table>
                     </div>
                 </div>
@@ -1044,106 +1305,47 @@
             </div>
             @endif
 
-            {{-- ======================================================== --}}
-            {{-- TAB 5: MTSS BREAKDOWN --}}
-            {{-- ======================================================== --}}
-            <div class="tab-pane fade" id="tab-mtss" role="tabpanel">
-                <div class="fin-table-card p-4 mb-4">
-                    <h4 class="font-weight-bold text-dark mb-3 rajdhani" style="letter-spacing: 0.5px;">
-                        <i class="fas fa-university text-primary mr-2"></i> MTSS DEDUCTIONS & ALLOCATION BREAKDOWN
-                    </h4>
-                    
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="fin-stat-card">
-                                <span class="fin-label">Gross Project Cost</span>
-                                <div class="fin-val-lg mt-1">Rs. {{ number_format($head->allocation ?? 0, 2) }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="fin-stat-card" style="border-left: 5px solid #dc2626;">
-                                <span class="fin-label text-danger">MTSS Deductions</span>
-                                <div class="fin-val-lg text-danger mt-1">Rs. {{ number_format($head->mtss_share ?? 0, 2) }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="fin-stat-card" style="border-left: 5px solid #16a34a;">
-                                <span class="fin-label text-success">Net RDW Allocation</span>
-                                <div class="fin-val-lg text-success mt-1">Rs. {{ number_format($head->rdw_share ?? 0, 2) }}</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {{-- MTSS TRANSFERS TABLE --}}
-                    @if(count($transfers) > 0)
-                    <div class="mt-4">
-                        <h5 class="font-weight-bold text-dark mb-3 rajdhani"><i class="fas fa-history text-secondary mr-1"></i> MTSS Transfers History</h5>
-                        <div class="table-responsive">
-                            <table class="table table-bordered fin-table mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Transfer Type</th>
-                                        <th>Title</th>
-                                        <th>From Head</th>
-                                        <th>To Head</th>
-                                        <th class="text-right" style="color: #0284c7;">Amount (Rs)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($transfers as $idx => $trf)
-                                        <tr>
-                                            <td class="font-weight-bold text-primary">{{ $idx + 1 }}</td>
-                                            <td><span class="badge badge-info">{{ $trf->trf_type }}</span></td>
-                                            <td class="font-weight-bold text-dark">{{ $trf->trf_title }}</td>
-                                            <td class="text-muted font-weight-bold">{{ $trf->trf_fromhed ?: '-' }}</td>
-                                            <td class="text-muted font-weight-bold">{{ $trf->trf_tohed ?: '-' }}</td>
-                                            <td class="text-right font-weight-bold text-dark">{{ number_format($trf->trf_amount, 2) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="p-3 mt-4 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                        <h6 class="font-weight-bold text-primary rajdhani mb-2"><i class="fas fa-info-circle mr-1"></i> Deduction Formula & Structure</h6>
-                        <p class="text-muted mb-0 font-weight-bold" style="font-size: 0.94rem;">
-                            MTSS represents the institutional share allocated for central support and administrative overheads. The Net RDW Share is computed as: <strong class="text-dark">Gross Allocation - MTSS Deductions</strong>. All subhead budgets and expenditure limits are strictly tracked against the Net RDW Share.
-                        </p>
-                    </div>
-                </div>
-            </div>
 
             {{-- ======================================================== --}}
             {{-- TAB 6: PROJECT FILES & ATTACHMENTS --}}
             {{-- ======================================================== --}}
+            {{-- ======================================================== --}}
+            {{-- TAB: PROJECT FILES & ATTACHMENTS (SINGLE UNIFIED SECTION) --}}
+            {{-- ======================================================== --}}
             <div class="tab-pane fade" id="tab-docs" role="tabpanel">
                 <div class="row">
-                    <div class="col-lg-8 mb-4">
+                    <div class="col-12 mb-4">
                         <div class="fin-table-card">
-                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: #f8fafc; border-color: #e2e8f0 !important;">
-                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
-                                    <i class="fas fa-folder-open text-primary mr-2"></i> ALL PROJECT FILES & ATTACHMENTS
-                                </h5>
-                                <span class="badge badge-primary px-3 py-1 font-weight-bold rajdhani" style="font-size: 0.85rem;">
-                                    {{ count($allAttachments ?? []) }} Document(s) Available
-                                </span>
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap" style="background: #f8fafc; border-color: #e2e8f0 !important; gap: 10px;">
+                                <div class="d-flex align-items-center" style="gap: 10px;">
+                                    <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                        <i class="fas fa-folder-open text-primary mr-2"></i> ALL PROJECT FILES & ATTACHMENTS
+                                    </h5>
+                                    <span class="badge badge-primary px-3 py-1 font-weight-bold rajdhani" style="font-size: 0.85rem;" id="projectAttCountBadge">
+                                        {{ count($allAttachments ?? []) }} Document(s) Available
+                                    </span>
+                                </div>
+                                
+                                @if(Auth::check())
+                                <button type="button" class="btn btn-sm btn-primary font-weight-bold rajdhani px-3 shadow-sm rounded-pill d-flex align-items-center" data-toggle="modal" data-target="#modalUploadProjectFinAttachment" style="font-size: 13px; letter-spacing: 0.5px;">
+                                    <i class="fas fa-plus mr-1.5"></i> UPLOAD / ADD ATTACHMENT
+                                </button>
+                                @endif
                             </div>
 
                             <div class="table-responsive">
                                 <table class="table fin-table w-100 m-0" id="finProjectAttachmentsTable">
                                     <thead>
                                         <tr>
-                                            <th class="pl-3" style="width: 8%;">#</th>
-                                            <th style="width: 38%;">DOCUMENT TITLE / TYPE</th>
-                                            <th style="width: 24%;">FILE NAME</th>
-                                            <th style="width: 15%;">UPLOAD DATE</th>
-                                            <th class="pr-3 text-center" style="width: 15%;">ACTION</th>
+                                            <th class="pl-3" style="width: 6%;">#</th>
+                                            <th style="width: 34%;">DOCUMENT TITLE / TYPE</th>
+                                            <th style="width: 26%;">FILE NAME</th>
+                                            <th style="width: 18%;">UPLOAD DATE</th>
+                                            <th class="pr-3 text-center" style="width: 16%;">ACTION</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="finProjectAttachmentsTbody">
                                         @forelse($allAttachments ?? [] as $index => $att)
                                             @php
                                                 $path = $att->jat_path ?? '';
@@ -1160,9 +1362,9 @@
                                                 <td class="pl-3 font-weight-bold text-primary">{{ $loop->iteration }}</td>
                                                 <td class="font-weight-bold text-dark">
                                                     <i class="fas {{ $icon }} fa-lg mr-2"></i>
-                                                    {{ $att->jat_type ?: 'Attachment #' . $att->jat_id }}
+                                                    <span class="doc-type-text">{{ $att->jat_type ?: 'Attachment #' . $att->jat_id }}</span>
                                                 </td>
-                                                <td class="text-muted font-weight-bold font-mono" style="font-size: 0.82rem;">
+                                                <td class="text-muted font-weight-bold font-mono" style="font-size: 0.85rem;">
                                                     {{ basename($path) ?: 'Document File' }}
                                                 </td>
                                                 <td class="text-dark font-weight-bold" style="font-size: 0.85rem;">
@@ -1178,7 +1380,7 @@
                                                 </td>
                                             </tr>
                                         @empty
-                                            <tr>
+                                            <tr id="noAttachmentsRow">
                                                 <td colspan="5" class="text-center text-muted py-4 font-weight-bold">
                                                     <i class="fas fa-folder-open fa-2x mb-2 text-muted" style="opacity: 0.3;"></i>
                                                     <p class="mb-0">No attachments uploaded yet for this project.</p>
@@ -1190,22 +1392,221 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="col-lg-4 mb-4">
-                        {{-- Universal Attachment Widget --}}
-                        <div class="sticky-top" style="top: 20px;">
-                            @include('partials.attachments_widget', [
-                                'module' => 'prj',
-                                'objectId' => $project->prj_id,
-                                'title' => 'Project Document Uploads',
-                                'defaultSlots' => ['Project Proposal', 'URD', 'Work Order', 'PPF'],
-                                'attachments' => $allAttachments ?? $project->attachments,
-                                'canUpload' => Auth::check(),
-                                'canDelete' => false,
-                            ])
+            {{-- UPLOAD ATTACHMENT MODAL FOR PROJECT FINANCIAL VIEW --}}
+            @if(Auth::check())
+            <div class="modal fade" id="modalUploadProjectFinAttachment" tabindex="-1" role="dialog" aria-labelledby="modalUploadProjectFinAttachmentLabel" aria-hidden="true" style="z-index: 1065;">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+                        <div class="modal-header py-3 px-4" style="background: #0f172a; color: #ffffff;">
+                            <h6 class="modal-title font-weight-bold rajdhani mb-0" id="modalUploadProjectFinAttachmentLabel" style="font-size: 15px; letter-spacing: 0.5px;">
+                                <i class="fas fa-paperclip text-primary mr-2"></i> UPLOAD PROJECT ATTACHMENT / FILE
+                            </h6>
+                            <button type="button" class="close text-white opacity-75" data-dismiss="modal" aria-label="Close" style="outline: none;">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form id="formUploadProjectFinAttachment" action="{{ route('universal.attachment.upload') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="module" value="prj">
+                            <input type="hidden" name="object_id" value="{{ $project->prj_id }}">
+                            <div class="modal-body p-4" style="background: #ffffff;">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-dark rajdhani" style="font-size: 13px;">DOCUMENT TITLE / TYPE <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <select class="form-control" id="selectDocTypeQuick" onchange="if(this.value){ document.getElementById('inputDocTypeCustom').value = this.value; }" style="font-size: 13px;">
+                                            <option value="">-- Quick Select Standard Type or Type Custom Below --</option>
+                                            <option value="Project Proposal">Project Proposal</option>
+                                            <option value="URD">URD (User Requirement Document)</option>
+                                            <option value="Work Order">Work Order</option>
+                                            <option value="PPF">PPF</option>
+                                            <option value="Financial Status">Financial Status</option>
+                                            <option value="Approval Letter">Approval Letter</option>
+                                            <option value="Sanction Order">Sanction Order</option>
+                                            <option value="Minute">Minute</option>
+                                        </select>
+                                    </div>
+                                    <input type="text" name="doc_type" id="inputDocTypeCustom" class="form-control mt-2" placeholder="Or enter custom document title (e.g. Inception Report, Audit Note)" required style="font-size: 13px; border-radius: 6px;">
+                                </div>
+
+                                <div class="form-group mb-2">
+                                    <label class="font-weight-bold text-dark rajdhani" style="font-size: 13px;">SELECT ATTACHMENT FILE <span class="text-danger">*</span></label>
+                                    <input type="file" name="file" id="fileFinAttachmentInput" class="form-control-file border p-2" style="border-radius: 6px; background: #f8fafc; font-size: 12.5px;" required>
+                                    <small class="text-muted d-block mt-1 font-weight-bold" style="font-size: 11px;">
+                                        Supported: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max 20MB)
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="modal-footer py-2.5 px-4 bg-light border-top d-flex justify-content-between">
+                                <button type="button" class="btn btn-sm btn-secondary font-weight-bold px-3" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-sm btn-primary font-weight-bold rajdhani px-4 shadow-sm" id="btnSubmitFinAttachment" style="letter-spacing: 0.5px; font-size: 13px;">
+                                    <i class="fas fa-cloud-upload-alt mr-1"></i> UPLOAD FILE
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- ======================================================== --}}
+            {{-- TAB: CHARTS & FINANCIAL ANALYTICS (VERY LAST TAB) --}}
+            {{-- ======================================================== --}}
+            <div class="tab-pane fade" id="tab-charts" role="tabpanel">
+                
+                {{-- QUICK KPI SUMMARY ROW --}}
+                <div class="row mb-4">
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #0284c7; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #0284c7;">Allocation</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #0284c7;">Rs. {{ number_format($head->allocation ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">Sanctioned Budget</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #0369a1; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #0369a1;">Received</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #0369a1;">Rs. {{ number_format($head->received ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">{{ ($head->allocation ?? 0) > 0 ? round((($head->received ?? 0) / $head->allocation) * 100, 1) : 0 }}% Inflow</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #dc2626; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #dc2626;">Expenditure</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #dc2626;">Rs. {{ number_format($head->expenditure ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">{{ ($head->allocation ?? 0) > 0 ? round((($head->expenditure ?? 0) / $head->allocation) * 100, 1) : 0 }}% Spent</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #d97706; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #d97706;">Commitments</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #d97706;">Rs. {{ number_format($head->commitments ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">Active Orders</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #64748b; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #64748b;">In Process</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #64748b;">Rs. {{ number_format($head->in_process ?? 0) }}</div>
+                            <small class="text-muted font-weight-bold">Pending Approval</small>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                        <div class="fin-stat-card h-100" style="border-top: 4px solid #16a34a; padding: 12px 16px;">
+                            <div class="fin-label text-truncate" style="color: #16a34a;">Spendable</div>
+                            <div class="fin-val-lg" style="font-size: 1.35rem; color: #16a34a;">Rs. {{ number_format($head->pcc_can_be_spent ?? ($head->remaining ?? 0)) }}</div>
+                            <small class="text-muted font-weight-bold">Net Remaining</small>
                         </div>
                     </div>
                 </div>
+
+                {{-- ROW 1: MACRO CASH FLOW & BUDGET STATUS DOUGHNUT --}}
+                <div class="row">
+                    <div class="col-xl-7 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-chart-bar text-primary mr-2"></i> MACRO CASH FLOW & FINANCIAL BALANCE
+                                </h5>
+                                <span class="badge badge-light border text-primary px-2.5 py-1 font-weight-bold">
+                                    Inflow vs Outflow
+                                </span>
+                            </div>
+                            <div style="height: 310px; position: relative;">
+                                <canvas id="finDetailedChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-5 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-chart-pie text-success mr-2"></i> BUDGET UTILIZATION BREAKDOWN
+                                </h5>
+                                <span class="badge badge-light border text-success px-2.5 py-1 font-weight-bold">
+                                    Allocation %
+                                </span>
+                            </div>
+                            <div style="height: 310px; position: relative;">
+                                <canvas id="budgetUtilizationDoughnutChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ROW 2: SUBHEADS MULTI-BAR COMPARISON & EXPENDITURE SHARE PIE --}}
+                <div class="row">
+                    <div class="col-xl-8 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-layer-group text-primary mr-2"></i> SUBHEADS MULTI-DIMENSIONAL COMPARISON
+                                </h5>
+                                <span class="badge badge-light border text-info px-2.5 py-1 font-weight-bold">
+                                    Alloc vs Spent vs Commit vs Remaining
+                                </span>
+                            </div>
+                            <div style="height: 330px; position: relative;">
+                                <canvas id="subheadComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-chart-pie text-danger mr-2"></i> SUBHEAD EXPENDITURE SHARE
+                                </h5>
+                                <span class="badge badge-light border text-danger px-2.5 py-1 font-weight-bold">
+                                    Spent Distribution
+                                </span>
+                            </div>
+                            <div style="height: 330px; position: relative;">
+                                <canvas id="subheadExpenditurePieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ROW 3: FUNDING SHARES & SUBHEAD UTILIZATION RATES --}}
+                <div class="row">
+                    <div class="col-xl-6 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-university text-warning mr-2"></i> MULTI-SCOPE FUNDING SHARES
+                                </h5>
+                                <span class="badge badge-light border text-warning px-2.5 py-1 font-weight-bold">
+                                    MTSS vs RDW vs CSRF
+                                </span>
+                            </div>
+                            <div style="height: 290px; position: relative;">
+                                <canvas id="fundingSharesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-12 mb-4">
+                        <div class="fin-table-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                    <i class="fas fa-tasks text-success mr-2"></i> SUBHEAD BUDGET UTILIZATION RATES (%)
+                                </h5>
+                                <span class="badge badge-light border text-success px-2.5 py-1 font-weight-bold">
+                                    Burn Rates %
+                                </span>
+                            </div>
+                            <div style="height: 290px; position: relative;">
+                                <canvas id="subheadUtilizationBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -1232,153 +1633,474 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-activate tab from URL hash (e.g. #tab-milestones, #tab-docs)
+    var hash = window.location.hash;
+    if (hash) {
+        var tabLink = document.querySelector('a[href="' + hash + '"]');
+        if (tabLink) {
+            // Use jQuery if available (Bootstrap 4 tabs)
+            if (typeof $ !== 'undefined') {
+                $(tabLink).tab('show');
+            } else {
+                tabLink.click();
+            }
+            // Scroll to top after tab switch
+            setTimeout(function() {
+                var tabContent = document.querySelector(hash);
+                if (tabContent) tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
+        }
+    }
     @if($head)
     const head = @json($head);
     const subheads = @json($subheads);
-    
-    // 1. MAIN DETAILED CASH FLOW CHART
-    const canvasMain = document.getElementById('finDetailedChart');
-    if (canvasMain) {
-        const ctxMain = canvasMain.getContext('2d');
-        new Chart(ctxMain, {
-            type: 'bar',
-            data: {
-                labels: ['Received (Inflow)', 'Expenditure (Spent)', 'Commitments (Active)', 'Remaining (Spendable)'],
-                datasets: [{
-                    label: 'PKR Amount',
-                    data: [
-                        head.received || 0,
-                        head.expenditure || 0,
-                        head.commitments || 0,
-                        head.pcc_can_be_spent || head.remaining || 0
-                    ],
-                    backgroundColor: [
-                        '#0284c7',
-                        '#dc2626',
-                        '#d97706',
-                        '#16a34a'
-                    ],
-                    borderColor: [
-                        '#0369a1',
-                        '#b91c1c',
-                        '#b45309',
-                        '#15803d'
-                    ],
-                    borderWidth: 1.5,
-                    borderRadius: 6,
-                    barThickness: 42
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return ' Rs. ' + Number(context.raw).toLocaleString();
-                            }
-                        }
-                    }
+    let finChartsRendered = false;
+
+    function renderAllFinCharts() {
+        if (finChartsRendered) return;
+        finChartsRendered = true;
+
+        // 1. MAIN DETAILED CASH FLOW BAR CHART
+        const canvasMain = document.getElementById('finDetailedChart');
+        if (canvasMain) {
+            const ctxMain = canvasMain.getContext('2d');
+            new Chart(ctxMain, {
+                type: 'bar',
+                data: {
+                    labels: ['Received (Inflow)', 'Expenditure (Spent)', 'Commitments (Active)', 'Remaining (Spendable)'],
+                    datasets: [{
+                        label: 'PKR Amount',
+                        data: [
+                            head.received || 0,
+                            head.expenditure || 0,
+                            head.commitments || 0,
+                            head.pcc_can_be_spent || head.remaining || 0
+                        ],
+                        backgroundColor: ['#0284c7', '#dc2626', '#d97706', '#16a34a'],
+                        borderColor: ['#0369a1', '#b91c1c', '#b45309', '#15803d'],
+                        borderWidth: 1.5,
+                        barThickness: 38
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#e2e8f0' },
-                        ticks: {
-                            color: '#475569',
-                            font: { family: "'Rajdhani', sans-serif", weight: 'bold', size: 12 },
-                            callback: function(value) {
-                                return 'Rs. ' + (value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : (value/1000).toFixed(0) + 'k');
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: { display: false },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return ' Rs. ' + Number(tooltipItem.yLabel || tooltipItem.value).toLocaleString();
                             }
                         }
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            color: '#1e293b',
-                            font: { family: "'Rajdhani', sans-serif", weight: 'bold', size: 13 }
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontColor: '#475569',
+                                fontFamily: "'Rajdhani', sans-serif",
+                                callback: function(value) {
+                                    return 'Rs. ' + (value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : (value/1000).toFixed(0) + 'k');
+                                }
+                            },
+                            gridLines: { color: '#e2e8f0' }
+                        }],
+                        xAxes: [{
+                            gridLines: { display: false },
+                            ticks: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 12 }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // 2. BUDGET UTILIZATION BREAKDOWN (DOUGHNUT CHART)
+        const canvasDoughnut = document.getElementById('budgetUtilizationDoughnutChart');
+        if (canvasDoughnut) {
+            const ctxDoughnut = canvasDoughnut.getContext('2d');
+            const totalAlloc = Number(head.allocation || 0);
+            const spentVal = Number(head.expenditure || 0);
+            const cmtVal = Number(head.commitments || 0);
+            const ipcVal = Number(head.in_process || 0);
+            const remVal = Math.max(0, Number(head.pcc_can_be_spent || head.remaining || 0));
+
+            new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Expenditure (Spent)', 'Commitments (Reserved)', 'In Process (Pending)', 'Spendable Balance'],
+                    datasets: [{
+                        data: [spentVal, cmtVal, ipcVal, remVal],
+                        backgroundColor: ['#dc2626', '#d97706', '#64748b', '#16a34a'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom',
+                        labels: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 11, boxWidth: 14 }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                const val = data.datasets[0].data[tooltipItem.index];
+                                const pct = totalAlloc > 0 ? ((val / totalAlloc) * 100).toFixed(1) : 0;
+                                return ' ' + data.labels[tooltipItem.index] + ': Rs. ' + Number(val).toLocaleString() + ' (' + pct + '%)';
+                            }
+                        }
+                    },
+                    cutoutPercentage: 62
+                }
+            });
+        }
+
+        // 3. SUBHEADS COMPARISON MULTI-BAR CHART
+        const canvasSub = document.getElementById('subheadComparisonChart');
+        if (canvasSub && Array.isArray(subheads) && subheads.length > 0) {
+            const ctxSub = canvasSub.getContext('2d');
+            const shLabels = subheads.map(s => s.name || 'N/A');
+            const shAllocData = subheads.map(s => Number(s.allocation || 0));
+            const shExpData = subheads.map(s => Number(s.expenditure || 0));
+            const shCmtData = subheads.map(s => Number(s.commitments || 0));
+            const shRemData = subheads.map(s => Math.max(0, Number(s.can_be_spent || s.remaining || 0)));
+
+            new Chart(ctxSub, {
+                type: 'bar',
+                data: {
+                    labels: shLabels,
+                    datasets: [
+                        {
+                            label: 'Allocation',
+                            data: shAllocData,
+                            backgroundColor: '#0284c7',
+                            borderColor: '#0369a1',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Expenditure',
+                            data: shExpData,
+                            backgroundColor: '#dc2626',
+                            borderColor: '#b91c1c',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Commitments',
+                            data: shCmtData,
+                            backgroundColor: '#d97706',
+                            borderColor: '#b45309',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Can Be Spent',
+                            data: shRemData,
+                            backgroundColor: '#16a34a',
+                            borderColor: '#15803d',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'top',
+                        labels: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 12, boxWidth: 12 }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                const datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                                return ' ' + datasetLabel + ': Rs. ' + Number(tooltipItem.yLabel).toLocaleString();
+                            }
+                        }
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontColor: '#475569',
+                                fontFamily: "'Rajdhani', sans-serif",
+                                callback: function(value) {
+                                    return 'Rs. ' + (value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : (value/1000).toFixed(0) + 'k');
+                                }
+                            },
+                            gridLines: { color: '#e2e8f0' }
+                        }],
+                        xAxes: [{
+                            gridLines: { display: false },
+                            ticks: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 12 }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // 4. SUBHEAD EXPENDITURE SHARE (PIE CHART)
+        const canvasPie = document.getElementById('subheadExpenditurePieChart');
+        if (canvasPie && Array.isArray(subheads) && subheads.length > 0) {
+            const ctxPie = canvasPie.getContext('2d');
+            const filteredSh = subheads.filter(s => Number(s.expenditure || 0) > 0);
+            const targetList = filteredSh.length > 0 ? filteredSh : subheads;
+            const pLabels = targetList.map(s => s.name || 'N/A');
+            const pData = targetList.map(s => Number(s.expenditure || 0));
+            const pColors = ['#0284c7', '#dc2626', '#d97706', '#16a34a', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316'];
+
+            new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: pLabels,
+                    datasets: [{
+                        data: pData,
+                        backgroundColor: pColors.slice(0, pLabels.length),
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom',
+                        labels: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 11, boxWidth: 12 }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                const val = data.datasets[0].data[tooltipItem.index];
+                                const sum = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const pct = sum > 0 ? ((val / sum) * 100).toFixed(1) : 0;
+                                return ' ' + data.labels[tooltipItem.index] + ': Rs. ' + Number(val).toLocaleString() + ' (' + pct + '%)';
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        // 5. FUNDING SHARES DISTRIBUTION
+        const canvasFund = document.getElementById('fundingSharesChart');
+        if (canvasFund) {
+            const ctxFund = canvasFund.getContext('2d');
+            new Chart(ctxFund, {
+                type: 'doughnut',
+                data: {
+                    labels: ['MTSS Share', 'RDW Net Share', 'CSRF Share'],
+                    datasets: [{
+                        data: [
+                            Number(head.mtss_share || 0),
+                            Number(head.rdw_share || 0),
+                            Number(head.csrf_share || 0)
+                        ],
+                        backgroundColor: ['#dc2626', '#16a34a', '#d97706'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom',
+                        labels: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 11, boxWidth: 14 }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                const val = data.datasets[0].data[tooltipItem.index];
+                                const sum = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const pct = sum > 0 ? ((val / sum) * 100).toFixed(1) : 0;
+                                return ' ' + data.labels[tooltipItem.index] + ': Rs. ' + Number(val).toLocaleString() + ' (' + pct + '%)';
+                            }
+                        }
+                    },
+                    cutoutPercentage: 55
+                }
+            });
+        }
+
+        // 6. SUBHEAD UTILIZATION HORIZONTAL BAR CHART
+        const canvasUtil = document.getElementById('subheadUtilizationBarChart');
+        if (canvasUtil && Array.isArray(subheads) && subheads.length > 0) {
+            const ctxUtil = canvasUtil.getContext('2d');
+            const uLabels = subheads.map(s => s.name || 'N/A');
+            const uPercentages = subheads.map(s => {
+                const alloc = Number(s.allocation || 0);
+                const exp = Number(s.expenditure || 0);
+                return alloc > 0 ? Number(((exp / alloc) * 100).toFixed(1)) : 0;
+            });
+            const uColors = uPercentages.map(p => p > 90 ? '#dc2626' : (p > 60 ? '#d97706' : '#16a34a'));
+
+            new Chart(ctxUtil, {
+                type: 'horizontalBar',
+                data: {
+                    labels: uLabels,
+                    datasets: [{
+                        label: 'Utilization %',
+                        data: uPercentages,
+                        backgroundColor: uColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: { display: false },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return ' ' + tooltipItem.xLabel + '% Utilized';
+                            }
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                max: Math.max(100, Math.ceil(Math.max(...uPercentages, 100) / 10) * 10),
+                                fontColor: '#475569',
+                                fontFamily: "'Rajdhani', sans-serif",
+                                callback: function(val) { return val + '%'; }
+                            },
+                            gridLines: { color: '#e2e8f0' }
+                        }],
+                        yAxes: [{
+                            gridLines: { display: false },
+                            ticks: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 12 }
+                        }]
+                    }
+                }
+            });
+        }
     }
 
-    // 2. SUBHEADS COMPARISON BAR CHART
-    const canvasSub = document.getElementById('subheadComparisonChart');
-    if (canvasSub && Array.isArray(subheads) && subheads.length > 0) {
-        const ctxSub = canvasSub.getContext('2d');
-        const shLabels = subheads.map(s => s.name || 'N/A');
-        const shAllocData = subheads.map(s => s.allocation || 0);
-        const shExpData = subheads.map(s => s.expenditure || 0);
+    // Tab Activation Listener for Charts
+    $('a[data-toggle="pill"]').on('shown.bs.tab', function(e) {
+        if (e.target.getAttribute('href') === '#tab-charts') {
+            renderAllFinCharts();
+        }
+    });
 
-        new Chart(ctxSub, {
-            type: 'bar',
-            data: {
-                labels: shLabels,
-                datasets: [
-                    {
-                        label: 'Allocation',
-                        data: shAllocData,
-                        backgroundColor: '#0284c7',
-                        borderColor: '#0369a1',
-                        borderWidth: 1.5,
-                        borderRadius: 5
-                    },
-                    {
-                        label: 'Expenditure',
-                        data: shExpData,
-                        backgroundColor: '#dc2626',
-                        borderColor: '#b91c1c',
-                        borderWidth: 1.5,
-                        borderRadius: 5
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#1e293b',
-                            font: { family: "'Rajdhani', sans-serif", weight: 'bold', size: 13 }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': Rs. ' + Number(context.raw).toLocaleString();
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#e2e8f0' },
-                        ticks: {
-                            color: '#475569',
-                            font: { family: "'Rajdhani', sans-serif", weight: 'bold' },
-                            callback: function(value) {
-                                return 'Rs. ' + (value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : (value/1000).toFixed(0) + 'k');
-                            }
-                        }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            color: '#1e293b',
-                            font: { family: "'Rajdhani', sans-serif", weight: 'bold', size: 12 }
-                        }
-                    }
-                }
-            }
-        });
+    if (window.location.hash === '#tab-charts' || $('#tab-charts').hasClass('active')) {
+        setTimeout(renderAllFinCharts, 250);
     }
     @endif
+
+    // AJAX Form Upload for Project Financial View Attachments
+    const uploadForm = document.getElementById('formUploadProjectFinAttachment');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('btnSubmitFinAttachment');
+            const origHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span> Uploading...';
+            }
+
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHtml;
+                }
+                $('#modalUploadProjectFinAttachment').modal('hide');
+                uploadForm.reset();
+
+                if (data.success) {
+                    // Update table
+                    const tbody = document.getElementById('finProjectAttachmentsTbody');
+                    const noRow = document.getElementById('noAttachmentsRow');
+                    if (noRow) noRow.remove();
+
+                    const rowCount = tbody ? tbody.querySelectorAll('tr').length + 1 : 1;
+                    const docType = formData.get('doc_type') || 'Attachment';
+                    const fileInput = document.getElementById('fileFinAttachmentInput');
+                    const fileName = fileInput && fileInput.files[0] ? fileInput.files[0].name : 'Document File';
+                    const fileUrl = data.url || '#';
+                    const ext = (fileName.split('.').pop() || '').toLowerCase();
+                    let iconClass = 'fa-file-alt text-info';
+                    if (ext === 'pdf') iconClass = 'fa-file-pdf text-danger';
+                    else if (['doc', 'docx'].includes(ext)) iconClass = 'fa-file-word text-primary';
+                    else if (['xls', 'xlsx'].includes(ext)) iconClass = 'fa-file-excel text-success';
+                    else if (['jpg', 'jpeg', 'png'].includes(ext)) iconClass = 'fa-file-image text-warning';
+
+                    const newRow = `
+                        <tr style="background: #f0fdf4;">
+                            <td class="pl-3 font-weight-bold text-primary">${rowCount}</td>
+                            <td class="font-weight-bold text-dark">
+                                <i class="fas ${iconClass} fa-lg mr-2"></i>
+                                <span class="doc-type-text">${docType}</span>
+                            </td>
+                            <td class="text-muted font-weight-bold font-mono" style="font-size: 0.85rem;">
+                                ${fileName}
+                            </td>
+                            <td class="text-dark font-weight-bold" style="font-size: 0.85rem;">
+                                Just now
+                            </td>
+                            <td class="pr-3 text-center">
+                                <a href="${fileUrl}" onclick="window.openLiveDocument('${fileUrl}', '${docType.replaceAll("'", "\\'")}'); return false;" class="rd-live-file-view btn btn-xs btn-primary font-weight-bold px-2.5 py-1 rounded shadow-sm" title="View Document Live">
+                                    <i class="fas fa-eye mr-1"></i> View File
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+
+                    if (tbody) tbody.insertAdjacentHTML('afterbegin', newRow);
+
+                    // Update count badges
+                    const badge = document.getElementById('projectAttCountBadge');
+                    if (badge) {
+                        badge.textContent = (rowCount) + ' Document(s) Available';
+                    }
+                    const pillLink = document.getElementById('tab-docs-link');
+                    if (pillLink) {
+                        pillLink.innerHTML = `<i class="fas fa-paperclip"></i> Files & Attachments (${rowCount})`;
+                    }
+
+                    if (window.Swal) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || 'File uploaded successfully!',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    } else {
+                        alert(data.message || 'File uploaded successfully!');
+                    }
+                } else {
+                    throw new Error(data.message || 'Upload failed');
+                }
+            })
+            .catch(err => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHtml;
+                }
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Failed',
+                        text: err.message || 'Could not upload attachment. Please try again.'
+                    });
+                } else {
+                    alert('Upload failed: ' + (err.message || 'Please try again.'));
+                }
+            });
+        });
+    }
 });
 </script>
 @endpush

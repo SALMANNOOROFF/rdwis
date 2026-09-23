@@ -451,10 +451,10 @@ class FinancialIntelligenceService
             ->where('c.cmt_hed_id', $headId)
             ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO'])
             ->select(
-                'shd.subhead',
+                DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN c.cmt_type = 'Sa' THEN 'HR' ELSE NULL END) as subhead"),
                 DB::raw('SUM(ROUND((CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) * COALESCE(shd.ratio, 1.0), 2)) as total')
             )
-            ->groupBy('shd.subhead')
+            ->groupBy(DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN c.cmt_type = 'Sa' THEN 'HR' ELSE NULL END)"))
             ->get();
 
         $subheadExpenditures = [];
@@ -475,10 +475,11 @@ class FinancialIntelligenceService
             ->where('c.cmt_status', 'Awaited')
             ->select(
                 'c.cmt_id',
+                'c.cmt_type',
                 'shd.subhead',
                 DB::raw('SUM(CASE WHEN t.trn_transtype = 1 THEN COALESCE(t.trn_amount1, 0) ELSE COALESCE(t.trn_amount2, 0) END) as paid')
             )
-            ->groupBy('c.cmt_id', 'shd.subhead')
+            ->groupBy('c.cmt_id', 'c.cmt_type', 'shd.subhead')
             ->get();
 
         $commitSubhead = DB::table('fin.commitments as c')
@@ -489,17 +490,18 @@ class FinancialIntelligenceService
             ->where('c.cmt_hed_id', $headId)
             ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
             ->where('c.cmt_status', 'Awaited')
-            ->select('c.cmt_id', 'shd.subhead', 'c.cmt_amount', 'shd.ratio')
+            ->select('c.cmt_id', 'c.cmt_type', 'shd.subhead', 'c.cmt_amount', 'shd.ratio')
             ->get();
 
         $subheadCommitments = [];
         foreach ($commitSubhead as $cmt) {
             $ratio = (float) ($cmt->ratio ?? 1.0);
-            $subhead = $cmt->subhead;
+            $subhead = !empty(trim((string)$cmt->subhead)) ? trim((string)$cmt->subhead) : ($cmt->cmt_type === 'Sa' ? 'HR' : null);
             
             $paid = 0;
             foreach ($paidSubhead as $p) {
-                if ($p->cmt_id == $cmt->cmt_id && $p->subhead == $subhead) {
+                $pSub = !empty(trim((string)$p->subhead)) ? trim((string)$p->subhead) : ($p->cmt_type === 'Sa' ? 'HR' : null);
+                if ($p->cmt_id == $cmt->cmt_id && $pSub == $subhead) {
                     $paid = (float) $p->paid;
                     break;
                 }
@@ -521,10 +523,10 @@ class FinancialIntelligenceService
             })
             ->where('ipc.hed_id', $headId)
             ->select(
-                DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN ipc.doctype IN ('Ps', 'mat', 'pur') THEN 'Equipment' ELSE 'Misc' END) as subhead"),
+                DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN ipc.doctype IN ('Ps', 'mat', 'pur') THEN 'Equipment' WHEN ipc.doctype = 'Sa' THEN 'HR' ELSE 'Misc' END) as subhead"),
                 DB::raw('SUM(ROUND((CASE WHEN ipc.transtype = 1 THEN ipc.amount1 ELSE ipc.amount2 END) * COALESCE(shd.ratio, 1.0), 2)) as total')
             )
-            ->groupBy(DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN ipc.doctype IN ('Ps', 'mat', 'pur') THEN 'Equipment' ELSE 'Misc' END)"))
+            ->groupBy(DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN ipc.doctype IN ('Ps', 'mat', 'pur') THEN 'Equipment' WHEN ipc.doctype = 'Sa' THEN 'HR' ELSE 'Misc' END)"))
             ->get();
 
         $subheadInProcesses = [];
@@ -580,11 +582,11 @@ class FinancialIntelligenceService
                     'name' => $name,
                     'allocation' => (float) $sh->sbh_alloc,
                     'expenditure' => $exp,
-                    'commitments' => 0.0,
-                    'in_process' => 0.0,
+                    'commitments' => $com,
+                    'in_process' => $ipcVal,
                     'forecast' => $forecast,
-                    'remaining' => round((float) $sh->sbh_alloc - $exp - $forecast, 2),
-                    'can_be_spent' => round((float) $sh->sbh_alloc - $exp - $forecast, 2)
+                    'remaining' => round((float) $sh->sbh_alloc - $exp - $com - $ipcVal - $forecast, 2),
+                    'can_be_spent' => round((float) $sh->sbh_alloc - $exp - $com - $ipcVal - $forecast, 2)
                 ];
             } else {
                 $result[] = [

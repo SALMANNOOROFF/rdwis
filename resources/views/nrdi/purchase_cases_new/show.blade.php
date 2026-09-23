@@ -7,16 +7,8 @@
 
     $caseValue      = (float)($purchase->live_value ?? ($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0)));
     
-    // Image terminologies implementation (Legacy Logic)
-    $finReceived    = (float)($head->received ?? 0);
-    $finBalance     = (float)($head->balance ?? 0);
-    $finExpenditure = (float)($head->expenditure ?? 0);
-    $finCommitments = (float)($head->commitments ?? 0);
-    $finInProcess   = (float)($head->in_process ?? 0);
-    $finAvailable   = (float)($head->available ?? 0);
-    $finCanBeSpent  = (float)($head->can_be_spent ?? 0);
-    // Pure Project Allocation (Excluding CSRF share)
-    $finAllocation  = (float)($head->prj_share ?? 0);
+    // Pure Project Allocation & Metrics (Excluding CSRF share / accounts)
+    $finAllocation  = (float)($head->pcc_share ?? ($head->prj_share ?? 0));
     if ($finAllocation <= 0 && isset($head->rdw_share)) {
         $rdw = (float)($head->rdw_share ?? 0);
         $cf  = (float)($head->cf_share ?? ($head->csrf_share ?? 0));
@@ -30,6 +22,14 @@
     if ($finAllocation <= 0 && !empty($purchase->project)) {
         $finAllocation = (float)($purchase->project->prj_aprvcost ?: ($purchase->project->prj_cost ?? 0));
     }
+
+    $finReceived    = isset($head->pcc_received) ? (float)$head->pcc_received : (float)($head->received ?? 0);
+    $finExpenditure = isset($head->pcc_expenditure) ? (float)$head->pcc_expenditure : (float)($head->expenditure ?? 0);
+    $finBalance     = isset($head->pcc_balance) ? (float)$head->pcc_balance : ($finReceived - $finExpenditure);
+    $finCommitments = isset($head->pcc_commitments) ? (float)$head->pcc_commitments : (float)($head->commitments ?? 0);
+    $finInProcess   = isset($head->pcc_in_process) ? (float)$head->pcc_in_process : (float)($head->in_process ?? 0);
+    $finAvailable   = isset($head->pcc_available) ? (float)$head->pcc_available : ($finBalance - $finCommitments - $finInProcess);
+    $finCanBeSpent  = isset($head->pcc_can_be_spent) ? (float)$head->pcc_can_be_spent : ($finAllocation - $finExpenditure - $finCommitments - $finInProcess);
 
     
     // For progress bar if still needed somewhere else
@@ -140,6 +140,33 @@
     box-shadow: 0 3px 8px rgba(40, 167, 69, 0.4) !important;
 }
 
+/* ---- Drilldown Buttons ---- */
+.btn-drill-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    margin-left: 5px;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+    border: 1px solid currentColor;
+    opacity: 0.85;
+    vertical-align: middle;
+}
+.btn-drill-link:hover {
+    opacity: 1;
+    transform: scale(1.18);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.btn-drill-red { color: #dc2626; background: #fee2e2; border-color: #fca5a5; }
+.btn-drill-amber { color: #b45309; background: #fef3c7; border-color: #fcd34d; }
+.btn-drill-green { color: #16a34a; background: #dcfce7; border-color: #86efac; }
+.btn-drill-gray { color: #475569; background: #f1f5f9; border-color: #cbd5e1; }
+.btn-drill-cyan { color: #0284c7; background: #e0f2fe; border-color: #7dd3fc; }
+
 /* ---- 2-col grid ---- */
 .dg-grid { display:grid; grid-template-columns:60% 40%; gap:18px; align-items:start; }
 @media(max-width:1300px){ .dg-grid { grid-template-columns:60% 40%; } }
@@ -201,9 +228,11 @@
 .dg-cs-btn { background:rgba(23,162,184,0.1); border:1px solid rgba(23,162,184,0.3); color:var(--rd-info); font-size:10px; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer; transition:all .2s; white-space:nowrap; }
 .dg-cs-btn:hover { background:rgba(23,162,184,0.22); color:#fff; border-color:var(--rd-info); }
 
-.dg-items-wrap { max-height:180px; overflow-y:auto; }
-.dg-items-wrap::-webkit-scrollbar { width:3px; }
-.dg-items-wrap::-webkit-scrollbar-thumb { background:var(--rd-border); border-radius:4px; }
+.dg-items-wrap { max-height:180px; overflow-y:auto; scrollbar-width: thin; scrollbar-color: #64748b #f1f5f9; }
+.dg-items-wrap::-webkit-scrollbar { width:8px; height:8px; }
+.dg-items-wrap::-webkit-scrollbar-track { background:#f1f5f9; border-radius:4px; }
+.dg-items-wrap::-webkit-scrollbar-thumb { background:#64748b; border-radius:4px; border:1px solid #f1f5f9; }
+.dg-items-wrap::-webkit-scrollbar-thumb:hover { background:#334155; }
 .dg-items-table { width:100%; font-size:11px; border-collapse:collapse; white-space: nowrap; }
 .dg-items-table th { padding:5px 8px; color: #475569; font-weight:700; font-size:10px; letter-spacing:.4px; text-align:left; text-transform:uppercase; background: #f8fafc; border-bottom: 1.5px solid #cbd5e1; }
 .dg-items-table td { padding:5px 8px; border-top:1px solid #f1f5f9; color: #0f172a; font-size:11px; vertical-align: middle; }
@@ -221,9 +250,69 @@
 .dg-panel-r-hdr { background:var(--rd-surface2); padding:8px 12px; border-bottom:1px solid var(--rd-border); display:flex; align-items:center; gap:6px; }
 .dg-panel-r-title { font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:700; color:var(--rd-accent); letter-spacing:0.8px; text-transform:uppercase; }
 
-.dg-trail-body { padding:14px; max-height:360px; overflow-y:auto; }
-.dg-trail-body::-webkit-scrollbar { width:3px; }
-.dg-trail-body::-webkit-scrollbar-thumb { background:var(--rd-border); border-radius:4px; }
+.dg-trail-body { padding:14px; max-height:360px; overflow-y:auto; scrollbar-width: thin; scrollbar-color: #64748b #f1f5f9; }
+.dg-trail-body::-webkit-scrollbar { width:8px; height:8px; }
+.dg-trail-body::-webkit-scrollbar-track { background:#f1f5f9; border-radius:4px; }
+.dg-trail-body::-webkit-scrollbar-thumb { background:#64748b; border-radius:4px; border:1px solid #f1f5f9; }
+.dg-trail-body::-webkit-scrollbar-thumb:hover { background:#334155; }
+
+/* Minute Section & Remarks Scrollbars */
+#conversational-comments-box {
+    scrollbar-width: thin !important;
+    scrollbar-color: #64748b #f1f5f9 !important;
+}
+#conversational-comments-box::-webkit-scrollbar {
+    width: 10px !important;
+}
+#conversational-comments-box::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+#conversational-comments-box::-webkit-scrollbar-thumb {
+    background: #64748b !important;
+    border-radius: 6px !important;
+    border: 2px solid #f1f5f9 !important;
+}
+#conversational-comments-box::-webkit-scrollbar-thumb:hover {
+    background: #334155 !important;
+}
+
+#inlineRemarks {
+    scrollbar-width: thin !important;
+    scrollbar-color: #64748b #f1f5f9 !important;
+}
+#inlineRemarks::-webkit-scrollbar {
+    width: 10px !important;
+}
+#inlineRemarks::-webkit-scrollbar-track {
+    background: #f8fafc !important;
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+#inlineRemarks::-webkit-scrollbar-thumb {
+    background: #64748b !important;
+    border-radius: 6px !important;
+    border: 2px solid #f8fafc !important;
+}
+#inlineRemarks::-webkit-scrollbar-thumb:hover {
+    background: #334155 !important;
+}
+
+#pcCaseAttachmentsList::-webkit-scrollbar {
+    width: 8px;
+}
+#pcCaseAttachmentsList::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+#pcCaseAttachmentsList::-webkit-scrollbar-thumb {
+    background: #64748b;
+    border-radius: 4px;
+}
+#pcCaseAttachmentsList::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}
 
 .dg-tl-item { display:flex; gap:10px; opacity:0; transform:translateX(-10px); animation:dgSlideIn .4s forwards; }
 @keyframes dgSlideIn { to { opacity:1; transform:translateX(0); } }
@@ -300,9 +389,10 @@
     scrollbar-width: thin;
     display: none;
 }
-#pcGlobalFirmDropdown::-webkit-scrollbar { width: 5px; }
-#pcGlobalFirmDropdown::-webkit-scrollbar-track { background: var(--rd-surface2); }
-#pcGlobalFirmDropdown::-webkit-scrollbar-thumb { background: var(--rd-border3); border-radius: 3px; }
+#pcGlobalFirmDropdown::-webkit-scrollbar { width: 8px; }
+#pcGlobalFirmDropdown::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+#pcGlobalFirmDropdown::-webkit-scrollbar-thumb { background: #64748b; border-radius: 4px; }
+#pcGlobalFirmDropdown::-webkit-scrollbar-thumb:hover { background: #334155; }
 .pc-firm-opt {
     padding: 7px 12px;
     font-size: 11px;
@@ -393,15 +483,61 @@
                                 @endif
                             @endif
 
-                            {{-- Comparative Statement visible to all users only when there is more than 1 quote in the case (for all case types) --}}
                             @if($quotesCount > 1)
                                 <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-comparative-stmt rajdhani">
                                     <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
                                 </a>
                             @endif
+
+                            @php
+                                $isPettyOrTada = in_array(strtolower(trim((string)($purchase->pcs_type ?? ''))), ['pe', 'petty', 'rb', 'tada', 'ta/da'], true);
+                                $reverseRoute = strtolower(trim((string)($purchase->pcs_type ?? ''))) === 'pe' || strtolower(trim((string)($purchase->pcs_type ?? ''))) === 'petty'
+                                    ? route('purchase.petty.reverse', $purchase->pcs_id)
+                                    : route('purchase.tada.reverse', $purchase->pcs_id);
+                            @endphp
+
+                            @if($isPettyOrTada && Gate::check('initiate', \App\Models\AudRev::class))
+                                <button type="button" class="btn-hdr-action btn-hdr-reverse rajdhani text-danger" style="border: 1px solid rgba(220, 53, 69, 0.6) !important; background: rgba(220, 53, 69, 0.08) !important; cursor: pointer;" data-toggle="modal" data-target="#reversePettyTadaModal">
+                                    <i class="fas fa-sync-alt mr-1"></i> REVERSE CASE
+                                </button>
+
+                                <!-- Reverse Modal -->
+                                <div class="modal fade text-left" id="reversePettyTadaModal" tabindex="-1" role="dialog" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content shadow-lg border-0" style="font-family: inherit;">
+                                            <form action="{{ $reverseRoute }}" method="POST">
+                                                @csrf
+                                                <div class="modal-header bg-danger text-white py-2">
+                                                    <h6 class="modal-title font-weight-bold mb-0">
+                                                        <i class="fas fa-sync-alt mr-1"></i> Reverse Purchase Case #{{ $purchase->pcs_id }}
+                                                    </h6>
+                                                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                </div>
+                                                <div class="modal-body p-3">
+                                                    <p class="small text-muted mb-2">
+                                                        This will generate a Data Revision request (RevType 1: Full Cascade) for Purchase Case #{{ $purchase->pcs_id }}.
+                                                    </p>
+                                                    <div class="form-group mb-0">
+                                                        <label class="font-weight-bold small text-dark">Reason for Reversal <span class="text-danger">*</span></label>
+                                                        <textarea name="rev_reason" class="form-control form-control-sm" rows="3" placeholder="Enter reason for revision..." required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light py-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-sm btn-danger font-weight-bold px-3">
+                                                        <i class="fas fa-check mr-1"></i> Generate Reversal Draft
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                             <a href="{{ $backRoute }}" class="dg-back-btn" style="padding: 6px 15px; font-size: 12px;">
                                 <i class="fas fa-arrow-left mr-1"></i> Back
                             </a>
+
                         </div>
                     </div>
                     
@@ -425,6 +561,17 @@
                         @endif
 
                         {{-- Case Header Metadata --}}
+                        @php
+                            $prjId = $purchase->project?->prj_id 
+                                ?? ($purchase->head?->hed_prj_id ?? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->value('hed_prj_id'));
+                            
+                            $caseAttachments = \Illuminate\Support\Facades\DB::table('pur.purattachments')
+                                ->where('pat_objid', $purchase->pcs_id)
+                                ->where('pat_objtype', 'pcs')
+                                ->whereNotNull('pat_path')
+                                ->where('pat_path', '<>', '')
+                                ->get();
+                        @endphp
                         <div class="mb-4 d-flex align-items-start gap-4">
                             <div style="flex: 1;">
                                 <div class="d-flex align-items-start mb-2" style="font-size: 13px;">
@@ -442,12 +589,43 @@
                                 <div class="d-flex flex-column" style="gap: 8px; font-size: 13px;">
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-hashtag text-primary mr-2"></i>CASE ID:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">#{{ $purchase->pcs_id }}</span></div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="far fa-calendar-alt text-primary mr-2"></i>DATE:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span></div>
-                                    <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-project-diagram text-primary mr-2"></i>PROJECT:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ $purchase->project?->prj_code ?? $purchase->pcs_hed_id }}</span></div>
+                                    <div class="d-flex align-items-center">
+                                        <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-project-diagram text-primary mr-2"></i>PROJECT:</strong> 
+                                        <span class="badge badge-light border px-2 py-1 font-weight-bold" style="font-size: 12.5px; color: #0f172a; background: #f8fafc; border-color: #cbd5e1 !important;">
+                                            {{ $purchase->project?->prj_code ?? ($purchase->head?->hed_code ?? $purchase->pcs_hed_id) }}
+                                        </span>
+                                        <div class="dropdown d-inline-block ml-1">
+                                            <button class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm dropdown-toggle" type="button" id="projectNavDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 12px; height: 22px; width: 24px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="Project Navigation">
+                                                <i class="fas fa-ellipsis-v" style="font-size: 10px;"></i>
+                                            </button>
+                                            <div class="dropdown-menu shadow-lg py-1 mt-1 border" aria-labelledby="projectNavDropdown" style="font-size: 12.5px; border-radius: 8px; border-color: #cbd5e1; min-width: 220px; z-index: 1050;">
+                                                <div class="dropdown-header py-1 px-3 text-muted text-uppercase rajdhani font-weight-bold" style="font-size: 10px; letter-spacing: 0.8px;">Project Navigation</div>
+                                                @if($prjId)
+                                                <a class="dropdown-item py-2 px-3 d-flex align-items-center font-weight-bold text-dark" href="{{ route('projects.show', $prjId) }}" target="_blank">
+                                                    <i class="fas fa-project-diagram text-primary mr-2" style="width: 16px;"></i> Project Details
+                                                </a>
+                                                @endif
+                                                <a class="dropdown-item py-2 px-3 d-flex align-items-center font-weight-bold text-dark" href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-docs" target="_blank">
+                                                    <i class="fas fa-paperclip text-success mr-2" style="width: 16px;"></i> Files & Attachments
+                                                </a>
+                                                <a class="dropdown-item py-2 px-3 d-flex align-items-center font-weight-bold text-dark" href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-milestones" target="_blank">
+                                                    <i class="fas fa-coins text-warning mr-2" style="width: 16px;"></i> Milestone Costs
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="d-flex align-items-center">
                                         <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> 
-                                        <span class="view-only text-dark font-weight-bold" id="pcSubheadView" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span>
+                                        <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                            <span class="view-only text-dark font-weight-bold" id="pcSubheadView" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span>
+                                            @if($purchase->subhead_display && $purchase->pcs_hed_id)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $purchase->subhead_display]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm" style="font-size: 12px; height: 22px; width: 22px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="View {{ $purchase->subhead_display }} Financial Breakdown">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </a>
+                                            @endif
+                                        </div>
                                         @if($canEdit)
-                                            <form class="edit-only d-flex align-items-center flex-grow-1 pc-metadata-ajax-form" style="gap:6px; margin:0;" action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST">
+                                            <form class="edit-only d-flex align-items-center flex-grow-1 pc-metadata-ajax-form ml-2" style="gap:6px; margin:0;" action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="op" value="save_metadata">
                                                 <input type="text" name="subhead" class="form-control form-control-sm" value="{{ $purchase->subhead_display }}" style="font-size: 11px; height: 28px; max-width: 200px;" list="subheadOptionsList" placeholder="Subhead...">
@@ -524,119 +702,6 @@
                                             </span>
                                         @endif
                                     </div>
-
-                                    {{-- Attached Documents (Project & Case Side-by-Side) --}}
-                                    @php
-                                        $prjId = $purchase->project?->prj_id 
-                                            ?? ($purchase->head?->hed_prj_id ?? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->value('hed_prj_id'));
-                                        
-                                        $projectAttachments = $prjId 
-                                            ? \Illuminate\Support\Facades\DB::table('prj.prjattachments')
-                                                ->where('jat_objid', $prjId)
-                                                ->whereIn('jat_objtype', ['prj', 'Project'])
-                                                ->whereNotNull('jat_path')
-                                                ->where('jat_path', '<>', '')
-                                                ->get()
-                                            : collect();
-
-                                        $caseAttachments = \Illuminate\Support\Facades\DB::table('pur.purattachments')
-                                            ->where('pat_objid', $purchase->pcs_id)
-                                            ->where('pat_objtype', 'pcs')
-                                            ->whereNotNull('pat_path')
-                                            ->where('pat_path', '<>', '')
-                                            ->get();
-                                    @endphp
-                                    <div class="mt-2 d-flex align-items-stretch" style="gap: 8px; max-width: 500px; width: 100%;">
-                                        
-                                        {{-- 1. PROJECT ATTACHMENTS --}}
-                                        <div class="card border shadow-sm" style="flex: 1 1 0; min-width: 0; border-radius: 6px; border-color: #cbd5e1 !important; background: #ffffff; margin-bottom: 0;">
-                                            <div class="card-header py-1 px-2 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; min-height: 24px;">
-                                                <div class="d-flex align-items-center overflow-hidden">
-                                                    <i class="fas fa-paperclip text-primary mr-1 flex-shrink-0" style="font-size: 9px;"></i>
-                                                    <span class="font-weight-bold text-truncate" style="font-size: 9.5px; color: #475569; text-transform: uppercase; letter-spacing: 0.3px;">PROJECT ATTACHMENTS</span>
-                                                </div>
-                                                <span class="badge badge-secondary badge-pill ml-1 flex-shrink-0" style="font-size: 8.5px; padding: 1px 4px;">{{ $projectAttachments->count() }}</span>
-                                            </div>
-                                            <div class="px-2 py-1" style="font-size: 10.5px; max-height: 110px; overflow-y: auto;">
-                                                @if($projectAttachments->count() > 0)
-                                                    @foreach($projectAttachments as $pIdx => $pDoc)
-                                                        <div class="d-flex justify-content-between align-items-center py-0.5 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f1f5f9 !important; min-height: 20px;">
-                                                            <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
-                                                                <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 13px;">{{ $pIdx + 1 }}.</span>
-                                                                <span class="text-truncate font-weight-600 text-dark" style="font-size: 10px; line-height: 1.1;" title="{{ $pDoc->jat_type }}">
-                                                                    {{ $pDoc->jat_type }}
-                                                                </span>
-                                                            </div>
-                                                            <a href="{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}" onclick="window.openLiveDocument('{{ \App\Facades\FileStorage::url($pDoc->jat_path) }}', '{{ addslashes($pDoc->jat_type) }}'); return false;" class="rd-live-file-view text-primary px-0.5 hover-zoom flex-shrink-0" style="font-size: 10px;" title="Live View {{ $pDoc->jat_type }}">
-                                                                <i class="fas fa-eye"></i>
-                                                            </a>
-                                                        </div>
-                                                    @endforeach
-                                                @else
-                                                    <div class="text-center py-2 text-muted" style="font-size: 9.5px;">
-                                                        <i class="fas fa-folder-open text-muted mr-1"></i> No files.
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        {{-- 2. CASE ATTACHMENTS --}}
-                                        <div class="card border shadow-sm" style="flex: 1 1 0; min-width: 0; border-radius: 6px; border-color: #cbd5e1 !important; background: #ffffff; margin-bottom: 0;">
-                                            <div class="card-header py-1 px-2 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; min-height: 24px;">
-                                                <div class="d-flex align-items-center overflow-hidden">
-                                                    <i class="fas fa-file-invoice text-primary mr-1 flex-shrink-0" style="font-size: 9px;"></i>
-                                                    <span class="font-weight-bold text-truncate" style="font-size: 9.5px; color: #475569; text-transform: uppercase; letter-spacing: 0.3px;">CASE ATTACHMENTS</span>
-                                                </div>
-                                                <div class="d-flex align-items-center flex-shrink-0">
-                                                    <span class="badge badge-secondary badge-pill ml-1" id="pcCaseAttCountBadge" style="font-size: 8.5px; padding: 1px 4px;">{{ $caseAttachments->count() }}</span>
-                                                    <button type="button" class="btn btn-xs btn-primary p-0 d-flex align-items-center justify-content-center ml-1" data-toggle="modal" data-target="#modalAddPurchaseCaseAttachment" style="width: 18px; height: 18px; border-radius: 4px; background: var(--rd-accent, #5F7858) !important; border: none; cursor: pointer;" title="Attach Document To Purchase Case (+)">
-                                                        <i class="fas fa-plus" style="font-size: 8.5px; color: #ffffff;"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="px-2 py-1" id="pcCaseAttachmentsList" style="font-size: 10.5px; max-height: 110px; overflow-y: auto;">
-                                                @if($caseAttachments->count() > 0)
-                                                    @foreach($caseAttachments as $cIdx => $cDoc)
-                                                        @php
-                                                            $cName = trim((string)($cDoc->pat_type ?: ''));
-                                                            if (empty($cName) || strtolower($cName) === 'attachment') {
-                                                                $fn = strtolower(basename(str_replace('\\', '/', $cDoc->pat_path)));
-                                                                $cName = match(true) {
-                                                                    str_starts_with($fn, 'frm-') => 'Form',
-                                                                    str_starts_with($fn, 'min-') => 'Minute',
-                                                                    str_starts_with($fn, 'san-') => 'Sanction',
-                                                                    str_starts_with($fn, 'fs-') => 'Financial Status',
-                                                                    str_starts_with($fn, 'app-') => 'Approval',
-                                                                    str_starts_with($fn, 'aip-') => 'Approval in Principal',
-                                                                    str_starts_with($fn, 'mrr-') => 'Market Research Report',
-                                                                    str_starts_with($fn, 'wo-') => 'Work Order',
-                                                                    str_starts_with($fn, 'pcs-') => 'Form',
-                                                                    default => ($cDoc->pat_type ?: basename(str_replace('\\', '/', $cDoc->pat_path)))
-                                                                };
-                                                            }
-                                                        @endphp
-                                                        <div class="d-flex justify-content-between align-items-center py-0.5 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f1f5f9 !important; min-height: 20px;">
-                                                            <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
-                                                                <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 13px;">{{ $cIdx + 1 }}.</span>
-                                                                <span class="text-truncate font-weight-600 text-dark" style="font-size: 10px; line-height: 1.1;" title="{{ $cName }}">
-                                                                    {{ $cName }}
-                                                                </span>
-                                                            </div>
-                                                            <div class="d-flex align-items-center flex-shrink-0" style="gap: 3px;">
-                                                                <button type="button" class="btn btn-link text-primary p-0 pc-live-view-quote-btn hover-zoom" data-url="{{ url('/purchase/quote-attachment/' . $cDoc->pat_id . '/view') }}" data-pat-id="{{ $cDoc->pat_id }}" data-ext="{{ strtolower(pathinfo($cDoc->pat_path, PATHINFO_EXTENSION)) }}" data-file-path="{{ $cDoc->pat_path }}" data-file-name="{{ $cName }}" data-title="{{ $cName }}" style="font-size: 10px;" title="View {{ $cName }}">
-                                                                    <i class="fas fa-eye"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                @else
-                                                    <div class="text-center py-2 text-muted" style="font-size: 9.5px;">
-                                                        <i class="fas fa-folder-open text-muted mr-1"></i> No files.
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             
@@ -664,40 +729,61 @@
                                     $initTot = $initBase + $initSst + $initGst;
                                 }
                             @endphp
-                            <div class="text-right d-flex flex-column align-items-end" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; font-size: 12px; min-width: 260px;">
-                                <div class="d-flex justify-content-between align-items-center w-100 mb-2">
-                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 11px; letter-spacing: 0.8px;">
+                            <div class="text-right d-flex flex-column align-items-end" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px 18px; font-size: 13px; min-width: 310px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                                <div class="d-flex justify-content-between align-items-center w-100 mb-2 pb-1" style="border-bottom: 1px solid #e2e8f0;">
+                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 13px; font-weight: 800; letter-spacing: 0.8px;">
                                         <i class="fas fa-chart-pie mr-1"></i> FINANCIAL REVIEW
                                     </h6>
-                                    <button class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 9px; border-radius: 4px;">
+                                    <button class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 10px; border-radius: 4px; font-weight: 700;">
                                         <i class="fas fa-expand-arrows-alt mr-1"></i> FULL REPORT
                                     </button>
                                 </div>
                                 
-                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 3px 20px; text-align: left;">
-                                    <div class="text-muted small font-weight-bold">ALLOCATED</div>
-                                    <div class="text-dark font-weight-bold text-right" style="color: #0f172a !important;">{{ number_format($finAllocation) }}</div>
+                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 4px 24px; text-align: left;">
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">ALLOCATED</div>
+                                    <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">{{ number_format($finAllocation) }}</div>
                                     
-                                    <div class="text-muted small font-weight-bold">RECEIVED</div>
-                                    <div class="text-dark font-weight-bold text-right" style="color: #0f172a !important;">{{ number_format($finReceived) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">RECEIVED</div>
+                                    <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">{{ number_format($finReceived) }}</div>
                                     
-                                    <div class="text-muted small font-weight-bold">EXPENDITURE</div>
-                                    <div class="text-danger font-weight-bold text-right">{{ number_format($finExpenditure) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">EXPENDITURE</div>
+                                    <div class="text-right d-flex justify-content-end align-items-center">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="text-danger font-weight-bold text-decoration-none" style="font-size: 15px; color: #dc2626 !important;" title="View Project Expenditure Breakdown">
+                                            {{ number_format($finExpenditure) }}
+                                        </a>
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View Project Expenditure Breakdown">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
                                     
-                                    <div class="text-muted small font-weight-bold">BALANCE</div>
-                                    <div class="text-primary font-weight-bold text-right" style="color: var(--rd-primary-700) !important;">{{ number_format($finBalance) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">BALANCE</div>
+                                    <div class="text-primary font-weight-bold text-right" style="font-size: 15px; color: #2563eb !important;">{{ number_format($finBalance) }}</div>
                                     
-                                    <div class="text-muted small font-weight-bold">COMMITMENTS</div>
-                                    <div class="text-warning font-weight-bold text-right" style="color: #d97706 !important;">{{ number_format($finCommitments) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">COMMITMENTS</div>
+                                    <div class="text-right d-flex justify-content-end align-items-center">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="text-warning font-weight-bold text-decoration-none" style="font-size: 15px; color: #d97706 !important;" title="View Project Commitments Breakdown">
+                                            {{ number_format($finCommitments) }}
+                                        </a>
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View Project Commitments Breakdown">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
                                     
-                                    <div class="text-muted small font-weight-bold">IN PROCESS</div>
-                                    <div class="text-muted text-right">{{ number_format($finInProcess) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">IN PROCESS</div>
+                                    <div class="text-right d-flex justify-content-end align-items-center">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="text-muted font-weight-bold text-decoration-none" style="font-size: 15px; color: #64748b !important;" title="View Project In-Process Cases">
+                                            {{ number_format($finInProcess) }}
+                                        </a>
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project In-Process Cases">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
                                     
-                                    <div class="text-success font-weight-bold small border-top pt-1" style="border-color: var(--rd-text1) !important;">AVAILABLE</div>
-                                    <div class="text-success font-weight-bold text-right border-top pt-1" style="border-color: var(--rd-text1) !important; color: #16a34a !important;">{{ number_format($finAvailable) }}</div>
+                                    <div class="text-success font-weight-bold border-top pt-1" style="font-size: 13px; color: #16a34a !important; border-color: #cbd5e1 !important; letter-spacing: 0.5px;">AVAILABLE</div>
+                                    <div class="text-success font-weight-bold text-right border-top pt-1" style="font-size: 15px; color: #16a34a !important; border-color: #cbd5e1 !important;">{{ number_format($finAvailable) }}</div>
                                     
-                                    <div class="text-warning font-weight-bold small" style="font-size: 11px; color: #d97706 !important;">CAN BE SPENT</div>
-                                    <div class="text-warning font-weight-bold text-right" style="font-size: 13px; color: #d97706 !important;">{{ number_format($finCanBeSpent) }}</div>
+                                    <div class="text-warning font-weight-bold" style="font-size: 13px; color: #d97706 !important; letter-spacing: 0.5px;">CAN BE SPENT</div>
+                                    <div class="text-warning font-weight-bold text-right" style="font-size: 16px; font-weight: 900; color: #d97706 !important;">{{ number_format($finCanBeSpent) }}</div>
                                 </div>
 
                                 {{-- Separator --}}
@@ -705,24 +791,24 @@
 
                                 {{-- Case Cost Summary Header --}}
                                 <div class="d-flex justify-content-between align-items-center w-100 mb-1">
-                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 11px; letter-spacing: 0.8px;">
+                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 12px; letter-spacing: 0.8px;">
                                         <i class="fas fa-file-invoice-dollar mr-1"></i> CASE FINANCIALS
                                     </h6>
                                 </div>
 
                                 {{-- Compact Case Cost Grid --}}
                                 <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 3px 20px; text-align: left;">
-                                    <div class="text-muted small" style="font-size: 11px;">Price</div>
-                                    <div class="text-dark font-weight-bold text-right" id="pcSummaryBasePrice" style="font-size: 12px; color: #0f172a !important;">{{ number_format($initBase, 2) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px;">Price</div>
+                                    <div class="text-dark font-weight-bold text-right" id="pcSummaryBasePrice" style="font-size: 13px; color: #0f172a !important;">{{ number_format($initBase, 2) }}</div>
                                     
-                                    <div class="text-muted small" style="font-size: 11px;">SST</div>
-                                    <div class="text-dark font-weight-bold text-right" id="pcSummarySst" style="font-size: 12px; color: #0f172a !important;">{{ number_format($initSst, 2) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px;">SST</div>
+                                    <div class="text-dark font-weight-bold text-right" id="pcSummarySst" style="font-size: 13px; color: #0f172a !important;">{{ number_format($initSst, 2) }}</div>
                                     
-                                    <div class="text-muted small" style="font-size: 11px;">GST</div>
-                                    <div class="text-dark font-weight-bold text-right" id="pcSummaryGst" style="font-size: 12px; color: #0f172a !important;">{{ number_format($initGst, 2) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px;">GST</div>
+                                    <div class="text-dark font-weight-bold text-right" id="pcSummaryGst" style="font-size: 13px; color: #0f172a !important;">{{ number_format($initGst, 2) }}</div>
                                     
-                                    <div class="text-success font-weight-bold small border-top pt-1" style="font-size: 11px; border-color: var(--rd-text1) !important; color: #16a34a !important;">TOTAL</div>
-                                    <div class="text-success font-weight-bold text-right border-top pt-1" id="pcSummaryTotal" style="font-size: 15px; border-color: var(--rd-text1) !important; color: #16a34a !important;">{{ number_format($initTot, 2) }}</div>
+                                    <div class="text-success font-weight-bold border-top pt-1" style="font-size: 13px; border-color: #cbd5e1 !important; color: #16a34a !important;">TOTAL</div>
+                                    <div class="text-success font-weight-bold text-right border-top pt-1" id="pcSummaryTotal" style="font-size: 16px; font-weight: 900; border-color: #cbd5e1 !important; color: #16a34a !important;">{{ number_format($initTot, 2) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -1013,17 +1099,96 @@
                 {{-- ============ RIGHT PANE ============ --}}
                 <div class="dg-right">
                     
-                    {{-- CONVERSATIONAL VIEW / MINUTE --}}
-                    <div class="dg-panel-r">
-                        <div class="dg-panel-r-hdr py-2 px-3 d-flex justify-content-between align-items-center">
+                    {{-- CONVERSATIONAL VIEW / MINUTE (WITH INTEGRATED CASE ATTACHMENTS DROPDOWN IN HEADER) --}}
+                    <div class="dg-panel-r" style="overflow: visible;">
+                        <div class="dg-panel-r-hdr py-2 px-3 d-flex justify-content-between align-items-center" style="position: relative; border-top-left-radius: 9px; border-top-right-radius: 9px;">
                             <div class="d-flex align-items-center gap-2">
-                                <i class="fas fa-file-alt text-primary" style="font-size: 12px;"></i>
-                                <span class="dg-panel-r-title" style="font-size: 12px; color: #0f172a !important;">Minute</span>
+                                <i class="fas fa-file-alt text-primary" style="font-size: 13px;"></i>
+                                <span class="dg-panel-r-title" style="font-size: 12px; font-weight: 700; color: #0f172a !important; letter-spacing: 0.5px; text-transform: uppercase;">Minute</span>
                             </div>
-                             <div class="d-flex gap-2">
-                                <a href="{{ route('purchase.minute_view', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-primary rajdhani font-weight-bold d-none" style="padding:4px 12px; font-size:11px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-                                    <i class="fas fa-eye mr-1"></i> VIEW MINUTE
-                                </a>
+                            
+                            {{-- Case Attachments Dropdown Trigger on Far Right of Minute Header --}}
+                            <div class="dropdown" id="pcCaseAttachmentsDropdownWrap">
+                                <button type="button" class="btn btn-xs font-weight-bold rajdhani px-2 py-1 d-flex align-items-center dropdown-toggle shadow-none" id="btnCaseAttachmentsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 11px; height: 26px; border-radius: 6px; gap: 5px; background: #ffffff; border: 1.5px solid #cbd5e1; color: #1e293b; cursor: pointer;" title="View or Add Case Attachments">
+                                    <i class="fas fa-paperclip text-primary" style="font-size: 11.5px;"></i>
+                                    <span>CASE ATTACHMENTS</span>
+                                    <span class="badge badge-primary badge-pill ml-1" id="pcCaseAttCountBadge" style="font-size: 9.5px; padding: 2px 6px;">{{ $caseAttachments->count() }}</span>
+                                </button>
+
+                                <div class="dropdown-menu dropdown-menu-right shadow-lg p-0" aria-labelledby="btnCaseAttachmentsDropdown" style="width: 380px; max-width: 92vw; border-radius: 8px; border: 1.5px solid #cbd5e1; z-index: 1060; margin-top: 5px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;">
+                                    {{-- Dropdown Header with Add Button --}}
+                                    <div class="d-flex justify-content-between align-items-center py-2 px-3 border-bottom" style="background: #f8fafc;">
+                                        <div class="d-flex align-items-center font-weight-bold text-dark rajdhani" style="font-size: 12px; gap: 6px;">
+                                            <i class="fas fa-paperclip text-primary"></i>
+                                            <span>ATTACHED CASE FILES</span>
+                                        </div>
+                                        <button type="button" class="btn btn-xs btn-primary font-weight-bold rajdhani px-2 py-0.5 d-flex align-items-center" data-toggle="modal" data-target="#modalAddPurchaseCaseAttachment" style="font-size: 11px; height: 23px; border-radius: 4px; background: var(--rd-accent, #5F7858) !important; border: none; gap: 4px;" title="Upload New Case Attachment">
+                                            <i class="fas fa-plus"></i> <span>ADD</span>
+                                        </button>
+                                    </div>
+
+                                    {{-- Dropdown Body: Attachments List --}}
+                                    <div class="px-3 py-2" id="pcCaseAttachmentsList" style="font-size: 11.5px; max-height: 250px; overflow-y: auto;">
+                                        @if($caseAttachments->count() > 0)
+                                            @foreach($caseAttachments as $cIdx => $cDoc)
+                                                @php
+                                                    $cName = trim((string)($cDoc->pat_type ?: ''));
+                                                    if (empty($cName) || strtolower($cName) === 'attachment') {
+                                                        $fn = strtolower(basename(str_replace('\\', '/', $cDoc->pat_path)));
+                                                        $cName = match(true) {
+                                                            str_starts_with($fn, 'frm-') => 'Form',
+                                                            str_starts_with($fn, 'min-') => 'Minute',
+                                                            str_starts_with($fn, 'san-') => 'Sanction',
+                                                            str_starts_with($fn, 'fs-') => 'Financial Status',
+                                                            str_starts_with($fn, 'app-') => 'Approval',
+                                                            str_starts_with($fn, 'aip-') => 'Approval in Principal',
+                                                            str_starts_with($fn, 'mrr-') => 'Market Research Report',
+                                                            str_starts_with($fn, 'wo-') => 'Work Order',
+                                                            str_starts_with($fn, 'pcs-') => 'Form',
+                                                            default => ($cDoc->pat_type ?: basename(str_replace('\\', '/', $cDoc->pat_path)))
+                                                        };
+                                                    }
+                                                    $ext = strtolower(pathinfo($cDoc->pat_path, PATHINFO_EXTENSION));
+                                                @endphp
+                                                <div class="d-flex justify-content-between align-items-center py-1.5 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f1f5f9 !important;">
+                                                    <div class="d-flex align-items-center overflow-hidden mr-2" style="flex: 1; min-width: 0; gap: 6px;">
+                                                        <span class="text-muted font-weight-bold flex-shrink-0" style="font-size: 10px; width: 16px;">{{ $cIdx + 1 }}.</span>
+                                                        @if(in_array($ext, ['pdf']))
+                                                            <i class="far fa-file-pdf text-danger flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @elseif(in_array($ext, ['doc', 'docx']))
+                                                            <i class="far fa-file-word text-primary flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @elseif(in_array($ext, ['xls', 'xlsx']))
+                                                            <i class="far fa-file-excel text-success flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @elseif(in_array($ext, ['png', 'jpg', 'jpeg']))
+                                                            <i class="far fa-file-image text-info flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @else
+                                                            <i class="far fa-file-alt text-secondary flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @endif
+                                                        <span class="text-truncate font-weight-bold text-dark" style="font-size: 11.5px;" title="{{ $cName }}">
+                                                            {{ $cName }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                                                        <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 pc-live-view-quote-btn hover-zoom font-weight-bold" data-url="{{ url('/purchase/quote-attachment/' . $cDoc->pat_id . '/view') }}" data-pat-id="{{ $cDoc->pat_id }}" data-ext="{{ $ext }}" data-file-path="{{ $cDoc->pat_path }}" data-file-name="{{ $cName }}" data-title="{{ $cName }}" style="font-size: 11px; height: 22px; border-radius: 4px;" title="View {{ $cName }}">
+                                                            <i class="fas fa-eye mr-1"></i> View
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="text-center py-3 text-muted" style="font-size: 11px;">
+                                                <i class="fas fa-folder-open text-muted mr-1"></i> No case attachments uploaded yet.
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- Dropdown Footer: Quick Action to Attach Document --}}
+                                    <div class="p-2 border-top bg-light text-center" style="border-color: #e2e8f0 !important;">
+                                        <button type="button" class="btn btn-xs btn-outline-success font-weight-bold w-100 py-1 d-flex align-items-center justify-content-center" data-toggle="modal" data-target="#modalAddPurchaseCaseAttachment" style="font-size: 11px; border-radius: 4px; gap: 5px;">
+                                            <i class="fas fa-plus"></i> <span>ATTACH NEW DOCUMENT</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -1368,7 +1533,7 @@
 {{-- ============ FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
 {{-- ============ PREMIUM FINANCIAL INTELLIGENCE DASHBOARD MODAL ============ --}}
 <div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%; width: 1380px;">
         <div class="modal-content" style="background: #ffffff; border: 1px solid var(--rd-border2); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.12);">
             <div class="modal-header border-bottom py-2 px-4 d-flex align-items-center justify-content-between" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
                 <div class="d-flex align-items-center">
@@ -1376,6 +1541,19 @@
                     <div>
                         <h5 class="modal-title rajdhani font-weight-bold text-dark mb-0" style="letter-spacing: 1.5px;">FINANCIAL INTELLIGENCE REPORT</h5>
                         <div class="small text-muted rajdhani">{{ $head->head_name ?? ($head->hed_name ?? ($head->prj_code ?? 'N/A')) }} | DATED {{ date('d M y') }} <span class="ml-2 text-primary">{{ ($head->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
+                    </div>
+                    <div class="ml-auto d-flex align-items-center mr-4" style="gap: 6px;">
+                        @if($prjId)
+                        <a href="{{ route('projects.show', $prjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 10.5px; border-radius: 6px; gap: 5px; padding: 4px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(37,99,235,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(37,99,235,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(37,99,235,0.25)';">
+                            <i class="fas fa-project-diagram"></i> Project Details
+                        </a>
+                        @endif
+                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 10.5px; border-radius: 6px; gap: 5px; padding: 4px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(22,163,74,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(22,163,74,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(22,163,74,0.25)';">
+                            <i class="fas fa-paperclip"></i> Files & Attachments
+                        </a>
+                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 10.5px; border-radius: 6px; gap: 5px; padding: 4px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(217,119,6,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(217,119,6,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(217,119,6,0.25)';">
+                            <i class="fas fa-coins"></i> Milestone Costs
+                        </a>
                     </div>
                 </div>
                 <button type="button" class="close text-dark opacity-50 hover-opacity-100" data-dismiss="modal">&times;</button>
@@ -1404,7 +1582,7 @@
 
                 <div class="row no-gutters">
                     {{-- Left Pane: Detailed Metrics Table --}}
-                    <div class="col-xl-5 border-right p-4" style="background: #fbfcfe; border-color: var(--rd-border) !important;">
+                    <div class="col-xl-4 col-lg-5 border-right p-4" style="background: #fbfcfe; border-color: var(--rd-border) !important;">
                         <div class="d-flex justify-content-between align-items-end mb-3">
                             <h6 class="rajdhani text-primary font-weight-bold mb-0" style="letter-spacing: 1px;"><i class="fas fa-table mr-2"></i>PROJECT SNAPSHOT</h6>
                             <div class="small text-muted rajdhani">FIGURES IN PKR</div>
@@ -1435,9 +1613,30 @@
                                     </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">Expenditure</td>
-                                        <td class="text-right text-danger">{{ number_format($head->pcc_expenditure ?? 0) }}</td>
-                                        <td class="text-right text-danger">{{ number_format($head->cf_expenditure ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #16a34a;">{{ number_format($head->prj_expenditure ?? 0) }}</td>
+                                        <td class="text-right text-danger">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View Project Expenditure Breakdown">
+                                                {{ number_format($head->pcc_expenditure ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View Project Expenditure Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right text-danger">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View CSRF Expenditure Breakdown">
+                                                {{ number_format($head->cf_expenditure ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View CSRF Expenditure Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right pr-3" style="color: #16a34a;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #16a34a;" title="View Total Expenditure Breakdown">
+                                                {{ number_format($head->prj_expenditure ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total Expenditure Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                     <tr style="background: rgba(37,99,235,0.03);">
                                         <td class="pl-3 text-primary font-weight-bold">Balance</td>
@@ -1447,15 +1646,57 @@
                                     </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">Commitments</td>
-                                        <td class="text-right text-warning">{{ number_format($head->pcc_commitments ?? 0) }}</td>
-                                        <td class="text-right text-warning">{{ number_format($head->cf_commitments ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #16a34a;">{{ number_format($head->prj_commitments ?? 0) }}</td>
+                                        <td class="text-right text-warning">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="text-warning text-decoration-none font-weight-bold" title="View Project Commitments Breakdown">
+                                                {{ number_format($head->pcc_commitments ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View Project Commitments Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right text-warning">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="text-warning text-decoration-none font-weight-bold" title="View CSRF Commitments Breakdown">
+                                                {{ number_format($head->cf_commitments ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View CSRF Commitments Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right pr-3" style="color: #16a34a;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #16a34a;" title="View Total Commitments Breakdown">
+                                                {{ number_format($head->prj_commitments ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total Commitments Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="pl-3 text-muted">In Process</td>
-                                        <td class="text-right text-muted">{{ number_format($head->pcc_in_process ?? 0) }}</td>
-                                        <td class="text-right text-muted">{{ number_format($head->cf_in_process ?? 0) }}</td>
-                                        <td class="text-right pr-3" style="color: #16a34a;">{{ number_format($head->prj_in_process ?? 0) }}</td>
+                                        <td class="text-right text-muted">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View Project In-Process Cases">
+                                                {{ number_format($head->pcc_in_process ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project In-Process Cases">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right text-muted">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View CSRF In-Process Cases">
+                                                {{ number_format($head->cf_in_process ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View CSRF In-Process Cases">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td class="text-right pr-3" style="color: #16a34a;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #16a34a;" title="View Total In-Process Cases">
+                                                {{ number_format($head->prj_in_process ?? 0) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-green" title="View Total In-Process Cases">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                     <tr style="background: rgba(22,163,74,0.05);">
                                         <td class="pl-3 font-weight-bold text-success">Available</td>
@@ -1514,71 +1755,122 @@
                         </div>
                     </div>
 
-                    {{-- Right Pane: Visual Analytics & Subheads --}}
-                    <div class="col-xl-7 p-4" style="background: #ffffff;">
-                        <div class="row">
-                            @foreach(collect($subheads)->slice(0, 3) as $idx => $sh)
-                            <div class="col-md-4 mb-4">
-                                <div class="subhead-mini-card p-3 rounded border text-center h-100" style="border-color: var(--rd-border) !important; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                                    <div class="d-flex justify-content-center mb-2" style="height: 80px;">
-                                        <canvas id="chartShMini{{ $idx }}"></canvas>
-                                    </div>
-                                    <h6 class="rajdhani font-weight-bold text-primary mb-1">{{ $sh['name'] }}</h6>
-                                    <div class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($sh['allocation']) }}</div>
-                                    <div class="mt-2 small text-muted rajdhani">UTILIZED: {{ number_format($sh['expenditure']) }}</div>
-                                </div>
+                    {{-- Right Pane: Full Subheads Breakdown (With Live Drilldown) --}}
+                    <div class="col-xl-8 col-lg-7 p-4" style="background: #ffffff;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--rd-border) !important;">
+                            <div>
+                                <h6 class="rajdhani text-primary font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 15px;">
+                                    <i class="fas fa-layer-group mr-2"></i> SUBHEAD FINANCIAL BREAKDOWN
+                                </h6>
+                                <div class="small text-muted rajdhani mt-0.5">DETAILED ALLOCATION, EXPENDITURE, COMMITMENTS, IN PROCESS & REMAINING</div>
                             </div>
-                            @endforeach
+                            <span class="badge badge-primary px-3 py-1 rajdhani font-weight-bold" style="font-size: 11px; background: rgba(37,99,235,0.1); color: var(--rd-primary-700); border: 1px solid rgba(37,99,235,0.2);">
+                                {{ count($subheads ?? []) }} SUBHEADS
+                            </span>
                         </div>
 
-                        {{-- Subhead Detailed Breakdown --}}
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="dg-sec-label mb-3"><i class="fas fa-th-list fa-xs"></i> Category Metrics Breakdown</div>
-                                <div class="table-responsive rounded border" style="border-color: var(--rd-border) !important;">
-                                    <table class="table table-sm table-hover mb-0 rajdhani" style="font-size: 12px; background: #ffffff;">
-                                        <thead style="background: var(--rd-surface2);">
-                                            <tr class="text-muted small">
-                                                <th class="pl-3">SUBHEAD</th>
-                                                <th class="text-right">EXPENDITURE</th>
-                                                <th class="text-right">COMMITMENTS</th>
-                                                <th class="text-right">IN PROCESS</th>
-                                                <th class="text-right pr-3">REMAINING</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($subheads as $sh)
-                                            <tr>
-                                                <td class="pl-3 font-weight-bold text-primary">{{ $sh['name'] }}</td>
-                                                <td class="text-right">{{ number_format($sh['expenditure']) }}</td>
-                                                <td class="text-right">{{ number_format($sh['commitments']) }}</td>
-                                                <td class="text-right">{{ number_format($sh['in_process']) }}</td>
-                                                <td class="text-right pr-3 font-weight-bold {{ $sh['remaining'] < 0 ? 'text-danger' : 'text-success' }}">
-                                                    {{ number_format($sh['remaining']) }}
-                                                </td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="table-responsive rounded border" style="border-color: var(--rd-border) !important;">
+                            <table class="table table-sm table-hover mb-0 rajdhani" style="font-size: 12.5px; background: #ffffff;">
+                                <thead style="background: var(--rd-surface2);">
+                                    <tr class="text-muted small font-weight-bold">
+                                        <th class="pl-3 py-2" style="white-space: nowrap;">SUBHEAD</th>
+                                        <th class="text-right py-2" style="white-space: nowrap;">ALLOCATED</th>
+                                        <th class="text-right py-2" style="white-space: nowrap;">EXPENDITURE</th>
+                                        <th class="text-right py-2" style="white-space: nowrap;">COMMITMENTS</th>
+                                        <th class="text-right py-2" style="white-space: nowrap;">IN PROCESS</th>
+                                        <th class="text-right py-2" style="white-space: nowrap;">REMAINING</th>
+                                        <th class="text-center pr-3 py-2" style="width: 90px; white-space: nowrap;">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $totAlloc = 0;
+                                        $totExp = 0;
+                                        $totCmt = 0;
+                                        $totIpc = 0;
+                                        $totRem = 0;
+                                    @endphp
+                                    @forelse($subheads ?? [] as $sh)
+                                    @php
+                                        $sName = is_array($sh) ? ($sh['name'] ?? '') : ($sh->name ?? '');
+                                        $sAlloc = (float)(is_array($sh) ? ($sh['allocation'] ?? 0) : ($sh->allocation ?? 0));
+                                        $sExp = (float)(is_array($sh) ? ($sh['expenditure'] ?? 0) : ($sh->expenditure ?? 0));
+                                        $sCmt = (float)(is_array($sh) ? ($sh['commitments'] ?? 0) : ($sh->commitments ?? 0));
+                                        $sIpc = (float)(is_array($sh) ? ($sh['in_process'] ?? 0) : ($sh->in_process ?? 0));
+                                        $sRem = (float)(is_array($sh) ? ($sh['remaining'] ?? ($sh['can_be_spent'] ?? 0)) : ($sh->remaining ?? ($sh->can_be_spent ?? 0)));
 
-                        {{-- Large Comparison Chart --}}
-                        <div class="row">
-                            <div class="col-lg-8">
-                                <div class="p-4 rounded border" style="border-color: var(--rd-border) !important; background: #ffffff; height: 300px;">
-                                    <canvas id="finDetailedChart"></canvas>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="d-grid gap-2 h-100" style="display: grid; grid-template-rows: repeat(4, 1fr); gap: 10px;">
-                                    <button class="btn btn-outline-primary btn-sm rajdhani font-weight-bold"><i class="fas fa-chart-pie mr-2"></i> SPENDING BREAKDOWN</button>
-                                    <button class="btn btn-outline-secondary btn-sm rajdhani font-weight-bold"><i class="fas fa-history mr-2"></i> SPENDING TIMELINE</button>
-                                    <button class="btn btn-outline-secondary btn-sm rajdhani font-weight-bold"><i class="fas fa-calculator mr-2"></i> SALARY FORECAST</button>
-                                    <button class="btn btn-outline-secondary btn-sm rajdhani font-weight-bold"><i class="fas fa-file-contract mr-2"></i> CONTRACTS TIMELINE</button>
-                                </div>
-                            </div>
+                                        $totAlloc += $sAlloc;
+                                        $totExp += $sExp;
+                                        $totCmt += $sCmt;
+                                        $totIpc += $sIpc;
+                                        $totRem += $sRem;
+                                    @endphp
+                                    <tr>
+                                        <td class="pl-3 py-2 font-weight-bold text-dark align-middle" style="white-space: nowrap;">
+                                            <i class="fas fa-folder-open text-primary mr-1"></i> {{ $sName }}
+                                        </td>
+                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #0f172a; white-space: nowrap;">
+                                            {{ number_format($sAlloc) }}
+                                        </td>
+                                        <td class="text-right py-2 font-weight-bold text-danger align-middle" style="white-space: nowrap;">
+                                            <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="text-danger text-decoration-none" title="Drilldown {{ $sName }} Expenditure">
+                                                    {{ number_format($sExp) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-red" title="Drilldown {{ $sName }} Expenditure">
+                                                    <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #d97706; white-space: nowrap;">
+                                            <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="text-decoration-none" style="color: #d97706;" title="Drilldown {{ $sName }} Commitments">
+                                                    {{ number_format($sCmt) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="Drilldown {{ $sName }} Commitments">
+                                                    <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="text-right py-2 font-weight-bold align-middle" style="color: #64748b; white-space: nowrap;">
+                                            <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="text-decoration-none" style="color: #64748b;" title="Drilldown {{ $sName }} In-Process">
+                                                    {{ number_format($sIpc) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="Drilldown {{ $sName }} In-Process">
+                                                    <i class="fas fa-search"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="text-right py-2 font-weight-bold align-middle {{ $sRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap;">
+                                            {{ number_format($sRem) }}
+                                        </td>
+                                        <td class="text-center pr-3 py-2 align-middle" style="white-space: nowrap;">
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-1 px-2" title="View Full {{ $sName }} Breakdown">
+                                                <i class="fas fa-external-link-alt mr-1"></i> VIEW
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted">No subheads available.</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                                @if(count($subheads ?? []) > 0)
+                                <tfoot style="background: rgba(37,99,235,0.05); font-weight: 800; border-top: 2px solid var(--rd-border);">
+                                    <tr>
+                                        <td class="pl-3 py-2 font-weight-bold text-dark" style="white-space: nowrap;">TOTAL</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #0f172a; white-space: nowrap;">{{ number_format($totAlloc) }}</td>
+                                        <td class="text-right py-2 font-weight-bold text-danger" style="white-space: nowrap;">{{ number_format($totExp) }}</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #d97706; white-space: nowrap;">{{ number_format($totCmt) }}</td>
+                                        <td class="text-right py-2 font-weight-bold" style="color: #64748b; white-space: nowrap;">{{ number_format($totIpc) }}</td>
+                                        <td class="text-right py-2 font-weight-bold {{ $totRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap;">{{ number_format($totRem) }}</td>
+                                        <td class="text-center pr-3 py-2 text-muted" style="white-space: nowrap;">--</td>
+                                    </tr>
+                                </tfoot>
+                                @endif
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -1587,9 +1879,6 @@
             <div class="modal-footer border-top py-2 px-4 d-flex justify-content-between" style="background: var(--rd-surface2); border-color: var(--rd-border) !important;">
                 <div class="small text-muted rajdhani"><i class="fas fa-shield-alt text-success mr-1"></i> RDWIS FINANCIAL AUDIT ENGINE ACTIVE</div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-primary btn-xs rajdhani font-weight-bold px-4" onclick="initFinancialIntelligenceCharts()">
-                        <i class="fas fa-sync-alt mr-1"></i> RE-CALCULATE
-                    </button>
                     <button type="button" class="btn btn-secondary btn-xs rajdhani font-weight-bold px-4" data-dismiss="modal">CLOSE REPORT</button>
                 </div>
             </div>
@@ -1604,8 +1893,10 @@
     .fin-card-glass:hover { background: var(--rd-neutral-50); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
     .border-accent { border-color: rgba(243,156,18,0.3) !important; }
     .bg-navy-darker { background: var(--rd-neutral-200) !important; }
-    .subhead-list-wrap::-webkit-scrollbar { width: 4px; }
-    .subhead-list-wrap::-webkit-scrollbar-thumb { background: var(--rd-accent); border-radius: 10px; }
+    .subhead-list-wrap::-webkit-scrollbar { width: 8px; }
+    .subhead-list-wrap::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
+    .subhead-list-wrap::-webkit-scrollbar-thumb { background: #64748b; border-radius: 6px; }
+    .subhead-list-wrap::-webkit-scrollbar-thumb:hover { background: #334155; }
 </style>
 
 </div>
@@ -1635,88 +1926,7 @@ function updateDashboardStatus(msg, isError = false) {
 }
 
 function initFinancialIntelligenceCharts() {
-    const head = @json($head);
-    const subheads = @json($subheads);
-    
-    console.log("RDWIS Financial Intelligence: Initializing high-fidelity charts...", head);
-    
-    if (typeof Chart === 'undefined') {
-        console.error("Chart.js not loaded!");
-        return;
-    }
-
-    // 1. Main Project Liquidity Bar Chart
-    const canvas = document.getElementById('finDetailedChart');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        if (window.finMainChart instanceof Chart) window.finMainChart.destroy();
-        window.finMainChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Received', 'Expenditure', 'Commitments', 'In Process', 'Remaining'],
-                datasets: [{
-                    label: 'PKR Value',
-                    data: [
-                        parseFloat(head.received || 0), 
-                        parseFloat(head.expenditure || 0), 
-                        parseFloat(head.commitments || 0), 
-                        parseFloat(head.in_process || 0), 
-                        parseFloat(head.remaining || 0)
-                    ],
-                    backgroundColor: [
-                        'rgba(77, 163, 255, 0.4)', 
-                        'rgba(255, 50, 50, 0.4)', 
-                        'rgba(243, 156, 18, 0.4)', 
-                        'rgba(23, 162, 184, 0.4)', 
-                        'rgba(77, 255, 136, 0.4)'
-                    ],
-                    borderColor: ['#4da3ff', '#ff3232', '#f39c12', '#17a2b8', '#4dff88'],
-                    borderWidth: 2, borderRadius: 4, barThickness: 40
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: { backgroundColor: '#001226', titleFont: { family: 'Rajdhani', size: 14 }, bodyFont: { family: 'Inter', size: 12 }, padding: 12 } 
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { family: 'Rajdhani' } } },
-                    x: { grid: { display: false }, ticks: { color: '#aaa', font: { family: 'Rajdhani', weight: 'bold' } } }
-                }
-            }
-        });
-    }
-
-    // 2. Mini Subhead Utilization Charts (Doughnut)
-    (subheads || []).slice(0, 3).forEach((sh, idx) => {
-        const shCanvas = document.getElementById(`chartShMini${idx}`);
-        if (shCanvas) {
-            const shCtx = shCanvas.getContext('2d');
-            if (window[`finShChart${idx}`] instanceof Chart) window[`finShChart${idx}`].destroy();
-            
-            const used = Math.abs(parseFloat(sh.expenditure || 0)) + Math.abs(parseFloat(sh.commitments || 0)) + Math.abs(parseFloat(sh.in_process || 0));
-            const remaining = Math.max(0, parseFloat(sh.remaining || 0));
-
-            window[`finShChart${idx}`] = new Chart(shCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Used', 'Remaining'],
-                    datasets: [{
-                        data: [used, remaining],
-                        backgroundColor: ['rgba(77, 255, 136, 0.8)', 'rgba(255, 255, 255, 0.05)'],
-                        borderColor: 'transparent',
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    cutout: '70%'
-                }
-            });
-        }
-    });
+    // Tabular breakdown active; charts removed as requested
 }
 
 
@@ -2218,22 +2428,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (countBadge) countBadge.textContent = files.length;
         if (!wrapEl) return;
         if (!files.length) {
-            wrapEl.innerHTML = `<div class="text-center py-2 text-muted" style="font-size: 9.5px;"><i class="fas fa-folder-open text-muted mr-1"></i> No files.</div>`;
+            wrapEl.innerHTML = `<div class="text-center py-3 text-muted" style="font-size: 11px;"><i class="fas fa-folder-open text-muted mr-1"></i> No case attachments uploaded yet.</div>`;
             return;
         }
         wrapEl.innerHTML = files.map((f, idx) => {
             const name = resolveAttName(f);
+            const ext = ((f.pat_path || f.pat_filename || '').split('.').pop() || '').toLowerCase();
+            let iconClass = 'far fa-file-alt text-secondary';
+            if (ext === 'pdf') iconClass = 'far fa-file-pdf text-danger';
+            else if (['doc', 'docx'].includes(ext)) iconClass = 'far fa-file-word text-primary';
+            else if (['xls', 'xlsx'].includes(ext)) iconClass = 'far fa-file-excel text-success';
+            else if (['png', 'jpg', 'jpeg'].includes(ext)) iconClass = 'far fa-file-image text-info';
+
             return `
-                <div class="d-flex justify-content-between align-items-center py-0.5 ${idx < files.length - 1 ? 'border-bottom' : ''}" style="border-color: #f1f5f9 !important; min-height: 20px;">
-                    <div class="d-flex align-items-center overflow-hidden mr-1" style="flex: 1; min-width: 0;">
-                        <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 13px;">${idx + 1}.</span>
-                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 10px; line-height: 1.1;" title="${name.replaceAll('"', '&quot;')}">
+                <div class="d-flex justify-content-between align-items-center py-1.5 ${idx < files.length - 1 ? 'border-bottom' : ''}" style="border-color: #f1f5f9 !important;">
+                    <div class="d-flex align-items-center overflow-hidden mr-2" style="flex: 1; min-width: 0; gap: 6px;">
+                        <span class="text-muted font-weight-bold flex-shrink-0" style="font-size: 10px; width: 16px;">${idx + 1}.</span>
+                        <i class="${iconClass} flex-shrink-0" style="font-size: 12px;"></i>
+                        <span class="text-truncate font-weight-bold text-dark" style="font-size: 11.5px;" title="${name.replaceAll('"', '&quot;')}">
                             ${name.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}
                         </span>
                     </div>
-                    <div class="d-flex align-items-center flex-shrink-0" style="gap: 3px;">
-                        <button type="button" class="btn btn-link text-primary p-0 pc-live-view-quote-btn hover-zoom" data-url="${quoteViewBase}/${f.pat_id}/view" data-pat-id="${f.pat_id}" data-ext="${(f.pat_path || f.pat_filename || '').split('.').pop().toLowerCase()}" data-file-path="${f.pat_path || ''}" data-file-name="${(f.pat_filename || f.pat_path || '').replaceAll('"','&quot;')}" data-title="${name.replaceAll('"', '&quot;')}" style="font-size: 10px;" title="View ${name.replaceAll('"', '&quot;')}">
-                            <i class="fas fa-eye"></i>
+                    <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                        <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 pc-live-view-quote-btn hover-zoom font-weight-bold" data-url="${quoteViewBase}/${f.pat_id}/view" data-pat-id="${f.pat_id}" data-ext="${ext}" data-file-path="${f.pat_path || ''}" data-file-name="${(f.pat_filename || f.pat_path || '').replaceAll('"','&quot;')}" data-title="${name.replaceAll('"', '&quot;')}" style="font-size: 11px; height: 22px; border-radius: 4px;" title="View ${name.replaceAll('"', '&quot;')}">
+                            <i class="fas fa-eye mr-1"></i> View
                         </button>
                     </div>
                 </div>

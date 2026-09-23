@@ -1,6 +1,7 @@
 @extends('welcome')
 
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/contract-case-projects.css') }}?v={{ filemtime(public_path('css/contract-case-projects.css')) }}">
 <!-- SweetAlert2 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
@@ -214,7 +215,7 @@
 /* 2-Column Grid Layout */
 .dg-grid {
     display: grid;
-    grid-template-columns: 64% 36%;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 20px;
     align-items: start;
 }
@@ -289,6 +290,83 @@
     color: var(--rd-accent, #5F7858);
     letter-spacing: 0.8px;
     text-transform: uppercase;
+}
+
+/* Minute Section & Remarks Prominent Scrollbars */
+#conversational-comments-box {
+    scrollbar-width: thin !important;
+    scrollbar-color: #64748b #f1f5f9 !important;
+}
+#conversational-comments-box::-webkit-scrollbar {
+    width: 10px !important;
+    height: 10px !important;
+}
+#conversational-comments-box::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+#conversational-comments-box::-webkit-scrollbar-thumb {
+    background: #64748b !important;
+    border-radius: 6px !important;
+    border: 2px solid #f1f5f9 !important;
+}
+#conversational-comments-box::-webkit-scrollbar-thumb:hover {
+    background: #334155 !important;
+}
+
+#inlineRemarks,
+textarea.form-control,
+textarea {
+    scrollbar-width: thin !important;
+    scrollbar-color: #64748b #f1f5f9 !important;
+}
+#inlineRemarks::-webkit-scrollbar,
+textarea.form-control::-webkit-scrollbar,
+textarea::-webkit-scrollbar {
+    width: 10px !important;
+    height: 10px !important;
+}
+#inlineRemarks::-webkit-scrollbar-track,
+textarea.form-control::-webkit-scrollbar-track,
+textarea::-webkit-scrollbar-track {
+    background: #f8fafc !important;
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+#inlineRemarks::-webkit-scrollbar-thumb,
+textarea.form-control::-webkit-scrollbar-thumb,
+textarea::-webkit-scrollbar-thumb {
+    background: #64748b !important;
+    border-radius: 6px !important;
+    border: 2px solid #f8fafc !important;
+}
+#inlineRemarks::-webkit-scrollbar-thumb:hover,
+textarea.form-control::-webkit-scrollbar-thumb:hover,
+textarea::-webkit-scrollbar-thumb:hover {
+    background: #334155 !important;
+}
+
+.table-responsive::-webkit-scrollbar,
+.rd-table-responsive::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+.table-responsive::-webkit-scrollbar-track,
+.rd-table-responsive::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+.table-responsive::-webkit-scrollbar-thumb,
+.rd-table-responsive::-webkit-scrollbar-thumb {
+    background: #64748b;
+    border-radius: 6px;
+    border: 2px solid #f1f5f9;
+}
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.rd-table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #334155;
 }
 
 /* Action Buttons (Matches Purchase Cases) */
@@ -652,75 +730,8 @@
 
                     <div class="p-4">
 
-                        {{-- ===================================================== --}}
-                        {{-- 1. CASE DETAILS & FINANCIAL PULSE                     --}}
-                        {{-- ===================================================== --}}
-                        <div class="row align-items-start mb-3">
-
-                            {{-- Left Sub-Column: Metadata & Attachments --}}
-                            <div class="col-md-7">
-                                <div class="d-flex align-items-center gap-2 mb-3">
-                                    <span class="font-weight-bold text-dark" style="font-size: 17px; color: #0f172a !important;">
-                                        {{ $empName }}
-                                    </span>
-                                </div>
-
-                                <div class="row g-2 mb-3" style="font-size: var(--dg-value-size);">
-                                    <div class="col-6 mb-2">
-                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Case ID & Date</span>
-                                        <span class="text-dark font-weight-bold">#CC-{{ $case->ctc_id }}</span> &bull; <span class="text-muted">{{ \Carbon\Carbon::parse($case->ctc_date ?? now())->format('d M, Y') }}</span>
-                                    </div>
-                                    <div class="col-6 mb-2">
-                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Division / Directorate</span>
-                                        <span class="text-dark font-weight-bold">{{ $case->division_name }}</span>
-                                    </div>
-                                    <div class="col-6 mb-2">
-                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Allocated Project</span>
-                                        <span class="text-dark font-weight-bold">{{ $projectCode }}</span>
-                                    </div>
-                                    <div class="col-6 mb-2">
-                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Case Status</span>
-                                        <span class="badge {{ $case->ctc_status === 'Approved' ? 'badge-success' : ($case->ctc_status === 'Under Revision' ? 'badge-danger' : 'badge-primary') }} font-weight-bold px-2 py-0.5" style="font-size: 11px;">
-                                            {{ $case->ctc_status }}
-                                        </span>
-                                    </div>
-                                    <div class="col-6 mb-2">
-                                        <span class="text-muted d-block" style="font-size: var(--dg-label-size); font-weight: 700; text-transform: uppercase;">Current Location</span>
-                                        <span class="badge font-weight-bold px-2 py-0.5" style="background: #e0f2fe; color: #0369a1 !important; border: 1px solid #bae6fd; font-size: 11px;">
-                                            <i class="fas fa-building mr-1 text-primary"></i> {{ $case->current_office_name }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {{-- Attached Documents (Project & Case Side-by-Side Micro-Cards) --}}
-                                <div class="d-flex align-items-stretch" style="gap: 10px;">
-                                    {{-- 1. PROJECT ATTACHMENTS --}}
-                                    <div class="border rounded" style="flex: 1; border-color: #e2e8f0 !important; background: #ffffff; border-radius: 7px;">
-                                        <div class="py-1.5 px-2.5 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; min-height: 26px;">
-                                            <span class="font-weight-bold text-truncate" style="font-size: 9px; color: #475569; text-transform: uppercase;">
-                                                <i class="fas fa-paperclip text-primary mr-1"></i> PROJECT ATTACHMENTS
-                                            </span>
-                                            <span class="badge badge-secondary badge-pill" style="font-size: 8px; padding: 2px 5px;">{{ $projectAttachments->count() }}</span>
-                                        </div>
-                                        <div class="px-2.5 py-1" style="font-size: 10px;">
-                                            @forelse($projectAttachments as $pIdx => $pDoc)
-                                                @php
-                                                    $pUrl = \App\Facades\FileStorage::url($pDoc->jat_path);
-                                                    $pTitle = addslashes($pDoc->jat_type ?: 'Project Attachment');
-                                                @endphp
-                                                <div class="d-flex justify-content-between align-items-center py-1 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f8fafc !important;">
-                                                    <a href="{{ $pUrl }}" onclick="window.openLiveDocument('{{ $pUrl }}', '{{ $pTitle }}'); return false;" class="d-flex align-items-center overflow-hidden mr-1 text-decoration-none rd-live-file-view" style="flex: 1; min-width: 0; cursor: pointer;" title="View {{ $pDoc->jat_type }} Live">
-                                                        <span class="text-muted font-weight-bold mr-1 flex-shrink-0" style="font-size: 9.5px; width: 14px;">{{ $pIdx + 1 }}.</span>
-                                                        <span class="text-truncate font-weight-600 text-dark" style="font-size: 9.5px;">{{ $pDoc->jat_type }}</span>
-                                                    </a>
-                                                    <a href="{{ $pUrl }}" onclick="window.openLiveDocument('{{ $pUrl }}', '{{ $pTitle }}'); return false;" class="rd-live-file-view text-primary flex-shrink-0" title="View Document Live" style="cursor: pointer;"><i class="fas fa-eye"></i></a>
-                                                </div>
-                                            @empty
-                                                <div class="text-center py-1 text-muted" style="font-size: 9px;">No files.</div>
-                                            @endforelse
-                                        </div>
-                                    </div>
-
+                        @include('md.contract-cases._project_overview')
+                        <div class="mb-3">
                                     {{-- 2. CASE ATTACHMENTS (WITH + UPLOAD BUTTON) --}}
                                     <div class="border rounded" style="flex: 1; border-color: #e2e8f0 !important; background: #ffffff; border-radius: 7px;">
                                         <div class="py-1.5 px-2.5 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; min-height: 26px;">
@@ -752,48 +763,7 @@
                                             @endforelse
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            {{-- Right Sub-Column: Financial Pulse Card --}}
-                            <div class="col-md-5">
-                                <div class="dg-fin-card">
-                                    <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-2" style="border-color: #d7dee6 !important;">
-                                        <span class="rajdhani font-weight-bold text-dark" style="font-size: 12.5px; letter-spacing: 0.5px;">
-                                            <i class="fas fa-coins text-primary mr-1"></i> FINANCIAL PULSE
-                                        </span>
-                                        <span class="badge badge-light border text-primary font-weight-bold rajdhani" style="font-size: 9.5px;">HR BUDGET IMPACT</span>
-                                    </div>
-
-                                    <div class="d-flex flex-column" style="gap: 6px; font-size: 11px;">
-                                        <div class="d-flex justify-content-between">
-                                            <span class="text-muted font-weight-600">PROPOSED SALARY:</span>
-                                            <strong class="text-dark rajdhani font-weight-bold" style="font-size: 13px;">Rs. {{ number_format($proposedSalary) }}</strong>
-                                        </div>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="text-muted font-weight-600">PREVIOUS SALARY:</span>
-                                            <span class="text-muted rajdhani">{{ $previousSalary > 0 ? 'Rs. ' . number_format($previousSalary) : 'N/A (New Hire)' }}</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="text-muted font-weight-600">SALARY INCREMENT:</span>
-                                            <span class="text-success rajdhani font-weight-bold">{{ $previousSalary > 0 ? '+ Rs. ' . number_format($salaryDiff) . ' (' . ($incrementPct > 0 ? '+' . $incrementPct : $incrementPct) . '%)' : 'Full Proposed' }}</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="text-muted font-weight-600">PROJECT SHARE:</span>
-                                            <span class="text-primary font-weight-bold">{{ $projectPlan->ccp_budgetpercent ?? 100 }}%</span>
-                                        </div>
-                                    </div>
-
-                                    {{-- Annual impact gets its own highlighted row --}}
-                                    <div class="dg-fin-impact-row">
-                                        <span class="text-dark font-weight-bold" style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.3px;">Annual Impact</span>
-                                        <span class="text-success rajdhani font-weight-bold" style="font-size: 16px;">Rs. {{ number_format($annualImpact) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
-
                         <div class="dg-divider"></div>
 
                         {{-- ===================================================== --}}

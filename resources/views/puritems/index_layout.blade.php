@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 @section('content')
 
 <style>
@@ -168,9 +168,11 @@
   }
 
   /* scrollbar */
-  .panel-body::-webkit-scrollbar { width: 4px; }
-  .panel-body::-webkit-scrollbar-track { background: transparent; }
-  .panel-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+  .panel-body { scrollbar-width: thin; scrollbar-color: #64748b #f1f5f9; }
+  .panel-body::-webkit-scrollbar { width: 8px; }
+  .panel-body::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  .panel-body::-webkit-scrollbar-thumb { background: #64748b; border-radius: 4px; }
+  .panel-body::-webkit-scrollbar-thumb:hover { background: #334155; }
 
   /* ══════════════════════════════════════════
      LEFT PANEL — INVENTORY MASTER

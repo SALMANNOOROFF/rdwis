@@ -24,7 +24,7 @@ class DataRevisionPolicy
      */
     public function viewAny(CenAccount $user): bool
     {
-        return RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_VIEW);
+        return RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_VIEW) || !empty($user->acc_unt_id);
     }
 
     /**
@@ -33,10 +33,6 @@ class DataRevisionPolicy
      */
     public function view(CenAccount $user, AudRev $rev): bool
     {
-        if (! RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_VIEW)) {
-            return false;
-        }
-
         $context = UserAccessContext::forUser($user);
 
         // 1. Super Admin has global visibility
@@ -125,20 +121,12 @@ class DataRevisionPolicy
     {
         $context = UserAccessContext::forUser($user);
 
-        if (! RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_RELEASE)) {
-            return false;
-        }
-
-        if (! $context->isApprover() && ! $context->isSuperAdmin()) {
-            return false;
-        }
-
         // Can only release if currently Draft or Under Revision
         if (! $rev->isDraft() && ! $rev->isUnderRevision()) {
             return false;
         }
 
-        // Must belong to initiating unit (or SuperAdmin)
+        // SuperAdmin can always release
         if ($context->isSuperAdmin()) {
             return true;
         }
@@ -148,7 +136,11 @@ class DataRevisionPolicy
             $initUnitId = (int) ($rev->rev_unt_id ?? 0);
         }
 
-        return $this->scopeService->canAccessUnit($user, $initUnitId);
+        if ($initUnitId > 0 && ! $this->scopeService->canAccessUnit($user, $initUnitId)) {
+            return false;
+        }
+
+        return RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_RELEASE) || $context->isApprover() || $context->isEditor();
     }
 
     /**
@@ -236,10 +228,6 @@ class DataRevisionPolicy
     {
         $context = UserAccessContext::forUser($user);
 
-        if (! RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_CANCEL)) {
-            return false;
-        }
-
         if ($rev->isFulfilled()) {
             return false;
         }
@@ -265,7 +253,7 @@ class DataRevisionPolicy
                 $initUnitId = (int) ($rev->rev_unt_id ?? 0);
             }
 
-            return $this->scopeService->canAccessUnit($user, $initUnitId);
+            return $initUnitId > 0 && $this->scopeService->canAccessUnit($user, $initUnitId);
         }
 
         return false;
@@ -280,7 +268,7 @@ class DataRevisionPolicy
      */
     public function viewAttachments(CenAccount $user, AudRev $rev): bool
     {
-        if (! $rev->isFulfilled()) {
+        if (! $rev->isFulfilled() && ! $rev->isCancelled()) {
             return false;
         }
 

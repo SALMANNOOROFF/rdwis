@@ -467,19 +467,19 @@ class ProjectController extends Controller
             'equip_alloc' => $equipAlloc,
             'equip_cmt' => $equipCmt,
             'equip_ipc' => $equipIpc,
-            'equip_remaining' => $equipRemaining ?: ($equipAlloc - $equipExp),
+            'equip_remaining' => $equipSh ? $equipRemaining : ($equipAlloc - $equipExp),
             'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
             'hr'    => $hrExp ?: ($totalSpent * 0.35),
             'hr_alloc' => $hrAlloc,
             'hr_cmt' => $hrCmt,
             'hr_ipc' => $hrIpc,
-            'hr_remaining' => $hrRemaining ?: ($hrAlloc - $hrExp),
+            'hr_remaining' => $hrSh ? $hrRemaining : ($hrAlloc - $hrExp),
             'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
             'misc'  => $miscExp ?: ($totalSpent * 0.20),
             'misc_alloc' => $miscAlloc,
             'misc_cmt' => $miscCmt,
             'misc_ipc' => $miscIpc,
-            'misc_remaining' => $miscRemaining ?: ($miscAlloc - $miscExp),
+            'misc_remaining' => $miscSh ? $miscRemaining : ($miscAlloc - $miscExp),
             'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
         ];
 
@@ -1188,10 +1188,58 @@ class ProjectController extends Controller
            $showPrjShareValue = (round($head->prj_share, 2) != round($head->pcc_share, 2));
        }
 
-       return view('SORD.project_details', compact(
-           'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
-           'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head',
-           'showProjectActualSection', 'showPrjShareValue'
-       ));
-   }
+        return view('SORD.project_details', compact(
+            'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
+            'mprsSubmitted', 'mprsLeft', 'totalMonths', 'head',
+            'showProjectActualSection', 'showPrjShareValue'
+        ));
+    }
+
+    /**
+     * Initiate a data revision for a Project Task/Milestone.
+     * Legacy prj_milestones_rev.bas:58.
+     * Unified endpoint supporting RevType 1 (Cascade) or RevType 2 (Field-level).
+     */
+    public function reverseMilestone(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $milestone = DB::table('prj.milestones')->where('msn_idd', $id)->orWhere('msn_id', $id)->first();
+        if (!$milestone) {
+            abort(404, 'Milestone not found.');
+        }
+
+        $project = DB::table('prj.projects')->where('prj_id', $milestone->msn_xprj_id)->first();
+        $targetUnit = (int) ($project->prj_unt_id ?? $user->acc_unt_id ?? 0);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isPrjOrAdmin = in_array($userArea, ['prj', 'rdwprj', 'prjrdw', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isPrjOrAdmin) {
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $targetUnit)) {
+                abort(403, 'Unauthorized. Task/Milestone is outside your unit scope.');
+            }
+        }
+
+        $revTypeInput = (int) $request->input('rev_type', 1);
+        $revType = $revTypeInput === 2 ? \App\Enums\RevType::FIELD_LEVEL : \App\Enums\RevType::FULL_CASCADE;
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Task',
+            objectId: $milestone->msn_idd ?? $milestone->msn_id,
+            unitId: $targetUnit,
+            revType: $revType,
+            revRef: $project->prj_code ?? null,
+            revObjectExt: (string) ($milestone->msn_id ?? ''),
+            intUnitId: (int) ($user->acc_unt_id ?? $targetUnit),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Task #{$milestone->msn_id} created successfully.");
+    }
 }

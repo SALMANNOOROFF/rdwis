@@ -161,18 +161,18 @@
         $projectName = $headStatus['head_name'] ?? ($purchase->project?->prj_title ?? 'Project');
         $projectCode = $headStatus['head_code'] ?? ($purchase->project?->prj_code ?? 'N/A');
 
-        $finProjectShare = (float)($headStatus['acc_share'] ?? ($headStatus['allocation'] ?? ($purchase->project?->prj_aprvcost ?? 0)));
-        $finReceived     = (float)($headStatus['received'] ?? ($headStatus['acc_received'] ?? $finProjectShare));
+        $finProjectShare = (float)($headStatus['pcc_share'] ?? ($headStatus['acc_share'] ?? ($headStatus['allocation'] ?? ($purchase->project?->prj_aprvcost ?? 0))));
+        $finReceived     = (float)($headStatus['pcc_received'] ?? ($headStatus['received'] ?? ($headStatus['acc_received'] ?? $finProjectShare)));
         if ($finReceived <= 0 && $finProjectShare > 0) {
             $finReceived = $finProjectShare;
         }
-        $finExpenditure  = (float)($headStatus['expenditure'] ?? ($headStatus['acc_expenditure'] ?? 0));
-        $finCommitments  = (float)($headStatus['commitments'] ?? ($headStatus['acc_commitments'] ?? 0));
-        $finInProcess    = (float)($headStatus['in_process'] ?? ($headStatus['acc_in_process'] ?? $caseValue));
+        $finExpenditure  = (float)($headStatus['pcc_expenditure'] ?? ($headStatus['expenditure'] ?? ($headStatus['acc_expenditure'] ?? 0)));
+        $finCommitments  = (float)($headStatus['pcc_commitments'] ?? ($headStatus['commitments'] ?? ($headStatus['acc_commitments'] ?? 0)));
+        $finInProcess    = (float)($headStatus['pcc_in_process'] ?? ($headStatus['in_process'] ?? ($headStatus['acc_in_process'] ?? $caseValue)));
         if ($finInProcess <= 0) {
             $finInProcess = $caseValue;
         }
-        $finAvailable    = (float)($headStatus['can_be_spent'] ?? ($headStatus['acc_available'] ?? ($finReceived - $finExpenditure - $finCommitments - $finInProcess)));
+        $finAvailable    = (float)($headStatus['pcc_can_be_spent'] ?? ($headStatus['can_be_spent'] ?? ($headStatus['acc_available'] ?? ($finReceived - $finExpenditure - $finCommitments - $finInProcess))));
     @endphp
 
     <div class="minute-sheet">

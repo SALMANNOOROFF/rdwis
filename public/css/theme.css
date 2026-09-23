@@ -141,20 +141,179 @@ hr {
   color: var(--rd-primary-800);
 }
 
-/* Scrollbars */
+/* ============================================================
+   PROMINENT SCROLLBAR SYSTEM (ACCESSIBLE & HIGH CONTRAST)
+   ============================================================ */
+/* Firefox Standard Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b #f1f5f9;
+}
+
+html, body {
+  scrollbar-width: auto;
+  scrollbar-color: #64748b #f1f5f9;
+}
+
+/* Universal WebKit Scrollbars (Chrome, Edge, Safari, Opera) */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
+
 ::-webkit-scrollbar-track {
-  background: var(--rd-neutral-100);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: var(--rd-neutral-400);
-  border-radius: 3px;
+  background: #64748b;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--rd-neutral-500);
+  background: #334155;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-corner {
+  background: #f1f5f9;
+}
+
+/* Page Level Scrollbars (Window, HTML, Body, Content-Wrapper) */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.wrapper::-webkit-scrollbar,
+.content-wrapper::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.wrapper::-webkit-scrollbar-track,
+.content-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-left: 1px solid #cbd5e1;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.wrapper::-webkit-scrollbar-thumb,
+.content-wrapper::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.wrapper::-webkit-scrollbar-thumb:hover,
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Table Horizontal & Vertical Scrollbars */
+.table-responsive::-webkit-scrollbar,
+.rd-table-responsive::-webkit-scrollbar,
+.dataTables_scrollBody::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-track,
+.rd-table-responsive::-webkit-scrollbar-track,
+.dataTables_scrollBody::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.table-responsive::-webkit-scrollbar-thumb,
+.rd-table-responsive::-webkit-scrollbar-thumb,
+.dataTables_scrollBody::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.rd-table-responsive::-webkit-scrollbar-thumb:hover,
+.dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Textareas & Remarks Inputs */
+textarea::-webkit-scrollbar,
+.form-control[type="textarea"]::-webkit-scrollbar,
+#inlineRemarks::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+textarea::-webkit-scrollbar-track,
+#inlineRemarks::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+textarea::-webkit-scrollbar-thumb,
+#inlineRemarks::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 6px;
+  border: 2px solid #f8fafc;
+}
+
+textarea::-webkit-scrollbar-thumb:hover,
+#inlineRemarks::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Minute Section & Decision Comments Trail */
+#conversational-comments-box,
+.dg-trail-body,
+.trail-scroll-container,
+.dg-items-wrap {
+  scrollbar-width: thin !important;
+  scrollbar-color: #64748b #f1f5f9 !important;
+}
+
+#conversational-comments-box::-webkit-scrollbar,
+.dg-trail-body::-webkit-scrollbar,
+.trail-scroll-container::-webkit-scrollbar,
+.dg-items-wrap::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+#conversational-comments-box::-webkit-scrollbar-track,
+.dg-trail-body::-webkit-scrollbar-track,
+.trail-scroll-container::-webkit-scrollbar-track,
+.dg-items-wrap::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-radius: 6px !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+#conversational-comments-box::-webkit-scrollbar-thumb,
+.dg-trail-body::-webkit-scrollbar-thumb,
+.trail-scroll-container::-webkit-scrollbar-thumb,
+.dg-items-wrap::-webkit-scrollbar-thumb {
+  background: #64748b !important;
+  border-radius: 6px !important;
+  border: 2px solid #f1f5f9 !important;
+}
+
+#conversational-comments-box::-webkit-scrollbar-thumb:hover,
+.dg-trail-body::-webkit-scrollbar-thumb:hover,
+.trail-scroll-container::-webkit-scrollbar-thumb:hover,
+.dg-items-wrap::-webkit-scrollbar-thumb:hover {
+  background: #334155 !important;
 }
 
 

@@ -75,6 +75,55 @@ class PurchaseController extends Controller
     return view('purchase.new_case.purchasecasedetails', compact('purchase', 'firms'));
 }
 
+    /**
+     * Initiate a data revision for a regular Purchase Case.
+     * Legacy pur_purcases_rev.bas:56.
+     * Allowed only for Approved, Fulfilled, or Partially Fulfilled cases within user's unit/procurement scope.
+     */
+    public function reverseCase(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $purchase = Purchase::findOrFail($id);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isProc = in_array($userArea, ['proc', 'prc', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isProc) {
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, (int) $purchase->pcs_unt_id)) {
+                abort(403, 'Unauthorized. Purchase Case is outside your unit scope.');
+            }
+        }
+
+        $allowedStatuses = ['approved', 'fulfilled', 'partially fulfilled'];
+        $statusLower = strtolower(trim((string) $purchase->pcs_status));
+        if (!in_array($statusLower, $allowedStatuses, true)) {
+            return back()->with('error', "Cannot reverse Purchase Case #{$id} with status '{$purchase->pcs_status}'. Status must be Approved, Fulfilled, or Partially Fulfilled.");
+        }
+
+        $revTypeInput = (int) $request->input('rev_type', 1);
+        $revType = $revTypeInput === 2 ? \App\Enums\RevType::FIELD_LEVEL : \App\Enums\RevType::FULL_CASCADE;
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Purchase Case',
+            objectId: $purchase->pcs_id,
+            unitId: (int) $purchase->pcs_unt_id,
+            revType: $revType,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $purchase->pcs_unt_id),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Purchase Case #{$id} created successfully.");
+    }
+
+
     public function nrdiShow($id)
     {
         $user = Auth::user();

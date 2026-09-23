@@ -182,6 +182,15 @@ class FinanceOfProjectController extends Controller
         // Get the overall financial status for this head
         $fin = $this->finService->getHeadStatus($headId);
 
+        $definedSubheads = DB::table('fin.subheads')
+            ->where('sbh_hed_id', $headId)
+            ->pluck('sbh_name')
+            ->filter()
+            ->values()
+            ->toArray();
+
+        $otherSubheads = array_values(array_filter($definedSubheads, fn($s) => strcasecmp(trim((string)$s), 'Misc') !== 0));
+
         $figureKey = ($scope === 'pcc' ? 'pcc_' : ($scope === 'csrf' ? 'cf_' : ($scope === 'acc' ? 'acc_' : 'prj_'))) . str_replace('-', '_', $figure);
         $currentValue = $fin->$figureKey ?? 0;
 
@@ -254,17 +263,29 @@ class FinanceOfProjectController extends Controller
                 ->join('fin.transactions as t', 'c.cmt_id', '=', 't.trn_cmt_id')
                 ->leftJoin('pur.purcases as pcs', function($join) {
                     $join->on('pcs.pcs_id', '=', 'c.cmt_docid')
-                         ->where('c.cmt_type', '=', 'Ps');
+                         ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb']);
                 })
                 ->leftJoin('frm.firmz as frm', 'pcs.pcs_frm_id', '=', 'frm.frm_id')
                 ->leftJoin('fin.salorders as sor', function($join) {
                     $join->on('sor.sor_id', '=', 'c.cmt_docid')
                          ->where('c.cmt_type', '=', 'Sa');
-                })
-                ->leftJoin('fin.docs_shd as shd', function ($join) {
+                });
+
+            if ($scope === 'subhead') {
+                $expQuery->leftJoin('fin.docs_shd as shd', function ($join) {
                     $join->on('c.cmt_docid', '=', 'shd.doc_id')
                          ->on('c.cmt_type', '=', 'shd.doc_type');
                 });
+            } else {
+                $shdSubExp = DB::table('fin.docs_shd')
+                    ->select('doc_id', 'doc_type', DB::raw("STRING_AGG(DISTINCT subhead, ', ') as subhead"), DB::raw('SUM(ratio) as ratio'))
+                    ->groupBy('doc_id', 'doc_type');
+
+                $expQuery->leftJoinSub($shdSubExp, 'shd', function ($join) {
+                    $join->on('c.cmt_docid', '=', 'shd.doc_id')
+                         ->on('c.cmt_type', '=', 'shd.doc_type');
+                });
+            }
 
             // Apply scope filtering
             if ($scope === 'pcc') {
@@ -284,8 +305,41 @@ class FinanceOfProjectController extends Controller
             } elseif ($scope === 'subhead') {
                 $expQuery->where('c.cmt_hed_id', $headId)
                          ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO']);
-                if ($subhead && $subhead !== 'Misc') {
-                    $expQuery->where('shd.subhead', $subhead);
+                if ($subhead) {
+                    if (strcasecmp(trim((string)$subhead), 'Misc') === 0) {
+                        if (!empty($otherSubheads)) {
+                            $expQuery->where(function($q) use ($otherSubheads) {
+                                $q->where(function($sq) use ($otherSubheads) {
+                                    $sq->whereNotIn('shd.subhead', $otherSubheads)
+                                       ->orWhereNull('shd.subhead');
+                                })->where('c.cmt_type', '!=', 'Sa');
+                            });
+                        } else {
+                            $expQuery->where(function($q) {
+                                $q->where(function($sq) {
+                                    $sq->where('shd.subhead', 'Misc')
+                                       ->orWhereNull('shd.subhead');
+                                })->where('c.cmt_type', '!=', 'Sa');
+                            });
+                        }
+                    } elseif (strcasecmp(trim((string)$subhead), 'HR') === 0) {
+                        $expQuery->where(function($q) {
+                            $q->where('shd.subhead', 'HR')
+                              ->orWhere(function($sq) {
+                                  $sq->where('c.cmt_type', 'Sa')
+                                     ->where(function($ssq) {
+                                         $ssq->whereNull('shd.subhead')->orWhere('shd.subhead', '');
+                                     });
+                              });
+                        });
+                    } else {
+                        $subheadList = array_map('trim', explode(',', $subhead));
+                        if (count($subheadList) === 1) {
+                            $expQuery->where('shd.subhead', $subheadList[0]);
+                        } else {
+                            $expQuery->whereIn('shd.subhead', $subheadList);
+                        }
+                    }
                 }
             } elseif ($figure === 'ownexp') {
                 $expQuery->where('c.cmt_effhed_id', $headId)
@@ -323,25 +377,55 @@ class FinanceOfProjectController extends Controller
                 if ($row->cmt_type === 'Sa') {
                     $title = 'Monthly Salary: ' . ($row->sor_empnamecomp ?: 'Staff') . ($row->sor_month ? ' (' . $row->sor_month . ')' : '');
                 } elseif (!$title) {
-                    $title = ($row->cmt_type === 'TO' ? 'Transfer Out' : ($row->cmt_type === 'Pt' ? 'Petty Cash' : 'Expenditure Document #' . $row->cmt_docid));
+                    $title = ($row->cmt_type === 'TO' ? 'Transfer Out' : ($row->cmt_type === 'Pt' ? 'Petty Cash Case #' . $row->cmt_docid : ($row->cmt_type === 'Rb' ? 'Reimbursement Case #' . $row->cmt_docid : 'Expenditure Document #' . $row->cmt_docid)));
                 }
 
                 $ratio = (float) ($row->ratio ?? 1.0);
-                $amt1 = abs((float) $row->trn_amount1) * $ratio;
+                $isRecovery = ((float) $row->trn_amount1) > 0;
+                $multiplier = $isRecovery ? -1 : 1;
+                $amt1 = abs((float) $row->trn_amount1) * $ratio * $multiplier;
                 $tax1 = abs((float) ($row->trn_tax1 ?? 0)) * $ratio;
-                $amt2 = abs((float) ($row->trn_amount2 ?: $row->trn_amount1)) * $ratio;
+                $amt2 = abs((float) ($row->trn_amount2 ?: $row->trn_amount1)) * $ratio * $multiplier;
+
+                $rawShd = !empty(trim((string)$row->subhead)) ? $row->subhead : ($row->cmt_sudohed ?: ($row->cmt_type === 'Sa' ? 'HR' : null));
+                if ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0) {
+                    $resolvedSubhead = 'Misc';
+                } else {
+                    $resolvedSubhead = $rawShd ?: 'Misc';
+                }
+
+                $vendor = $row->frm_name;
+                if (!$vendor) {
+                    if ($row->cmt_type === 'Sa') {
+                        $vendor = 'Employee Payroll';
+                    } elseif ($row->cmt_type === 'Rb') {
+                        $vendor = 'Staff Reimbursement';
+                    } elseif ($row->cmt_type === 'Pt') {
+                        $vendor = 'Petty Cash';
+                    } else {
+                        $vendor = '-';
+                    }
+                }
+
+                $caseUrl = null;
+                if (in_array(strtolower($row->cmt_type), ['ps', 'pt', 'rb', 'mat', 'pur'])) {
+                    $caseUrl = url('/nrdi/purchase-cases-new/' . $row->cmt_docid);
+                } elseif (in_array(strtolower($row->cmt_type), ['ct', 'ctc', 'cat'])) {
+                    $caseUrl = url('/nrdi/contract-cases-new/' . $row->cmt_docid);
+                }
 
                 $items[] = (object) [
                     'id'          => $row->trn_id,
                     'ref_no'      => $row->cmt_type . '-' . $row->cmt_docid,
+                    'case_url'    => $caseUrl,
                     'date'        => $row->trn_date ? \Carbon\Carbon::parse($row->trn_date)->format('d M Y') : '-',
                     'title'       => $title,
-                    'subhead'     => $row->subhead ?: ($row->cmt_sudohed ?: 'General'),
-                    'vendor'      => $row->frm_name ?: ($row->cmt_type === 'Sa' ? 'Employee Payroll' : '-'),
+                    'subhead'     => $resolvedSubhead,
+                    'vendor'      => $vendor,
                     'amount'      => round($amt1, 2),
                     'tax'         => round($tax1, 2),
                     'total'       => round($amt2, 2),
-                    'status'      => 'Paid / Debited',
+                    'status'      => $isRecovery ? 'Recovery / Reversal' : 'Paid / Debited',
                 ];
             }
         }
@@ -358,18 +442,31 @@ class FinanceOfProjectController extends Controller
                 ->leftJoinSub($paidSub, 'p', 'c.cmt_id', '=', 'p.trn_cmt_id')
                 ->leftJoin('pur.purcases as pcs', function($join) {
                     $join->on('pcs.pcs_id', '=', 'c.cmt_docid')
-                         ->where('c.cmt_type', '=', 'Ps');
+                         ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb']);
                 })
                 ->leftJoin('frm.firmz as frm', 'pcs.pcs_frm_id', '=', 'frm.frm_id')
                 ->leftJoin('fin.salorders as sor', function($join) {
                     $join->on('sor.sor_id', '=', 'c.cmt_docid')
                          ->where('c.cmt_type', '=', 'Sa');
-                })
-                ->leftJoin('fin.docs_shd as shd', function ($join) {
+                });
+
+            if ($scope === 'subhead') {
+                $cmtQuery->leftJoin('fin.docs_shd as shd', function ($join) {
                     $join->on('c.cmt_docid', '=', 'shd.doc_id')
                          ->on('c.cmt_type', '=', 'shd.doc_type');
-                })
-                ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
+                });
+            } else {
+                $shdSubCmt = DB::table('fin.docs_shd')
+                    ->select('doc_id', 'doc_type', DB::raw("STRING_AGG(DISTINCT subhead, ', ') as subhead"), DB::raw('1.0 as ratio'))
+                    ->groupBy('doc_id', 'doc_type');
+
+                $cmtQuery->leftJoinSub($shdSubCmt, 'shd', function ($join) {
+                    $join->on('c.cmt_docid', '=', 'shd.doc_id')
+                         ->on('c.cmt_type', '=', 'shd.doc_type');
+                });
+            }
+
+            $cmtQuery->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
                 ->where('c.cmt_status', 'Awaited');
 
             // Apply scope filtering
@@ -386,8 +483,41 @@ class FinanceOfProjectController extends Controller
                 $cmtQuery->where('c.cmt_hed_id', $headId);
             } elseif ($scope === 'subhead') {
                 $cmtQuery->where('c.cmt_hed_id', $headId);
-                if ($subhead && $subhead !== 'Misc') {
-                    $cmtQuery->where('shd.subhead', $subhead);
+                if ($subhead) {
+                    if (strcasecmp(trim((string)$subhead), 'Misc') === 0) {
+                        if (!empty($otherSubheads)) {
+                            $cmtQuery->where(function($q) use ($otherSubheads) {
+                                $q->where(function($sq) use ($otherSubheads) {
+                                    $sq->whereNotIn('shd.subhead', $otherSubheads)
+                                       ->orWhereNull('shd.subhead');
+                                })->where('c.cmt_type', '!=', 'Sa');
+                            });
+                        } else {
+                            $cmtQuery->where(function($q) {
+                                $q->where(function($sq) {
+                                    $sq->where('shd.subhead', 'Misc')
+                                       ->orWhereNull('shd.subhead');
+                                })->where('c.cmt_type', '!=', 'Sa');
+                            });
+                        }
+                    } elseif (strcasecmp(trim((string)$subhead), 'HR') === 0) {
+                        $cmtQuery->where(function($q) {
+                            $q->where('shd.subhead', 'HR')
+                              ->orWhere(function($sq) {
+                                  $sq->where('c.cmt_type', 'Sa')
+                                     ->where(function($ssq) {
+                                         $ssq->whereNull('shd.subhead')->orWhere('shd.subhead', '');
+                                     });
+                              });
+                        });
+                    } else {
+                        $subheadList = array_map('trim', explode(',', $subhead));
+                        if (count($subheadList) === 1) {
+                            $cmtQuery->where('shd.subhead', $subheadList[0]);
+                        } else {
+                            $cmtQuery->whereIn('shd.subhead', $subheadList);
+                        }
+                    }
                 }
             } else {
                 // Account level
@@ -418,21 +548,49 @@ class FinanceOfProjectController extends Controller
                 if ($row->cmt_type === 'Sa') {
                     $title = 'Committed Salary: ' . ($row->sor_empnamecomp ?: 'Staff') . ($row->sor_month ? ' (' . $row->sor_month . ')' : '');
                 } elseif (!$title) {
-                    $title = 'Commitment Case #' . $row->cmt_docid . ' (' . $row->cmt_type . ')';
+                    $title = ($row->cmt_type === 'Rb' ? 'Reimbursement Case #' . $row->cmt_docid : ($row->cmt_type === 'Pt' ? 'Petty Cash Case #' . $row->cmt_docid : 'Commitment Case #' . $row->cmt_docid . ' (' . $row->cmt_type . ')'));
                 }
 
-                $ratio = (float) ($row->ratio ?? 1.0);
+                $ratio = ($scope === 'subhead') ? (float) ($row->ratio ?? 1.0) : 1.0;
                 $cmtAmt = abs((float) $row->cmt_amount) * $ratio;
                 $paidAmt = abs((float) ($row->paid ?? 0)) * $ratio;
                 $outstanding = max(0, $cmtAmt - $paidAmt);
 
+                $rawShd = !empty(trim((string)$row->subhead)) ? $row->subhead : ($row->cmt_sudohed ?: ($row->cmt_type === 'Sa' ? 'HR' : null));
+                if ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0) {
+                    $resolvedSubhead = 'Misc';
+                } else {
+                    $resolvedSubhead = $rawShd ?: 'Misc';
+                }
+
+                $vendor = $row->frm_name;
+                if (!$vendor) {
+                    if ($row->cmt_type === 'Sa') {
+                        $vendor = $row->sor_empnamecomp ?: 'Employee Payroll';
+                    } elseif ($row->cmt_type === 'Rb') {
+                        $vendor = 'Staff Reimbursement';
+                    } elseif ($row->cmt_type === 'Pt') {
+                        $vendor = 'Petty Cash';
+                    } else {
+                        $vendor = '-';
+                    }
+                }
+
+                $caseUrl = null;
+                if (in_array(strtolower($row->cmt_type), ['ps', 'pt', 'rb', 'mat', 'pur'])) {
+                    $caseUrl = url('/nrdi/purchase-cases-new/' . $row->cmt_docid);
+                } elseif (in_array(strtolower($row->cmt_type), ['ct', 'ctc', 'cat'])) {
+                    $caseUrl = url('/nrdi/contract-cases-new/' . $row->cmt_docid);
+                }
+
                 $items[] = (object) [
                     'id'          => $row->cmt_id,
                     'ref_no'      => $row->cmt_type . '-' . $row->cmt_docid,
+                    'case_url'    => $caseUrl,
                     'date'        => $row->cmt_date ? \Carbon\Carbon::parse($row->cmt_date)->format('d M Y') : '-',
                     'title'       => $title,
-                    'subhead'     => $row->subhead ?: ($row->cmt_sudohed ?: 'General'),
-                    'vendor'      => $row->frm_name ?: ($row->cmt_type === 'Sa' ? 'Employee' : '-'),
+                    'subhead'     => $resolvedSubhead,
+                    'vendor'      => $vendor,
                     'committed'   => round($cmtAmt, 2),
                     'paid'        => round($paidAmt, 2),
                     'amount'      => round($outstanding, 2),
@@ -449,11 +607,23 @@ class FinanceOfProjectController extends Controller
                 ->leftJoin('pur.purcases as pcs', function($join) {
                     $join->on('pcs.pcs_id', '=', 'ipc.docid')
                          ->whereIn('ipc.doctype', ['Ps', 'Pt', 'pt', 'Rb', 'mat', 'pur']);
-                })
-                ->leftJoin('fin.docs_shd as shd', function ($join) {
+                });
+
+            if ($scope === 'subhead') {
+                $ipcQuery->leftJoin('fin.docs_shd as shd', function ($join) {
                     $join->on('ipc.doctype', '=', 'shd.doc_type')
                          ->on('ipc.docid', '=', 'shd.doc_id');
                 });
+            } else {
+                $shdSubIpc = DB::table('fin.docs_shd')
+                    ->select('doc_id', 'doc_type', DB::raw("STRING_AGG(DISTINCT subhead, ', ') as subhead"), DB::raw('1.0 as ratio'))
+                    ->groupBy('doc_id', 'doc_type');
+
+                $ipcQuery->leftJoinSub($shdSubIpc, 'shd', function ($join) {
+                    $join->on('ipc.doctype', '=', 'shd.doc_type')
+                         ->on('ipc.docid', '=', 'shd.doc_id');
+                });
+            }
 
             // Scope filtering
             if ($scope === 'pcc') {
@@ -469,24 +639,39 @@ class FinanceOfProjectController extends Controller
                 $ipcQuery->where('ipc.hed_id', $headId);
             } elseif ($scope === 'subhead') {
                 $ipcQuery->where('ipc.hed_id', $headId);
-                if ($subhead === 'Equipment') {
-                    $ipcQuery->where(function($q) {
-                        $q->where('shd.subhead', 'Equipment')
-                          ->orWhere(function($subQ) {
-                              $subQ->whereNull('shd.subhead')
-                                   ->whereIn('ipc.doctype', ['Ps', 'mat', 'pur']);
-                          });
-                    });
-                } elseif ($subhead === 'Misc') {
-                    $ipcQuery->where(function($q) {
-                        $q->where('shd.subhead', 'Misc')
-                          ->orWhere(function($subQ) {
-                              $subQ->whereNull('shd.subhead')
-                                   ->whereNotIn('ipc.doctype', ['Ps', 'mat', 'pur']);
-                          });
-                    });
-                } elseif ($subhead) {
-                    $ipcQuery->where('shd.subhead', $subhead);
+                if ($subhead) {
+                    if (strcasecmp(trim((string)$subhead), 'Equipment') === 0) {
+                        $ipcQuery->where(function($q) {
+                            $q->where('shd.subhead', 'Equipment')
+                              ->orWhere(function($subQ) {
+                                  $subQ->whereNull('shd.subhead')
+                                       ->whereIn('ipc.doctype', ['Ps', 'mat', 'pur']);
+                              });
+                        });
+                    } elseif (strcasecmp(trim((string)$subhead), 'HR') === 0) {
+                        $ipcQuery->where(function($q) {
+                            $q->where('shd.subhead', 'HR')
+                              ->orWhere(function($subQ) {
+                                  $subQ->whereNull('shd.subhead')
+                                       ->where('ipc.doctype', 'Sa');
+                              });
+                        });
+                    } elseif (strcasecmp(trim((string)$subhead), 'Misc') === 0) {
+                        $ipcQuery->where(function($q) {
+                            $q->where('shd.subhead', 'Misc')
+                              ->orWhere(function($subQ) {
+                                  $subQ->whereNull('shd.subhead')
+                                       ->whereNotIn('ipc.doctype', ['Ps', 'mat', 'pur', 'Sa']);
+                              });
+                        });
+                    } else {
+                        $subheadList = array_map('trim', explode(',', $subhead));
+                        if (count($subheadList) === 1) {
+                            $ipcQuery->where('shd.subhead', $subheadList[0]);
+                        } else {
+                            $ipcQuery->whereIn('shd.subhead', $subheadList);
+                        }
+                    }
                 }
             } else {
                 // Account level
@@ -511,7 +696,7 @@ class FinanceOfProjectController extends Controller
             ->get();
 
             foreach ($rawIpc as $row) {
-                $ratio = (float) ($row->ratio ?? 1.0);
+                $ratio = ($scope === 'subhead') ? (float) ($row->ratio ?? 1.0) : 1.0;
                 $amt1 = abs((float) ($row->amount1 ?: $row->amount2)) * $ratio;
                 $amt2 = abs((float) ($row->amount2 ?: $row->amount1)) * $ratio;
 
@@ -519,8 +704,22 @@ class FinanceOfProjectController extends Controller
                     ? $row->subhead
                     : (!empty(trim((string)$row->sudohed)) ? $row->sudohed : (in_array(strtolower($row->doctype), ['ps', 'mat', 'pur']) ? 'Equipment' : 'Misc'));
 
+                if ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0 && (empty($row->subhead) || strcasecmp(trim((string)$row->subhead), 'Misc') === 0)) {
+                    $resolvedSubhead = 'Misc';
+                }
+
+                $caseUrl = null;
+                if (!empty($row->docid)) {
+                    if (in_array(strtolower((string)$row->doctype), ['ct', 'ctc'])) {
+                        $caseUrl = url('/nrdi/contract-cases-new/' . $row->docid);
+                    } else {
+                        $caseUrl = url('/nrdi/purchase-cases-new/' . $row->docid);
+                    }
+                }
+
                 $items[] = (object) [
                     'id'          => $row->docid,
+                    'case_url'    => $caseUrl,
                     'ref_no'      => strtoupper($row->doctype) . '-' . $row->docid,
                     'date'        => $row->rdate ? \Carbon\Carbon::parse($row->rdate)->format('d M Y') : '-',
                     'title'       => $row->title ?: 'In-Process Case #' . $row->docid,
@@ -567,8 +766,18 @@ class FinanceOfProjectController extends Controller
 
             foreach ($rawLoans as $row) {
                 $amt = abs((float) ($row->trn_amount1 ?: $row->trn_amount2));
+                $caseUrl = null;
+                if (!empty($row->cmt_docid)) {
+                    if (in_array(strtolower((string)$row->cmt_type), ['ct', 'ctc'])) {
+                        $caseUrl = url('/nrdi/contract-cases-new/' . $row->cmt_docid);
+                    } else {
+                        $caseUrl = url('/nrdi/purchase-cases-new/' . $row->cmt_docid);
+                    }
+                }
+
                 $items[] = (object) [
                     'id'          => $row->trn_id,
+                    'case_url'    => $caseUrl,
                     'ref_no'      => $row->cmt_type . '-' . $row->cmt_docid,
                     'date'        => $row->trn_date ? \Carbon\Carbon::parse($row->trn_date)->format('d M Y') : '-',
                     'title'       => ($figure === 'loansgiven' ? 'Loan Provided to Project: ' : 'Loan Borrowed from Project: ') . ($row->related_head ?: 'Other Head'),
@@ -608,4 +817,53 @@ class FinanceOfProjectController extends Controller
             'isWithoutGst', 'sumAmount', 'sumTotal'
         ));
     }
+
+    /**
+     * Initiate a data revision for a Funding record (fin.sharesinstall).
+     * Legacy fin_sharesinstall_rev.bas:84.
+     * RevType 3 (LINKED_CASCADE) exercising verified 'Funding - 3' cascade.
+     */
+    public function reverseFunding(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $install = DB::table('fin.sharesinstall as si')
+            ->leftJoin('cen.heads as h', 'si.shi_hed_id', '=', 'h.hed_id')
+            ->where('si.shi_id', $id)
+            ->select('si.*', 'h.hed_name', 'h.hed_code', 'h.hed_unt_id')
+            ->first();
+
+        if (!$install) {
+            abort(404, 'Funding record not found.');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isFinOrAdmin = in_array($userArea, ['fin', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isFinOrAdmin) {
+            $targetUnit = (int) ($install->hed_unt_id ?? $user->acc_unt_id ?? 0);
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $targetUnit)) {
+                abort(403, 'Unauthorized. Funding record is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $headName = $install->hed_name ?? $install->hed_code ?? 'Funding';
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Funding',
+            objectId: $install->shi_id,
+            unitId: (int) ($install->hed_unt_id ?? $user->acc_unt_id),
+            revType: \App\Enums\RevType::LINKED_CASCADE, // RevType 3
+            revRef: $headName,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $install->hed_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Funding #{$id} created successfully.");
+    }
 }
+

@@ -1591,4 +1591,105 @@ class DivHrController extends Controller
             || session('impersonated_by_god')
             || strtolower($user->acc_username ?? '') === 'superadminrdw';
     }
+
+    /**
+     * Initiate a data revision for a Full Employee Record.
+     * Legacy hr_emps_detail.bas:235.
+     * Preserved bug-for-bug per Phase 3/4 finding.
+     * RevType 1 (FULL_CASCADE).
+     */
+    public function reverseEmployeeFull(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $emp = DB::table('hr.emps')->where('emp_id', $id)->first();
+        if (!$emp) {
+            abort(404, 'Employee record not found.');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHrOrAdmin = in_array($userArea, ['hr', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isHrOrAdmin) {
+            $empUnit = (int) ($emp->emp_unt_id ?? 0);
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $empUnit)) {
+                abort(403, 'Unauthorized. Employee is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Employee',
+            objectId: (string) $emp->emp_id,
+            unitId: (int) ($emp->emp_unt_id ?? $user->acc_unt_id),
+            revType: \App\Enums\RevType::FULL_CASCADE,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $emp->emp_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Employee {$emp->emp_id} created successfully.");
+    }
+
+    /**
+     * Initiate a data revision for an Employee (Field-level).
+     * Legacy hr_emps_rev.bas:66.
+     * RevType 2 (FIELD_LEVEL).
+     */
+    public function reverseEmployeeField(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $emp = DB::table('hr.emps')->where('emp_id', $id)->first();
+        if (!$emp) {
+            abort(404, 'Employee record not found.');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHrOrAdmin = in_array($userArea, ['hr', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isHrOrAdmin) {
+            $empUnit = (int) ($emp->emp_unt_id ?? 0);
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $empUnit)) {
+                abort(403, 'Unauthorized. Employee is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        if (empty($fieldDiffs) && $request->filled('field_name')) {
+            $fieldDiffs = [[
+                'table' => 'hr_emps',
+                'rowid' => (string) $emp->emp_id,
+                'attrib' => (string) $request->input('field_name'),
+                'colname' => (string) $request->input('field_name'),
+                'oldvalue' => $request->input('old_value'),
+                'newvalue' => $request->input('new_value'),
+                'datatype' => 'Text',
+                'type' => 1,
+            ]];
+        }
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Employee',
+            objectId: (string) $emp->emp_id,
+            unitId: (int) ($emp->emp_unt_id ?? $user->acc_unt_id),
+            revType: \App\Enums\RevType::FIELD_LEVEL,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $emp->emp_unt_id),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Employee {$emp->emp_id} created successfully.");
+    }
 }
+

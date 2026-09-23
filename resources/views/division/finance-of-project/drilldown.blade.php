@@ -213,9 +213,15 @@
                                     <td>{{ $idx + 1 }}</td>
                                     <td class="font-weight-bold text-dark">{{ $it->date }}</td>
                                     <td>
-                                        <span class="badge badge-light border text-dark font-mono px-2 py-1">
-                                            {{ $it->ref_no }}
-                                        </span>
+                                        @if(!empty($it->case_url))
+                                            <a href="{{ $it->case_url }}" target="_blank" class="badge badge-light border border-primary text-primary font-mono px-2 py-1 text-decoration-none" style="transition: all 0.2s; font-size: 0.8rem;" title="View Case Details">
+                                                <i class="fas fa-external-link-alt mr-1" style="font-size: 0.65rem;"></i>{{ $it->ref_no }}
+                                            </a>
+                                        @else
+                                            <span class="badge badge-light border text-dark font-mono px-2 py-1">
+                                                {{ $it->ref_no }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="font-weight-bold text-primary">{{ $it->title }}</span>

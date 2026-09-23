@@ -497,6 +497,73 @@
             </button>
         </form>
     @endif
+
+    @php
+        $canReverse = in_array(strtolower(trim($purchase->pcs_status)), ['approved', 'fulfilled', 'partially fulfilled'], true);
+        $user = Auth::user();
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isProcOrAdmin = in_array($userArea, ['proc', 'prc', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+        $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+        $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+        $inScope = $isProcOrAdmin || ($user->acc_unt_id && (int) $purchase->pcs_unt_id === (int) $user->acc_unt_id) || ($lower > 0 && $upper > 0 && $purchase->pcs_unt_id >= $lower && $purchase->pcs_unt_id <= $upper);
+    @endphp
+
+    @if($canReverse && $inScope && Gate::check('initiate', \App\Models\AudRev::class))
+        <button type="button" class="btn btn-danger px-4 shadow-sm unlock ml-2" data-toggle="modal" data-target="#reversePurchaseCaseModal">
+            <i class="fas fa-sync-alt mr-1"></i> Reverse Case
+        </button>
+
+        <!-- Reverse Purchase Case Modal -->
+        <div class="modal fade text-left" id="reversePurchaseCaseModal" tabindex="-1" role="dialog" aria-labelledby="reverseModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content shadow-lg border-0">
+                    <form action="{{ route('purchase.case.reverse', $purchase->pcs_id) }}" method="POST">
+                        @csrf
+                        <div class="modal-header bg-danger text-white py-2">
+                            <h5 class="modal-title font-weight-bold" id="reverseModalLabel">
+                                <i class="fas fa-sync-alt mr-2"></i>Initiate Reversal for Case #{{ $purchase->pcs_id }}
+                            </h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <p class="text-muted mb-3">
+                                Initiating a data revision will generate a Draft reversal request for this Purchase Case.
+                            </p>
+                            <div class="form-group mb-3">
+                                <label class="font-weight-bold text-dark mb-2">Reversal Scope:</label>
+                                <div class="custom-control custom-radio mb-2">
+                                    <input type="radio" id="revScope1" name="rev_type" value="1" class="custom-control-input" checked>
+                                    <label class="custom-control-label font-weight-bold" for="revScope1">
+                                        Full Cascade Reversal (Scope 1)
+                                        <small class="d-block text-muted font-weight-normal">Roll back purchase case status, items fulfilment, commitments, receipts, and quotations.</small>
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="revScope2" name="rev_type" value="2" class="custom-control-input">
+                                    <label class="custom-control-label font-weight-bold" for="revScope2">
+                                        Field-Level Revision (Scope 2)
+                                        <small class="d-block text-muted font-weight-normal">Field-level data correction without cascading destructive deletions.</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="rev_reason" class="font-weight-bold text-dark">Reason for Reversal <span class="text-danger">*</span></label>
+                                <textarea name="rev_reason" id="rev_reason" rows="3" class="form-control" placeholder="Explain the operational or audit reason for this reversal..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light py-2">
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger font-weight-bold px-4">
+                                <i class="fas fa-check-circle mr-1"></i> Generate Reversal Draft
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 <script>
@@ -506,6 +573,7 @@
         }
     }
 </script>
+
 
                 </div>
             </div>

@@ -238,4 +238,103 @@ class AttendanceController extends Controller
 
         return $target->with('success', "Attendance sheet created for {$month} ({$count} new employee rows added).");
     }
+
+    /**
+     * Initiate a data revision for Monthly Attendance.
+     * Legacy hr_attendance_rev.bas:58.
+     * RevType 2 (FIELD_LEVEL).
+     */
+    public function reverseMonthly(Request $request, $id = null, ?\App\Services\DataRevisionService $revisionService = null)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $revisionService = $revisionService ?: app(\App\Services\DataRevisionService::class);
+        $targetId = $id ?: ($request->input('att_id') ?: $request->input('object_id'));
+        if (!$targetId) {
+            abort(422, 'Attendance ID (att_id) is required.');
+        }
+
+        $att = DB::table('hr.attendance')->where('att_id', $targetId)->first();
+        if (!$att) {
+            abort(404, 'Attendance record not found.');
+        }
+
+        $unitId = (int) ($att->att_unt_id ?? 0);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHrOrAdmin = in_array($userArea, ['hr', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isHrOrAdmin && !app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $unitId)) {
+            abort(403, 'Unauthorized. Attendance is outside your unit scope.');
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Attendance',
+            objectId: $att->att_id,
+            unitId: $unitId,
+            revType: \App\Enums\RevType::FIELD_LEVEL,
+            revRef: $request->input('month') ?? ($att->att_startdt ? substr((string) $att->att_startdt, 0, 7) : null),
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $unitId),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Monthly Attendance created successfully.");
+    }
+
+    /**
+     * Initiate a data revision for Single-Day Attendance.
+     * Legacy hr_attendance_rev2.bas:38.
+     * RevType 2 (FIELD_LEVEL).
+     */
+    public function reverseDaily(Request $request, $id = null, ?\App\Services\DataRevisionService $revisionService = null)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $revisionService = $revisionService ?: app(\App\Services\DataRevisionService::class);
+        $targetId = $id ?: ($request->input('att_id') ?: $request->input('object_id'));
+        if (!$targetId) {
+            abort(422, 'Attendance ID (att_id) is required.');
+        }
+
+        $att = DB::table('hr.attendance')->where('att_id', $targetId)->first();
+        if (!$att) {
+            abort(404, 'Attendance record not found.');
+        }
+
+        $unitId = (int) ($att->att_unt_id ?? 0);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHrOrAdmin = in_array($userArea, ['hr', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isHrOrAdmin && !app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $unitId)) {
+            abort(403, 'Unauthorized. Attendance is outside your unit scope.');
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Attendance',
+            objectId: $att->att_id,
+            unitId: $unitId,
+            revType: \App\Enums\RevType::FIELD_LEVEL,
+            revRef: $request->input('date') ?? ($att->att_startdt ? (string) $att->att_startdt : null),
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $unitId),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Daily Attendance created successfully.");
+    }
 }
+

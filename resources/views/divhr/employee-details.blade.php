@@ -147,6 +147,14 @@
             <i class="fas fa-edit mr-1"></i> Edit Profile
           </a>
         @endif
+
+        @can('initiate', \App\Models\AudRev::class)
+          <button type="button" onclick="document.getElementById('reverseEmployeeModal').classList.remove('hidden')"
+            class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-bold text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/50 rounded-lg shadow-sm transition-all inline-flex items-center justify-center gap-1.5"
+            title="Initiate Data Revision for Employee">
+            <i class="fas fa-sync-alt text-rose-400"></i> Reverse Employee
+          </button>
+        @endcan
       </div>
     </header>
     <div class="grid grid-cols-12 gap-6">
@@ -960,6 +968,140 @@
       }
     });
   </script>
+
+  @can('initiate', \App\Models\AudRev::class)
+  {{-- Employee Reversal Modal --}}
+  <div id="reverseEmployeeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-surface border border-border1 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
+      {{-- Modal Header --}}
+      <div class="px-6 py-4 border-b border-border1 flex items-center justify-between bg-surface2">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold">
+            <i class="fas fa-sync-alt text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-text1">Initiate Reversal for Employee</h3>
+            <p class="text-xs text-text3">{{ $emp->emp_name ?? 'Employee' }} (ID: {{ $emp->emp_id ?? $id }})</p>
+          </div>
+        </div>
+        <button type="button" onclick="document.getElementById('reverseEmployeeModal').classList.add('hidden')"
+          class="text-text3 hover:text-text1 p-1 rounded-lg hover:bg-surface3 transition-colors">
+          <i class="fas fa-times text-base"></i>
+        </button>
+      </div>
+
+      {{-- Tab Buttons --}}
+      <div class="px-6 pt-4 pb-2 border-b border-border1 flex gap-2">
+        <button type="button" id="empRevTabFieldBtn" onclick="switchEmpRevTab('field')"
+          class="flex-1 py-2 px-3 text-xs font-bold rounded-lg border border-primary bg-primary/10 text-primary transition-all flex items-center justify-center gap-1.5">
+          <i class="fas fa-edit"></i> Field-Level (Recommended)
+        </button>
+        <button type="button" id="empRevTabFullBtn" onclick="switchEmpRevTab('full')"
+          class="flex-1 py-2 px-3 text-xs font-bold rounded-lg border border-border2 bg-surface2 text-text2 hover:bg-surface3 hover:text-text1 transition-all flex items-center justify-center gap-1.5">
+          <i class="fas fa-layer-group"></i> Full Record
+        </button>
+      </div>
+
+      {{-- Tab 1: Field-Level Correction (RevType 2) --}}
+      <div id="empRevTabField" class="p-6">
+        <form action="{{ route('divhr.employees.reverse-field', $emp->emp_id ?? $id) }}" method="POST" class="space-y-4">
+          @csrf
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-text2 mb-1.5">Field to Revise</label>
+            <select name="field_name" class="w-full text-xs bg-surface2 border border-border2 rounded-lg px-3 py-2 text-text1 focus:ring-1 focus:ring-primary focus:outline-none">
+              <option value="emp_title">Designation / Title (Current: {{ $emp->emp_title ?? '—' }})</option>
+              <option value="emp_rank">Rank (Current: {{ $emp->emp_rank ?? '—' }})</option>
+              <option value="emp_status">Status (Current: {{ $emp->emp_status ?? '—' }})</option>
+              <option value="emp_cnic">CNIC (Current: {{ $emp->emp_cnic ?? '—' }})</option>
+              <option value="emp_salary">Basic Pay / Salary</option>
+              <option value="emp_joindt">Joining Date (Current: {{ $emp->emp_joindt ?? '—' }})</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-text2 mb-1.5">Old Value</label>
+              <input type="text" name="old_value" placeholder="Previous value"
+                class="w-full text-xs bg-surface2 border border-border2 rounded-lg px-3 py-2 text-text1 focus:ring-1 focus:ring-primary focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-text2 mb-1.5">New Value</label>
+              <input type="text" name="new_value" placeholder="Corrected value" required
+                class="w-full text-xs bg-surface2 border border-border2 rounded-lg px-3 py-2 text-text1 focus:ring-1 focus:ring-primary focus:outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-text2 mb-1.5">Revision Reason <span class="text-rose-400">*</span></label>
+            <textarea name="rev_reason" rows="3" required placeholder="Explain why this employee field correction is required..."
+              class="w-full text-xs bg-surface2 border border-border2 rounded-lg p-3 text-text1 focus:ring-1 focus:ring-primary focus:outline-none resize-none"></textarea>
+          </div>
+
+          <div class="pt-2 flex justify-end gap-2">
+            <button type="button" onclick="document.getElementById('reverseEmployeeModal').classList.add('hidden')"
+              class="px-4 py-2 text-xs font-semibold text-text2 hover:text-text1 bg-surface2 hover:bg-surface3 border border-border2 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-4 py-2 text-xs font-bold text-white bg-primary hover:opacity-90 rounded-lg shadow transition-opacity flex items-center gap-1.5">
+              <i class="fas fa-check"></i> Submit Field Correction Draft
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {{-- Tab 2: Full Record Reversal (RevType 1) --}}
+      <div id="empRevTabFull" class="p-6 hidden">
+        <form action="{{ route('divhr.employees.reverse-full', $emp->emp_id ?? $id) }}" method="POST" class="space-y-4">
+          @csrf
+          {{-- Required Amber Warning Box --}}
+          <div class="p-3.5 bg-amber-500/15 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-start gap-2.5">
+            <i class="fas fa-exclamation-triangle mt-0.5 text-amber-400 flex-shrink-0"></i>
+            <span class="leading-relaxed">Full employee reversal has no working execution path — historical Employee reversals used field-level correction instead</span>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-text2 mb-1.5">Revision Reason <span class="text-rose-400">*</span></label>
+            <textarea name="rev_reason" rows="3" required placeholder="Explain why full employee revision is being initiated..."
+              class="w-full text-xs bg-surface2 border border-border2 rounded-lg p-3 text-text1 focus:ring-1 focus:ring-primary focus:outline-none resize-none"></textarea>
+          </div>
+
+          <div class="pt-2 flex justify-end gap-2">
+            <button type="button" onclick="document.getElementById('reverseEmployeeModal').classList.add('hidden')"
+              class="px-4 py-2 text-xs font-semibold text-text2 hover:text-text1 bg-surface2 hover:bg-surface3 border border-border2 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-4 py-2 text-xs font-bold text-amber-300 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-700/50 rounded-lg shadow transition-colors flex items-center gap-1.5">
+              <i class="fas fa-paper-plane"></i> Initiate Full Reversal Draft
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchEmpRevTab(tab) {
+      var fieldTab = document.getElementById('empRevTabField');
+      var fullTab = document.getElementById('empRevTabFull');
+      var fieldBtn = document.getElementById('empRevTabFieldBtn');
+      var fullBtn = document.getElementById('empRevTabFullBtn');
+
+      if (tab === 'field') {
+        fieldTab.classList.remove('hidden');
+        fullTab.classList.add('hidden');
+        fieldBtn.className = "flex-1 py-2 px-3 text-xs font-bold rounded-lg border border-primary bg-primary/10 text-primary transition-all flex items-center justify-center gap-1.5";
+        fullBtn.className = "flex-1 py-2 px-3 text-xs font-bold rounded-lg border border-border2 bg-surface2 text-text2 hover:bg-surface3 hover:text-text1 transition-all flex items-center justify-center gap-1.5";
+      } else {
+        fieldTab.classList.add('hidden');
+        fullTab.classList.remove('hidden');
+        fullBtn.className = "flex-1 py-2 px-3 text-xs font-bold rounded-lg border border-amber-500 bg-amber-500/10 text-amber-300 transition-all flex items-center justify-center gap-1.5";
+        fieldBtn.className = "flex-1 py-2 px-3 text-xs font-bold rounded-lg border border-border2 bg-surface2 text-text2 hover:bg-surface3 hover:text-text1 transition-all flex items-center justify-center gap-1.5";
+      }
+    }
+  </script>
+  @endcan
 
 </div>
 @endsection

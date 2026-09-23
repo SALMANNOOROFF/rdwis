@@ -35,7 +35,7 @@ class AdminReversalController extends Controller
 
     /**
      * Draft revisions tab.
-     * Accessible only to roles with reversal.initiate or reversal.release (non-IT originators).
+     * Accessible to non-IT division/department users. SO IT accounts do not view drafts.
      */
     public function draft(Request $request)
     {
@@ -47,15 +47,9 @@ class AdminReversalController extends Controller
         $userArea = (string) ($user->acc_untarea ?? '');
         $isItStaff = ($userUnitId === 860000 || AreaDefinition::isIt($userArea) || in_array($context->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
 
-        // IT accounts do not originate drafts (matching legacy start_it_multiple.bas vs start_fin_multiple.bas)
-        $canAccessDraft = ! $isItStaff && (
-            $context->isSuperAdmin() ||
-            RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_INITIATE) ||
-            RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_RELEASE)
-        );
-
-        if (! $canAccessDraft) {
-            abort(403, 'Unauthorized. Draft revisions are restricted to initiating units.');
+        // SO IT does not view drafts - redirect to open
+        if ($isItStaff) {
+            return redirect()->route('admin.reversals.open');
         }
 
         return $this->renderListing($request, 'draft');
@@ -96,15 +90,54 @@ class AdminReversalController extends Controller
             'attachments',
         ]);
 
-        return view('admin.reversals.show', compact('rev'));
+        $user = auth()->user();
+        $context = UserAccessContext::forUser($user);
+        $userUnitId = (int) ($user->acc_unt_id ?? 0);
+        $userArea = (string) ($user->acc_untarea ?? '');
+        $isItStaff = ($userUnitId === 860000 || AreaDefinition::isIt($userArea) || in_array($context->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
+
+        return view('admin.reversals.show', compact('rev', 'isItStaff'));
+    }
+
+    /**
+     * Update reversal details (e.g. Reason while in Draft or Under Revision).
+     */
+    public function update(Request $request, AudRev $rev)
+    {
+        $this->authorize('view', $rev);
+
+        if (! $rev->isDraft() && ! $rev->isUnderRevision()) {
+            return redirect()->route('admin.reversals.show', $rev->rev_id)
+                ->withErrors(['update' => 'Only Draft or Under Revision cases can be edited.']);
+        }
+
+        $request->validate([
+            'rev_reason' => 'required|string|max:1000',
+        ]);
+
+        $rev->rev_reason = trim($request->input('rev_reason'));
+        $rev->save();
+
+        return redirect()->route('admin.reversals.show', $rev->rev_id)
+            ->with('status', 'Reason updated successfully.');
     }
 
     /**
      * Release a reversal case to IT for execution.
      */
-    public function release(AudRev $rev, DataRevisionService $revisionService)
+    public function release(Request $request, AudRev $rev, DataRevisionService $revisionService)
     {
         $this->authorize('release', $rev);
+
+        if ($request->filled('rev_reason')) {
+            $rev->rev_reason = trim($request->input('rev_reason'));
+            $rev->save();
+        }
+
+        if (empty(trim((string) $rev->rev_reason))) {
+            return redirect()->route('admin.reversals.show', $rev->rev_id)
+                ->withErrors(['release' => 'Please enter reason for data revision before releasing.']);
+        }
 
         try {
             $revisionService->release($rev);
@@ -114,7 +147,7 @@ class AdminReversalController extends Controller
         }
 
         return redirect()->route('admin.reversals.show', $rev->rev_id)
-            ->with('status', "Reversal #{$rev->rev_id} released successfully to IT for execution.");
+            ->with('status', "The data revision case has been released.");
     }
 
     /**
@@ -204,47 +237,77 @@ class AdminReversalController extends Controller
 
         // Global visibility: SuperAdmin, Command, IT Staff (unit 860000 / IT roles)
         $isItStaff = ($userUnitId === 860000 || AreaDefinition::isIt($userArea) || in_array($context->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
-        $isGlobal = ($context->isSuperAdmin() || $context->isCommand() || $isItStaff);
+        $isGlobal = ($context->isSuperAdmin() || $context->isCommand());
 
-        // IT accounts do not originate drafts (matching legacy start_it_multiple.bas vs start_fin_multiple.bas)
-        $canViewDraft = ! $isItStaff && (
-            $context->isSuperAdmin() ||
-            RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_INITIATE) ||
-            RolePermissionMap::hasPermission($user, PermissionRegistry::REVERSAL_RELEASE)
-        );
+        // SO IT does not view drafts - redirect to open
+        if ($isItStaff && $tab === 'draft') {
+            return redirect()->route('admin.reversals.open');
+        }
+
+        $canViewDraft = ! $isItStaff;
 
         $baseQuery = AudRev::query();
 
-        if (! $isGlobal) {
-            $scopeService = app(DataScopeService::class);
-            $baseQuery->where(function ($q) use ($user, $scopeService, $userArea) {
-                $q->where(function ($sq) use ($user, $scopeService) {
-                    $scopeService->applyScope($sq, $user, 'rev_unt_id');
-                })->orWhere(function ($sq) use ($user, $scopeService) {
-                    $scopeService->applyScope($sq, $user, 'rev_intunt_id');
+        $divisionBreakdown = [];
+        $selectedDivision = $request->query('division', $request->query('unit_id', ''));
+
+        if ($isItStaff) {
+            // SO IT sees all Open and Closed cases across all divisions/departments, but never Drafts
+            $baseQuery->where('rev_status', '!=', 'Draft');
+            $reversalsDraftCount = 0;
+            $reversalsOpenCount = AudRev::whereIn('rev_status', ['In Process', 'Under Revision'])->count();
+            $reversalsClosedCount = AudRev::whereIn('rev_status', ['Fulfilled', 'Cancelled'])->count();
+            $reversalsFulfilledCount = AudRev::where('rev_status', 'Fulfilled')->count();
+            $reversalsCancelledCount = AudRev::where('rev_status', 'Cancelled')->count();
+
+            // Calculate division-wise breakdown for current tab
+            $divStatsQuery = AudRev::query();
+            if ($tab === 'closed') {
+                $divStatsQuery->whereIn('rev_status', ['Fulfilled', 'Cancelled']);
+            } else {
+                $divStatsQuery->whereIn('rev_status', ['In Process', 'Under Revision']);
+            }
+
+            $rawCounts = (clone $divStatsQuery)
+                ->selectRaw('COALESCE(rev_unt_id, rev_intunt_id) as unit_id, count(*) as count')
+                ->groupBy('unit_id')
+                ->pluck('count', 'unit_id');
+
+            if ($rawCounts->isNotEmpty()) {
+                $units = \App\Models\Unit::whereIn('unt_id', $rawCounts->keys())
+                    ->get(['unt_id', 'unt_namesh', 'unt_name']);
+
+                foreach ($units as $u) {
+                    $divisionBreakdown[] = [
+                        'unit_id' => $u->unt_id,
+                        'name' => $u->unt_namesh ?? $u->unt_name,
+                        'count' => (int) ($rawCounts[$u->unt_id] ?? 0),
+                    ];
+                }
+                // Sort by count descending
+                usort($divisionBreakdown, fn($a, $b) => $b['count'] <=> $a['count']);
+            }
+        } else {
+            // Division / Department user: strictly scoped to their division / department
+            if (! $isGlobal) {
+                $scopeService = app(DataScopeService::class);
+                $baseQuery->where(function ($q) use ($user, $scopeService) {
+                    $q->where(function ($sq) use ($user, $scopeService) {
+                        $scopeService->applyScope($sq, $user, 'rev_intunt_id');
+                    })->orWhere(function ($sq) use ($user, $scopeService) {
+                        $scopeService->applyScope($sq, $user, 'rev_unt_id');
+                    });
                 });
+            }
 
-                if (AreaDefinition::isFinance($userArea)) {
-                    $q->orWhereIn('rev_obj', ['Salary', 'Salary Order', 'Commitment', 'Transaction', 'Payment', 'Allocation', 'Funding', 'Transfer', 'FinContract']);
-                }
-
-                if (AreaDefinition::isHr($userArea)) {
-                    $q->orWhereIn('rev_obj', ['Employee', 'Contract', 'Attendance', 'Salary Requisition']);
-                }
-
-                if (AreaDefinition::isProcurement($userArea)) {
-                    $q->orWhereIn('rev_obj', ['Purchase Case', 'Purchase Receipt', 'Purchase Attachment', 'Quotation']);
-                }
-            });
+            // Calculate tab counts scoped to division
+            $countsQuery = clone $baseQuery;
+            $reversalsDraftCount = (clone $countsQuery)->where('rev_status', 'Draft')->count();
+            $reversalsOpenCount = (clone $countsQuery)->whereIn('rev_status', ['In Process', 'Under Revision'])->count();
+            $reversalsClosedCount = (clone $countsQuery)->whereIn('rev_status', ['Fulfilled', 'Cancelled'])->count();
+            $reversalsFulfilledCount = (clone $countsQuery)->where('rev_status', 'Fulfilled')->count();
+            $reversalsCancelledCount = (clone $countsQuery)->where('rev_status', 'Cancelled')->count();
         }
-
-        // Calculate tab counts
-        $countsQuery = clone $baseQuery;
-        $reversalsDraftCount = (clone $countsQuery)->where('rev_status', 'Draft')->count();
-        $reversalsOpenCount = (clone $countsQuery)->whereIn('rev_status', ['In Process', 'Under Revision'])->count();
-        $reversalsClosedCount = (clone $countsQuery)->whereIn('rev_status', ['Fulfilled', 'Cancelled'])->count();
-        $reversalsFulfilledCount = (clone $countsQuery)->where('rev_status', 'Fulfilled')->count();
-        $reversalsCancelledCount = (clone $countsQuery)->where('rev_status', 'Cancelled')->count();
 
         $query = clone $baseQuery;
 
@@ -264,10 +327,22 @@ class AdminReversalController extends Controller
                 break;
         }
 
+        // Apply division filter if requested
+        if ($selectedDivision !== '' && $selectedDivision !== null) {
+            $divId = (int) $selectedDivision;
+            if ($divId > 0) {
+                $query->where(function ($q) use ($divId) {
+                    $q->where('rev_unt_id', $divId)
+                      ->orWhere('rev_intunt_id', $divId);
+                });
+            }
+        }
+
         $reversals = $query
-            ->with(['unit', 'initiatingUnit'])
+            ->with(['unit', 'initiatingUnit', 'attachments'])
             ->orderByDesc('rev_id')
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
         $status = $tab;
 
@@ -275,7 +350,10 @@ class AdminReversalController extends Controller
             'reversals',
             'tab',
             'status',
+            'isItStaff',
             'canViewDraft',
+            'divisionBreakdown',
+            'selectedDivision',
             'reversalsDraftCount',
             'reversalsOpenCount',
             'reversalsClosedCount',

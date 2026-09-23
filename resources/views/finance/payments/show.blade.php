@@ -138,9 +138,48 @@
         <div class="col-lg-6 mb-4">
             <!-- 1. Commitment & Purchase Case Summary Cards -->
             <div class="card card-clean p-4 mb-4">
-                <h5 class="text-dark rajdhani font-weight-bold mb-3 border-bottom pb-2">
-                    <i class="fas fa-file-invoice text-primary mr-2"></i> Commitment &amp; Case Summary
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h5 class="text-dark rajdhani font-weight-bold mb-0">
+                        <i class="fas fa-file-invoice text-primary mr-2"></i> Commitment &amp; Case Summary
+                    </h5>
+                    @if(Gate::check('initiate', \App\Models\AudRev::class))
+                        <button type="button" class="btn btn-outline-danger btn-sm rajdhani font-weight-bold" data-toggle="modal" data-target="#reverseCommitmentModal">
+                            <i class="fas fa-sync-alt mr-1"></i> REVERSE COMMITMENT
+                        </button>
+
+                        <!-- Reverse Commitment Modal -->
+                        <div class="modal fade" id="reverseCommitmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content border-0 shadow-lg">
+                                    <form action="{{ route('finance.payments.commitments.reverse', $commitment->cmt_id) }}" method="POST">
+                                        @csrf
+                                        <div class="modal-header bg-danger text-white py-2">
+                                            <h6 class="modal-title font-weight-bold mb-0">
+                                                <i class="fas fa-sync-alt mr-1"></i> Reverse Commitment #{{ $commitment->cmt_id }}
+                                            </h6>
+                                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                        </div>
+                                        <div class="modal-body p-3">
+                                            <p class="small text-muted mb-2">
+                                                This will generate a Data Revision request (RevType 1: Full Cascade) to reverse the status of this commitment to Awaited.
+                                            </p>
+                                            <div class="form-group mb-0">
+                                                <label class="font-weight-bold small text-dark">Reason for Reversal <span class="text-danger">*</span></label>
+                                                <textarea name="rev_reason" class="form-control form-control-sm" rows="3" placeholder="Enter reason for revision..." required></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer bg-light py-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-sm btn-danger font-weight-bold px-3">
+                                                <i class="fas fa-check mr-1"></i> Generate Reversal Draft
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
                 
                 <div class="row g-3">
                     <div class="col-sm-6 mb-2">
@@ -202,6 +241,7 @@
                                 <th class="text-right">Price (Pre-Tax)</th>
                                 <th class="text-right">Tax</th>
                                 <th class="text-right">Final Price</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -212,10 +252,51 @@
                                     <td class="text-right rajdhani font-weight-bold text-dark">PKR {{ number_format(abs((float)$t->trn_amount1), 2) }}</td>
                                     <td class="text-right rajdhani text-muted">{{ number_format(abs((float)$t->trn_tax1), 2) }}</td>
                                     <td class="text-right rajdhani font-weight-bold text-success">PKR {{ number_format(abs((float)$t->trn_amount2), 2) }}</td>
+                                    <td class="text-center">
+                                        @if(Gate::check('initiate', \App\Models\AudRev::class))
+                                            <button type="button" class="btn btn-outline-danger btn-xs font-weight-bold" data-toggle="modal" data-target="#reversePaymentModal{{ $t->trn_id }}">
+                                                <i class="fas fa-sync-alt mr-1"></i> Reverse
+                                            </button>
+
+                                            <!-- Reverse Payment Modal -->
+                                            <div class="modal fade text-left" id="reversePaymentModal{{ $t->trn_id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content border-0 shadow-lg">
+                                                        <form action="{{ route('finance.payments.transactions.reverse', $t->trn_id) }}" method="POST">
+                                                            @csrf
+                                                            <div class="modal-header bg-danger text-white py-2">
+                                                                <h6 class="modal-title font-weight-bold mb-0">
+                                                                    <i class="fas fa-sync-alt mr-1"></i> Reverse Payment #{{ $t->trn_id }}
+                                                                </h6>
+                                                                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                            </div>
+                                                            <div class="modal-body p-3">
+                                                                <p class="small text-muted mb-2">
+                                                                    This will generate a Data Revision request (RevType 3: Linked Cascade) for Payment installment #{{ $t->trn_id }}.
+                                                                </p>
+                                                                <div class="form-group mb-0">
+                                                                    <label class="font-weight-bold small text-dark">Reason for Reversal <span class="text-danger">*</span></label>
+                                                                    <textarea name="rev_reason" class="form-control form-control-sm" rows="3" placeholder="Enter reason for revision..." required></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer bg-light py-2">
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-sm btn-danger font-weight-bold px-3">
+                                                                    <i class="fas fa-check mr-1"></i> Generate Reversal Draft
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">
+                                    <td colspan="6" class="text-center py-4 text-muted">
                                         No payment installments recorded yet.
                                     </td>
                                 </tr>
@@ -228,6 +309,14 @@
                                     <th class="text-right rajdhani text-dark font-weight-bold">PKR {{ number_format($aa, 2) }}</th>
                                     <th class="text-right rajdhani text-muted font-weight-bold">{{ number_format($at, 2) }}</th>
                                     <th class="text-right rajdhani font-weight-bold text-success">PKR {{ number_format($aat, 2) }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        @endif
+                    </table>
+                </div>
+            </div>
+
                                 </tr>
                             </tfoot>
                         @endif

@@ -236,6 +236,81 @@ class PurchaseInitiationController extends Controller
     }
 
     /**
+     * Initiate a data revision for a Petty Purchase Case.
+     * Legacy pur_purcasespetty_detail.bas:245.
+     */
+    public function reversePetty(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $purchase = Purchase::findOrFail($id);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isProcOrAdmin = in_array($userArea, ['proc', 'prc', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isProcOrAdmin) {
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, (int) $purchase->pcs_unt_id)) {
+                abort(403, 'Unauthorized. Purchase Case is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Purchase Case',
+            objectId: $purchase->pcs_id,
+            unitId: (int) $purchase->pcs_unt_id,
+            revType: \App\Enums\RevType::FULL_CASCADE,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($purchase->pcs_intunt_id ?? $user->acc_unt_id ?? $purchase->pcs_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Petty Purchase Case #{$id} created successfully.");
+    }
+
+    /**
+     * Initiate a data revision for a TA/DA Purchase Case.
+     * Legacy pur_purcasestada_detail.bas:241.
+     */
+    public function reverseTada(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $purchase = Purchase::findOrFail($id);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isProcOrAdmin = in_array($userArea, ['proc', 'prc', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isProcOrAdmin) {
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, (int) $purchase->pcs_unt_id)) {
+                abort(403, 'Unauthorized. Purchase Case is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Purchase Case',
+            objectId: $purchase->pcs_id,
+            unitId: (int) $purchase->pcs_unt_id,
+            revType: \App\Enums\RevType::FULL_CASCADE,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($purchase->pcs_intunt_id ?? $user->acc_unt_id ?? $purchase->pcs_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for TA/DA Purchase Case #{$id} created successfully.");
+    }
+
+
+    /**
      * Pull back a case from HQ to Division (Hold/Revert)
      */
     public function holdCase($id)

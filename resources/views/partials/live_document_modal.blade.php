@@ -51,7 +51,7 @@
                 </div>
 
                 {{-- 2. Iframe (PDF & Native Browser Documents) --}}
-                <iframe id="rdLiveDocIframe" src="" style="display:none; width: 100%; height: 100%; border: none; background: #ffffff;"></iframe>
+                <iframe id="rdLiveDocIframe" src="" style="display:none; width: 100%; height: 100%; min-height: 78vh; border: none; background: #ffffff;"></iframe>
 
                 {{-- 3. Image Viewer Canvas --}}
                 <div id="rdLiveDocImgWrap" style="display:none; width: 100%; height: 100%; overflow: auto; align-items: center; justify-content: center; padding: 25px; background: #1e293b;">

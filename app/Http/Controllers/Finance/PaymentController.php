@@ -653,10 +653,92 @@ class PaymentController extends Controller
             }
         }
 
-        if ($lower === 0 && $upper === 0) {
-            return [0, 99999999];
-        }
-
         return [$lower, $upper];
     }
+
+    /**
+     * Initiate a data revision for a Commitment (PCS).
+     * Legacy fin_commitments_u_pcs_detail.bas:117.
+     */
+    public function reverseCommitment(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $cmt = DB::table('fin.commitments')->where('cmt_id', $id)->first();
+        if (!$cmt) {
+            abort(404, 'Commitment not found.');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isFinOrAdmin = in_array($userArea, ['fin', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isFinOrAdmin) {
+            $cmtUnit = (int) ($cmt->cmt_unt_id ?? $cmt->cmt_effunt_id ?? 0);
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $cmtUnit)) {
+                abort(403, 'Unauthorized. Commitment is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Commitment',
+            objectId: $cmt->cmt_id,
+            unitId: (int) ($cmt->cmt_unt_id ?? $cmt->cmt_effunt_id ?? $user->acc_unt_id),
+            revType: \App\Enums\RevType::FULL_CASCADE,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $cmt->cmt_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Commitment #{$id} created successfully.");
+    }
+
+    /**
+     * Initiate a data revision for a Payment Transaction.
+     * Legacy fin_commitments_u_pcs_detail_sub2.bas:20.
+     * RevType 3 (LINKED_CASCADE) exercising verified 'Payment - 3' cascade.
+     */
+    public function reversePayment(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $trn = DB::table('fin.transactions')->where('trn_id', $id)->first();
+        if (!$trn) {
+            abort(404, 'Payment transaction not found.');
+        }
+
+        $cmt = DB::table('fin.commitments')->where('cmt_id', $trn->trn_cmt_id)->first();
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isFinOrAdmin = in_array($userArea, ['fin', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isFinOrAdmin) {
+            $cmtUnit = (int) ($cmt->cmt_unt_id ?? $cmt->cmt_effunt_id ?? 0);
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $cmtUnit)) {
+                abort(403, 'Unauthorized. Payment transaction is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Payment',
+            objectId: $trn->trn_id,
+            unitId: (int) ($cmt->cmt_unt_id ?? $cmt->cmt_effunt_id ?? $user->acc_unt_id),
+            revType: \App\Enums\RevType::LINKED_CASCADE, // Strictly RevType 3
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $cmt->cmt_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Payment #{$id} created successfully.");
+    }
 }
+

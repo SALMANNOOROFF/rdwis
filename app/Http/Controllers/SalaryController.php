@@ -348,6 +348,88 @@ class SalaryController extends Controller
     }
 
     /**
+     * Initiate a data revision for a Salary Order.
+     * Legacy fin_salorders_u.bas:166.
+     * Distinct from cancelOrder (Mechanism A vs Mechanism B).
+     */
+    public function reverseOrder(Request $request, int $sorId, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $order = FinSalOrder::findOrFail($sorId);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isFinOrAdmin = in_array($userArea, ['fin', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isFinOrAdmin) {
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, (int) $order->sor_unt_id)) {
+                abort(403, 'Unauthorized. Salary order is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Salary Order',
+            objectId: $order->sor_id,
+            unitId: (int) $order->sor_unt_id,
+            revType: \App\Enums\RevType::FULL_CASCADE,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $order->sor_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Salary Order #{$sorId} created successfully.");
+    }
+
+    /**
+     * Initiate a data revision for a Salary Requisition (via linked Salary Order).
+     * Legacy hr_salreqs_u.bas:109,116.
+     */
+    public function reverseRequisition(Request $request, int $srqId, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $srq = HrSalReq::findOrFail($srqId);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHrOrFinOrAdmin = in_array($userArea, ['fin', 'hr', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isHrOrFinOrAdmin) {
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, (int) $srq->srq_unt_id)) {
+                abort(403, 'Unauthorized. Salary requisition is outside your unit scope.');
+            }
+        }
+
+        // Resolve linked Salary Order (Audit.bas / hr_salreqs_u.bas:109)
+        $order = DB::table('fin.salorders')->where('sor_srq_id', $srqId)->first();
+        if (!$order) {
+            return back()->with('error', "No linked Salary Order exists for Requisition #{$srqId}. Un-ordered requisitions should be cancelled or amended directly.");
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Salary Order',
+            objectId: $order->sor_id,
+            unitId: (int) $srq->srq_unt_id,
+            revType: \App\Enums\RevType::FULL_CASCADE,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $srq->srq_unt_id),
+            revReason: $reason
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Salary Order #{$order->sor_id} (Requisition #{$srqId}) created successfully.");
+    }
+
+
+    /**
      * 14. Manual Salary Override POST/PATCH endpoint (Draft Orders only).
      */
     public function updateSalary(Request $request, int $sorId)

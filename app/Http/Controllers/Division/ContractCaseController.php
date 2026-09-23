@@ -763,4 +763,100 @@ class ContractCaseController extends Controller
             'message' => 'Contract Case has been cancelled.'
         ]);
     }
+
+    /**
+     * Initiate a data revision for a Contract.
+     * Legacy hr_contracts_rev.bas:111.
+     * RevType 1 or 2 (chosen by user via modal).
+     */
+    public function reverseContract(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $contract = DB::table('hr.contracts')->where('ctr_id', $id)->first();
+        if (!$contract) {
+            abort(404, 'Contract not found.');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHrOrAdmin = in_array($userArea, ['hr', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isHrOrAdmin) {
+            $ctrUnit = (int) ($contract->ctr_unt_id ?? 0);
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $ctrUnit)) {
+                abort(403, 'Unauthorized. Contract is outside your unit scope.');
+            }
+        }
+
+        $revTypeInput = (int) $request->input('rev_type', 1);
+        $revType = $revTypeInput === 2 ? \App\Enums\RevType::FIELD_LEVEL : \App\Enums\RevType::FULL_CASCADE;
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Contract',
+            objectId: $contract->ctr_id,
+            unitId: (int) ($contract->ctr_unt_id ?? $user->acc_unt_id),
+            revType: $revType,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $contract->ctr_unt_id),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Contract #{$id} created successfully.");
+    }
+
+    /**
+     * Initiate a data revision for a Contract Plan.
+     * Legacy hr_contractplans_rev.bas:45.
+     * RevType 2 (FIELD_LEVEL).
+     */
+    public function reversePlan(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = Auth::user();
+        $plan = DB::table('hr.contractplans as cp')
+            ->leftJoin('hr.contracts as c', 'cp.cpn_ctr_id', '=', 'c.ctr_id')
+            ->where('cp.cpn_id', $id)
+            ->select('cp.*', 'c.ctr_unt_id')
+            ->first();
+
+        if (!$plan) {
+            abort(404, 'Contract Plan not found.');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHrOrAdmin = in_array($userArea, ['hr', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isHrOrAdmin) {
+            $planUnit = (int) ($plan->ctr_unt_id ?? 0);
+            if (!app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $planUnit)) {
+                abort(403, 'Unauthorized. Contract Plan is outside your unit scope.');
+            }
+        }
+
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Contract Plan',
+            objectId: $plan->cpn_id,
+            unitId: (int) ($plan->ctr_unt_id ?? $user->acc_unt_id),
+            revType: \App\Enums\RevType::FIELD_LEVEL,
+            revRef: null,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $plan->ctr_unt_id),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Contract Plan #{$id} created successfully.");
+    }
 }
+

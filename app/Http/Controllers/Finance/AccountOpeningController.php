@@ -521,4 +521,113 @@ class AccountOpeningController extends Controller
 
         return back()->with('success', "Account '{$head->hed_code}' reopened successfully. It is now in Open Accounts.");
     }
+
+    /**
+     * Initiate a data revision for a Milestone Cost.
+     * Legacy fin_msncosts_rev.bas:52.
+     * RevType 2 (FIELD_LEVEL).
+     */
+    public function reverseMilestoneCost(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $cost = DB::table('fin.msncosts as mc')
+            ->leftJoin('prj.milestones as m', 'mc.mct_msn_idd', '=', 'm.msn_idd')
+            ->leftJoin('prj.projects as p', 'm.msn_xprj_id', '=', 'p.prj_id')
+            ->where('mc.mct_msn_idd', $id)
+            ->select('mc.*', 'p.prj_code', 'p.prj_unt_id')
+            ->first();
+
+        if (!$cost) {
+            abort(404, 'Milestone cost not found.');
+        }
+
+        $unitId = (int) ($cost->prj_unt_id ?? 0);
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isFinOrAdmin = in_array($userArea, ['fin', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        if (!$isFinOrAdmin && !app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $unitId)) {
+            abort(403, 'Unauthorized. Milestone Cost is outside your unit scope.');
+        }
+
+        $objCode = $cost->prj_code ?? (string) $id;
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Milestone Cost',
+            objectId: $id,
+            unitId: $unitId,
+            revType: \App\Enums\RevType::FIELD_LEVEL,
+            revRef: $objCode,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $unitId),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Milestone Cost #{$id} created successfully.");
+    }
+
+    /**
+     * Initiate a data revision for an Account Head (Open or Closed).
+     * Legacy cen_heads_rev.bas:86.
+     * RevType 1 or 2 (chosen by user via modal).
+     */
+    public function reverseHead(Request $request, $id, \App\Services\DataRevisionService $revisionService)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('initiate', \App\Models\AudRev::class);
+
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $head = DB::table('cen.heads')->where('hed_id', $id)->first();
+        if (!$head) {
+            abort(404, 'Account head not found.');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isFinOrAdmin = in_array($userArea, ['fin', 'rdw', 'hqs', 'it'], true) || ($user->acc_username === 'superadminrdw');
+
+        $targetUnit = (int) ($head->hed_unt_id ?? 0);
+        if (!$isFinOrAdmin && !app(\App\Services\Auth\DataScopeService::class)->canAccessUnit($user, $targetUnit)) {
+            abort(403, 'Unauthorized. Account head is outside your unit scope.');
+        }
+
+        // Legacy cen_heads_rev.bas:77-81: Option 1 sets intRevType = 2 (Option 2 was disabled with Exit Sub).
+        // Account revisions in aud.revdata are field-level (RevType 2).
+        $revType = \App\Enums\RevType::FIELD_LEVEL;
+        $reason = $request->input('rev_reason') ?: $request->input('reason');
+        $fieldDiffs = $request->input('field_diffs', []);
+
+        if (empty($fieldDiffs) && $request->filled('field_name')) {
+            $fieldDiffs = [[
+                'table'    => 'cen_heads',
+                'rowid'    => (string) $head->hed_id,
+                'attrib'   => (string) $request->input('field_name'),
+                'colname'  => (string) $request->input('field_name'),
+                'oldvalue' => $request->input('old_value', $head->hed_name),
+                'newvalue' => $request->input('new_value', $head->hed_name),
+                'datatype' => 'Text',
+                'type'     => 1,
+            ]];
+        }
+
+        $revision = $revisionService->createDataRevision(
+            revObject: 'Account',
+            objectId: $head->hed_id,
+            unitId: (int) ($head->hed_unt_id ?? $user->acc_unt_id),
+            revType: $revType,
+            revRef: $head->hed_code,
+            revObjectExt: null,
+            intUnitId: (int) ($user->acc_unt_id ?? $head->hed_unt_id),
+            revReason: $reason,
+            fieldDiffs: is_array($fieldDiffs) ? $fieldDiffs : []
+        );
+
+        return redirect()->route('admin.reversals.show', $revision->rev_id)
+            ->with('success', "Data revision draft #{$revision->rev_id} for Account Head '{$head->hed_code}' created successfully.");
+    }
 }
+

@@ -1,7 +1,9 @@
-﻿<style>
-.trail-scroll-container { max-height: 350px; overflow-y: auto; padding-right: 5px; border: 1px solid var(--rd-border); border-radius: 8px; background: rgba(0,0,0,0.1); }
-.trail-scroll-container::-webkit-scrollbar { width: 4px; }
-.trail-scroll-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+<style>
+.trail-scroll-container { max-height: 350px; overflow-y: auto; padding-right: 5px; border: 1px solid var(--rd-border); border-radius: 8px; background: rgba(0,0,0,0.02); scrollbar-width: thin; scrollbar-color: #64748b #f1f5f9; }
+.trail-scroll-container::-webkit-scrollbar { width: 8px; }
+.trail-scroll-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
+.trail-scroll-container::-webkit-scrollbar-thumb { background: #64748b; border-radius: 6px; }
+.trail-scroll-container::-webkit-scrollbar-thumb:hover { background: #334155; }
 .trail-item { position: relative; padding-left: 20px; margin-bottom: 15px; border-left: 1px dashed rgba(255,255,255,0.15); margin-left: 10px; }
 .trail-dot { position: absolute; left: -6px; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--rd-primary-600); border: 2px solid #080b0f; z-index: 2; }
 .trail-dot.bg-success { background: #28a745; }

@@ -153,8 +153,8 @@ class AttachmentController extends Controller
 
         if ($module === 'aud') {
             $rev = \App\Models\AudRev::find($objectId);
-            if (! $rev || ! $rev->isFulfilled() || ! auth()->user()?->can('viewAttachments', $rev)) {
-                abort(403, 'Unauthorized. Attachments are restricted to fulfilled reversals and authorized roles.');
+            if (! $rev || (! $rev->isFulfilled() && ! $rev->isCancelled()) || ! auth()->user()?->can('viewAttachments', $rev)) {
+                abort(403, 'Unauthorized. Attachments are restricted to closed reversals and authorized roles.');
             }
         }
 
@@ -228,8 +228,8 @@ class AttachmentController extends Controller
 
         if ($module === 'aud') {
             $rev = \App\Models\AudRev::find($record->aat_objid);
-            if (! $rev || ! $rev->isFulfilled() || ! auth()->user()?->can('viewAttachments', $rev)) {
-                abort(403, 'Unauthorized. Attachment viewing is restricted to fulfilled reversals and authorized roles.');
+            if (! $rev || (! $rev->isFulfilled() && ! $rev->isCancelled()) || ! auth()->user()?->can('viewAttachments', $rev)) {
+                abort(403, 'Unauthorized. Attachment viewing is restricted to closed reversals and authorized roles.');
             }
         }
 

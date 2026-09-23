@@ -323,13 +323,116 @@
             border-radius: 8px;
         }
 
-        .rd-table-responsive::-webkit-scrollbar {
-            height: 6px;
+        /* High Contrast Prominent Universal Scrollbars */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #64748b #f1f5f9;
         }
 
-        .rd-table-responsive::-webkit-scrollbar-thumb {
-            background: var(--rd-border);
-            border-radius: 10px;
+        html, body {
+            scrollbar-width: auto;
+            scrollbar-color: #64748b #f1f5f9;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #64748b;
+            border-radius: 6px;
+            border: 2px solid #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        .rd-table-responsive::-webkit-scrollbar,
+        .table-responsive::-webkit-scrollbar,
+        .dataTables_scrollBody::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        .rd-table-responsive::-webkit-scrollbar-track,
+        .table-responsive::-webkit-scrollbar-track,
+        .dataTables_scrollBody::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .rd-table-responsive::-webkit-scrollbar-thumb,
+        .table-responsive::-webkit-scrollbar-thumb,
+        .dataTables_scrollBody::-webkit-scrollbar-thumb {
+            background: #64748b;
+            border-radius: 6px;
+            border: 2px solid #f1f5f9;
+        }
+
+        .rd-table-responsive::-webkit-scrollbar-thumb:hover,
+        .table-responsive::-webkit-scrollbar-thumb:hover,
+        .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        /* Specific Prominent Scrollbars for Minute, Remarks & Decision Trail */
+        #conversational-comments-box,
+        #inlineRemarks,
+        textarea.form-control,
+        .dg-trail-body,
+        .trail-scroll-container,
+        .dg-items-wrap {
+            scrollbar-width: thin !important;
+            scrollbar-color: #64748b #f1f5f9 !important;
+        }
+
+        #conversational-comments-box::-webkit-scrollbar,
+        #inlineRemarks::-webkit-scrollbar,
+        textarea.form-control::-webkit-scrollbar,
+        .dg-trail-body::-webkit-scrollbar,
+        .trail-scroll-container::-webkit-scrollbar,
+        .dg-items-wrap::-webkit-scrollbar {
+            width: 10px !important;
+            height: 10px !important;
+        }
+
+        #conversational-comments-box::-webkit-scrollbar-track,
+        #inlineRemarks::-webkit-scrollbar-track,
+        textarea.form-control::-webkit-scrollbar-track,
+        .dg-trail-body::-webkit-scrollbar-track,
+        .trail-scroll-container::-webkit-scrollbar-track,
+        .dg-items-wrap::-webkit-scrollbar-track {
+            background: #f1f5f9 !important;
+            border-radius: 6px !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        #conversational-comments-box::-webkit-scrollbar-thumb,
+        #inlineRemarks::-webkit-scrollbar-thumb,
+        textarea.form-control::-webkit-scrollbar-thumb,
+        .dg-trail-body::-webkit-scrollbar-thumb,
+        .trail-scroll-container::-webkit-scrollbar-thumb,
+        .dg-items-wrap::-webkit-scrollbar-thumb {
+            background: #64748b !important;
+            border-radius: 6px !important;
+            border: 2px solid #f1f5f9 !important;
+        }
+
+        #conversational-comments-box::-webkit-scrollbar-thumb:hover,
+        #inlineRemarks::-webkit-scrollbar-thumb:hover,
+        textarea.form-control::-webkit-scrollbar-thumb:hover,
+        .dg-trail-body::-webkit-scrollbar-thumb:hover,
+        .trail-scroll-container::-webkit-scrollbar-thumb:hover,
+        .dg-items-wrap::-webkit-scrollbar-thumb:hover {
+            background: #334155 !important;
         }
 
         /* ---- Original Sidebar Overrides ---- */
@@ -1111,17 +1214,21 @@
               </a>
           </li>
 
+          @php
+              $sbItReversalsCount = 0;
+              try {
+                  $sbItReversalsCount = \App\Models\AudRev::whereIn('rev_status', ['In Process', 'Under Revision'])->count();
+              } catch (\Throwable $e) {}
+          @endphp
           <li class="nav-item">
               <a href="{{ route('admin.reversals.index') }}" class="nav-link {{ Request::routeIs('admin.reversals.*') ? 'active' : '' }}">
-                  <i class="nav-icon fas fa-undo-alt"></i>
-                  <p>Data Reversals</p>
-              </a>
-          </li>
-
-          <li class="nav-item">
-              <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
-                  <i class="fas fa-chart-pie nav-icon text-warning"></i>
-                  <p>Project Financing</p>
+                  <i class="nav-icon fas fa-history text-warning"></i>
+                  <p>
+                      Reversals
+                      @if($sbItReversalsCount > 0)
+                          <span class="badge badge-warning badge-pill ml-1 font-weight-bold" style="font-size: 9px; padding: 2px 5px;">{{ $sbItReversalsCount }}</span>
+                      @endif
+                  </p>
               </a>
           </li>
 
@@ -1222,6 +1329,55 @@
               }
           @endphp
           <li class="nav-header" style="color: #94a3b8; font-size: 9.5px; letter-spacing: 0.8px; font-weight: 700; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; padding-bottom: 2px;">Helpdesk</li>
+          @php
+              $currentUser = auth()->user();
+              $sbIsItStaff = false;
+              $sbReversalsBadgeCount = 0;
+
+              if ($currentUser) {
+                  try {
+                      $sbContext = \App\Services\Auth\UserAccessContext::forUser($currentUser);
+                      $sbUserUnitId = (int) ($currentUser->acc_unt_id ?? 0);
+                      $sbUserArea = (string) ($currentUser->acc_untarea ?? '');
+                      $sbIsItStaff = ($sbUserUnitId === 860000 || \App\Services\Auth\AreaDefinition::isIt($sbUserArea) || in_array($sbContext->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
+                      $sbIsGlobal = ($sbContext->isSuperAdmin() || $sbContext->isCommand());
+
+                      if ($sbIsItStaff) {
+                          $sbReversalsBadgeCount = \App\Models\AudRev::whereIn('rev_status', ['In Process', 'Under Revision'])->count();
+                      } else {
+                          $revQuery = \App\Models\AudRev::query();
+                          if (!$sbIsGlobal) {
+                              $scopeService = app(\App\Services\Auth\DataScopeService::class);
+                              $revQuery->where(function ($q) use ($currentUser, $scopeService) {
+                                  $q->where(function ($sq) use ($currentUser, $scopeService) {
+                                      $scopeService->applyScope($sq, $currentUser, 'rev_intunt_id');
+                                  })->orWhere(function ($sq) use ($currentUser, $scopeService) {
+                                      $scopeService->applyScope($sq, $currentUser, 'rev_unt_id');
+                                  });
+                              });
+                          }
+                          $sbReversalsBadgeCount = (clone $revQuery)->whereIn('rev_status', ['Draft', 'In Process', 'Under Revision'])->count();
+                      }
+                  } catch (\Throwable $e) {
+                      // Graceful fallback
+                  }
+              }
+          @endphp
+
+          @if(! $sbIsItStaff)
+          <li class="nav-item">
+              <a href="{{ route('admin.reversals.index') }}" class="nav-link {{ Request::routeIs('admin.reversals.*') ? 'active' : '' }}" style="border-radius: 6px; margin: 1px 6px; padding: 6px 10px;">
+                  <i class="nav-icon fas fa-history text-warning" style="font-size: 13px; margin-right: 6px;"></i>
+                  <p style="font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      Reversals
+                      @if($sbReversalsBadgeCount > 0)
+                          <span class="badge badge-warning badge-pill ml-1 font-weight-bold" style="font-size: 9px; padding: 2px 5px;">{{ $sbReversalsBadgeCount }}</span>
+                      @endif
+                  </p>
+              </a>
+          </li>
+          @endif
+
           <li class="nav-item">
               <a href="{{ route('support.tickets.index') }}" class="nav-link {{ Request::routeIs('support.tickets.*') ? 'active' : '' }}" style="border-radius: 6px; margin: 1px 6px; padding: 6px 10px;">
                   <i class="nav-icon fas fa-headset text-info" style="font-size: 13px; margin-right: 6px;"></i>
