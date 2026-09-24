@@ -316,13 +316,6 @@
                     </table>
                 </div>
             </div>
-
-                                </tr>
-                            </tfoot>
-                        @endif
-                    </table>
-                </div>
-            </div>
         </div>
 
         <!-- RIGHT COLUMN: Add Payment Section & Settle Form -->

@@ -115,49 +115,60 @@
             'end_dt' => $case->ctc_newenddt,
             'month_count' => $monthCount,
         ]);
-    } elseif ($sortedPlans->isNotEmpty()) {
-        $currentGroup = null;
-        foreach ($sortedPlans as $p) {
-            $hedId = $p->ccp_hed_id;
-            $prjCode = $p->project->prj_code ?? (\Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $hedId)->value('hed_code') ?? $projectCode);
-            $prjName = $p->project->prj_name ?? (\Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $hedId)->value('hed_name') ?? $projectName);
-
-            if ($currentGroup === null) {
-                $currentGroup = [
-                    'hed_id' => $hedId,
-                    'prj_code' => $prjCode,
-                    'prj_name' => $prjName,
-                    'start_dt' => $p->ccp_startdt,
-                    'end_dt' => $p->ccp_enddt,
-                    'month_count' => 1,
-                ];
-            } elseif ($currentGroup['hed_id'] == $hedId && $currentGroup['prj_code'] == $prjCode) {
-                $currentGroup['end_dt'] = $p->ccp_enddt;
-                $currentGroup['month_count']++;
-            } else {
-                $allocatedGroups->push($currentGroup);
-                $currentGroup = [
-                    'hed_id' => $hedId,
-                    'prj_code' => $prjCode,
-                    'prj_name' => $prjName,
-                    'start_dt' => $p->ccp_startdt,
-                    'end_dt' => $p->ccp_enddt,
-                    'month_count' => 1,
-                ];
-            }
-        }
-        if ($currentGroup !== null) {
-            $allocatedGroups->push($currentGroup);
-        }
     } else {
-        $allocatedGroups->push([
-            'hed_id' => null,
-            'prj_code' => $projectCode,
-            'prj_name' => $projectName,
-            'start_dt' => $case->ctc_newstartdt,
-            'end_dt' => $case->ctc_newenddt,
-            'month_count' => 12,
-        ]);
+        // Only include plans where candidate has actually been allocated to a specific project head
+        $allocatedPlans = $sortedPlans->filter(function($p) {
+            return !empty($p->ccp_hed_id);
+        });
+
+        if ($allocatedPlans->isNotEmpty()) {
+            $currentGroup = null;
+            foreach ($allocatedPlans as $p) {
+                $hedId = $p->ccp_hed_id;
+                $headRow = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $hedId)->first();
+                $prjRow = ($headRow && $headRow->hed_prj_id) ? \Illuminate\Support\Facades\DB::table('prj.projects')->where('prj_id', $headRow->hed_prj_id)->first() : null;
+                $prjCode = $p->project->prj_code ?? ($prjRow->prj_code ?? ($headRow->hed_code ?? 'PRJ'));
+                $prjName = $p->project->prj_name ?? ($prjRow->prj_name ?? ($headRow->hed_name ?? 'Project'));
+
+                if ($currentGroup === null) {
+                    $currentGroup = [
+                        'hed_id' => $hedId,
+                        'prj_code' => $prjCode,
+                        'prj_name' => $prjName,
+                        'start_dt' => $p->ccp_startdt,
+                        'end_dt' => $p->ccp_enddt,
+                        'month_count' => 1,
+                    ];
+                } elseif ($currentGroup['hed_id'] == $hedId) {
+                    $currentGroup['end_dt'] = $p->ccp_enddt;
+                    $currentGroup['month_count']++;
+                } else {
+                    $allocatedGroups->push($currentGroup);
+                    $currentGroup = [
+                        'hed_id' => $hedId,
+                        'prj_code' => $prjCode,
+                        'prj_name' => $prjName,
+                        'start_dt' => $p->ccp_startdt,
+                        'end_dt' => $p->ccp_enddt,
+                        'month_count' => 1,
+                    ];
+                }
+            }
+            if ($currentGroup !== null) {
+                $allocatedGroups->push($currentGroup);
+            }
+        } else {
+            // Fallback when no monthly head breakdown is specified
+            $monthCount = $case->casePlans->count() ?: 12;
+            $allocatedGroups->push([
+                'hed_id' => $projectPlan?->ccp_hed_id ?? null,
+                'prj_code' => $projectCode ?: 'Core',
+                'prj_name' => $projectName ?: 'Core Institutional Budget',
+                'start_dt' => $case->ctc_newstartdt,
+                'end_dt' => $case->ctc_newenddt,
+                'month_count' => $monthCount,
+            ]);
+        }
     }
 
     // Build full Project Cards with Financial Review metrics & drilldown links
@@ -192,7 +203,7 @@
             ? "{$startFmt} – {$endFmt} ({$mCount} " . Str::plural('Month', $mCount) . ")"
             : "{$mCount} " . Str::plural('Month', $mCount);
 
-        $cardKey = $hId ? (string)$hId : 'alloc_' . $agIdx;
+        $cardKey = 'alloc_' . $agIdx . '_' . ($hId ?: '0');
 
         $projectCards[] = [
             'card_key' => $cardKey,
@@ -1072,14 +1083,16 @@ textarea::-webkit-scrollbar-thumb:hover {
                                         {{ $totalContractMonths }} {{ Str::plural('Month', $totalContractMonths) }}
                                     </div>
 
-                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">Increment</div>
-                                    <div class="font-weight-bold text-right" style="font-size: 14px;">
-                                        @if($salaryDiff > 0)
-                                            <span class="text-success font-weight-bold">+{{ $incrementPct }}% (+Rs. {{ number_format($salaryDiff) }})</span>
-                                        @else
-                                            <span class="text-muted font-weight-bold">0%</span>
-                                        @endif
-                                    </div>
+                                    @if($isRenewal || $isRehiring)
+                                        <div class="text-muted font-weight-bold" style="font-size: 13px;">Increment</div>
+                                        <div class="font-weight-bold text-right" style="font-size: 14px;">
+                                            @if($salaryDiff > 0)
+                                                <span class="text-success font-weight-bold">+{{ $incrementPct }}% (+Rs. {{ number_format($salaryDiff) }})</span>
+                                            @else
+                                                <span class="text-muted font-weight-bold">0%</span>
+                                            @endif
+                                        </div>
+                                    @endif
 
                                     {{-- Full-width clean divider for TOTAL PACKAGE --}}
                                     <div style="grid-column: 1 / -1; border-top: 1.5px solid #cbd5e1; margin: 4px 0 2px 0;"></div>
@@ -1221,24 +1234,26 @@ textarea::-webkit-scrollbar-thumb:hover {
                                         </tbody>
                                     </table>
 
-                                    {{-- 1-Line Increment Summary Strip --}}
-                                    <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top" style="background: #f0fdf4; border-color: #86efac !important; font-size: 12px;">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <strong class="text-success rajdhani font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">
-                                                INCREMENT: +Rs. {{ number_format($salaryDiff) }} ({{ $incrementPct > 0 ? '+' . $incrementPct : $incrementPct }}%)
-                                            </strong>
-                                            <span class="text-dark font-weight-bold ml-3" style="font-size: 13px;">
-                                                @if($prevGrade !== $empGrade)
-                                                    Grade: <span class="text-muted">{{ $prevGrade }}</span> &rarr; <span class="text-primary">{{ $empGrade }}</span>
-                                                @else
-                                                    Grade: <span class="text-dark">{{ $empGrade }}</span>
-                                                @endif
-                                            </span>
+                                    @if($isRenewal || $isRehiring)
+                                        {{-- 1-Line Increment Summary Strip --}}
+                                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top" style="background: #f0fdf4; border-color: #86efac !important; font-size: 12px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <strong class="text-success rajdhani font-weight-bold" style="font-size: 14px; letter-spacing: 0.3px;">
+                                                    INCREMENT: +Rs. {{ number_format($salaryDiff) }} ({{ $incrementPct > 0 ? '+' . $incrementPct : $incrementPct }}%)
+                                                </strong>
+                                                <span class="text-dark font-weight-bold ml-3" style="font-size: 13px;">
+                                                    @if($prevGrade !== $empGrade)
+                                                        Grade: <span class="text-muted">{{ $prevGrade }}</span> &rarr; <span class="text-primary">{{ $empGrade }}</span>
+                                                    @else
+                                                        Grade: <span class="text-dark">{{ $empGrade }}</span>
+                                                    @endif
+                                                </span>
+                                            </div>
+                                            <div class="rajdhani font-weight-bold text-success" style="font-size: 14px;">
+                                                Annual Delta: +Rs. {{ number_format($salaryDiff * 12) }}
+                                            </div>
                                         </div>
-                                        <div class="rajdhani font-weight-bold text-success" style="font-size: 14px;">
-                                            Annual Delta: +Rs. {{ number_format($salaryDiff * 12) }}
-                                        </div>
-                                    </div>
+                                    @endif
                                 @else
                                     {{-- Fresh Hiring Table --}}
                                     <table class="spec-data-table">

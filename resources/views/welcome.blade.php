@@ -1150,6 +1150,31 @@
                   </li>
               </ul>
           </li>
+
+          {{-- Verification Sub-screens (Salary Verification & Salary Heads) --}}
+          <li class="nav-item {{ Request::routeIs('fin.verification.*') ? 'menu-open' : '' }}">
+              <a href="#" class="nav-link {{ Request::routeIs('fin.verification.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-check-double text-cyan"></i>
+                  <p>
+                      Verification
+                      <i class="right fas fa-angle-left"></i>
+                  </p>
+              </a>
+              <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                      <a href="{{ route('fin.verification.contracts.index') }}" class="nav-link {{ Request::routeIs('fin.verification.contracts.*') ? 'active' : '' }}">
+                          <i class="fas fa-file-signature nav-icon text-warning"></i>
+                          <p>Salary Verification</p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('fin.verification.salary-heads.index') }}" class="nav-link {{ Request::routeIs('fin.verification.salary-heads.*') ? 'active' : '' }}">
+                          <i class="fas fa-tags nav-icon text-info"></i>
+                          <p>Salary Heads</p>
+                      </a>
+                  </li>
+              </ul>
+          </li>
           @endif
 
           @if($isProc)

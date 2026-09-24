@@ -194,13 +194,23 @@ class ContractCaseFulfillmentService
                     }
                 }
 
-                // Add fin.contractsverif record (cvf_verif = 0)
+                // Add fin.contractsverif record (cvf_verif = false)
                 $verifExists = DB::table('fin.contractsverif')->where('cvf_ctr_id', $newContractId)->exists();
                 if (!$verifExists) {
                     DB::table('fin.contractsverif')->insert([
                         'cvf_ctr_id' => $newContractId,
-                        'cvf_verif'  => '0',
+                        'cvf_verif'  => false,
                         'cvf_dtg'    => null,
+                    ]);
+                }
+
+                // Defensive check-then-insert for fin.empeffheads (legacy hr_contracts_add.bas:246-252)
+                $eehExists = DB::table('fin.empeffheads')->where('eeh_emp_id', $empId)->exists();
+                if (!$eehExists) {
+                    DB::table('fin.empeffheads')->insert([
+                        'eeh_emp_id' => $empId,
+                        'eeh_status' => 'Open',
+                        'eeh_dtg'    => now(),
                     ]);
                 }
 

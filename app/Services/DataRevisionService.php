@@ -42,6 +42,7 @@ class DataRevisionService
         'fin_subheads'        => 'fin.subheads',
         'fin_msncosts'        => 'fin.msncosts',
         'fin_contractsverif'  => 'fin.contractsverif',
+        'fin_empeffheads'     => 'fin.empeffheads',
         'cen_heads'           => 'cen.heads',
         'cen_units'           => 'cen.units',
         'prj_projects'        => 'prj.projects',
@@ -67,6 +68,7 @@ class DataRevisionService
         'fin.subheads',
         'fin.msncosts',
         'fin.contractsverif',
+        'fin.empeffheads',
         'hr.contracts',
         'hr.emps',
         'hr.salreqs',
@@ -102,6 +104,7 @@ class DataRevisionService
         'fin.sharesalloc'     => 'sha_id',
         'fin.sharesinstall'   => 'shi_id',
         'fin.contractsverif'  => 'cvf_ctr_id',
+        'fin.empeffheads'     => 'eeh_emp_id',
         'fin.subheads'        => 'sbh_id',
         'fin.msncosts'        => 'mct_msn_idd',
         'prj.milestones'      => 'msn_idd',
@@ -425,6 +428,12 @@ class DataRevisionService
                 // 1. Task / Milestone (Audit.bas:241-242)
                 $objectData = $object . "\r\n" . $this->copyRowData('prj_milestones', 'msn_idd', $objId);
                 $this->makeDRCompEntry($revId, 'prj_milestones', $objId, $objectData, 'msn_idd', 1);
+                break;
+
+            case 'Salary Head - 1':
+                // 1. Salary Head
+                $objectData = $object . "\r\n" . $this->copyRowData('fin_empeffheads', 'eeh_emp_id', $objId);
+                $this->makeDRCompEntry($revId, 'fin_empeffheads', $objId, $objectData, 'eeh_rev', 1);
                 break;
 
             default:
@@ -757,6 +766,13 @@ class DataRevisionService
                         $updates['msn_comp'] = 50;
                     }
                     DB::table('prj.milestones')->where('msn_idd', $rowId)->update($updates);
+                    break;
+
+                case 'eeh_rev':
+                    DB::table('fin.empeffheads')->where('eeh_emp_id', $rowId)->update([
+                        'eeh_status' => 'Open',
+                        'eeh_dtg'    => now(),
+                    ]);
                     break;
 
                 default:

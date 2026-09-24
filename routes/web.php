@@ -799,6 +799,25 @@ Route::middleware('auth')->group(function () {
                 Route::get('/payments/{cmt_id}', [\App\Http\Controllers\Finance\PaymentController::class, 'show'])->name('payments.show');
                 Route::post('/payments/{cmt_id}/transaction', [\App\Http\Controllers\Finance\PaymentController::class, 'storeTransaction'])->name('payments.store_transaction');
                 Route::post('/commitments/salary/{cmt_id}/pay', [\App\Http\Controllers\Finance\PaymentController::class, 'paySalaryCommitment'])->name('commitments.salary.pay');
+
+                // VERIFICATION SUB-SCREENS (Salary Verification & Salary Heads)
+                Route::prefix('verification')->name('verification.')->group(function () {
+                    // Part A: Salary Verification
+                    Route::get('/contracts', [\App\Http\Controllers\Finance\FinanceVerificationController::class, 'salaryVerificationIndex'])
+                        ->name('contracts.index');
+                    Route::post('/contracts/{ctrId}/verify', [\App\Http\Controllers\Finance\FinanceVerificationController::class, 'verifyContract'])
+                        ->name('contracts.verify');
+
+                    // Part B: Salary Heads
+                    Route::get('/salary-heads', [\App\Http\Controllers\Finance\FinanceVerificationController::class, 'salaryHeadsIndex'])
+                        ->name('salary-heads.index');
+                    Route::post('/salary-heads/{empId}/update', [\App\Http\Controllers\Finance\FinanceVerificationController::class, 'updateSalaryHead'])
+                        ->name('salary-heads.update');
+                    Route::post('/salary-heads/{empId}/close', [\App\Http\Controllers\Finance\FinanceVerificationController::class, 'closeSalaryHead'])
+                        ->name('salary-heads.close');
+                    Route::post('/salary-heads/{empId}/reverse', [\App\Http\Controllers\Finance\FinanceVerificationController::class, 'reverseSalaryHead'])
+                        ->name('salary-heads.reverse');
+                });
             });
             
             // Finance Reports (Accessible to HQ, Divisions, Fin)

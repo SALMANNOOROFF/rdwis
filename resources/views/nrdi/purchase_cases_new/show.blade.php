@@ -31,8 +31,59 @@
     $finAvailable   = isset($head->pcc_available) ? (float)$head->pcc_available : ($finBalance - $finCommitments - $finInProcess);
     $finCanBeSpent  = isset($head->pcc_can_be_spent) ? (float)$head->pcc_can_be_spent : ($finAllocation - $finExpenditure - $finCommitments - $finInProcess);
 
+    // Milestones Breakdown for Financial Review
+    $finRecCompleted = (float)($head->receivable_completed ?? 0);
+    $finRecCurrent   = (float)($head->receivable_current ?? 0);
+
+    $prjId = $purchase->project?->prj_id ?? (DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->value('hed_prj_id') ?? $purchase->pcs_hed_id);
     
-    // For progress bar if still needed somewhere else
+    $currMilestone = null;
+    if ($prjId) {
+        $currMilestone = DB::table('prj.milestones')
+            ->where('msn_xprj_id', $prjId)
+            ->whereRaw("LOWER(TRIM(msn_status)) = 'in progress'")
+            ->orderBy('msn_id')
+            ->first();
+            
+        if (!$currMilestone) {
+            $currMilestone = DB::table('prj.milestones')
+                ->where('msn_xprj_id', $prjId)
+                ->whereRaw("LOWER(TRIM(msn_status)) NOT IN ('completed', 'cancelled')")
+                ->orderBy('msn_id')
+                ->first();
+        }
+        
+        if (!$currMilestone) {
+            $currMilestone = DB::table('prj.milestones')
+                ->where('msn_xprj_id', $prjId)
+                ->orderByDesc('msn_id')
+                ->first();
+        }
+    }
+
+    $currMsnNo        = $currMilestone ? $currMilestone->msn_id : null;
+    $currMsnLabel     = $currMsnNo ? ('M-' . $currMsnNo) : ($currMilestone ? 'M' : 'None');
+    $currMsnDesc      = $currMilestone ? $currMilestone->msn_desc : '';
+    $currMsnTotalCost = $currMilestone ? (float)($currMilestone->msn_cost ?? 0) : 0;
+    
+    $headMsnCost = null;
+    if ($currMilestone && $purchase->pcs_hed_id) {
+        $headMsnCost = DB::table('fin.msncosts')
+            ->where('mct_hed_id', $purchase->pcs_hed_id)
+            ->where('mct_msn_idd', $currMilestone->msn_idd)
+            ->value('mct_cost');
+    }
+    if ($currMsnTotalCost <= 0 && $headMsnCost !== null) {
+        $currMsnTotalCost = (float)$headMsnCost;
+    }
+    
+    $currMsnPayment = $finRecCurrent;
+    if ($currMsnPayment <= 0 && $headMsnCost !== null && (float)$headMsnCost > 0) {
+        $currMsnPayment = (float)$headMsnCost;
+    } elseif ($currMsnPayment <= 0 && $currMsnTotalCost > 0) {
+        $currMsnPayment = $currMsnTotalCost;
+    }
+
     $totalBudget    = $finReceived;
     $utilizedBudget = $finExpenditure;
     $balanceAfter   = $finAvailable;
@@ -746,32 +797,37 @@
                                     <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">RECEIVED</div>
                                     <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">{{ number_format($finReceived) }}</div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">EXPENDITURE</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">EXPENDITURE</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="text-danger font-weight-bold text-decoration-none" style="font-size: 15px; color: #dc2626 !important;" title="View Project Expenditure Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 15px; color: #0f172a !important;" title="View Project Expenditure Breakdown">
                                             {{ number_format($finExpenditure) }}
                                         </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" title="View Project Expenditure Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project Expenditure Breakdown">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
                                     </div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">BALANCE</div>
-                                    <div class="text-primary font-weight-bold text-right" style="font-size: 15px; color: #2563eb !important;">{{ number_format($finBalance) }}</div>
+                                    <div class="text-muted font-weight-bold d-flex flex-column justify-content-center" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">
+                                        <div class="d-flex align-items-center flex-wrap">
+                                            <span>BALANCE</span>
+                                            <span class="ml-1 text-muted font-weight-normal" style="font-size: 12px; color: #0f172a !important;">(with MTSS)</span>
+                                        </div>
+                                    </div>
+                                    <div class="font-weight-bold text-right align-self-center" style="font-size: 15px; color: #0f172a !important;">{{ number_format($finBalance) }}</div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">COMMITMENTS</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">COMMITMENTS</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="text-warning font-weight-bold text-decoration-none" style="font-size: 15px; color: #d97706 !important;" title="View Project Commitments Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 15px; color: #0f172a !important;" title="View Project Commitments Breakdown">
                                             {{ number_format($finCommitments) }}
                                         </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" title="View Project Commitments Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project Commitments Breakdown">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
                                     </div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">IN PROCESS</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">IN PROCESS</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="text-muted font-weight-bold text-decoration-none" style="font-size: 15px; color: #64748b !important;" title="View Project In-Process Cases">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 15px; color: #0f172a !important;" title="View Project In-Process Cases">
                                             {{ number_format($finInProcess) }}
                                         </a>
                                         <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project In-Process Cases">
@@ -779,11 +835,25 @@
                                         </a>
                                     </div>
                                     
-                                    <div class="text-success font-weight-bold border-top pt-1" style="font-size: 13px; color: #16a34a !important; border-color: #cbd5e1 !important; letter-spacing: 0.5px;">AVAILABLE</div>
-                                    <div class="text-success font-weight-bold text-right border-top pt-1" style="font-size: 15px; color: #16a34a !important; border-color: #cbd5e1 !important;">{{ number_format($finAvailable) }}</div>
+                                    <div class="text-muted font-weight-bold border-top pt-1" style="font-size: 12px; color: #475569 !important; border-color: #cbd5e1 !important; letter-spacing: 0.5px;">AVAILABLE</div>
+                                    <div class="font-weight-bold text-right border-top pt-1" style="font-size: 15px; color: {{ $finAvailable < 0 ? '#dc2626' : '#16a34a' }} !important; border-color: #cbd5e1 !important;">{{ number_format($finAvailable) }}</div>
                                     
-                                    <div class="text-warning font-weight-bold" style="font-size: 13px; color: #d97706 !important; letter-spacing: 0.5px;">CAN BE SPENT</div>
-                                    <div class="text-warning font-weight-bold text-right" style="font-size: 16px; font-weight: 900; color: #d97706 !important;">{{ number_format($finCanBeSpent) }}</div>
+                                    <div class="text-muted font-weight-bold pt-1" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">COMPLETED MILESTONES</div>
+                                    <div class="text-dark font-weight-bold text-right pt-1" style="font-size: 15px; color: #0f172a !important;" title="Receivable for completed milestones">{{ number_format($finRecCompleted) }}</div>
+                                    
+                                    <div class="text-muted font-weight-bold d-flex flex-column justify-content-center pt-0.5" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">
+                                        <div class="d-flex align-items-center flex-wrap">
+                                            <span>CURRENT MILESTONE</span>
+                                            <span class="badge badge-light px-1.5 py-0.5 ml-1 font-weight-bold" style="font-size: 11px; background: #e2e8f0; color: #1e293b !important; border: 1px solid #cbd5e1; border-radius: 4px; letter-spacing: 0.4px;" title="{{ $currMsnDesc ?: 'Current Milestone' }}">({{ $currMsnLabel }})</span>
+                                        </div>
+                                        @if($currMsnTotalCost > 0 && abs($currMsnTotalCost - $currMsnPayment) > 1)
+                                            <div class="text-muted small font-weight-normal mt-0.5" style="font-size: 10px; color: #64748b !important; line-height: 1;">Total: Rs. {{ number_format($currMsnTotalCost) }}</div>
+                                        @endif
+                                    </div>
+                                    <div class="text-dark font-weight-bold text-right align-self-center pt-0.5" style="font-size: 15px; color: #0f172a !important;" title="Current milestone payment/receivable: Rs. {{ number_format($currMsnPayment) }}">{{ number_format($currMsnPayment) }}</div>
+                                    
+                                    <div class="text-warning font-weight-bold border-top pt-1" style="font-size: 13px; color: #d97706 !important; border-color: #cbd5e1 !important; letter-spacing: 0.5px;">CAN BE SPENT</div>
+                                    <div class="text-warning font-weight-bold text-right border-top pt-1" style="font-size: 16px; font-weight: 900; color: #d97706 !important;" title="Available after Receivables: Rs. {{ number_format($head->available_after_receivables ?? ($finAvailable + $finRecCompleted + $currMsnPayment)) }}">{{ number_format($finCanBeSpent) }}</div>
                                 </div>
 
                                 {{-- Separator --}}
@@ -1725,15 +1795,20 @@
                             <h6 class="rajdhani font-weight-bold mb-3" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 1.5px;">RECEIVABLES</h6>
                             <div class="receivable-item d-flex justify-content-between mb-2">
                                 <span class="rajdhani font-weight-bold" style="font-size: 14px; color: #475569;">Comp. Milestones</span>
-                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($head->receivable_completed) }}</span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($finRecCompleted) }}</span>
                             </div>
                             <div class="receivable-item d-flex justify-content-between mb-2">
-                                <span class="rajdhani font-weight-bold" style="font-size: 14px; color: #475569;">Current Milestone</span>
-                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($head->receivable_current) }}</span>
+                                <span class="rajdhani font-weight-bold" style="font-size: 14px; color: #475569;">
+                                    Current Milestone <span class="badge badge-primary px-1.5 py-0.5 ml-1" style="font-size: 11px; font-weight: 700; background: #2563eb; color: #ffffff;">({{ $currMsnLabel }})</span>
+                                    @if($currMsnTotalCost > 0 && abs($currMsnTotalCost - $currMsnPayment) > 1)
+                                        <span class="text-muted small ml-1 font-weight-normal">(Total: Rs. {{ number_format($currMsnTotalCost) }})</span>
+                                    @endif
+                                </span>
+                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($currMsnPayment) }}</span>
                             </div>
                             <div class="receivable-item d-flex justify-content-between mt-3 p-3 rounded" style="background: rgba(37,99,235,0.08); border: 1.5px solid rgba(37,99,235,0.3);">
                                 <span class="rajdhani font-weight-bold" style="color: #1e40af; font-size: 14.5px;">Available after Rcv.</span>
-                                <span class="rajdhani font-weight-bold" style="color: #1e40af; font-size: 16px;">{{ number_format($head->available_after_receivables) }}</span>
+                                <span class="rajdhani font-weight-bold" style="color: #1e40af; font-size: 16px;">{{ number_format($head->available_after_receivables ?? ($finAvailable + $finRecCompleted + $currMsnPayment)) }}</span>
                             </div>
                         </div>
 
