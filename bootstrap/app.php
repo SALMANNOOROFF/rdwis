@@ -23,6 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\DataHorizonMiddleware::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+        ]);
         $middleware->trustProxies(at: '*');
         $middleware->alias([
             'area' => CheckArea::class,

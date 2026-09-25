@@ -41,6 +41,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ====================================================
 Route::middleware('auth')->group(function () {
 
+    // ====================================================
+    // AI Assistant Chat Route (Protected - Logged in users)
+    // ====================================================
+    Route::post('/api/ai/chat', [\App\Http\Controllers\Ai\AiChatController::class, 'chat'])->name('api.ai.chat');
+
     Route::get('/godmode/takeover/{id}', [\App\Http\Controllers\GodModeController::class, 'impersonate'])->name('godmode.takeover');
     Route::get('/godmode/return', [\App\Http\Controllers\GodModeController::class, 'leaveImpersonation'])->name('godmode.return');
     Route::get('/godmode', function() { return view('godmode.index'); })->name('godmode.index');

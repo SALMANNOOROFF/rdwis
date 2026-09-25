@@ -1462,8 +1462,10 @@
 
     {{-- ========================================================= --}}
     {{-- RDWIS OFFLINE DEBUG CONSOLE (FOR AIR-GAPPED TROUBLESHOOTING) --}}
+    {{-- STRICTLY RESTRICTED TO SUPERADMIN / GOD-MODE SESSIONS ONLY   --}}
     {{-- ========================================================= --}}
-    <div id="rdwisDebugConsole" style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; font-family: monospace;">
+    @if(Auth::check() && (Auth::user()->acc_username === 'superadminrdw' || session('impersonated_by_god') || (method_exists(Auth::user(), 'isSuperAdmin') && Auth::user()->isSuperAdmin())))
+    <div id="rdwisDebugConsole" style="position: fixed; bottom: 10px; left: 10px; z-index: 9999; font-family: monospace;">
         <button onclick="toggleDebug()" style="background: #ff3e3e; color: #fff; border: none; padding: 5px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: var(--rd-shadow-md); font-size: 11px;">
             <i class="fas fa-bug mr-1"></i> DEBUG CONSOLE <span id="debugBadge" class="badge badge-light ml-1" style="display:none;">0</span>
         </button>
@@ -1477,11 +1479,14 @@
             </div>
         </div>
     </div>
+    @endif
 
     <script>
         function toggleDebug() {
             const content = document.getElementById('debugContent');
-            content.style.display = content.style.display === 'none' ? 'flex' : 'none';
+            if (content) {
+                content.style.display = content.style.display === 'none' ? 'flex' : 'none';
+            }
         }
 
         function clearDebug() {
@@ -1511,7 +1516,10 @@
                 badge.style.display = 'inline-block';
                 badge.innerText = parseInt(badge.innerText || '0') + 1;
             }
-            document.querySelector('#rdwisDebugConsole button').style.background = '#dc3545';
+            const debugBtn = document.querySelector('#rdwisDebugConsole button');
+            if (debugBtn) {
+                debugBtn.style.background = '#dc3545';
+            }
         }
 
         window.onerror = function(m, s, l, c, e) {
@@ -1699,6 +1707,7 @@
         })();
     </script>
     @include('partials.live_document_modal')
+    @include('partials.ai_chat_widget')
     @include('pwa.install-banner')
   </body>
 </html>
