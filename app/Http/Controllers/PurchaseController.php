@@ -897,7 +897,8 @@ class PurchaseController extends Controller
             $refNo = 'R&D/Projects/Proc/' . $refSuffix;
         }
 
-        $seeDistribution = $savedLetter?->pit_distribution_label ?: 'See distribution';
+        $seeDistribution = $savedLetter?->pit_distribution_label ?: ($globalTemplate->see_distribution ?: 'See distribution');
+        $pageSetup = $globalTemplate->getMergedPageSetup();
 
         return view('purchase.initiation.it_annex', compact(
             'purchase',
@@ -915,7 +916,8 @@ class PurchaseController extends Controller
             'signatoryRank',
             'signatoryDept',
             'selectedFirms',
-            'annexItems'
+            'annexItems',
+            'pageSetup'
         ));
     }
 
@@ -1042,8 +1044,9 @@ class PurchaseController extends Controller
         }
 
         $template = PurItTemplate::getTemplate();
+        $pageSetup = $template->getMergedPageSetup();
 
-        return view('purchase.initiation.it_template_editor', compact('template'));
+        return view('purchase.initiation.it_template_editor', compact('template', 'pageSetup'));
     }
 
     /**
@@ -1065,6 +1068,7 @@ class PurchaseController extends Controller
             'signatory_name'  => 'nullable|string|max:255',
             'signatory_rank'  => 'nullable|string|max:255',
             'signatory_dept'  => 'nullable|string|max:255',
+            'page_setup'      => 'nullable|array',
         ]);
 
         // Normalize tab characters in paragraphs
@@ -1081,6 +1085,7 @@ class PurchaseController extends Controller
             'signatory_name' => $validated['signatory_name'] ?? 'MUHAMMAD MUDASSIR',
             'signatory_rank' => $validated['signatory_rank'] ?? 'Cdr (R) Pakistan Navy',
             'signatory_dept' => $validated['signatory_dept'] ?? 'Dir Procurement',
+            'page_setup'     => $validated['page_setup'] ?? $template->getMergedPageSetup(),
         ]);
 
         return response()->json([

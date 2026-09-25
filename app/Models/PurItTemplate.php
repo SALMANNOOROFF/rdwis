@@ -15,11 +15,69 @@ class PurItTemplate extends Model
         'signatory_rank',
         'signatory_dept',
         'see_distribution',
+        'page_setup',
     ];
 
     protected $casts = [
         'paragraphs' => 'array',
+        'page_setup' => 'array',
     ];
+
+    public static function defaultPageSetup(): array
+    {
+        return [
+            'page_size'           => 'A4',
+            'orientation'         => 'portrait',
+            'margin_top'          => '18',
+            'margin_bottom'       => '18',
+            'margin_left'         => '20',
+            'margin_right'        => '18',
+            'header_space'        => '10',
+            'footer_space'        => '10',
+            'row_spacing'         => '5pt',
+            'col_spacing'         => '6px',
+
+            'header_show'         => false,
+            'header_left_text'    => "Tele: 021-9924000\nFax: 021-9924001",
+            'header_center_text'  => "GOVERNMENT OF PAKISTAN - MINISTRY OF DEFENCE\nR&D WING NRDI AT PNS JAUHAR",
+            'header_right_text'   => "Habib Ibrahim Rahimtoola Road\nKarachi-75350",
+
+            'footer_show'         => false,
+            'footer_left_text'    => "CONFIDENTIAL / FOR OFFICIAL USE ONLY",
+            'footer_right_text'   => "Page 1 of 1",
+
+            'header_org_name'     => 'Naval Research & Development Institute',
+            'header_wing'         => 'R&D Wing',
+            'header_base'         => 'at PNS JAUHAR',
+            'header_address'      => 'Habib Rehmatullah Road',
+            'header_city'         => 'KARACHI',
+            'header_phone'        => 'Ph (off): 48504781',
+            'see_distribution'    => 'See distribution:',
+            'ref_prefix'          => 'R&D/Projects/Proc/',
+            'annex_label'         => 'ANNEX A',
+            'dated_label'         => 'Dated :',
+            'annex_title'         => 'LIST OF REQUIRED ITEMS',
+            'th_sno'              => 'S No',
+            'th_spec'             => 'Item / specification',
+            'th_qty'              => 'Qty',
+
+            'editable_ref_no'     => true,
+            'editable_date'       => true,
+            'editable_subject'    => true,
+            'editable_paragraphs' => true,
+            'editable_signatory'  => true,
+            'editable_firms'      => true,
+            'editable_items'      => true,
+        ];
+    }
+
+    public function getMergedPageSetup(): array
+    {
+        $defaults = static::defaultPageSetup();
+        $saved = $this->page_setup ?? [];
+
+        return array_merge($defaults, is_array($saved) ? $saved : []);
+    }
 
     /**
      * Get the single global template row, or create it with defaults if missing.
@@ -47,6 +105,7 @@ class PurItTemplate extends Model
                 'signatory_rank'   => 'Cdr (R) Pakistan Navy',
                 'signatory_dept'   => 'Dir Procurement',
                 'see_distribution' => 'See distribution',
+                'page_setup'       => static::defaultPageSetup(),
             ]);
         }
 

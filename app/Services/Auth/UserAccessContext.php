@@ -3,20 +3,22 @@
 namespace App\Services\Auth;
 
 use App\Models\CenAccount;
+use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 
 class UserAccessContext
 {
-    protected ?CenAccount $user = null;
+    protected Authenticatable|CenAccount|User|null $user = null;
     protected ?string $roleSlug = null;
     protected array $permissions = [];
 
-    public function __construct(?CenAccount $user = null)
+    public function __construct(Authenticatable|CenAccount|User|null $user = null)
     {
         $this->user = $user ?? Auth::user();
     }
 
-    public static function forUser(?CenAccount $user): self
+    public static function forUser(Authenticatable|CenAccount|User|null $user): self
     {
         return new self($user);
     }
@@ -26,7 +28,7 @@ class UserAccessContext
         return app(self::class);
     }
 
-    public function user(): ?CenAccount
+    public function user(): Authenticatable|CenAccount|User|null
     {
         return $this->user;
     }

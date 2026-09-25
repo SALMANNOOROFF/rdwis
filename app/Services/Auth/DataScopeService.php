@@ -4,6 +4,8 @@ namespace App\Services\Auth;
 
 use App\Models\CenAccount;
 use App\Models\Unit;
+use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -42,10 +44,10 @@ class DataScopeService
      * Resolve effective numeric bounds for an account.
      * Handles single access, multiple access, wide command scope, and inverted SORD range safely.
      *
-     * @param CenAccount $account
+     * @param Authenticatable|CenAccount|User $account
      * @return array{lower: int, upper: int, is_wide: bool, is_single: bool, specific_units: ?array<int>}
      */
-    public function resolveScope(CenAccount $account): array
+    public function resolveScope(Authenticatable|CenAccount|User $account): array
     {
         $context = UserAccessContext::forUser($account);
 
@@ -127,7 +129,7 @@ class DataScopeService
     /**
      * Check if a specific unit ID is accessible to the account.
      */
-    public function canAccessUnit(CenAccount $account, int $unitId): bool
+    public function canAccessUnit(Authenticatable|CenAccount|User $account, int $unitId): bool
     {
         $scope = $this->resolveScope($account);
 
@@ -146,11 +148,11 @@ class DataScopeService
      * Apply data scope boundaries to an Eloquent/Query Builder.
      *
      * @param Builder|\Illuminate\Database\Query\Builder $query
-     * @param CenAccount $account
+     * @param Authenticatable|CenAccount|User $account
      * @param string $unitColumn e.g. 'prj_unt_id', 'pcs_unt_id', 'unt_id'
      * @return Builder|\Illuminate\Database\Query\Builder
      */
-    public function applyScope($query, CenAccount $account, string $unitColumn = 'unt_id')
+    public function applyScope($query, Authenticatable|CenAccount|User $account, string $unitColumn = 'unt_id')
     {
         $scope = $this->resolveScope($account);
 
@@ -179,7 +181,7 @@ class DataScopeService
     /**
      * Apply scope to Project queries.
      */
-    public function scopeProjects($query, CenAccount $account, string $unitColumn = 'prj_unt_id')
+    public function scopeProjects($query, Authenticatable|CenAccount|User $account, string $unitColumn = 'prj_unt_id')
     {
         return $this->applyScope($query, $account, $unitColumn);
     }
@@ -187,7 +189,7 @@ class DataScopeService
     /**
      * Apply scope to Purchase Case queries.
      */
-    public function scopePurchases($query, CenAccount $account, string $unitColumn = 'pcs_unt_id')
+    public function scopePurchases($query, Authenticatable|CenAccount|User $account, string $unitColumn = 'pcs_unt_id')
     {
         return $this->applyScope($query, $account, $unitColumn);
     }

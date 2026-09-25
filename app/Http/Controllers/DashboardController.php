@@ -912,294 +912,345 @@ class DashboardController extends Controller
             ->select('unt_id', 'unt_name', 'unt_namesh')
             ->get();
 
-        // Cache financial metrics for 90 seconds to ensure high performance
-        $cacheKey = "fin_dashboard_data_{$mode}_{$lower}_{$upper}";
-        if ($request->has('refresh')) {
-            \Illuminate\Support\Facades\Cache::forget($cacheKey);
-        }
-
-        $dashboardData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 90, function () use ($lower, $upper) {
-            $finService = app(\App\Services\FinancialIntelligenceService::class);
-
-            // 1. Fetch Head & Project Financial Statuses
-            $heads = DB::table('cen.heads as h')
-                ->leftJoin('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
-                ->leftJoin('cen.units as u', 'h.hed_unt_id', '=', 'u.unt_id')
-                ->where('h.hed_type', 'Project')
-                ->whereBetween('h.hed_unt_id', [$lower, $upper])
-                ->select(
-                    'h.hed_id',
-                    'h.hed_code',
-                    'h.hed_name',
-                    'h.hed_unt_id',
-                    'p.prj_id',
-                    'p.prj_code',
-                    'p.prj_title',
-                    'u.unt_id',
-                    'u.unt_name',
-                    'u.unt_namesh as division'
-                )
-                ->orderBy('h.hed_code')
-                ->get();
-
-            $headStatuses = [];
-            $totAlloc = 0; $totRec = 0; $totExp = 0; $totBal = 0;
-            $totCmt = 0; $totInp = 0; $totAvail = 0; $totSpent = 0;
-
-            foreach ($heads as $h) {
-                $st = $finService->getHeadStatus($h->hed_id);
-                $alloc = (float) ($st->allocation ?? 0);
-                $rec   = (float) ($st->received ?? 0);
-                $exp   = (float) ($st->expenditure ?? 0);
-                $bal   = (float) ($st->balance ?? 0);
-                $cmt   = (float) ($st->commitments ?? 0);
-                $inp   = (float) ($st->in_process ?? 0);
-                $avail = (float) ($st->available ?? 0);
-                $spent = (float) ($st->can_be_spent ?? 0);
-
-                $totAlloc += $alloc;
-                $totRec   += $rec;
-                $totExp   += $exp;
-                $totBal   += $bal;
-                $totCmt   += $cmt;
-                $totInp   += $inp;
-                $totAvail += $avail;
-                $totSpent += $spent;
-
-                $headStatuses[] = [
-                    'hed_id'                => $h->hed_id,
-                    'hed_code'              => $h->hed_code,
-                    'hed_name'              => $h->hed_name,
-                    'prj_id'                => $h->prj_id,
-                    'prj_code'              => $h->prj_code ?: $h->hed_code,
-                    'prj_title'             => $h->prj_title ?: $h->hed_name,
-                    'unt_id'                => $h->unt_id,
-                    'division'              => $h->division ?: 'General',
-                    'division_full'         => $h->unt_name ?: ($h->division ?: 'General'),
-                    'allocation'            => $alloc,
-                    'received'              => $rec,
-                    'expenditure'           => $exp,
-                    'balance'               => $bal,
-                    'commitments'           => $cmt,
-                    'in_process'            => $inp,
-                    'available'             => $avail,
-                    'can_be_spent'          => $spent,
-                    'pct_utilized'          => $alloc > 0 ? round(($exp / $alloc) * 100, 1) : 0,
-                    'expenditure_drilldown' => route('division.finance-of-project.drilldown', [$h->hed_id, 'pcc', 'expenditure']),
-                    'commitments_drilldown' => route('division.finance-of-project.drilldown', [$h->hed_id, 'pcc', 'commitments']),
-                    'in_process_drilldown'  => route('division.finance-of-project.drilldown', [$h->hed_id, 'pcc', 'in-process']),
-                    'full_report_url'       => route('projects.financial_view', $h->hed_id),
-                    'project_details_url'   => $h->prj_id ? route('projects.show', $h->prj_id) : '#',
-                ];
+            // Cache key version bump to flush old structures
+            $cacheKey = "fin_dashboard_data_v3_{$mode}_{$lower}_{$upper}";
+            if ($request->has('refresh')) {
+                \Illuminate\Support\Facades\Cache::forget($cacheKey);
             }
 
-            $macroTotals = [
-                'allocation'      => $totAlloc,
-                'received'        => $totRec,
-                'expenditure'     => $totExp,
-                'balance'         => $totBal,
-                'commitments'     => $totCmt,
-                'in_process'      => $totInp,
-                'available'       => $totAvail,
-                'can_be_spent'    => $totSpent,
-                'utilization_pct' => $totAlloc > 0 ? round(($totExp / $totAlloc) * 100, 1) : 0,
-                'released_pct'    => $totAlloc > 0 ? round(($totRec / $totAlloc) * 100, 1) : 0,
-            ];
+            $dashboardData = \Illuminate\Support\Facades\Cache::remember($cacheKey, 90, function () use ($lower, $upper) {
+                $finService = app(\App\Services\FinancialIntelligenceService::class);
 
-            // 2. Commitments & Disbursement Pipeline Detailed Groups (for reactive filtering)
-            $cmtDetailedGroups = DB::table('fin.commitments as c')
-                ->leftJoin('cen.heads as h', 'c.cmt_hed_id', '=', 'h.hed_id')
-                ->leftJoin('cen.units as u', 'c.cmt_unt_id', '=', 'u.unt_id')
-                ->selectRaw("
-                    c.cmt_unt_id as unt_id,
-                    coalesce(u.unt_name, '') as division_name,
-                    c.cmt_hed_id as hed_id,
-                    (CASE WHEN c.cmt_type = 'Sa' THEN 'salary' ELSE 'purchase' END) as kind,
-                    c.cmt_status as status,
-                    count(*) as cnt,
-                    coalesce(sum(abs(c.cmt_amount)), 0) as amt
-                ")
-                ->whereBetween('c.cmt_unt_id', [$lower, $upper])
-                ->groupBy('c.cmt_unt_id', 'u.unt_name', 'c.cmt_hed_id', DB::raw("CASE WHEN c.cmt_type = 'Sa' THEN 'salary' ELSE 'purchase' END"), 'c.cmt_status')
-                ->get()
-                ->toArray();
+                // 1. Fetch Head & Project Financial Statuses
+                $heads = DB::table('cen.heads as h')
+                    ->leftJoin('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
+                    ->leftJoin('cen.units as u', 'h.hed_unt_id', '=', 'u.unt_id')
+                    ->where('h.hed_type', 'Project')
+                    ->whereBetween('h.hed_unt_id', [$lower, $upper])
+                    ->select(
+                        'h.hed_id',
+                        'h.hed_code',
+                        'h.hed_name',
+                        'h.hed_unt_id',
+                        'p.prj_id',
+                        'p.prj_code',
+                        'p.prj_title',
+                        'u.unt_id',
+                        'u.unt_name',
+                        'u.unt_namesh as division'
+                    )
+                    ->orderBy('h.hed_code')
+                    ->get();
 
-            $cmtPurAwaited = DB::table('fin.commitments')
-                ->where('cmt_type', '!=', 'Sa')
-                ->where('cmt_status', 'Awaited')
-                ->whereBetween('cmt_unt_id', [$lower, $upper])
-                ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
-                ->first();
+                $headStatuses = [];
+                $totAlloc = 0; $totRec = 0; $totExp = 0; $totBal = 0;
+                $totCmt = 0; $totInp = 0; $totAvail = 0; $totSpent = 0;
 
-            $cmtPurPaid = DB::table('fin.commitments')
-                ->where('cmt_type', '!=', 'Sa')
-                ->where('cmt_status', 'Paid')
-                ->whereBetween('cmt_unt_id', [$lower, $upper])
-                ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
-                ->first();
+                foreach ($heads as $h) {
+                    $st = $finService->getHeadStatus($h->hed_id);
+                    $alloc = (float) ($st->allocation ?? 0);
+                    $rec   = (float) ($st->received ?? 0);
+                    $exp   = (float) ($st->expenditure ?? 0);
+                    $bal   = (float) ($st->balance ?? 0);
+                    $cmt   = (float) ($st->commitments ?? 0);
+                    $inp   = (float) ($st->in_process ?? 0);
+                    $avail = (float) ($st->available ?? 0);
+                    $spent = (float) ($st->can_be_spent ?? 0);
 
-            $cmtSalAwaited = DB::table('fin.commitments')
-                ->where('cmt_type', '=', 'Sa')
-                ->where('cmt_status', 'Awaited')
-                ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
-                ->first();
+                    $totAlloc += $alloc;
+                    $totRec   += $rec;
+                    $totExp   += $exp;
+                    $totBal   += $bal;
+                    $totCmt   += $cmt;
+                    $totInp   += $inp;
+                    $totAvail += $avail;
+                    $totSpent += $spent;
 
-            $cmtSalPaid = DB::table('fin.commitments')
-                ->where('cmt_type', '=', 'Sa')
-                ->where('cmt_status', 'Paid')
-                ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
-                ->first();
-
-            $commitmentsStats = [
-                'pur_awaited_cnt'   => (int) ($cmtPurAwaited->cnt ?? 0),
-                'pur_awaited_amt'   => (float) ($cmtPurAwaited->amt ?? 0),
-                'pur_paid_cnt'      => (int) ($cmtPurPaid->cnt ?? 0),
-                'pur_paid_amt'      => (float) ($cmtPurPaid->amt ?? 0),
-                'sal_awaited_cnt'   => (int) ($cmtSalAwaited->cnt ?? 0),
-                'sal_awaited_amt'   => (float) ($cmtSalAwaited->amt ?? 0),
-                'sal_paid_cnt'      => (int) ($cmtSalPaid->cnt ?? 0),
-                'sal_paid_amt'      => (float) ($cmtSalPaid->amt ?? 0),
-                'total_awaited_cnt' => (int) (($cmtPurAwaited->cnt ?? 0) + ($cmtSalAwaited->cnt ?? 0)),
-                'total_awaited_amt' => (float) (($cmtPurAwaited->amt ?? 0) + ($cmtSalAwaited->amt ?? 0)),
-            ];
-
-            // 3. Contracts & Salary Verification Stats & Detailed Groups
-            $verifDetailedGroups = DB::table('hr.contracts as c')
-                ->leftJoin('cen.units as u', 'c.ctr_unt_id', '=', 'u.unt_id')
-                ->leftJoin('fin.contractsverif as v', 'c.ctr_id', '=', 'v.cvf_ctr_id')
-                ->whereBetween('c.ctr_unt_id', [$lower, $upper])
-                ->selectRaw("
-                    c.ctr_unt_id as unt_id,
-                    coalesce(u.unt_name, '') as division_name,
-                    c.ctr_hed_id as hed_id,
-                    count(*) as total_cnt,
-                    count(case when v.cvf_verif = true then 1 end) as verified_cnt,
-                    count(case when v.cvf_ctr_id is null or v.cvf_verif = false then 1 end) as pending_cnt
-                ")
-                ->groupBy('c.ctr_unt_id', 'u.unt_name', 'c.ctr_hed_id')
-                ->get()
-                ->toArray();
-
-            $effHeadDetailedGroups = DB::table('fin.empeffheads as eh')
-                ->leftJoin('hr.emps as e', 'eh.eeh_emp_id', '=', 'e.emp_id')
-                ->leftJoin('cen.units as u', 'e.emp_unt_id', '=', 'u.unt_id')
-                ->whereBetween('e.emp_unt_id', [$lower, $upper])
-                ->selectRaw("
-                    e.emp_unt_id as unt_id,
-                    coalesce(u.unt_name, '') as division_name,
-                    eh.eeh_emphed_id as hed_id,
-                    count(*) as cnt
-                ")
-                ->groupBy('e.emp_unt_id', 'u.unt_name', 'eh.eeh_emphed_id')
-                ->get()
-                ->toArray();
-
-            $verifTotal = DB::table('hr.contracts')->count();
-            $verifDone = DB::table('fin.contractsverif')->where('cvf_verif', true)->count();
-            $verifPending = DB::table('hr.contracts')
-                ->leftJoin('fin.contractsverif', 'ctr_id', '=', 'cvf_ctr_id')
-                ->where(function ($q) {
-                    $q->whereNull('cvf_ctr_id')->orWhere('cvf_verif', false);
-                })
-                ->count();
-            $effHeadsCount = DB::table('fin.empeffheads')->count();
-
-            $verificationStats = [
-                'total_contracts'      => $verifTotal,
-                'verified_contracts'   => $verifDone,
-                'pending_contracts'    => $verifPending,
-                'effective_heads_count'=> $effHeadsCount,
-                'verified_pct'         => $verifTotal > 0 ? round(($verifDone / $verifTotal) * 100, 1) : 0,
-            ];
-
-            // 4. Monthly Disbursement Trends (Last 12 Months)
-            $monthlyRows = DB::table('fin.transactions')
-                ->selectRaw("TO_CHAR(trn_date, 'YYYY-MM') as ym, sum(abs(trn_amount2)) as total_disbursed, count(*) as tx_count")
-                ->whereNotNull('trn_date')
-                ->where('trn_date', '>=', now()->subMonths(11)->startOfMonth()->toDateString())
-                ->groupBy(DB::raw("TO_CHAR(trn_date, 'YYYY-MM')"))
-                ->orderBy('ym', 'asc')
-                ->get();
-
-            $monthlyTrends = $monthlyRows->map(function ($row) {
-                return [
-                    'ym'     => $row->ym,
-                    'label'  => \Carbon\Carbon::createFromFormat('Y-m', $row->ym)->format('M Y'),
-                    'amount' => (float) $row->total_disbursed,
-                    'count'  => (int) $row->tx_count,
-                ];
-            })->values()->toArray();
-
-            // 5. Recent Disbursed Financial Transactions (Live Ledger Preview with Division and Head attributes)
-            $recentTransactions = DB::table('fin.transactions as t')
-                ->join('fin.commitments as c', 't.trn_cmt_id', '=', 'c.cmt_id')
-                ->leftJoin('cen.heads as h', 'c.cmt_hed_id', '=', 'h.hed_id')
-                ->leftJoin('cen.units as u', 'c.cmt_unt_id', '=', 'u.unt_id')
-                ->leftJoin('pur.purcases as p', function ($join) {
-                    $join->on('c.cmt_docid', '=', 'p.pcs_id')
-                         ->where('c.cmt_type', '!=', 'Sa');
-                })
-                ->leftJoin('fin.salorders as s', function ($join) {
-                    $join->on('c.cmt_docid', '=', 's.sor_id')
-                         ->where('c.cmt_type', '=', 'Sa');
-                })
-                ->leftJoin('frm.firmz as f', 'p.pcs_frm_id', '=', 'f.frm_id')
-                ->whereBetween('c.cmt_unt_id', [$lower, $upper])
-                ->orderBy('t.trn_id', 'desc')
-                ->take(30)
-                ->select([
-                    't.trn_id',
-                    't.trn_date',
-                    't.trn_amount1',
-                    't.trn_tax1',
-                    't.trn_amount2',
-                    'c.cmt_id',
-                    'c.cmt_type',
-                    'c.cmt_status',
-                    'c.cmt_unt_id',
-                    'c.cmt_hed_id',
-                    'u.unt_name as division_name',
-                    'h.hed_code',
-                    'p.pcs_id',
-                    'p.pcs_title',
-                    'f.frm_name',
-                    's.sor_id',
-                    's.sor_empnamecomp',
-                    's.sor_month',
-                ])
-                ->get()
-                ->map(function ($r) {
-                    $desc = $r->cmt_type === 'Sa'
-                        ? 'Salary: ' . ($r->sor_empnamecomp ?: 'Employee #' . $r->sor_id) . ' (' . $r->sor_month . ')'
-                        : ($r->pcs_title ?: ($r->frm_name ?: 'Purchase Case #' . $r->pcs_id));
-                    return [
-                        'trn_id'        => $r->trn_id,
-                        'cmt_id'        => $r->cmt_id,
-                        'date'          => $r->trn_date,
-                        'type'          => $r->cmt_type === 'Sa' ? 'Salary' : 'Purchase',
-                        'division'      => $r->division_name ?: '',
-                        'division_id'   => $r->cmt_unt_id,
-                        'hed_id'        => $r->cmt_hed_id,
-                        'head'          => $r->hed_code ?: 'N/A',
-                        'desc'          => $desc,
-                        'amount'        => abs((float) $r->trn_amount2),
-                        'tax'           => abs((float) $r->trn_tax1),
-                        'status'        => $r->cmt_status,
+                    $headStatuses[] = [
+                        'hed_id'                => $h->hed_id,
+                        'hed_code'              => $h->hed_code,
+                        'hed_name'              => $h->hed_name,
+                        'prj_id'                => $h->prj_id,
+                        'prj_code'              => $h->prj_code ?: $h->hed_code,
+                        'prj_title'             => $h->prj_title ?: $h->hed_name,
+                        'unt_id'                => $h->unt_id,
+                        'division'              => $h->division ?: 'General',
+                        'division_full'         => $h->unt_name ?: ($h->division ?: 'General'),
+                        'allocation'            => $alloc,
+                        'received'              => $rec,
+                        'expenditure'           => $exp,
+                        'balance'               => $bal,
+                        'commitments'           => $cmt,
+                        'in_process'            => $inp,
+                        'available'             => $avail,
+                        'can_be_spent'          => $spent,
+                        'pct_utilized'          => $alloc > 0 ? round(($exp / $alloc) * 100, 1) : 0,
+                        'expenditure_drilldown' => route('division.finance-of-project.drilldown', [$h->hed_id, 'pcc', 'expenditure']),
+                        'commitments_drilldown' => route('division.finance-of-project.drilldown', [$h->hed_id, 'pcc', 'commitments']),
+                        'in_process_drilldown'  => route('division.finance-of-project.drilldown', [$h->hed_id, 'pcc', 'in-process']),
+                        'full_report_url'       => route('projects.financial_view', $h->hed_id),
+                        'project_details_url'   => $h->prj_id ? route('projects.show', $h->prj_id) : '#',
                     ];
-                })->toArray();
+                }
 
-            return [
-                'headStatuses'          => $headStatuses,
-                'macroTotals'           => $macroTotals,
-                'commitmentsStats'      => $commitmentsStats,
-                'verificationStats'     => $verificationStats,
-                'monthlyTrends'         => $monthlyTrends,
-                'recentTransactions'    => $recentTransactions,
-                'cmtDetailedGroups'     => $cmtDetailedGroups,
-                'verifDetailedGroups'   => $verifDetailedGroups,
-                'effHeadDetailedGroups' => $effHeadDetailedGroups,
-            ];
-        });
+                $macroTotals = [
+                    'allocation'      => $totAlloc,
+                    'received'        => $totRec,
+                    'expenditure'     => $totExp,
+                    'balance'         => $totBal,
+                    'commitments'     => $totCmt,
+                    'in_process'      => $totInp,
+                    'available'       => $totAvail,
+                    'can_be_spent'    => $totSpent,
+                    'utilization_pct' => $totAlloc > 0 ? round(($totExp / $totAlloc) * 100, 1) : 0,
+                    'released_pct'    => $totAlloc > 0 ? round(($totRec / $totAlloc) * 100, 1) : 0,
+                ];
+
+                // 2. Commitments & Disbursement Pipeline Detailed Groups (for reactive filtering)
+                $cmtDetailedGroups = DB::table('fin.commitments as c')
+                    ->leftJoin('cen.heads as h', 'c.cmt_hed_id', '=', 'h.hed_id')
+                    ->leftJoin('cen.units as u', DB::raw('coalesce(c.cmt_unt_id, h.hed_unt_id)'), '=', 'u.unt_id')
+                    ->selectRaw("
+                        coalesce(c.cmt_unt_id, h.hed_unt_id) as unt_id,
+                        coalesce(u.unt_namesh, u.unt_name, '') as division_namesh,
+                        coalesce(u.unt_name, u.unt_namesh, '') as division_name,
+                        c.cmt_hed_id as hed_id,
+                        (CASE WHEN c.cmt_type = 'Sa' THEN 'salary' ELSE 'purchase' END) as kind,
+                        c.cmt_status as status,
+                        count(*) as cnt,
+                        coalesce(sum(abs(c.cmt_amount)), 0) as amt
+                    ")
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('c.cmt_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->groupBy(DB::raw('coalesce(c.cmt_unt_id, h.hed_unt_id)'), 'u.unt_namesh', 'u.unt_name', 'c.cmt_hed_id', DB::raw("CASE WHEN c.cmt_type = 'Sa' THEN 'salary' ELSE 'purchase' END"), 'c.cmt_status')
+                    ->get()
+                    ->toArray();
+
+                $cmtPurAwaited = DB::table('fin.commitments')
+                    ->where('cmt_type', '!=', 'Sa')
+                    ->where('cmt_status', 'Awaited')
+                    ->whereBetween('cmt_unt_id', [$lower, $upper])
+                    ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
+                    ->first();
+
+                $cmtPurPaid = DB::table('fin.commitments')
+                    ->where('cmt_type', '!=', 'Sa')
+                    ->where('cmt_status', 'Paid')
+                    ->whereBetween('cmt_unt_id', [$lower, $upper])
+                    ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
+                    ->first();
+
+                $cmtSalAwaited = DB::table('fin.commitments')
+                    ->where('cmt_type', '=', 'Sa')
+                    ->where('cmt_status', 'Awaited')
+                    ->whereBetween('cmt_unt_id', [$lower, $upper])
+                    ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
+                    ->first();
+
+                $cmtSalPaid = DB::table('fin.commitments')
+                    ->where('cmt_type', '=', 'Sa')
+                    ->where('cmt_status', 'Paid')
+                    ->whereBetween('cmt_unt_id', [$lower, $upper])
+                    ->selectRaw('count(*) as cnt, sum(abs(cmt_amount)) as amt')
+                    ->first();
+
+                $commitmentsStats = [
+                    'pur_awaited_cnt'   => (int) ($cmtPurAwaited->cnt ?? 0),
+                    'pur_awaited_amt'   => (float) ($cmtPurAwaited->amt ?? 0),
+                    'pur_paid_cnt'      => (int) ($cmtPurPaid->cnt ?? 0),
+                    'pur_paid_amt'      => (float) ($cmtPurPaid->amt ?? 0),
+                    'sal_awaited_cnt'   => (int) ($cmtSalAwaited->cnt ?? 0),
+                    'sal_awaited_amt'   => (float) ($cmtSalAwaited->amt ?? 0),
+                    'sal_paid_cnt'      => (int) ($cmtSalPaid->cnt ?? 0),
+                    'sal_paid_amt'      => (float) ($cmtSalPaid->amt ?? 0),
+                    'total_awaited_cnt' => (int) (($cmtPurAwaited->cnt ?? 0) + ($cmtSalAwaited->cnt ?? 0)),
+                    'total_awaited_amt' => (float) (($cmtPurAwaited->amt ?? 0) + ($cmtSalAwaited->amt ?? 0)),
+                ];
+
+                // 3. Contracts & Salary Verification Stats & Detailed Groups
+                $verifDetailedGroups = DB::table('hr.contracts as c')
+                    ->leftJoin('cen.heads as h', 'c.ctr_hed_id', '=', 'h.hed_id')
+                    ->leftJoin('cen.units as u', DB::raw('coalesce(c.ctr_unt_id, h.hed_unt_id)'), '=', 'u.unt_id')
+                    ->leftJoin('fin.contractsverif as v', 'c.ctr_id', '=', 'v.cvf_ctr_id')
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('c.ctr_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->selectRaw("
+                        coalesce(c.ctr_unt_id, h.hed_unt_id) as unt_id,
+                        coalesce(u.unt_namesh, u.unt_name, '') as division_namesh,
+                        coalesce(u.unt_name, u.unt_namesh, '') as division_name,
+                        c.ctr_hed_id as hed_id,
+                        count(*) as total_cnt,
+                        count(case when v.cvf_verif = true then 1 end) as verified_cnt,
+                        count(case when v.cvf_ctr_id is null or v.cvf_verif = false then 1 end) as pending_cnt
+                    ")
+                    ->groupBy(DB::raw('coalesce(c.ctr_unt_id, h.hed_unt_id)'), 'u.unt_namesh', 'u.unt_name', 'c.ctr_hed_id')
+                    ->get()
+                    ->toArray();
+
+                $effHeadDetailedGroups = DB::table('fin.empeffheads as eh')
+                    ->leftJoin('hr.emps as e', 'eh.eeh_emp_id', '=', 'e.emp_id')
+                    ->leftJoin('cen.heads as h', 'eh.eeh_emphed_id', '=', 'h.hed_id')
+                    ->leftJoin('cen.units as u', DB::raw('coalesce(e.emp_unt_id, h.hed_unt_id)'), '=', 'u.unt_id')
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('e.emp_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->selectRaw("
+                        coalesce(e.emp_unt_id, h.hed_unt_id) as unt_id,
+                        coalesce(u.unt_namesh, u.unt_name, '') as division_namesh,
+                        coalesce(u.unt_name, u.unt_namesh, '') as division_name,
+                        eh.eeh_emphed_id as hed_id,
+                        count(*) as cnt
+                    ")
+                    ->groupBy(DB::raw('coalesce(e.emp_unt_id, h.hed_unt_id)'), 'u.unt_namesh', 'u.unt_name', 'eh.eeh_emphed_id')
+                    ->get()
+                    ->toArray();
+
+                $verifTotal = DB::table('hr.contracts as c')
+                    ->leftJoin('cen.heads as h', 'c.ctr_hed_id', '=', 'h.hed_id')
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('c.ctr_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->count();
+
+                $verifDone = DB::table('fin.contractsverif as v')
+                    ->join('hr.contracts as c', 'v.cvf_ctr_id', '=', 'c.ctr_id')
+                    ->leftJoin('cen.heads as h', 'c.ctr_hed_id', '=', 'h.hed_id')
+                    ->where('v.cvf_verif', true)
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('c.ctr_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->count();
+
+                $verifPending = DB::table('hr.contracts as c')
+                    ->leftJoin('cen.heads as h', 'c.ctr_hed_id', '=', 'h.hed_id')
+                    ->leftJoin('fin.contractsverif as v', 'c.ctr_id', '=', 'v.cvf_ctr_id')
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('c.ctr_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->where(function ($q) {
+                        $q->whereNull('v.cvf_ctr_id')->orWhere('v.cvf_verif', false);
+                    })
+                    ->count();
+
+                $effHeadsCount = DB::table('fin.empeffheads as eh')
+                    ->leftJoin('hr.emps as e', 'eh.eeh_emp_id', '=', 'e.emp_id')
+                    ->leftJoin('cen.heads as h', 'eh.eeh_emphed_id', '=', 'h.hed_id')
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('e.emp_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->count();
+
+                $verificationStats = [
+                    'total_contracts'      => $verifTotal,
+                    'verified_contracts'   => $verifDone,
+                    'pending_contracts'    => $verifPending,
+                    'effective_heads_count'=> $effHeadsCount,
+                    'verified_pct'         => $verifTotal > 0 ? round(($verifDone / $verifTotal) * 100, 1) : 0,
+                ];
+
+                // 4. Monthly Disbursement Trends (Last 12 Months)
+                $monthlyRows = DB::table('fin.transactions')
+                    ->selectRaw("TO_CHAR(trn_date, 'YYYY-MM') as ym, sum(abs(trn_amount2)) as total_disbursed, count(*) as tx_count")
+                    ->whereNotNull('trn_date')
+                    ->where('trn_date', '>=', now()->subMonths(11)->startOfMonth()->toDateString())
+                    ->groupBy(DB::raw("TO_CHAR(trn_date, 'YYYY-MM')"))
+                    ->orderBy('ym', 'asc')
+                    ->get();
+
+                $monthlyTrends = $monthlyRows->map(function ($row) {
+                    return [
+                        'ym'     => $row->ym,
+                        'label'  => \Carbon\Carbon::createFromFormat('Y-m', $row->ym)->format('M Y'),
+                        'amount' => (float) $row->total_disbursed,
+                        'count'  => (int) $row->tx_count,
+                    ];
+                })->values()->toArray();
+
+                // 5. Recent Disbursed Financial Transactions (Live Ledger Preview with Division and Head attributes)
+                $recentTransactions = DB::table('fin.transactions as t')
+                    ->join('fin.commitments as c', 't.trn_cmt_id', '=', 'c.cmt_id')
+                    ->leftJoin('cen.heads as h', 'c.cmt_hed_id', '=', 'h.hed_id')
+                    ->leftJoin('cen.units as u', DB::raw('coalesce(c.cmt_unt_id, h.hed_unt_id)'), '=', 'u.unt_id')
+                    ->leftJoin('pur.purcases as p', function ($join) {
+                        $join->on('c.cmt_docid', '=', 'p.pcs_id')
+                             ->where('c.cmt_type', '!=', 'Sa');
+                    })
+                    ->leftJoin('fin.salorders as s', function ($join) {
+                        $join->on('c.cmt_docid', '=', 's.sor_id')
+                             ->where('c.cmt_type', '=', 'Sa');
+                    })
+                    ->leftJoin('frm.firmz as f', 'p.pcs_frm_id', '=', 'f.frm_id')
+                    ->where(function($q) use ($lower, $upper) {
+                        $q->whereBetween('c.cmt_unt_id', [$lower, $upper])
+                          ->orWhereBetween('h.hed_unt_id', [$lower, $upper]);
+                    })
+                    ->orderBy('t.trn_id', 'desc')
+                    ->take(30)
+                    ->select([
+                        't.trn_id',
+                        't.trn_date',
+                        't.trn_amount1',
+                        't.trn_tax1',
+                        't.trn_amount2',
+                        'c.cmt_id',
+                        'c.cmt_type',
+                        'c.cmt_status',
+                        'c.cmt_unt_id',
+                        'h.hed_unt_id',
+                        'c.cmt_hed_id',
+                        'u.unt_name as division_name',
+                        'u.unt_namesh as division_namesh',
+                        'h.hed_code',
+                        'p.pcs_id',
+                        'p.pcs_title',
+                        'f.frm_name',
+                        's.sor_id',
+                        's.sor_empnamecomp',
+                        's.sor_month',
+                    ])
+                    ->get()
+                    ->map(function ($r) {
+                        $desc = $r->cmt_type === 'Sa'
+                            ? 'Salary: ' . ($r->sor_empnamecomp ?: 'Employee #' . $r->sor_id) . ' (' . $r->sor_month . ')'
+                            : ($r->pcs_title ?: ($r->frm_name ?: 'Purchase Case #' . $r->pcs_id));
+                        return [
+                            'trn_id'          => $r->trn_id,
+                            'cmt_id'          => $r->cmt_id,
+                            'date'            => $r->trn_date,
+                            'type'            => $r->cmt_type === 'Sa' ? 'Salary' : 'Purchase',
+                            'division'        => $r->division_namesh ?: ($r->division_name ?: ''),
+                            'division_full'   => $r->division_name ?: ($r->division_namesh ?: ''),
+                            'division_id'     => $r->cmt_unt_id ?: $r->hed_unt_id,
+                            'hed_id'          => $r->cmt_hed_id,
+                            'head'            => $r->hed_code ?: 'N/A',
+                            'desc'            => $desc,
+                            'amount'          => abs((float) $r->trn_amount2),
+                            'tax'             => abs((float) $r->trn_tax1),
+                            'status'          => $r->cmt_status,
+                        ];
+                    })->toArray();
+
+                return [
+                    'headStatuses'          => $headStatuses,
+                    'macroTotals'           => $macroTotals,
+                    'commitmentsStats'      => $commitmentsStats,
+                    'verificationStats'     => $verificationStats,
+                    'monthlyTrends'         => $monthlyTrends,
+                    'recentTransactions'    => $recentTransactions,
+                    'cmtDetailedGroups'     => $cmtDetailedGroups,
+                    'verifDetailedGroups'   => $verifDetailedGroups,
+                    'effHeadDetailedGroups' => $effHeadDetailedGroups,
+                ];
+            });
 
         return view('fin.dashboard', [
             'mode'                  => $mode,

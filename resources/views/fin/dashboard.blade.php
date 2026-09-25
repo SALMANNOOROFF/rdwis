@@ -606,7 +606,7 @@
                         </thead>
                         <tbody id="tx-table-body">
                             @forelse($recentTransactions as $tx)
-                            <tr class="tx-row" data-division="{{ strtolower($tx['division']) }}" data-hed-id="{{ $tx['hed_id'] }}">
+                            <tr class="tx-row" data-division="{{ strtolower($tx['division']) }}" data-division-full="{{ strtolower($tx['division_full'] ?? '') }}" data-unt-id="{{ $tx['division_id'] }}" data-hed-id="{{ $tx['hed_id'] }}">
                                 <td class="rajdhani font-weight-bold text-dark">#{{ $tx['trn_id'] }}</td>
                                 <td class="rajdhani text-muted" style="font-size: 12.5px;">{{ $tx['date'] ? \Carbon\Carbon::parse($tx['date'])->format('d M, Y') : '—' }}</td>
                                 <td>
@@ -1082,7 +1082,12 @@
             headSelect.append($('<option value="all">All Project Heads (All)</option>'));
 
             headStatuses.forEach(function(h) {
-                if (selectedDivision === 'all' || h.division.toLowerCase() === selectedDivision.toLowerCase()) {
+                let matchDiv = (selectedDivision === 'all' || 
+                    (h.division && h.division.toLowerCase() === selectedDivision.toLowerCase()) ||
+                    (h.division_full && h.division_full.toLowerCase() === selectedDivision.toLowerCase()) ||
+                    String(h.unt_id) === String(selectedDivision)
+                );
+                if (matchDiv) {
                     headSelect.append(
                         $('<option></option>')
                             .val(h.hed_id)
@@ -1104,9 +1109,19 @@
             let sumAlloc = 0, sumRec = 0, sumExp = 0, sumBal = 0, sumCmt = 0, sumInp = 0, sumAvail = 0, sumSpent = 0;
             let filteredArray = [];
 
+            // Helper function for flexible division matching
+            function isDivMatch(divShort, divFull, untId) {
+                if (selectedDiv === 'all') return true;
+                const s = selectedDiv.toLowerCase();
+                if (divShort && divShort.toLowerCase() === s) return true;
+                if (divFull && divFull.toLowerCase() === s) return true;
+                if (untId && String(untId) === String(selectedDiv)) return true;
+                return false;
+            }
+
             // 1. Calculate dynamic KPI values from filtered heads
             headStatuses.forEach(function(h) {
-                let matchDiv = (selectedDiv === 'all' || h.division.toLowerCase() === selectedDiv.toLowerCase());
+                let matchDiv = isDivMatch(h.division, h.division_full, h.unt_id);
                 let matchHead = (selectedHedId === 'all' || String(h.hed_id) === String(selectedHedId));
 
                 if (matchDiv && matchHead) {
@@ -1164,11 +1179,13 @@
             rows.each(function() {
                 const row = $(this);
                 const div = row.attr('data-division') || '';
+                const divFull = row.attr('data-division-full') || '';
+                const untId = row.attr('data-unt-id') || '';
                 const hedId = row.attr('data-hed-id') || '';
                 const code = row.attr('data-code') || '';
                 const title = row.attr('data-title') || '';
 
-                let matchDiv = (selectedDiv === 'all' || div.toLowerCase() === selectedDiv.toLowerCase());
+                let matchDiv = isDivMatch(div, divFull, untId);
                 let matchHead = (selectedHedId === 'all' || hedId === String(selectedHedId));
                 let matchSearch = (!searchTerm || code.includes(searchTerm) || title.includes(searchTerm));
 
@@ -1189,7 +1206,7 @@
             let salPaidAmt = 0, salPaidCnt = 0;
 
             cmtDetailedGroups.forEach(function(item) {
-                let matchDiv = (selectedDiv === 'all' || (item.division_name || '').toLowerCase() === selectedDiv.toLowerCase());
+                let matchDiv = isDivMatch(item.division_namesh, item.division_name, item.unt_id);
                 let matchHead = (selectedHedId === 'all' || String(item.hed_id) === String(selectedHedId));
 
                 if (matchDiv && matchHead) {
@@ -1229,7 +1246,7 @@
             let pendingContracts = 0;
 
             verifDetailedGroups.forEach(function(item) {
-                let matchDiv = (selectedDiv === 'all' || (item.division_name || '').toLowerCase() === selectedDiv.toLowerCase());
+                let matchDiv = isDivMatch(item.division_namesh, item.division_name, item.unt_id);
                 let matchHead = (selectedHedId === 'all' || String(item.hed_id) === String(selectedHedId));
 
                 if (matchDiv && matchHead) {
@@ -1241,7 +1258,7 @@
 
             let effHeadsCount = 0;
             effHeadDetailedGroups.forEach(function(item) {
-                let matchDiv = (selectedDiv === 'all' || (item.division_name || '').toLowerCase() === selectedDiv.toLowerCase());
+                let matchDiv = isDivMatch(item.division_namesh, item.division_name, item.unt_id);
                 let matchHead = (selectedHedId === 'all' || String(item.hed_id) === String(selectedHedId));
 
                 if (matchDiv && matchHead) {
@@ -1266,9 +1283,11 @@
             txRows.each(function() {
                 const row = $(this);
                 const div = row.attr('data-division') || '';
+                const divFull = row.attr('data-division-full') || '';
+                const untId = row.attr('data-unt-id') || '';
                 const hedId = row.attr('data-hed-id') || '';
 
-                let matchDiv = (selectedDiv === 'all' || div.toLowerCase() === selectedDiv.toLowerCase());
+                let matchDiv = isDivMatch(div, divFull, untId);
                 let matchHead = (selectedHedId === 'all' || hedId === String(selectedHedId));
 
                 if (matchDiv && matchHead) {

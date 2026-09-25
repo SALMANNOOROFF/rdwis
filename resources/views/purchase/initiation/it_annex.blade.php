@@ -1,5 +1,21 @@
 @php
     $canEdit = $canEditIt ?? false;
+    $pageSize = $pageSetup['page_size'] ?? 'A4';
+    $orientation = $pageSetup['orientation'] ?? 'portrait';
+    $marginTop = ($pageSetup['margin_top'] ?? '25.4') . 'mm';
+    $marginBottom = ($pageSetup['margin_bottom'] ?? '25.4') . 'mm';
+    $marginLeft = ($pageSetup['margin_left'] ?? '25.4') . 'mm';
+    $marginRight = ($pageSetup['margin_right'] ?? '20.32') . 'mm';
+    $rowSpacing = $pageSetup['row_spacing'] ?? '8pt';
+    $colSpacing = $pageSetup['col_spacing'] ?? '8px';
+
+    $canEditRefNo = $canEdit && (!isset($pageSetup['editable_ref_no']) || $pageSetup['editable_ref_no']);
+    $canEditDate = $canEdit && (!isset($pageSetup['editable_date']) || $pageSetup['editable_date']);
+    $canEditSubject = $canEdit && (!isset($pageSetup['editable_subject']) || $pageSetup['editable_subject']);
+    $canEditParagraphs = $canEdit && (!isset($pageSetup['editable_paragraphs']) || $pageSetup['editable_paragraphs']);
+    $canEditSignatory = $canEdit && (!isset($pageSetup['editable_signatory']) || $pageSetup['editable_signatory']);
+    $canEditFirms = $canEdit && (!isset($pageSetup['editable_firms']) || $pageSetup['editable_firms']);
+    $canEditItems = $canEdit && (!isset($pageSetup['editable_items']) || $pageSetup['editable_items']);
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -158,12 +174,12 @@
             gap: 30px;
         }
 
-        /* A4 Page Simulation on Screen with Left: 1.0" (25.4mm), Right: 0.8" (20.32mm) padding */
+        /* A4 Page Simulation on Screen with User Defined Margins & Page Size */
         .a4-page {
             background: #fff;
-            width: 210mm;
-            min-height: 297mm;
-            padding: 25.4mm 20.32mm 25.4mm 25.4mm;
+            width: {{ $orientation === 'landscape' ? ($pageSize === 'Letter' ? '11in' : ($pageSize === 'Legal' ? '14in' : '297mm')) : ($pageSize === 'Letter' ? '8.5in' : ($pageSize === 'Legal' ? '8.5in' : '210mm')) }};
+            min-height: {{ $orientation === 'landscape' ? ($pageSize === 'Letter' ? '8.5in' : ($pageSize === 'Legal' ? '8.5in' : '210mm')) : ($pageSize === 'Letter' ? '11in' : ($pageSize === 'Legal' ? '14in' : '297mm')) }};
+            padding: {{ $marginTop }} {{ $marginRight }} {{ $marginBottom }} {{ $marginLeft }};
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             position: relative;
             box-sizing: border-box;
@@ -171,6 +187,33 @@
             font-size: 12pt;
             line-height: 1.5;
             color: #000;
+        }
+
+        /* HEADER BLOCK */
+        .page-header-block {
+            border-bottom: 2px solid #000;
+            padding-bottom: 6px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 9.5pt;
+            line-height: 1.35;
+        }
+        .header-left { text-align: left; flex: 1; }
+        .header-center { text-align: center; flex: 2; font-weight: bold; }
+        .header-right { text-align: right; flex: 1; }
+
+        /* FOOTER BLOCK */
+        .page-footer-block {
+            border-top: 1px solid #000;
+            padding-top: 6px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 9pt;
+            color: #333;
         }
 
         /* Toast notification */
@@ -217,116 +260,42 @@
             border-radius: 2px;
         }
 
-        /* Paragraphs with sub-bullets Tab Stop indentation */
-        .para-wrapper {
-            position: relative;
-            margin-bottom: 8pt;
+        /* Single Editable Body Box */
+        .letter-body-single {
+            outline: none;
+            min-height: 120px;
+            font-size: 12pt;
+            line-height: 1.4;
+            text-align: justify;
+            margin-bottom: 12pt;
+            border-radius: 2px;
+            transition: background-color 0.15s, box-shadow 0.15s;
         }
-        .editable-para {
-            margin: 0;
+        body:not(.printing) .letter-body-single[contenteditable="true"]:hover {
+            background-color: #f8fafc;
+            box-shadow: 0 0 0 1px #cbd5e1;
+        }
+        body:not(.printing) .letter-body-single[contenteditable="true"]:focus {
+            background-color: #f0f9ff;
+            box-shadow: 0 0 0 2px var(--rd-primary-700);
+        }
+        .letter-body-single p, .letter-body-single div {
+            margin: 0 0 6pt 0;
             text-align: justify;
             white-space: pre-wrap;
-            tab-size: 36px;
-            -moz-tab-size: 36px;
-            font-size: 12pt;
-            line-height: 1.5;
-            font-family: Arial, Helvetica, sans-serif;
             word-break: break-word;
+            tab-size: 36px;
+            font-size: 12pt;
+            line-height: 1.4;
+            font-family: Arial, Helvetica, sans-serif;
         }
-        .editable-para.main-para {
-            padding-left: 0;
-            text-indent: 0;
-            margin-bottom: 12pt;
-        }
-        .editable-para.sub-para {
-            padding-left: 54px;
-            text-indent: 0;
-            margin-bottom: 8pt;
-        }
-        .para-actions-hover {
-            position: absolute;
-            top: -14px;
-            right: 0px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.15s ease-in-out;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            padding: 2px 6px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            z-index: 100;
-        }
-        .para-wrapper:hover .para-actions-hover {
-            opacity: 1;
-        }
-        .btn-insert-para {
-            background: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #7dd3fc;
-            border-radius: 4px;
-            padding: 2px 7px;
-            font-size: 10.5px;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            white-space: nowrap;
-            transition: all 0.15s ease;
-        }
-        .btn-insert-para:hover {
-            background: #0284c7;
-            color: #fff;
-            border-color: #0284c7;
-        }
-        .btn-del-para {
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #f87171;
-            border-radius: 4px;
-            padding: 3px 6px;
-            font-size: 10.5px;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            transition: all 0.15s ease;
-        }
-        .btn-del-para:hover {
-            background: #dc2626;
-            color: #fff;
-            border-color: #dc2626;
-        }
-
-        .btn-add-para {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #f1f5f9;
-            border: 1px dashed #64748b;
-            color: #334155;
-            padding: 6px 14px;
-            font-size: 11px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 4px;
-            margin-bottom: 20px;
-            transition: all 0.15s;
-        }
-        .btn-add-para:hover {
-            background: #e2e8f0;
-            color: #0f172a;
-            border-color: #334155;
+        .letter-body-single p.sub-para, .letter-body-single div.sub-para {
+            padding-left: 48px;
         }
 
         /* ================= PAGE 1: RFQ LETTER ================= */
         .letter-header {
-            margin-bottom: 22pt;
+            margin-bottom: 16pt;
             font-size: 12pt;
             line-height: 1.35;
         }
@@ -349,7 +318,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-top: 14pt;
+            margin-top: 10pt;
         }
         .meta-col-left {
             width: 48%;
@@ -359,21 +328,21 @@
         }
         .meta-item {
             line-height: 1.35;
-            margin-bottom: 4pt;
+            margin-bottom: 3pt;
         }
 
         .letter-subject {
             font-size: 12pt;
             font-weight: bold;
-            margin: 20pt 0 16pt 0;
+            margin: 14pt 0 12pt 0;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
         /* Signatory */
         .signatory-wrapper {
-            margin-top: 28pt;
-            margin-bottom: 24pt;
+            margin-top: 16pt;
+            margin-bottom: 16pt;
             display: flex;
             justify-content: flex-end;
             padding-right: 20px;
@@ -482,16 +451,22 @@
         }
 
         .firms-vertical-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 20px;
+            width: 100%;
+        }
+        .firms-vertical-list.grid-1col {
             display: flex;
             flex-direction: column;
             gap: 14px;
             max-width: 600px;
         }
-        .firms-vertical-list.grid-2col {
+        .firms-vertical-list.grid-3col {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px 20px;
-            max-width: 100%;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px 16px;
+            width: 100%;
         }
         .firm-entry {
             font-size: 11pt;
@@ -797,8 +772,8 @@
         /* ================= PRINT MEDIA ================= */
         @media print {
             @page {
-                size: auto;
-                margin: 0mm;
+                size: {{ strtolower($pageSize) }} {{ $orientation }};
+                margin: {{ $marginTop }} {{ $marginRight }} {{ $marginBottom }} {{ $marginLeft }};
             }
             html, body {
                 background: #fff !important;
@@ -834,17 +809,31 @@
             .a4-page {
                 box-shadow: none !important;
                 border: none !important;
-                padding: 25.4mm 20.32mm 25.4mm 25.4mm !important;
-                margin: 0 auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
                 width: 100% !important;
                 min-height: auto !important;
                 box-sizing: border-box !important;
+            }
+            .distribution-area {
+                page-break-inside: auto;
+                break-inside: auto;
+            }
+            .dist-header-row {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                page-break-after: avoid;
+                break-after: avoid;
             }
             .firm-entry {
                 page-break-inside: avoid;
                 break-inside: avoid;
             }
-            .para-wrapper {
+            .signatory-wrapper {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .letter-header, .letter-subject {
                 page-break-inside: avoid;
                 break-inside: avoid;
             }
@@ -852,7 +841,7 @@
                 page-break-before: always !important;
                 break-before: page !important;
                 margin-top: 0 !important;
-                padding-top: 20mm !important;
+                padding-top: 0 !important;
             }
             [contenteditable="true"] {
                 background: transparent !important;
@@ -921,30 +910,30 @@
                 <div class="header-top-row">
                     <div class="header-top-left"></div>
                     <div class="header-top-right">
-                        <div style="font-weight: bold; white-space: nowrap;">Naval Research & Development Institute</div>
-                        <div>R&D Wing</div>
-                        <div>at PNS JAUHAR</div>
-                        <div>Habib Rehmatullah Road</div>
-                        <div>KARACHI</div>
+                        <div style="font-weight: bold; white-space: nowrap;" contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="header_org_name" oninput="markUnsaved()">{{ $pageSetup['header_org_name'] ?? 'Naval Research & Development Institute' }}</div>
+                        <div contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="header_wing" oninput="markUnsaved()">{{ $pageSetup['header_wing'] ?? 'R&D Wing' }}</div>
+                        <div contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="header_base" oninput="markUnsaved()">{{ $pageSetup['header_base'] ?? 'at PNS JAUHAR' }}</div>
+                        <div contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="header_address" oninput="markUnsaved()">{{ $pageSetup['header_address'] ?? 'Habib Rehmatullah Road' }}</div>
+                        <div contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="header_city" oninput="markUnsaved()">{{ $pageSetup['header_city'] ?? 'KARACHI' }}</div>
                     </div>
                 </div>
 
                 <div class="header-meta-row">
                     <div class="meta-col-left">
                         <div class="meta-item">
-                            R&D/Projects/Proc/<span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="ref_no_suffix" oninput="syncRefSuffix(this.innerText)">{{ $refSuffix }}</span>
+                            <span id="ref_prefix">{{ $pageSetup['ref_prefix'] ?? 'R&D/Projects/Proc/' }}</span><span contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" id="ref_no_suffix" oninput="syncRefSuffix(this.innerText)">{{ $refSuffix }}</span>
                         </div>
                         <div class="meta-item">
-                            <span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="see_distribution" oninput="markUnsaved()">{{ $seeDistribution ?? 'See distribution' }}</span>
+                            <span contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" id="see_distribution" oninput="markUnsaved()">{{ $seeDistribution ?? ($pageSetup['see_distribution'] ?? 'See distribution:') }}</span>
                         </div>
                     </div>
 
                     <div class="meta-col-right">
                         <div class="meta-item">
-                            Ph (off): 48504781
+                            <span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="header_phone" oninput="markUnsaved()">{{ $pageSetup['header_phone'] ?? 'Ph (off): 48504781' }}</span>
                         </div>
                         <div class="meta-item">
-                            <span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="letter_date" oninput="syncDate(this.innerText)">{{ $letterDate }}</span>
+                            <span contenteditable="{{ $canEditDate ? 'true' : 'false' }}" id="letter_date" oninput="syncDate(this.innerText)">{{ $letterDate }}</span>
                         </div>
                     </div>
                 </div>
@@ -952,49 +941,26 @@
 
             <!-- SUBJECT -->
             <div class="letter-subject">
-                <u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="subject">{{ $subject }}</span></u>
+                <u><span contenteditable="{{ $canEditSubject ? 'true' : 'false' }}" id="subject">{{ $subject }}</span></u>
             </div>
 
-            <!-- BODY PARAGRAPHS -->
-            <div class="letter-body" id="letterParagraphs">
+            <!-- SINGLE CONTINUOUS EDITABLE BODY BOX -->
+            <div class="letter-body-single" contenteditable="{{ $canEditParagraphs ? 'true' : 'false' }}" id="letterParagraphs" oninput="markUnsaved()">
                 @foreach($paragraphs as $pIndex => $pText)
                 @php
                     $cleanPText = preg_replace('/^(\s*[0-9a-gA-G]+\.)[ \t]+/u', "$1\t", $pText);
                     $isSub = preg_match('/^\s*[a-g]\./i', trim($cleanPText));
                 @endphp
-                <div class="para-wrapper" data-index="{{ $pIndex }}">
-                    <div class="editable-para {{ $isSub ? 'sub-para' : 'main-para' }}" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{!! $cleanPText !!}</div>
-                    @if($canEdit)
-                    <div class="para-actions-hover no-print">
-                        <button type="button" class="btn-insert-para" onclick="insertParagraphAfter(this)" title="Insert New Paragraph Here">
-                            <i class="fas fa-plus"></i> Add Para
-                        </button>
-                        @if($pIndex > 0)
-                        <button type="button" class="btn-del-para" onclick="removeParagraph(this)" title="Delete Paragraph">
-                            <i class="fas fa-times"></i> Del
-                        </button>
-                        @endif
-                    </div>
-                    @endif
-                </div>
+                <p class="{{ $isSub ? 'sub-para' : 'main-para' }}">{!! $cleanPText !!}</p>
                 @endforeach
             </div>
-
-            @if($canEdit)
-            <!-- ADD PARAGRAPH BUTTON (SCREEN ONLY) -->
-            <div class="no-print" style="margin-top: 2px; margin-bottom: 18px;">
-                <button type="button" class="btn-add-para" onclick="addParagraph()">
-                    <i class="fas fa-plus"></i> Add Paragraph
-                </button>
-            </div>
-            @endif
 
             <!-- SIGNATORY -->
             <div class="signatory-wrapper">
                 <div class="signatory-box">
-                    <div class="sig-name" contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="signatory_name" oninput="markUnsaved()">{{ $signatoryName }}</div>
-                    <div class="sig-rank" contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="signatory_rank" oninput="markUnsaved()">{{ $signatoryRank }}</div>
-                    <div class="sig-dept" contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="signatory_dept" oninput="markUnsaved()">{{ $signatoryDept }}</div>
+                    <div class="sig-name" contenteditable="{{ $canEditSignatory ? 'true' : 'false' }}" id="signatory_name" oninput="markUnsaved()">{{ $signatoryName }}</div>
+                    <div class="sig-rank" contenteditable="{{ $canEditSignatory ? 'true' : 'false' }}" id="signatory_rank" oninput="markUnsaved()">{{ $signatoryRank }}</div>
+                    <div class="sig-dept" contenteditable="{{ $canEditSignatory ? 'true' : 'false' }}" id="signatory_dept" oninput="markUnsaved()">{{ $signatoryDept }}</div>
                 </div>
             </div>
 
@@ -1006,7 +972,7 @@
                         <span class="firm-count-pill no-print" id="firmCountBadge">{{ count($selectedFirms) }} Firms</span>
                     </div>
 
-                    @if($canEdit)
+                    @if($canEditFirms)
                     <div class="dist-actions no-print">
                         <button type="button" class="btn-firm-act btn-add-all" onclick="addAllSystemFirms()" title="Add all registered firms from database into this distribution list">
                             <i class="fas fa-database"></i> Add All System Firms ({{ count($firmsDirectory) }})
@@ -1029,20 +995,20 @@
                     @foreach($selectedFirms as $f)
                     <div class="firm-entry" data-id="{{ $f['id'] ?? '' }}">
                         <div class="firm-hdr">
-                            <span class="f-name" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $f['name'] }}</span>
-                            @if($canEdit)
+                            <span class="f-name" contenteditable="{{ $canEditFirms ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $f['name'] }}</span>
+                            @if($canEditFirms)
                             <button type="button" class="btn-del-firm no-print" onclick="removeFirm(this)" title="Remove Firm">
                                 <i class="fas fa-times"></i>
                             </button>
                             @endif
                         </div>
-                        <span class="f-addr" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $f['address'] ?: 'Karachi, Pakistan' }}</span>
-                        <span class="f-tel" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">Tel: {{ $f['tel'] ?: 'N/A' }}</span>
+                        <span class="f-addr" contenteditable="{{ $canEditFirms ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $f['address'] ?: 'Karachi, Pakistan' }}</span>
+                        <span class="f-tel" contenteditable="{{ $canEditFirms ? 'true' : 'false' }}" oninput="markUnsaved()">Tel: {{ $f['tel'] ?: 'N/A' }}</span>
                     </div>
                     @endforeach
                 </div>
 
-                @if($canEdit)
+                @if($canEditFirms)
                 <!-- FIRM SEARCH BAR (SCREEN ONLY) -->
                 <div class="firm-search-bar no-print">
                     <i class="fas fa-search" style="color: var(--rd-text3); font-size: 13px;"></i>
@@ -1072,17 +1038,17 @@
 
             <!-- ANNEX TOP RIGHT -->
             <div class="it-annex-header">
-                <div class="annex-line"><u>ANNEX A</u></div>
-                <div class="annex-line"><u>TO IT NO R&D/Projects/Proc/<span id="annex_ref_suffix" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="syncRefSuffixFromAnnex(this.innerText)">{{ $refSuffix }}</span></u></div>
-                <div class="annex-line"><u>Dated : <span id="annex_date" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="syncDateFromAnnex(this.innerText)">{{ $letterDate }}</span></u></div>
+                <div class="annex-line"><u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="annex_label" oninput="markUnsaved()">{{ $pageSetup['annex_label'] ?? 'ANNEX A' }}</span></u></div>
+                <div class="annex-line"><u>TO IT NO <span contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" id="annex_ref_prefix">{{ $pageSetup['ref_prefix'] ?? 'R&D/Projects/Proc/' }}</span><span id="annex_ref_suffix" contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" oninput="syncRefSuffixFromAnnex(this.innerText)">{{ $refSuffix }}</span></u></div>
+                <div class="annex-line"><u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="dated_label">{{ $pageSetup['dated_label'] ?? 'Dated :' }}</span> <span id="annex_date" contenteditable="{{ $canEditDate ? 'true' : 'false' }}" oninput="syncDateFromAnnex(this.innerText)">{{ $letterDate }}</span></u></div>
             </div>
 
             <!-- TITLE -->
             <div class="annex-heading">
-                <u>LIST OF REQUIRED ITEMS</u>
+                <u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="annex_title" oninput="markUnsaved()">{{ $pageSetup['annex_title'] ?? 'LIST OF REQUIRED ITEMS' }}</span></u>
             </div>
 
-            @if($canEdit)
+            @if($canEditItems)
             <!-- ADD ROW BUTTON (SCREEN ONLY) -->
             <div class="no-print" style="margin-bottom: 8px; display: flex; justify-content: flex-end;">
                 <button type="button" class="btn-add-table-row" onclick="addAnnexRow()">
@@ -1095,10 +1061,10 @@
             <table class="annex-table" id="annexItemsTable">
                 <thead>
                     <tr>
-                        <th style="width: 55px;">S No</th>
-                        <th class="t-left">Item / specification</th>
-                        <th style="width: 100px;">Qty</th>
-                        @if($canEdit)
+                        <th style="width: 55px;">{{ $pageSetup['th_sno'] ?? 'S No' }}</th>
+                        <th class="t-left">{{ $pageSetup['th_spec'] ?? 'Item / specification' }}</th>
+                        <th style="width: 100px;">{{ $pageSetup['th_qty'] ?? 'Qty' }}</th>
+                        @if($canEditItems)
                         <th style="width: 35px;" class="col-act no-print"></th>
                         @endif
                     </tr>
@@ -1107,9 +1073,9 @@
                     @forelse($annexItems as $idx => $item)
                     <tr>
                         <td class="t-center item-serial">{{ $item['serial'] ?? ($idx + 1) }}</td>
-                        <td class="t-left item-desc" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $item['desc'] ?? '' }}</td>
-                        <td class="t-center item-qty" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $item['qty'] ?? '01 Nos' }}</td>
-                        @if($canEdit)
+                        <td class="t-left item-desc" contenteditable="{{ $canEditItems ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $item['desc'] ?? '' }}</td>
+                        <td class="t-center item-qty" contenteditable="{{ $canEditItems ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $item['qty'] ?? '01 Nos' }}</td>
+                        @if($canEditItems)
                         <td class="t-center col-act no-print">
                             <button type="button" class="btn-del-row" onclick="deleteAnnexRow(this)" title="Delete Row">
                                 <i class="fas fa-trash-alt"></i>
@@ -1120,9 +1086,9 @@
                     @empty
                     <tr>
                         <td class="t-center item-serial">1</td>
-                        <td class="t-left item-desc" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $purchase->pcs_title }}</td>
-                        <td class="t-center item-qty" contenteditable="{{ $canEdit ? 'true' : 'false' }}" oninput="markUnsaved()">01 x Nos</td>
-                        @if($canEdit)
+                        <td class="t-left item-desc" contenteditable="{{ $canEditItems ? 'true' : 'false' }}" oninput="markUnsaved()">{{ $purchase->pcs_title }}</td>
+                        <td class="t-center item-qty" contenteditable="{{ $canEditItems ? 'true' : 'false' }}" oninput="markUnsaved()">01 x Nos</td>
+                        @if($canEditItems)
                         <td class="t-center col-act no-print">
                             <button type="button" class="btn-del-row" onclick="deleteAnnexRow(this)" title="Delete Row">
                                 <i class="fas fa-trash-alt"></i>
@@ -1133,13 +1099,6 @@
                     @endforelse
                 </tbody>
             </table>
-
-            <!-- FOOTER -->
-            <div class="annex-footer">
-                <div></div>
-                <div style="font-weight: bold;">1 of 1</div>
-                <div>Printed on {{ date('d M y   H:i') }}</div>
-            </div>
 
         </div>
 
@@ -1442,6 +1401,34 @@
             filterFirms(input ? input.value : '');
         }
 
+        function updateFirmCountBadge() {
+            const list = document.getElementById('firmsList');
+            const badge = document.getElementById('firmCountBadge');
+            if (!list || !badge) return;
+            const count = list.children.length;
+            badge.innerText = `${count} ${count === 1 ? 'Firm' : 'Firms'}`;
+        }
+
+        function toggleFirmsLayout() {
+            const list = document.getElementById('firmsList');
+            const txt = document.getElementById('layoutToggleText');
+            if (!list) return;
+
+            if (list.classList.contains('grid-1col')) {
+                list.className = 'firms-vertical-list'; // 2-Col Default
+                if (txt) txt.innerText = '2-Col Grid';
+                showToast('Switched to 2-Column Grid Layout');
+            } else if (list.classList.contains('grid-3col')) {
+                list.className = 'firms-vertical-list grid-1col'; // 1-Col List
+                if (txt) txt.innerText = '1-Col List';
+                showToast('Switched to 1-Column List Layout');
+            } else {
+                list.className = 'firms-vertical-list grid-3col'; // 3-Col Compact
+                if (txt) txt.innerText = '3-Col Compact';
+                showToast('Switched to 3-Column Compact Grid View');
+            }
+        }
+
         function addAllSystemFirms() {
             const list = document.getElementById('firmsList');
             let addedCount = 0;
@@ -1696,11 +1683,28 @@
             });
 
             const paragraphs = [];
-            document.querySelectorAll('#letterParagraphs .editable-para').forEach(el => {
-                let pText = el.innerText.trim();
-                pText = pText.replace(/^(\s*[0-9a-zA-Z]+\.)[ \t]+/i, '$1\t');
-                paragraphs.push(pText);
-            });
+            const bodyEl = document.getElementById('letterParagraphs');
+            if (bodyEl) {
+                const nodes = bodyEl.querySelectorAll('p, div');
+                if (nodes.length > 0) {
+                    nodes.forEach(n => {
+                        let txt = n.innerText.trim();
+                        if (txt) {
+                            txt = txt.replace(/^(\s*[0-9a-zA-Z]+\.)[ \t]+/i, '$1\t');
+                            paragraphs.push(txt);
+                        }
+                    });
+                } else {
+                    const lines = bodyEl.innerText.split('\n');
+                    lines.forEach(line => {
+                        let txt = line.trim();
+                        if (txt) {
+                            txt = txt.replace(/^(\s*[0-9a-zA-Z]+\.)[ \t]+/i, '$1\t');
+                            paragraphs.push(txt);
+                        }
+                    });
+                }
+            }
 
             const items = [];
             document.querySelectorAll('#annexItemsBody tr').forEach(r => {
