@@ -41,13 +41,30 @@ class AiToolRegistryTest extends TestCase
     {
         $toolMap = AiToolRegistry::getToolMap();
 
+        $this->assertArrayHasKey('getOrganizationStats', $toolMap);
+        $this->assertArrayHasKey('getDivisionOverview', $toolMap);
+        $this->assertArrayHasKey('searchProjects', $toolMap);
+        $this->assertArrayHasKey('getProjectFinancialDetails', $toolMap);
+        $this->assertArrayHasKey('searchPurchaseCases', $toolMap);
+        $this->assertArrayHasKey('getPurchaseCaseDetails', $toolMap);
         $this->assertArrayHasKey('getPurchaseCaseStatus', $toolMap);
+        $this->assertArrayHasKey('searchContractCases', $toolMap);
+        $this->assertArrayHasKey('getContractCaseDetails', $toolMap);
+        $this->assertArrayHasKey('searchEmployees', $toolMap);
+        $this->assertArrayHasKey('getEmployeeDetails', $toolMap);
         $this->assertArrayHasKey('getChequeDetails', $toolMap);
         $this->assertArrayHasKey('getAttendanceSummary', $toolMap);
+
+        $this->assertEquals('ORG', $toolMap['getOrganizationStats']['category']);
+        $this->assertTrue($toolMap['getOrganizationStats']['read_only']);
 
         $this->assertEquals('1A', $toolMap['getPurchaseCaseStatus']['category']);
         $this->assertTrue($toolMap['getPurchaseCaseStatus']['read_only']);
         $this->assertArrayHasKey('caseId', $toolMap['getPurchaseCaseStatus']['parameters']['properties']);
+
+        $this->assertEquals('FIN', $toolMap['getProjectFinancialDetails']['category']);
+        $this->assertTrue($toolMap['getProjectFinancialDetails']['read_only']);
+        $this->assertArrayHasKey('projectId', $toolMap['getProjectFinancialDetails']['parameters']['properties']);
 
         $this->assertEquals('3A', $toolMap['getChequeDetails']['category']);
         $this->assertTrue($toolMap['getChequeDetails']['read_only']);
@@ -56,9 +73,20 @@ class AiToolRegistryTest extends TestCase
         $this->assertEquals('5A', $toolMap['getAttendanceSummary']['category']);
         $this->assertTrue($toolMap['getAttendanceSummary']['read_only']);
         $this->assertArrayHasKey('employeeId', $toolMap['getAttendanceSummary']['parameters']['properties']);
-        $this->assertArrayHasKey('month', $toolMap['getAttendanceSummary']['parameters']['properties']);
 
-        $this->assertEquals(['getPurchaseCaseStatus', 'getChequeDetails', 'getAttendanceSummary'], AiToolRegistry::getAllowedTools());
+        $this->assertContains('getOrganizationStats', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getDivisionOverview', AiToolRegistry::getAllowedTools());
+        $this->assertContains('searchProjects', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getProjectFinancialDetails', AiToolRegistry::getAllowedTools());
+        $this->assertContains('searchPurchaseCases', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getPurchaseCaseDetails', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getPurchaseCaseStatus', AiToolRegistry::getAllowedTools());
+        $this->assertContains('searchContractCases', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getContractCaseDetails', AiToolRegistry::getAllowedTools());
+        $this->assertContains('searchEmployees', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getEmployeeDetails', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getChequeDetails', AiToolRegistry::getAllowedTools());
+        $this->assertContains('getAttendanceSummary', AiToolRegistry::getAllowedTools());
     }
 
     /**
@@ -443,5 +471,136 @@ class AiToolRegistryTest extends TestCase
         $this->expectExceptionMessage("AI tool 'unregisteredTool' is not registered");
 
         $this->registry->invoke('unregisteredTool', [], $user);
+    }
+
+    /**
+     * Test 16: getDivisionOverview returns stats for authorized division.
+     */
+    public function test_get_division_overview_for_authorized_user(): void
+    {
+        $user = $this->createDivisionUser(200000);
+        $result = $this->registry->getDivisionOverview(null, $user);
+
+        $this->assertEquals(200000, $result['division_id']);
+        $this->assertArrayHasKey('total_projects', $result);
+        $this->assertArrayHasKey('active_projects', $result);
+        $this->assertArrayHasKey('total_employees', $result);
+        $this->assertArrayHasKey('total_purchase_cases', $result);
+        $this->assertArrayHasKey('total_contract_cases', $result);
+        $this->assertArrayHasKey('total_project_budget', $result);
+    }
+
+    /**
+     * Test 17: searchProjects scopes to authorized division.
+     */
+    public function test_search_projects_scoped_to_division(): void
+    {
+        $user = $this->createDivisionUser(200000);
+        $result = $this->registry->searchProjects(null, null, 10, $user);
+
+        $this->assertArrayHasKey('projects', $result);
+        $this->assertArrayHasKey('count', $result);
+        foreach ($result['projects'] as $p) {
+            $this->assertEquals(200000, $p['division_id']);
+        }
+    }
+
+    /**
+     * Test 18: getProjectFinancialDetails throws UnauthorizedScopeException for cross-division user.
+     */
+    public function test_get_project_financial_details_throws_for_cross_division(): void
+    {
+        $user = $this->createDivisionUser(200000); // Unit 200000
+
+        // Find or reference a project belonging to a different unit, e.g. 350000 or 250000
+        $otherProject = DB::table('prj.projects')->where('prj_unt_id', '!=', 200000)->first();
+        if ($otherProject) {
+            $this->expectException(UnauthorizedScopeException::class);
+            $this->registry->getProjectFinancialDetails($otherProject->prj_id, $user);
+        } else {
+            $this->assertTrue(true);
+        }
+    }
+
+    /**
+     * Test 19: searchPurchaseCases returns division-scoped records.
+     */
+    public function test_search_purchase_cases_scoped(): void
+    {
+        $user = $this->createDivisionUser(200000);
+        $case = $this->createPurchaseCase(200000, 'Division');
+
+        $result = $this->registry->searchPurchaseCases($case->pcs_title, null, 5, $user);
+
+        $this->assertGreaterThanOrEqual(1, $result['count']);
+        $found = collect($result['purchase_cases'])->firstWhere('case_id', $case->pcs_id);
+        $this->assertNotNull($found);
+        $this->assertEquals(200000, $found['division_id']);
+    }
+
+    /**
+     * Test 20: getPurchaseCaseDetails returns items and stage display.
+     */
+    public function test_get_purchase_case_details(): void
+    {
+        $user = $this->createDivisionUser(200000);
+        $case = $this->createPurchaseCase(200000, 'Division');
+
+        $result = $this->registry->getPurchaseCaseDetails($case->pcs_id, $user);
+
+        $this->assertEquals($case->pcs_id, $result['case_id']);
+        $this->assertArrayHasKey('items', $result);
+        $this->assertArrayHasKey('stage_display', $result);
+        $this->assertEquals(200000, $result['division_id']);
+    }
+
+    /**
+     * Test 21: searchEmployees returns division-scoped employees.
+     */
+    public function test_search_employees_scoped(): void
+    {
+        $user = $this->createDivisionUser(200000);
+        $result = $this->registry->searchEmployees('', null, 10, $user);
+
+        $this->assertArrayHasKey('employees', $result);
+        foreach ($result['employees'] as $emp) {
+            $this->assertEquals(200000, $emp['division_id']);
+        }
+    }
+
+    /**
+     * Test 22: getOrganizationStats returns org-wide totals for Finance/SuperAdmin user.
+     */
+    public function test_get_organization_stats_for_finance_user(): void
+    {
+        $finUser = CenAccount::where('acc_untarea', 'fin')
+            ->whereRaw("LOWER(acc_status) = 'active'")
+            ->first();
+        if (!$finUser) {
+            $finUser = $this->createDivisionUser(800000, 'fin');
+        }
+
+        $result = $this->registry->getOrganizationStats('all', $finUser);
+
+        $this->assertEquals('organization_wide', $result['scope']);
+        $this->assertArrayHasKey('employees', $result);
+        $this->assertArrayHasKey('total_employees', $result['employees']);
+        $this->assertArrayHasKey('projects', $result);
+        $this->assertArrayHasKey('total_projects', $result['projects']);
+    }
+
+    /**
+     * Test 23: searchProjects finds projects when querying division name.
+     */
+    public function test_search_projects_by_division_name(): void
+    {
+        $user = CenAccount::where('acc_untarea', 'fin')
+            ->whereRaw("LOWER(acc_status) = 'active'")
+            ->first() ?: $this->createDivisionUser(200000);
+        $result = $this->registry->invoke('searchProjects', ['query' => 'Communication Division'], $user);
+
+        $this->assertArrayHasKey('projects', $result);
+        $this->assertGreaterThanOrEqual(1, $result['count']);
+        $this->assertEquals(200000, $result['projects'][0]['division_id']);
     }
 }

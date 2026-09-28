@@ -23,13 +23,14 @@
         $finAllocation = (float)($purchase->project->prj_aprvcost ?: ($purchase->project->prj_cost ?? 0));
     }
 
-    $finReceived    = isset($head->pcc_received) ? (float)$head->pcc_received : (float)($head->received ?? 0);
-    $finExpenditure = isset($head->pcc_expenditure) ? (float)$head->pcc_expenditure : (float)($head->expenditure ?? 0);
-    $finBalance     = isset($head->pcc_balance) ? (float)$head->pcc_balance : ($finReceived - $finExpenditure);
-    $finCommitments = isset($head->pcc_commitments) ? (float)$head->pcc_commitments : (float)($head->commitments ?? 0);
-    $finInProcess   = isset($head->pcc_in_process) ? (float)$head->pcc_in_process : (float)($head->in_process ?? 0);
-    $finAvailable   = isset($head->pcc_available) ? (float)$head->pcc_available : ($finBalance - $finCommitments - $finInProcess);
-    $finCanBeSpent  = isset($head->pcc_can_be_spent) ? (float)$head->pcc_can_be_spent : ($finAllocation - $finExpenditure - $finCommitments - $finInProcess);
+    $finReceived        = isset($head->pcc_received) ? (float)$head->pcc_received : (float)($head->received ?? 0);
+    $finExpenditure     = isset($head->pcc_expenditure) ? (float)$head->pcc_expenditure : (float)($head->expenditure ?? 0);
+    $finBalance         = isset($head->pcc_balance) ? (float)$head->pcc_balance : ($finReceived - $finExpenditure);
+    $finCommitments     = isset($head->pcc_commitments) ? (float)$head->pcc_commitments : (float)($head->commitments ?? 0);
+    $finInProcess       = isset($head->pcc_in_process) ? (float)$head->pcc_in_process : (float)($head->in_process ?? 0);
+    $finAvailable       = isset($head->pcc_available) ? (float)$head->pcc_available : ($finBalance - $finCommitments - $finInProcess);
+    $finYetToBeReceived = isset($head->pcc_yet_to_be_received) ? (float)$head->pcc_yet_to_be_received : (float)($head->yet_to_be_received ?? ($finAllocation - $finReceived));
+    $finRemaining       = (float)($head->acc_remaining ?? ($head->pcc_can_be_spent ?? ($head->remaining ?? ($head->prj_remaining ?? ($finAllocation - $finExpenditure - $finCommitments - $finInProcess)))));
 
     // Milestones Breakdown for Financial Review
     $finRecCompleted = (float)($head->receivable_completed ?? 0);
@@ -61,11 +62,27 @@
         }
     }
 
-    $currMsnNo        = $currMilestone ? $currMilestone->msn_id : null;
-    $currMsnLabel     = $currMsnNo ? ('M-' . $currMsnNo) : ($currMilestone ? 'M' : 'None');
-    $currMsnDesc      = $currMilestone ? $currMilestone->msn_desc : '';
-    $currMsnTotalCost = $currMilestone ? (float)($currMilestone->msn_cost ?? 0) : 0;
-    
+    $currMsnNo     = $currMilestone ? $currMilestone->msn_id : null;
+    $currMsnLabel  = $currMsnNo ? ('M-' . $currMsnNo) : ($currMilestone ? 'M' : 'None');
+    $currMsnDesc   = $currMilestone ? $currMilestone->msn_desc : '';
+    $currMsnStatus = $currMilestone ? strtolower(trim((string)$currMilestone->msn_status)) : '';
+
+    // RDW Share ratio from sharesalloc (net of MTSS share)
+    $rdwShareRatio = 1.0;
+    if ($purchase->pcs_hed_id) {
+        $sharesPlus = DB::table('fin.sharesalloc as s')
+            ->join('fin.commitments as c1', 's.sha_ficmt_id', '=', 'c1.cmt_id')
+            ->leftJoin('fin.commitments as c2', 's.sha_focmt_id', '=', 'c2.cmt_id')
+            ->where('s.sha_hed_id', $purchase->pcs_hed_id)
+            ->select('c1.cmt_amount as alloc', 'c2.cmt_amount as mtss_share')
+            ->first();
+        if ($sharesPlus && (float)$sharesPlus->alloc > 0) {
+            $allocAmt = (float)$sharesPlus->alloc;
+            $mtssAmt = -1 * (float)($sharesPlus->mtss_share ?? 0);
+            $rdwShareRatio = max(0, ($allocAmt - $mtssAmt) / $allocAmt);
+        }
+    }
+
     $headMsnCost = null;
     if ($currMilestone && $purchase->pcs_hed_id) {
         $headMsnCost = DB::table('fin.msncosts')
@@ -73,15 +90,27 @@
             ->where('mct_msn_idd', $currMilestone->msn_idd)
             ->value('mct_cost');
     }
-    if ($currMsnTotalCost <= 0 && $headMsnCost !== null) {
-        $currMsnTotalCost = (float)$headMsnCost;
-    }
     
-    $currMsnPayment = $finRecCurrent;
-    if ($currMsnPayment <= 0 && $headMsnCost !== null && (float)$headMsnCost > 0) {
-        $currMsnPayment = (float)$headMsnCost;
-    } elseif ($currMsnPayment <= 0 && $currMsnTotalCost > 0) {
-        $currMsnPayment = $currMsnTotalCost;
+    // Strictly RDW Share for current milestone
+    $currMsnRdwCost = ($headMsnCost !== null) ? round((float)$headMsnCost * $rdwShareRatio, 0) : 0;
+    $currMsnPayment = $finRecCurrent > 0 ? $finRecCurrent : $currMsnRdwCost;
+
+    // Can Be Spent Calculation:
+    // Milestone limit = Completed Milestones + Current Milestone + Available (Available minus mein ho to ghatay ga)
+    // Remaining limit = Remaining
+    // Can Be Spent = in dono mein se chhoti value: min(Milestone limit, Remaining limit)
+    $milestoneLimit = (float)$finRecCompleted + (float)$currMsnPayment + (float)$finAvailable;
+    $remainingLimit = (float)$finRemaining;
+    $finCanBeSpent  = min($milestoneLimit, $remainingLimit);
+
+    // Check if completed and current milestone are the same milestone or same status
+    $isSameMilestone = false;
+    if ($currMilestone && $currMsnStatus === 'completed') {
+        $isSameMilestone = true;
+    } elseif ($finRecCompleted > 0 && $finRecCurrent <= 0) {
+        $isSameMilestone = true;
+    } elseif ($finRecCompleted > 0 && abs($finRecCompleted - $currMsnPayment) < 1) {
+        $isSameMilestone = true;
     }
 
     $totalBudget    = $finReceived;
@@ -219,10 +248,9 @@
 .btn-drill-cyan { color: #0284c7; background: #e0f2fe; border-color: #7dd3fc; }
 
 /* ---- 2-col grid ---- */
-.dg-grid { display:grid; grid-template-columns:60% 40%; gap:18px; align-items:start; }
-@media(max-width:1300px){ .dg-grid { grid-template-columns:60% 40%; } }
-@media(max-width:1024px){ .dg-grid { grid-template-columns:1fr; } }
-@media(max-width:860px)  { .dg-grid { grid-template-columns:1fr; } }
+.dg-grid { display:grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap:16px; align-items:start; }
+@media(max-width:1300px){ .dg-grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; } }
+@media(max-width:1100px){ .dg-grid { grid-template-columns:1fr; } }
 
 /* ---- Section labels (no box) ---- */
 .dg-sec-label { font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.8px; color:var(--rd-accent); text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
@@ -515,21 +543,21 @@
 
                             @if($isDProc)
                                 @if(!$hasItLetter)
-                                    {{-- Procurement user sees button to CREATE IT on all cases --}}
+                                    {{-- Procurement user sees button to CREATE RFQ on all cases --}}
                                     <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn-hdr-action btn-hdr-it-annex rajdhani" style="background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; cursor: pointer;">
-                                        <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
+                                        <i class="fas fa-plus-circle mr-1"></i> CREATE RFQ LETTER
                                     </button>
                                 @else
-                                    {{-- Procurement user sees button to EDIT/VIEW IT --}}
+                                    {{-- Procurement user sees button to EDIT/VIEW RFQ --}}
                                     <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
-                                        <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
+                                        <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW RFQ LETTER & ANNEX
                                     </a>
                                 @endif
                             @else
-                                {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
+                                {{-- Other users (Finance, Division, MD, DDG, DG) see VIEW RFQ LETTER ONLY IF procurement has created it --}}
                                 @if($hasItLetter)
                                     <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-it-annex rajdhani">
-                                        <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                                        <i class="fas fa-eye mr-1"></i> VIEW RFQ LETTER
                                     </a>
                                 @endif
                             @endif
@@ -622,9 +650,31 @@
                                 ->whereNotNull('pat_path')
                                 ->where('pat_path', '<>', '')
                                 ->get();
+
+                            $breakdown = $purchase->tax_breakdown;
+                            $winningQuote = $purchase->winning_quote
+                                ?? $purchase->quotes->where('qte_recomm', true)->first()
+                                ?? $purchase->quotes->sortBy('qte_price')->first();
+
+                            $initBase = (float)($breakdown['base'] ?? 0);
+                            $initSst  = (float)($breakdown['sst'] ?? 0);
+                            $initGst  = (float)($breakdown['gst'] ?? 0);
+                            $initTot  = (float)($breakdown['total'] ?? ($purchase->pcs_price ?? 0));
+
+                            if ($initTot <= 0 && $winningQuote) {
+                                $initTot = (float)($winningQuote->qte_price ?: 0);
+                                $initSst = (float)($winningQuote->qte_inttax ?? 0);
+                                $initGst = (float)($winningQuote->qte_midtax ?? 0);
+                                $initBase = (float)($winningQuote->qte_intprice ?: ($initTot - $initSst - $initGst));
+                            } elseif ($initBase <= 0 && $initTot > 0) {
+                                $initBase = max(0, $initTot - $initSst - $initGst);
+                            }
+                            if ($initTot <= 0 && $initBase > 0) {
+                                $initTot = $initBase + $initSst + $initGst;
+                            }
                         @endphp
-                        <div class="mb-4 d-flex align-items-start gap-4">
-                            <div style="flex: 1;">
+                        <div class="mb-4 d-flex align-items-start justify-content-between" style="gap: 14px;">
+                            <div style="flex: 1 1 0; min-width: 0;">
                                 <div class="d-flex align-items-start mb-2" style="font-size: 13px;">
                                     <strong style="color: #475569; width: 140px; display:inline-block; flex-shrink: 0; font-weight: 700;"><i class="fas fa-tag text-primary mr-2"></i>CASE TITLE:</strong>
                                     <div class="view-only font-weight-bold text-dark" id="pcTitleView" style="font-size: 16px; color: #0f172a !important;">{{ $purchase->pcs_title }}</div>
@@ -753,132 +803,111 @@
                                             </span>
                                         @endif
                                     </div>
+
+                                    {{-- Case Financials Card (Placed below Case Details on Left Side) --}}
+                                    <div class="mt-3 p-3 rajdhani" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); max-width: 400px;">
+                                        <div class="d-flex align-items-center mb-2 pb-1" style="border-bottom: 1px solid #e2e8f0;">
+                                            <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 13px; font-weight: 800; letter-spacing: 0.8px;">
+                                                <i class="fas fa-file-invoice-dollar mr-1"></i> CASE FINANCIALS
+                                            </h6>
+                                        </div>
+                                        <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 3px 20px; text-align: left;">
+                                            <div class="text-muted font-weight-bold" style="font-size: 12px;">Price</div>
+                                            <div class="text-dark font-weight-bold text-right" id="pcSummaryBasePrice" style="font-size: 13.5px; color: #0f172a !important;">{{ number_format($initBase, 2) }}</div>
+                                            
+                                            <div class="text-muted font-weight-bold" style="font-size: 12px;">SST</div>
+                                            <div class="text-dark font-weight-bold text-right" id="pcSummarySst" style="font-size: 13.5px; color: #0f172a !important;">{{ number_format($initSst, 2) }}</div>
+                                            
+                                            <div class="text-muted font-weight-bold" style="font-size: 12px;">GST</div>
+                                            <div class="text-dark font-weight-bold text-right" id="pcSummaryGst" style="font-size: 13.5px; color: #0f172a !important;">{{ number_format($initGst, 2) }}</div>
+                                            
+                                            <div class="text-success font-weight-bold border-top pt-1" style="font-size: 13px; border-color: #cbd5e1 !important; color: #16a34a !important;">TOTAL</div>
+                                            <div class="text-success font-weight-bold text-right border-top pt-1" id="pcSummaryTotal" style="font-size: 16px; font-weight: 900; border-color: #cbd5e1 !important; color: #16a34a !important;">{{ number_format($initTot, 2) }}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            {{-- Financial Overview & Case Cost Summary --}}
-                            @php
-                                $breakdown = $purchase->tax_breakdown;
-                                $winningQuote = $purchase->winning_quote
-                                    ?? $purchase->quotes->where('qte_recomm', true)->first()
-                                    ?? $purchase->quotes->sortBy('qte_price')->first();
-
-                                $initBase = (float)($breakdown['base'] ?? 0);
-                                $initSst  = (float)($breakdown['sst'] ?? 0);
-                                $initGst  = (float)($breakdown['gst'] ?? 0);
-                                $initTot  = (float)($breakdown['total'] ?? ($purchase->pcs_price ?? 0));
-
-                                if ($initTot <= 0 && $winningQuote) {
-                                    $initTot = (float)($winningQuote->qte_price ?: 0);
-                                    $initSst = (float)($winningQuote->qte_inttax ?? 0);
-                                    $initGst = (float)($winningQuote->qte_midtax ?? 0);
-                                    $initBase = (float)($winningQuote->qte_intprice ?: ($initTot - $initSst - $initGst));
-                                } elseif ($initBase <= 0 && $initTot > 0) {
-                                    $initBase = max(0, $initTot - $initSst - $initGst);
-                                }
-                                if ($initTot <= 0 && $initBase > 0) {
-                                    $initTot = $initBase + $initSst + $initGst;
-                                }
-                            @endphp
-                            <div class="text-right d-flex flex-column align-items-end" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px 18px; font-size: 13px; min-width: 310px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                            {{-- Financial Overview (Pure Financial Review on Right Side) --}}
+                            <div class="text-right d-flex flex-column align-items-end" style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; font-size: 12px; width: 292px; max-width: 100%; box-sizing: border-box; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
                                 <div class="d-flex justify-content-between align-items-center w-100 mb-2 pb-1" style="border-bottom: 1px solid #e2e8f0;">
-                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 13px; font-weight: 800; letter-spacing: 0.8px;">
+                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.8px;">
                                         <i class="fas fa-chart-pie mr-1"></i> FINANCIAL REVIEW
                                     </h6>
-                                    <button class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 10px; border-radius: 4px; font-weight: 700;">
+                                    <button class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0" data-toggle="modal" data-target="#financialIntelligenceModal" style="font-size: 9.5px; padding: 1px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap;">
                                         <i class="fas fa-expand-arrows-alt mr-1"></i> FULL REPORT
                                     </button>
                                 </div>
                                 
-                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 4px 24px; text-align: left;">
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">ALLOCATED</div>
-                                    <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">{{ number_format($finAllocation) }}</div>
+                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; text-align: left;">
+                                    <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px;">ALLOCATED</div>
+                                    <div class="text-dark font-weight-bold text-right" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;">{{ number_format($finAllocation) }}</div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">RECEIVED</div>
-                                    <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">{{ number_format($finReceived) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px;">RECEIVED</div>
+                                    <div class="text-dark font-weight-bold text-right" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;">{{ number_format($finReceived) }}</div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">EXPENDITURE</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">EXPENDITURE</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 15px; color: #0f172a !important;" title="View Project Expenditure Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Project Expenditure Breakdown">
                                             {{ number_format($finExpenditure) }}
                                         </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project Expenditure Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Project Expenditure Breakdown">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
                                     </div>
                                     
-                                    <div class="text-muted font-weight-bold d-flex flex-column justify-content-center" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">
+                                    <div class="text-muted font-weight-bold d-flex flex-column justify-content-center" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">
                                         <div class="d-flex align-items-center flex-wrap">
                                             <span>BALANCE</span>
-                                            <span class="ml-1 text-muted font-weight-normal" style="font-size: 12px; color: #0f172a !important;">(with MTSS)</span>
+                                            <span class="ml-1 text-muted font-weight-normal" style="font-size: 10.5px; color: #64748b !important;">(with MTSS)</span>
                                         </div>
                                     </div>
-                                    <div class="font-weight-bold text-right align-self-center" style="font-size: 15px; color: #0f172a !important;">{{ number_format($finBalance) }}</div>
+                                    <div class="font-weight-bold text-right align-self-center" style="font-size: 13.5px; white-space: nowrap; color: {{ $finBalance < 0 ? '#dc2626' : ($finBalance > 0 ? '#16a34a' : '#0f172a') }} !important;">{{ number_format($finBalance) }}</div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">COMMITMENTS</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">COMMITMENTS</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 15px; color: #0f172a !important;" title="View Project Commitments Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Project Commitments Breakdown">
                                             {{ number_format($finCommitments) }}
                                         </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project Commitments Breakdown">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Project Commitments Breakdown">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
                                     </div>
                                     
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">IN PROCESS</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">IN PROCESS</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 15px; color: #0f172a !important;" title="View Project In-Process Cases">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Project In-Process Cases">
                                             {{ number_format($finInProcess) }}
                                         </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" title="View Project In-Process Cases">
+                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Project In-Process Cases">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
                                     </div>
                                     
-                                    <div class="text-muted font-weight-bold border-top pt-1" style="font-size: 12px; color: #475569 !important; border-color: #cbd5e1 !important; letter-spacing: 0.5px;">AVAILABLE</div>
-                                    <div class="font-weight-bold text-right border-top pt-1" style="font-size: 15px; color: {{ $finAvailable < 0 ? '#dc2626' : '#16a34a' }} !important; border-color: #cbd5e1 !important;">{{ number_format($finAvailable) }}</div>
+                                    <div class="text-muted font-weight-bold border-top pt-1" style="font-size: 11px; color: #475569 !important; border-color: #cbd5e1 !important; letter-spacing: 0.4px;">AVAILABLE</div>
+                                    <div class="font-weight-bold text-right border-top pt-1" style="font-size: 13.5px; white-space: nowrap; color: {{ $finAvailable < 0 ? '#dc2626' : ($finAvailable > 0 ? '#16a34a' : '#0f172a') }} !important; border-color: #cbd5e1 !important;">{{ number_format($finAvailable) }}</div>
                                     
-                                    <div class="text-muted font-weight-bold pt-1" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">COMPLETED MILESTONES</div>
-                                    <div class="text-dark font-weight-bold text-right pt-1" style="font-size: 15px; color: #0f172a !important;" title="Receivable for completed milestones">{{ number_format($finRecCompleted) }}</div>
-                                    
-                                    <div class="text-muted font-weight-bold d-flex flex-column justify-content-center pt-0.5" style="font-size: 12px; letter-spacing: 0.5px; color: #475569 !important;">
+                                    <div class="text-muted font-weight-bold pt-1" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">YET TO BE RECEIVED</div>
+                                    <div class="font-weight-bold text-right pt-1" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="Yet to be Received: Rs. {{ number_format($finYetToBeReceived) }}">{{ number_format($finYetToBeReceived) }}</div>
+
+                                    <div class="text-muted font-weight-bold pt-1" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">REMAINING</div>
+                                    <div class="font-weight-bold text-right pt-1" style="font-size: 13.5px; font-weight: 800; white-space: nowrap; color: #0f172a !important;" title="Remaining Budget: Rs. {{ number_format($finRemaining) }}">{{ number_format($finRemaining) }}</div>
+
+                                    <div class="text-muted font-weight-bold pt-1" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">COMPLETED MILESTONES</div>
+                                    <div class="font-weight-bold text-right pt-1" style="font-size: 13.5px; white-space: nowrap; color: {{ $finAvailable <= 0 ? '#2563eb' : '#0f172a' }} !important;" title="Receivable for completed milestones: Rs. {{ number_format($finRecCompleted) }}">{{ number_format($finRecCompleted) }}</div>
+
+                                    <div class="text-muted font-weight-bold d-flex flex-column justify-content-center pt-0.5" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">
                                         <div class="d-flex align-items-center flex-wrap">
                                             <span>CURRENT MILESTONE</span>
-                                            <span class="badge badge-light px-1.5 py-0.5 ml-1 font-weight-bold" style="font-size: 11px; background: #e2e8f0; color: #1e293b !important; border: 1px solid #cbd5e1; border-radius: 4px; letter-spacing: 0.4px;" title="{{ $currMsnDesc ?: 'Current Milestone' }}">({{ $currMsnLabel }})</span>
+                                            @if($currMsnLabel !== 'None')
+                                            <span class="badge badge-light px-1 py-0 ml-1 font-weight-bold" style="font-size: 9.5px; background: #e2e8f0; color: #1e293b !important; border: 1px solid #cbd5e1; border-radius: 4px; letter-spacing: 0.3px;" title="{{ $currMsnDesc ?: 'Current Milestone' }}">({{ $currMsnLabel }})</span>
+                                            @endif
                                         </div>
-                                        @if($currMsnTotalCost > 0 && abs($currMsnTotalCost - $currMsnPayment) > 1)
-                                            <div class="text-muted small font-weight-normal mt-0.5" style="font-size: 10px; color: #64748b !important; line-height: 1;">Total: Rs. {{ number_format($currMsnTotalCost) }}</div>
-                                        @endif
                                     </div>
-                                    <div class="text-dark font-weight-bold text-right align-self-center pt-0.5" style="font-size: 15px; color: #0f172a !important;" title="Current milestone payment/receivable: Rs. {{ number_format($currMsnPayment) }}">{{ number_format($currMsnPayment) }}</div>
-                                    
-                                    <div class="text-warning font-weight-bold border-top pt-1" style="font-size: 13px; color: #d97706 !important; border-color: #cbd5e1 !important; letter-spacing: 0.5px;">CAN BE SPENT</div>
-                                    <div class="text-warning font-weight-bold text-right border-top pt-1" style="font-size: 16px; font-weight: 900; color: #d97706 !important;" title="Available after Receivables: Rs. {{ number_format($head->available_after_receivables ?? ($finAvailable + $finRecCompleted + $currMsnPayment)) }}">{{ number_format($finCanBeSpent) }}</div>
-                                </div>
+                                    <div class="font-weight-bold text-right align-self-center pt-0.5" style="font-size: 13.5px; white-space: nowrap; color: {{ $finAvailable <= 0 ? '#2563eb' : '#0f172a' }} !important;" title="Current milestone RDW share: Rs. {{ number_format($currMsnPayment) }}">{{ number_format($currMsnPayment) }}</div>
 
-                                {{-- Separator --}}
-                                <div class="w-100 my-2" style="border-top: 1px dashed #cbd5e1;"></div>
-
-                                {{-- Case Cost Summary Header --}}
-                                <div class="d-flex justify-content-between align-items-center w-100 mb-1">
-                                    <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 12px; letter-spacing: 0.8px;">
-                                        <i class="fas fa-file-invoice-dollar mr-1"></i> CASE FINANCIALS
-                                    </h6>
-                                </div>
-
-                                {{-- Compact Case Cost Grid --}}
-                                <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 3px 20px; text-align: left;">
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px;">Price</div>
-                                    <div class="text-dark font-weight-bold text-right" id="pcSummaryBasePrice" style="font-size: 13px; color: #0f172a !important;">{{ number_format($initBase, 2) }}</div>
-                                    
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px;">SST</div>
-                                    <div class="text-dark font-weight-bold text-right" id="pcSummarySst" style="font-size: 13px; color: #0f172a !important;">{{ number_format($initSst, 2) }}</div>
-                                    
-                                    <div class="text-muted font-weight-bold" style="font-size: 12px;">GST</div>
-                                    <div class="text-dark font-weight-bold text-right" id="pcSummaryGst" style="font-size: 13px; color: #0f172a !important;">{{ number_format($initGst, 2) }}</div>
-                                    
-                                    <div class="text-success font-weight-bold border-top pt-1" style="font-size: 13px; border-color: #cbd5e1 !important; color: #16a34a !important;">TOTAL</div>
-                                    <div class="text-success font-weight-bold text-right border-top pt-1" id="pcSummaryTotal" style="font-size: 16px; font-weight: 900; border-color: #cbd5e1 !important; color: #16a34a !important;">{{ number_format($initTot, 2) }}</div>
+                                    <div class="font-weight-bold border-top pt-1" style="font-size: 11.5px; color: #475569 !important; border-color: #cbd5e1 !important; letter-spacing: 0.4px;">CAN BE SPENT</div>
+                                    <div class="font-weight-bold text-right border-top pt-1" style="font-size: 14.5px; font-weight: 900; white-space: nowrap; color: {{ $finCanBeSpent < 0 ? '#dc2626' : ($finCanBeSpent > 0 ? '#16a34a' : '#0f172a') }} !important; border-color: #cbd5e1 !important;" title="Can Be Spent: Rs. {{ number_format($finCanBeSpent) }}">{{ number_format($finCanBeSpent) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -1795,20 +1824,17 @@
                             <h6 class="rajdhani font-weight-bold mb-3" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 1.5px;">RECEIVABLES</h6>
                             <div class="receivable-item d-flex justify-content-between mb-2">
                                 <span class="rajdhani font-weight-bold" style="font-size: 14px; color: #475569;">Comp. Milestones</span>
-                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($finRecCompleted) }}</span>
+                                <span class="rajdhani font-weight-bold" style="font-size: 14px; color: {{ $finAvailable <= 0 ? '#2563eb' : '#0f172a' }};">{{ number_format($finRecCompleted) }}</span>
                             </div>
                             <div class="receivable-item d-flex justify-content-between mb-2">
                                 <span class="rajdhani font-weight-bold" style="font-size: 14px; color: #475569;">
-                                    Current Milestone <span class="badge badge-primary px-1.5 py-0.5 ml-1" style="font-size: 11px; font-weight: 700; background: #2563eb; color: #ffffff;">({{ $currMsnLabel }})</span>
-                                    @if($currMsnTotalCost > 0 && abs($currMsnTotalCost - $currMsnPayment) > 1)
-                                        <span class="text-muted small ml-1 font-weight-normal">(Total: Rs. {{ number_format($currMsnTotalCost) }})</span>
-                                    @endif
+                                    Current Milestone @if($currMsnLabel !== 'None')<span class="badge badge-primary px-1.5 py-0.5 ml-1" style="font-size: 11px; font-weight: 700; background: #2563eb; color: #ffffff;">({{ $currMsnLabel }})</span>@endif
                                 </span>
-                                <span class="text-dark rajdhani font-weight-bold" style="font-size: 14px;">{{ number_format($currMsnPayment) }}</span>
+                                <span class="rajdhani font-weight-bold" style="font-size: 14px; color: {{ $finAvailable <= 0 ? '#2563eb' : '#0f172a' }};">{{ number_format($currMsnPayment) }}</span>
                             </div>
                             <div class="receivable-item d-flex justify-content-between mt-3 p-3 rounded" style="background: rgba(37,99,235,0.08); border: 1.5px solid rgba(37,99,235,0.3);">
                                 <span class="rajdhani font-weight-bold" style="color: #1e40af; font-size: 14.5px;">Available after Rcv.</span>
-                                <span class="rajdhani font-weight-bold" style="color: #1e40af; font-size: 16px;">{{ number_format($head->available_after_receivables ?? ($finAvailable + $finRecCompleted + $currMsnPayment)) }}</span>
+                                <span class="rajdhani font-weight-bold" style="font-size: 16px; color: {{ $finCanBeSpent < 0 ? '#dc2626' : ($finCanBeSpent > 0 ? '#16a34a' : '#1e40af') }};">{{ number_format($finCanBeSpent) }}</span>
                             </div>
                         </div>
 
@@ -4162,7 +4188,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     window.promptCreateIt = function(pcsId) {
-        if (confirm('Do you want to create IT / RFQ Letter for this purchase case?')) {
+        if (confirm('Do you want to create RFQ Letter for this purchase case?')) {
             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
             fetch(`/purchase/case/${pcsId}/it-letter/create`, {
                 method: 'POST',
@@ -4186,11 +4212,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.open(data.redirect, '_blank');
                     location.reload();
                 } else {
-                    alert(data.message || 'Error creating IT.');
+                    alert(data.message || 'Error creating RFQ Letter.');
                 }
             })
             .catch(err => {
-                alert('Failed to create IT: ' + err.message);
+                alert('Failed to create RFQ Letter: ' + err.message);
             });
         }
     };

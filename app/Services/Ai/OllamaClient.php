@@ -25,7 +25,7 @@ class OllamaClient
     {
         $this->baseUrl = rtrim($baseUrl ?? config('services.ollama.base_url', 'http://localhost:11434'), '/');
         $this->model = $model ?? config('services.ollama.model', 'qwen2.5:3b');
-        $this->timeout = $timeout ?? (int) config('services.ollama.timeout', 45);
+        $this->timeout = $timeout ?? (int) config('services.ollama.timeout', 90);
     }
 
     public function getBaseUrl(): string
@@ -67,9 +67,11 @@ class OllamaClient
             $payload['tools'] = $tools;
         }
 
-        if (!empty($options)) {
-            $payload['options'] = $options;
-        }
+        $defaultOptions = [
+            'temperature' => 0.1,
+            'num_predict' => !empty($tools) ? 128 : 280,
+        ];
+        $payload['options'] = array_merge($defaultOptions, $options);
 
         try {
             $response = Http::timeout($this->timeout)

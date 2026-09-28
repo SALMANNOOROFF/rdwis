@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>IT Letter Default Template & Page Setup Editor</title>
+    <title>RFQ Letter Default Template & Page Setup Editor</title>
     
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
@@ -903,7 +903,7 @@
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <div class="top-bar-title">
-                <span><i class="fas fa-file-alt" style="color: #60a5fa; margin-right: 4px;"></i> IT Letter — Default Template & Page Setup Editor</span>
+                <span><i class="fas fa-file-alt" style="color: #60a5fa; margin-right: 4px;"></i> RFQ Letter — Default Template & Page Setup Editor</span>
                 <span class="save-indicator" id="saveIndicator">
                     <i class="fas fa-check-circle"></i> Saved
                 </span>
@@ -1139,7 +1139,7 @@
         <!-- INSTRUCTIONS PANEL & GUIDELINES (WIDE SIDE-BY-SIDE BANNER) -->
         <div class="instructions-panel no-print" id="instructionsPanel">
             <div class="instructions-panel-header">
-                <h4><i class="fas fa-sliders-h" style="color: #d97706;"></i> IT Template & Page Layout Customization Guide</h4>
+                <h4><i class="fas fa-sliders-h" style="color: #d97706;"></i> RFQ Template & Page Layout Customization Guide</h4>
                 <button type="button" class="btn-toggle-guide" onclick="toggleGuidePanel()" id="btnToggleGuide">
                     <i class="fas fa-chevron-up"></i> Hide Guide
                 </button>
@@ -1155,7 +1155,7 @@
                         <li><strong>Header & Organization:</strong> Edit Org Name, Wing, Base/Unit, Address, City, & Phone directly on the document.</li>
                         <li><strong>Reference Prefix:</strong> Customize default ref prefix <code>R&D/Projects/Proc/</code>.</li>
                         <li><strong>Subject & Body:</strong> Click to edit Subject title, body paragraphs, and signatory details.</li>
-                        <li><strong>Annex A Titles & Headers:</strong> Customize <code>ANNEX A</code>, <code>TO IT NO </code>, <code>Dated :</code>, Annex Title, & Table Headers (<code>S No</code>, <code>Item / specification</code>, <code>Qty</code>).</li>
+                        <li><strong>Annex A Titles & Headers:</strong> Customize <code>ANNEX A</code>, <code>TO RFQ NO </code>, <code>Dated :</code>, Annex Title, & Table Headers (<code>S No</code>, <code>Item / specification</code>, <code>Qty</code>).</li>
                     </ul>
                 </div>
 
@@ -1325,7 +1325,13 @@
                     <!-- ANNEX TOP RIGHT -->
                     <div class="it-annex-header">
                         <div class="annex-line"><u><span contenteditable="true" id="annex_label" oninput="markUnsaved()">{{ $pageSetup['annex_label'] ?? 'ANNEX A' }}</span></u></div>
-                        <div class="annex-line"><u><span contenteditable="true" id="to_it_no_prefix" oninput="markUnsaved()">{{ $pageSetup['to_it_no_prefix'] ?? 'TO IT NO ' }}</span><span contenteditable="true" id="annex_ref_prefix" oninput="markUnsaved()">{{ $pageSetup['ref_prefix'] ?? 'R&D/Projects/Proc/' }}</span><span style="color: #64748b; font-style: italic;">{PCS_ID}</span></u></div>
+                        @php
+                            $rfqPrefix = $pageSetup['to_it_no_prefix'] ?? 'TO RFQ NO ';
+                            if (trim($rfqPrefix) === 'TO IT NO' || trim($rfqPrefix) === 'TO IT NO:') {
+                                $rfqPrefix = 'TO RFQ NO ';
+                            }
+                        @endphp
+                        <div class="annex-line"><u><span contenteditable="true" id="to_it_no_prefix" oninput="markUnsaved()">{{ $rfqPrefix }}</span><span contenteditable="true" id="annex_ref_prefix" oninput="markUnsaved()">{{ $pageSetup['ref_prefix'] ?? 'R&D/Projects/Proc/' }}</span><span style="color: #64748b; font-style: italic;">{PCS_ID}</span></u></div>
                         <div class="annex-line"><u><span contenteditable="true" id="dated_label" oninput="markUnsaved()">{{ $pageSetup['dated_label'] ?? 'Dated :' }}</span> <span style="color: #64748b; font-style: italic;">{DEADLINE_DATE}</span></u></div>
                     </div>
 
@@ -2013,7 +2019,7 @@
                 header_phone: document.getElementById('header_phone') ? document.getElementById('header_phone').innerText.trim() : 'Ph (off): 48504781',
                 see_distribution: document.getElementById('see_distribution') ? document.getElementById('see_distribution').innerText.trim() : 'See distribution:',
                 ref_prefix: document.getElementById('ref_prefix') ? document.getElementById('ref_prefix').innerText.trim() : 'R&D/Projects/Proc/',
-                to_it_no_prefix: document.getElementById('to_it_no_prefix') ? document.getElementById('to_it_no_prefix').innerText.trim() : 'TO IT NO ',
+                to_it_no_prefix: document.getElementById('to_it_no_prefix') ? document.getElementById('to_it_no_prefix').innerText.trim() : 'TO RFQ NO ',
                 annex_label: document.getElementById('annex_label') ? document.getElementById('annex_label').innerText.trim() : 'ANNEX A',
                 dated_label: document.getElementById('dated_label') ? document.getElementById('dated_label').innerText.trim() : 'Dated :',
                 annex_title: document.getElementById('annex_title') ? document.getElementById('annex_title').innerText.trim() : 'LIST OF REQUIRED ITEMS',
@@ -2107,7 +2113,7 @@
             document.getElementById('see_distribution').innerText = 'See distribution:';
             document.getElementById('ref_prefix').innerText = 'R&D/Projects/Proc/';
             document.getElementById('annex_ref_prefix').innerText = 'R&D/Projects/Proc/';
-            document.getElementById('to_it_no_prefix').innerText = 'TO IT NO ';
+            document.getElementById('to_it_no_prefix').innerText = 'TO RFQ NO ';
             document.getElementById('annex_label').innerText = 'ANNEX A';
             document.getElementById('dated_label').innerText = 'Dated :';
             document.getElementById('subject').innerText = 'REQUEST FOR QUOTATION';

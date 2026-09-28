@@ -98,7 +98,7 @@
             COMPARATIVE STATEMENT OF PROCUREMENT OF MATERIAL FOR {{ strtoupper($purchase->pcs_title) }}
         </div>
         <div class="subtitle">
-            Following firms participated in bidding on {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y') }} against IT No R&D/Projects/Proc/{{ $purchase->pcs_id }} dated {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y') }}.
+            Following firms participated in bidding on {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y') }} against RFQ No R&D/Projects/Proc/{{ $purchase->pcs_id }} dated {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y') }}.
         </div>
 
         <table>

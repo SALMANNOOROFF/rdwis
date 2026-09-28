@@ -239,21 +239,21 @@
                         @endphp
                         @if($isDProc)
                             @if(!$hasItLetter)
-                                {{-- Procurement user sees button to CREATE IT on all cases --}}
+                                {{-- Procurement user sees button to CREATE RFQ on all cases --}}
                                 <button type="button" onclick="promptCreateIt({{ $purchase->pcs_id }})" class="btn btn-sm btn-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; background: #f59e0b !important; color: #fff !important; border: 1px solid #d97706 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;">
-                                    <i class="fas fa-plus-circle mr-1"></i> CREATE IT / RFQ
+                                    <i class="fas fa-plus-circle mr-1"></i> CREATE RFQ LETTER
                                 </button>
                             @else
-                                {{-- Procurement user sees button to EDIT/VIEW IT --}}
+                                {{-- Procurement user sees button to EDIT/VIEW RFQ --}}
                                 <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(245,158,11,0.5); color: #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW IT & ANNEX
+                                    <i class="fas fa-file-signature mr-1"></i> EDIT / VIEW RFQ LETTER & ANNEX
                                 </a>
                             @endif
                         @else
-                            {{-- Other users see VIEW IT / RFQ LETTER ONLY IF procurement has created it --}}
+                            {{-- Other users see VIEW RFQ LETTER ONLY IF procurement has created it --}}
                             @if($hasItLetter)
                                 <a href="{{ route('purchase.it_annex', $purchase->pcs_id) }}" target="_blank" class="btn btn-sm btn-outline-warning rajdhani font-weight-bold" style="padding:4px 12px; font-size:11px; border-radius: 6px; border-color: rgba(245,158,11,0.5); color: #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                    <i class="fas fa-eye mr-1"></i> VIEW IT / RFQ LETTER
+                                    <i class="fas fa-eye mr-1"></i> VIEW RFQ LETTER
                                 </a>
                             @endif
                         @endif
@@ -983,7 +983,7 @@ function selectFirm(caseId, quoteId) {
 }
 
 window.promptCreateIt = function(pcsId) {
-    if (confirm('Do you want to create IT / RFQ Letter for this purchase case?')) {
+    if (confirm('Do you want to create RFQ Letter for this purchase case?')) {
         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
         fetch(`/purchase/case/${pcsId}/it-letter/create`, {
             method: 'POST',
@@ -1007,11 +1007,11 @@ window.promptCreateIt = function(pcsId) {
                 window.open(data.redirect, '_blank');
                 location.reload();
             } else {
-                alert(data.message || 'Error creating IT.');
+                alert(data.message || 'Error creating RFQ Letter.');
             }
         })
         .catch(err => {
-            alert('Failed to create IT: ' + err.message);
+            alert('Failed to create RFQ Letter: ' + err.message);
         });
     }
 };

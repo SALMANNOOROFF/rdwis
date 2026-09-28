@@ -1,0 +1,491 @@
+/* ============================================================
+   RDWIS AI ASSISTANT (RIVA) — ROBOT MASCOT & CHAT STYLESHEET
+   Enterprise Animated AI Mascot & Interactive Assistant
+   Lightweight, 100% Offline, Hardware-Accelerated (60 FPS)
+   ============================================================ */
+
+/* --- Master Widget Container --- */
+.rdwis-ai-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 28px;
+    z-index: 99990;
+    font-family: inherit;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Ensure widget lifts gracefully if PWA Install banner is present */
+body.has-pwa-banner .rdwis-ai-widget {
+    bottom: 96px;
+    transition: bottom 0.4s ease;
+}
+
+/* --- Floating Mascot Launcher Trigger --- */
+.rdwis-robot-launcher {
+    position: relative;
+    width: 100px;
+    height: 120px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    outline: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    filter: drop-shadow(0 8px 22px rgba(15, 23, 42, 0.28));
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: bottom center;
+}
+
+.rdwis-robot-launcher:hover {
+    transform: scale(1.05) translateY(-3px);
+}
+
+.rdwis-robot-launcher:focus-visible {
+    outline: none;
+}
+
+.rdwis-robot-launcher:focus-visible .rdwis-robot-svg {
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7));
+}
+
+/* Mascot SVG Container */
+.rdwis-robot-svg-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    pointer-events: none;
+    perspective: 800px;
+}
+
+.rdwis-robot-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    display: block;
+}
+
+/* --- Floating RIVA Badge on Mascot (Hidden per user preference) --- */
+.rdwis-robot-badge {
+    display: none !important;
+}
+
+/* --- Speech Bubble Component --- */
+.rdwis-speech-bubble {
+    position: absolute;
+    bottom: 124px;
+    right: 6px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(14, 165, 233, 0.35);
+    border-radius: 16px;
+    padding: 9px 15px;
+    color: #0F172A;
+    font-size: 12.5px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(56, 189, 248, 0.15);
+    white-space: nowrap;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rdwis-speech-bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Pointer Beak for Speech Bubble */
+.rdwis-speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    right: 36px;
+    width: 14px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.94);
+    border-right: 1px solid rgba(14, 165, 233, 0.35);
+    border-bottom: 1px solid rgba(14, 165, 233, 0.35);
+    transform: rotate(45deg);
+    border-bottom-right-radius: 3px;
+}
+
+.rdwis-speech-bubble:hover {
+    background: #FFFFFF;
+    border-color: #0284c7;
+    box-shadow: 0 12px 28px -4px rgba(14, 165, 233, 0.25);
+    transform: translateY(-2px);
+}
+
+.rdwis-bubble-sparkle {
+    color: #0284c7;
+    font-size: 13px;
+    animation: rivaSparkleTwinkle 2s infinite ease-in-out;
+}
+
+@keyframes rivaSparkleTwinkle {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.85; }
+    50% { transform: scale(1.2) rotate(15deg); opacity: 1; filter: drop-shadow(0 0 4px #38bdf8); }
+}
+
+/* --- SVG Layer Animations & Transforms --- */
+
+/* 1. Natural Idle Bobbing / Floating */
+.riva-float-rig {
+    transform-origin: 100px 150px;
+    animation: rivaIdleBob 3.2s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+@keyframes rivaIdleBob {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(0, -9px, 0);
+    }
+}
+
+/* Ground Shadow counter-scaling */
+.riva-shadow-rig {
+    transform-origin: 100px 226px;
+    animation: rivaShadowPulse 3.2s ease-in-out infinite alternate;
+    will-change: transform, opacity;
+}
+
+@keyframes rivaShadowPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.95;
+    }
+    100% {
+        transform: scale(0.82);
+        opacity: 0.55;
+    }
+}
+
+/* 2. Head Tilt & Rotation Rig */
+.riva-head-rig {
+    transform-origin: 100px 114px;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1);
+    will-change: transform;
+}
+
+/* 3. Eye Tracking & Natural Blinking */
+.riva-eye {
+    transform-origin: center;
+    transition: transform 0.08s ease-out;
+    will-change: transform;
+}
+
+.riva-eye-left {
+    transform-origin: 77px 68px;
+}
+
+.riva-eye-right {
+    transform-origin: 123px 68px;
+}
+
+/* Eye Blink Trigger Class */
+.riva-blinking .riva-eye {
+    animation: rivaBlinkKeyframe 0.16s ease-in-out forwards;
+}
+
+@keyframes rivaBlinkKeyframe {
+    0% {
+        transform: scaleY(1);
+    }
+    45% {
+        transform: scaleY(0.08);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+/* 4. Left Arm Wave / Articulation */
+.riva-arm-left {
+    transform-origin: 48px 128px;
+    will-change: transform;
+    transition: transform 0.3s ease-out;
+}
+
+.riva-waving .riva-arm-left {
+    animation: rivaArmWave 1.4s cubic-bezier(0.45, 0.05, 0.55, 0.95) 2;
+}
+
+@keyframes rivaArmWave {
+    0% {
+        transform: rotate(0deg);
+    }
+    20% {
+        transform: rotate(-36deg) translateY(-4px);
+    }
+    40% {
+        transform: rotate(-10deg) translateY(-2px);
+    }
+    60% {
+        transform: rotate(-32deg) translateY(-4px);
+    }
+    80% {
+        transform: rotate(-14deg) translateY(-2px);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+/* Right Arm: Idle sway & Hover High-Wave */
+.riva-arm-right {
+    transform-origin: 152px 128px;
+    will-change: transform;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: rivaArmRightSway 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes rivaArmRightSway {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-2.5deg); }
+}
+
+/* Hover or Arm Raised State: Right arm lifts up high and waves happily */
+.rdwis-robot-launcher:hover .riva-arm-right,
+.riva-arm-raised .riva-arm-right {
+    animation: rivaRightArmRaiseWave 1.1s ease-in-out infinite alternate !important;
+}
+
+@keyframes rivaRightArmRaiseWave {
+    0% {
+        transform: rotate(-80deg) translateY(-2px);
+    }
+    50% {
+        transform: rotate(-112deg) translateY(-6px);
+    }
+    100% {
+        transform: rotate(-92deg) translateY(-3px);
+    }
+}
+
+/* 5. Mouth Thinking & Talking Animations */
+.riva-mouth-rig {
+    transform-origin: 100px 85px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Thinking State: Attentive head tilt + neon pulse */
+.riva-state-thinking .riva-head-rig {
+    transform: rotate(4deg) translateY(1px);
+}
+
+.riva-state-thinking .riva-mouth-shape {
+    animation: rivaMouthThinking 1.1s ease-in-out infinite alternate;
+    filter: url(#rivaCyanIntenseGlow);
+}
+
+@keyframes rivaMouthThinking {
+    0% {
+        opacity: 0.6;
+        transform: scaleX(0.85);
+    }
+    100% {
+        opacity: 1;
+        transform: scaleX(1.15);
+    }
+}
+
+/* Talking State (Streaming / Replying) */
+.riva-state-talking .riva-mouth-shape {
+    animation: rivaMouthTalk 0.28s ease-in-out infinite alternate;
+    filter: url(#rivaCyanIntenseGlow);
+}
+
+@keyframes rivaMouthTalk {
+    0% {
+        transform: scale(0.9, 0.7);
+    }
+    100% {
+        transform: scale(1.15, 1.25);
+    }
+}
+
+/* 6. Stylized 5-Minute 360° Spin Animation */
+.riva-spin-active .riva-float-rig {
+    animation: rivaSpin360 1.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+
+@keyframes rivaSpin360 {
+    0% {
+        transform: translateY(0) rotateY(0deg);
+    }
+    20% {
+        transform: translateY(-16px) rotateY(70deg) scale(1.06);
+    }
+    50% {
+        transform: translateY(-20px) rotateY(180deg) scale(1.08);
+    }
+    80% {
+        transform: translateY(-12px) rotateY(290deg) scale(1.04);
+    }
+    100% {
+        transform: translateY(0) rotateY(360deg) scale(1);
+    }
+}
+
+/* Energetic Eye Flash during Spin */
+.riva-spin-active .riva-eye-shape {
+    filter: url(#rivaCyanIntenseGlow);
+}
+
+/* --- Chat Window Container Upgrades --- */
+.rdwis-ai-chat-window {
+    position: absolute;
+    bottom: 126px;
+    right: 0;
+    width: 400px;
+    height: 560px;
+    max-height: calc(100vh - 140px);
+    background: #FFFFFF;
+    border-radius: 18px;
+    border: 1px solid rgba(14, 165, 233, 0.35);
+    box-shadow: 0 24px 50px -12px rgba(15, 23, 42, 0.32), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform-origin: bottom right;
+    animation: rivaWindowSpringIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 100;
+}
+
+@keyframes rivaWindowSpringIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Chat Header Enhancements */
+.rdwis-ai-header {
+    background: linear-gradient(135deg, #091e2f 0%, #0c3e4a 50%, #064e3b 100%);
+    color: #FFFFFF;
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.16);
+}
+
+.rdwis-ai-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(14, 165, 233, 0.5);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    flex-shrink: 0;
+}
+
+/* --- Responsive Layout & Screen Breakpoints --- */
+
+/* Tablet (Max 1024px) */
+@media screen and (max-width: 1024px) {
+    .rdwis-ai-widget {
+        bottom: 20px;
+        right: 20px;
+    }
+    .rdwis-robot-launcher {
+        width: 84px;
+        height: 100px;
+    }
+    .rdwis-ai-chat-window {
+        bottom: 108px;
+        width: 360px;
+        height: 510px;
+    }
+    .rdwis-speech-bubble {
+        bottom: 104px;
+        font-size: 11.5px;
+        padding: 7px 12px;
+    }
+}
+
+/* Mobile Devices (Max 480px) */
+@media screen and (max-width: 480px) {
+    .rdwis-ai-widget {
+        bottom: 14px;
+        right: 14px;
+    }
+    .rdwis-robot-launcher {
+        width: 66px;
+        height: 78px;
+    }
+    .rdwis-robot-badge {
+        font-size: 8px;
+        padding: 1.5px 5px;
+        top: -3px;
+    }
+    .rdwis-speech-bubble {
+        bottom: 84px;
+        right: 0;
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    .rdwis-speech-bubble::after {
+        right: 24px;
+    }
+    .rdwis-ai-chat-window {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        height: 85vh;
+        max-height: 85vh;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* --- Accessibility: Prefers-Reduced-Motion --- */
+@media (prefers-reduced-motion: reduce) {
+    .riva-float-rig,
+    .riva-shadow-rig,
+    .riva-arm-right,
+    .rdwis-robot-badge,
+    .rdwis-bubble-sparkle {
+        animation: none !important;
+    }
+    .riva-waving .riva-arm-left,
+    .riva-blinking .riva-eye,
+    .riva-spin-active .riva-float-rig {
+        animation: none !important;
+    }
+    .rdwis-ai-chat-window,
+    .rdwis-speech-bubble,
+    .rdwis-robot-launcher {
+        transition: opacity 0.15s ease !important;
+        animation: none !important;
+    }
+}

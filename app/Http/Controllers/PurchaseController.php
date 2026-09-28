@@ -927,7 +927,7 @@ class PurchaseController extends Controller
         $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
         $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
         if (!$isDProc) {
-            return response()->json(['success' => false, 'message' => 'Only Procurement Department can raise/create IT.'], 403);
+            return response()->json(['success' => false, 'message' => 'Only Procurement Department can raise/create RFQ Letter.'], 403);
         }
 
         $purchase = Purchase::with(['items', 'quotes.firm'])->findOrFail($id);
@@ -961,7 +961,7 @@ class PurchaseController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'IT Letter created successfully.',
+            'message' => 'RFQ Letter created successfully.',
             'redirect' => route('purchase.it_annex', $purchase->pcs_id),
         ]);
     }
@@ -972,7 +972,7 @@ class PurchaseController extends Controller
         $userArea = strtolower(trim((string) ($user?->acc_untarea ?? '')));
         $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
         if (!$isDProc) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. Only Procurement Department can edit and save IT.'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized. Only Procurement Department can edit and save RFQ Letter.'], 403);
         }
 
         $purchase = Purchase::findOrFail($id);
@@ -1025,13 +1025,13 @@ class PurchaseController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'IT Letter & Annex saved successfully.',
+            'message' => 'RFQ Letter & Annex saved successfully.',
             'data'    => $itLetter,
         ]);
     }
 
     /**
-     * Show the standalone IT Letter Template Editor page.
+     * Show the standalone RFQ Letter Template Editor page.
      */
     public function itTemplate()
     {
@@ -1040,7 +1040,7 @@ class PurchaseController extends Controller
         $isDProc = str_contains($userArea, 'proc') || str_contains($userArea, 'prc') || in_array($userArea, ['proc', 'prc'], true) || ($user?->acc_username === 'superadminrdw');
 
         if (!$isDProc) {
-            abort(403, 'Only Procurement Department or Super Admin can access the IT Letter Template Editor.');
+            abort(403, 'Only Procurement Department or Super Admin can access the RFQ Letter Template Editor.');
         }
 
         $template = PurItTemplate::getTemplate();
@@ -1050,7 +1050,7 @@ class PurchaseController extends Controller
     }
 
     /**
-     * Save the global IT Letter default template via AJAX.
+     * Save the global RFQ Letter default template via AJAX.
      */
     public function saveItTemplate(Request $request)
     {
@@ -1090,7 +1090,7 @@ class PurchaseController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'IT Letter template saved successfully.',
+            'message' => 'RFQ Letter template saved successfully.',
         ]);
     }
 

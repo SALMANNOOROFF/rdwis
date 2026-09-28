@@ -73,7 +73,28 @@ class DataScopeService
             ];
         }
 
-        // 3. SORD (Staff Officer R&D): dynamically scoped to all project divisions
+        // 3. Command Wings and Central Departments (Finance, HR, Procurement, HQ): organization-wide visibility across project divisions
+        $area = strtolower(trim((string) ($account->acc_untarea ?? '')));
+        $desig = strtoupper(trim((string) ($account->acc_desig ?? '')));
+        if (
+            AreaDefinition::isFinance($area) ||
+            AreaDefinition::isHr($area) ||
+            AreaDefinition::isProcurement($area) ||
+            in_array($area, ['fin', 'hr', 'proc', 'prc', 'rdw', 'hqs', 'it', 'adm'], true) ||
+            str_contains($desig, 'FINANCE') ||
+            str_contains($desig, 'PROCUREMENT') ||
+            str_contains($desig, 'HUMAN RESOURCE')
+        ) {
+            return [
+                'lower' => 0,
+                'upper' => 99999999,
+                'is_wide' => true,
+                'is_single' => false,
+                'specific_units' => null,
+            ];
+        }
+
+        // 4. SORD (Staff Officer R&D): dynamically scoped to all project divisions
         if ($context->isSord()) {
             $divisionIds = self::getDynamicDivisionUnitIds();
             return [
@@ -85,7 +106,7 @@ class DataScopeService
             ];
         }
 
-        // 4. Evaluate single vs multiple access bounds
+        // 5. Evaluate single vs multiple access bounds for Division officers
         $isSingle = strtolower(trim((string) ($account->acc_access ?? ''))) === 'single';
         $userUnitId = (int) ($account->acc_unt_id ?? 0);
         $lowers = (int) ($account->acc_lowers ?? 0);

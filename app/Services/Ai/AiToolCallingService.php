@@ -235,7 +235,10 @@ class AiToolCallingService
             'content' => json_encode($toolResult, JSON_UNESCAPED_UNICODE),
         ];
 
-        $finalResponse = $this->client->chat($followUpMessages, $tools);
+        // Do not re-send tool schemas in final text generation turn to drastically cut prompt evaluation time
+        $finalResponse = $this->client->chat($followUpMessages, [], [
+            'num_predict' => 280,
+        ]);
         $finalContent = (string) ($finalResponse['message']['content'] ?? '');
 
         return [
@@ -262,14 +265,26 @@ class AiToolCallingService
         $properties = $parameters['properties'] ?? [];
 
         foreach ($required as $paramName) {
-            $snake = Str::snake($paramName);
-            $hasKey = array_key_exists($paramName, $arguments) || array_key_exists($snake, $arguments);
+            $candidates = [
+                $paramName,
+                Str::snake($paramName),
+                Str::camel($paramName),
+                strtolower($paramName),
+            ];
 
-            if (!$hasKey) {
+            $foundKey = null;
+            foreach ($candidates as $k) {
+                if (array_key_exists($k, $arguments)) {
+                    $foundKey = $k;
+                    break;
+                }
+            }
+
+            if ($foundKey === null) {
                 return "Missing required parameter '{$paramName}'.";
             }
 
-            $value = $arguments[$paramName] ?? $arguments[$snake] ?? null;
+            $value = $arguments[$foundKey];
             if ($value === null || (is_string($value) && trim($value) === '')) {
                 return "Parameter '{$paramName}' cannot be empty.";
             }

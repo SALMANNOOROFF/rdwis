@@ -54,6 +54,7 @@ class PurItTemplate extends Model
             'header_phone'        => 'Ph (off): 48504781',
             'see_distribution'    => 'See distribution:',
             'ref_prefix'          => 'R&D/Projects/Proc/',
+            'to_it_no_prefix'     => 'TO RFQ NO ',
             'annex_label'         => 'ANNEX A',
             'dated_label'         => 'Dated :',
             'annex_title'         => 'LIST OF REQUIRED ITEMS',

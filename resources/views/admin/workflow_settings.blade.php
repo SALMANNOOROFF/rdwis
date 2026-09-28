@@ -82,7 +82,7 @@
                             @include('admin._workflow_tab_content', [
                                 'typeKey' => 'PS',
                                 'typeTitle' => 'PS (Procurement Store & Scrutiny Cases)',
-                                'typeDescription' => 'All tender, market quotation, RFQ generation, and IT letter cases. Involves collaborative scrutiny loop between Division and Director Procurement (DProc) before releasing to Finance.',
+                                'typeDescription' => 'All tender, market quotation, RFQ generation, and RFQ letter cases. Involves collaborative scrutiny loop between Division and Director Procurement (DProc) before releasing to Finance.',
                                 'matrix' => $psMatrix,
                                 'stageOptions' => $stageOptions,
                                 'availableCaseTypes' => $availableCaseTypes

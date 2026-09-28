@@ -254,7 +254,7 @@ Route::middleware('auth')->group(function () {
                     Route::get('/{id}', [\App\Http\Controllers\PurchaseFinanceController::class, 'show'])->name('show');
                 });
 
-                // IT Letter Template Editor (standalone — not per-case)
+                // RFQ Letter Template Editor (standalone — not per-case)
                 Route::get('/it-template', [\App\Http\Controllers\PurchaseController::class, 'itTemplate'])->name('it_template');
                 Route::post('/it-template/save', [\App\Http\Controllers\PurchaseController::class, 'saveItTemplate'])->name('it_template.save');
 

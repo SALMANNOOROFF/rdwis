@@ -261,7 +261,7 @@
                     </div>
                     <small class="text-muted font-italic d-block" style="font-size: 11px;">
                         @if($typeKey === 'PS')
-                            Note: For PS cases, Division sends case to DProc for quotation floating & IT letter scrutiny.
+                            Note: For PS cases, Division sends case to DProc for quotation floating & RFQ letter scrutiny.
                         @else
                             Note: For {{ $typeKey }} cases, Division releases directly to Director Finance.
                         @endif

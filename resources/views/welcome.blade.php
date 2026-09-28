@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/rdwis-ai-robot.css') }}">
     <!-- SweetAlert2 -->
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.all.min.js') }}"></script>
 
@@ -752,7 +753,7 @@
                   <li class="nav-item">
                       <a href="{{ route('nrdi.purchase_cases_new.it_template') }}" class="nav-link py-2 px-2.5 rounded d-flex align-items-center {{ Request::is('*/it-template*') ? 'bg-primary text-white font-weight-bold' : 'text-dark' }}" style="font-size: 12.5px;">
                           <i class="fas fa-file-alt nav-icon {{ Request::is('*/it-template*') ? 'text-white' : 'text-warning' }} mr-2" style="font-size: 14px;"></i>
-                          <p class="mb-0 text-truncate font-weight-bold rajdhani">IT Letter Template</p>
+                          <p class="mb-0 text-truncate font-weight-bold rajdhani">RFQ Letter Template</p>
                       </a>
                   </li>
               </ul>
@@ -1192,7 +1193,7 @@
                   </li>
                   <li class="nav-item">
                       <a href="{{ route('nrdi.purchase_cases_new.it_template') }}" class="nav-link {{ Request::is('*/it-template*') ? 'active' : '' }}">
-                          <i class="fas fa-file-alt nav-icon text-warning"></i><p>IT Letter Template</p>
+                          <i class="fas fa-file-alt nav-icon text-warning"></i><p>RFQ Letter Template</p>
                       </a>
                   </li>
               </ul>

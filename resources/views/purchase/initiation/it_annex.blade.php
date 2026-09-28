@@ -23,7 +23,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Request for Quotation & IT Annex - Case #{{ $purchase->pcs_id }}</title>
+    <title>Request for Quotation & RFQ Annex - Case #{{ $purchase->pcs_id }}</title>
     
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
@@ -867,7 +867,7 @@
             </a>
             <div class="top-bar-title">
                 <span>Case #{{ $purchase->pcs_id }}</span>
-                <span style="color: var(--rd-text3); font-weight: normal; font-size: 13px;">— Request for Quotation & IT Annex</span>
+                <span style="color: var(--rd-text3); font-weight: normal; font-size: 13px;">— Request for Quotation & RFQ Annex</span>
                 <span class="save-indicator" id="saveIndicator">
                     <i class="fas fa-check-circle"></i> Saved
                 </span>
@@ -1039,7 +1039,13 @@
             <!-- ANNEX TOP RIGHT -->
             <div class="it-annex-header">
                 <div class="annex-line"><u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="annex_label" oninput="markUnsaved()">{{ $pageSetup['annex_label'] ?? 'ANNEX A' }}</span></u></div>
-                <div class="annex-line"><u>TO IT NO <span contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" id="annex_ref_prefix">{{ $pageSetup['ref_prefix'] ?? 'R&D/Projects/Proc/' }}</span><span id="annex_ref_suffix" contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" oninput="syncRefSuffixFromAnnex(this.innerText)">{{ $refSuffix }}</span></u></div>
+                @php
+                    $rfqPrefix = $pageSetup['to_it_no_prefix'] ?? 'TO RFQ NO ';
+                    if (trim($rfqPrefix) === 'TO IT NO' || trim($rfqPrefix) === 'TO IT NO:') {
+                        $rfqPrefix = 'TO RFQ NO ';
+                    }
+                @endphp
+                <div class="annex-line"><u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="to_it_no_prefix" oninput="markUnsaved()">{{ $rfqPrefix }}</span><span contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" id="annex_ref_prefix">{{ $pageSetup['ref_prefix'] ?? 'R&D/Projects/Proc/' }}</span><span id="annex_ref_suffix" contenteditable="{{ $canEditRefNo ? 'true' : 'false' }}" oninput="syncRefSuffixFromAnnex(this.innerText)">{{ $refSuffix }}</span></u></div>
                 <div class="annex-line"><u><span contenteditable="{{ $canEdit ? 'true' : 'false' }}" id="dated_label">{{ $pageSetup['dated_label'] ?? 'Dated :' }}</span> <span id="annex_date" contenteditable="{{ $canEditDate ? 'true' : 'false' }}" oninput="syncDateFromAnnex(this.innerText)">{{ $letterDate }}</span></u></div>
             </div>
 

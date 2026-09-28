@@ -50,10 +50,10 @@
                 </div>
             </div>
 
-            <!-- SECTION 2: IT LETTER (RFQ) FORM -->
+            <!-- SECTION 2: RFQ LETTER FORM -->
             <div class="card card-primary shadow-lg">
                 <div class="card-header collapsed" data-toggle="collapse" data-target="#itCollapse" style="cursor:pointer">
-                    <h3 class="card-title text-white"><i class="fas fa-envelope-open-text mr-2"></i> 2. IT Letter / Request for Quotation</h3>
+                    <h3 class="card-title text-white"><i class="fas fa-envelope-open-text mr-2"></i> 2. RFQ Letter / Request for Quotation</h3>
                 </div>
                 <div id="itCollapse" class="collapse" data-parent="#reportAccordion">
                     <form action="{{ route('reports.generate.itletter') }}" method="POST" target="_blank">
@@ -83,7 +83,7 @@
                             <button type="button" class="btn btn-primary btn-sm" onclick="addITRow()">+ Add More Firm</button>
                         </div>
                         <div class="card-footer bg-white text-right">
-                            <button type="submit" class="btn btn-primary shadow-sm px-4">Generate IT Letter</button>
+                            <button type="submit" class="btn btn-primary shadow-sm px-4">Generate RFQ Letter</button>
                         </div>
                     </form>
                 </div>
