@@ -1,0 +1,110 @@
+{
+    "live": {
+        "division_name": "Command, Control and Communication (C3)",
+        "project_name": "Interfacing of Link Y with DVBS",
+        "project_code": "DVBS",
+        "project_start_date": "2017-11-15",
+        "estimated_end_date": "2020-05-31",
+        "total_project_budget": 15000000,
+        "project_budget_available": true,
+        "hr_allocated_budget": 675000,
+        "hr_budget_utilized_to_date": 675000,
+        "hr_budget_remaining": -2065322.58,
+        "hr_budget_committed_total": 3029032,
+        "hr_budget_available": true,
+        "case_cost": 3029032,
+        "hr_balance_sufficient": false,
+        "suggested_shortfall": 5094354.58,
+        "equipment_allocated": 16012529,
+        "equipment_utilized": 16012529,
+        "equipment_remaining": 0,
+        "equipment_committed": 0,
+        "equipment_available": true,
+        "employee": {
+            "name": "Khuzaima Ali Khan",
+            "grade": "RO",
+            "contract_expiry": "2026-12-24",
+            "start_date": "2026-12-25",
+            "end_date": "2027-10-27",
+            "current_salary": 220000,
+            "proposed_salary": 300000,
+            "max_allowed_increment": "appraisal pending"
+        },
+        "approval_chain": [
+            {
+                "id": 41,
+                "form_code": "RDW\/HR\/F-09",
+                "grade_level": "RO_AND_ABOVE",
+                "sequence": 1,
+                "role_title": "Project Director \/ PI",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "is_final_authority": false,
+                "created_at": "2026-10-05T02:52:53.083516Z",
+                "updated_at": "2026-10-05T09:52:53.000000Z"
+            },
+            {
+                "id": 42,
+                "form_code": "RDW\/HR\/F-09",
+                "grade_level": "RO_AND_ABOVE",
+                "sequence": 2,
+                "role_title": "Dir HR \/ SO HR",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "is_final_authority": false,
+                "created_at": "2026-10-05T02:52:53.083516Z",
+                "updated_at": "2026-10-05T09:52:53.000000Z"
+            },
+            {
+                "id": 43,
+                "form_code": "RDW\/HR\/F-09",
+                "grade_level": "RO_AND_ABOVE",
+                "sequence": 3,
+                "role_title": "Dir Finance",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "is_final_authority": false,
+                "created_at": "2026-10-05T02:52:53.083516Z",
+                "updated_at": "2026-10-05T09:52:53.000000Z"
+            },
+            {
+                "id": 44,
+                "form_code": "RDW\/HR\/F-09",
+                "grade_level": "RO_AND_ABOVE",
+                "sequence": 4,
+                "role_title": "MD RDW",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "is_final_authority": false,
+                "created_at": "2026-10-05T02:52:53.083516Z",
+                "updated_at": "2026-10-05T09:52:53.000000Z"
+            },
+            {
+                "id": 45,
+                "form_code": "RDW\/HR\/F-09",
+                "grade_level": "RO_AND_ABOVE",
+                "sequence": 5,
+                "role_title": "DG NRDI",
+                "action_type": "Approval",
+                "can_approve": true,
+                "is_final_authority": true,
+                "created_at": "2026-10-05T02:52:53.083516Z",
+                "updated_at": "2026-10-05T09:52:53.000000Z"
+            }
+        ],
+        "final_approver": "DG NRDI"
+    },
+    "manual": {
+        "shift_amount": null,
+        "shift_justification": null,
+        "director_remarks": null
+    },
+    "warnings": [
+        "Exceeds the policy maximum (Para 67). Proposed increment is 36.4%, but maximum allowable is 20%."
+    ],
+    "missing_fields": [
+        "shift_amount",
+        "shift_justification"
+    ],
+    "is_complete": false
+}

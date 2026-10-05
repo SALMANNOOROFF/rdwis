@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/rdwis-ai-robot.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/rdwis-ai-robot.css') }}?v={{ filemtime(public_path('css/rdwis-ai-robot.css')) }}">
     <!-- SweetAlert2 -->
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.all.min.js') }}"></script>
 

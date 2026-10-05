@@ -213,7 +213,7 @@ class ContractCaseApprovalService
                 }
             }
 
-            if ($nextStage === 'Division' || in_array($nextStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
+            if ($nextStage === 'Division' || in_array($nextStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE', 'C#', 'C3', 'Ex Sys Div', 'AI & Emers', 'R & EW', 'UWT div', 'S & UAV', 'P & I'])) {
                 $targetName = $targetStageName ?: ($nextStage === 'Division' ? 'Division' : $nextStage . ' Division');
                 $nextStage = 'Division';
                 $legacyStatus = 'Under Revision';
@@ -366,7 +366,7 @@ class ContractCaseApprovalService
                 }
             }
 
-            if ($destStage === 'Division' || in_array($destStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
+            if ($destStage === 'Division' || in_array($destStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE', 'C#', 'C3', 'Ex Sys Div', 'AI & Emers', 'R & EW', 'UWT div', 'S & UAV', 'P & I'])) {
                 $destStage = 'Division';
                 if ($targetAcc && $targetAcc->acc_unt_id) {
                     DB::table('hr.ctrcases')->where('ctc_id', $case->ctc_id)->update([

@@ -15,6 +15,7 @@ class FinancialIntelligenceService
     private $globalVarsCache = [];
     private $salOrdersCache = [];
     private $extExpensesCache = [];
+    private static array $subheadBreakdownCache = [];
 
     private function getGlobalVar($name)
     {
@@ -435,6 +436,10 @@ class FinancialIntelligenceService
 
     public function getSubheadBreakdown($headId)
     {
+        if (isset(self::$subheadBreakdownCache[$headId])) {
+            return self::$subheadBreakdownCache[$headId];
+        }
+
         // Alphabetical except "Misc" sorted last
         $subheads = DB::table('fin.subheads')
             ->where('sbh_hed_id', $headId)
@@ -602,7 +607,12 @@ class FinancialIntelligenceService
             }
         }
 
-        return $result;
+        return self::$subheadBreakdownCache[$headId] = $result;
+    }
+
+    public static function clearSubheadBreakdownCache(): void
+    {
+        self::$subheadBreakdownCache = [];
     }
 
     /**

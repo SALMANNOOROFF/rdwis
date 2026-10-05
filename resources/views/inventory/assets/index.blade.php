@@ -358,7 +358,7 @@
                             </td>
                             @if($canPerformAction)
                             <td>
-                                @if($a->ias_unt_id == $currUser->acc_unt_id)
+                                @if(($a->ias_unt_id ?? null) == ($currUser->acc_unt_id ?? null))
                                     <button type="button" class="btn btn-sm btn-outline-info font-weight-bold" data-toggle="modal" data-target="#updateModal{{ $a->iac_id }}">
                                         Transition
                                     </button>
@@ -387,7 +387,7 @@
     @if($canPerformAction)
     <!-- Modals Section -->
     @foreach($assets as $a)
-        @if($a->ias_unt_id == $currUser->acc_unt_id)
+        @if(($a->ias_unt_id ?? null) == ($currUser->acc_unt_id ?? null))
         <div class="modal fade" id="updateModal{{ $a->iac_id }}" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-white border border-secondary text-dark">

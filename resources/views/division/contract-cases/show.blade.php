@@ -497,6 +497,9 @@
             </div>
 
         </div>
+        {{-- HR Policy Case File Tab Panel (Step 3) --}}
+        @include('hrforms.case-file-panel', ['case' => $case])
+
     </section>
 </div>
 

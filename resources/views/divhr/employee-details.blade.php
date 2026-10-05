@@ -103,6 +103,82 @@
       );
       position: relative;
     }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 8mm 12mm;
+      }
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+      }
+      body * {
+        visibility: hidden !important;
+      }
+      #employmentRecordModal,
+      #employmentRecordModal *,
+      #employmentRecordPrintArea,
+      #employmentRecordPrintArea * {
+        visibility: visible !important;
+      }
+      #employmentRecordModal {
+        position: static !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+        overflow: visible !important;
+        inset: auto !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      #employmentRecordModal > div {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+      }
+      #employmentRecordModal .overflow-y-auto {
+        overflow: visible !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+      }
+      #employmentRecordPrintArea {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        border: none !important;
+        display: block !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .contract-item-row {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .no-print, .modal-backdrop, header, nav, aside {
+        display: none !important;
+      }
+    }
   </style>
 
   <div class="max-w-[1600px] mx-auto p-3 sm:p-6 pb-20 sm:pb-6">
@@ -112,12 +188,65 @@
         <h1 class="text-xl font-bold text-text1 tracking-tight" style="font-family: 'Rajdhani', sans-serif;">{{ $emp->emp_name ?? 'Jonathan Pierce' }}</h1>
       </div>
       <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-        <button onclick="history.back()"
-          class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-text1 bg-surface3 border border-border2 rounded-lg shadow-refined hover:bg-surface4 transition-all">
-          <i class="fas fa-arrow-left mr-1"></i> Back
-        </button>
+        <!-- 1. Employee Documents Dropdown (sb sy pehly) -->
+        <div class="relative inline-block text-left" id="employeeDocsDropdownWrap">
+          <button type="button" id="employeeDocsToggleBtn"
+            class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-bold text-sky-800 bg-sky-100 hover:bg-sky-200 border border-sky-300 rounded-lg shadow-sm transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer">
+            <i class="fas fa-folder-open text-sky-600"></i> Employee Documents
+            <i class="fas fa-chevron-down text-[10px] ml-1 transition-transform duration-200" id="employeeDocsChevron"></i>
+          </button>
+          <div id="employeeDocsDropdownMenu" class="origin-top-left absolute left-0 mt-1.5 w-72 rounded-xl shadow-2xl bg-white border border-slate-200 z-50 p-2.5" style="display: none;">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1 border-b border-slate-100 mb-1 flex justify-between items-center">
+              <span>Attached Documents</span>
+              <span class="text-[9px] px-1.5 py-0.5 bg-sky-50 text-sky-600 rounded font-bold">{{ count($attachments ?? []) }} Files</span>
+            </div>
+            <div class="max-h-56 overflow-y-auto space-y-1 mb-2">
+              @php
+                $attSlots = ['Appointment Letter', 'Form', 'CV', 'Minute'];
+                $attMap = collect($attachments ?? [])->keyBy('eat_type');
+              @endphp
+              @foreach($attSlots as $slot)
+                @php $existing = $attMap->get($slot); @endphp
+                @if($existing)
+                  <a href="{{ route('universal.attachment.view', ['module' => 'emp', 'id' => $existing->eat_id]) }}" target="_blank"
+                    class="flex items-center justify-between p-2 rounded text-xs hover:bg-sky-50 text-slate-700 transition">
+                    <span class="flex items-center gap-1.5 truncate">
+                      <i class="fas fa-file-pdf text-rose-500"></i>
+                      <span class="truncate font-medium">{{ $slot }}</span>
+                    </span>
+                    <span class="text-[10px] text-sky-600 font-bold flex-shrink-0">View <i class="fas fa-external-link-alt ml-0.5 text-[8px]"></i></span>
+                  </a>
+                @else
+                  <div class="flex items-center justify-between p-2 rounded text-xs text-slate-400">
+                    <span class="flex items-center gap-1.5">
+                      <i class="far fa-file text-slate-300"></i>
+                      <span>{{ $slot }}</span>
+                    </span>
+                    <span class="text-[9px] italic">Not uploaded</span>
+                  </div>
+                @endif
+              @endforeach
+            </div>
+            <div class="pt-2 border-t border-slate-100 flex flex-col gap-1">
+              <button type="button" onclick="document.getElementById('docsUploadModal').classList.remove('hidden'); document.getElementById('employeeDocsDropdownMenu').style.display='none';"
+                class="w-full text-center py-1.5 px-2 bg-sky-600 hover:bg-sky-700 text-white rounded text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer">
+                <i class="fas fa-upload text-[10px]"></i> Manage & Upload Documents
+              </button>
+              <button type="button" onclick="document.getElementById('officialDemographicsModal').classList.remove('hidden'); document.getElementById('employeeDocsDropdownMenu').style.display='none';"
+                class="w-full text-center py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold transition flex items-center justify-center gap-1 cursor-pointer">
+                <i class="fas fa-shield-alt text-[10px] text-primary"></i> View Security & Demographics
+              </button>
+            </div>
+          </div>
+        </div>
 
         @if($canEdit ?? false)
+          {{-- 2. Edit Profile button (usky bad) --}}
+          <a href="{{ route('divhr.employee.edit', $emp->emp_id ?? $id) }}"
+            class="flex-1 sm:flex-initial px-4 py-2 text-xs font-bold text-white bg-primary rounded-lg shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all inline-flex items-center justify-center gap-1.5 text-decoration-none">
+            <i class="fas fa-edit mr-1"></i> Edit Profile
+          </a>
+
           @if(in_array(strtolower($emp->emp_status ?? 'active'), ['active', 'current']))
             {{-- Contract Renewal (Cr) button --}}
             <a href="{{ route('division.contract-cases.create', ['type' => 'Cr', 'emp_id' => $emp->emp_id ?? $id]) }}"
@@ -140,12 +269,6 @@
               <i class="fas fa-user-plus text-cyan-700"></i> Rehire Employee (Rh)
             </a>
           @endif
-
-          {{-- Edit Profile button (Division & HR only) --}}
-          <a href="{{ route('divhr.employee.edit', $emp->emp_id ?? $id) }}"
-            class="flex-1 sm:flex-initial px-4 py-2 text-xs font-bold text-white bg-primary rounded-lg shadow-lg shadow-blue-500/20 hover:opacity-90 transition-all inline-flex items-center justify-center gap-1.5 text-decoration-none">
-            <i class="fas fa-edit mr-1"></i> Edit Profile
-          </a>
         @endif
 
         @can('initiate', \App\Models\AudRev::class)
@@ -155,10 +278,15 @@
             <i class="fas fa-sync-alt text-rose-400"></i> Reverse Employee
           </button>
         @endcan
+
+        <button onclick="history.back()"
+          class="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-text1 bg-surface3 border border-border2 rounded-lg shadow-refined hover:bg-surface4 transition-all">
+          <i class="fas fa-arrow-left mr-1"></i> Back
+        </button>
       </div>
     </header>
     <div class="grid grid-cols-12 gap-6">
-      <div class="col-span-12 lg:col-span-3 space-y-7">
+      <div class="col-span-12 lg:col-span-3 space-y-5">
         <!-- ===== EMPLOYEE PROFILE CARD ===== -->
         <div
           class="bg-surface border border-border1 rounded-xl p-6 overflow-hidden relative text-center">
@@ -294,33 +422,26 @@
             </div>
           </div>
         </div>
-
-        {{-- Employee Attachments Widget --}}
-        @include('partials.attachments_widget', [
-            'module' => 'emp',
-            'objectId' => $emp->emp_id ?? $id,
-            'title' => 'Employee Documents',
-            'defaultSlots' => ['Appointment Letter', 'Form', 'CV', 'Minute'],
-            'attachments' => $attachments ?? [],
-            'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
-        ])
       </div>
       <div class="col-span-12 lg:col-span-9 space-y-6">
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
 
           <div 
             class="xl:col-span-8 bg-surface border border-border1 rounded-xl p-4 min-h-[385px] flex flex-col">
-            <div class="flex items-center gap-2 mb-4">
-              <i class="fas fa-file-contract text-primary text-lg mr-1.5"></i>
-              <h3 class="font-bold text-text1">Contract Details</h3>
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-file-contract text-primary text-lg mr-1.5"></i>
+                <h3 class="font-bold text-text1">Contract Details</h3>
+              </div>
+              <button type="button" onclick="openEmploymentRecordModal()"
+                title="Print Contracts"
+                class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer ml-auto">
+                <i class="fas fa-print text-slate-600"></i> Employment History
+              </button>
             </div>
             <div
               class="bg-transparent p-3 rounded-xl border border-border1 mb-3">
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                <div>
-                  <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Department</p>
-                  <p class="font-semibold text-text1 text-xs truncate">{{ $authUnit?->unt_name ?? ($base?->eff_unit_name ?? ($emp?->unt_name ?? '—')) }}</p>
-                </div>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div>
                   <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Hired Project Head</p>
                   @php
@@ -330,7 +451,7 @@
                     $dCount = (int)($distinctPlanCount ?? 0);
                   @endphp
                   <div class="flex items-center flex-wrap gap-1">
-                    <p class="font-semibold text-text1 text-xs truncate max-w-[200px]" title="{{ $detPrjTitle }}">
+                    <p class="font-semibold text-text1 text-xs truncate max-w-[220px]" title="{{ $detPrjTitle }}">
                       @if($detHeadCode)
                         <span class="px-2 py-0.5 font-bold mr-1 rounded text-[10px] text-white shadow-xs" style="background-color: #0284c7;">{{ $detHeadCode }}</span>
                       @endif
@@ -379,13 +500,28 @@
                 </div>
                 <div>
                   <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Designation</p>
-                  <p class="font-semibold text-text1 text-xs truncate">{{ $currentContract?->ctr_jobtitle ?? ($emp?->emp_title ?? '—') }}</p>
-                </div>
-                <div class="border-t md:border-t-0 pt-2 md:pt-0 border-border1">
-                  <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Next Review</p>
-                  <p class="font-semibold text-text1 text-xs">
-                    {{ !empty($currentContract?->ctr_enddt) ? \Carbon\Carbon::parse($currentContract?->ctr_enddt)->format('d-M-Y') : '—' }}
+                  <p class="font-semibold text-text1 text-xs truncate" title="{{ $currentContract?->ctr_jobtitle ?? ($emp?->emp_title ?? '—') }}">
+                    {{ $currentContract?->ctr_jobtitle ?? ($emp?->emp_title ?? '—') }}
                   </p>
+                </div>
+                <div>
+                  <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">Start Date</p>
+                  <p class="font-semibold text-text1 text-xs">
+                    {{ !empty($currentContract?->ctr_startdt) ? \Carbon\Carbon::parse($currentContract?->ctr_startdt)->format('d-M-Y') : '—' }}
+                  </p>
+                </div>
+                <div>
+                  <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">End Date</p>
+                  <div class="flex items-center gap-2">
+                    <p class="font-semibold text-text1 text-xs">
+                      {{ !empty($currentContract?->ctr_enddt) ? \Carbon\Carbon::parse($currentContract?->ctr_enddt)->format('d-M-Y') : '—' }}
+                    </p>
+                    <!-- Blinking Green Indicator for Active Contract -->
+                    <span class="relative flex h-2.5 w-2.5 ml-1" title="Active Contract">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-sm"></span>
+                    </span>
+                  </div>
                 </div>
               </div>
               <div
@@ -426,18 +562,17 @@
               </div>
             </div>
             <div class="flex-1 min-h-0">
-              <h4 class="text-[10px] text-text3 uppercase tracking-widest mb-3 font-bold">Previous Contracts History
-              </h4>
+              <h4 class="text-[10px] text-text3 uppercase tracking-widest mb-3 font-bold">Previous Contracts History</h4>
               <div id="contractsWrapper"
-                class="border border-border1 rounded-xl relative contracts-scroll overflow-hidden" style="height: 155px; max-height: 155px;">
+                class="border border-border1 rounded-xl relative contracts-scroll overflow-hidden" style="height: 185px; max-height: 220px; overflow-y: auto;">
                 <table class="w-full text-left text-[11px] table-fixed">
                   <colgroup>
-                    <col style="width: 20%;">
-                    <col style="width: 32%;">
+                    <col style="width: 25%;">
+                    <col style="width: 35%;">
                     <col style="width: 16%;">
-                    <col style="width: 11%;">
-                    <col style="width: 11%;">
-                    <col style="width: 10%;">
+                    <col style="width: 9%;">
+                    <col style="width: 9%;">
+                    <col style="width: 6%;">
                   </colgroup>
                   <thead
                     class="sticky top-0 z-10 bg-surface2 border-b border-border1">
@@ -447,9 +582,9 @@
                       <th class="px-2.5 py-2 font-bold text-[9px] text-text3 uppercase">Salary</th>
                       <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase">Start</th>
                       <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase">End</th>
-                      <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase text-center relative">
-                        Status
-                        <span class="absolute right-2 top-1 flex gap-1.5">
+                      <th class="px-2 py-2 font-bold text-[9px] text-text3 uppercase text-center relative" title="Contract Status">
+                        <span class="inline-block w-2 h-2 rounded-full bg-slate-300" title="Indicator"></span>
+                        <span class="absolute right-1 top-1 flex gap-1">
                           <button id="contractScrollUp"
                             class="w-5 h-5 rounded-full bg-surface3 border border-border2 text-text2 flex items-center justify-center shadow-sm hover:bg-surface4 hover:text-text1">
                             <i class="fas fa-arrow-up text-xs"></i>
@@ -463,39 +598,41 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border1">
-                    @forelse(($contractsHistory ?? collect()) as $c)
+                    @php
+                      $prevContracts = ($contractsHistory ?? collect())->filter(function($c) use ($currentContract) {
+                        return !$currentContract || $c->ctr_id != $currentContract->ctr_id;
+                      });
+                    @endphp
+                    @forelse($prevContracts as $c)
                       @php
-                        $label = $c->status_label ?? '—';
-                        $cls = $label === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : ($label === 'Future' ? 'bg-primary/10 text-primary border border-primary/20'
-                              : 'bg-surface3 text-text2 border border-border1');
                         $cHead = $c->ctr_hed_code ?: ($c->ctr_prj_code ?? null);
                         $cPrj = $c->ctr_prj_title ?: ($c->ctr_hed_name ?: ($c->ctr_hed_code ?: ($c->ctr_prj_code ?? null)));
                       @endphp
                       <tr class="hover:bg-surface2/50 transition-colors">
-                        <td class="px-2.5 py-2 font-medium text-text1 truncate">
-                          <span class="font-bold block truncate" title="{{ $c->ctr_jobtitle ?? '—' }}">{{ $c->ctr_jobtitle ?? '—' }}</span>
+                        <td class="px-2.5 py-2 font-medium text-text1">
+                          <span class="font-bold block text-[11px] leading-tight" title="{{ $c->ctr_jobtitle ?? '—' }}">{{ $c->ctr_jobtitle ?? '—' }}</span>
                           @if(!empty($c->ctr_grade))
-                            <span class="text-[9px] text-text3 block font-semibold truncate">{{ $c->ctr_grade }}</span>
+                            <span class="text-[9px] text-text3 block font-semibold">{{ $c->ctr_grade }}</span>
                           @endif
                         </td>
-                        <td class="px-2.5 py-2 font-medium text-text1 truncate">
-                          <div class="flex items-center gap-1 min-w-0">
+                        <td class="px-2.5 py-2 font-medium text-text1">
+                          <div class="flex items-center gap-1.5 flex-wrap">
                             @if($cHead)
                               <span class="px-1.5 py-0.5 font-bold flex-shrink-0 rounded text-[9px] text-white shadow-xs" style="background-color: #0284c7;">{{ $cHead }}</span>
                             @endif
-                            <span class="text-[10.5px] font-semibold text-text1 truncate block" title="{{ $cPrj }}">{{ $cPrj ?: ($cHead ?: '—') }}</span>
+                            <span class="text-[10.5px] font-semibold text-text1 leading-snug break-words" title="{{ $cPrj }}">{{ $cPrj ?: ($cHead ?: '—') }}</span>
                           </div>
                         </td>
                         <td class="px-2.5 py-2 font-bold text-text1 whitespace-nowrap">{{ $c->ctr_salary ? number_format($c->ctr_salary) : '—' }}</td>
                         <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('M Y') : '—' }}</td>
                         <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('M Y') : '—' }}</td>
                         <td class="px-2 py-2 text-center whitespace-nowrap">
-                          <span class="px-2 py-0.5 {{ $cls }} rounded-full text-[8.5px] font-black uppercase tracking-wider inline-block">{{ $label }}</span>
+                          <!-- Stopped Red Circle Indicator -->
+                          <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm" title="Completed / Past Contract"></span>
                         </td>
                       </tr>
                     @empty
-                      <tr><td colspan="6" class="px-3 py-2 text-center text-text3">No contracts</td></tr>
+                      <tr><td colspan="6" class="px-3 py-4 text-center text-text3">No previous contracts recorded</td></tr>
                     @endforelse
                   </tbody>
                 </table>
@@ -609,7 +746,7 @@
               <div class="flex items-center gap-2 mb-2">
                 <h3 class="font-bold text-sm text-text1">Previous Projects</h3>
               </div>
-              <div id="projectsWrapper" class="border border-border1 rounded-xl relative contracts-scroll" style="height: 120px;">
+              <div id="projectsWrapper" class="border border-border1 rounded-xl relative contracts-scroll" style="height: 210px; max-height: 250px; overflow-y: auto;">
                 <table class="w-full text-left text-[11px]">
                   <thead class="sticky top-0 z-10 bg-surface2 border-b border-border1">
                     <tr>
@@ -787,65 +924,243 @@
       <div class="flex justify-between text-xs"><span class="text-text2">Relation</span><span class="font-bold text-text1">{{ $emer['relation'] ?? '—' }}</span></div>
       <div class="flex justify-between text-xs"><span class="text-text2">Phone</span><span class="font-bold text-text1">{{ $emer['mobile'] ?? '—' }}</span></div>
     </div>
+    </div>
   </div>
-
-  <!-- Row: Official & Security Clearance + Personal / Demographic Details -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-    <!-- Official & Security Clearance -->
-    <div class="bg-surface border border-border1 rounded-xl p-6">
-      <div class="flex items-center gap-2 mb-4">
-        <i class="fas fa-shield-alt text-primary text-lg mr-1.5"></i>
-        <h3 class="font-bold text-text1">Official & Security Clearance</h3>
-      </div>
-      <div class="space-y-3">
-        <div class="flex justify-between text-xs py-1 border-b border-border1">
-          <span class="text-text2 font-medium">Clearance Status</span>
-          <span class="font-bold text-text1">
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider {{ ($empC->emp_secclear ?? '') === 'Cleared' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-surface3 text-text2' }}">
-              {{ $empC->emp_secclear ?? 'Not Cleared' }}
-            </span>
-          </span>
-        </div>
-        <div class="flex justify-between text-xs py-1 border-b border-border1">
-          <span class="text-text2 font-medium">Clearance Number</span>
-          <span class="font-bold text-text1">{{ $empC->emp_cnum ?? '—' }}</span>
-        </div>
-        <div class="flex justify-between text-xs py-1 border-b border-border1">
-          <span class="text-text2 font-medium">Issue Date</span>
-          <span class="font-bold text-text1">{{ !empty($empC->emp_cissuedt) ? \Carbon\Carbon::parse($empC->emp_cissuedt)->format('d-M-Y') : '—' }}</span>
-        </div>
-        <div class="flex justify-between text-xs py-1">
-          <span class="text-text2 font-medium">Expiry Date</span>
-          <span class="font-bold text-text1">{{ !empty($empC->emp_cexpdt) ? \Carbon\Carbon::parse($empC->emp_cexpdt)->format('d-M-Y') : '—' }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Personal & Demographics -->
-    <div class="bg-surface border border-border1 rounded-xl p-6">
-      <div class="flex items-center gap-2 mb-4">
-        <i class="fas fa-id-card text-primary text-lg mr-1.5"></i>
-        <h3 class="font-bold text-text1">Demographics & Address</h3>
+  <!-- Document Management Modal -->
+  <div id="docsUploadModal" class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
+    <div class="bg-surface border border-border1 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative">
+      <div class="flex justify-between items-center pb-3 border-b border-border1 mb-4">
+        <h3 class="text-base font-bold text-text1 flex items-center gap-2">
+          <i class="fas fa-folder-open text-primary"></i> Employee Documents Management
+        </h3>
+        <button type="button" onclick="document.getElementById('docsUploadModal').classList.add('hidden')" class="text-text2 hover:text-text1 cursor-pointer">
+          <i class="fas fa-times text-lg"></i>
+        </button>
       </div>
-      <div class="space-y-3">
-        <div class="flex justify-between text-xs py-1 border-b border-border1">
-          <span class="text-text2 font-medium">Date of Birth / Gender</span>
-          <span class="font-bold text-text1">
-            {{ !empty($empA?->emp_dob) ? \Carbon\Carbon::parse($empA->emp_dob)->format('d-M-Y') : '—' }}
-            ({{ $empA?->emp_gender ?? '—' }})
-          </span>
+      @include('partials.attachments_widget', [
+          'module' => 'emp',
+          'objectId' => $emp->emp_id ?? $id,
+          'title' => 'Employee Documents',
+          'defaultSlots' => ['Appointment Letter', 'Form', 'CV', 'Minute'],
+          'attachments' => $attachments ?? [],
+          'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
+      ])
+    </div>
+  </div>
+
+  <!-- Official Security & Demographics Modal -->
+  <div id="officialDemographicsModal" class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
+    <div class="bg-surface border border-border1 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative">
+      <div class="flex justify-between items-center pb-3 border-b border-border1 mb-4">
+        <h3 class="text-base font-bold text-text1 flex items-center gap-2">
+          <i class="fas fa-shield-alt text-primary"></i> Official Security & Demographics
+        </h3>
+        <button type="button" onclick="document.getElementById('officialDemographicsModal').classList.add('hidden')" class="text-text2 hover:text-text1 cursor-pointer">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Official & Security Clearance -->
+        <div class="bg-surface2/50 border border-border1 rounded-xl p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <i class="fas fa-shield-alt text-primary text-base"></i>
+            <h4 class="font-bold text-text1 text-sm">Security Clearance</h4>
+          </div>
+          <div class="space-y-2.5 text-xs">
+            <div class="flex justify-between py-1 border-b border-border1">
+              <span class="text-text2">Clearance Status</span>
+              <span class="font-bold text-text1">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider {{ ($empC->emp_secclear ?? '') === 'Cleared' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-surface3 text-text2' }}">
+                  {{ $empC->emp_secclear ?? 'Not Cleared' }}
+                </span>
+              </span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-border1">
+              <span class="text-text2">Clearance Number</span>
+              <span class="font-bold text-text1">{{ $empC->emp_cnum ?? '—' }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-border1">
+              <span class="text-text2">Issue Date</span>
+              <span class="font-bold text-text1">{{ !empty($empC->emp_cissuedt) ? \Carbon\Carbon::parse($empC->emp_cissuedt)->format('d-M-Y') : '—' }}</span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span class="text-text2">Expiry Date</span>
+              <span class="font-bold text-text1">{{ !empty($empC->emp_cexpdt) ? \Carbon\Carbon::parse($empC->emp_cexpdt)->format('d-M-Y') : '—' }}</span>
+            </div>
+          </div>
         </div>
-        <div class="flex justify-between text-xs py-1 border-b border-border1">
-          <span class="text-text2 font-medium">Marital / Nationality</span>
-          <span class="font-bold text-text1">{{ $empA?->emp_marital ?? '—' }} / {{ $empA?->emp_ntnlty ?? 'Pakistani' }}</span>
+
+        <!-- Personal & Demographics -->
+        <div class="bg-surface2/50 border border-border1 rounded-xl p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <i class="fas fa-id-card text-primary text-base"></i>
+            <h4 class="font-bold text-text1 text-sm">Demographics & Address</h4>
+          </div>
+          <div class="space-y-2.5 text-xs">
+            <div class="flex justify-between py-1 border-b border-border1">
+              <span class="text-text2">DOB / Gender</span>
+              <span class="font-bold text-text1">
+                {{ !empty($empA?->emp_dob) ? \Carbon\Carbon::parse($empA->emp_dob)->format('d-M-Y') : '—' }}
+                ({{ $empA?->emp_gender ?? '—' }})
+              </span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-border1">
+              <span class="text-text2">Marital / Nationality</span>
+              <span class="font-bold text-text1">{{ $empA?->emp_marital ?? '—' }} / {{ $empA?->emp_ntnlty ?? 'Pakistani' }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-border1">
+              <span class="text-text2">Religion / Caste</span>
+              <span class="font-bold text-text1">{{ $empB?->emp_religion ?? '—' }} ({{ $empB?->emp_caste ?? '—' }})</span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span class="text-text2">Permanent Address</span>
+              <span class="font-bold text-text1 text-right truncate max-w-[60%]" title="{{ $empA?->emp_paddress ?? '' }}">{{ $empA?->emp_paddress ?? '—' }}</span>
+            </div>
+          </div>
         </div>
-        <div class="flex justify-between text-xs py-1 border-b border-border1">
-          <span class="text-text2 font-medium">Religion / Caste</span>
-          <span class="font-bold text-text1">{{ $empB?->emp_religion ?? '—' }} ({{ $empB?->emp_caste ?? '—' }})</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employment Record Print Modal -->
+  <div id="employmentRecordModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-start sm:items-center justify-center p-2 sm:p-4 hidden">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full my-auto sm:my-3 overflow-hidden flex flex-col border border-slate-300" style="max-height: 94vh;">
+      <!-- Modal Toolbar (Not printed) -->
+      <div class="no-print flex-shrink-0 bg-slate-100 border-b border-slate-200 px-5 py-2.5 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700">
+            <i class="fas fa-file-invoice text-xs"></i>
+          </div>
+          <div>
+            <span class="font-bold text-xs sm:text-sm text-slate-800 tracking-wide block">Employment Record Preview</span>
+          </div>
         </div>
-        <div class="flex justify-between text-xs py-1">
-          <span class="text-text2 font-medium">Permanent Address</span>
-          <span class="font-bold text-text1 text-right truncate max-w-[60%]" title="{{ $empA?->emp_paddress ?? '' }}">{{ $empA?->emp_paddress ?? '—' }}</span>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="printEmploymentRecord()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fas fa-print"></i> Print Document (A4)
+          </button>
+          <button type="button" onclick="document.getElementById('employmentRecordModal').classList.add('hidden')" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-bold transition cursor-pointer">
+            <i class="fas fa-times mr-1"></i> Close
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Paper Area Container -->
+      <div class="flex-1 overflow-y-auto p-2 sm:p-5 bg-slate-100 flex justify-center" style="font-family: Arial, Helvetica, sans-serif;">
+        <div id="employmentRecordPrintArea" style="background: #ffffff; color: #000000; width: 100%; max-width: 820px; margin: 0 auto; padding: 24px 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-radius: 4px;">
+          <!-- Document Title -->
+          <h1 style="font-size: 20px; font-weight: 600; margin: 0 0 12px 0; color: #000000; letter-spacing: -0.5px;">Employment Record</h1>
+
+          <!-- Top Details Grid -->
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 30px; font-size: 11.5px; line-height: 1.4; margin-bottom: 10px;">
+            <!-- Left Col -->
+            <div>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="width: 38%; font-weight: bold; color: #000; padding: 1.5px 0;">Employee ID</td>
+                  <td style="color: #000; padding: 1.5px 0;">{{ $emp->emp_num ?: ($emp->emp_id ?: $id) }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0;">Joining Date</td>
+                  <td style="color: #000; padding: 1.5px 0;">{{ !empty($emp->emp_joindt) ? \Carbon\Carbon::parse($emp->emp_joindt)->format('d M y') : (!empty($firstContract?->ctr_startdt) ? \Carbon\Carbon::parse($firstContract->ctr_startdt)->format('d M y') : '—') }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0;">Division</td>
+                  <td style="color: #000; padding: 1.5px 0; font-weight: 500;">{{ $emp->unt_name ?: ($authUnit?->unt_name ?: ($base?->eff_unit_name ?: 'Communication Division')) }}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Right Col -->
+            <div>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="width: 32%; font-weight: bold; color: #000; padding: 1.5px 0;">Name</td>
+                  <td style="color: #000; padding: 1.5px 0;">{{ $emp->emp_name ?: '—' }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0;">Last Date</td>
+                  <td style="color: #000; padding: 1.5px 0;">{{ !empty($emp->emp_enddt) ? \Carbon\Carbon::parse($emp->emp_enddt)->format('d M y') : '' }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0;">Project</td>
+                  <td style="color: #000; padding: 1.5px 0;">{{ $currentContract?->ctr_hed_code ?: ($currentContract?->ctr_prj_code ?: ($emp->hed_code ?: ($emp->prj_code ?? '—'))) }}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Divider line -->
+          <hr style="border: none; border-top: 1px solid #000; margin: 8px 0 6px 0;">
+
+          <!-- Section Heading: Contracts -->
+          <div style="font-size: 12.5px; font-weight: bold; color: #000; margin-bottom: 6px;">Contracts</div>
+
+          <!-- Contracts List (Reverse Chronological) -->
+          @forelse(($contractsHistory ?? collect()) as $c)
+            <div class="contract-item-row" style="margin-bottom: 8px; font-size: 11px; line-height: 1.35; page-break-inside: avoid; break-inside: avoid;">
+              <!-- Dates Header -->
+              <div style="margin-bottom: 3px; font-size: 11.5px;">
+                <span style="font-weight: bold; color: #000;">Contract dates</span>
+                <span style="margin-left: 18px; color: #000;">
+                  {{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('d M y') : '—' }} to {{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('d M y') : '—' }}
+                  @if(!empty($c->ctr_termindt) && $c->ctr_termindt > $c->ctr_enddt)
+                    <span style="color: #222;">(extended to {{ \Carbon\Carbon::parse($c->ctr_termindt)->format('d M y') }})</span>
+                  @endif
+                </span>
+              </div>
+
+              <!-- Details Table with fixed layout and proper column widths -->
+              <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
+                <colgroup>
+                  <col style="width: 10%;">
+                  <col style="width: 25%;">
+                  <col style="width: 10%;">
+                  <col style="width: 24%;">
+                  <col style="width: 11%;">
+                  <col style="width: 20%;">
+                </colgroup>
+                <tr>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Division</td>
+                  <td style="color: #000; padding: 1.5px 0; vertical-align: top; font-weight: 500;">{{ $c->ctr_unt_name ?: ($emp->unt_name ?: ($authUnit?->unt_name ?: 'Communication Division')) }}</td>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Grade</td>
+                  <td style="color: #000; padding: 1.5px 0; vertical-align: top;">{{ $c->ctr_grade ?: '—' }}</td>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Type</td>
+                  <td style="color: #000; padding: 1.5px 0 1.5px 6px; vertical-align: top;">{{ ($c->ctr_type == 1 || empty($c->ctr_type)) ? 'Full Time' : ($c->ctr_type == 2 ? 'Part Time' : 'Full Time') }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Project</td>
+                  <td style="color: #000; padding: 1.5px 0; vertical-align: top;">{{ $c->ctr_hed_code ?: ($c->ctr_prj_code ?: '') }}</td>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Job Title</td>
+                  <td style="color: #000; padding: 1.5px 0; vertical-align: top;">{{ $c->ctr_jobtitle ?: '—' }}</td>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Salary</td>
+                  <td style="color: #000; padding: 1.5px 0 1.5px 6px; vertical-align: top;">{{ $c->ctr_salary ? number_format($c->ctr_salary) : '—' }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Remarks</td>
+                  <td colspan="3" style="color: #000; padding: 1.5px 12px 1.5px 0; vertical-align: top; line-height: 1.35;">{{ $c->ctr_remarks ?: '' }}</td>
+                  <td style="font-weight: bold; color: #000; padding: 1.5px 0; vertical-align: top;">Probation</td>
+                  <td style="color: #000; padding: 1.5px 0 1.5px 6px; vertical-align: top;">{{ !empty($c->ctr_prob) ? ($c->ctr_prob . (is_numeric($c->ctr_prob) ? ' Months' : '')) : 'Nil' }}</td>
+                </tr>
+              </table>
+
+              <!-- Divider Line between contracts -->
+              <hr style="border: none; border-top: 1px solid #777; margin: 6px 0 6px 0;">
+            </div>
+          @empty
+            <div style="font-size: 11px; color: #666; padding: 8px 0;">No contract history found.</div>
+          @endforelse
+
+          <!-- Footer -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 10px; color: #333;">
+            <div style="flex: 1;"></div>
+            <div style="flex: 1; text-align: center; color: #444;">1 of 1</div>
+            <div style="flex: 1; text-align: right; color: #444;">Printed on {{ now()->format('d M y  H:i') }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -895,7 +1210,7 @@
       var pFirstRow = pTbody ? pTbody.querySelector('tr') : null;
       var pRowHeight = pFirstRow ? pFirstRow.offsetHeight : 40;
       var pHeaderHeight = pThead ? pThead.offsetHeight : 24;
-      pWrapper.style.height = '75px';
+      pWrapper.style.height = '210px';
       var pUp = document.getElementById('projectScrollUp');
       var pDown = document.getElementById('projectScrollDown');
       if (pUp) pUp.addEventListener('click', function () { pWrapper.scrollBy({ top: -pRowHeight, behavior: 'smooth' }); });
@@ -904,7 +1219,7 @@
         var pFr = pTbody ? pTbody.querySelector('tr') : null;
         var pRh = pFr ? pFr.offsetHeight : pRowHeight;
         var pHh = pThead ? pThead.offsetHeight : pHeaderHeight;
-        pWrapper.style.height = '75px';
+        pWrapper.style.height = '210px';
         pRowHeight = pRh;
         pHeaderHeight = pHh;
       });
@@ -967,6 +1282,72 @@
         });
       }
     });
+
+    // Employee Documents Dropdown Toggle
+    document.addEventListener('DOMContentLoaded', function () {
+      var docBtn = document.getElementById('employeeDocsToggleBtn');
+      var docMenu = document.getElementById('employeeDocsDropdownMenu');
+      var docChevron = document.getElementById('employeeDocsChevron');
+      var docWrap = document.getElementById('employeeDocsDropdownWrap');
+
+      if (docBtn && docMenu) {
+        docBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var isHidden = docMenu.style.display === 'none' || docMenu.style.display === '';
+          if (isHidden) {
+            docMenu.style.display = 'block';
+            if (docChevron) docChevron.style.transform = 'rotate(180deg)';
+          } else {
+            docMenu.style.display = 'none';
+            if (docChevron) docChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+
+        document.addEventListener('click', function (e) {
+          if (docWrap && !docWrap.contains(e.target)) {
+            docMenu.style.display = 'none';
+            if (docChevron) docChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+    });
+
+    function openEmploymentRecordModal() {
+      var modal = document.getElementById('employmentRecordModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function printEmploymentRecord() {
+      var printArea = document.getElementById('employmentRecordPrintArea');
+      if (!printArea) {
+        window.print();
+        return;
+      }
+      var content = printArea.innerHTML;
+      var empName = @json($emp->emp_name ?? 'Employee');
+      var printWin = window.open('', '_blank', 'width=980,height=900,menubar=no,toolbar=no,location=no,status=no');
+      if (!printWin) {
+        window.print();
+        return;
+      }
+      printWin.document.write('<!DOCTYPE html><html><head><title>Employment Record - ' + empName + '</title>');
+      printWin.document.write('<style>');
+      printWin.document.write('@page { size: A4 portrait; margin: 8mm 12mm; }');
+      printWin.document.write('* { box-sizing: border-box; }');
+      printWin.document.write('body { font-family: Arial, Helvetica, sans-serif; background: #ffffff !important; color: #000000 !important; margin: 0; padding: 0; font-size: 11px; line-height: 1.35; -webkit-print-color-adjust: exact; print-color-adjust: exact; }');
+      printWin.document.write('table { width: 100%; border-collapse: collapse; table-layout: fixed; }');
+      printWin.document.write('hr { border: none; border-top: 1px solid #000; margin: 8px 0 6px 0; }');
+      printWin.document.write('.contract-item-row { page-break-inside: avoid; break-inside: avoid; }');
+      printWin.document.write('@media print { body { padding: 0 !important; } }');
+      printWin.document.write('</style></head><body>');
+      printWin.document.write(content);
+      printWin.document.write('</body></html>');
+      printWin.document.close();
+      printWin.focus();
+      setTimeout(function() {
+        printWin.print();
+      }, 400);
+    }
   </script>
 
   @can('initiate', \App\Models\AudRev::class)

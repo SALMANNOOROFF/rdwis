@@ -434,7 +434,7 @@ class PurchaseApprovalService
                     if ($toStage === 'Approved') {
                         $newPcsStatus = 'Approved';
                         $this->closeSubstatus($case);
-                    } elseif ($toStage === 'Division' || in_array($toStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE'])) {
+                    } elseif ($toStage === 'Division' || in_array($toStage, ['Enab', 'Comm', 'NWS', 'Sensors', 'Sys', 'SoSE', 'C#', 'C3', 'Ex Sys Div', 'AI & Emers', 'R & EW', 'UWT div', 'S & UAV', 'P & I'])) {
                         $toStage = 'Division';
                         $newPcsStatus = 'Returned';
                         $this->transitionSubstatus($case, 'Division');

@@ -319,6 +319,7 @@ class DivHrController extends Controller
                      ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
                      ->orOn('cp.prj_id', '=', 'ch.hed_id');
             })
+            ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
             ->where('c.ctr_num', $id)
             ->whereRaw('? between c.ctr_startdt and c.ctr_enddt', [$monthRef])
             ->orderBy('c.ctr_enddt', 'desc')
@@ -327,7 +328,8 @@ class DivHrController extends Controller
                 'ch.hed_code as ctr_hed_code', 
                 'ch.hed_name as ctr_hed_name',
                 'cp.prj_title as ctr_prj_title',
-                'cp.prj_code as ctr_prj_code'
+                'cp.prj_code as ctr_prj_code',
+                'cu.unt_name as ctr_unt_name'
             )
             ->first();
 
@@ -340,6 +342,7 @@ class DivHrController extends Controller
                          ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
                          ->orOn('cp.prj_id', '=', 'ch.hed_id');
                 })
+                ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
                 ->where('c.ctr_num', $id)
                 ->orderBy('c.ctr_startdt', 'desc')
                 ->orderBy('c.ctr_id', 'desc')
@@ -348,7 +351,8 @@ class DivHrController extends Controller
                     'ch.hed_code as ctr_hed_code', 
                     'ch.hed_name as ctr_hed_name',
                     'cp.prj_title as ctr_prj_title',
-                    'cp.prj_code as ctr_prj_code'
+                    'cp.prj_code as ctr_prj_code',
+                    'cu.unt_name as ctr_unt_name'
                 )
                 ->first();
         }
@@ -433,6 +437,7 @@ class DivHrController extends Controller
                      ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
                      ->orOn('cp.prj_id', '=', 'ch.hed_id');
             })
+            ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
             ->where('c.ctr_num', $id)
             ->orderBy('c.ctr_startdt', 'desc')
             ->orderBy('c.ctr_id', 'desc')
@@ -441,7 +446,8 @@ class DivHrController extends Controller
                 'ch.hed_code as ctr_hed_code', 
                 'ch.hed_name as ctr_hed_name',
                 'cp.prj_title as ctr_prj_title',
-                'cp.prj_code as ctr_prj_code'
+                'cp.prj_code as ctr_prj_code',
+                'cu.unt_name as ctr_unt_name'
             )
             ->get()
             ->map(function ($row) {

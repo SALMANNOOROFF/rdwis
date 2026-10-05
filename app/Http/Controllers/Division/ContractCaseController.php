@@ -411,6 +411,16 @@ class ContractCaseController extends Controller
             return $case;
         });
 
+        // Auto-generate HR Policy forms (after case transaction commits, fail-safe)
+        if (config('hrforms.enabled', false)) {
+            try {
+                app(\App\Services\HrForms\FormGenerationService::class)->syncForms($case);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("HrForms generation failed for case CC-{$case->ctc_id}: " . $e->getMessage());
+                session()->flash('warning', 'Contract case saved as draft, but some HR forms could not be auto-generated.');
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Contract Case draft created successfully.',
@@ -655,6 +665,17 @@ class ContractCaseController extends Controller
             // Recalculate price
             $this->pricingService->calculatePrice($case);
         });
+
+        // Auto-sync HR Policy forms (after case transaction commits, fail-safe)
+        // Only draft or under-revision cases trigger sync; submitted/approved cases must not be touched
+        if (config('hrforms.enabled', false) && in_array($case->ctc_status, ['Draft', 'Under Revision'], true)) {
+            try {
+                app(\App\Services\HrForms\FormGenerationService::class)->syncForms($case);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("HrForms sync failed for case CC-{$case->ctc_id}: " . $e->getMessage());
+                session()->flash('warning', 'Contract case revision saved, but some HR forms could not be updated.');
+            }
+        }
 
         return response()->json([
             'success' => true,

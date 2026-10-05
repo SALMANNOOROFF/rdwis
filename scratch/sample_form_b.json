@@ -1,0 +1,116 @@
+{
+    "live": {
+        "grade": "Manager",
+        "duration": "28 Apr 2025 to 31 Jul 2025 (4 Months)",
+        "job_type": "Full Time",
+        "gross_pay": 70000,
+        "job_title": "Manager",
+        "start_date": "2025-04-28",
+        "project_code": "10KM",
+        "division_name": "Command, Control and Communication (C3)",
+        "project_title": "Project will be allocated on next pay",
+        "tenure_months": 4,
+        "approval_chain": [
+            {
+                "id": 7,
+                "sequence": 1,
+                "form_code": "RDW\/HR\/F-02",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "Project Director",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "RO_AND_ABOVE",
+                "is_final_authority": false
+            },
+            {
+                "id": 8,
+                "sequence": 2,
+                "form_code": "RDW\/HR\/F-02",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "Co-PI \/ Subject Expert",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "RO_AND_ABOVE",
+                "is_final_authority": false
+            },
+            {
+                "id": 9,
+                "sequence": 3,
+                "form_code": "RDW\/HR\/F-02",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "Dir HR \/ SO HR",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "RO_AND_ABOVE",
+                "is_final_authority": false
+            },
+            {
+                "id": 10,
+                "sequence": 4,
+                "form_code": "RDW\/HR\/F-02",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "MD RDW",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "RO_AND_ABOVE",
+                "is_final_authority": false
+            },
+            {
+                "id": 11,
+                "sequence": 5,
+                "form_code": "RDW\/HR\/F-02",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "DG NRDI",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Approval",
+                "can_approve": true,
+                "grade_level": "RO_AND_ABOVE",
+                "is_final_authority": true
+            }
+        ],
+        "final_approver": "DG NRDI",
+        "estimated_end_date": "2025-07-31",
+        "already_hired_count": 0,
+        "hr_allocated_budget": null,
+        "hr_budget_available": false,
+        "hr_budget_remaining": null,
+        "principal_candidate": {
+            "cnic": null,
+            "name": "yyy",
+            "institute": null,
+            "qualification": null,
+            "field_experience": null,
+            "institute_source": "manual",
+            "experience_source": "manual",
+            "qualification_source": "manual"
+        },
+        "total_project_budget": null,
+        "case_financial_impact": 173306,
+        "project_budget_available": false,
+        "hr_budget_committed_total": null,
+        "hr_budget_utilized_to_date": null
+    },
+    "manual": {
+        "interview_date": null,
+        "interview_time": null,
+        "interview_venue": null,
+        "approved_hr_count": null,
+        "board_recommendations": null,
+        "interview_time_source": "manual",
+        "interview_venue_source": "manual",
+        "shortlisted_candidates": [],
+        "standby_candidate_name": null
+    },
+    "warnings": [
+        "Proposed salary (Rs. 70,000) is below the Annex K starting salary band for Manager (Rs. 150,000 - Rs. 200,000) by Rs. 80,000. Policy allows warning only."
+    ],
+    "is_complete": false,
+    "missing_fields": [
+        "approved_hr_count",
+        "interview_date"
+    ]
+}

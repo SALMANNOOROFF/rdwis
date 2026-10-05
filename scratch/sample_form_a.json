@@ -1,0 +1,120 @@
+{
+    "live": {
+        "tenure_days": 95,
+        "hr_allocated": null,
+        "project_code": "10KM",
+        "project_name": "Project will be allocated on next pay",
+        "proposed_qty": 1,
+        "director_name": "Aleem Mushtaq",
+        "division_name": "Command, Control and Communication (C3)",
+        "tenure_months": 4,
+        "approval_chain": [
+            {
+                "id": 1,
+                "sequence": 1,
+                "form_code": "RDW\/HR\/F-01",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "Project Director",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Initiation",
+                "can_approve": false,
+                "grade_level": "ALL",
+                "is_final_authority": false
+            },
+            {
+                "id": 2,
+                "sequence": 2,
+                "form_code": "RDW\/HR\/F-01",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "Dir HR \/ SO HR",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "ALL",
+                "is_final_authority": false
+            },
+            {
+                "id": 3,
+                "sequence": 3,
+                "form_code": "RDW\/HR\/F-01",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "Dir Finance \/ SO Finance",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "ALL",
+                "is_final_authority": false
+            },
+            {
+                "id": 4,
+                "sequence": 4,
+                "form_code": "RDW\/HR\/F-01",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "MD RDW",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "ALL",
+                "is_final_authority": false
+            },
+            {
+                "id": 5,
+                "sequence": 5,
+                "form_code": "RDW\/HR\/F-01",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "Dir Log NRDI",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Recommendation",
+                "can_approve": false,
+                "grade_level": "ALL",
+                "is_final_authority": false
+            },
+            {
+                "id": 6,
+                "sequence": 6,
+                "form_code": "RDW\/HR\/F-01",
+                "created_at": "2026-10-02T00:58:07.016233Z",
+                "role_title": "DG NRDI",
+                "updated_at": "2026-10-02T07:58:07.000000Z",
+                "action_type": "Approval",
+                "can_approve": true,
+                "grade_level": "ALL",
+                "is_final_authority": true
+            }
+        ],
+        "final_approver": "DG NRDI",
+        "forecast_basis": "case_plans_daily_prorated",
+        "proposed_grade": "Manager",
+        "total_forecast": 173306,
+        "approved_budget": null,
+        "proposed_salary": 70000,
+        "consultancy_misc": null,
+        "project_end_date": "2025-07-31",
+        "salary_band_range": "Rs. 150,000 - 200,000",
+        "hardware_equipment": null,
+        "project_start_date": "2025-04-28",
+        "forecasted_per_month": 70000,
+        "allocations_available": false,
+        "project_budget_available": false
+    },
+    "manual": {
+        "overheads": 0,
+        "work_order_no": null,
+        "work_order_date": null,
+        "other_cost_heads": 0,
+        "experience_required": null,
+        "warranty_expiry_date": null,
+        "service_charges_taxes": 0,
+        "qualification_required": null,
+        "infrastructure_development": 0
+    },
+    "warnings": [
+        "Proposed salary (Rs. 70,000) is below the Annex K starting salary band for Manager (Rs. 150,000 - Rs. 200,000) by Rs. 80,000. Policy allows warning only."
+    ],
+    "is_complete": false,
+    "missing_fields": [
+        "work_order_no",
+        "work_order_date",
+        "warranty_expiry_date"
+    ]
+}

@@ -1,6 +1,6 @@
 {{-- RDWIS AI Assistant Floating Chat Widget (RIVA) with Animated Robot Mascot --}}
 @auth
-<link rel="stylesheet" href="{{ asset('css/rdwis-ai-robot.css') }}">
+<link rel="stylesheet" href="{{ asset('css/rdwis-ai-robot.css') }}?v={{ filemtime(public_path('css/rdwis-ai-robot.css')) }}">
 
 <div id="rdwisAiWidgetContainer" class="rdwis-ai-widget" aria-label="RDWIS AI Assistant (RIVA)">
     
@@ -774,7 +774,7 @@
 }
 </style>
 
-<script src="{{ asset('js/rdwis-ai-robot.js') }}"></script>
+<script src="{{ asset('js/rdwis-ai-robot.js') }}?v={{ filemtime(public_path('js/rdwis-ai-robot.js')) }}"></script>
 
 <script>
 (function() {
@@ -814,6 +814,7 @@
 
     toggleBtn.addEventListener('click', function(e) {
         e.preventDefault();
+        if (window.__RIVA_WAS_DRAGGED__) return;
         toggleChat();
     });
     
@@ -971,6 +972,233 @@
             );
         });
     }
+
+    // ============================================================
+    // RIVA DRAGGABLE MASCOT & 2-MINUTE AUTO-RETURN CONTROLLER
+    // ============================================================
+    (function setupDraggableRiva() {
+        var container = document.getElementById('rdwisAiWidgetContainer');
+        var launcher = document.getElementById('rdwisAiToggleBtn') || document.getElementById('rdwisRobotLauncher');
+        var bubble = document.getElementById('rdwisSpeechBubble');
+        var header = document.querySelector('.rdwis-ai-header');
+
+        if (!container || !launcher) return;
+
+        var isDragging = false;
+        var isPressed = false;
+        var startPointerX = 0;
+        var startPointerY = 0;
+        var startBoxLeft = 0;
+        var startBoxTop = 0;
+        var autoReturnTimer = null;
+        var AUTO_RETURN_MS = 120000; // 2 minutes (120,000 ms)
+        var wasMovedAway = false;
+
+        function getZoomRatio() {
+            try {
+                var z = parseFloat(window.getComputedStyle(document.body).zoom);
+                if (!isNaN(z) && z > 0) return z;
+            } catch(e) {}
+            return 1.0;
+        }
+
+        function onStart(e) {
+            // Ignore right clicks or middle clicks
+            if (e.button !== undefined && e.button !== 0) return;
+            // Ignore clicks on header controls (close, clear) or inputs
+            if (e.target.closest('#rdwisAiCloseBtn, #rdwisAiClearBtn, input, textarea, select')) return;
+
+            // Clear any pending return timer while user is holding/moving
+            if (autoReturnTimer) {
+                clearTimeout(autoReturnTimer);
+                autoReturnTimer = null;
+            }
+
+            var rect = container.getBoundingClientRect();
+            var pointer = (e.touches && e.touches.length > 0) ? e.touches[0] : e;
+
+            isPressed = true;
+            isDragging = false;
+            startPointerX = pointer.clientX;
+            startPointerY = pointer.clientY;
+            startBoxLeft = rect.left;
+            startBoxTop = rect.top;
+
+            document.addEventListener('mousemove', onMove, { passive: false });
+            document.addEventListener('mouseup', onEnd, { passive: false });
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd, { passive: false });
+            document.addEventListener('touchcancel', onEnd, { passive: false });
+        }
+
+        function onMove(e) {
+            if (!isPressed) return;
+
+            var pointer = (e.touches && e.touches.length > 0) ? e.touches[0] : e;
+            var deltaX = pointer.clientX - startPointerX;
+            var deltaY = pointer.clientY - startPointerY;
+            var dist = Math.hypot(deltaX, deltaY);
+
+            if (!isDragging && dist > 4) {
+                isDragging = true;
+                window.__RIVA_WAS_DRAGGED__ = true;
+                container.classList.add('is-dragging');
+                document.body.style.userSelect = 'none';
+                document.body.style.webkitUserSelect = 'none';
+            }
+
+            if (isDragging) {
+                if (e.cancelable) e.preventDefault();
+
+                var zoom = getZoomRatio();
+                var visualLeft = startBoxLeft + deltaX;
+                var visualTop = startBoxTop + deltaY;
+
+                // Viewport boundaries clamping
+                var maxLeft = window.innerWidth - container.offsetWidth - 8;
+                var maxTop = window.innerHeight - container.offsetHeight - 8;
+                visualLeft = Math.max(8, Math.min(visualLeft, maxLeft));
+                visualTop = Math.max(8, Math.min(visualTop, maxTop));
+
+                // Scale to CSS units according to body zoom
+                var cssLeft = Math.round(visualLeft / zoom);
+                var cssTop = Math.round(visualTop / zoom);
+
+                container.style.setProperty('transition', 'none', 'important');
+                container.style.setProperty('right', 'auto', 'important');
+                container.style.setProperty('bottom', 'auto', 'important');
+                container.style.setProperty('left', cssLeft + 'px', 'important');
+                container.style.setProperty('top', cssTop + 'px', 'important');
+
+                // Adaptive placement for window & speech bubble
+                adaptQuadrant(visualLeft, visualTop);
+            }
+        }
+
+        function adaptQuadrant(visualLeft, visualTop) {
+            if (chatWindow) {
+                if (visualTop < 380) {
+                    chatWindow.classList.add('open-downwards');
+                } else {
+                    chatWindow.classList.remove('open-downwards');
+                }
+                if (visualLeft < 380) {
+                    chatWindow.classList.add('open-rightwards');
+                } else {
+                    chatWindow.classList.remove('open-rightwards');
+                }
+            }
+            if (bubble) {
+                if (visualTop < 120) {
+                    bubble.classList.add('bubble-downwards');
+                } else {
+                    bubble.classList.remove('bubble-downwards');
+                }
+            }
+        }
+
+        function onEnd() {
+            if (!isPressed) return;
+            isPressed = false;
+
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', onEnd);
+            document.removeEventListener('touchcancel', onEnd);
+            document.body.style.userSelect = '';
+            document.body.style.webkitUserSelect = '';
+
+            if (container) {
+                container.classList.remove('is-dragging');
+            }
+
+            if (isDragging) {
+                isDragging = false;
+                wasMovedAway = true;
+
+                // Keep flag briefly so following click event doesn't toggle chat
+                setTimeout(function() {
+                    window.__RIVA_WAS_DRAGGED__ = false;
+                }, 200);
+
+                // Start 2-Minute Return Countdown
+                scheduleReturnHome();
+            } else {
+                window.__RIVA_WAS_DRAGGED__ = false;
+            }
+        }
+
+        function scheduleReturnHome() {
+            if (autoReturnTimer) clearTimeout(autoReturnTimer);
+            autoReturnTimer = setTimeout(function() {
+                flyHome();
+            }, AUTO_RETURN_MS);
+        }
+
+        function flyHome() {
+            if (!container || isPressed || isDragging) return;
+
+            var zoom = getZoomRatio();
+            var isPwa = document.body.classList.contains('has-pwa-banner');
+            var homeBottom = isPwa ? 96 : 24;
+            var homeRight = 28;
+
+            var targetVisualLeft = window.innerWidth - container.offsetWidth - homeRight;
+            var targetVisualTop = window.innerHeight - container.offsetHeight - homeBottom;
+
+            var targetCssLeft = Math.round(targetVisualLeft / zoom);
+            var targetCssTop = Math.round(targetVisualTop / zoom);
+
+            container.classList.add('riva-flying-home');
+            container.style.setProperty('transition', 'left 1s cubic-bezier(0.34, 1.25, 0.64, 1), top 1s cubic-bezier(0.34, 1.25, 0.64, 1)', 'important');
+            container.style.setProperty('left', targetCssLeft + 'px', 'important');
+            container.style.setProperty('top', targetCssTop + 'px', 'important');
+
+            setTimeout(function() {
+                container.style.removeProperty('transition');
+                container.style.removeProperty('left');
+                container.style.removeProperty('top');
+                container.style.removeProperty('right');
+                container.style.removeProperty('bottom');
+                container.classList.remove('riva-flying-home');
+                wasMovedAway = false;
+
+                if (chatWindow) {
+                    chatWindow.classList.remove('open-downwards', 'open-rightwards');
+                }
+                if (bubble) {
+                    bubble.classList.remove('bubble-downwards');
+                }
+
+                if (window.RivaRobot && window.RivaRobot.wave) {
+                    window.RivaRobot.wave();
+                }
+                if (window.RivaRobot && window.RivaRobot.showBubble) {
+                    window.RivaRobot.showBubble("Back at my station! 🤖");
+                }
+            }, 1050);
+        }
+
+        // Attach dragstart preventer to avoid browser HTML5 ghost drag
+        [launcher, bubble, header, container].forEach(function(el) {
+            if (!el) return;
+            el.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        });
+
+        // Attach mousedown & touchstart handlers
+        [launcher, bubble, header].forEach(function(el) {
+            if (!el) return;
+            el.addEventListener('mousedown', onStart);
+            el.addEventListener('touchstart', onStart, { passive: true });
+        });
+
+        // Expose helper on window for debugging or manual trigger
+        window.rivaFlyHome = flyHome;
+    })();
 })();
 </script>
 @endauth

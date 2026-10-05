@@ -75,7 +75,7 @@
             ?? 'Institutional Core Budget';
     }
 
-    $empName = $case->ctc_empnamecomp ?: ($case->employee->emp_name ?? 'Candidate Name');
+    $empName = $case->ctc_empnamecomp ?: ($case->employee->emp_name ?? null);
     $empDesignation = $case->ctc_newjobtitle ?: ($case->employee->emp_desig ?? 'N/A');
     $empGrade = $case->ctc_newgrade ?: ($case->employee->emp_grade ?? 'N/A');
 
@@ -2090,6 +2090,9 @@ textarea::-webkit-scrollbar-thumb:hover {
     </div>
 </div>
 @endforeach
+
+{{-- HR Policy Case File Tab Panel (Step 3) --}}
+@include('hrforms.case-file-panel', ['case' => $case])
 
 @push('scripts')
 <script>

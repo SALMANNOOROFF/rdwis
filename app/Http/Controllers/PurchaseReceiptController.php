@@ -406,6 +406,7 @@ class PurchaseReceiptController extends Controller
                 'a.ias_type',
                 'a.ias_subtype',
                 'a.ias_chargedate',
+                'a.ias_unt_id',
                 'p.pcs_title',
                 'u.unt_namesh',
                 'u.unt_name',

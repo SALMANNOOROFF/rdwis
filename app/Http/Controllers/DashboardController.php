@@ -48,14 +48,29 @@ class DashboardController extends Controller
             ->select('h.hed_id', 'h.hed_prj_id', 'h.hed_code', 'p.prj_title', 'p.prj_status', 'p.prj_aprvdt')
             ->get();
 
+        $unit = DB::table('cen.units')->where('unt_id', $unitId)->select('unt_id', 'unt_name', 'unt_namesh')->first();
+
         $financials = [];
         $projectsList = [];
         $totalAmount = 0;
         $totalSpent = 0;
+        $totalCommitments = 0;
+        $totalInProcess = 0;
 
         foreach ($heads as $h) {
             $fin = $finService->getHeadStatus($h->hed_id);
             
+            $appr = (float)($fin->prj_share ?? 0);
+            $spent = (float)($fin->prj_expenditure ?? 0);
+            $rem = (float)($fin->prj_remaining ?? 0);
+            $comm = (float)($fin->prj_commitments ?? 0);
+            $inp = (float)($fin->prj_in_process ?? 0);
+
+            $totalAmount += $appr;
+            $totalSpent += $spent;
+            $totalCommitments += $comm;
+            $totalInProcess += $inp;
+
             // Collect detailed financials for interactive panel
             $financials[] = [
                 'head_id' => $h->hed_id,
@@ -63,9 +78,10 @@ class DashboardController extends Controller
                 'title' => $h->prj_title,
                 
                 // Top Level
-                'approved' => $fin->prj_share ?? 0,
-                'spent' => $fin->prj_expenditure ?? 0,
-                'remaining' => $fin->prj_remaining ?? 0,
+                'approved' => $appr,
+                'spent' => $spent,
+                'remaining' => $rem,
+                'commitments' => $comm,
                 
                 // Details (Project Scope)
                 'prj_share' => $fin->prj_share ?? 0,
@@ -90,22 +106,30 @@ class DashboardController extends Controller
             // Milestones logic
             $totalMilestones = DB::table('prj.milestones')->where('msn_xprj_id', $h->hed_prj_id)->count();
             $completedMilestones = DB::table('prj.milestones')->where('msn_xprj_id', $h->hed_prj_id)->where('msn_status', 'Completed')->count();
+            $milestonesPct = $totalMilestones > 0 ? round(($completedMilestones / $totalMilestones) * 100) : 0;
+            $burnRate = $appr > 0 ? round((abs($spent) / $appr) * 100, 1) : 0;
             
             $projectsList[] = [
                 'prj_id' => $h->hed_prj_id,
                 'title' => $h->prj_title,
                 'team_count' => $teamCount,
                 'milestones' => "$completedMilestones / $totalMilestones",
+                'milestones_total' => $totalMilestones,
+                'milestones_completed' => $completedMilestones,
+                'milestones_pct' => $milestonesPct,
                 'created_on' => $h->prj_aprvdt ? \Carbon\Carbon::parse($h->prj_aprvdt)->format('M d, Y') : 'N/A',
                 'status' => $h->prj_status,
-                'head_code' => $h->hed_code
+                'head_code' => $h->hed_code,
+                'approved' => $appr,
+                'spent' => abs($spent),
+                'commitments' => $comm,
+                'remaining' => $rem,
+                'burn_rate' => $burnRate
             ];
-
-            $totalAmount += ($fin->prj_share ?? 0);
-            $totalSpent += ($fin->prj_expenditure ?? 0);
         }
 
         $totalRemaining = $totalAmount - abs($totalSpent);
+        $utilizationRate = $totalAmount > 0 ? round((abs($totalSpent) / $totalAmount) * 100, 1) : 0;
 
         // 3. Purchase Cases Breakdown
         $casesBreakdown = Purchase::where('pcs_unt_id', $unitId)
@@ -116,10 +140,32 @@ class DashboardController extends Controller
         
         $totalCases = array_sum($casesBreakdown);
 
-        // 4. Hiring Cases 
+        // 4. Recent Purchase Cases
+        $recentPurchases = DB::table('pur.purcases as p')
+            ->leftJoin('cen.heads as h', 'p.pcs_effhed_id', '=', 'h.hed_id')
+            ->where('p.pcs_unt_id', $unitId)
+            ->orderBy('p.pcs_id', 'desc')
+            ->limit(5)
+            ->select('p.pcs_id', 'p.pcs_title', 'p.pcs_status', 'p.pcs_price', 'p.pcs_date', 'h.hed_code')
+            ->get();
+
+        // 5. Assets and Inventory Stats
+        $assetStats = DB::table('ina.invatcomps as c')
+            ->join('ina.invats as a', 'c.iac_ias_id', '=', 'a.ias_id')
+            ->where('a.ias_unt_id', $unitId)
+            ->selectRaw("
+                COUNT(c.iac_id) as total_items,
+                COUNT(CASE WHEN c.iac_status IN ('Untagged', 'Tagged', 'Held') THEN 1 END) as on_charge_count,
+                COUNT(CASE WHEN c.iac_status NOT IN ('Untagged', 'Tagged', 'Held') THEN 1 END) as off_charge_count,
+                COALESCE(SUM(CASE WHEN c.iac_status IN ('Untagged', 'Tagged', 'Held') THEN c.iac_qty * a.ias_price ELSE 0 END), 0) as on_charge_val,
+                COALESCE(SUM(CASE WHEN c.iac_status NOT IN ('Untagged', 'Tagged', 'Held') THEN c.iac_qty * a.ias_price ELSE 0 END), 0) as off_charge_val
+            ")->first();
+
+        // 6. Hiring Cases 
         $hiringCases = 0;
 
         return response()->json([
+            'unit' => $unit,
             'totalProjects' => $totalProjects,
             'projectsByStage' => $projectsByStage,
             'financials' => $financials,
@@ -127,11 +173,22 @@ class DashboardController extends Controller
             'finSummary' => [
                 'total' => $totalAmount,
                 'spent' => abs($totalSpent),
-                'remaining' => $totalRemaining
+                'commitments' => $totalCommitments,
+                'in_process' => $totalInProcess,
+                'remaining' => $totalRemaining,
+                'utilization_rate' => $utilizationRate
             ],
             'purchaseStats' => [
                 'breakdown' => $casesBreakdown,
-                'total' => $totalCases
+                'total' => $totalCases,
+                'recent' => $recentPurchases
+            ],
+            'assetStats' => [
+                'total_items' => (int)($assetStats->total_items ?? 0),
+                'on_charge_count' => (int)($assetStats->on_charge_count ?? 0),
+                'off_charge_count' => (int)($assetStats->off_charge_count ?? 0),
+                'on_charge_val' => (float)($assetStats->on_charge_val ?? 0),
+                'off_charge_val' => (float)($assetStats->off_charge_val ?? 0),
             ],
             'hiringStats' => [
                 'active' => $hiringCases

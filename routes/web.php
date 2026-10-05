@@ -109,6 +109,19 @@ Route::middleware('auth')->group(function () {
     Route::middleware('force_password_change')->group(function () {
         Route::get('/contract-cases/{id}/projects/{headId}/panel', [\App\Http\Controllers\ContractCaseController::class, 'projectPanel'])
             ->whereNumber(['id', 'headId'])->name('contract-cases.project-panel');
+
+        // HR Forms Module Routes (Step 3: Case File UI & Progress Tracker)
+        Route::prefix('hrforms')->name('hrforms.')->group(function () {
+            Route::get('/cases/{caseId}/tab', [\App\Http\Controllers\HrForms\CaseFileController::class, 'index'])->name('case-file.index');
+            Route::get('/forms/{formId}', [\App\Http\Controllers\HrForms\CaseFileController::class, 'showForm'])->name('forms.show');
+            Route::put('/forms/{formId}', [\App\Http\Controllers\HrForms\CaseFileController::class, 'updateForm'])->name('forms.update');
+            Route::post('/forms/{formId}/refresh', [\App\Http\Controllers\HrForms\CaseFileController::class, 'refreshLive'])->name('forms.refresh');
+            Route::post('/forms/{formId}/submit', [\App\Http\Controllers\HrForms\CaseFileController::class, 'submitForm'])->name('forms.submit');
+            Route::post('/forms/{formId}/pending-action', [\App\Http\Controllers\HrForms\CaseFileController::class, 'pendingAction'])->name('forms.pending-action');
+            Route::post('/cases/{caseId}/milestones', [\App\Http\Controllers\HrForms\CaseFileController::class, 'updateMilestone'])->name('milestones.update');
+            Route::put('/cases/{caseId}/project-extras', [\App\Http\Controllers\HrForms\CaseFileController::class, 'updateProjectExtras'])->name('project-extras.update');
+        });
+
         Route::get('/', function () {
             $u = Auth::user();
             if (method_exists($u, 'isSORD') && $u->isSORD()) {
