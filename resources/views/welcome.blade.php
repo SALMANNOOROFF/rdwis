@@ -489,6 +489,72 @@
             0% { transform: translateY(0px) scale(0.97); opacity: 0.9; }
             100% { transform: translateY(-6px) scale(1.02); opacity: 1; }
         }
+
+        /* Master AI Assistant ON/OFF Switch Pill in Top Navbar */
+        .rdwis-ai-navbar-pill {
+            display: inline-flex;
+            align-items: center;
+            background: var(--rd-surface, #ffffff);
+            border: 1.5px solid var(--rd-border, #cbd5e1);
+            border-radius: 20px;
+            padding: 3px 10px 3px 7px;
+            height: 34px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            user-select: none;
+        }
+        .rdwis-ai-navbar-pill:hover {
+            background: var(--rd-neutral-50, #f8fafc);
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        .rdwis-ai-pill-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            transition: all 0.25s ease;
+        }
+        .rdwis-ai-pill-icon.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
+        }
+        .rdwis-ai-toggle-track {
+            position: relative;
+            width: 30px;
+            height: 16px;
+            background: #cbd5e1;
+            border-radius: 10px;
+            transition: background 0.25s ease, box-shadow 0.25s ease;
+            margin-left: 5px;
+            display: inline-block;
+        }
+        .rdwis-ai-toggle-track.active {
+            background: #10b981;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        }
+        .rdwis-ai-toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        }
+        .rdwis-ai-toggle-track.active .rdwis-ai-toggle-knob {
+            transform: translateX(14px);
+        }
     </style>
   </head>
 
@@ -532,6 +598,48 @@
       </ul>
 
       <ul class="navbar-nav ml-auto align-items-center" style="gap: 8px;">
+
+        @php
+            $isAiAssistantEnabled = \App\Models\SystemSetting::get('ai_assistant_enabled', '1') === '1';
+            $navbarUser = Auth::user();
+            $canManageAi = $navbarUser && (
+                $navbarUser->acc_username === 'superadminrdw' ||
+                session('impersonated_by_god') ||
+                (method_exists($navbarUser, 'canManageAi') && $navbarUser->canManageAi()) ||
+                (method_exists($navbarUser, 'isSuperAdmin') && $navbarUser->isSuperAdmin()) ||
+                (method_exists($navbarUser, 'isSoit') && $navbarUser->isSoit()) ||
+                strtolower(trim((string) ($navbarUser->acc_untarea ?? ''))) === 'it'
+            );
+        @endphp
+
+        @if($canManageAi)
+        {{-- Master AI Assistant (RIVA) ON/OFF Toggle Switch for SO IT & Super Admin Only --}}
+        <li class="nav-item d-flex align-items-center" id="rdwisAiAdminToggleWrapper" style="margin-right: 2px;">
+            <div class="rdwis-ai-navbar-pill d-flex align-items-center" 
+                 id="rdwisAiAdminToggleSwitch" 
+                 role="button" 
+                 tabindex="0"
+                 onclick="toggleMasterAiAssistant()" 
+                 title="AI Assistant (RIVA) Master Switch — Click to toggle On/Off for all users"
+                 aria-label="Toggle AI Assistant Master Switch"
+                 aria-checked="{{ $isAiAssistantEnabled ? 'true' : 'false' }}">
+                <div class="rdwis-ai-pill-icon {{ $isAiAssistantEnabled ? 'active' : '' }}" id="rdwisAiPillIcon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="rdwis-ai-pill-text d-none d-md-flex flex-column ml-1.5 mr-1 text-left" style="line-height: 1.1;">
+                    <span class="rdwis-ai-title" style="font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: var(--rd-text1, #1e293b);">RIVA AI</span>
+                    <span class="rdwis-ai-sub" style="font-size: 9px; color: var(--rd-text3, #64748b);">MASTER</span>
+                </div>
+                {{-- Switch track & knob --}}
+                <div class="rdwis-ai-toggle-track {{ $isAiAssistantEnabled ? 'active' : '' }}" id="rdwisAiToggleTrack">
+                    <div class="rdwis-ai-toggle-knob"></div>
+                </div>
+                <span class="badge {{ $isAiAssistantEnabled ? 'badge-success' : 'badge-secondary' }} ml-1 px-1.5 py-0.5 rdwis-ai-state-badge" id="rdwisAiStateBadge" style="font-size: 9.5px; font-weight: 700; border-radius: 6px;">
+                    {{ $isAiAssistantEnabled ? 'ON' : 'OFF' }}
+                </span>
+            </div>
+        </li>
+        @endif
         
         {{-- Dynamic Purchase Notifications --}}
         <li class="nav-item dropdown" id="notif-bell-container">
@@ -1708,7 +1816,153 @@
         })();
     </script>
     @include('partials.live_document_modal')
-    @include('partials.ai_chat_widget')
+
+    @php
+        $isAiAssistantEnabled = \App\Models\SystemSetting::get('ai_assistant_enabled', '1') === '1';
+        $footerUser = Auth::user();
+        $userCanManageAi = $footerUser && (
+            $footerUser->acc_username === 'superadminrdw' ||
+            session('impersonated_by_god') ||
+            (method_exists($footerUser, 'canManageAi') && $footerUser->canManageAi()) ||
+            (method_exists($footerUser, 'isSuperAdmin') && $footerUser->isSuperAdmin()) ||
+            (method_exists($footerUser, 'isSoit') && $footerUser->isSoit()) ||
+            strtolower(trim((string) ($footerUser->acc_untarea ?? ''))) === 'it'
+        );
+    @endphp
+
+    @if($isAiAssistantEnabled || $userCanManageAi)
+        @include('partials.ai_chat_widget', ['isAiAssistantEnabled' => $isAiAssistantEnabled])
+    @endif
+
+    @if($userCanManageAi)
+    <script>
+        function toggleMasterAiAssistant() {
+            var pill = document.getElementById('rdwisAiAdminToggleSwitch');
+            var track = document.getElementById('rdwisAiToggleTrack');
+            var icon = document.getElementById('rdwisAiPillIcon');
+            var badge = document.getElementById('rdwisAiStateBadge');
+            if (!pill || pill.dataset.loading === 'true') return;
+
+            pill.dataset.loading = 'true';
+            pill.style.opacity = '0.6';
+            pill.style.pointerEvents = 'none';
+
+            var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+            fetch('{{ route('api.ai.toggle') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({})
+            })
+            .then(function(res) {
+                return res.json();
+            })
+            .then(function(data) {
+                pill.dataset.loading = 'false';
+                pill.style.opacity = '1';
+                pill.style.pointerEvents = '';
+
+                if (data.success) {
+                    var isEnabled = Boolean(data.enabled);
+                    pill.setAttribute('aria-checked', isEnabled ? 'true' : 'false');
+                    
+                    if (isEnabled) {
+                        if (track) track.classList.add('active');
+                        if (icon) icon.classList.add('active');
+                        if (badge) {
+                            badge.className = 'badge badge-success ml-1 px-1.5 py-0.5 rdwis-ai-state-badge';
+                            badge.innerText = 'ON';
+                        }
+
+                        // Bring back chatbot in UI
+                        var widget = document.getElementById('rdwisAiWidgetContainer');
+                        if (widget) {
+                            widget.style.setProperty('display', 'block', 'important');
+                            if (window.jQuery) {
+                                $(widget).stop(true, true).hide().fadeIn(300);
+                            }
+                        } else {
+                            window.location.reload();
+                            return;
+                        }
+
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'AI Assistant (RIVA) is ON',
+                                text: 'Chatbot is now visible across RDWIS.',
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
+                        }
+                    } else {
+                        if (track) track.classList.remove('active');
+                        if (icon) icon.classList.remove('active');
+                        if (badge) {
+                            badge.className = 'badge badge-secondary ml-1 px-1.5 py-0.5 rdwis-ai-state-badge';
+                            badge.innerText = 'OFF';
+                        }
+
+                        // Close chat window if open
+                        var chatWindow = document.getElementById('rdwisAiChatWindow');
+                        if (chatWindow) chatWindow.classList.remove('active');
+                        var toggleBtn = document.getElementById('rdwisAiToggleBtn');
+                        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+
+                        // Vanish chatbot from UI
+                        var widget = document.getElementById('rdwisAiWidgetContainer');
+                        if (widget) {
+                            if (window.jQuery) {
+                                $(widget).stop(true, true).fadeOut(300, function() {
+                                    widget.style.setProperty('display', 'none', 'important');
+                                });
+                            } else {
+                                widget.style.setProperty('display', 'none', 'important');
+                            }
+                        }
+
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'info',
+                                title: 'AI Assistant (RIVA) is OFF',
+                                text: 'Chatbot hidden from UI for all users.',
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
+                        }
+                    }
+                } else {
+                    alert(data.message || 'Failed to toggle AI Assistant.');
+                }
+            })
+            .catch(function(err) {
+                pill.dataset.loading = 'false';
+                pill.style.opacity = '1';
+                pill.style.pointerEvents = '';
+                console.error('AI toggle error:', err);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Toggle Failed',
+                        text: 'An error occurred while communicating with the server.'
+                    });
+                }
+            });
+        }
+    </script>
+    @endif
+
     @include('pwa.install-banner')
   </body>
 </html>

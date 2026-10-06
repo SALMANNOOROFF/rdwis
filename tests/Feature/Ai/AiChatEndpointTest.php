@@ -18,8 +18,15 @@ class AiChatEndpointTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        \App\Models\SystemSetting::set('ai_assistant_enabled', '1');
+    }
+
     protected function tearDown(): void
     {
+        \App\Models\SystemSetting::set('ai_assistant_enabled', '1');
         HorizonScopeContext::reset();
         parent::tearDown();
     }

@@ -144,6 +144,35 @@ class UserAccessContext
     }
 
     /**
+     * Check if user is Staff Officer IT & CYS (SO IT) or IT Department staff.
+     */
+    public function isSoit(): bool
+    {
+        if (! $this->user) {
+            return false;
+        }
+
+        $area = strtolower(trim((string) ($this->user->acc_untarea ?? '')));
+        $desig = strtoupper(trim((string) ($this->user->acc_desig ?? '')));
+        $desigShort = strtoupper(trim((string) ($this->user->acc_desigshort ?? '')));
+
+        return $area === 'it'
+            || str_contains($desigShort, 'SO IT')
+            || str_contains($desig, 'STAFF OFFICER IT')
+            || str_contains($desig, 'SYS ADMIN')
+            || str_contains($desig, 'SYSTEM ADMIN')
+            || in_array($this->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true);
+    }
+
+    /**
+     * Check if user is authorized to manage AI assistant settings (SO IT or Super Admin).
+     */
+    public function canManageAi(): bool
+    {
+        return $this->isSuperAdmin() || $this->isSoit();
+    }
+
+    /**
      * Check if user belongs to a Division in Projects area.
      */
     public function isDivision(): bool

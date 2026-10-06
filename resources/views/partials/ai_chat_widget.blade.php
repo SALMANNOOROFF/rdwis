@@ -2,7 +2,7 @@
 @auth
 <link rel="stylesheet" href="{{ asset('css/rdwis-ai-robot.css') }}?v={{ filemtime(public_path('css/rdwis-ai-robot.css')) }}">
 
-<div id="rdwisAiWidgetContainer" class="rdwis-ai-widget" aria-label="RDWIS AI Assistant (RIVA)">
+<div id="rdwisAiWidgetContainer" class="rdwis-ai-widget" aria-label="RDWIS AI Assistant (RIVA)"{!! (isset($isAiAssistantEnabled) && !$isAiAssistantEnabled) ? ' style="display: none !important;"' : '' !!}>
     
     {{-- Interactive Speech Bubble --}}
     <div id="rdwisSpeechBubble" class="rdwis-speech-bubble" role="status" aria-live="polite" title="Click to chat with RIVA">

@@ -22,6 +22,14 @@ class AiChatController extends Controller
      */
     public function chat(Request $request, AiToolCallingService $toolCallingService): JsonResponse
     {
+        if (\App\Models\SystemSetting::get('ai_assistant_enabled', '1') !== '1') {
+            return response()->json([
+                'success' => false,
+                'message' => 'The AI Assistant (RIVA) is currently disabled by System Administrator.',
+                'status' => 'disabled',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'message' => 'required|string|max:2000',
             'history' => 'nullable|array',
@@ -62,5 +70,65 @@ class AiChatController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 503);
         }
+    }
+
+    /**
+     * Toggle master AI Assistant status (Enable/Disable).
+     * Strictly restricted to SO IT and Super Admin.
+     */
+    public function toggle(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
+        }
+
+        $canManage = (method_exists($user, 'canManageAi') && $user->canManageAi())
+            || ($user->acc_username === 'superadminrdw')
+            || session('impersonated_by_god')
+            || (method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin())
+            || (method_exists($user, 'isSoit') && $user->isSoit())
+            || strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'it';
+
+        if (!$canManage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only SO IT and Super Admin can configure AI Assistant availability.',
+            ], 403);
+        }
+
+        if ($request->has('enabled')) {
+            $enabled = filter_var($request->input('enabled'), FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $current = \App\Models\SystemSetting::get('ai_assistant_enabled', '1');
+            $enabled = ($current !== '1');
+        }
+
+        \App\Models\SystemSetting::set(
+            'ai_assistant_enabled',
+            $enabled ? '1' : '0',
+            'Master AI Assistant (RIVA) Enable/Disable Switch'
+        );
+
+        return response()->json([
+            'success' => true,
+            'enabled' => $enabled,
+            'message' => $enabled
+                ? 'AI Assistant (RIVA) has been successfully ENABLED across RDWIS.'
+                : 'AI Assistant (RIVA) has been successfully DISABLED across RDWIS.',
+        ]);
+    }
+
+    /**
+     * Check master AI Assistant status.
+     */
+    public function status(): JsonResponse
+    {
+        $enabled = \App\Models\SystemSetting::get('ai_assistant_enabled', '1') === '1';
+
+        return response()->json([
+            'success' => true,
+            'enabled' => $enabled,
+        ]);
     }
 }

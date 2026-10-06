@@ -520,6 +520,21 @@ class CenAccount extends Authenticatable
         return in_array($area, ['rdwprj', 'prjrdw'], true);
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return \App\Services\Auth\UserAccessContext::forUser($this)->isSuperAdmin();
+    }
+
+    public function isSoit(): bool
+    {
+        return \App\Services\Auth\UserAccessContext::forUser($this)->isSoit();
+    }
+
+    public function canManageAi(): bool
+    {
+        return \App\Services\Auth\UserAccessContext::forUser($this)->canManageAi();
+    }
+
     public function isDivision()
     {
         return $this->normalizedArea() === 'prj';
