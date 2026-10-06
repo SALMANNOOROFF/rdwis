@@ -34,25 +34,33 @@ class FormGenerationService
     {
         $grade = strtoupper(trim((string)($case->ctc_newgrade ?? '')));
         $jobTitle = strtolower(trim((string)($case->ctc_newjobtitle ?? '')));
-        $type = strtoupper(trim((string)($case->ctc_type ?? '')));
+        $rawType = (string)($case->ctc_type ?? '');
 
-        $isIntern = ($grade === 'INTERNEE' || str_contains($jobTitle, 'intern'));
+        // Configurable intern keywords
+        $internGrades = config('hrforms.intern_keywords.grades', ['INTERNEE', 'INTERN']);
+        $internTitles = config('hrforms.intern_keywords.job_titles', ['intern', 'internee', 'trainee']);
+
+        $isIntern = in_array($grade, array_map('strtoupper', $internGrades), true);
+        if (!$isIntern) {
+            foreach ($internTitles as $t) {
+                if (str_contains($jobTitle, strtolower($t))) {
+                    $isIntern = true;
+                    break;
+                }
+            }
+        }
+
+        $baseType = \App\Models\HrForms\HiringTypeMap::resolveHiringType($rawType);
 
         if ($isIntern) {
             // Para 31(g): Fresh intern requires board forms (Internship), but intern extension/renewal requires only MD RDW approval
-            if (in_array($type, ['CR', 'RENEWAL', 'CE', 'EXTENSION'])) {
+            if (in_array($baseType, ['Renewal', 'Extension'], true)) {
                 return 'Internship_Extension';
             }
             return 'Internship';
         }
 
-        return match ($type) {
-            'HG', 'CF', 'FRESH' => 'Fresh',
-            'CR', 'RENEWAL'     => 'Renewal',
-            'CE', 'EXTENSION'   => 'Extension',
-            'RH', 'REHIRING'    => 'Rehiring',
-            default             => 'Fresh',
-        };
+        return $baseType;
     }
 
     /**
@@ -277,6 +285,15 @@ class FormGenerationService
                     $existing->is_required = $target['is_required'];
                     $existing->save();
 
+                    // Ensure draft PDF exists in private storage
+                    if (!\App\Models\HrForms\FormFile::where('case_form_id', $existing->id)->exists()) {
+                        try {
+                            app(\App\Services\HrForms\FormFileStorageService::class)->generateAndSavePdf($existing, null, false);
+                        } catch (\Throwable $e) {
+                            \Illuminate\Support\Facades\Log::warning("Draft PDF auto-generation on sync failed for form {$existing->id}: " . $e->getMessage());
+                        }
+                    }
+
                     FormAuditLog::logAction(
                         $case->ctc_id,
                         $existing->id,
@@ -322,6 +339,13 @@ class FormGenerationService
                 }
 
                 $form->save();
+
+                // Auto-generate and save draft PDF in private storage
+                try {
+                    app(\App\Services\HrForms\FormFileStorageService::class)->generateAndSavePdf($form, null, false);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("Initial PDF generation failed for form {$form->id}: " . $e->getMessage());
+                }
 
                 FormAuditLog::logAction(
                     $case->ctc_id,

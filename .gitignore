@@ -18,6 +18,12 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/app
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/views
+*.sql
+*.pdf
 /vendor
 Homestead.json
 
@@ -25,3 +31,4 @@ Homestead.yaml
 Thumbs.db
 dev.accdb
 desktop.ini
+scratch/

@@ -30,6 +30,16 @@ class CaseForm extends Model
         return $this->belongsTo(\App\Models\HrCtrCase::class, 'case_id', 'ctc_id');
     }
 
+    public function formFiles()
+    {
+        return $this->hasMany(FormFile::class, 'case_form_id')->orderBy('version', 'desc');
+    }
+
+    public function finalFile()
+    {
+        return $this->hasOne(FormFile::class, 'case_form_id')->where('is_final', true);
+    }
+
     public function isSubmitted(): bool
     {
         return $this->status === 'Submitted' || !empty($this->submitted_at);

@@ -1374,6 +1374,9 @@ textarea::-webkit-scrollbar-thumb:hover {
                                             @endif
                                         </div>
 
+                                        {{-- HR Policy Forms Section (Policy 2026) inside Dropdown --}}
+                                        @include('hrforms.attachments-forms-section', ['caseId' => $case->ctc_id])
+
                                         {{-- Dropdown Footer: Quick Action to Attach Document --}}
                                         <div class="p-2 border-top bg-light text-center" style="border-color: #e2e8f0 !important;">
                                             <button type="button" class="btn btn-xs btn-outline-success font-weight-bold w-100 py-1 d-flex align-items-center justify-content-center" data-toggle="modal" data-target="#modalAddContractCaseAttachment" style="font-size: 11px; border-radius: 4px; gap: 5px;">
@@ -2090,9 +2093,6 @@ textarea::-webkit-scrollbar-thumb:hover {
     </div>
 </div>
 @endforeach
-
-{{-- HR Policy Case File Tab Panel (Step 3) --}}
-@include('hrforms.case-file-panel', ['case' => $case])
 
 @push('scripts')
 <script>

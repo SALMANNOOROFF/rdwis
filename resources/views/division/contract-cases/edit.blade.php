@@ -635,9 +635,17 @@
                     </div>
                 </form>
             </div>
+        {{-- Case Attachments & HR Policy Forms Widget --}}
+        <div class="mt-4">
+            @include('partials.attachments_widget', [
+                'module' => 'ctc',
+                'objectId' => $case->ctc_id,
+                'title' => 'Case Attachments & HR Policy Forms',
+                'defaultSlots' => ['CV', 'Approval', 'Form', 'Minute'],
+                'attachments' => $case->attachments,
+                'canEdit' => true,
+            ])
         </div>
-        {{-- HR Policy Case File Tab Panel (Step 3) --}}
-        @include('hrforms.case-file-panel', ['case' => $case])
 
     </section>
 </div>

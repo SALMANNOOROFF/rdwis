@@ -17,6 +17,7 @@ use App\Services\HrForms\Extractors\AnnexMExtractor;
 use App\Services\HrForms\Extractors\AnnexNExtractor;
 use App\Services\HrForms\Extractors\AnnexTExtractor;
 use App\Services\HrForms\Extractors\AnnexUExtractor;
+use App\Services\HrForms\ApprovalRoutingService;
 use App\Services\HrForms\FormCompletenessService;
 use App\Services\HrForms\FormGenerationService;
 use App\Services\HrForms\ProgressTrackerService;
@@ -182,10 +183,19 @@ class CaseFileController extends Controller
         // Merge manual layer while preserving live layer strictly untouched
         $formData = $form->form_data ?? ['live' => [], 'manual' => [], 'warnings' => [], 'missing_fields' => []];
         $oldManual = $formData['manual'] ?? [];
-        $formData['manual'] = array_merge($oldManual, $manualInput);
+        $mergedManual = array_merge($oldManual, $manualInput);
 
-        // Calculate auto totals and scoring summaries
-        $formData = $this->applyAutoCalculations($form->form_code, $formData);
+        // Update with extractor if available to refresh calculations, warnings, and missing_fields
+        $extractor = $this->getExtractorInstance($form->form_code);
+        if ($extractor) {
+            $extracted = $extractor->extract($case, $form->instance_key, $mergedManual);
+            $formData['manual'] = array_merge($mergedManual, $extracted['manual'] ?? []);
+            $formData['warnings'] = $extracted['warnings'] ?? [];
+            $formData['missing_fields'] = $extracted['missing_fields'] ?? [];
+        } else {
+            $formData['manual'] = $mergedManual;
+            $formData = $this->applyAutoCalculations($form->form_code, $formData);
+        }
 
         // Recompute completeness status
         $eval = $this->completenessService->evaluateStatus($form->form_code, $formData, $form->status);
@@ -197,6 +207,13 @@ class CaseFileController extends Controller
         $form->form_data = $formData;
         $form->filled_by = Auth::id();
         $form->save();
+
+        // Auto-generate and save draft PDF in private storage
+        try {
+            app(\App\Services\HrForms\FormFileStorageService::class)->generateAndSavePdf($form, Auth::id(), false);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Draft PDF auto-save failed for form {$form->id}: " . $e->getMessage());
+        }
 
         // Update hrforms.case_extras if provided
         if (!empty($caseExtraInput)) {
@@ -256,6 +273,7 @@ class CaseFileController extends Controller
 
         $existingManual = $form->form_data['manual'] ?? [];
         $freshData = $extractor->extract($case, $form->instance_key, $existingManual);
+        $freshData['manual'] = array_merge($existingManual, $freshData['manual'] ?? []);
 
         $eval = $this->completenessService->evaluateStatus($form->form_code, $freshData, $form->status);
         $freshData['is_complete'] = $eval['is_complete'];
@@ -318,6 +336,13 @@ class CaseFileController extends Controller
         $form->status = 'Submitted';
         $form->save();
 
+        // Auto-generate and save FINAL immutable PDF in private storage
+        try {
+            app(\App\Services\HrForms\FormFileStorageService::class)->generateAndSavePdf($form, Auth::id(), true);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Final PDF generation failed for form {$form->id}: " . $e->getMessage());
+        }
+
         FormAuditLog::logAction(
             $case->ctc_id,
             $form->id,
@@ -326,6 +351,15 @@ class CaseFileController extends Controller
             ['status' => 'Ready'],
             ['status' => 'Submitted', 'submitted_at' => $form->submitted_at]
         );
+
+        // If Annex B (Selection Board) is submitted, candidate is selected -> trigger joining forms (Annex D & U)
+        if ($form->form_code === 'RDW/HR/F-02') {
+            try {
+                app(\App\Services\HrForms\FormGenerationService::class)->triggerJoiningForms($case);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Trigger joining forms on Annex B submit failed: " . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -377,22 +411,35 @@ class CaseFileController extends Controller
             ]);
         }
 
-        // Keep
-        $form->status = 'Draft';
+        // Keep: restore previous status recorded in audit_log when flagged as Pending Removal
+        $lastLog = FormAuditLog::where('form_id', $form->id)
+            ->where('action', 'status_changed')
+            ->where('new_values->status', 'Pending Removal')
+            ->latest('id')
+            ->first();
+
+        $restoredStatus = $lastLog?->old_values['status'] ?? 'Draft';
+        // If restoredStatus was Pending Removal or empty, fallback to Draft
+        if (empty($restoredStatus) || $restoredStatus === 'Pending Removal') {
+            $restoredStatus = 'Draft';
+        }
+
+        $form->status = $restoredStatus;
         $form->save();
 
         FormAuditLog::logAction(
             $case->ctc_id,
             $form->id,
             'pending_removal_retained',
-            "User decided to retain form {$form->form_code} ({$form->instance_key}) despite hiring type change.",
+            "User decided to retain form {$form->form_code} ({$form->instance_key}) despite hiring type change. Restored status to {$restoredStatus}.",
             ['status' => 'Pending Removal'],
-            ['status' => 'Draft']
+            ['status' => $restoredStatus]
         );
 
         return response()->json([
             'success' => true,
-            'message' => 'Form retained as active Draft.',
+            'message' => "Form retained with restored status ({$restoredStatus}).",
+            'status'  => $restoredStatus,
         ]);
     }
 
@@ -636,5 +683,136 @@ class CaseFileController extends Controller
             'RDW/HR/F-11' => app(AnnexUExtractor::class),
             default       => null,
         };
+    }
+
+    /**
+     * Download or view single form PDF (B1-B4).
+     */
+    public function downloadFormPdf(int $formId, Request $request)
+    {
+        if (!config('hrforms.enabled', false)) {
+            abort(404, 'HR Forms feature is disabled.');
+        }
+
+        $form = CaseForm::findOrFail($formId);
+        $case = HrCtrCase::findOrFail($form->case_id);
+        Gate::authorize('view', $case);
+
+        $isSubmitted = $form->isSubmitted();
+        $sourceData = $isSubmitted ? ($form->snapshot_data ?? $form->form_data) : $form->form_data;
+        $live = $sourceData['live'] ?? [];
+        $manual = $sourceData['manual'] ?? [];
+        $warnings = $isSubmitted ? [] : ($sourceData['warnings'] ?? []); // B4: warnings only on DRAFT
+
+        $routingService = app(ApprovalRoutingService::class);
+        $chain = $routingService->getChain($form->form_code, $case->ctc_newgrade);
+
+        $viewName = match ($form->form_code) {
+            'RDW/HR/F-01' => 'hrforms.pdf.annex_a',
+            'RDW/HR/F-02' => 'hrforms.pdf.annex_b',
+            'RDW/HR/F-07' => 'hrforms.pdf.annex_j',
+            'ANNEX-T'     => 'hrforms.pdf.annex_t',
+            'RDW/HR/F-09' => 'hrforms.pdf.annex_n',
+            'RDW/HR/F-08' => 'hrforms.pdf.annex_m',
+            'RDW/HR/F-03' => 'hrforms.pdf.annex_d',
+            'RDW/HR/F-11' => 'hrforms.pdf.annex_u',
+            default       => 'hrforms.pdf.layout',
+        };
+
+        $viewData = [
+            'case'         => $case,
+            'form'         => $form,
+            'formCode'     => $form->form_code,
+            'annex'        => $form->annex,
+            'formTitle'    => $form->form_title,
+            'subtitle'     => $form->instance_key !== 'main' ? "Candidate Screening: {$form->instance_key}" : null,
+            'live'         => $live,
+            'manual'       => $manual,
+            'chain'        => $chain,
+            'warnings'     => $warnings,
+            'isSubmitted'  => $isSubmitted,
+            'submittedAt'  => $form->submitted_at?->format('d M Y H:i'),
+            'submittedBy'  => $form->submitter?->acc_name ?? 'Authorized Officer',
+        ];
+
+        // Audit log download (insert-only)
+        FormAuditLog::logAction(
+            $case->ctc_id,
+            $form->id,
+            'pdf_downloaded',
+            "Downloaded PDF for {$form->form_code} ({$form->instance_key})",
+            ['status' => $form->status]
+        );
+
+        return app(\App\Services\HrForms\FormFileStorageService::class)->downloadPdfResponse($form);
+    }
+
+    /**
+     * Download merged case file dossier with cover page (B3).
+     */
+    public function downloadCaseDossier(int $caseId, Request $request)
+    {
+        if (!config('hrforms.enabled', false)) {
+            abort(404, 'HR Forms feature is disabled.');
+        }
+
+        $case = HrCtrCase::findOrFail($caseId);
+        Gate::authorize('view', $case);
+
+        // Fetch active forms excluding archived Pending Removal and Scheduled-empty forms
+        $forms = CaseForm::where('case_id', $caseId)
+            ->where('status', '!=', 'Pending Removal (Archived)')
+            ->where(function($q) {
+                $q->where('status', '!=', 'Scheduled')
+                  ->orWhereNotNull('submitted_at');
+            })
+            ->get();
+
+        // Sort in order: A, B, J (cand_1..3), T, N, M, D, U
+        $orderMap = [
+            'RDW/HR/F-01' => 1,
+            'RDW/HR/F-02' => 2,
+            'RDW/HR/F-07' => 3,
+            'ANNEX-T'     => 4,
+            'RDW/HR/F-09' => 5,
+            'RDW/HR/F-08' => 6,
+            'RDW/HR/F-03' => 7,
+            'RDW/HR/F-11' => 8,
+        ];
+
+        $sortedForms = $forms->sortBy(function($f) use ($orderMap) {
+            $baseOrder = $orderMap[$f->form_code] ?? 99;
+            $inst = $f->instance_key;
+            return sprintf('%02d_%s', $baseOrder, $inst);
+        });
+
+        $enclosedList = $sortedForms->map(function($f) {
+            return [
+                'form_code'    => $f->form_code,
+                'annex'        => $f->annex,
+                'title'        => $f->form_title,
+                'instance_key' => $f->instance_key,
+                'status'       => $f->status,
+            ];
+        })->toArray();
+
+        $hiringType = app(FormGenerationService::class)->resolveHiringType($case);
+
+        // Log dossier download in audit_log
+        FormAuditLog::logAction(
+            $case->ctc_id,
+            null,
+            'dossier_downloaded',
+            "Downloaded consolidated case file dossier (" . count($enclosedList) . " enclosed forms)"
+        );
+
+        $dossierPdf = app(\App\Services\HrForms\FormFileStorageService::class)->renderDossierContent($caseId);
+        $fileName = "CaseFile_CC-{$case->ctc_id}.pdf";
+
+        return response($dossierPdf, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $fileName . '"',
+            'Content-Length'      => strlen($dossierPdf),
+        ]);
     }
 }

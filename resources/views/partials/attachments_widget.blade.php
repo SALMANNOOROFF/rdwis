@@ -172,6 +172,11 @@
                 </div>
             </div>
         @endforeach
+
+        {{-- HR Policy Forms Section (Policy 2026) --}}
+        @if($module === 'ctc')
+            @include('hrforms.attachments-forms-section', ['caseId' => $objectId])
+        @endif
     </div>
 </div>
 

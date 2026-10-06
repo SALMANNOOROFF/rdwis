@@ -196,7 +196,7 @@
                 </div>
                 <form id="form-ad-exemption" onsubmit="window.HrCaseFile.saveAdExemption(event)">
                     <div class="modal-body">
-                        <p class="text-muted small">Policy requires at least 14 days between advertisement and interview (Para 29). Record an authorized exemption reason below to clear the warning.</p>
+                        <p class="text-muted small">Policy requires at least 14 days between advertisement and interview (Para 13). Record an authorized exemption reason below to clear the warning.</p>
                         <div class="form-group">
                             <label class="font-weight-bold small">Exemption Justification</label>
                             <textarea name="advertisement_exemption_justification" id="ae_justification" class="form-control" rows="3" required placeholder="State urgent project deadline / management authorization..."></textarea>
@@ -759,19 +759,36 @@ window.HrCaseFile = (function() {
         body.html(html);
     }
 
-    // Annex B Form View
+    // Annex B Form View (Selection Board - F-02)
     function renderAnnexB(body, live, manual, isSubmitted) {
+        const shortlist = manual.shortlisted_candidates || live.shortlisted_candidates || [];
+        const isSingle = manual.single_candidate_mode !== undefined ? manual.single_candidate_mode : (live.single_candidate || false);
+        
+        let candidateRows = '';
+        for (let i = 1; i <= 3; i++) {
+            const cand = shortlist[i - 1] || {};
+            candidateRows += `
+                <tr class="annex-b-candidate-row" data-index="${i}">
+                    <td class="font-weight-bold text-center" style="width: 40px;">${i}</td>
+                    <td><input type="text" class="form-control form-control-sm ab-cand-name" value="${cand.name || ''}" placeholder="Candidate ${i} Name" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm ab-cand-qual" value="${cand.qualification || ''}" placeholder="e.g. BS Software Eng" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm ab-cand-inst" value="${cand.institute || ''}" placeholder="e.g. NUST / FAST" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm ab-cand-exp" value="${cand.field_experience || cand.experience || ''}" placeholder="e.g. 3 Years" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                </tr>
+            `;
+        }
+
         const html = `
             <div class="card p-3 border-0 shadow-sm mb-3">
-                <h6 class="font-weight-bold text-primary border-bottom pb-2">Selection Board Candidate Selection</h6>
+                <h6 class="font-weight-bold text-primary border-bottom pb-2">Hiring Board Candidate Information</h6>
                 <div class="row">
                     <div class="col-md-6 form-group">
                         <label class="font-weight-bold small">Principal Candidate Selection <span class="text-danger">*</span></label>
-                        <input type="text" id="ab-principal" class="form-control form-control-sm font-weight-bold" value="${manual.principal_candidate || ''}" ${isSubmitted ? 'readonly disabled' : ''} placeholder="Principal candidate full name">
+                        <input type="text" id="ab-principal" class="form-control form-control-sm font-weight-bold" value="${manual.principal_candidate || live.principal_candidate?.name || ''}" ${isSubmitted ? 'readonly disabled' : ''} placeholder="Principal candidate full name">
                     </div>
                     <div class="col-md-6 form-group">
                         <label class="font-weight-bold small">Standby Candidate Selection</label>
-                        <input type="text" id="ab-standby" class="form-control form-control-sm" value="${manual.standby_candidate || ''}" ${isSubmitted ? 'readonly disabled' : ''} placeholder="Standby candidate full name">
+                        <input type="text" id="ab-standby" class="form-control form-control-sm" value="${manual.standby_candidate || manual.standby_candidate_name || ''}" ${isSubmitted ? 'readonly disabled' : ''} placeholder="Standby candidate full name">
                     </div>
                     <div class="col-md-4 form-group">
                         <label class="font-weight-bold small">Interview Date <span class="text-danger">*</span></label>
@@ -786,9 +803,152 @@ window.HrCaseFile = (function() {
                         <input type="text" id="ab-venue" class="form-control form-control-sm" value="${manual.interview_venue || 'RDW Conference Room'}" ${isSubmitted ? 'readonly disabled' : ''}>
                     </div>
                 </div>
+
+                <div class="border rounded p-3 bg-light mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="font-weight-bold small mb-0"><i class="fas fa-users mr-1"></i> Shortlisted Candidates Entry (Rule: 3 Candidates, or 1 in Single-Candidate Mode)</label>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="ab-single-cand-mode" ${isSingle ? 'checked' : ''} ${isSubmitted ? 'disabled' : ''} onchange="$('#ab-single-justification-box').toggleClass('d-none', !this.checked)">
+                            <label class="custom-control-label small font-weight-bold" for="ab-single-cand-mode">Single Candidate Mode</label>
+                        </div>
+                    </div>
+                    <table class="table table-bordered table-sm mb-2 bg-white">
+                        <thead class="thead-light">
+                            <tr style="font-size: 0.78rem;">
+                                <th>#</th>
+                                <th>Candidate Name</th>
+                                <th>Qualification</th>
+                                <th>Institute</th>
+                                <th>Field Experience</th>
+                            </tr>
+                        </thead>
+                        <tbody>${candidateRows}</tbody>
+                    </table>
+                    <div id="ab-single-justification-box" class="${isSingle ? '' : 'd-none'} mt-2">
+                        <label class="font-weight-bold small text-danger">Single Candidate Mode Justification <span class="text-danger">*</span></label>
+                        <textarea id="ab-single-justification" class="form-control form-control-sm" rows="2" ${isSubmitted ? 'readonly disabled' : ''} placeholder="Explain why only 1 candidate was evaluated (niche skill set, direct project transfer, etc.).">${manual.single_candidate_justification || ''}</textarea>
+                    </div>
+                </div>
+
                 <div class="form-group mb-0">
                     <label class="font-weight-bold small">Board Recommendations <span class="text-danger">*</span></label>
                     <textarea id="ab-recom" class="form-control" rows="2" ${isSubmitted ? 'readonly disabled' : ''}>${manual.board_recommendations || ''}</textarea>
+                </div>
+            </div>
+        `;
+        body.html(html);
+    }
+
+    // Annex T Form View (Comparison Matrix of Shortlisted Candidates)
+    function renderAnnexT(body, live, manual, isSubmitted) {
+        const candidates = manual.candidates || live.candidates || [];
+        let rows = '';
+
+        for (let i = 1; i <= 3; i++) {
+            const cand = candidates[i - 1] || {};
+            rows += `
+                <tr class="annex-t-candidate-row" data-index="${i}">
+                    <td class="font-weight-bold text-center" style="width: 40px;">${i}</td>
+                    <td><input type="text" class="form-control form-control-sm at-cand-name font-weight-bold" value="${cand.name || ''}" placeholder="Candidate ${i}" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm at-cand-cnic" value="${cand.cnic || ''}" placeholder="CNIC" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm at-cand-qual" value="${cand.qualification || ''}" placeholder="Degree & Major" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm at-cand-exp" value="${cand.experience_years || ''}" placeholder="Years" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm at-cand-skills" value="${cand.skills || ''}" placeholder="Technical Skills" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                    <td><input type="text" class="form-control form-control-sm at-cand-remarks" value="${cand.remarks || ''}" placeholder="Selection Suitability" ${isSubmitted ? 'readonly disabled' : ''}></td>
+                </tr>
+            `;
+        }
+
+        const html = `
+            <div class="card p-3 border-0 shadow-sm mb-3">
+                <h6 class="font-weight-bold text-primary border-bottom pb-2">Comparison Matrix of Shortlisted Candidates</h6>
+                <div class="row mb-2">
+                    <div class="col-md-6"><small class="text-muted">Position Applied:</small> <span class="font-weight-bold">${live.position_applied || 'N/A'} (${live.grade || ''})</span></div>
+                    <div class="col-md-6 text-right"><small class="text-muted">Division / Project:</small> <span class="font-weight-bold">${live.division_name || ''} - ${live.project_name || ''}</span></div>
+                </div>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-sm mb-0">
+                        <thead class="bg-light" style="font-size: 0.78rem;">
+                            <tr>
+                                <th>#</th>
+                                <th>Candidate Name</th>
+                                <th>CNIC</th>
+                                <th>Qualification</th>
+                                <th>Exp (Years)</th>
+                                <th>Key Skills</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="font-weight-bold small">Justification for Qualification / Student Relaxation (Para 29) <span class="text-muted">(Required if relaxed)</span></label>
+                    <textarea id="at-justification" class="form-control" rows="2" ${isSubmitted ? 'readonly disabled' : ''} placeholder="Enter relaxation justification if student or qualification requirements were relaxed...">${manual.justification_relaxation || ''}</textarea>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="font-weight-bold small">Director Signature / Selection Board Remarks <span class="text-danger">*</span></label>
+                    <textarea id="at-dir-remarks" class="form-control" rows="2" ${isSubmitted ? 'readonly disabled' : ''}>${manual.director_signature_remarks || 'Recommended for Selection Board interview'}</textarea>
+                </div>
+            </div>
+        `;
+        body.html(html);
+    }
+
+    // Annex U Form View (Personal Data Form - F-11)
+    function renderAnnexU(body, live, manual, isSubmitted) {
+        const sections = [
+            '1. Personal Information',
+            '2. Next of Kin Details',
+            '3. Emergency Contact Details',
+            '4. Education (Matric to Highest Degree)',
+            '5. Professional Courses & Certifications',
+            '6. Professional Experience History',
+            '7. Vehicle Ownership Details',
+            '8. Bank Account Details (Meezan Bank)',
+            '9. Research Publications & Dissertation',
+            '10. References (Two Independent Referees)'
+        ];
+
+        let sectionList = '';
+        sections.forEach(function(s, idx) {
+            sectionList += `<li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                <span class="font-weight-500">${s}</span>
+                <span class="badge badge-success px-2 py-1"><i class="fas fa-check"></i> Standard Section</span>
+            </li>`;
+        });
+
+        const html = `
+            <div class="card p-3 border-0 shadow-sm mb-3">
+                <h6 class="font-weight-bold text-primary border-bottom pb-2">Personal Data Form (RDW/HR/F-11) — 10 Policy Sections</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <table class="table table-sm mb-0">
+                            <tr><td class="text-muted">Candidate Name:</td><td class="font-weight-bold text-primary">${live.candidate_name || 'N/A'}</td></tr>
+                            <tr><td class="text-muted">CNIC:</td><td class="font-weight-bold">${live.cnic || 'N/A'}</td></tr>
+                            <tr><td class="text-muted">Designation & Grade:</td><td>${live.designation || 'N/A'} (${live.grade || ''})</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm mb-0">
+                            <tr><td class="text-muted">Project:</td><td class="font-weight-bold">${live.project_title || 'N/A'}</td></tr>
+                            <tr><td class="text-muted">Reporting Division:</td><td>${live.division_name || 'N/A'}</td></tr>
+                            <tr><td class="text-muted">Bank Head:</td><td>${live.bank_account?.bank_name || 'Meezan Bank Ltd'}</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="font-weight-bold small text-muted text-uppercase mb-2">Form Structure Checklist</label>
+                    <ul class="list-group list-group-flush border rounded">${sectionList}</ul>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="font-weight-bold small">Candidate Undertaking / Remarks</label>
+                    <textarea id="au-undertaking" class="form-control" rows="2" ${isSubmitted ? 'readonly disabled' : ''}>${manual.undertaking || 'I hereby affirm that all information provided in this personal data form is correct and true to the best of my knowledge.'}</textarea>
                 </div>
             </div>
         `;
@@ -881,6 +1041,42 @@ window.HrCaseFile = (function() {
             manual.interview_time = $('#ab-time').val();
             manual.interview_venue = $('#ab-venue').val();
             manual.board_recommendations = $('#ab-recom').val();
+            manual.single_candidate_mode = $('#ab-single-cand-mode').is(':checked');
+            manual.single_candidate_justification = $('#ab-single-justification').val();
+
+            const shortlist = [];
+            $('.annex-b-candidate-row').each(function() {
+                const name = $(this).find('.ab-cand-name').val();
+                if (name && name.trim().length > 0) {
+                    shortlist.push({
+                        name: name.trim(),
+                        qualification: $(this).find('.ab-cand-qual').val() || null,
+                        institute: $(this).find('.ab-cand-inst').val() || null,
+                        field_experience: $(this).find('.ab-cand-exp').val() || null,
+                    });
+                }
+            });
+            manual.shortlisted_candidates = shortlist;
+        } else if (code === 'ANNEX-T') {
+            const candidates = [];
+            $('.annex-t-candidate-row').each(function() {
+                const name = $(this).find('.at-cand-name').val();
+                if (name && name.trim().length > 0) {
+                    candidates.push({
+                        name: name.trim(),
+                        cnic: $(this).find('.at-cand-cnic').val() || null,
+                        qualification: $(this).find('.at-cand-qual').val() || null,
+                        experience_years: $(this).find('.at-cand-exp').val() || null,
+                        skills: $(this).find('.at-cand-skills').val() || null,
+                        remarks: $(this).find('.at-cand-remarks').val() || null,
+                    });
+                }
+            });
+            manual.candidates = candidates;
+            manual.justification_relaxation = $('#at-justification').val();
+            manual.director_signature_remarks = $('#at-dir-remarks').val();
+        } else if (code === 'RDW/HR/F-11') {
+            manual.undertaking = $('#au-undertaking').val();
         } else {
             $('.generic-manual-input').each(function() {
                 const k = $(this).data('key');
