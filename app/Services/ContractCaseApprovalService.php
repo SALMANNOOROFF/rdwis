@@ -300,6 +300,15 @@ class ContractCaseApprovalService
                 $this->recordRemark($case, $user, $remarks, 'Approved');
             }
         });
+
+        // Wire triggerJoiningForms (HR Policy 2026: transition Annex D & U from Scheduled to Draft)
+        if (config('hrforms.enabled', false)) {
+            try {
+                app(\App\Services\HrForms\FormGenerationService::class)->triggerJoiningForms($case);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("HrForms triggerJoiningForms failed for case CC-{$case->ctc_id}: " . $e->getMessage());
+            }
+        }
     }
 
     /**

@@ -84,22 +84,18 @@ class SalaryBandService
         $max = (float) $band->max_salary;
 
         $inBand = ($salary >= $min && $salary <= $max);
-        $warning = null;
+        $minFmt = number_format($min);
+        $maxFmt = number_format($max);
+        $note = "Reference band: Rs. {$minFmt} - {$maxFmt}";
 
-        if (!$inBand) {
-            if ($salary < $min) {
-                $diff = number_format($min - $salary);
-                $warning = "Proposed salary (Rs. " . number_format($salary) . ") is below the Annex K starting salary band for {$band->designation} (Rs. " . number_format($min) . " - Rs. " . number_format($max) . ") by Rs. {$diff}. Policy allows warning only.";
-            } else {
-                $diff = number_format($salary - $max);
-                $warning = "Proposed salary (Rs. " . number_format($salary) . ") exceeds the Annex K starting salary band for {$band->designation} (Rs. " . number_format($min) . " - Rs. " . number_format($max) . ") by Rs. {$diff}. Requires Board justification.";
-            }
-        }
+        // Addendum compliance: neutral informational note, never reads as an error or blocking gate
+        $warning = $inBand ? null : "{$note}";
 
         return [
             'has_band'  => true,
             'in_band'   => $inBand,
             'warning'   => $warning,
+            'note'      => $note,
             'min'       => $min,
             'max'       => $max,
             'band_name' => $band->designation,

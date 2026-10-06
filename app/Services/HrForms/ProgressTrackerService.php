@@ -179,14 +179,37 @@ class ProgressTrackerService
 
         switch ($code) {
             case 'in_principle_approval':
+                // A5: If marked headcount_in_proposal, show "Not required (headcount in proposal)"
+                if (!empty($caseExtra?->headcount_in_proposal)) {
+                    return [
+                        'status'     => 'Not Required',
+                        'source'     => 'hrforms.case_extras (headcount_in_proposal)',
+                        'event_date' => null,
+                        'note'       => 'Not required (headcount in proposal)',
+                        'can_edit'   => false,
+                    ];
+                }
+
                 $formCode = in_array($hiringType, ['Extension', 'Renewal']) ? 'RDW/HR/F-09_main' : 'RDW/HR/F-01_main';
                 $form = $caseForms->get($formCode);
+                $isDgApproved = ($ms && in_array($ms->status, ['Completed', 'Approved'])) 
+                    || in_array(strtoupper((string)$case->ctc_status), ['APPROVED', 'FULFILLED']);
+
                 if ($form && $form->status === 'Submitted') {
+                    if ($isDgApproved) {
+                        return [
+                            'status'     => 'Completed',
+                            'source'     => "{$form->form_code} (Submitted & Approved by DG NRDI)",
+                            'event_date' => $ms?->event_date?->format('Y-m-d') ?? $form->submitted_at?->format('Y-m-d'),
+                            'note'       => 'Approved by DG NRDI',
+                            'can_edit'   => false,
+                        ];
+                    }
                     return [
-                        'status'     => 'Completed',
-                        'source'     => "{$form->form_code} (Submitted)",
+                        'status'     => 'In Progress',
+                        'source'     => "{$form->form_code} (Submitted, awaiting DG NRDI approval)",
                         'event_date' => $form->submitted_at?->format('Y-m-d'),
-                        'note'       => 'Submitted for approval',
+                        'note'       => 'Submitted; awaiting DG NRDI approval',
                         'can_edit'   => false,
                     ];
                 }
@@ -379,6 +402,24 @@ class ProgressTrackerService
                 ];
 
             case 'joining':
+                // A5: Complete ONLY when employee record shows a joining date (hr.emps.emp_joindt)
+                $empJoiningDate = null;
+                if ($case->ctc_emp_id) {
+                    $empJoiningDate = DB::table('hr.emps')
+                        ->where('emp_id', $case->ctc_emp_id)
+                        ->value('emp_joindt');
+                }
+
+                if ($empJoiningDate) {
+                    return [
+                        'status'     => 'Completed',
+                        'source'     => 'hr.emps.emp_joindt',
+                        'event_date' => Carbon::parse($empJoiningDate)->format('Y-m-d'),
+                        'note'       => 'Employee joined on ' . Carbon::parse($empJoiningDate)->format('d M Y'),
+                        'can_edit'   => false,
+                    ];
+                }
+
                 if (strtoupper((string)$case->ctc_status) === 'JOINED') {
                     return [
                         'status'     => 'Completed',
@@ -388,21 +429,23 @@ class ProgressTrackerService
                         'can_edit'   => false,
                     ];
                 }
+
                 $uForm = $caseForms->get('RDW/HR/F-11_main');
                 if ($uForm && $uForm->status === 'Submitted') {
                     return [
-                        'status'     => 'Completed',
-                        'source'     => 'RDW/HR/F-11 (Submitted)',
+                        'status'     => 'In Progress',
+                        'source'     => 'RDW/HR/F-11 (Submitted - documents complete)',
                         'event_date' => $uForm->submitted_at?->format('Y-m-d'),
-                        'note'       => 'Joining data recorded',
+                        'note'       => 'Annex U documents submitted; awaiting employee joining date in hr.emps',
                         'can_edit'   => false,
                     ];
                 }
+
                 return [
                     'status'     => 'Pending',
-                    'source'     => 'hr.ctrcases / Annex U',
+                    'source'     => 'hr.emps.emp_joindt',
                     'event_date' => null,
-                    'note'       => null,
+                    'note'       => 'Awaiting reporting and joining date',
                     'can_edit'   => false,
                 ];
 
@@ -454,7 +497,7 @@ class ProgressTrackerService
                 'is_exempted'   => false,
                 'days'         => $diffDays,
                 'justification'=> null,
-                'message'      => "Policy requires at least 14 days between advertisement start and interview date (Para 29). Currently {$diffDays} days. Record an exemption with justification to clear this warning.",
+                'message'      => "Policy requires at least 14 days between advertisement start and interview date (Para 13). Currently {$diffDays} days. Record an exemption with justification to clear this warning.",
             ];
         }
 

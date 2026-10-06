@@ -36,6 +36,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Intern Keywords (Configurable Detection)
+    |--------------------------------------------------------------------------
+    */
+    'intern_keywords' => [
+        'grades'     => ['INTERNEE', 'INTERN'],
+        'job_titles' => ['intern', 'internee', 'trainee'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | RT and Below Fallback Grades
+    |--------------------------------------------------------------------------
+    */
+    'rt_and_below_grades' => [
+        'SRT', 'RT', 'JRT',
+        'LA', 'LAB ATTENDANT',
+        'RA', 'RESEARCH AIDE',
+        'EA', 'ENGINEERING AIDE',
+        'SS', 'SUPPORT STAFF',
+        'LABOR', 'WORKER', 'GARDENER', 'NAIB QASID', 'DIVER', 'MAALI',
+        'JA', 'JUNIOR ASSISTANT',
+        'INTERN', 'INTERNEE',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Schema Name
     |--------------------------------------------------------------------------
     */

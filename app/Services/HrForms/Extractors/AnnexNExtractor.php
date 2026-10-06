@@ -98,14 +98,13 @@ class AnnexNExtractor implements FormExtractorInterface
         $grade = $case->ctc_newgrade;
         $prevContract = $case->effective_previous_contract;
         $expiryDate = $prevContract?->ctr_enddt ?? null;
-        $currentSalary = (float) ($prevContract?->ctr_salary ?? $case->previous_salary ?? 0);
+        $currentSalary = (float) ($case->getAttributes()['previous_salary'] ?? $prevContract?->ctr_salary ?? $case->previous_salary ?? 0);
         $proposedSalary = (float) $case->ctc_newsalary;
 
         $startDate = $case->ctc_newstartdt;
         $endDate = $case->ctc_newenddt;
 
-        $typeUpper = strtoupper(trim($case->ctc_type ?? ''));
-        $isRenewal = in_array($typeUpper, ['CR', 'RENEWAL']);
+        $isRenewal = \App\Models\HrForms\HiringTypeMap::resolveHiringType($case->ctc_type) === 'Renewal';
 
         $warnings = [];
 

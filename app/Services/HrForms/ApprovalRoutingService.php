@@ -32,9 +32,9 @@ class ApprovalRoutingService
             return ($band->approval_level === 'DG_NRDI') ? 'RO_AND_ABOVE' : 'RT_AND_BELOW';
         }
 
-        // 2. Fallback heuristic for unconfigured grades (Para 6)
+        // 2. Fallback heuristic for unconfigured grades from config (Para 6)
         $g = strtoupper(trim($grade));
-        $rtAndBelow = [
+        $rtAndBelow = config('hrforms.rt_and_below_grades', [
             'SRT', 'RT', 'JRT',
             'LA', 'LAB ATTENDANT',
             'RA', 'RESEARCH AIDE',
@@ -43,7 +43,7 @@ class ApprovalRoutingService
             'LABOR', 'WORKER', 'GARDENER', 'NAIB QASID', 'DIVER', 'MAALI',
             'JA', 'JUNIOR ASSISTANT',
             'INTERN', 'INTERNEE'
-        ];
+        ]);
 
         foreach ($rtAndBelow as $pattern) {
             if ($g === $pattern || str_starts_with($g, $pattern . '-') || str_starts_with($g, $pattern . ' ')) {
@@ -59,6 +59,14 @@ class ApprovalRoutingService
      */
     public function getFinalApprover(string $formCode, ?string $grade): string
     {
+        $chain = $this->getChain($formCode, $grade);
+        if (!empty($chain)) {
+            $lastStep = end($chain);
+            if (!empty($lastStep['approver_role'])) {
+                return $lastStep['approver_role'];
+            }
+        }
+
         if ($formCode === 'RDW/HR/F-01') {
             return 'DG NRDI';
         }

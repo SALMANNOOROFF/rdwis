@@ -102,8 +102,7 @@ class AnnexMExtractor implements FormExtractorInterface
         }
 
         $warnings = [];
-        $typeUpper = strtoupper(trim($case->ctc_type ?? ''));
-        $isRenewal = in_array($typeUpper, ['CR', 'RENEWAL']);
+        $isRenewal = \App\Models\HrForms\HiringTypeMap::resolveHiringType($case->ctc_type) === 'Renewal';
 
         if ($allMarked && $isRenewal && $currentSalary > 0) {
             $diff = $proposedSalary - $currentSalary;
