@@ -21,16 +21,16 @@
             <span class="badge badge-success ml-2 px-2 py-0.5" id="hrforms-badge-count-{{ $caseId }}" style="font-size: 11px;">{{ $formsCount }}</span>
         </div>
         <div class="d-flex align-items-center" style="gap: 5px;">
-            <a href="{{ route('hrforms.cases.pdf-dossier', $caseId) }}" target="_blank" class="btn btn-xs btn-outline-success font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Download Consolidated Policy Dossier PDF">
+            <a href="{{ route('hrforms.cases.pdf-dossier', $caseId) }}" target="_blank" onclick="event.stopPropagation();" class="btn btn-xs btn-outline-success font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Download Consolidated Policy Dossier PDF">
                 <i class="fas fa-file-pdf mr-1"></i> Dossier
             </a>
-            <button type="button" class="btn btn-xs btn-light border text-dark font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="window.HrCaseFile.openTrackerModal({{ $caseId }})" title="Annex C Progress Tracker">
+            <button type="button" class="btn btn-xs btn-light border text-dark font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); window.HrCaseFile.openTrackerModal({{ $caseId }})" title="Annex C Progress Tracker">
                 <i class="fas fa-tasks mr-1"></i> Tracker
             </button>
-            <button type="button" class="btn btn-xs btn-light border text-dark font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="window.HrCaseFile.openExtrasModal({{ $caseId }})" title="Project Metadata & Extras">
+            <button type="button" class="btn btn-xs btn-light border text-dark font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); window.HrCaseFile.openExtrasModal({{ $caseId }})" title="Project Metadata & Extras">
                 <i class="fas fa-project-diagram mr-1"></i> Extras
             </button>
-            <button type="button" class="btn btn-xs btn-light border text-dark font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="window.HrCaseFile.openAuditModal({{ $caseId }})" title="Audit Trail History">
+            <button type="button" class="btn btn-xs btn-light border text-dark font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); window.HrCaseFile.openAuditModal({{ $caseId }})" title="Audit Trail History">
                 <i class="fas fa-history mr-1"></i> Audit
             </button>
         </div>
@@ -46,10 +46,10 @@
                         <strong>{{ $prf->annex }} ({{ $prf->form_code }}):</strong> Marked for removal due to hiring type change, but has user manual entries.
                     </div>
                     <div class="d-flex" style="gap: 4px;">
-                        <button type="button" class="btn btn-xs btn-success py-0 px-2 font-weight-bold" onclick="window.HrCaseFile.decidePendingRemoval({{ $prf->id }}, 'keep', {{ $caseId }})">
+                        <button type="button" class="btn btn-xs btn-success py-0 px-2 font-weight-bold" onclick="event.stopPropagation(); window.HrCaseFile.decidePendingRemoval({{ $prf->id }}, 'keep', {{ $caseId }})">
                             <i class="fas fa-check mr-1"></i> Keep
                         </button>
-                        <button type="button" class="btn btn-xs btn-outline-danger py-0 px-2 font-weight-bold" onclick="window.HrCaseFile.decidePendingRemoval({{ $prf->id }}, 'remove', {{ $caseId }})">
+                        <button type="button" class="btn btn-xs btn-outline-danger py-0 px-2 font-weight-bold" onclick="event.stopPropagation(); window.HrCaseFile.decidePendingRemoval({{ $prf->id }}, 'remove', {{ $caseId }})">
                             <i class="fas fa-trash-alt mr-1"></i> Archive
                         </button>
                     </div>
@@ -114,19 +114,19 @@
 
                 {{-- Action Buttons --}}
                 <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
-                    <button type="button" class="btn btn-xs btn-outline-primary font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" onclick="window.HrCaseFile.openForm({{ $form->id }}, {{ $caseId }})" title="Open / Edit Form Fields">
+                    <button type="button" class="btn btn-xs btn-outline-primary font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); window.HrCaseFile.openForm({{ $form->id }}, {{ $caseId }})" title="Open / Edit Form Fields">
                         <i class="fas {{ $isSubmitted ? 'fa-eye' : 'fa-edit' }}"></i> {{ $isSubmitted ? 'View' : 'Edit' }}
                     </button>
-                    <a href="{{ route('hrforms.forms.pdf', $form->id) }}" target="_blank" class="btn btn-xs btn-outline-secondary font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" title="Download PDF (%PDF-)">
+                    <a href="{{ route('hrforms.forms.pdf', $form->id) }}" target="_blank" onclick="event.stopPropagation();" class="btn btn-xs btn-outline-secondary font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" title="Download PDF (%PDF-)">
                         <i class="fas fa-download"></i> PDF
                     </a>
                     @if(!$isSubmitted && in_array($form->status, ['Draft', 'Pending Input'], true))
-                        <button type="button" class="btn btn-xs btn-light border text-muted py-1 px-1.5" style="font-size: 11px; border-radius: 4px;" onclick="window.HrCaseFile.refreshLive({{ $form->id }}, {{ $caseId }})" title="Refresh Live Data">
+                        <button type="button" class="btn btn-xs btn-light border text-muted py-1 px-1.5" style="font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); window.HrCaseFile.refreshLive({{ $form->id }}, {{ $caseId }})" title="Refresh Live Data">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     @endif
                     @if(!$isSubmitted && $form->status === 'Ready')
-                        <button type="button" class="btn btn-xs btn-success font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" onclick="window.HrCaseFile.submitFormDirect({{ $form->id }}, {{ $caseId }})" title="Mark Form as Submitted">
+                        <button type="button" class="btn btn-xs btn-success font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" onclick="event.stopPropagation(); window.HrCaseFile.submitFormDirect({{ $form->id }}, {{ $caseId }})" title="Mark Form as Submitted">
                             <i class="fas fa-check"></i> Submit
                         </button>
                     @endif

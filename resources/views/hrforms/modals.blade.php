@@ -1,7 +1,20 @@
 {{-- HR Policy Forms Unified Modals & Script --}}
+<style>
+/* Elevate HR Policy Form modals and dialogs above backdrops and all dropdowns */
+#hrforms-modals-container .modal,
+.modal.hrforms-teleported-modal {
+    z-index: 1070 !important;
+}
+.modal.hrforms-teleported-modal .modal-dialog {
+    z-index: 1071 !important;
+}
+body > .modal-backdrop {
+    z-index: 1060 !important;
+}
+</style>
 <div id="hrforms-modals-container">
     {{-- 1. Form View & Edit Modal --}}
-    <div class="modal fade" id="modalFormViewEdit" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" style="z-index: 1065;">
+    <div class="modal fade hrforms-teleported-modal" id="modalFormViewEdit" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" style="z-index: 1070;">
         <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
             <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: #1e293b; color: #ffffff; padding: 1rem 1.5rem;">
@@ -40,7 +53,7 @@
     </div>
 
     {{-- 2. Annex C Progress Tracker Modal --}}
-    <div class="modal fade" id="modalAnnexCTracker" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal fade hrforms-teleported-modal" id="modalAnnexCTracker" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1070;">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: #1e293b; color: #ffffff;">
@@ -77,7 +90,7 @@
     </div>
 
     {{-- 3. Project Extras Modal --}}
-    <div class="modal fade" id="modalProjectExtras" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal fade hrforms-teleported-modal" id="modalProjectExtras" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1070;">
         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
             <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: #1e293b; color: #ffffff;">
@@ -116,7 +129,7 @@
     </div>
 
     {{-- 4. Advertisement Exemption Modal --}}
-    <div class="modal fade" id="modalAdExemption" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal fade hrforms-teleported-modal" id="modalAdExemption" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1070;">
         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
             <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: #1e293b; color: #ffffff;">
@@ -143,7 +156,7 @@
     </div>
 
     {{-- 5. Audit History Modal --}}
-    <div class="modal fade" id="modalAuditHistory" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal fade hrforms-teleported-modal" id="modalAuditHistory" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1070;">
         <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
             <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
                 <div class="modal-header" style="background: #1e293b; color: #ffffff;">
@@ -182,7 +195,29 @@ window.HrCaseFile = (function() {
     let activeForm = null;
     let currentCaseId = {{ $caseId ?? 0 }};
 
+    function ensureModalsInBody() {
+        var c = document.getElementById('hrforms-modals-container');
+        if (c && c.parentNode !== document.body) {
+            document.body.appendChild(c);
+        }
+        $('#modalFormViewEdit, #modalAnnexCTracker, #modalProjectExtras, #modalAdExemption, #modalAuditHistory').addClass('hrforms-teleported-modal');
+    }
+
+    function dismissDropdowns() {
+        if (window.$) {
+            $('.dropdown.show, .dropdown-menu.show').removeClass('show');
+            $('#btnCaseAttachmentsDropdown').attr('aria-expanded', 'false');
+            $('[data-toggle="dropdown"]').attr('aria-expanded', 'false');
+        }
+    }
+
+    function prepareModal() {
+        ensureModalsInBody();
+        dismissDropdowns();
+    }
+
     function openForm(formId, caseId) {
+        prepareModal();
         currentCaseId = caseId || currentCaseId;
         $.getJSON('/hrforms/forms/' + formId, function(res) {
             if (!res.success) return;
@@ -923,6 +958,7 @@ window.HrCaseFile = (function() {
     }
 
     function openTrackerModal(caseId) {
+        prepareModal();
         currentCaseId = caseId || currentCaseId;
         $.getJSON('/hrforms/cases/' + currentCaseId + '/tab', function(res) {
             if (!res.success) return;
@@ -957,6 +993,7 @@ window.HrCaseFile = (function() {
     }
 
     function openExtrasModal(caseId) {
+        prepareModal();
         currentCaseId = caseId || currentCaseId;
         $.getJSON('/hrforms/cases/' + currentCaseId + '/tab', function(res) {
             if (!res.success) return;
@@ -995,6 +1032,7 @@ window.HrCaseFile = (function() {
     }
 
     function openExemptionModal() {
+        prepareModal();
         $('#modalAdExemption').modal('show');
     }
 
@@ -1021,6 +1059,7 @@ window.HrCaseFile = (function() {
     }
 
     function openAuditModal(caseId) {
+        prepareModal();
         currentCaseId = caseId || currentCaseId;
         const tbody = $('#modal-audit-history-tbody');
         tbody.html('<tr><td colspan="4" class="text-center text-muted py-3">Loading audit trail...</td></tr>');
@@ -1054,6 +1093,8 @@ window.HrCaseFile = (function() {
 
     return {
         openForm: openForm,
+        ensureModalsInBody: ensureModalsInBody,
+        prepareModal: prepareModal,
         saveCurrentForm: saveCurrentForm,
         refreshCurrentLive: refreshCurrentLive,
         refreshLive: refreshLive,
@@ -1070,4 +1111,16 @@ window.HrCaseFile = (function() {
         calcAnnexJTotal: calcAnnexJTotal,
     };
 })();
+
+$(function() {
+    if (window.HrCaseFile && typeof window.HrCaseFile.ensureModalsInBody === 'function') {
+        window.HrCaseFile.ensureModalsInBody();
+    }
+    $(document).on('hidden.bs.modal', '.hrforms-teleported-modal', function() {
+        if ($('.modal.show').length === 0) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').css('padding-right', '');
+        }
+    });
+});
 </script>
