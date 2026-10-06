@@ -83,4 +83,67 @@ class HrFormsCtrCasesImmutabilityTest extends TestCase
             );
         }
     }
+
+    /**
+     * Dynamic Immutability Test (No Hardcoded Literals):
+     * Takes pre-suite live counts, triggers sync & form generation across multiple cases,
+     * and asserts that per-ctc_type and per-ctc_status counts before and after are strictly identical.
+     */
+    public function test_dynamic_immutability_snapshot_before_and_after_hrforms_operations(): void
+    {
+        // 1. Dynamic Snapshot Before
+        $typeCountsBefore = DB::table('hr.ctrcases')
+            ->select('ctc_type', DB::raw('count(*) as cnt'))
+            ->groupBy('ctc_type')
+            ->pluck('cnt', 'ctc_type')
+            ->toArray();
+
+        $statusCountsBefore = DB::table('hr.ctrcases')
+            ->select('ctc_status', DB::raw('count(*) as cnt'))
+            ->groupBy('ctc_status')
+            ->pluck('cnt', 'ctc_status')
+            ->toArray();
+
+        $allRowsBefore = DB::table('hr.ctrcases')
+            ->select('ctc_id', 'ctc_type', 'ctc_status')
+            ->get()
+            ->keyBy('ctc_id');
+
+        // 2. Perform HR Forms operations across multiple active cases
+        $generationService = app(\App\Services\HrForms\FormGenerationService::class);
+        $sampleCases = \App\Models\HrCtrCase::take(10)->get();
+        foreach ($sampleCases as $case) {
+            $generationService->syncForms($case);
+        }
+
+        // 3. Dynamic Snapshot After
+        $typeCountsAfter = DB::table('hr.ctrcases')
+            ->select('ctc_type', DB::raw('count(*) as cnt'))
+            ->groupBy('ctc_type')
+            ->pluck('cnt', 'ctc_type')
+            ->toArray();
+
+        $statusCountsAfter = DB::table('hr.ctrcases')
+            ->select('ctc_status', DB::raw('count(*) as cnt'))
+            ->groupBy('ctc_status')
+            ->pluck('cnt', 'ctc_status')
+            ->toArray();
+
+        $allRowsAfter = DB::table('hr.ctrcases')
+            ->select('ctc_id', 'ctc_type', 'ctc_status')
+            ->get()
+            ->keyBy('ctc_id');
+
+        // 4. Compare before and after dynamically - zero modifications allowed
+        $this->assertSame($typeCountsBefore, $typeCountsAfter, 'per-ctc_type counts must be 100% identical before and after operations.');
+        $this->assertSame($statusCountsBefore, $statusCountsAfter, 'per-ctc_status counts must be 100% identical before and after operations.');
+        $this->assertSame($allRowsBefore->count(), $allRowsAfter->count(), 'Total case rows count must be 100% identical before and after operations.');
+
+        foreach ($allRowsBefore as $id => $rowBefore) {
+            $rowAfter = $allRowsAfter->get($id);
+            $this->assertNotNull($rowAfter, "Case #{$id} must persist unchanged.");
+            $this->assertSame($rowBefore->ctc_type, $rowAfter->ctc_type, "Case #{$id} ctc_type was modified!");
+            $this->assertSame($rowBefore->ctc_status, $rowAfter->ctc_status, "Case #{$id} ctc_status was modified!");
+        }
+    }
 }
