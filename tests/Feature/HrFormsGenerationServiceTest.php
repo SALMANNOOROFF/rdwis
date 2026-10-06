@@ -15,6 +15,8 @@ use Tests\TestCase;
 
 class HrFormsGenerationServiceTest extends TestCase
 {
+    use \Illuminate\Foundation\Testing\DatabaseTransactions;
+
     protected FormGenerationService $generationService;
     protected SalaryBandService $salaryBandService;
     protected ApprovalRoutingService $routingService;
@@ -119,6 +121,9 @@ class HrFormsGenerationServiceTest extends TestCase
         }
         $fresh->ctc_newgrade = 'RO';
         $fresh->ctc_newjobtitle = 'Engineer';
+
+        CaseForm::where('case_id', $fresh->ctc_id)->where('form_code', 'RDW/HR/F-07')->forceDelete();
+        CaseExtra::where('case_id', $fresh->ctc_id)->delete();
 
         CaseExtra::updateOrCreate(
             ['case_id' => $fresh->ctc_id],

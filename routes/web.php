@@ -120,6 +120,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/forms/{formId}/pending-action', [\App\Http\Controllers\HrForms\CaseFileController::class, 'pendingAction'])->name('forms.pending-action');
             Route::post('/cases/{caseId}/milestones', [\App\Http\Controllers\HrForms\CaseFileController::class, 'updateMilestone'])->name('milestones.update');
             Route::put('/cases/{caseId}/project-extras', [\App\Http\Controllers\HrForms\CaseFileController::class, 'updateProjectExtras'])->name('project-extras.update');
+            Route::get('/forms/{formId}/pdf', [\App\Http\Controllers\HrForms\CaseFileController::class, 'downloadFormPdf'])->name('forms.pdf');
+            Route::get('/cases/{caseId}/pdf-dossier', [\App\Http\Controllers\HrForms\CaseFileController::class, 'downloadCaseDossier'])->name('cases.pdf-dossier');
+            Route::get('/settings', [\App\Http\Controllers\HrForms\SettingsController::class, 'index'])->name('settings')->middleware('area:hr,nrdi,rdw');
+            Route::post('/settings', [\App\Http\Controllers\HrForms\SettingsController::class, 'update'])->name('settings.update')->middleware('area:hr,nrdi,rdw');
         });
 
         Route::get('/', function () {

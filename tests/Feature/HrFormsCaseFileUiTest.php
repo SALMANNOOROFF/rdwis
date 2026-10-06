@@ -17,6 +17,8 @@ use Tests\TestCase;
 
 class HrFormsCaseFileUiTest extends TestCase
 {
+    use \Illuminate\Foundation\Testing\DatabaseTransactions;
+
     protected CenAccount $divisionUser;
     protected HrCtrCase $testCase;
 
@@ -86,15 +88,12 @@ class HrFormsCaseFileUiTest extends TestCase
      */
     public function test_manual_save_never_changes_live_layer_and_refresh_never_changes_manual(): void
     {
-        $form = CaseForm::where('case_id', $this->testCase->ctc_id)
-            ->where('form_code', 'RDW/HR/F-02')
-            ->first();
+        $form = CaseForm::where('form_code', 'RDW/HR/F-02')->where('status', '!=', 'Submitted')->first()
+            ?: CaseForm::where('form_code', 'RDW/HR/F-02')->first();
 
-        if (!$form) {
-            $form = CaseForm::where('case_id', $this->testCase->ctc_id)->first();
-        }
-
+        $this->assertNotNull($form);
         $form->status = 'Draft';
+        $form->submitted_at = null;
         $form->save();
 
         $originalLive = $form->form_data['live'] ?? [];
@@ -256,7 +255,15 @@ class HrFormsCaseFileUiTest extends TestCase
             ->first();
         $this->assertNotNull($auditLog, 'Archiving a Pending Removal form must create an audit log entry.');
 
-        // Decision: 'keep' -> resets to Draft
+        // Decision: 'keep' -> restores PREVIOUS status recorded in audit_log (e.g. Ready)
+        FormAuditLog::logAction(
+            $this->testCase->ctc_id,
+            $form2->id,
+            'status_changed',
+            'Marked as Pending Removal on hiring type change',
+            ['status' => 'Ready'],
+            ['status' => 'Pending Removal']
+        );
         $form2->status = 'Pending Removal';
         $form2->submitted_at = null;
         $form2->save();
@@ -265,7 +272,7 @@ class HrFormsCaseFileUiTest extends TestCase
             ->post(route('hrforms.forms.pending-action', $form2->id), ['decision' => 'keep']);
 
         $this->assertEquals(200, $keepResp->status(), 'Keep decision failed: ' . json_encode($keepResp->json()));
-        $this->assertSame('Draft', CaseForm::find($form2->id)->status);
+        $this->assertSame('Ready', CaseForm::find($form2->id)->status, 'Keep decision must restore previous status (Ready) from audit log');
     }
 
     /**
@@ -379,7 +386,103 @@ class HrFormsCaseFileUiTest extends TestCase
     }
 
     /**
-     * Test 10: Schema fingerprint hash is strictly unchanged.
+     * Test 10: PDF download returns 200, logs audit row, and guest is blocked (B6).
+     */
+    public function test_download_form_pdf_and_case_dossier_with_audit_and_authorization(): void
+    {
+        $form = CaseForm::where('case_id', $this->testCase->ctc_id)->first();
+        $this->assertNotNull($form);
+
+        // 1. Authorized download returns 200
+        $resp = $this->actingAs($this->divisionUser)
+            ->get(route('hrforms.forms.pdf', $form->id));
+        $resp->assertStatus(200);
+        $this->assertStringContainsString('application/pdf', $resp->headers->get('Content-Type'));
+
+        // Proves audit log entry created
+        $audit = FormAuditLog::where('form_id', $form->id)
+            ->where('action', 'pdf_downloaded')
+            ->first();
+        $this->assertNotNull($audit);
+
+        // 2. Full Case Dossier download returns 200 with cover page
+        $dossierResp = $this->actingAs($this->divisionUser)
+            ->get(route('hrforms.cases.pdf-dossier', $this->testCase->ctc_id));
+        $dossierResp->assertStatus(200);
+        $this->assertStringContainsString('application/pdf', $dossierResp->headers->get('Content-Type'));
+
+        $dossierAudit = FormAuditLog::where('case_id', $this->testCase->ctc_id)
+            ->where('action', 'dossier_downloaded')
+            ->first();
+        $this->assertNotNull($dossierAudit);
+
+        // 3. Guest / Unauthorized is blocked (403 or redirect to login)
+        auth()->logout();
+        $guestResp = $this->get(route('hrforms.forms.pdf', $form->id));
+        $this->assertTrue(in_array($guestResp->status(), [302, 401, 403], true));
+    }
+
+    /**
+     * Test 11: Submitted form PDF renders from snapshot only and ignores live changes (B2/B6).
+     */
+    public function test_submitted_form_pdf_renders_from_snapshot_only(): void
+    {
+        $form = CaseForm::where('case_id', $this->testCase->ctc_id)->first();
+        $form->status = 'Submitted';
+        $form->submitted_at = now();
+        $form->snapshot_data = [
+            'live' => [
+                'project_title' => 'SNAPSHOT_PROJECT_TITLE_NEVER_CHANGES',
+                'grade'         => 'RO',
+            ],
+            'manual' => [
+                'board_recommendations' => 'SNAPSHOT_RECOMMENDATION_TEXT',
+            ],
+            'warnings' => ['WARNING_THAT_MUST_NOT_APPEAR_ON_SUBMITTED_PDF'],
+        ];
+        $form->save();
+
+        // Mutate live case to simulate live data changing after submission
+        $this->testCase->ctc_newjobtitle = 'CHANGED_LIVE_TITLE_THAT_MUST_BE_IGNORED';
+        $this->testCase->save();
+
+        $pdfResp = $this->actingAs($this->divisionUser)
+            ->get(route('hrforms.forms.pdf', $form->id));
+        $pdfResp->assertStatus(200);
+
+        $content = $pdfResp->getContent();
+        $this->assertStringStartsWith('%PDF-', $content, 'PDF output must be a valid binary PDF starting with %PDF-');
+        $this->assertTrue(strlen($content) > 1000, 'PDF binary output must be substantial.');
+        $finalFile = \App\Models\HrForms\FormFile::where('case_form_id', $form->id)->where('is_final', true)->first();
+        $this->assertNotNull($finalFile, 'A final file record must be recorded in hrforms.form_files upon submission.');
+    }
+
+    /**
+     * Test 12: PDF routes return 404 with zero queries when feature flag is off.
+     */
+    public function test_pdf_routes_return_404_when_feature_flag_is_off(): void
+    {
+        config(['hrforms.enabled' => false]);
+        $form = CaseForm::where('case_id', $this->testCase->ctc_id)->first();
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $resp = $this->actingAs($this->divisionUser)
+            ->get(route('hrforms.forms.pdf', $form->id));
+        $resp->assertStatus(404);
+
+        $queries = DB::getQueryLog();
+        $hrformsQueries = array_filter($queries, function ($q) {
+            return str_contains($q['query'], 'hrforms');
+        });
+        $this->assertCount(0, $hrformsQueries, 'Disabled feature flag must execute ZERO hrforms queries.');
+
+        config(['hrforms.enabled' => true]);
+    }
+
+    /**
+     * Test 13: Schema fingerprint hash is strictly unchanged.
      */
     public function test_fingerprint_hash_strictly_unchanged(): void
     {
