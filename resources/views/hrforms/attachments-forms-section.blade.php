@@ -117,7 +117,7 @@
                     <button type="button" class="btn btn-xs btn-outline-primary font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" onclick="window.HrCaseFile.openForm({{ $form->id }}, {{ $caseId }})" title="Open / Edit Form Fields">
                         <i class="fas {{ $isSubmitted ? 'fa-eye' : 'fa-edit' }}"></i> {{ $isSubmitted ? 'View' : 'Edit' }}
                     </button>
-                    <a href="{{ route('universal.hrforms.forms.pdf', $form->id) }}" target="_blank" class="btn btn-xs btn-outline-secondary font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" title="Download PDF (%PDF-)">
+                    <a href="{{ route('hrforms.forms.pdf', $form->id) }}" target="_blank" class="btn btn-xs btn-outline-secondary font-weight-bold py-1 px-2" style="font-size: 11px; border-radius: 4px;" title="Download PDF (%PDF-)">
                         <i class="fas fa-download"></i> PDF
                     </a>
                     @if(!$isSubmitted && in_array($form->status, ['Draft', 'Pending Input'], true))
