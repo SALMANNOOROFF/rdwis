@@ -87,7 +87,7 @@ class AnnexNExtractor implements FormExtractorInterface
         }
 
         // Case cost
-        $casePrice = (float) ($case->ctc_price ?: ($case->ctc_newsalary * max(1, $case->casePlans->count() ?: 12)));
+        $casePrice = (float) ($case->ctc_price ?: ($case->ctc_newsalary * $case->tenure_months));
         $hrCommittedTotal = $hrAvailable ? ($hrCommitted + $casePrice) : null;
         $isHrDeficit = $hrAvailable ? ($hrRemaining < $casePrice) : true;
         $suggestedShortfall = ($hrAvailable && $isHrDeficit) ? max(0.0, round($casePrice - $hrRemaining, 2)) : null;

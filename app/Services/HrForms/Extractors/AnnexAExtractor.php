@@ -95,8 +95,7 @@ class AnnexAExtractor implements FormExtractorInterface
         // 5. Read project_extras (if saved earlier)
         $projectExtra = $prjId ? ProjectExtra::where('project_id', $prjId)->first() : null;
 
-        // 6. Forecasted salaries & tenure calculation (FIX 9)
-        $months = max(1, $case->casePlans->count() ?: 12);
+        $months = $case->tenure_months;
         $totalDays = null;
         if ($case->ctc_newstartdt && $case->ctc_newenddt) {
             $totalDays = Carbon::parse($case->ctc_newstartdt)->diffInDays(Carbon::parse($case->ctc_newenddt)) + 1;

@@ -496,11 +496,14 @@ class ProjectController extends Controller
             $backUrl = route('projects.show', $project->prj_id);
         }
 
+        $salaryForecastEmployees = $headRecord ? $finService->getPrjSalForecastEmployees($headRecord->hed_id) : [];
+        $totalSalaryForecast = $headRecord ? $finService->getPrjSalForecast($headRecord->hed_id) : 0;
+
         return view('projects.financial_view', compact(
             'project', 'totalSpent', 'balance', 'spentPercentage', 'finData', 
             'head', 'subheads', 'loans', 'milestones', 'installments', 'transfers',
             'headRecord', 'showProjectActualSection', 'showPrjShareValue', 'backUrl',
-            'allAttachments'
+            'allAttachments', 'salaryForecastEmployees', 'totalSalaryForecast'
         ));
     }
 

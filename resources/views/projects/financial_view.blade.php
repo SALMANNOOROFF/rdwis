@@ -349,6 +349,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" id="tab-forecast-link" data-toggle="pill" href="#tab-forecast" role="tab">
+                        <i class="fas fa-user-clock"></i> Salary Forecast ({{ count($salaryForecastEmployees ?? []) }})
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" id="tab-milestones-link" data-toggle="pill" href="#tab-milestones" role="tab">
                         <i class="fas fa-tasks"></i> Milestones & Fundings ({{ count($milestones) }})
                     </a>
@@ -799,7 +804,9 @@
                                         <td class="pl-3 font-weight-bold text-dark" style="font-size: 1.05rem;">
                                             <i class="fas fa-caret-right text-primary mr-1.5"></i> {{ $shName }}
                                             @if($shName === 'HR' && !empty($forecast))
-                                                <span class="badge badge-info ml-1" title="Forecasted salary">Forecast: {{ number_format($forecast) }}</span>
+                                                <a href="#tab-forecast" onclick="$('#tab-forecast-link').tab('show');" class="badge badge-info ml-1" style="cursor: pointer; text-decoration: none;" title="Click to view detailed salary forecast">
+                                                    <i class="fas fa-user-clock mr-0.5"></i> Forecast: {{ number_format($forecast) }} <i class="fas fa-arrow-right ml-0.5" style="font-size: 0.65rem;"></i>
+                                                </a>
                                             @endif
                                         </td>
                                         <td class="text-right font-weight-bold" style="color: #0284c7; font-size: 1.05rem;">
@@ -883,6 +890,233 @@
                             @endif
                         </table>
                     </div>
+
+                    {{-- SALARY FORECAST SUMMARY UNDER SUBHEAD BREAKDOWN --}}
+                    <div class="p-3 border-top" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 10px;">
+                            <div>
+                                <h6 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 0.8px; font-size: 1.15rem;">
+                                    <i class="fas fa-user-clock text-info mr-2"></i> HR SALARY FORECAST SUMMARY & FUTURE LIABILITIES
+                                </h6>
+                                <div class="text-muted small rajdhani font-weight-bold">Summary of projected future salary obligations for active employees contracted under this project head</div>
+                            </div>
+                            <a href="#tab-forecast" onclick="$('#tab-forecast-link').tab('show');" class="btn btn-outline-primary btn-sm font-weight-bold rounded-pill px-3 shadow-sm rajdhani" style="font-size: 0.9rem;">
+                                <i class="fas fa-chart-bar mr-1"></i> View Full Staff Breakdown & Charts
+                            </a>
+                        </div>
+                        @php
+                            $hrRemVal2 = (float)($finData['hr_remaining'] ?? 0);
+                            $fcVal2 = (float)($totalSalaryForecast ?? 0);
+                            $diff2 = $hrRemVal2 - $fcVal2;
+                            $covPct2 = $fcVal2 > 0 ? min(100, max(0, round(($hrRemVal2 / $fcVal2) * 100, 1))) : 100;
+                            $defPct2 = max(0, round(100 - $covPct2, 1));
+                        @endphp
+                        <div class="d-flex flex-wrap align-items-center justify-content-between py-2.5 px-3 mb-2 bg-white rounded border" style="border-color: #cbd5e1 !important; gap: 15px;">
+                            <div class="py-1">
+                                <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">Total Forecast</span>
+                                <div class="font-weight-bold text-primary font-mono rajdhani" style="font-size: 20px; line-height: 1.1;">
+                                    Rs. {{ number_format($totalSalaryForecast ?? 0) }}
+                                </div>
+                                <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">{{ count($salaryForecastEmployees ?? []) }} Active Staff on Head</span>
+                            </div>
+                            <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">HR Cash Can Be Spent</span>
+                                <div class="font-weight-bold text-success font-mono rajdhani" style="font-size: 20px; line-height: 1.1;">
+                                    Rs. {{ number_format($finData['hr_remaining'] ?? 0) }}
+                                </div>
+                                <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">Spendable Cash Balance</span>
+                            </div>
+                            <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">Coverage Status</span>
+                                <div class="font-weight-bold font-mono rajdhani {{ $diff2 >= 0 ? 'text-success' : 'text-danger' }}" style="font-size: 20px; line-height: 1.1;">
+                                    {{ $diff2 >= 0 ? '+Rs. ' . number_format($diff2) : '-Rs. ' . number_format(abs($diff2)) }}
+                                </div>
+                                <span class="badge {{ $diff2 >= 0 ? 'badge-success' : 'badge-danger' }} px-2 py-0.5 font-weight-bold rajdhani" style="font-size: 11px;">
+                                    <i class="fas {{ $diff2 >= 0 ? 'fa-check-circle' : 'fa-exclamation-triangle' }} mr-0.5"></i>
+                                    {{ $diff2 >= 0 ? 'Fully Funded' : 'Budget Deficit' }}
+                                </span>
+                            </div>
+                            <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important; min-width: 220px;">
+                                <div class="d-flex justify-content-between text-muted small font-weight-bold rajdhani mb-1" style="font-size: 11px;">
+                                    <span>Cash Coverage</span>
+                                    <span class="{{ $diff2 >= 0 ? 'text-success' : 'text-danger' }}">{{ $covPct2 }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px; border-radius: 5px; background: #fee2e2;">
+                                    <div class="progress-bar bg-success" style="width: {{ $covPct2 }}%;"></div>
+                                    @if($diff2 < 0)
+                                    <div class="progress-bar bg-danger" style="width: {{ $defPct2 }}%;"></div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ======================================================== --}}
+            {{-- TAB: SALARY FORECAST (ACTIVE STAFF REMAINING CONTRACTS) --}}
+            {{-- ======================================================== --}}
+            <div class="tab-pane fade" id="tab-forecast" role="tabpanel">
+                <div class="fin-table-card mb-4">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap" style="background: #f8fafc; border-color: #cbd5e1 !important; gap: 10px;">
+                        <div>
+                            <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
+                                <i class="fas fa-user-clock text-info mr-2"></i> PROJECT SALARY FORECAST BREAKDOWN
+                            </h5>
+                            <small class="text-muted font-weight-bold rajdhani" style="font-size: 0.95rem;">
+                                Projected future salary obligations for active employees contracted under Head <strong>{{ $headRecord->hed_code ?? 'N/A' }}</strong>
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center" style="gap: 8px;">
+                            <span class="badge badge-info px-3 py-1 font-weight-bold rajdhani" style="font-size: 0.9rem;">
+                                {{ count($salaryForecastEmployees ?? []) }} Active Staff on Head
+                            </span>
+                            <span class="badge badge-primary px-3 py-1 font-weight-bold rajdhani" style="font-size: 0.9rem;">
+                                Total Forecast: Rs. {{ number_format($totalSalaryForecast ?? 0) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- CLEAN UNBOXED STATS ROW --}}
+                    @php
+                        $hrRemVal = (float)($finData['hr_remaining'] ?? 0);
+                        $fcVal = (float)($totalSalaryForecast ?? 0);
+                        $diff = $hrRemVal - $fcVal;
+                        $covPct = $fcVal > 0 ? min(100, max(0, round(($hrRemVal / $fcVal) * 100, 1))) : 100;
+                        $defPct = max(0, round(100 - $covPct, 1));
+                    @endphp
+                    <div class="p-3 bg-light border-bottom">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between py-2.5 px-3 bg-white rounded border" style="border-color: #cbd5e1 !important; gap: 15px;">
+                            <div class="py-1">
+                                <span class="text-muted small font-weight-bold d-block text-uppercase rajdhani" style="font-size: 11px; letter-spacing: 0.6px;">Total Forecast Commitment</span>
+                                <div class="font-weight-bold text-primary font-mono rajdhani" style="font-size: 20px; line-height: 1.1;">Rs. {{ number_format($totalSalaryForecast ?? 0) }}</div>
+                                <small class="text-muted rajdhani font-weight-bold">Future staff contract liabilities</small>
+                            </div>
+                            <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                <span class="text-muted small font-weight-bold d-block text-uppercase rajdhani" style="font-size: 11px; letter-spacing: 0.6px;">HR Cash Can Be Spent</span>
+                                <div class="font-weight-bold text-success font-mono rajdhani" style="font-size: 20px; line-height: 1.1;">Rs. {{ number_format($finData['hr_remaining'] ?? 0) }}</div>
+                                <small class="text-muted rajdhani font-weight-bold">Allocation minus actual expenses</small>
+                            </div>
+                            <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                <span class="text-muted small font-weight-bold d-block text-uppercase rajdhani" style="font-size: 11px; letter-spacing: 0.6px;">Budget Coverage Status</span>
+                                <div class="font-weight-bold font-mono rajdhani {{ $diff >= 0 ? 'text-success' : 'text-danger' }}" style="font-size: 20px; line-height: 1.1;">
+                                    {{ $diff >= 0 ? '+Rs. ' . number_format($diff) : '-Rs. ' . number_format(abs($diff)) }}
+                                </div>
+                                <span class="badge {{ $diff >= 0 ? 'badge-success' : 'badge-danger' }} px-2 py-0.5 font-weight-bold rajdhani" style="font-size: 11px;">
+                                    <i class="fas {{ $diff >= 0 ? 'fa-check-circle' : 'fa-exclamation-triangle' }} mr-0.5"></i>
+                                    {{ $diff >= 0 ? 'Fully Funded' : 'Budget Deficit' }}
+                                </span>
+                            </div>
+                            <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important; min-width: 220px;">
+                                <div class="d-flex justify-content-between text-muted small font-weight-bold rajdhani mb-1" style="font-size: 11px;">
+                                    <span>Coverage Proportion</span>
+                                    <span class="{{ $diff >= 0 ? 'text-success' : 'text-danger' }}">{{ $covPct }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px; border-radius: 5px; background: #fee2e2;">
+                                    <div class="progress-bar bg-success" style="width: {{ $covPct }}%;"></div>
+                                    @if($diff < 0)
+                                    <div class="progress-bar bg-danger" style="width: {{ $defPct }}%;"></div>
+                                    @endif
+                                </div>
+                                <div class="d-flex justify-content-between mt-1 text-muted rajdhani font-weight-bold" style="font-size: 10.5px;">
+                                    <span>Cash: {{ $covPct }}%</span>
+                                    @if($diff < 0)
+                                    <span class="text-danger">Deficit: {{ $defPct }}%</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ALIGNED TABLE --}}
+                    <div class="table-responsive">
+                        <table class="table fin-table w-100 m-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center py-2.5" style="width: 50px;">#</th>
+                                    <th class="pl-3 py-2.5" style="width: 140px;">EMPLOYEE ID</th>
+                                    <th class="pl-3 py-2.5">EMPLOYEE NAME</th>
+                                    <th class="text-right py-2.5" style="width: 180px; color: #0284c7;">MONTHLY SALARY (Rs)</th>
+                                    <th class="text-center py-2.5" style="width: 160px; color: #64748b;">CONTRACT END DATE</th>
+                                    <th class="text-right pr-4 py-2.5" style="width: 230px; color: #0369a1;">FORECASTED COMMITMENT (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($salaryForecastEmployees ?? [] as $idx => $emp)
+                                    <tr>
+                                        <td class="text-center align-middle font-weight-bold text-muted">{{ $idx + 1 }}</td>
+                                        <td class="pl-3 align-middle font-weight-bold font-mono text-dark">{{ $emp['emp_id'] }}</td>
+                                        <td class="pl-3 align-middle font-weight-bold text-dark" style="font-size: 1.02rem;">
+                                            <i class="fas fa-user-circle text-primary mr-1.5"></i>
+                                            {{ $emp['emp_name'] }}
+                                        </td>
+                                        <td class="text-right align-middle font-weight-bold text-dark font-mono">
+                                            {{ number_format($emp['monthly_salary'], 2) }}
+                                        </td>
+                                        <td class="text-center align-middle font-weight-bold font-mono text-secondary">
+                                            <i class="fas fa-calendar-alt text-muted mr-1"></i>
+                                            {{ \Carbon\Carbon::parse($emp['contract_end'])->format('d M Y') }}
+                                        </td>
+                                        <td class="text-right pr-4 align-middle font-weight-bold font-mono" style="color: #0369a1; font-size: 1.08rem;">
+                                            {{ number_format($emp['forecast_amount'], 2) }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4 font-weight-bold">
+                                            <i class="fas fa-info-circle mr-1"></i> No active staff salary forecast found for this project head.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if(count($salaryForecastEmployees ?? []) > 0)
+                            <tfoot>
+                                <tr style="background: #f8fafc; border-top: 2.5px solid #cbd5e1; border-bottom: 2px solid #cbd5e1;">
+                                    <td colspan="5" class="pl-3 py-2.5 font-weight-bold text-dark text-uppercase rajdhani" style="font-size: 1.15rem; letter-spacing: 0.5px;">
+                                        <i class="fas fa-calculator text-primary mr-1.5"></i> TOTAL PROJECT SALARY FORECAST
+                                    </td>
+                                    <td class="text-right pr-4 py-2.5 font-weight-bold" style="color: #0369a1; font-size: 1.2rem;">
+                                        Rs. {{ number_format($totalSalaryForecast ?? 0, 2) }}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                            @endif
+                        </table>
+                    </div>
+
+                    {{-- SALARY FORECAST VISUAL CHARTS SECTION --}}
+                    @if(count($salaryForecastEmployees ?? []) > 0)
+                    <div class="p-4 border-top" style="background: #ffffff; border-color: #cbd5e1 !important;">
+                        <div class="row">
+                            <div class="col-lg-8 mb-3 mb-lg-0">
+                                <div class="bg-light p-3 rounded border shadow-sm h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                        <h6 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 0.5px; font-size: 1.1rem;">
+                                            <i class="fas fa-chart-bar text-primary mr-1.5"></i> STAFF SALARY FORECAST DISTRIBUTION
+                                        </h6>
+                                        <span class="badge badge-light border text-muted font-weight-bold rajdhani">PKR Amount per Employee</span>
+                                    </div>
+                                    <div style="height: 290px; position: relative;">
+                                        <canvas id="forecastStaffBarChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="bg-light p-3 rounded border shadow-sm h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                        <h6 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 0.5px; font-size: 1.1rem;">
+                                            <i class="fas fa-chart-pie text-info mr-1.5"></i> FORECAST VS HR CASH COVERAGE
+                                        </h6>
+                                        <span class="badge badge-light border text-muted font-weight-bold rajdhani">Liability vs Asset</span>
+                                    </div>
+                                    <div style="height: 290px; position: relative;">
+                                        <canvas id="forecastBudgetComparisonChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -1975,15 +2209,128 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // SALARY FORECAST CHARTS
+    const salaryForecastEmployees = @json($salaryForecastEmployees ?? []);
+    const totalSalaryForecast = Number(@json($totalSalaryForecast ?? 0));
+    const hrCashRemaining = Number(@json($finData['hr_remaining'] ?? 0));
+    let forecastChartsRendered = false;
+
+    function renderForecastCharts() {
+        if (forecastChartsRendered) return;
+        forecastChartsRendered = true;
+
+        // Staff Salary Forecast Distribution (Horizontal Bar Chart)
+        const canvasStaff = document.getElementById('forecastStaffBarChart');
+        if (canvasStaff && salaryForecastEmployees.length > 0) {
+            const ctxStaff = canvasStaff.getContext('2d');
+            const empLabels = salaryForecastEmployees.map(e => e.emp_name);
+            const empData = salaryForecastEmployees.map(e => Number(e.forecast_amount));
+            const barColors = empData.map(v => v < 0 ? '#ef4444' : '#0284c7');
+
+            new Chart(ctxStaff, {
+                type: 'horizontalBar',
+                data: {
+                    labels: empLabels,
+                    datasets: [{
+                        label: 'Forecast Amount (PKR)',
+                        data: empData,
+                        backgroundColor: barColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: { display: false },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return ' Rs. ' + Number(tooltipItem.xLabel).toLocaleString();
+                            }
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                fontColor: '#475569',
+                                fontFamily: "'Rajdhani', sans-serif",
+                                callback: function(val) {
+                                    if (val === 0) return '0';
+                                    return (val < 0 ? '-' : '') + 'Rs. ' + (Math.abs(val) >= 1000000 ? (Math.abs(val)/1000000).toFixed(1) + 'M' : (Math.abs(val)/1000).toFixed(0) + 'k');
+                                }
+                            },
+                            gridLines: { color: '#e2e8f0' }
+                        }],
+                        yAxes: [{
+                            gridLines: { display: false },
+                            ticks: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 12, fontStyle: 'bold' }
+                        }]
+                    }
+                }
+            });
+        }
+
+        // Forecast vs Cash Coverage (Doughnut Chart)
+        const canvasBudget = document.getElementById('forecastBudgetComparisonChart');
+        if (canvasBudget) {
+            const ctxBudget = canvasBudget.getContext('2d');
+            const covered = Math.min(hrCashRemaining, totalSalaryForecast);
+            const deficit = Math.max(0, totalSalaryForecast - hrCashRemaining);
+            const surplus = Math.max(0, hrCashRemaining - totalSalaryForecast);
+
+            const bLabels = deficit > 0 ? ['Funded Portion', 'Forecast Deficit'] : ['Staff Forecast', 'Surplus Spendable'];
+            const bData = deficit > 0 ? [covered, deficit] : [totalSalaryForecast, surplus];
+            const bColors = deficit > 0 ? ['#0284c7', '#dc2626'] : ['#0284c7', '#16a34a'];
+
+            new Chart(ctxBudget, {
+                type: 'doughnut',
+                data: {
+                    labels: bLabels,
+                    datasets: [{
+                        data: bData,
+                        backgroundColor: bColors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom',
+                        labels: { fontColor: '#1e293b', fontFamily: "'Rajdhani', sans-serif", fontSize: 11, boxWidth: 14 }
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                const val = data.datasets[0].data[tooltipItem.index];
+                                const sum = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const pct = sum > 0 ? ((val / sum) * 100).toFixed(1) : 0;
+                                return ' ' + data.labels[tooltipItem.index] + ': Rs. ' + Number(val).toLocaleString() + ' (' + pct + '%)';
+                            }
+                        }
+                    },
+                    cutoutPercentage: 60
+                }
+            });
+        }
+    }
+
     // Tab Activation Listener for Charts
     $('a[data-toggle="pill"]').on('shown.bs.tab', function(e) {
-        if (e.target.getAttribute('href') === '#tab-charts') {
+        const target = e.target.getAttribute('href');
+        if (target === '#tab-charts') {
             renderAllFinCharts();
+        } else if (target === '#tab-forecast') {
+            setTimeout(renderForecastCharts, 150);
         }
     });
 
     if (window.location.hash === '#tab-charts' || $('#tab-charts').hasClass('active')) {
         setTimeout(renderAllFinCharts, 250);
+    }
+    if (window.location.hash === '#tab-forecast' || $('#tab-forecast').hasClass('active')) {
+        setTimeout(renderForecastCharts, 250);
     }
     @endif
 

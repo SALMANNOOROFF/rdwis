@@ -106,7 +106,7 @@
 
     if ($isHrIsAdmin) {
         // HR, Admin, and IS hires are by default strictly allocated to CSRF
-        $monthCount = $case->casePlans->count() > 0 ? $case->casePlans->count() : 12;
+        $monthCount = $case->tenure_months;
         $allocatedGroups->push([
             'hed_id' => null,
             'prj_code' => 'CSRF',
@@ -116,19 +116,21 @@
             'month_count' => $monthCount,
         ]);
     } else {
-        // Only include plans where candidate has actually been allocated to a specific project head
-        $allocatedPlans = $sortedPlans->filter(function($p) {
-            return !empty($p->ccp_hed_id);
-        });
-
-        if ($allocatedPlans->isNotEmpty()) {
+        if ($sortedPlans->isNotEmpty()) {
             $currentGroup = null;
-            foreach ($allocatedPlans as $p) {
-                $hedId = $p->ccp_hed_id;
-                $headRow = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $hedId)->first();
-                $prjRow = ($headRow && $headRow->hed_prj_id) ? \Illuminate\Support\Facades\DB::table('prj.projects')->where('prj_id', $headRow->hed_prj_id)->first() : null;
-                $prjCode = $p->project->prj_code ?? ($prjRow->prj_code ?? ($headRow->hed_code ?? 'PRJ'));
-                $prjName = $p->project->prj_name ?? ($prjRow->prj_name ?? ($headRow->hed_name ?? 'Project'));
+            foreach ($sortedPlans as $p) {
+                $hedId = !empty($p->ccp_hed_id) ? (int)$p->ccp_hed_id : null;
+                $isUnallocated = empty($hedId);
+
+                if ($isUnallocated) {
+                    $prjCode = 'Project Not Yet Allocated';
+                    $prjName = 'Project Not Yet Allocated';
+                } else {
+                    $headRow = \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $hedId)->first();
+                    $prjRow = ($headRow && $headRow->hed_prj_id) ? \Illuminate\Support\Facades\DB::table('prj.projects')->where('prj_id', $headRow->hed_prj_id)->first() : null;
+                    $prjCode = $p->project->prj_code ?? ($prjRow->prj_code ?? ($headRow->hed_code ?? 'PRJ'));
+                    $prjName = $p->project->prj_name ?? ($prjRow->prj_name ?? ($headRow->hed_name ?? 'Project'));
+                }
 
                 if ($currentGroup === null) {
                     $currentGroup = [
@@ -137,12 +139,12 @@
                         'prj_name' => $prjName,
                         'start_dt' => $p->ccp_startdt,
                         'end_dt' => $p->ccp_enddt,
-                        'month_count' => 1,
+                        'is_unallocated' => $isUnallocated,
                     ];
-                } elseif ($currentGroup['hed_id'] == $hedId) {
+                } elseif ($currentGroup['hed_id'] === $hedId) {
                     $currentGroup['end_dt'] = $p->ccp_enddt;
-                    $currentGroup['month_count']++;
                 } else {
+                    $currentGroup['month_count'] = \App\Models\HrCtrCase::calculateMonths($currentGroup['start_dt'], $currentGroup['end_dt']);
                     $allocatedGroups->push($currentGroup);
                     $currentGroup = [
                         'hed_id' => $hedId,
@@ -150,23 +152,26 @@
                         'prj_name' => $prjName,
                         'start_dt' => $p->ccp_startdt,
                         'end_dt' => $p->ccp_enddt,
-                        'month_count' => 1,
+                        'is_unallocated' => $isUnallocated,
                     ];
                 }
             }
             if ($currentGroup !== null) {
+                $currentGroup['month_count'] = \App\Models\HrCtrCase::calculateMonths($currentGroup['start_dt'], $currentGroup['end_dt']);
                 $allocatedGroups->push($currentGroup);
             }
         } else {
             // Fallback when no monthly head breakdown is specified
-            $monthCount = $case->casePlans->count() ?: 12;
+            $monthCount = $case->tenure_months;
+            $hasHead = !empty($projectPlan?->ccp_hed_id) || !empty($case->ctc_prj_id);
             $allocatedGroups->push([
-                'hed_id' => $projectPlan?->ccp_hed_id ?? null,
-                'prj_code' => $projectCode ?: 'Core',
-                'prj_name' => $projectName ?: 'Core Institutional Budget',
+                'hed_id' => $projectPlan?->ccp_hed_id ?? ($case->ctc_prj_id ?? null),
+                'prj_code' => $hasHead ? ($projectCode ?: 'Core') : 'Project Not Yet Allocated',
+                'prj_name' => $hasHead ? ($projectName ?: 'Core Institutional Budget') : 'Project Not Yet Allocated',
                 'start_dt' => $case->ctc_newstartdt,
                 'end_dt' => $case->ctc_newenddt,
                 'month_count' => $monthCount,
+                'is_unallocated' => !$hasHead,
             ]);
         }
     }
@@ -179,6 +184,7 @@
 
     foreach ($allocatedGroups as $agIdx => $ag) {
         $hId = $ag['hed_id'];
+        $isUnalloc = !empty($ag['is_unallocated']);
         $alloc = $hId ? $allocatedProjects->firstWhere('hed_id', $hId) : null;
         $headRecord = $alloc ?: ($hId ? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $hId)->first() : null);
         $prjId = $alloc->hed_prj_id ?? ($headRecord->hed_prj_id ?? null);
@@ -187,14 +193,14 @@
         $hiredCount = $hId ? (int)($projectHiredCounts->get($hId, 0)) : 0;
 
         $fin = $hId ? $finService->getHeadStatus($hId) : null;
-        $fAlloc = (float)($fin->pcc_share ?? ($fin->prj_share ?? ($fin->allocation ?? 0)));
-        $fRec = (float)($fin->pcc_received ?? ($fin->received ?? 0));
-        $fExp = (float)($fin->pcc_expenditure ?? ($fin->expenditure ?? 0));
-        $fBal = (float)($fin->pcc_balance ?? ($fRec - $fExp));
-        $fCmt = (float)($fin->pcc_commitments ?? ($fin->commitments ?? 0));
-        $fInp = (float)($fin->pcc_in_process ?? ($fin->in_process ?? 0));
-        $fAvail = (float)($fin->pcc_available ?? ($fBal - $fCmt - $fInp));
-        $fSpent = (float)($fin->pcc_can_be_spent ?? ($fAlloc - $fExp - $fCmt - $fInp));
+        $fAlloc = $fin ? (float)($fin->pcc_share ?? ($fin->prj_share ?? ($fin->allocation ?? 0))) : 0;
+        $fRec = $fin ? (float)($fin->pcc_received ?? ($fin->received ?? 0)) : 0;
+        $fExp = $fin ? (float)($fin->pcc_expenditure ?? ($fin->expenditure ?? 0)) : 0;
+        $fBal = $fin ? (float)($fin->pcc_balance ?? ($fRec - $fExp)) : 0;
+        $fCmt = $fin ? (float)($fin->pcc_commitments ?? ($fin->commitments ?? 0)) : 0;
+        $fInp = $fin ? (float)($fin->pcc_in_process ?? ($fin->in_process ?? 0)) : 0;
+        $fAvail = $fin ? (float)($fin->pcc_available ?? ($fBal - $fCmt - $fInp)) : 0;
+        $fSpent = $fin ? (float)($fin->pcc_can_be_spent ?? ($fAlloc - $fExp - $fCmt - $fInp)) : 0;
 
         $startFmt = $ag['start_dt'] ? \Carbon\Carbon::parse($ag['start_dt'])->format('d M, Y') : '';
         $endFmt = $ag['end_dt'] ? \Carbon\Carbon::parse($ag['end_dt'])->format('d M, Y') : '';
@@ -203,7 +209,7 @@
             ? "{$startFmt} – {$endFmt} ({$mCount} " . Str::plural('Month', $mCount) . ")"
             : "{$mCount} " . Str::plural('Month', $mCount);
 
-        $cardKey = 'alloc_' . $agIdx . '_' . ($hId ?: '0');
+        $cardKey = 'alloc_' . $agIdx . '_' . ($hId ?: 'unalloc');
 
         $projectCards[] = [
             'card_key' => $cardKey,
@@ -211,6 +217,7 @@
             'prj_id' => $prjId,
             'prj_code' => $prjCode,
             'prj_name' => $prjName,
+            'is_unallocated' => $isUnalloc,
             'start_dt' => $ag['start_dt'],
             'end_dt' => $ag['end_dt'],
             'month_count' => $mCount,
@@ -237,7 +244,7 @@
     }
 
     $activeProjectCard = $projectCards[0] ?? null;
-    $totalContractMonths = $case->casePlans->count() ?: 12;
+    $totalContractMonths = $case->tenure_months;
     $totalContractValue = (float)($case->ctc_price ?: ($proposedSalary * $totalContractMonths));
 
     // Prepare Financial Intelligence Data & Subheads Breakdown for project modals
@@ -795,6 +802,22 @@ textarea::-webkit-scrollbar-thumb:hover {
     border-color: #4d6247 !important;
     box-shadow: 0 2px 6px rgba(95, 120, 88, 0.35);
 }
+.project-badge-btn.badge-unallocated {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border-color: #fcd34d !important;
+}
+.project-badge-btn.badge-unallocated:hover {
+    background: #fde68a !important;
+    color: #78350f !important;
+    border-color: #f59e0b !important;
+}
+.project-badge-btn.badge-unallocated.active {
+    background: #d97706 !important;
+    color: #ffffff !important;
+    border-color: #b45309 !important;
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.35);
+}
 
 /* Drilldown Buttons */
 .btn-drill-link {
@@ -901,11 +924,11 @@ textarea::-webkit-scrollbar-thumb:hover {
                                         </strong>
                                         <div class="d-inline-flex align-items-center flex-wrap" style="gap: 5px;">
                                             @forelse($projectCards as $idx => $pCard)
-                                                <span class="badge project-badge-btn {{ $idx === 0 ? 'active' : '' }}" 
+                                                <span class="badge project-badge-btn {{ $idx === 0 ? 'active' : '' }} {{ !empty($pCard['is_unallocated']) ? 'badge-unallocated' : '' }}" 
                                                       onclick="selectProject('{{ $pCard['card_key'] }}')"
                                                       data-card-key="{{ $pCard['card_key'] }}"
-                                                      title="Click to view details for {{ $pCard['prj_code'] }}">
-                                                    <i class="fas fa-folder-open mr-1.5"></i>{{ $pCard['prj_code'] }}
+                                                      title="{{ !empty($pCard['is_unallocated']) ? 'Project Not Yet Allocated' : 'Click to view details for ' . $pCard['prj_code'] }}">
+                                                    <i class="fas {{ !empty($pCard['is_unallocated']) ? 'fa-clock' : 'fa-folder-open' }} mr-1.5"></i>{{ $pCard['prj_code'] }}
                                                 </span>
                                                 @if(!$loop->last)
                                                     <span class="text-dark font-weight-bold mr-1" style="font-size: 14px;">,</span>
@@ -1722,6 +1745,18 @@ textarea::-webkit-scrollbar-thumb:hover {
 </div>
 
 {{-- Financial Intelligence Report Modals for Allocated Projects --}}
+<style>
+/* Financial Intelligence Report Modal Elevation & Scrollability */
+.modal.financial-intelligence-modal {
+    z-index: 1075 !important;
+}
+.modal.financial-intelligence-modal .modal-dialog {
+    z-index: 1076 !important;
+}
+body.fin-modal-open > .modal-backdrop {
+    z-index: 1070 !important;
+}
+</style>
 @foreach($projectModalsData as $mKey => $mData)
 @php
     $mHead = $mData['head'] ?? null;
@@ -1730,36 +1765,36 @@ textarea::-webkit-scrollbar-thumb:hover {
     $mPrjId = $mCard['prj_id'] ?? null;
     $mHedId = $mCard['hed_id'] ?? null;
 @endphp
-<div class="modal fade" id="financialIntelligenceModal_{{ $mKey }}" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95%; width: 1420px;">
-        <div class="modal-content shadow-2xl" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.18);">
-            <div class="modal-header border-bottom py-3 px-4 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-color: #e2e8f0 !important;">
-                <div class="d-flex align-items-center">
-                    <div class="mr-3" style="font-size: 28px; color: var(--rd-accent, #5F7858);"><i class="fas fa-chart-line"></i></div>
+<div class="modal fade financial-intelligence-modal" id="financialIntelligenceModal_{{ $mKey }}" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1075 !important;">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable my-2" style="max-width: 96%; width: 1420px; z-index: 1076 !important;">
+        <div class="modal-content shadow-2xl" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.18);">
+            <div class="modal-header border-bottom py-2.5 px-4 d-flex align-items-center justify-content-between flex-shrink-0" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+                <div class="d-flex align-items-center flex-grow-1 mr-3">
+                    <div class="mr-3" style="font-size: 26px; color: var(--rd-accent, #5F7858);"><i class="fas fa-chart-line"></i></div>
                     <div>
                         <h4 class="modal-title rajdhani font-weight-bold text-dark mb-0" style="letter-spacing: 1.5px; font-size: 19px; font-weight: 800;">FINANCIAL INTELLIGENCE REPORT</h4>
                         <div class="text-muted rajdhani font-weight-bold mt-0.5" style="font-size: 13px;">{{ $mHead->head_name ?? ($mHead->hed_name ?? ($mCard['prj_code'] ?? 'N/A')) }} | DATED {{ date('d M Y') }} <span class="ml-2 font-weight-bold text-primary">{{ ($mHead->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
                     </div>
-                    <div class="ml-auto d-flex align-items-center mr-4" style="gap: 8px;">
+                    <div class="ml-auto d-flex align-items-center mr-2" style="gap: 8px;">
                         @if(!empty($mPrjId))
-                        <a href="{{ route('projects.show', $mPrjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none;">
+                        <a href="{{ route('projects.show', $mPrjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 5px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none;">
                             <i class="fas fa-project-diagram"></i> Project Details
                         </a>
                         @endif
                         @if(!empty($mHedId))
-                        <a href="{{ route('projects.financial_view', $mHedId) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none;">
+                        <a href="{{ route('projects.financial_view', $mHedId) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 5px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none;">
                             <i class="fas fa-paperclip"></i> Files & Attachments
                         </a>
-                        <a href="{{ route('projects.financial_view', $mHedId) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none;">
+                        <a href="{{ route('projects.financial_view', $mHedId) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 5px 12px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none;">
                             <i class="fas fa-coins"></i> Milestone Costs
                         </a>
                         @endif
                     </div>
                 </div>
-                <button type="button" class="close text-dark opacity-60 hover-opacity-100" data-dismiss="modal" style="font-size: 26px;">&times;</button>
+                <button type="button" class="close text-dark opacity-75 hover-opacity-100" data-dismiss="modal" aria-label="Close" style="font-size: 28px; line-height: 1; outline: none; cursor: pointer; padding: 0.25rem 0.5rem;">&times;</button>
             </div>
             
-            <div class="modal-body p-0" style="background: #ffffff;">
+            <div class="modal-body p-0" style="background: #ffffff; overflow-y: auto; flex: 1 1 auto; max-height: calc(100vh - 140px);">
                 {{-- Top Summary bar --}}
                 <div class="row no-gutters border-bottom" style="background: #f1f5f9; border-color: #e2e8f0 !important;">
                     <div class="col-md-3 border-right p-3.5" style="border-color: #cbd5e1 !important;">
@@ -2079,14 +2114,146 @@ textarea::-webkit-scrollbar-thumb:hover {
                                 @endif
                             </table>
                         </div>
+
+                        {{-- PROJECT SALARY FORECAST SUMMARY & VISUAL OVERVIEW --}}
+                        @php
+                            $fisCase = app(\App\Services\FinancialIntelligenceService::class);
+                            $caseHedId = $mHedId ?? null;
+                            $caseForecastEmployees = $caseHedId ? $fisCase->getPrjSalForecastEmployees($caseHedId) : [];
+                            $caseForecastTotal = $caseHedId ? $fisCase->getPrjSalForecast($caseHedId) : 0;
+                            $caseHrSh = collect($mSubheads ?? [])->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'hr') !== false);
+                            $caseHrRem = (float)(is_array($caseHrSh) ? ($caseHrSh['remaining'] ?? ($caseHrSh['can_be_spent'] ?? 0)) : ($caseHrSh->remaining ?? ($caseHrSh->can_be_spent ?? 0)));
+                            $caseDiff = $caseHrRem - $caseForecastTotal;
+                        @endphp
+                        @if($caseHedId && (count($caseForecastEmployees) > 0 || $caseForecastTotal > 0))
+                        <div class="mt-3 p-3 rounded border" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-2.5 pb-2 border-bottom" style="border-color: #e2e8f0 !important;">
+                                <div>
+                                    <h6 class="rajdhani font-weight-bold mb-0" style="letter-spacing: 0.8px; font-size: 16px; font-weight: 800; color: #1e3a8a;">
+                                        <i class="fas fa-user-clock text-info mr-1.5"></i> SALARY FORECAST OVERVIEW (HR STAFF)
+                                    </h6>
+                                    <div class="small rajdhani" style="font-size: 12.5px; font-weight: 600; color: #475569;">Projected future salary liabilities for active employees under this head</div>
+                                </div>
+                                <span class="badge badge-info px-2.5 py-1 rajdhani font-weight-bold" style="font-size: 12px;">
+                                    {{ count($caseForecastEmployees) }} ACTIVE STAFF
+                                </span>
+                            </div>
+
+                            @php
+                                $caseCoveragePct = $caseForecastTotal > 0 ? min(100, max(0, round(($caseHrRem / $caseForecastTotal) * 100, 1))) : 100;
+                                $caseDeficitPct = max(0, round(100 - $caseCoveragePct, 1));
+                            @endphp
+
+                            {{-- CLEAN STREAMLINED STATS (NO BOXES / NO DABBAY) --}}
+                            <div class="d-flex flex-wrap align-items-center justify-content-between py-2.5 px-3 mb-3 bg-white rounded border" style="border-color: #cbd5e1 !important; gap: 12px;">
+                                <div class="py-1">
+                                    <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">Total Forecast</span>
+                                    <div class="font-weight-bold text-primary font-mono rajdhani" style="font-size: 19px; line-height: 1.1;">
+                                        Rs. {{ number_format($caseForecastTotal) }}
+                                    </div>
+                                    <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">Future staff contracts</span>
+                                </div>
+                                <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                    <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">HR Cash Can Be Spent</span>
+                                    <div class="font-weight-bold text-success font-mono rajdhani" style="font-size: 19px; line-height: 1.1;">
+                                        Rs. {{ number_format($caseHrRem) }}
+                                    </div>
+                                    <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">Spendable Cash Balance</span>
+                                </div>
+                                <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                    <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">Coverage Status</span>
+                                    <div class="font-weight-bold font-mono rajdhani {{ $caseDiff >= 0 ? 'text-success' : 'text-danger' }}" style="font-size: 19px; line-height: 1.1;">
+                                        {{ $caseDiff >= 0 ? '+Rs. ' . number_format($caseDiff) : '-Rs. ' . number_format(abs($caseDiff)) }}
+                                    </div>
+                                    <span class="badge {{ $caseDiff >= 0 ? 'badge-success' : 'badge-danger' }} px-2 py-0.5 font-weight-bold rajdhani" style="font-size: 11px;">
+                                        <i class="fas {{ $caseDiff >= 0 ? 'fa-check-circle' : 'fa-exclamation-triangle' }} mr-0.5"></i>
+                                        {{ $caseDiff >= 0 ? 'Fully Funded' : 'Budget Deficit' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- EXPLANATORY VISUAL CHART PANEL --}}
+                            <div class="bg-white p-3 rounded border shadow-sm">
+                                {{-- 1. BUDGET COVERAGE EXPLANATION BAR --}}
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="rajdhani font-weight-bold text-dark" style="font-size: 12.5px; letter-spacing: 0.5px;">
+                                            <i class="fas fa-balance-scale text-primary mr-1"></i> BUDGET COVERAGE EXPLANATION
+                                        </span>
+                                        <span class="rajdhani font-weight-bold {{ $caseDiff >= 0 ? 'text-success' : 'text-danger' }}" style="font-size: 12px;">
+                                            {{ $caseCoveragePct }}% Covered by Current Cash
+                                        </span>
+                                    </div>
+                                    <div class="progress" style="height: 12px; border-radius: 6px; background: #fee2e2;">
+                                        <div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: {{ min(100, $caseCoveragePct) }}%;" title="Covered: Rs. {{ number_format(min($caseHrRem, $caseForecastTotal)) }}"></div>
+                                        @if($caseDiff < 0)
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $caseDeficitPct }}%;" title="Deficit: Rs. {{ number_format(abs($caseDiff)) }}"></div>
+                                        @endif
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1 text-muted small rajdhani font-weight-bold" style="font-size: 11px;">
+                                        <span><i class="fas fa-circle text-success mr-1" style="font-size: 8px;"></i> Cash Covered: Rs. {{ number_format(min($caseHrRem, $caseForecastTotal)) }} ({{ $caseCoveragePct }}%)</span>
+                                        @if($caseDiff < 0)
+                                        <span class="text-danger"><i class="fas fa-circle text-danger mr-1" style="font-size: 8px;"></i> Deficit Gap: Rs. {{ number_format(abs($caseDiff)) }} ({{ $caseDeficitPct }}%)</span>
+                                        @else
+                                        <span class="text-success"><i class="fas fa-check-circle mr-1"></i> Surplus Cash: +Rs. {{ number_format($caseDiff) }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- 2. STAFF SALARY FORECAST BREAKDOWN CHART --}}
+                                <div class="pt-2.5 border-top" style="border-color: #f1f5f9 !important;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="rajdhani font-weight-bold text-dark" style="font-size: 13px;">
+                                            <i class="fas fa-chart-bar text-info mr-1"></i> STAFF SALARY FORECAST LIABILITIES CHART
+                                        </span>
+                                        <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">Ranked by Future Liability</span>
+                                    </div>
+
+                                    <div style="position: relative; height: 180px; width: 100%; margin-bottom: 12px;">
+                                        <canvas class="salary-forecast-chart" data-employees='@json($caseForecastEmployees)'></canvas>
+                                    </div>
+
+                                    {{-- 3. STAFF DETAILS BREAKDOWN LIST --}}
+                                    <div class="d-flex flex-column" style="gap: 6px;">
+                                        @foreach(array_slice($caseForecastEmployees, 0, 5) as $fe)
+                                        @php
+                                            $fAmount = (float)$fe['forecast_amount'];
+                                            $fPct = $caseForecastTotal > 0 ? min(100, max(0, round(($fAmount / $caseForecastTotal) * 100))) : 0;
+                                        @endphp
+                                        <div class="d-flex justify-content-between align-items-center px-2.5 py-1 rounded" style="background: #f8fafc; border: 1px solid #f1f5f9;">
+                                            <div class="d-flex align-items-center small rajdhani font-weight-bold text-truncate" style="font-size: 12px; max-width: 65%;">
+                                                <i class="fas fa-user-circle text-primary mr-1.5 flex-shrink-0"></i>
+                                                <span class="text-dark font-weight-bold text-truncate mr-1.5">{{ $fe['emp_name'] }}</span>
+                                                <span class="text-muted font-normal text-truncate" style="font-size: 11px;">
+                                                    (Rs. {{ number_format($fe['monthly_salary']) }}/mo &bull; End: {{ \Carbon\Carbon::parse($fe['contract_end'])->format('d M y') }})
+                                                </span>
+                                            </div>
+                                            <div class="text-right flex-shrink-0">
+                                                <span class="font-mono text-dark font-weight-bold rajdhani" style="font-size: 12.5px;">Rs. {{ number_format($fAmount) }}</span>
+                                                <span class="badge badge-light border ml-1 rajdhani font-weight-bold text-muted" style="font-size: 10.5px;">{{ $fPct }}%</span>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @if(count($caseForecastEmployees) > 5)
+                                        <div class="text-right mt-0.5">
+                                            <small class="text-muted rajdhani font-weight-bold" style="font-size: 11px;">+ {{ count($caseForecastEmployees) - 5 }} other staff members contracted under head</small>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
             
-            <div class="modal-footer border-top py-2.5 px-4 d-flex justify-content-between" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+            <div class="modal-footer border-top py-2 px-4 d-flex justify-content-between align-items-center flex-shrink-0" style="background: #f8fafc; border-color: #e2e8f0 !important;">
                 <div class="rajdhani font-weight-bold" style="font-size: 13px; color: #475569;"><i class="fas fa-shield-alt text-success mr-1.5"></i> RDWIS FINANCIAL AUDIT ENGINE ACTIVE</div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-secondary btn-sm rajdhani font-weight-bold px-4" data-dismiss="modal" style="font-size: 12.5px; border-radius: 6px;">CLOSE REPORT</button>
+                    <button type="button" class="btn btn-secondary btn-sm rajdhani font-weight-bold px-4" data-dismiss="modal" style="font-size: 12.5px; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-times mr-1"></i> CLOSE REPORT
+                    </button>
                 </div>
             </div>
         </div>
@@ -2097,6 +2264,151 @@ textarea::-webkit-scrollbar-thumb:hover {
 @push('scripts')
 <script>
 $(document).ready(function() {
+    // Teleport financial intelligence modals to body to prevent stacking context or layout clipping issues
+    $('.financial-intelligence-modal').each(function() {
+        if (this.parentNode !== document.body) {
+            document.body.appendChild(this);
+        }
+    });
+
+    $(document).on('show.bs.modal', '.financial-intelligence-modal', function() {
+        if (this.parentNode !== document.body) {
+            document.body.appendChild(this);
+        }
+        $('body').addClass('fin-modal-open');
+    });
+
+    $(document).on('shown.bs.modal', '.financial-intelligence-modal', function() {
+        const modal = this;
+        setTimeout(function() {
+            const canvases = modal.querySelectorAll('canvas.salary-forecast-chart');
+            canvases.forEach(function(canvasEl) {
+                if (canvasEl._chartInstance) {
+                    try { canvasEl._chartInstance.destroy(); } catch (e) {}
+                }
+                try {
+                    const raw = canvasEl.getAttribute('data-employees');
+                    const employees = raw ? JSON.parse(raw) : [];
+                    if (!employees || employees.length === 0) return;
+
+                    const topStaff = employees.slice(0, 6);
+                    const labels = topStaff.map(s => s.emp_name);
+                    const amounts = topStaff.map(s => Number(s.forecast_amount));
+                    const isV4 = typeof Chart !== 'undefined' && Chart.version && parseInt(Chart.version) >= 3;
+
+                    const config = {
+                        type: isV4 ? 'bar' : 'horizontalBar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Forecast Amount (PKR)',
+                                data: amounts,
+                                backgroundColor: [
+                                    '#0284c7', '#0ea5e9', '#0284c7', '#0d9488', '#14b8a6', '#64748b'
+                                ],
+                                borderWidth: 0,
+                                barPercentage: 0.65
+                            }]
+                        },
+                        options: isV4 ? {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(ctx) {
+                                            const val = ctx.raw !== undefined ? ctx.raw : (ctx.parsed ? ctx.parsed.x : 0);
+                                            return ' Rs. ' + Number(val).toLocaleString();
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        font: { family: "'Rajdhani', sans-serif", size: 10 },
+                                        color: '#64748b',
+                                        callback: function(val) {
+                                            if (val >= 1000000) return 'Rs. ' + (val/1000000).toFixed(1) + 'M';
+                                            if (val >= 1000) return 'Rs. ' + (val/1000).toFixed(0) + 'k';
+                                            return val;
+                                        }
+                                    },
+                                    grid: { color: '#f1f5f9' }
+                                },
+                                y: {
+                                    ticks: {
+                                        font: { family: "'Rajdhani', sans-serif", size: 11, weight: 'bold' },
+                                        color: '#1e293b'
+                                    },
+                                    grid: { display: false }
+                                }
+                            }
+                        } : {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            legend: { display: false },
+                            tooltips: {
+                                callbacks: {
+                                    label: function(item) {
+                                        return ' Rs. ' + Number(item.xLabel).toLocaleString();
+                                    }
+                                }
+                            },
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        beginAtZero: true,
+                                        fontFamily: "'Rajdhani', sans-serif",
+                                        fontColor: '#64748b',
+                                        fontSize: 10,
+                                        callback: function(val) {
+                                            if (val >= 1000000) return 'Rs. ' + (val/1000000).toFixed(1) + 'M';
+                                            if (val >= 1000) return 'Rs. ' + (val/1000).toFixed(0) + 'k';
+                                            return val;
+                                        }
+                                    },
+                                    gridLines: { color: '#f1f5f9' }
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        fontFamily: "'Rajdhani', sans-serif",
+                                        fontColor: '#1e293b',
+                                        fontSize: 11,
+                                        fontStyle: 'bold'
+                                    },
+                                    gridLines: { display: false }
+                                }]
+                            }
+                        }
+                    };
+
+                    const ctx = canvasEl.getContext('2d');
+                    canvasEl._chartInstance = new Chart(ctx, config);
+                } catch (err) {
+                    console.error("Salary forecast chart init failed:", err);
+                }
+            });
+        }, 200);
+    });
+
+    $(document).on('hidden.bs.modal', '.financial-intelligence-modal', function() {
+        $('body').removeClass('fin-modal-open');
+        if ($('.modal.show').length === 0) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').css('padding-right', '');
+        }
+    });
+
+    // Ensure dismiss buttons always trigger hide even if event delegation is interfered with
+    $(document).on('click', '.financial-intelligence-modal [data-dismiss="modal"]', function(e) {
+        e.preventDefault();
+        $(this).closest('.modal').modal('hide');
+    });
+
     const inlineRemarks = document.getElementById('decisionRemarks');
     const btnReturn = document.getElementById('btnReturn');
     const btnForward = document.getElementById('btnForward');
@@ -2508,19 +2820,34 @@ window.selectProject = function(cardKey) {
     if (prjTenureEl) prjTenureEl.textContent = data.tenure_display || data.period_formatted || '—';
 
     const prjHiredEl = document.getElementById('activeProjectHiredStaff');
-    if (prjHiredEl) prjHiredEl.innerHTML = '<i class="fas fa-users text-primary mr-1"></i> ' + (data.hired_count || 0) + ' Staff';
+    if (prjHiredEl) {
+        if (data.is_unallocated) {
+            prjHiredEl.innerHTML = '<i class="fas fa-clock text-warning mr-1"></i> Not Allocated';
+        } else {
+            prjHiredEl.innerHTML = '<i class="fas fa-users text-primary mr-1"></i> ' + (data.hired_count || 0) + ' Staff';
+        }
+    }
 
     const subheadEl = document.getElementById('activeProjectSubhead');
-    if (subheadEl) subheadEl.textContent = data.subhead || 'HR';
+    if (subheadEl) subheadEl.textContent = data.is_unallocated ? '—' : (data.subhead || 'HR');
 
     const subheadDrill = document.getElementById('activeSubheadDrilldownLink');
-    if (subheadDrill) subheadDrill.href = data.subhead_drilldown || '#';
+    if (subheadDrill) {
+        subheadDrill.href = data.subhead_drilldown || '#';
+        subheadDrill.style.display = data.hed_id ? 'inline-flex' : 'none';
+    }
 
     const prjDocs = document.getElementById('activeProjectDocsLink');
-    if (prjDocs) prjDocs.href = data.attachments_url || '#';
+    if (prjDocs) {
+        prjDocs.href = data.attachments_url || '#';
+        prjDocs.style.display = data.hed_id ? 'inline-flex' : 'none';
+    }
 
     const prjMilestones = document.getElementById('activeProjectMilestonesLink');
-    if (prjMilestones) prjMilestones.href = data.milestones_url || '#';
+    if (prjMilestones) {
+        prjMilestones.href = data.milestones_url || '#';
+        prjMilestones.style.display = data.hed_id ? 'inline-flex' : 'none';
+    }
 
     const prjDetails = document.getElementById('activeProjectDetailsLink');
     if (prjDetails) {
@@ -2552,7 +2879,10 @@ window.selectProject = function(cardKey) {
         expEl.href = data.expenditure_drilldown;
     }
     const expLink = document.getElementById('finReviewExpDrillLink');
-    if (expLink) expLink.href = data.expenditure_drilldown;
+    if (expLink) {
+        expLink.href = data.expenditure_drilldown;
+        expLink.style.display = data.hed_id ? 'inline-flex' : 'none';
+    }
 
     const balEl = document.getElementById('finReviewBalance');
     if (balEl) balEl.textContent = Number(data.balance).toLocaleString('en-US');
@@ -2563,7 +2893,10 @@ window.selectProject = function(cardKey) {
         cmtEl.href = data.commitments_drilldown;
     }
     const cmtLink = document.getElementById('finReviewCmtDrillLink');
-    if (cmtLink) cmtLink.href = data.commitments_drilldown;
+    if (cmtLink) {
+        cmtLink.href = data.commitments_drilldown;
+        cmtLink.style.display = data.hed_id ? 'inline-flex' : 'none';
+    }
 
     const inpEl = document.getElementById('finReviewInProcess');
     if (inpEl) {
@@ -2571,7 +2904,10 @@ window.selectProject = function(cardKey) {
         inpEl.href = data.in_process_drilldown;
     }
     const inpLink = document.getElementById('finReviewInpDrillLink');
-    if (inpLink) inpLink.href = data.in_process_drilldown;
+    if (inpLink) {
+        inpLink.href = data.in_process_drilldown;
+        inpLink.style.display = data.hed_id ? 'inline-flex' : 'none';
+    }
 
     const availEl = document.getElementById('finReviewAvailable');
     if (availEl) availEl.textContent = Number(data.available).toLocaleString('en-US');

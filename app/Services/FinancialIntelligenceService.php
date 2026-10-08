@@ -414,24 +414,27 @@ class FinancialIntelligenceService
 
     private function calculateMilestoneReceivableCurrent($headId)
     {
-        $currentRows = DB::table('fin.msncosts as m')
+        // Legacy RDWIS behavior: Pick the FIRST 'In progress' milestone ordered by milestone index (msn_id)
+        $firstRow = DB::table('fin.msncosts as m')
             ->join('prj.milestones as p', 'm.mct_msn_idd', '=', 'p.msn_idd')
             ->join('fin.sharesalloc as s', 'm.mct_hed_id', '=', 's.sha_hed_id')
             ->join('fin.commitments as c', 's.sha_ficmt_id', '=', 'c.cmt_id')
             ->where('m.mct_hed_id', $headId)
             ->where('p.msn_status', 'In progress')
+            ->orderBy('p.msn_id', 'asc')
             ->select('m.mct_cost', 's.sha_cf', 's.sha_pcc', 'c.cmt_amount')
-            ->get();
+            ->first();
 
-        $receivableCurrent = 0;
-        foreach ($currentRows as $row) {
-            $cmtAmount = (float) $row->cmt_amount;
-            if ($cmtAmount > 0) {
-                $receivableCurrent += round((float)$row->mct_cost * (((float)$row->sha_cf + (float)$row->sha_pcc) / $cmtAmount), 0);
-            }
+        if (!$firstRow) {
+            return 0.0;
         }
 
-        return round($receivableCurrent, 2);
+        $cmtAmount = (float) $firstRow->cmt_amount;
+        if ($cmtAmount > 0) {
+            return round((float)$firstRow->mct_cost * (((float)$firstRow->sha_cf + (float)$firstRow->sha_pcc) / $cmtAmount), 2);
+        }
+
+        return 0.0;
     }
 
     public function getSubheadBreakdown($headId)
@@ -580,7 +583,7 @@ class FinancialIntelligenceService
             $com = round(abs($com), 2);
             $ipcVal = round(abs($ipcVal), 2);
 
-            // HR Subhead row replacement with forecast
+            // HR Subhead row: legacy formula (forecast is tracked independently)
             if ($name === 'HR') {
                 $forecast = $this->getPrjSalForecast($headId);
                 $result[] = [
@@ -590,8 +593,8 @@ class FinancialIntelligenceService
                     'commitments' => $com,
                     'in_process' => $ipcVal,
                     'forecast' => $forecast,
-                    'remaining' => round((float) $sh->sbh_alloc - $exp - $com - $ipcVal - $forecast, 2),
-                    'can_be_spent' => round((float) $sh->sbh_alloc - $exp - $com - $ipcVal - $forecast, 2)
+                    'remaining' => round((float) $sh->sbh_alloc - $exp - $com - $ipcVal, 2),
+                    'can_be_spent' => round((float) $sh->sbh_alloc - $exp - $com - $ipcVal, 2)
                 ];
             } else {
                 $result[] = [
@@ -1099,6 +1102,73 @@ class FinancialIntelligenceService
         }
 
         return round($totalForecast, 2);
+    }
+
+    public function getPrjSalForecastEmployees($headId)
+    {
+        $lastSalMonth = DB::table('fin.salorders')
+            ->where('sor_status', 'Fulfilled')
+            ->where('sor_hed_id', $headId)
+            ->max('sor_month');
+            
+        $dtLastSalMonth = $lastSalMonth ?? '1900-01-01';
+
+        $contracts = DB::table('hr.contracts as ctr')
+            ->join('hr.emps as emp', 'ctr.ctr_num', '=', 'emp.emp_id')
+            ->join('fin.empeffheads as eeh', 'ctr.ctr_num', '=', 'eeh.eeh_emp_id')
+            ->join('hr.contractplans as cpn', 'ctr.ctr_id', '=', 'cpn.cpn_ctr_id')
+            ->where('eeh.eeh_status', 'Open')
+            ->where('cpn.cpn_enddt', '>', $dtLastSalMonth)
+            ->where('cpn.cpn_hed_id', $headId)
+            ->select('ctr.ctr_num', 'emp.emp_name', 'cpn.cpn_enddt', 'ctr.ctr_salary')
+            ->orderBy('cpn.cpn_enddt', 'asc')
+            ->get();
+
+        $empSummary = [];
+        foreach ($contracts as $c) {
+            $matrix = $this->getSalaryMatrix($c->ctr_num, $c->cpn_enddt);
+            if (empty($matrix)) continue;
+            
+            $empForecast = 0.0;
+            $s = 0;
+            for ($n = 8; $n <= 10; $n++) {
+                if (!isset($matrix[$n])) break;
+                
+                $effhedStr = $matrix[$n]['effhed_id'];
+                if (!$effhedStr) continue;
+                
+                $effhedParts = explode(' ', $effhedStr);
+                $effhedId = (int) $effhedParts[0];
+                
+                if ($effhedId == $headId) {
+                    $lngSal = (float) $matrix[$n]['prorated_salary'];
+                    $s++;
+                    if ($s == 1) {
+                        $lngSal += $this->calculateArrDues($c->ctr_num, $c->cpn_enddt);
+                    }
+                    $empForecast += $lngSal;
+                }
+            }
+
+            if (!isset($empSummary[$c->ctr_num])) {
+                $empSummary[$c->ctr_num] = [
+                    'emp_id' => $c->ctr_num,
+                    'emp_name' => $c->emp_name,
+                    'monthly_salary' => (float)$c->ctr_salary,
+                    'contract_end' => $c->cpn_enddt,
+                    'forecast_amount' => 0.0
+                ];
+            }
+            if ($c->cpn_enddt > $empSummary[$c->ctr_num]['contract_end']) {
+                $empSummary[$c->ctr_num]['contract_end'] = $c->cpn_enddt;
+            }
+            $empSummary[$c->ctr_num]['forecast_amount'] += $empForecast;
+        }
+
+        // Sort descending by forecast_amount
+        $result = array_values($empSummary);
+        usort($result, fn($a, $b) => $b['forecast_amount'] <=> $a['forecast_amount']);
+        return $result;
     }
 
     public function getUaSalForecast($unitId)

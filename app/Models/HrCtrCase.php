@@ -398,5 +398,32 @@ class HrCtrCase extends Model
         }
         return null;
     }
+
+    /**
+     * Calculate tenure duration in months between two dates.
+     * Contracts are inclusive of start and end date (e.g., 05 Oct 2026 to 04 Oct 2027 is 12 months).
+     * Standard hiring cases in RDWIS are capped at 12 months.
+     */
+    public static function calculateMonths(?string $startDate, ?string $endDate): int
+    {
+        if (!$startDate || !$endDate) {
+            return 12;
+        }
+        $start = \Carbon\Carbon::parse($startDate);
+        $end = \Carbon\Carbon::parse($endDate);
+        if ($start->gt($end)) {
+            return 0;
+        }
+        $diff = $start->floatDiffInMonths($end->copy()->addDay());
+        return max(1, min(12, (int) round($diff)));
+    }
+
+    /**
+     * Accessor: Total contract tenure in months (max 12).
+     */
+    public function getTenureMonthsAttribute(): int
+    {
+        return self::calculateMonths($this->ctc_newstartdt, $this->ctc_newenddt);
+    }
 }
 

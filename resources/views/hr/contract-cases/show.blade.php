@@ -412,7 +412,7 @@
                         <div class="clean-card">
                             <div class="clean-card-header">
                                 <span><i class="fas fa-project-diagram mr-2 text-primary"></i> Project Head Allocation Plan</span>
-                                <span class="badge badge-secondary px-2 py-1 font-weight-bold">{{ $case->casePlans->count() }} Months</span>
+                                <span class="badge badge-secondary px-2 py-1 font-weight-bold">{{ $case->tenure_months }} {{ Str::plural('Month', $case->tenure_months) }}</span>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0" style="font-size: 0.88rem;">

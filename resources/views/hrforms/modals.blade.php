@@ -8,8 +8,9 @@
 .modal.hrforms-teleported-modal .modal-dialog {
     z-index: 1071 !important;
 }
-body > .modal-backdrop {
-    z-index: 1060 !important;
+/* Only elevate backdrop when an HR Policy Form modal is active, not universally */
+body.hrforms-modal-open > .modal-backdrop {
+    z-index: 1065 !important;
 }
 </style>
 <div id="hrforms-modals-container">
@@ -1116,7 +1117,11 @@ $(function() {
     if (window.HrCaseFile && typeof window.HrCaseFile.ensureModalsInBody === 'function') {
         window.HrCaseFile.ensureModalsInBody();
     }
+    $(document).on('show.bs.modal', '.hrforms-teleported-modal', function() {
+        $('body').addClass('hrforms-modal-open');
+    });
     $(document).on('hidden.bs.modal', '.hrforms-teleported-modal', function() {
+        $('body').removeClass('hrforms-modal-open');
         if ($('.modal.show').length === 0) {
             $('.modal-backdrop').remove();
             $('body').removeClass('modal-open').css('padding-right', '');

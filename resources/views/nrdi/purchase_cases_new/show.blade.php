@@ -1980,6 +1980,136 @@
                                 @endif
                             </table>
                         </div>
+
+                        {{-- PROJECT SALARY FORECAST SUMMARY & VISUAL OVERVIEW --}}
+                        @php
+                            $fisCase = app(\App\Services\FinancialIntelligenceService::class);
+                            $caseHedId = $purchase->pcs_hed_id ?? null;
+                            $caseForecastEmployees = $caseHedId ? $fisCase->getPrjSalForecastEmployees($caseHedId) : [];
+                            $caseForecastTotal = $caseHedId ? $fisCase->getPrjSalForecast($caseHedId) : 0;
+                            $caseHrSh = collect($subheads ?? [])->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'hr') !== false);
+                            $caseHrRem = (float)(is_array($caseHrSh) ? ($caseHrSh['remaining'] ?? ($caseHrSh['can_be_spent'] ?? 0)) : ($caseHrSh->remaining ?? ($caseHrSh->can_be_spent ?? 0)));
+                            $caseDiff = $caseHrRem - $caseForecastTotal;
+                        @endphp
+                        @if($caseHedId && (count($caseForecastEmployees) > 0 || $caseForecastTotal > 0))
+                        <div class="mt-3 p-3 rounded border" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-2.5 pb-2 border-bottom" style="border-color: #e2e8f0 !important;">
+                                <div>
+                                    <h6 class="rajdhani font-weight-bold mb-0" style="letter-spacing: 0.8px; font-size: 16px; font-weight: 800; color: #1e3a8a;">
+                                        <i class="fas fa-user-clock text-info mr-1.5"></i> SALARY FORECAST OVERVIEW (HR STAFF)
+                                    </h6>
+                                    <div class="small rajdhani" style="font-size: 12.5px; font-weight: 600; color: #475569;">Projected future salary liabilities for active employees under this head</div>
+                                </div>
+                                <span class="badge badge-info px-2.5 py-1 rajdhani font-weight-bold" style="font-size: 12px;">
+                                    {{ count($caseForecastEmployees) }} ACTIVE STAFF
+                                </span>
+                            </div>
+
+                            @php
+                                $caseCoveragePct = $caseForecastTotal > 0 ? min(100, max(0, round(($caseHrRem / $caseForecastTotal) * 100, 1))) : 100;
+                                $caseDeficitPct = max(0, round(100 - $caseCoveragePct, 1));
+                            @endphp
+
+                            {{-- CLEAN STREAMLINED STATS (NO BOXES / NO DABBAY) --}}
+                            <div class="d-flex flex-wrap align-items-center justify-content-between py-2.5 px-3 mb-3 bg-white rounded border" style="border-color: #cbd5e1 !important; gap: 12px;">
+                                <div class="py-1">
+                                    <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">Total Forecast</span>
+                                    <div class="font-weight-bold text-primary font-mono rajdhani" style="font-size: 19px; line-height: 1.1;">
+                                        Rs. {{ number_format($caseForecastTotal) }}
+                                    </div>
+                                    <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">Future staff contracts</span>
+                                </div>
+                                <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                    <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">HR Cash Can Be Spent</span>
+                                    <div class="font-weight-bold text-success font-mono rajdhani" style="font-size: 19px; line-height: 1.1;">
+                                        Rs. {{ number_format($caseHrRem) }}
+                                    </div>
+                                    <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">Spendable Cash Balance</span>
+                                </div>
+                                <div class="border-left pl-3 py-1" style="border-color: #cbd5e1 !important;">
+                                    <span class="text-muted small rajdhani font-weight-bold text-uppercase d-block" style="font-size: 11px; letter-spacing: 0.6px;">Coverage Status</span>
+                                    <div class="font-weight-bold font-mono rajdhani {{ $caseDiff >= 0 ? 'text-success' : 'text-danger' }}" style="font-size: 19px; line-height: 1.1;">
+                                        {{ $caseDiff >= 0 ? '+Rs. ' . number_format($caseDiff) : '-Rs. ' . number_format(abs($caseDiff)) }}
+                                    </div>
+                                    <span class="badge {{ $caseDiff >= 0 ? 'badge-success' : 'badge-danger' }} px-2 py-0.5 font-weight-bold rajdhani" style="font-size: 11px;">
+                                        <i class="fas {{ $caseDiff >= 0 ? 'fa-check-circle' : 'fa-exclamation-triangle' }} mr-0.5"></i>
+                                        {{ $caseDiff >= 0 ? 'Fully Funded' : 'Budget Deficit' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- EXPLANATORY VISUAL CHART PANEL --}}
+                            <div class="bg-white p-3 rounded border shadow-sm">
+                                {{-- 1. BUDGET COVERAGE EXPLANATION BAR --}}
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="rajdhani font-weight-bold text-dark" style="font-size: 12.5px; letter-spacing: 0.5px;">
+                                            <i class="fas fa-balance-scale text-primary mr-1"></i> BUDGET COVERAGE EXPLANATION
+                                        </span>
+                                        <span class="rajdhani font-weight-bold {{ $caseDiff >= 0 ? 'text-success' : 'text-danger' }}" style="font-size: 12px;">
+                                            {{ $caseCoveragePct }}% Covered by Current Cash
+                                        </span>
+                                    </div>
+                                    <div class="progress" style="height: 12px; border-radius: 6px; background: #fee2e2;">
+                                        <div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: {{ min(100, $caseCoveragePct) }}%;" title="Covered: Rs. {{ number_format(min($caseHrRem, $caseForecastTotal)) }}"></div>
+                                        @if($caseDiff < 0)
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $caseDeficitPct }}%;" title="Deficit: Rs. {{ number_format(abs($caseDiff)) }}"></div>
+                                        @endif
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1 text-muted small rajdhani font-weight-bold" style="font-size: 11px;">
+                                        <span><i class="fas fa-circle text-success mr-1" style="font-size: 8px;"></i> Cash Covered: Rs. {{ number_format(min($caseHrRem, $caseForecastTotal)) }} ({{ $caseCoveragePct }}%)</span>
+                                        @if($caseDiff < 0)
+                                        <span class="text-danger"><i class="fas fa-circle text-danger mr-1" style="font-size: 8px;"></i> Deficit Gap: Rs. {{ number_format(abs($caseDiff)) }} ({{ $caseDeficitPct }}%)</span>
+                                        @else
+                                        <span class="text-success"><i class="fas fa-check-circle mr-1"></i> Surplus Cash: +Rs. {{ number_format($caseDiff) }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- 2. STAFF SALARY FORECAST BREAKDOWN CHART --}}
+                                <div class="pt-2.5 border-top" style="border-color: #f1f5f9 !important;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="rajdhani font-weight-bold text-dark" style="font-size: 13px;">
+                                            <i class="fas fa-chart-bar text-info mr-1"></i> STAFF SALARY FORECAST LIABILITIES CHART
+                                        </span>
+                                        <span class="text-muted small rajdhani font-weight-bold" style="font-size: 11px;">Ranked by Future Liability</span>
+                                    </div>
+
+                                    <div style="position: relative; height: 180px; width: 100%; margin-bottom: 12px;">
+                                        <canvas class="salary-forecast-chart" data-employees='@json($caseForecastEmployees)'></canvas>
+                                    </div>
+
+                                    {{-- 3. STAFF DETAILS BREAKDOWN LIST --}}
+                                    <div class="d-flex flex-column" style="gap: 6px;">
+                                        @foreach(array_slice($caseForecastEmployees, 0, 5) as $fe)
+                                        @php
+                                            $fAmount = (float)$fe['forecast_amount'];
+                                            $fPct = $caseForecastTotal > 0 ? min(100, max(0, round(($fAmount / $caseForecastTotal) * 100))) : 0;
+                                        @endphp
+                                        <div class="d-flex justify-content-between align-items-center px-2.5 py-1 rounded" style="background: #f8fafc; border: 1px solid #f1f5f9;">
+                                            <div class="d-flex align-items-center small rajdhani font-weight-bold text-truncate" style="font-size: 12px; max-width: 65%;">
+                                                <i class="fas fa-user-circle text-primary mr-1.5 flex-shrink-0"></i>
+                                                <span class="text-dark font-weight-bold text-truncate mr-1.5">{{ $fe['emp_name'] }}</span>
+                                                <span class="text-muted font-normal text-truncate" style="font-size: 11px;">
+                                                    (Rs. {{ number_format($fe['monthly_salary']) }}/mo &bull; End: {{ \Carbon\Carbon::parse($fe['contract_end'])->format('d M y') }})
+                                                </span>
+                                            </div>
+                                            <div class="text-right flex-shrink-0">
+                                                <span class="font-mono text-dark font-weight-bold rajdhani" style="font-size: 12.5px;">Rs. {{ number_format($fAmount) }}</span>
+                                                <span class="badge badge-light border ml-1 rajdhani font-weight-bold text-muted" style="font-size: 10.5px;">{{ $fPct }}%</span>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @if(count($caseForecastEmployees) > 5)
+                                        <div class="text-right mt-0.5">
+                                            <small class="text-muted rajdhani font-weight-bold" style="font-size: 11px;">+ {{ count($caseForecastEmployees) - 5 }} other staff members contracted under head</small>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -2034,13 +2164,122 @@ function updateDashboardStatus(msg, isError = false) {
 }
 
 function initFinancialIntelligenceCharts() {
-    // Tabular breakdown active; charts removed as requested
-}
+    const canvases = document.querySelectorAll('#financialIntelligenceModal canvas.salary-forecast-chart');
+    canvases.forEach(function(canvasEl) {
+        if (canvasEl._chartInstance) {
+            try { canvasEl._chartInstance.destroy(); } catch (e) {}
+        }
+        try {
+            const raw = canvasEl.getAttribute('data-employees');
+            const employees = raw ? JSON.parse(raw) : [];
+            if (!employees || employees.length === 0) return;
 
+            const topStaff = employees.slice(0, 6);
+            const labels = topStaff.map(s => s.emp_name);
+            const amounts = topStaff.map(s => Number(s.forecast_amount));
+            const isV4 = typeof Chart !== 'undefined' && Chart.version && parseInt(Chart.version) >= 3;
+
+            const config = {
+                type: isV4 ? 'bar' : 'horizontalBar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Forecast Amount (PKR)',
+                        data: amounts,
+                        backgroundColor: [
+                            '#0284c7', '#0ea5e9', '#0284c7', '#0d9488', '#14b8a6', '#64748b'
+                        ],
+                        borderWidth: 0,
+                        barPercentage: 0.65
+                    }]
+                },
+                options: isV4 ? {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const val = ctx.raw !== undefined ? ctx.raw : (ctx.parsed ? ctx.parsed.x : 0);
+                                    return ' Rs. ' + Number(val).toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: { family: "'Rajdhani', sans-serif", size: 10 },
+                                color: '#64748b',
+                                callback: function(val) {
+                                    if (val >= 1000000) return 'Rs. ' + (val/1000000).toFixed(1) + 'M';
+                                    if (val >= 1000) return 'Rs. ' + (val/1000).toFixed(0) + 'k';
+                                    return val;
+                                }
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        y: {
+                            ticks: {
+                                font: { family: "'Rajdhani', sans-serif", size: 11, weight: 'bold' },
+                                color: '#1e293b'
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                } : {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: { display: false },
+                    tooltips: {
+                        callbacks: {
+                            label: function(item) {
+                                return ' Rs. ' + Number(item.xLabel).toLocaleString();
+                            }
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontFamily: "'Rajdhani', sans-serif",
+                                fontColor: '#64748b',
+                                fontSize: 10,
+                                callback: function(val) {
+                                    if (val >= 1000000) return 'Rs. ' + (val/1000000).toFixed(1) + 'M';
+                                    if (val >= 1000) return 'Rs. ' + (val/1000).toFixed(0) + 'k';
+                                    return val;
+                                }
+                            },
+                            gridLines: { color: '#f1f5f9' }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                fontFamily: "'Rajdhani', sans-serif",
+                                fontColor: '#1e293b',
+                                fontSize: 11,
+                                fontStyle: 'bold'
+                            },
+                            gridLines: { display: false }
+                        }]
+                    }
+                }
+            };
+
+            const ctx = canvasEl.getContext('2d');
+            canvasEl._chartInstance = new Chart(ctx, config);
+        } catch (err) {
+            console.error("Salary forecast chart init failed:", err);
+        }
+    });
+}
 
 $(function() {
     $('#financialIntelligenceModal').on('shown.bs.modal', function () {
-        setTimeout(initFinancialIntelligenceCharts, 300);
+        setTimeout(initFinancialIntelligenceCharts, 200);
     });
 });
 // Main page progress bar animation
@@ -2051,7 +2290,7 @@ $(function() {
 
     // Modal trigger logic
     $(document).on('shown.bs.modal', '#financialIntelligenceModal', function () {
-        setTimeout(initFinancialIntelligenceCharts, 250);
+        setTimeout(initFinancialIntelligenceCharts, 200);
     });
 </script>
 <script src="{{ asset('plugins/mammoth/mammoth.browser.min.js') }}"></script>

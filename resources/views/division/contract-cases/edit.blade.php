@@ -706,8 +706,13 @@ $(document).ready(function() {
             if (end >= start) {
                 const diffMs = end - start;
                 const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-                const months = Math.floor(diffDays / 30.417);
-                const remainingDays = Math.floor(diffDays % 30.417);
+                let months = Math.floor(diffDays / 30.417);
+                let remainingDays = Math.floor(diffDays % 30.417);
+                if (diffDays >= 364 && diffDays <= 366) {
+                    months = 12;
+                    remainingDays = 0;
+                }
+                if (months > 12) months = 12;
 
                 let durText = months > 0 ? months + ' months ' : '';
                 durText += remainingDays > 0 ? remainingDays + ' days' : '';

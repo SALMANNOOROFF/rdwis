@@ -613,6 +613,8 @@ Route::middleware('auth')->group(function () {
 
                 Route::get('/employee/{id}', [DivHrController::class, 'employeedetail'])
                     ->name('divhr.employeedetail');
+                Route::get('/employee/{id}/service-contract/{ctrId?}', [DivHrController::class, 'serviceContractView'])
+                    ->name('divhr.employee.service_contract');
                 Route::get('/employee/{id}/edit', [DivHrController::class, 'employeeEdit'])
                     ->name('divhr.employee.edit');
                 Route::post('/employee/{id}/update', [DivHrController::class, 'employeeUpdate'])

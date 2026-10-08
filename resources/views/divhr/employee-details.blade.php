@@ -433,11 +433,26 @@
                 <i class="fas fa-file-contract text-primary text-lg mr-1.5"></i>
                 <h3 class="font-bold text-text1">Contract Details</h3>
               </div>
-              <button type="button" onclick="openEmploymentRecordModal()"
-                title="Print Contracts"
-                class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer ml-auto">
-                <i class="fas fa-print text-slate-600"></i> Employment History
-              </button>
+              <div class="flex items-center gap-2 ml-auto">
+                @if(($contractsHistory ?? collect())->count() <= 1)
+                  <a href="{{ url('/divhr/employee/' . ($emp->emp_id ?? $id) . '/service-contract') }}" target="_blank"
+                    title="View & Print Official Service Contract"
+                    class="px-3 py-1.5 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-300 rounded-lg shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer text-decoration-none">
+                    <i class="fas fa-file-signature text-sky-600"></i> Service Contract
+                  </a>
+                @else
+                  <button type="button" onclick="openServiceContractSelector()"
+                    title="View & Print Official Service Contract"
+                    class="px-3 py-1.5 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-300 rounded-lg shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer">
+                    <i class="fas fa-file-signature text-sky-600"></i> Service Contract
+                  </button>
+                @endif
+                <button type="button" onclick="openEmploymentRecordModal()"
+                  title="Print Contracts"
+                  class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer">
+                  <i class="fas fa-print text-slate-600"></i> Employment History
+                </button>
+              </div>
             </div>
             <div
               class="bg-transparent p-3 rounded-xl border border-border1 mb-3">
@@ -1483,6 +1498,9 @@
     }
   </script>
   @endcan
+  
+  {{-- Service Contract Modal & Document View --}}
+  @include('divhr.partials.service-contract-modal')
 
 </div>
 @endsection

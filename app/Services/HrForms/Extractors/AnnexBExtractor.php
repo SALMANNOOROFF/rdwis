@@ -83,7 +83,7 @@ class AnnexBExtractor implements FormExtractorInterface
             }
         }
 
-        $casePrice = (float) ($case->ctc_price ?: ($case->ctc_newsalary * max(1, $case->casePlans->count() ?: 12)));
+        $casePrice = (float) ($case->ctc_price ?: ($case->ctc_newsalary * $case->tenure_months));
         $hrCommittedTotal = $hrAvailable ? ($hrCommitted + $casePrice) : null;
 
         // 4. Case designation details
@@ -94,7 +94,7 @@ class AnnexBExtractor implements FormExtractorInterface
 
         $startFmt = $case->ctc_newstartdt ? Carbon::parse($case->ctc_newstartdt)->format('d M Y') : null;
         $endFmt = $case->ctc_newenddt ? Carbon::parse($case->ctc_newenddt)->format('d M Y') : null;
-        $months = max(1, $case->casePlans->count() ?: 12);
+        $months = $case->tenure_months;
         $durationStr = ($startFmt && $endFmt) ? "{$startFmt} to {$endFmt} ({$months} Months)" : null;
 
         // 5. Salary evaluation against Annex K

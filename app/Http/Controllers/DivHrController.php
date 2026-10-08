@@ -205,6 +205,7 @@ class DivHrController extends Controller
 
                         if ($currentSpan === null || $currentSpan['head_id'] !== $headId) {
                             if ($currentSpan !== null) {
+                                $currentSpan['months_count'] = \App\Models\HrCtrCase::calculateMonths($currentSpan['start_dt'], $currentSpan['end_dt']);
                                 $projectSpans[] = $currentSpan;
                             }
                             $currentSpan = [
@@ -221,13 +222,13 @@ class DivHrController extends Controller
                         } else {
                             $currentSpan['end_dt'] = $p->cpn_enddt;
                             $currentSpan['end_label'] = Carbon::parse($p->cpn_enddt)->format('M Y');
-                            $currentSpan['months_count']++;
                             if ($today >= $p->cpn_startdt && $today <= $p->cpn_enddt) {
                                 $currentSpan['is_current'] = true;
                             }
                         }
                     }
                     if ($currentSpan !== null) {
+                        $currentSpan['months_count'] = \App\Models\HrCtrCase::calculateMonths($currentSpan['start_dt'], $currentSpan['end_dt']);
                         $projectSpans[] = $currentSpan;
                     }
 
@@ -401,6 +402,7 @@ class DivHrController extends Controller
 
                 if ($currentSpan === null || $currentSpan['head_id'] !== $headId) {
                     if ($currentSpan !== null) {
+                        $currentSpan['months_count'] = \App\Models\HrCtrCase::calculateMonths($currentSpan['start_dt'], $currentSpan['end_dt']);
                         $projectSpans[] = $currentSpan;
                     }
                     $currentSpan = [
@@ -417,13 +419,13 @@ class DivHrController extends Controller
                 } else {
                     $currentSpan['end_dt'] = $p->cpn_enddt;
                     $currentSpan['end_label'] = Carbon::parse($p->cpn_enddt)->format('M Y');
-                    $currentSpan['months_count']++;
                     if ($today >= $p->cpn_startdt && $today <= $p->cpn_enddt) {
                         $currentSpan['is_current'] = true;
                     }
                 }
             }
             if ($currentSpan !== null) {
+                $currentSpan['months_count'] = \App\Models\HrCtrCase::calculateMonths($currentSpan['start_dt'], $currentSpan['end_dt']);
                 $projectSpans[] = $currentSpan;
             }
 
@@ -622,6 +624,80 @@ class DivHrController extends Controller
             'canEdit',
             'currentContractPlans',
             'distinctPlanCount'
+        ));
+    }
+
+    // Full-page dedicated Service Contract view
+    public function serviceContractView($id, $ctrId = null)
+    {
+        $user = Auth::user();
+        $isGlobalHrViewer = $this->isGlobalHrViewer($user);
+
+        if (!$isGlobalHrViewer) {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $empCheck = DB::table('hr.emps')
+                ->where('emp_id', $id)
+                ->whereBetween('emp_unt_id', [$lower, $upper])
+                ->first();
+            if (!$empCheck) {
+                abort(403, 'Unauthorized access to this employee contract.');
+            }
+        }
+
+        $emp = Employee::query()
+            ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('prj.projects as p', function ($join) {
+                $join->on('p.prj_id', '=', 'h.hed_prj_id')
+                     ->orOn('p.prj_id', '=', 'hr.emps.emp_hed_id')
+                     ->orOn('p.prj_id', '=', 'h.hed_id');
+            })
+            ->leftJoin('cen.units as u', 'hr.emps.emp_unt_id', '=', 'u.unt_id')
+            ->select('hr.emps.*', 'h.hed_code', 'h.hed_name', 'p.prj_title', 'p.prj_code', 'u.unt_name')
+            ->where('emp_id', $id)
+            ->first();
+
+        if (!$emp) {
+            abort(404, 'Employee not found.');
+        }
+
+        $empA = DB::table('hr.empsexta')->where('empexta_emp_id', $id)->first();
+
+        $contractsHistory = DB::table('hr.contracts as c')
+            ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+            ->leftJoin('prj.projects as cp', function ($join) {
+                $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                     ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                     ->orOn('cp.prj_id', '=', 'ch.hed_id');
+            })
+            ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
+            ->where('c.ctr_num', $id)
+            ->orderBy('c.ctr_startdt', 'desc')
+            ->orderBy('c.ctr_id', 'desc')
+            ->select(
+                'c.*', 
+                'ch.hed_code as ctr_hed_code', 
+                'ch.hed_name as ctr_hed_name',
+                'cp.prj_title as ctr_prj_title',
+                'cp.prj_code as ctr_prj_code',
+                'cu.unt_name as ctr_unt_name'
+            )
+            ->get();
+
+        $selectedContract = null;
+        if ($ctrId) {
+            $selectedContract = $contractsHistory->firstWhere('ctr_id', $ctrId);
+        }
+        if (!$selectedContract) {
+            $selectedContract = $contractsHistory->first();
+        }
+
+        return view('divhr.service-contract-page', compact(
+            'id',
+            'emp',
+            'empA',
+            'contractsHistory',
+            'selectedContract'
         ));
     }
 
