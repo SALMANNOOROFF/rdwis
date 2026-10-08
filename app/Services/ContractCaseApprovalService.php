@@ -124,6 +124,12 @@ class ContractCaseApprovalService
             'crr_status'    => $status,
             'crr_dtg'       => now(),
         ]);
+
+        // Auto-clear private draft remarks on official decision dispatch
+        $accId = (int) ($user?->acc_id ?? $user?->id ?? 0);
+        if ($accId) {
+            \App\Models\UserCaseDraftRemark::clearDraft($accId, 'contract', (int) $case->ctc_id);
+        }
     }
 
     /**

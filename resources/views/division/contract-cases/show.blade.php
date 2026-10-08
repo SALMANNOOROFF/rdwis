@@ -440,8 +440,15 @@
                                 <form id="releaseForm">
                                     @csrf
                                     <div class="form-group mb-0">
-                                        <label class="rd-form-label font-weight-bold">Release Remarks <span class="text-danger">*</span></label>
-                                        <textarea name="remarks" class="rd-textarea" rows="3" placeholder="Enter remarks or justification for HR Scrutiny..." required></textarea>
+                                        <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap" style="gap: 6px;">
+                                            <label class="rd-form-label font-weight-bold mb-0">Release Remarks <span class="text-danger">*</span></label>
+                                            @include('partials._draft_remarks_bar', [
+                                                'caseType' => 'contract',
+                                                'caseId' => $case->ctc_id,
+                                                'targetTextarea' => '#divReleaseRemarks'
+                                            ])
+                                        </div>
+                                        <textarea id="divReleaseRemarks" name="remarks" class="rd-textarea" rows="3" placeholder="Enter remarks or justification for HR Scrutiny..." required></textarea>
                                     </div>
                                     <button type="submit" class="btn-release-action"><i class="fas fa-paper-plane"></i> Release to HR</button>
                                 </form>

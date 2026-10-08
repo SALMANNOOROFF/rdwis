@@ -1449,13 +1449,20 @@ textarea::-webkit-scrollbar-thumb:hover {
                                     </div>
 
                                     <div class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                        <div class="d-flex justify-content-between align-items-center mb-1.5 flex-wrap" style="gap: 6px;">
                                             <span class="text-dark small rajdhani font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">
                                                 <i class="fas fa-pen-nib mr-1 text-primary"></i> REMARKS & SCRUTINY NOTES
                                             </span>
-                                            <span class="text-muted font-italic" style="font-size: 10.5px;">
-                                                <i class="fas fa-arrows-alt-v mr-0.5"></i> Drag corner to resize
-                                            </span>
+                                            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                                @include('partials._draft_remarks_bar', [
+                                                    'caseType' => 'contract',
+                                                    'caseId' => $case->ctc_id,
+                                                    'targetTextarea' => '#decisionRemarks'
+                                                ])
+                                                <span class="text-muted font-italic" style="font-size: 10.5px;">
+                                                    <i class="fas fa-arrows-alt-v mr-0.5"></i> Drag corner to resize
+                                                </span>
+                                            </div>
                                         </div>
                                         <textarea id="decisionRemarks" class="form-control" placeholder="Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;"></textarea>
                                         

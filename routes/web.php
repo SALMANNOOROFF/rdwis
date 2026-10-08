@@ -72,6 +72,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/user-quick-remarks/{id}', [\App\Http\Controllers\UserQuickRemarkController::class, 'update'])->name('user.quick-remarks.update');
     Route::delete('/user-quick-remarks/{id}', [\App\Http\Controllers\UserQuickRemarkController::class, 'destroy'])->name('user.quick-remarks.destroy');
 
+    // User Case Draft Remarks (Private per user)
+    Route::post('/draft-remarks/save', [\App\Http\Controllers\UserCaseDraftRemarkController::class, 'save'])->name('draft-remarks.save');
+    Route::post('/draft-remarks/clear', [\App\Http\Controllers\UserCaseDraftRemarkController::class, 'clear'])->name('draft-remarks.clear');
+    Route::get('/draft-remarks/get', [\App\Http\Controllers\UserCaseDraftRemarkController::class, 'get'])->name('draft-remarks.get');
+
     Route::get('/debug-user', function () {
         $u = Auth::user();
 

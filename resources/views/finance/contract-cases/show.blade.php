@@ -445,7 +445,14 @@
                             </div>
                             <div class="p-4">
                                 <div class="form-group mb-3">
-                                    <label class="rd-form-label font-weight-bold">Scrutiny Remarks <span class="text-danger">*</span></label>
+                                    <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap" style="gap: 6px;">
+                                        <label class="rd-form-label font-weight-bold mb-0">Scrutiny Remarks <span class="text-danger">*</span></label>
+                                        @include('partials._draft_remarks_bar', [
+                                            'caseType' => 'contract',
+                                            'caseId' => $case->ctc_id,
+                                            'targetTextarea' => '#finRemarks'
+                                        ])
+                                    </div>
                                     <textarea id="finRemarks" class="rd-textarea" rows="3" placeholder="Enter budget verification, project allocation clearance, and financial notes..."></textarea>
                                 </div>
                                 <button type="button" class="btn-action-forward" id="btn-forward-md">

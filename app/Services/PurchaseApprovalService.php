@@ -584,6 +584,12 @@ class PurchaseApprovalService
             // 4. Notify Interested Parties (Feedback Loop) - only for real decisions
             if ($action !== 'save_draft') {
                 $this->notifyInterestedParties($case, $action, $user, $remarks);
+
+                // Auto-clear private draft remarks on real decision dispatch
+                $accId = (int) ($user?->acc_id ?? $user?->id ?? 0);
+                if ($accId) {
+                    \App\Models\UserCaseDraftRemark::clearDraft($accId, 'purchase', (int) $case->pcs_id);
+                }
             }
 
             return $case;
