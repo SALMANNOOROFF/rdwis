@@ -1053,7 +1053,7 @@ class FinancialIntelligenceService
             $dtMonth = (new \DateTime($dtMonth))->modify('-1 month')->format('Y-m-t');
         }
 
-        return $dues;
+        return max(0, $dues);
     }
 
     public function getPrjSalForecast($headId)
@@ -1073,14 +1073,15 @@ class FinancialIntelligenceService
             ->where('cpn.cpn_enddt', '>', $dtLastSalMonth)
             ->where('cpn.cpn_hed_id', $headId)
             ->select('ctr.ctr_num', 'cpn.cpn_enddt')
+            ->orderBy('cpn.cpn_enddt', 'asc')
             ->get();
 
         $totalForecast = 0.0;
+        $seenEmps = [];
         foreach ($contracts as $c) {
             $matrix = $this->getSalaryMatrix($c->ctr_num, $c->cpn_enddt);
             if (empty($matrix)) continue;
             
-            $s = 0;
             for ($n = 8; $n <= 10; $n++) {
                 if (!isset($matrix[$n])) break;
                 
@@ -1092,16 +1093,16 @@ class FinancialIntelligenceService
                 
                 if ($effhedId == $headId) {
                     $lngSal = (float) $matrix[$n]['prorated_salary'];
-                    $s++;
-                    if ($s == 1) {
-                        $lngSal += $this->calculateArrDues($c->ctr_num, $c->cpn_enddt);
+                    if (!isset($seenEmps[$c->ctr_num])) {
+                        $lngSal += max(0, $this->calculateArrDues($c->ctr_num, $c->cpn_enddt));
+                        $seenEmps[$c->ctr_num] = true;
                     }
                     $totalForecast += $lngSal;
                 }
             }
         }
 
-        return round($totalForecast, 2);
+        return round(max(0, $totalForecast), 2);
     }
 
     public function getPrjSalForecastEmployees($headId)
@@ -1125,12 +1126,12 @@ class FinancialIntelligenceService
             ->get();
 
         $empSummary = [];
+        $seenEmps = [];
         foreach ($contracts as $c) {
             $matrix = $this->getSalaryMatrix($c->ctr_num, $c->cpn_enddt);
             if (empty($matrix)) continue;
             
             $empForecast = 0.0;
-            $s = 0;
             for ($n = 8; $n <= 10; $n++) {
                 if (!isset($matrix[$n])) break;
                 
@@ -1142,9 +1143,9 @@ class FinancialIntelligenceService
                 
                 if ($effhedId == $headId) {
                     $lngSal = (float) $matrix[$n]['prorated_salary'];
-                    $s++;
-                    if ($s == 1) {
-                        $lngSal += $this->calculateArrDues($c->ctr_num, $c->cpn_enddt);
+                    if (!isset($seenEmps[$c->ctr_num])) {
+                        $lngSal += max(0, $this->calculateArrDues($c->ctr_num, $c->cpn_enddt));
+                        $seenEmps[$c->ctr_num] = true;
                     }
                     $empForecast += $lngSal;
                 }

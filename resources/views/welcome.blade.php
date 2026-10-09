@@ -951,7 +951,14 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
+                <a href="{{ route('purchase.receipts.index') }}" class="nav-link {{ Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-receipt text-success"></i>
+                    <p>Purchase Receipts</p>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-boxes text-info"></i>
                     <p>Inventory & Assets</p>
                 </a>
@@ -1171,7 +1178,14 @@
           @endif
 
           <li class="nav-item">
-              <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') || Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
+              <a href="{{ route('purchase.receipts.index') }}" class="nav-link {{ Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-receipt text-warning"></i>
+                  <p>Purchase Receipts</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('inventory.assets.index') }}" class="nav-link {{ Request::routeIs('inventory.assets.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-boxes text-success"></i>
                   <p>Inventory & Assets</p>
               </a>

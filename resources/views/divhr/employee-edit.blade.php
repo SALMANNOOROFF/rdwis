@@ -285,12 +285,24 @@
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="rd-form-label">Job Title / Designation</label>
-              <input type="text" name="emp_title" class="rd-input" value="{{ $emp->emp_title }}">
+              <label class="rd-form-label">
+                Job Title / Designation
+                <span class="badge badge-light border text-muted ml-1" style="font-size: 10px; font-weight: 600;">
+                  <i class="fas fa-lock text-secondary mr-1"></i>Bound to Contract Case
+                </span>
+              </label>
+              <div class="input-group">
+                <input type="text" name="emp_title" class="rd-input bg-light font-weight-bold text-dark" readonly 
+                       value="{{ $hiringJobTitle ?: ($emp->emp_title ?: '—') }}" 
+                       style="cursor: not-allowed; border-color: #cbd5e1; background-color: #f8fafc !important;">
+              </div>
+              <small class="text-muted" style="font-size: 11px;">
+                <i class="fas fa-shield-alt text-info mr-1"></i>Designation is bound to approved hiring contract case and cannot be manually altered.
+              </small>
             </div>
             <div class="col-md-6 mb-3">
               <label class="rd-form-label">Rank / Scale</label>
-              <input type="text" name="emp_rank" class="rd-input" value="{{ $emp->emp_rank }}">
+              <input type="text" name="emp_rank" class="rd-input" value="{{ $emp->emp_rank ?: ($hiringRank ?? '') }}">
             </div>
           </div>
 
@@ -371,15 +383,25 @@
           <div class="row">
             <div class="col-md-4 mb-3">
               <label class="rd-form-label">Mobile (Primary)</label>
-              <input type="text" name="emp_mobile" class="rd-input" value="{{ $empA->emp_mobile ?? '' }}">
+              <input type="text" name="emp_mobile" class="rd-input phone-format-input font-mono" 
+                     value="{{ $empA->emp_mobile ?? '' }}" 
+                     placeholder="+923211940417" maxlength="13" autocomplete="tel">
+              <small class="text-muted font-weight-bold" style="font-size: 11px;">
+                <i class="fas fa-phone-alt text-success mr-1"></i>Format: +923XXXXXXXXX (e.g. +923211940417)
+              </small>
             </div>
             <div class="col-md-4 mb-3">
               <label class="rd-form-label">Mobile (Secondary)</label>
-              <input type="text" name="emp_mobile2" class="rd-input" value="{{ $empA->emp_mobile2 ?? '' }}">
+              <input type="text" name="emp_mobile2" class="rd-input phone-format-input font-mono" 
+                     value="{{ $empA->emp_mobile2 ?? '' }}" 
+                     placeholder="+923211940417" maxlength="13" autocomplete="tel">
+              <small class="text-muted font-weight-bold" style="font-size: 11px;">
+                <i class="fas fa-phone-alt text-success mr-1"></i>Format: +923XXXXXXXXX (e.g. +923211940417)
+              </small>
             </div>
             <div class="col-md-4 mb-3">
               <label class="rd-form-label">Landline</label>
-              <input type="text" name="emp_landline" class="rd-input" value="{{ $empA->emp_landline ?? '' }}">
+              <input type="text" name="emp_landline" class="rd-input font-mono" value="{{ $empA->emp_landline ?? '' }}" placeholder="021-XXXXXXXX">
             </div>
           </div>
 
@@ -445,7 +467,12 @@
             </div>
             <div class="col-md-4 mb-3">
               <label class="rd-form-label">Emergency Contact Mobile</label>
-              <input type="text" name="emp_emermobile" class="rd-input" value="{{ $empB->emp_emermobile ?? '' }}">
+              <input type="text" name="emp_emermobile" class="rd-input phone-format-input font-mono" 
+                     value="{{ $empB->emp_emermobile ?? '' }}" 
+                     placeholder="+923211940417" maxlength="13" autocomplete="tel">
+              <small class="text-muted font-weight-bold" style="font-size: 11px;">
+                <i class="fas fa-phone-alt text-success mr-1"></i>Format: +923XXXXXXXXX (e.g. +923211940417)
+              </small>
             </div>
           </div>
 
@@ -1060,6 +1087,49 @@ $(document).ready(function() {
       formatted += '-' + val.substring(12, 13);
     }
     $(this).val(formatted);
+  });
+
+  // ── Auto-format Mobile Number Inputs (+923XXXXXXXXX) ──────
+  function formatPakMobile(val) {
+    if (!val) return '';
+    let clean = val.toString().trim();
+    if (clean.length === 0) return '';
+
+    // Extract all numbers
+    let digits = clean.replace(/\D/g, '');
+
+    // Strip leading 92 or leading 0 to extract standard 10-digit number (3XXXXXXXXX)
+    if (digits.startsWith('92')) {
+      digits = digits.substring(2);
+    } else if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+
+    // Limit to 10 digits
+    if (digits.length > 10) {
+      digits = digits.substring(0, 10);
+    }
+
+    if (digits.length > 0) {
+      return '+92' + digits;
+    }
+    return clean.startsWith('+') ? '+' : '';
+  }
+
+  $(document).on('input', '.phone-format-input', function() {
+    let input = $(this);
+    let originalVal = input.val();
+    if (!originalVal) return;
+    let formatted = formatPakMobile(originalVal);
+    input.val(formatted);
+  });
+
+  $(document).on('blur', '.phone-format-input', function() {
+    let input = $(this);
+    let val = input.val().trim();
+    if (val === '+92' || val === '+' || val === '+9') {
+      input.val('');
+    }
   });
 
   // ── Save Form via AJAX ─────────────────────────────────────

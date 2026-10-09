@@ -769,6 +769,40 @@ class DivHrController extends Controller
             ->select('h.hed_id', 'h.hed_code', 'h.hed_name', 'p.prj_title', 'p.prj_code')
             ->first();
 
+        // Retrieve Job Title / Designation bound to hiring contract case
+        $latestContract = DB::table('hr.contracts as c')
+            ->where('c.ctr_num', $id)
+            ->whereNotNull('c.ctr_jobtitle')
+            ->where('c.ctr_jobtitle', '<>', '')
+            ->orderBy('c.ctr_startdt', 'desc')
+            ->orderBy('c.ctr_id', 'desc')
+            ->first();
+
+        if (!$latestContract) {
+            $latestContract = DB::table('hr.contracts as c')
+                ->where('c.ctr_num', $id)
+                ->orderBy('c.ctr_startdt', 'desc')
+                ->orderBy('c.ctr_id', 'desc')
+                ->first();
+        }
+
+        $latestCase = DB::table('hr.ctrcases')
+            ->where('ctc_emp_id', $id)
+            ->orderBy('ctc_id', 'desc')
+            ->first();
+
+        $hiringJobTitle = $latestContract->ctr_jobtitle 
+            ?? $latestCase->ctc_approvedjobtitle 
+            ?? $latestCase->ctc_newjobtitle 
+            ?? $emp->emp_title 
+            ?? '';
+
+        $hiringRank = $latestContract->ctr_grade 
+            ?? $latestCase->ctc_approvedgrade 
+            ?? $latestCase->ctc_newgrade 
+            ?? $emp->emp_rank 
+            ?? '';
+
         return view('divhr.employee-edit', compact(
             'id',
             'emp',
@@ -783,7 +817,9 @@ class DivHrController extends Controller
             'bankAccounts',
             'departments',
             'heads',
-            'currentHead'
+            'currentHead',
+            'hiringJobTitle',
+            'hiringRank'
         ));
     }
 
@@ -871,8 +907,37 @@ class DivHrController extends Controller
 
             $cleanPhone = function (?string $val, int $max = 13): ?string {
                 if (empty($val)) return null;
-                return mb_substr(trim($val), 0, $max);
+                $val = trim($val);
+                $clean = preg_replace('/[^\d+]/', '', $val);
+                if (str_starts_with($clean, '03')) {
+                    $clean = '+92' . substr($clean, 1);
+                } elseif (str_starts_with($clean, '92') && !str_starts_with($clean, '+92')) {
+                    $clean = '+' . $clean;
+                } elseif (str_starts_with($clean, '3') && strlen($clean) === 10) {
+                    $clean = '+92' . $clean;
+                }
+                return mb_substr($clean, 0, $max);
             };
+
+            // Retrieve Job Title / Designation bound to hiring contract case
+            $latestContract = DB::table('hr.contracts as c')
+                ->where('c.ctr_num', $id)
+                ->whereNotNull('c.ctr_jobtitle')
+                ->where('c.ctr_jobtitle', '<>', '')
+                ->orderBy('c.ctr_startdt', 'desc')
+                ->orderBy('c.ctr_id', 'desc')
+                ->first();
+
+            $latestCase = DB::table('hr.ctrcases')
+                ->where('ctc_emp_id', $id)
+                ->orderBy('ctc_id', 'desc')
+                ->first();
+
+            $hiringJobTitle = $latestContract->ctr_jobtitle 
+                ?? $latestCase->ctc_approvedjobtitle 
+                ?? $latestCase->ctc_newjobtitle 
+                ?? $emp->emp_title 
+                ?? '';
 
             // 1. Update Core (hr.emps)
             DB::table('hr.emps')->where('emp_id', $id)->update([
@@ -883,7 +948,7 @@ class DivHrController extends Controller
                 'emp_hed_id'   => $emp->emp_hed_id,
                 'emp_status'   => $validated['emp_status'],
                 'emp_rank'     => !empty($validated['emp_rank']) ? mb_substr($validated['emp_rank'], 0, 100) : null,
-                'emp_title'    => !empty($validated['emp_title']) ? mb_substr($validated['emp_title'], 0, 255) : null,
+                'emp_title'    => !empty($hiringJobTitle) ? mb_substr($hiringJobTitle, 0, 255) : (!empty($validated['emp_title']) ? mb_substr($validated['emp_title'], 0, 255) : null),
                 'emp_lastdt'   => !empty($validated['emp_lastdt']) ? $validated['emp_lastdt'] : null,
                 'emp_remarks'  => $validated['emp_remarks'] ?? null,
                 'emp_locked'   => $request->has('emp_locked') ? true : false,

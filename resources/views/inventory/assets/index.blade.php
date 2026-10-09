@@ -111,15 +111,8 @@
             </p>
         </div>
         <div>
-            @php
-                $headerUser = Auth::user();
-                $isCmdHeader = method_exists($headerUser, 'isMdDdgDg') && $headerUser->isMdDdgDg();
-                $isProcHeader = in_array(strtolower(trim($headerUser->acc_untarea ?? '')), ['proc', 'prc'], true);
-                $isFinHeader = strtolower(trim($headerUser->acc_untarea ?? '')) === 'fin';
-                $canReceiveHeader = !$isCmdHeader && !$isProcHeader && !$isFinHeader;
-            @endphp
-            <a href="{{ route('purchase.receipts.index') }}" class="btn btn-sm btn-outline-info font-weight-bold">
-                <i class="fas fa-boxes mr-1"></i> {{ $canReceiveHeader ? 'Receive Goods' : 'View Receipts' }}
+            <a href="{{ route('purchase.receipts.index') }}" class="btn btn-sm btn-outline-info font-weight-bold rajdhani px-3 py-1.5" style="border-radius: 6px;">
+                <i class="fas fa-receipt mr-1"></i> Purchase Receipts
             </a>
         </div>
     </div>

@@ -514,6 +514,16 @@
 
     <div class="p-3 pt-4">
         <div class="container-fluid">
+            @if(session('success'))
+                <div class="alert alert-success bg-success-subtle text-success border border-success-subtle shadow-sm mb-3 font-weight-bold" style="border-radius: 8px; font-size: 13.5px;">
+                    <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger bg-danger-subtle text-danger border border-danger-subtle shadow-sm mb-3 font-weight-bold" style="border-radius: 8px; font-size: 13.5px;">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> {{ session('error') }}
+                </div>
+            @endif
             
 
 
@@ -565,6 +575,23 @@
                             @if($quotesCount > 1)
                                 <a href="{{ route('purchase.cs_formal', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-comparative-stmt rajdhani">
                                     <i class="fas fa-balance-scale mr-1"></i> COMPARATIVE STATEMENT
+                                </a>
+                            @endif
+
+                            @php
+                                $currUser = Auth::user();
+                                $currUserArea = strtolower(trim((string)($currUser?->acc_untarea ?? '')));
+                                $currUserUnit = $currUser?->acc_unt_id;
+                                $isConcernedUnit = ($currUserUnit && ($purchase->pcs_intunt_id == $currUserUnit || $purchase->pcs_unt_id == $currUserUnit)) 
+                                    || in_array($currUserArea, ['prj', 'rdwprj', 'division', 'initiation']);
+                                $canReceiveGoods = ($purchase->pcs_status === 'Approved') 
+                                    && (($purchase->pcs_fulfillment_status ?? '') !== 'Fully Received')
+                                    && $isConcernedUnit;
+                            @endphp
+
+                            @if($canReceiveGoods)
+                                <a href="{{ route('purchase.receipts.create', $purchase->pcs_id) }}" class="btn-hdr-action rajdhani" style="background: rgba(16, 185, 129, 0.12) !important; color: #10b981 !important; border: 1.5px solid #10b981 !important; font-weight: 700; cursor: pointer;">
+                                    <i class="fas fa-boxes mr-1"></i> RECEIVE ITEMS
                                 </a>
                             @endif
 
@@ -2354,6 +2381,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'pci_serial' => (int) $i->pci_serial,
                 'pci_desc' => (string) $i->pci_desc,
                 'pci_qty' => (float) $i->pci_qty,
+                'pci_fulfilment' => (float) ($i->pci_fulfilment ?? 0),
                 'pci_qtyunit' => (string) ($i->pci_qtyunit ?: 'num'),
                 'pci_price' => (float) ($i->pci_price ?? 0),
                 'pci_type' => (int) ($i->pci_type ?? 7),
@@ -2594,6 +2622,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const subheadVal = it.pci_subhead || state.pcs_subhead || (isPt ? 'Direct' : 'Equipment');
             const subtypeVal = it.pci_subtype || '—';
 
+            const fulfilled = Number(it.pci_fulfilment || 0);
+            let fulfillBadge = '';
+            if (fulfilled >= qty && qty > 0) {
+                fulfillBadge = `<div class="mt-0.5"><span class="badge badge-success px-1 py-0.5" style="font-size: 8.5px; background: #16a34a;"><i class="fas fa-check mr-0.5"></i>Fulfilled</span></div>`;
+            } else if (fulfilled > 0) {
+                fulfillBadge = `<div class="mt-0.5"><span class="badge badge-warning px-1 py-0.5 text-dark" style="font-size: 8.5px; background: #fef08a; border: 1px solid #facc15;">${fmt(fulfilled)}/${fmt(qty)} Rcvd</span></div>`;
+            }
+
             if (isPt) {
                 // Pt (Incidental Expenditure)
                 return `
@@ -2606,7 +2642,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td><span class="text-dark font-weight-500" style="font-size: 11px;">${escapeHtml(subtypeVal)}</span></td>
                         <td class="text-center">${classBadge}</td>
                         <td><span class="badge badge-light border text-dark" style="font-size: 10px; padding: 2px 5px;">${escapeHtml(subheadVal)}</span></td>
-                        <td class="text-center font-weight-bold"><span class="pc-qty-display" style="color: #0f172a; font-size: 11.5px;">${fmt(qty)}</span></td>
+                        <td class="text-center font-weight-bold"><span class="pc-qty-display" style="color: #0f172a; font-size: 11.5px;">${fmt(qty)}</span>${fulfillBadge}</td>
                         <td class="text-center"><span class="small text-muted pc-unit-display" style="font-size: 10.5px;">${escapeHtml(it.pci_qtyunit || 'num')}</span></td>
                         <td class="text-right pr-3 font-weight-bold text-dark" style="color: #0f172a !important; font-size: 11.5px;">
                             ${fmt(baseTotal)}
@@ -2633,7 +2669,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td><span class="text-dark font-weight-500" style="font-size: 11px;">${escapeHtml(subtypeVal)}</span></td>
                     <td class="text-center">${classBadge}</td>
                     <td><span class="badge badge-light border text-dark" style="font-size: 10px; padding: 2px 5px;">${escapeHtml(subheadVal)}</span></td>
-                    <td class="text-center font-weight-bold"><span class="pc-qty-display" style="color: #0f172a; font-size: 11.5px;">${fmt(qty)}</span></td>
+                    <td class="text-center font-weight-bold"><span class="pc-qty-display" style="color: #0f172a; font-size: 11.5px;">${fmt(qty)}</span>${fulfillBadge}</td>
                     <td class="text-center"><span class="small text-muted pc-unit-display" style="font-size: 10.5px;">${escapeHtml(it.pci_qtyunit || 'num')}</span></td>
                     <td class="text-right pr-3 font-weight-bold text-dark" style="color: #0f172a !important; font-size: 11.5px;">
                         ${fmt(baseTotal)}

@@ -2125,7 +2125,7 @@ body.fin-modal-open > .modal-backdrop {
                         {{-- PROJECT SALARY FORECAST SUMMARY & VISUAL OVERVIEW --}}
                         @php
                             $fisCase = app(\App\Services\FinancialIntelligenceService::class);
-                            $caseHedId = $mHedId ?? null;
+                            $caseHedId = $mHedId ?? ($mHead->head_id ?? ($mCard['hed_id'] ?? null));
                             $caseForecastEmployees = $caseHedId ? $fisCase->getPrjSalForecastEmployees($caseHedId) : [];
                             $caseForecastTotal = $caseHedId ? $fisCase->getPrjSalForecast($caseHedId) : 0;
                             $caseHrSh = collect($mSubheads ?? [])->first(fn($s) => stripos(is_array($s) ? ($s['name'] ?? '') : ($s->name ?? ''), 'hr') !== false);

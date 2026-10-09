@@ -501,6 +501,10 @@ Route::middleware('auth')->group(function () {
 
         // --- PURCHASE & REPORTS (Project area) ---
         Route::get('/purchase/receipts', [\App\Http\Controllers\PurchaseReceiptController::class, 'index'])->name('purchase.receipts.index');
+        Route::get('/purchase/receipts/{prt_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'show'])->name('purchase.receipts.show')->where('prt_id', '[0-9]+');
+        Route::post('/purchase/receipts/{prt_id}/finalize', [\App\Http\Controllers\PurchaseReceiptController::class, 'finalizeReceipt'])->name('purchase.receipts.finalize')->where('prt_id', '[0-9]+');
+        Route::post('/purchase/receipts/{prt_id}/cancel-draft', [\App\Http\Controllers\PurchaseReceiptController::class, 'cancelDraftReceipt'])->name('purchase.receipts.cancel_draft')->where('prt_id', '[0-9]+');
+        Route::get('/purchase/receipts/{prt_id}/acceptance', [\App\Http\Controllers\PurchaseReceiptController::class, 'acceptance'])->name('purchase.receipts.acceptance')->where('prt_id', '[0-9]+');
         Route::get('/purchase/receipts/case/{pcs_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'create'])->name('purchase.receipts.create');
         Route::post('/purchase/receipts/case/{pcs_id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'store'])->name('purchase.receipts.store');
         Route::post('/purchase/receipts/case/{pcs_id}/cancel', [\App\Http\Controllers\PurchaseReceiptController::class, 'cancelCase'])->name('purchase.receipts.cancel');

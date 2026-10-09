@@ -367,7 +367,7 @@ class ProjectController extends Controller
 
         // Financial Intelligence (Legacy Logic Integration)
         $finService = app(\App\Services\FinancialIntelligenceService::class);
-        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $project->prj_id)->first();
+        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $project->prj_id)->orWhere('hed_id', $project->prj_id)->first();
         if (!$headRecord && is_numeric($id)) {
             $headRecord = DB::table('cen.heads')->where('hed_id', $id)->first();
         }
