@@ -1,0 +1,25 @@
+============================================================
+POSTGRESQL BACKUP LOG
+Date & Time: 2026-10-06 14:53:13
+Database   : rdw01
+Host:Port  : 127.0.0.1:5432
+Username   : postgres
+Folder     : E:\databackup2.0\2026-10-06_14-53-13
+============================================================
+Using pg_dump tool: C:\Program Files\PostgreSQL\18\bin\pg_dump.exe
+
+[1/2] Creating SQL backup (.sql)...
+ -> STATUS: SUCCESSFUL
+ -> File  : E:\databackup2.0\2026-10-06_14-53-13\rdw01.sql
+ -> Size  : 20.09 MB
+
+[2/2] Creating Directory type backup (-F d)...
+ -> STATUS: SUCCESSFUL
+ -> Folder: E:\databackup2.0\2026-10-06_14-53-13\rdw01_directory
+ -> Size  : 4.10 MB
+
+============================================================
+OVERALL STATUS: ALL BACKUPS COMPLETED SUCCESSFULLY!
+Finished At   : 2026-10-06 14:53:18
+Log File Saved: E:\databackup2.0\2026-10-06_14-53-13\backup_log.txt
+============================================================
