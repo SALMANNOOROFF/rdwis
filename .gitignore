@@ -30,6 +30,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 dev.accdb
-desktop.ini
 scratch/
+tests/
+test/
 2026-*/
