@@ -29,9 +29,8 @@ class AttendanceController extends Controller
         }
 
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
-        $isCentral = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs'], true);
-
         $isDivision = method_exists($user, 'isDivision') ? $user->isDivision() : in_array($area, ['prj', 'rdwprj'], true);
+        $isCentral = !$isDivision && in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc', 'is', 'it'], true);
 
         // Mode handling with Session Persistence
         if ($isDivision) {

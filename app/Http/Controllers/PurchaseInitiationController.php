@@ -21,6 +21,10 @@ class PurchaseInitiationController extends Controller
         $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
         $isHqOrProc = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'fin', 'proc', 'prc'], true);
 
+        if ($user->isMyDepartmentMode()) {
+            $isHqOrProc = false;
+        }
+
         if ($isHqOrProc) {
             $lower = 0;
             $upper = 99999999;
@@ -35,10 +39,15 @@ class PurchaseInitiationController extends Controller
         // Fetch all cases initiated by this unit/division with rich context
         $purchases = Purchase::with(['project', 'latestDecision.account', 'items', 'quotes.firm', 'decisions', 'currentSubstatus'])
             ->where(function($q) use ($user, $lower, $upper) {
-                if ($user->acc_unt_id) {
-                    $q->where('pcs_unt_id', $user->acc_unt_id);
+                if ($user->isMyDepartmentMode() && $user->acc_unt_id) {
+                    $q->where('pcs_unt_id', $user->acc_unt_id)
+                      ->orWhere('pcs_intunt_id', $user->acc_unt_id);
+                } else {
+                    if ($user->acc_unt_id) {
+                        $q->where('pcs_unt_id', $user->acc_unt_id);
+                    }
+                    $q->orWhereBetween('pcs_unt_id', [$lower, $upper]);
                 }
-                $q->orWhereBetween('pcs_unt_id', [$lower, $upper]);
             })
             ->orderBy('pcs_id', 'desc')
             ->get();

@@ -62,8 +62,31 @@ class User extends Authenticatable
         return in_array($area, ['rdwprj', 'prjrdw', 'rdw'], true);
     }
 
+    public function isCentralDepartment(): bool
+    {
+        $untId = (int) ($this->acc_unt_id ?? 0);
+        $area = $this->normalizedArea();
+
+        return in_array($untId, [800000, 810000, 820000, 840000, 860000, 880000], true)
+            || in_array($area, ['proc', 'prc', 'fin', 'finance', 'hr', 'is', 'it', 'admin'], true);
+    }
+
+    public function isMyDepartmentMode(): bool
+    {
+        return $this->isCentralDepartment() && session('active_dept_scope') === 'my';
+    }
+
+    public function isAllDepartmentsMode(): bool
+    {
+        return ! $this->isMyDepartmentMode();
+    }
+
     public function isDivision()
     {
+        if ($this->isMyDepartmentMode()) {
+            return true;
+        }
+
         if ($this->isSORD()) {
             return false;
         }
@@ -73,8 +96,32 @@ class User extends Authenticatable
 
     public function isFinance(): bool
     {
+        if ($this->isMyDepartmentMode()) {
+            return false;
+        }
+
         $area = $this->normalizedArea();
         return in_array($area, ['fin', 'finance'], true) || stripos((string) ($this->acc_desig ?? ''), 'finance') !== false;
+    }
+
+    public function isProcurement(): bool
+    {
+        if ($this->isMyDepartmentMode()) {
+            return false;
+        }
+
+        $area = $this->normalizedArea();
+        return in_array($area, ['proc', 'prc'], true) || stripos((string) ($this->acc_desig ?? ''), 'procurement') !== false;
+    }
+
+    public function isHr(): bool
+    {
+        if ($this->isMyDepartmentMode()) {
+            return false;
+        }
+
+        $area = $this->normalizedArea();
+        return in_array($area, ['hr'], true) || stripos((string) ($this->acc_desig ?? ''), 'hr') !== false;
     }
 
     public function isApprover(): bool

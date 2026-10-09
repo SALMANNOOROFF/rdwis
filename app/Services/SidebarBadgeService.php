@@ -26,10 +26,17 @@ class SidebarBadgeService
         $psTypes = app(\App\Services\PurchaseApprovalService::class)->getAssignedCaseTypes('PS');
 
         if ($isDivision) {
-            [$lower, $upper] = $user->acc_lowers == 0
-                ? [$user->acc_lowerm, $user->acc_upperm]
-                : [$user->acc_lowers, $user->acc_uppers];
-            $purCount = Purchase::whereBetween('pcs_unt_id', [$lower, $upper])
+            if (method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode()) {
+                [$lower, $upper] = [(int)$user->acc_unt_id, (int)$user->acc_unt_id];
+            } else {
+                [$lower, $upper] = $user->acc_lowers == 0
+                    ? [$user->acc_lowerm, $user->acc_upperm]
+                    : [$user->acc_lowers, $user->acc_uppers];
+            }
+            $purCount = Purchase::where(function($q) use ($lower, $upper, $user) {
+                    $q->whereBetween('pcs_unt_id', [$lower, $upper])
+                      ->orWhere('pcs_intunt_id', $user->acc_unt_id);
+                })
                 ->where(function($q) use ($psTypes) {
                     $q->where('pcs_status', 'Returned')
                       ->orWhere(function($sub) use ($psTypes) {
@@ -85,11 +92,18 @@ class SidebarBadgeService
         // 2. CONTRACT CASES BADGE (Only cases requiring pending action for this user)
         $ctrCount = 0;
         if ($isDivision) {
-            [$lower, $upper] = $user->acc_lowers == 0
-                ? [$user->acc_lowerm, $user->acc_upperm]
-                : [$user->acc_lowers, $user->acc_uppers];
+            if (method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode()) {
+                [$lower, $upper] = [(int)$user->acc_unt_id, (int)$user->acc_unt_id];
+            } else {
+                [$lower, $upper] = $user->acc_lowers == 0
+                    ? [$user->acc_lowerm, $user->acc_upperm]
+                    : [$user->acc_lowers, $user->acc_uppers];
+            }
             $ctrCount = DB::table('hr.ctrcases')
-                ->whereBetween('ctc_unt_id', [$lower, $upper])
+                ->where(function($q) use ($lower, $upper, $user) {
+                    $q->whereBetween('ctc_unt_id', [$lower, $upper])
+                      ->orWhere('ctc_newunt_id', $user->acc_unt_id);
+                })
                 ->whereIn('ctc_status', ['Draft', 'Returned', 'Under Revision'])
                 ->count();
         } elseif ($area === 'hr') {
@@ -132,9 +146,13 @@ class SidebarBadgeService
                 ->where('c.ctr_enddt', '<=', $threshold->toDateString());
 
             if ($isDivision) {
-                [$lower, $upper] = $user->acc_lowers == 0
-                    ? [$user->acc_lowerm, $user->acc_upperm]
-                    : [$user->acc_lowers, $user->acc_uppers];
+                if (method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode()) {
+                    [$lower, $upper] = [(int)$user->acc_unt_id, (int)$user->acc_unt_id];
+                } else {
+                    [$lower, $upper] = $user->acc_lowers == 0
+                        ? [$user->acc_lowerm, $user->acc_upperm]
+                        : [$user->acc_lowers, $user->acc_uppers];
+                }
                 $expiringQuery->whereBetween('e.emp_unt_id', [$lower, $upper]);
             }
 

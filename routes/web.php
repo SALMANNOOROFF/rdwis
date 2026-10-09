@@ -77,6 +77,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/draft-remarks/clear', [\App\Http\Controllers\UserCaseDraftRemarkController::class, 'clear'])->name('draft-remarks.clear');
     Route::get('/draft-remarks/get', [\App\Http\Controllers\UserCaseDraftRemarkController::class, 'get'])->name('draft-remarks.get');
 
+    // Department Scope Switcher (All Departments vs My Department)
+    Route::post('/user/toggle-scope', [\App\Http\Controllers\DepartmentScopeController::class, 'toggleScope'])->name('user.toggle_scope');
+
     Route::get('/debug-user', function () {
         $u = Auth::user();
 

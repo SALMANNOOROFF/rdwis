@@ -715,13 +715,28 @@
                                     @endif
                                 </div>
                                 <div class="d-flex flex-column" style="gap: 8px; font-size: 13px;">
-                                    <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-hashtag text-primary mr-2"></i>CASE ID:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">#{{ $purchase->pcs_id }}</span></div>
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                        <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-hashtag text-primary mr-2"></i>CASE ID:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">#{{ $purchase->pcs_id }}</span></div>
+                                        @if(!empty($purchase->pcs_sudohed) && $purchase->pcs_sudohed === 'CHRF')
+                                            <span class="badge badge-warning text-dark shadow-sm font-weight-bold" style="background: #fef08a; border: 1px solid #facc15; font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                                                <i class="fas fa-coins text-warning mr-1" style="color: #b45309 !important;"></i> CSRF Case (Funded via CSRF)
+                                            </span>
+                                        @endif
+                                    </div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="far fa-calendar-alt text-primary mr-2"></i>DATE:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span></div>
                                     <div class="d-flex align-items-center">
                                         <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-project-diagram text-primary mr-2"></i>PROJECT:</strong> 
                                         <span class="badge badge-light border px-2 py-1 font-weight-bold" style="font-size: 12.5px; color: #0f172a; background: #f8fafc; border-color: #cbd5e1 !important;">
-                                            {{ $purchase->project?->prj_code ?? ($purchase->head?->hed_code ?? $purchase->pcs_hed_id) }}
+                                            @if(!empty($purchase->pcs_sudohed) && $purchase->pcs_sudohed === 'CHRF')
+                                                CSRF Fund @if($purchase->effectiveHead) ({{ $purchase->effectiveHead->hed_code }}) @elseif($purchase->pcs_effhed_id) (#{{ $purchase->pcs_effhed_id }}) @endif
+                                            @else
+                                                {{ $purchase->project?->prj_code ?? ($purchase->head?->hed_code ?? $purchase->pcs_hed_id) }}
+                                            @endif
                                         </span>
+                                        @php
+                                            $navHedId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
+                                        @endphp
+                                        @if($navHedId)
                                         <div class="dropdown d-inline-block ml-1">
                                             <button class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm dropdown-toggle" type="button" id="projectNavDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 12px; height: 22px; width: 24px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="Project Navigation">
                                                 <i class="fas fa-ellipsis-v" style="font-size: 10px;"></i>
@@ -733,14 +748,15 @@
                                                     <i class="fas fa-project-diagram text-primary mr-2" style="width: 16px;"></i> Project Details
                                                 </a>
                                                 @endif
-                                                <a class="dropdown-item py-2 px-3 d-flex align-items-center font-weight-bold text-dark" href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-docs" target="_blank">
+                                                <a class="dropdown-item py-2 px-3 d-flex align-items-center font-weight-bold text-dark" href="{{ route('projects.financial_view', $navHedId) }}#tab-docs" target="_blank">
                                                     <i class="fas fa-paperclip text-success mr-2" style="width: 16px;"></i> Files & Attachments
                                                 </a>
-                                                <a class="dropdown-item py-2 px-3 d-flex align-items-center font-weight-bold text-dark" href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-milestones" target="_blank">
+                                                <a class="dropdown-item py-2 px-3 d-flex align-items-center font-weight-bold text-dark" href="{{ route('projects.financial_view', $navHedId) }}#tab-milestones" target="_blank">
                                                     <i class="fas fa-coins text-warning mr-2" style="width: 16px;"></i> Milestone Costs
                                                 </a>
                                             </div>
                                         </div>
+                                        @endif
                                     </div>
                                     <div class="d-flex align-items-center">
                                         <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> 

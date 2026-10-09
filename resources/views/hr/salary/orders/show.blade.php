@@ -93,6 +93,11 @@
             <span class="badge px-3 py-1 font-weight-bold" style="{{ $sorColors[$order->sor_status] ?? '' }}; font-size: 0.9rem;">
               sor_status: {{ $order->sor_status }}
             </span>
+            @if($order->sor_sudohed === 'CHRF')
+              <span class="badge badge-warning text-dark px-3 py-1 ml-2 font-weight-bold" style="background: #fef08a; border: 1px solid #facc15; font-size: 0.9rem;">
+                <i class="fas fa-coins text-warning mr-1" style="color: #b45309 !important;"></i> CSRF Funded
+              </span>
+            @endif
           </div>
         </div>
         <div class="card-body p-4">

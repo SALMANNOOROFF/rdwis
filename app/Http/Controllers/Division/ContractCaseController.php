@@ -32,13 +32,14 @@ class ContractCaseController extends Controller
     {
         $user = Auth::user();
         $userUnitId = (int) ($user->acc_unt_id ?? 0);
-        $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: $userUnitId);
+        $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
+        $divisionId = $isMyDept ? $userUnitId : ($user->acc_lowers ?: ($user->acc_lowerm ?: $userUnitId));
         $isSord = strtolower(trim((string)($user->acc_untarea ?? ''))) === 'rdwprj';
 
         $query = HrCtrCase::with(['casePlans.project', 'currentSubstatus', 'employee'])
-            ->where(function ($q) use ($divisionId, $userUnitId, $isSord) {
-                if ($isSord) {
-                    return; // SORD has visibility of all division cases
+            ->where(function ($q) use ($divisionId, $userUnitId, $isSord, $isMyDept) {
+                if ($isSord && !$isMyDept) {
+                    return; // SORD has visibility of all division cases only in global mode
                 }
                 if ($divisionId > 0) {
                     $q->where('ctc_divisionid', $divisionId)
@@ -82,21 +83,28 @@ class ContractCaseController extends Controller
         $this->authorize('create', HrCtrCase::class);
         $type = $request->query('type', 'Hg');
         $user = Auth::user();
-        $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
+        $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
+        $userUnitId = (int) ($user->acc_unt_id ?? 0);
+        $divisionId = $isMyDept ? $userUnitId : ($user->acc_lowers ?: ($user->acc_lowerm ?: $userUnitId));
+        $isCentral = $user->isCentralDepartment() || ($divisionId >= 800000);
 
         $division = DB::table('cen.units')->where('unt_id', $divisionId)->first();
-        $divisionName = $division ? $division->unt_name : 'Unknown Division';
+        $divisionName = $division ? $division->unt_name : ($user->acc_untname ?? 'Department');
 
-        // Fetch projects for division
-        $projects = DB::table('prj.projects')
-            ->where(function ($q) use ($divisionId) {
-                if ($divisionId > 0) {
-                    $q->where('prj_unt_id', $divisionId);
-                }
-            })
+        // Fetch projects for division (or active projects for CSRF if central department)
+        $projectsQuery = DB::table('prj.projects')
             ->select('prj_id', 'prj_code', 'prj_title')
-            ->orderBy('prj_code')
-            ->get();
+            ->orderBy('prj_code');
+
+        if ($isCentral) {
+            $projectsQuery->whereIn('prj_status', ['Approved', 'Ongoing', 'Active', 'In Progress', 'Completed']);
+        } else {
+            if ($divisionId > 0) {
+                $projectsQuery->where('prj_unt_id', $divisionId);
+            }
+        }
+
+        $projects = $projectsQuery->get();
 
         // Fetch existing employees in this division based on case type
         $employees = collect();
@@ -254,7 +262,9 @@ class ContractCaseController extends Controller
     {
         $this->authorize('create', HrCtrCase::class);
         $user = Auth::user();
-        $divisionId = $user->acc_lowers ?: ($user->acc_lowerm ?: 0);
+        $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
+        $userUnitId = (int) ($user->acc_unt_id ?? 0);
+        $divisionId = $isMyDept ? $userUnitId : ($user->acc_lowers ?: ($user->acc_lowerm ?: $userUnitId));
 
         $validated = $request->validate([
             'ctc_type'          => 'required|string',

@@ -237,6 +237,10 @@ class SalaryGenerationService
                 $effHedId = (int) ($headParts[0] ?? 0);
                 $sudoHed = $headParts[1] ?? null;
 
+                if (empty($sudoHed) && ((int)($emp->emp_unt_id ?? 0) >= 800000 || in_array((int)($emp->emp_unt_id ?? 0), [800000, 810000, 820000, 840000, 860000, 880000], true))) {
+                    $sudoHed = 'CHRF';
+                }
+
                 $effUntId = (int) DB::table('cen.heads')->where('hed_id', $effHedId)->value('hed_unt_id');
 
                 $breakdown[] = [
@@ -429,7 +433,7 @@ class SalaryGenerationService
             foreach ($reqs as $rf) {
                 $head = DB::table('cen.heads')->where('hed_id', $rf->srq_effhed_id)->first();
                 $transType = $head ? ($head->hed_transtype ?? 1) : 1;
-                $noLoan = is_null($rf->srq_hed_id) ? true : false;
+                $noLoan = (is_null($rf->srq_hed_id) || $rf->srq_sudohed === 'CHRF') ? true : false;
 
                 $sorParent = null;
                 if ($rf->srq_parent !== null) {
@@ -930,7 +934,8 @@ class SalaryGenerationService
      */
     public function getRequisitions(Authenticatable $user, ?string $month = null, ?string $status = null, int $perPage = 25)
     {
-        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
+        $isMultiple = (($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin') && !$isMyDept;
         $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
         $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
 
@@ -961,7 +966,8 @@ class SalaryGenerationService
      */
     public function getOrders(Authenticatable $user, ?string $month = null, ?string $status = null, int $perPage = 25)
     {
-        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
+        $isMultiple = (($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin') && !$isMyDept;
         $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
         $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
 

@@ -148,7 +148,12 @@
 
                 {{-- 3. Department --}}
                 <td>
-                  <div class="font-weight-bold text-dark">{{ $o->head->hed_name ?? ($o->effectiveHead->hed_name ?? 'Central') }}</div>
+                  <div class="font-weight-bold text-dark">
+                    {{ $o->head->hed_name ?? ($o->effectiveHead->hed_name ?? 'Central') }}
+                    @if($o->sor_sudohed === 'CHRF')
+                      <span class="badge badge-warning text-dark font-weight-bold ml-1" style="font-size: 10px; background: #fef08a; border: 1px solid #facc15;" title="Paid From CSRF">* CSRF</span>
+                    @endif
+                  </div>
                   <div class="small text-muted" style="font-size: 11px;">{{ $o->unit->unt_namesh ?? ($o->unit->unt_name ?? '') }}</div>
                 </td>
 

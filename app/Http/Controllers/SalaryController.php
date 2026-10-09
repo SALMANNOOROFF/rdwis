@@ -38,7 +38,8 @@ class SalaryController extends Controller
 
     protected function getUserBounds($user): array
     {
-        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
+        $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
+        $isMultiple = (($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin') && !$isMyDept;
         $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
         $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
         return [(int)$lower, (int)$upper];

@@ -181,6 +181,10 @@ class UserAccessContext
             return false;
         }
 
+        if (method_exists($this->user, 'isMyDepartmentMode') && $this->user->isMyDepartmentMode()) {
+            return true;
+        }
+
         if ($this->isSord() || $this->isCommand()) {
             return false;
         }

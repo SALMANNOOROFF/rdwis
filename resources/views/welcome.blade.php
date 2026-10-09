@@ -190,6 +190,16 @@
             overflow: hidden !important;
         }
 
+        body.sidebar-collapse .main-sidebar:not(:hover) .dept-scope-switcher-wrapper,
+        body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .dept-scope-switcher-wrapper {
+            display: none !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            overflow: hidden !important;
+        }
+
         body.sidebar-collapse .main-sidebar:not(:hover) .brand-link,
         body.sidebar-collapse.sidebar-mini .main-sidebar:not(:hover) .brand-link {
             display: flex !important;
@@ -719,6 +729,49 @@
             @endif
           </div>
         </div>
+
+        {{-- ========================================================= --}}
+        {{-- CENTRAL DEPARTMENTS SCOPE SWITCHER (All Depts vs My Dept) --}}
+        {{-- ========================================================= --}}
+        @if(Auth::check() && Auth::user()->isCentralDepartment())
+        @php
+            $isMyDept = Auth::user()->isMyDepartmentMode();
+            $deptName = Auth::user()->acc_untname ?? Auth::user()->acc_untnamesh ?? 'My Department';
+        @endphp
+        <div class="dept-scope-switcher-wrapper px-2 mb-2">
+            <div class="card mb-0 shadow-sm border-0" style="background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(10px); border-radius: 8px; border: 1px solid rgba(255,255,255,0.15) !important;">
+                <div class="card-body p-2 text-center">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;">Active Scope</span>
+                        @if($isMyDept)
+                            <span class="badge badge-success px-2 py-0.5" style="font-size: 10px; font-weight: 600; border-radius: 12px; box-shadow: 0 0 8px rgba(34,197,94,0.4);">
+                                <i class="fas fa-building mr-1"></i> My Dept
+                            </span>
+                        @else
+                            <span class="badge badge-info px-2 py-0.5" style="font-size: 10px; font-weight: 600; border-radius: 12px; box-shadow: 0 0 8px rgba(6,182,212,0.4);">
+                                <i class="fas fa-globe mr-1"></i> All Depts
+                            </span>
+                        @endif
+                    </div>
+                    
+                    <div class="text-left mb-2 text-truncate" style="font-size: 11.5px; color: #f1f5f9; font-weight: 600;" title="{{ $isMyDept ? $deptName : 'Global Directorate' }}">
+                        @if($isMyDept)
+                            <i class="fas fa-layer-group text-success mr-1"></i> <span>{{ $deptName }}</span>
+                        @else
+                            <i class="fas fa-shield-alt text-info mr-1"></i> <span>Global Directorate</span>
+                        @endif
+                    </div>
+
+                    <button type="button" class="btn btn-block btn-xs font-weight-bold d-flex align-items-center justify-content-center py-1 {{ $isMyDept ? 'btn-outline-info text-info' : 'btn-outline-success text-success' }}" 
+                            style="border-radius: 6px; font-size: 11px; transition: all 0.2s;"
+                            data-toggle="modal" data-target="#deptScopeSwitchModal">
+                        <i class="fas fa-exchange-alt mr-1.5"></i>
+                        {{ $isMyDept ? 'Switch to All Depts' : 'Switch to My Dept' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <nav class="mt-2">
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
@@ -1975,6 +2028,64 @@
             });
         }
     </script>
+    @if(Auth::check() && Auth::user()->isCentralDepartment())
+    {{-- Department Scope Switch Confirmation Modal --}}
+    <div class="modal fade" id="deptScopeSwitchModal" tabindex="-1" role="dialog" aria-labelledby="deptScopeSwitchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
+                <form action="{{ route('user.toggle_scope') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="scope" value="{{ Auth::user()->isMyDepartmentMode() ? 'all' : 'my' }}">
+                    <div class="modal-header {{ Auth::user()->isMyDepartmentMode() ? 'bg-info text-white' : 'bg-success text-white' }} py-3">
+                        <h5 class="modal-title font-weight-bold" id="deptScopeSwitchModalLabel" style="font-size: 16px;">
+                            <i class="fas fa-exchange-alt mr-2"></i>
+                            {{ Auth::user()->isMyDepartmentMode() ? 'Switch to All Departments Mode?' : 'Switch to My Department Mode?' }}
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 text-dark text-left" style="background-color: #ffffff;">
+                        @if(Auth::user()->isMyDepartmentMode())
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="mr-3 text-info" style="font-size: 32px; line-height: 1;">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-weight-bold text-dark mb-1" style="font-size: 15px;">Global Directorate Access</h6>
+                                    <p class="text-muted mb-0" style="font-size: 13px; line-height: 1.5;">
+                                        Switching to <strong>All Departments</strong> will restore your full organization-wide view (All division cases, central oversight, approvals, and comprehensive directorate reports).
+                                    </p>
+                                </div>
+                            </div>
+                        @else
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="mr-3 text-success" style="font-size: 32px; line-height: 1;">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-weight-bold text-dark mb-1" style="font-size: 15px;">Scoped Departmental View ({{ Auth::user()->acc_untname ?? Auth::user()->acc_untnamesh ?? 'My Department' }})</h6>
+                                    <p class="text-muted mb-0" style="font-size: 13px; line-height: 1.5;">
+                                        In <strong>My Department</strong> mode, your sidebar navigation and data scope will collapse to your department only (exactly like a technical division). Any purchase or hiring cases you create will be funded from <strong>CSRF</strong>.
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
+                        <div class="alert alert-light border mb-0 text-muted d-flex align-items-center" style="font-size: 12px; border-radius: 6px;">
+                            <i class="fas fa-info-circle mr-2 text-primary" style="font-size: 14px;"></i>
+                            <span>You can toggle between modes anytime from the top of the sidebar.</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light py-2">
+                        <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn {{ Auth::user()->isMyDepartmentMode() ? 'btn-info' : 'btn-success' }} btn-sm font-weight-bold px-4">
+                            <i class="fas fa-check mr-1"></i> Confirm & Switch
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     @endif
 
     @include('pwa.install-banner')

@@ -132,7 +132,10 @@ class DashboardController extends Controller
         $utilizationRate = $totalAmount > 0 ? round((abs($totalSpent) / $totalAmount) * 100, 1) : 0;
 
         // 3. Purchase Cases Breakdown
-        $casesBreakdown = Purchase::where('pcs_unt_id', $unitId)
+        $casesBreakdown = Purchase::where(function($q) use ($unitId) {
+                $q->where('pcs_unt_id', $unitId)
+                  ->orWhere('pcs_intunt_id', $unitId);
+            })
             ->select('pcs_status', DB::raw('count(*) as total'))
             ->groupBy('pcs_status')
             ->pluck('total', 'pcs_status')
@@ -142,8 +145,14 @@ class DashboardController extends Controller
 
         // 4. Recent Purchase Cases
         $recentPurchases = DB::table('pur.purcases as p')
-            ->leftJoin('cen.heads as h', 'p.pcs_effhed_id', '=', 'h.hed_id')
-            ->where('p.pcs_unt_id', $unitId)
+            ->leftJoin('cen.heads as h', function($join) {
+                $join->on('p.pcs_effhed_id', '=', 'h.hed_id')
+                    ->orOn('p.pcs_hed_id', '=', 'h.hed_id');
+            })
+            ->where(function($q) use ($unitId) {
+                $q->where('p.pcs_unt_id', $unitId)
+                  ->orWhere('p.pcs_intunt_id', $unitId);
+            })
             ->orderBy('p.pcs_id', 'desc')
             ->limit(5)
             ->select('p.pcs_id', 'p.pcs_title', 'p.pcs_status', 'p.pcs_price', 'p.pcs_date', 'h.hed_code')

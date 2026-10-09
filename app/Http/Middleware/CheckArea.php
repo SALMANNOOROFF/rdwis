@@ -23,6 +23,13 @@ class CheckArea
             return $next($request);
         }
 
+        if (method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode()) {
+            $normalizedRequestedAreas = array_map(fn($a) => strtolower(trim($a)), $areas);
+            if (in_array('prj', $normalizedRequestedAreas, true) || in_array('rdwprj', $normalizedRequestedAreas, true)) {
+                return $next($request);
+            }
+        }
+
         $userArea = (string) ($user->acc_untarea ?? '');
         $allowedAreas = AreaDefinition::getAllowedRouteAreas($userArea);
 

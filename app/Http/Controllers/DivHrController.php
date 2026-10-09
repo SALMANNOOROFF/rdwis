@@ -18,11 +18,12 @@ class DivHrController extends Controller
 
         // Determine Mode with Session Persistence
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
-        $isGlobalHrViewer = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc', 'it'])
+        $isGlobalHrViewer = (in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc', 'it'])
             || session('impersonated_by_god')
-            || strtolower($user->acc_username ?? '') === 'superadminrdw';
+            || strtolower($user->acc_username ?? '') === 'superadminrdw')
+            && !$user->isMyDepartmentMode();
 
-        if ($request->has('mode')) {
+        if ($request->has('mode') && $isGlobalHrViewer) {
             $mode = $request->query('mode') === 's' ? 's' : 'm';
             session(['hr_mode' => $mode]);
         } else {

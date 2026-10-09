@@ -399,6 +399,13 @@
             </div>
             <span class="badge-draft">DRAFT MODE</span>
           </div>
+
+          @if(Auth::user()->isCentralDepartment() || (int)(Auth::user()->acc_unt_id ?? 0) >= 800000)
+          <div class="alert alert-warning border-0 mb-0 d-flex align-items-center py-2 px-3" style="border-radius: 0; background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600;">
+              <i class="fas fa-shield-alt mr-2" style="font-size: 15px;"></i>
+              <span><strong>Central Department Case ({{ Auth::user()->acc_untname ?? 'Central Unit' }}):</strong> This purchase case is funded directly via the <strong>Central Shared Resource Fund (CSRF)</strong> of the selected project. Subhead allocation is bypassed.</span>
+          </div>
+          @endif
           
           <form class="soft-form" id="unifiedPurchaseForm" action="{{ route('purchase.store') }}" method="POST" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
             @csrf
@@ -422,13 +429,23 @@
 
                 <div class="soft-row">
                   <div class="soft-group">
-                    <label class="soft-label">Project / Budget Head <span class="text-danger">*</span></label>
+                    <label class="soft-label">
+                        Project / Budget Head <span class="text-danger">*</span>
+                        @if(Auth::user()->isCentralDepartment() || (int)(Auth::user()->acc_unt_id ?? 0) >= 800000)
+                            <span class="badge badge-warning text-dark ml-1" style="font-size: 9.5px;"><i class="fas fa-coins mr-1"></i> CSRF Source</span>
+                        @endif
+                    </label>
                     <select name="pcs_hed_id" id="pcs_hed_id" class="soft-select" required onchange="handleProjectHeadChange(this.value)">
-                      <option value="" selected disabled>Select Project Head...</option>
+                      <option value="" selected disabled>{{ (Auth::user()->isCentralDepartment() || (int)(Auth::user()->acc_unt_id ?? 0) >= 800000) ? 'Select Project (CSRF Fund Source)...' : 'Select Project Head...' }}</option>
                       @foreach($heads as $head)
                         <option value="{{ $head->hed_id }}">{{ $head->hed_code ?: $head->hed_name }}</option>
                       @endforeach
                     </select>
+                    @if(Auth::user()->isCentralDepartment() || (int)(Auth::user()->acc_unt_id ?? 0) >= 800000)
+                    <div style="font-size: 0.68rem; color: #b45309; margin-top: 3px; font-weight: 600;">
+                        <i class="fas fa-info-circle mr-1"></i> Charged against the selected Project's CSRF Share pool.
+                    </div>
+                    @endif
                   </div>
 
                   <div class="soft-group">

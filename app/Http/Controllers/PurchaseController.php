@@ -231,13 +231,17 @@ class PurchaseController extends Controller
 
         $user = auth()->user();
         $unitId = $user->acc_unt_id ?? null;
+        $isCentral = $user->isCentralDepartment() || ((int)$unitId >= 800000);
 
         $headsQuery = DB::table('cen.heads')
                     ->select('hed_id', 'hed_name', 'hed_code')
                     ->orderBy('hed_name', 'asc');
         
-        if ($unitId) {
+        if ($unitId && !$isCentral) {
             $headsQuery->where('hed_unt_id', $unitId);
+        } else {
+            // Central department case: can select any active Project Head whose CSRF is available
+            $headsQuery->where('hed_type', 'Project');
         }
 
         $heads = $headsQuery->get();
@@ -337,18 +341,34 @@ class PurchaseController extends Controller
                 $pcs->pcs_remarks = is_array($request->remarks_JSON) ? json_encode($request->remarks_JSON) : (string)$request->remarks_JSON;
             }
 
+            $isCentral = Auth::user()->isCentralDepartment() || ((int)$userUnitId >= 800000);
+            
             $pcs->pcs_status = 'Draft';
-            $pcs->pcs_unt_id = $userUnitId; 
-            $pcs->pcs_effunt_id = $userUnitId; 
-            $pcs->pcs_intunt_id = $userUnitId;
-            $pcs->pcs_hed_id = $request->pcs_hed_id;
-            $pcs->pcs_effhed_id = $request->pcs_hed_id;
+            $pcs->pcs_intunt_id = $userUnitId; // Initiating unit is their department
+
+            if ($isCentral) {
+                // Central Department CSRF Case
+                $pcs->pcs_sudohed = 'CHRF';
+                $pcs->pcs_noloan = 1;
+                $pcs->pcs_effhed_id = $request->pcs_hed_id; // Charged to selected Project's CSRF
+                $pcs->pcs_hed_id = null; // Central department has no owning head
+                
+                $headRow = DB::table('cen.heads')->where('hed_id', $request->pcs_hed_id)->first();
+                $pcs->pcs_unt_id = null;
+                $pcs->pcs_effunt_id = $headRow->hed_unt_id ?? $userUnitId;
+            } else {
+                $pcs->pcs_sudohed = null;
+                $pcs->pcs_noloan = false;
+                $pcs->pcs_unt_id = $userUnitId; 
+                $pcs->pcs_effunt_id = $userUnitId; 
+                $pcs->pcs_hed_id = $request->pcs_hed_id;
+                $pcs->pcs_effhed_id = $request->pcs_hed_id;
+            }
             $pcs->pcs_price = 0;
             $pcs->pcs_midprice = 0;
             $pcs->pcs_inttax = 0;
             $pcs->pcs_midtax = 0;
             $pcs->pcs_transtype = 1;
-            $pcs->pcs_noloan = false;
 
             // Quote type: 1 = Without Tax, 2 = With Tax
             $quoteType = (int) $request->input('pcs_quotetype', 1);

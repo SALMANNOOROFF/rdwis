@@ -399,6 +399,24 @@ class Purchase extends Model
     }
 
     /**
+     * Head/Project relationships
+     */
+    public function head()
+    {
+        return $this->belongsTo(CenHead::class, 'pcs_hed_id', 'hed_id');
+    }
+
+    public function effectiveHead()
+    {
+        return $this->belongsTo(CenHead::class, 'pcs_effhed_id', 'hed_id');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'pcs_hed_id', 'prj_id');
+    }
+
+    /**
      * Purchase notifications
      */
     public function notifications()
