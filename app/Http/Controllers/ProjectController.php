@@ -21,7 +21,21 @@ class ProjectController extends Controller
     $user = Auth::user();
     if (!$user) return redirect()->route('login');
     
-    $query = Project::where('prj_unt_id', $user->acc_unt_id)->with('milestones');
+    $isCentralMyDept = method_exists($user, 'isCentralDepartment') && $user->isCentralDepartment() && $user->isMyDepartmentMode();
+
+    if ($isCentralMyDept) {
+        $csrfPrjIds = DB::table('fin.sharesalloc as s')
+            ->join('cen.heads as h', 'h.hed_id', '=', 's.sha_hed_id')
+            ->where('s.sha_cf', '>', 0)
+            ->pluck('h.hed_prj_id')
+            ->unique()
+            ->filter()
+            ->toArray();
+        $query = Project::whereIn('prj_id', $csrfPrjIds)->with('milestones');
+    } else {
+        $query = Project::where('prj_unt_id', $user->acc_unt_id)->with('milestones');
+    }
+
     if (\Illuminate\Support\Facades\Schema::hasTable('doc.documents')) {
         $query->with('document');
     }
@@ -43,7 +57,7 @@ class ProjectController extends Controller
         $spent = 0;
         if ($headRecord) {
             $headStatus = $finService->getHeadStatus($headRecord->hed_id);
-            $spent = $headStatus->expenditure ?? 0;
+            $spent = $isCentralMyDept ? ($headStatus->cf_expenditure ?? 0) : ($headStatus->expenditure ?? 0);
         }
         $project->setAttribute('spent', $spent);
     }
@@ -58,48 +72,17 @@ class ProjectController extends Controller
         return redirect()->route('login');
     }
 
-    $closedStatuses = ['Closed', 'Completed', 'Cancelled'];
-
     $query = Project::with('unit');
     app(\App\Services\Auth\DataScopeService::class)->scopeProjects($query, $user);
 
-    $status = (string) $request->query('status', 'open');
-    if ($status === 'closed') {
-        $query->whereIn('prj_status', $closedStatuses);
-    } elseif ($status === 'all') {
-        $status = 'all';
-    } else {
-        $status = 'open';
-        $query->whereNotIn('prj_status', $closedStatuses);
-    }
-
-    $divisionId = $request->query('division');
-    if (is_numeric($divisionId) && (int) $divisionId > 0) {
-        $query->where('prj_unt_id', (int) $divisionId);
-    }
-
-    $term = trim((string) $request->query('term', ''));
-    if ($term !== '') {
-        $query->where(function ($q) use ($term) {
-            $q->where('prj_code', 'ILIKE', '%' . $term . '%')
-              ->orWhere('prj_title', 'ILIKE', '%' . $term . '%');
-        });
-    }
-
-    $projects = $query->orderByDesc('prj_id')->paginate(50);
-    $projects->appends([
-        'status' => $status,
-        'division' => $divisionId,
-        'term' => $term,
-    ]);
-
+    $projects = $query->orderByDesc('prj_id')->get();
     $this->attachProjectEmployeeCounts($projects);
 
     $divisionsQuery = Unit::where('unt_type', 'Division');
     app(\App\Services\Auth\DataScopeService::class)->applyScope($divisionsQuery, $user, 'unt_id');
     $divisions = $divisionsQuery->orderBy('unt_name', 'asc')->get();
 
-    return view('nrdi.projects.index', compact('projects', 'divisions', 'status', 'divisionId', 'term'));
+    return view('nrdi.projects.index', compact('projects', 'divisions'));
 }
 
     public function nrdiShow($id)
@@ -407,6 +390,11 @@ class ProjectController extends Controller
 
             $installments = DB::table('fin.sharesinstall as si')
                 ->leftJoin('fin.transactions as t', 't.trn_id', '=', 'si.shi_fitrn_id')
+                ->leftJoin('fin.transactions as t_out', 't_out.trn_id', '=', 'si.shi_fotrn_id')
+                ->leftJoin('fin.msncosts as mc', function ($join) use ($headRecord) {
+                    $join->on('mc.mct_msn_idd', '=', 'si.shi_msn_idd')
+                         ->where('mc.mct_hed_id', '=', $headRecord->hed_id);
+                })
                 ->leftJoin('prj.milestones as m', 'm.msn_idd', '=', 'si.shi_msn_idd')
                 ->where('si.shi_hed_id', $headRecord->hed_id)
                 ->select(
@@ -415,10 +403,17 @@ class ProjectController extends Controller
                     'si.shi_pcc',
                     'si.shi_cf',
                     'si.shi_prj',
+                    'si.shi_msn_idd',
                     't.trn_date',
-                    'm.msn_desc'
+                    't.trn_amount2 as inward',
+                    DB::raw('-1 * COALESCE(t_out.trn_amount2, 0) as mtss_share'),
+                    'mc.mct_msn_id',
+                    'mc.mct_cost',
+                    'm.msn_desc',
+                    'm.msn_status'
                 )
-                ->orderBy('si.shi_id')
+                ->orderBy('t.trn_date', 'asc')
+                ->orderBy('si.shi_id', 'asc')
                 ->get();
 
             $transfers = DB::table('fin.transfers')
@@ -463,24 +458,24 @@ class ProjectController extends Controller
         $miscPct = $miscAlloc > 0 ? round(($miscExp / $miscAlloc) * 100) : ($totalSpent > 0 ? round(($miscExp / $totalSpent) * 100) : 0);
 
         $finData = [
-            'equip' => $equipExp ?: ($totalSpent * 0.45),
+            'equip' => $equipExp,
             'equip_alloc' => $equipAlloc,
             'equip_cmt' => $equipCmt,
             'equip_ipc' => $equipIpc,
             'equip_remaining' => $equipSh ? $equipRemaining : ($equipAlloc - $equipExp),
-            'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
-            'hr'    => $hrExp ?: ($totalSpent * 0.35),
+            'equip_pct' => $equipAlloc > 0 ? min(100, round(($equipExp / $equipAlloc) * 100)) : 0,
+            'hr'    => $hrExp,
             'hr_alloc' => $hrAlloc,
             'hr_cmt' => $hrCmt,
             'hr_ipc' => $hrIpc,
             'hr_remaining' => $hrSh ? $hrRemaining : ($hrAlloc - $hrExp),
-            'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
-            'misc'  => $miscExp ?: ($totalSpent * 0.20),
+            'hr_pct' => $hrAlloc > 0 ? min(100, round(($hrExp / $hrAlloc) * 100)) : 0,
+            'misc'  => $miscExp,
             'misc_alloc' => $miscAlloc,
             'misc_cmt' => $miscCmt,
             'misc_ipc' => $miscIpc,
             'misc_remaining' => $miscSh ? $miscRemaining : ($miscAlloc - $miscExp),
-            'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
+            'misc_pct' => $miscAlloc > 0 ? min(100, round(($miscExp / $miscAlloc) * 100)) : 0,
         ];
 
         $showProjectActualSection = false;
@@ -534,12 +529,61 @@ class ProjectController extends Controller
             $headRecord = DB::table('cen.heads')->where('hed_id', $id)->first();
         }
         
-        $head = null;
-        $subheads = [];
+        $milestones = collect();
+        $installments = collect();
 
         if ($headRecord) {
             $head = $finService->getHeadStatus($headRecord->hed_id);
             $subheads = $finService->getSubheadBreakdown($headRecord->hed_id);
+
+            $milestones = DB::table('prj.milestones as m')
+                ->leftJoin('fin.msncosts as mc', function ($join) use ($headRecord) {
+                    $join->on('m.msn_idd', '=', 'mc.mct_msn_idd')
+                         ->where('mc.mct_hed_id', '=', $headRecord->hed_id);
+                })
+                ->where('m.msn_xprj_id', $project->prj_id)
+                ->select(
+                    'm.msn_id',
+                    'm.msn_idd',
+                    'm.msn_type',
+                    'm.msn_desc',
+                    'm.msn_status',
+                    'm.msn_cost',
+                    'm.msn_startdt',
+                    'm.msn_targetdt',
+                    'm.msn_achvdt',
+                    'mc.mct_cost'
+                )
+                ->orderBy('m.msn_id')
+                ->get();
+
+            $installments = DB::table('fin.sharesinstall as si')
+                ->leftJoin('fin.transactions as t', 't.trn_id', '=', 'si.shi_fitrn_id')
+                ->leftJoin('fin.transactions as t_out', 't_out.trn_id', '=', 'si.shi_fotrn_id')
+                ->leftJoin('fin.msncosts as mc', function ($join) use ($headRecord) {
+                    $join->on('mc.mct_msn_idd', '=', 'si.shi_msn_idd')
+                         ->where('mc.mct_hed_id', '=', $headRecord->hed_id);
+                })
+                ->leftJoin('prj.milestones as m', 'm.msn_idd', '=', 'si.shi_msn_idd')
+                ->where('si.shi_hed_id', $headRecord->hed_id)
+                ->select(
+                    'si.shi_id',
+                    'si.shi_hed_id',
+                    'si.shi_pcc',
+                    'si.shi_cf',
+                    'si.shi_prj',
+                    'si.shi_msn_idd',
+                    't.trn_date',
+                    't.trn_amount2 as inward',
+                    DB::raw('-1 * COALESCE(t_out.trn_amount2, 0) as mtss_share'),
+                    'mc.mct_msn_id',
+                    'mc.mct_cost',
+                    'm.msn_desc',
+                    'm.msn_status'
+                )
+                ->orderBy('t.trn_date', 'asc')
+                ->orderBy('si.shi_id', 'asc')
+                ->get();
         }
 
         $totalSpent = $head->expenditure ?? 0;
@@ -569,27 +613,114 @@ class ProjectController extends Controller
         $miscPct = $miscAlloc > 0 ? round(($miscExp / $miscAlloc) * 100) : ($totalSpent > 0 ? round(($miscExp / $totalSpent) * 100) : 0);
 
         $finData = [
-            'equip' => $equipExp ?: ($totalSpent * 0.45),
+            'equip' => $equipExp,
             'equip_alloc' => $equipAlloc,
             'equip_cmt' => $equipCmt,
             'equip_ipc' => $equipIpc,
-            'equip_remaining' => $equipRemaining ?: ($equipAlloc - $equipExp),
-            'equip_pct' => min(100, max(0, $equipPct ?: ($totalSpent > 0 ? 45 : 0))),
-            'hr'    => $hrExp ?: ($totalSpent * 0.35),
+            'equip_remaining' => $equipSh ? $equipRemaining : ($equipAlloc - $equipExp),
+            'equip_pct' => $equipAlloc > 0 ? min(100, round(($equipExp / $equipAlloc) * 100)) : 0,
+            'hr'    => $hrExp,
             'hr_alloc' => $hrAlloc,
             'hr_cmt' => $hrCmt,
             'hr_ipc' => $hrIpc,
-            'hr_remaining' => $hrRemaining ?: ($hrAlloc - $hrExp),
-            'hr_pct' => min(100, max(0, $hrPct ?: ($totalSpent > 0 ? 35 : 0))),
-            'misc'  => $miscExp ?: ($totalSpent * 0.20),
+            'hr_remaining' => $hrSh ? $hrRemaining : ($hrAlloc - $hrExp),
+            'hr_pct' => $hrAlloc > 0 ? min(100, round(($hrExp / $hrAlloc) * 100)) : 0,
+            'misc'  => $miscExp,
             'misc_alloc' => $miscAlloc,
             'misc_cmt' => $miscCmt,
             'misc_ipc' => $miscIpc,
-            'misc_remaining' => $miscRemaining ?: ($miscAlloc - $miscExp),
-            'misc_pct' => min(100, max(0, $miscPct ?: ($totalSpent > 0 ? 20 : 0))),
+            'misc_remaining' => $miscSh ? $miscRemaining : ($miscAlloc - $miscExp),
+            'misc_pct' => $miscAlloc > 0 ? min(100, round(($miscExp / $miscAlloc) * 100)) : 0,
         ];
 
-        return view('projects.print_financial_summary', compact('project', 'head', 'subheads', 'headRecord', 'finData'));
+        return view('projects.print_financial_summary', compact('project', 'head', 'subheads', 'headRecord', 'finData', 'milestones', 'installments'));
+    }
+
+    /**
+     * Dedicated Standalone Landscape Print View for Fundings & Milestones
+     */
+    public function printFundingsMilestones($id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $project = Project::with('milestones', 'attachments', 'unit')->where('prj_id', $id)->first();
+        if (!$project) {
+            $headForPrj = DB::table('cen.heads')->where('hed_id', $id)->first();
+            if ($headForPrj && $headForPrj->hed_prj_id) {
+                $project = Project::with('milestones', 'attachments', 'unit')->where('prj_id', $headForPrj->hed_prj_id)->first();
+            }
+        }
+        if (!$project) {
+            abort(404, 'Project not found');
+        }
+
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $headRecord = DB::table('cen.heads')->where('hed_prj_id', $project->prj_id)->first();
+        if (!$headRecord && is_numeric($id)) {
+            $headRecord = DB::table('cen.heads')->where('hed_id', $id)->first();
+        }
+
+        $head = null;
+        $milestones = collect();
+        $installments = collect();
+
+        if ($headRecord) {
+            $head = $finService->getHeadStatus($headRecord->hed_id);
+
+            $milestones = DB::table('prj.milestones as m')
+                ->leftJoin('fin.msncosts as mc', function ($join) use ($headRecord) {
+                    $join->on('m.msn_idd', '=', 'mc.mct_msn_idd')
+                         ->where('mc.mct_hed_id', '=', $headRecord->hed_id);
+                })
+                ->where('m.msn_xprj_id', $project->prj_id)
+                ->select(
+                    'm.msn_id',
+                    'm.msn_idd',
+                    'm.msn_type',
+                    'm.msn_desc',
+                    'm.msn_status',
+                    'm.msn_cost',
+                    'm.msn_startdt',
+                    'm.msn_targetdt',
+                    'm.msn_achvdt',
+                    'mc.mct_cost'
+                )
+                ->orderBy('m.msn_id')
+                ->get();
+
+            $installments = DB::table('fin.sharesinstall as si')
+                ->leftJoin('fin.transactions as t', 't.trn_id', '=', 'si.shi_fitrn_id')
+                ->leftJoin('fin.transactions as t_out', 't_out.trn_id', '=', 'si.shi_fotrn_id')
+                ->leftJoin('fin.msncosts as mc', function ($join) use ($headRecord) {
+                    $join->on('mc.mct_msn_idd', '=', 'si.shi_msn_idd')
+                         ->where('mc.mct_hed_id', '=', $headRecord->hed_id);
+                })
+                ->leftJoin('prj.milestones as m', 'm.msn_idd', '=', 'si.shi_msn_idd')
+                ->where('si.shi_hed_id', $headRecord->hed_id)
+                ->select(
+                    'si.shi_id',
+                    'si.shi_hed_id',
+                    'si.shi_pcc',
+                    'si.shi_cf',
+                    'si.shi_prj',
+                    'si.shi_msn_idd',
+                    't.trn_date',
+                    't.trn_amount2 as inward',
+                    DB::raw('-1 * COALESCE(t_out.trn_amount2, 0) as mtss_share'),
+                    'mc.mct_msn_id',
+                    'mc.mct_cost',
+                    'm.msn_desc',
+                    'm.msn_status'
+                )
+                ->orderBy('t.trn_date', 'asc')
+                ->orderBy('si.shi_id', 'asc')
+                ->get();
+        }
+
+        return view('projects.print_fundings_milestones', compact('project', 'head', 'headRecord', 'milestones', 'installments'));
     }
 
     // --- 2. CREATE PROJECT PAGE (Smart Logic) ---

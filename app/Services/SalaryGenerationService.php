@@ -37,7 +37,19 @@ class SalaryGenerationService
 
         // Get candidates: active or last date in current month
         $query = DB::table('hr.emps as e')
-            ->select('e.emp_id', 'e.emp_name', 'e.emp_title', 'e.emp_rank', 'e.emp_unt_id', 'e.emp_status', 'e.emp_lastdt', 'e.emp_hed_id');
+            ->leftJoin('cen.units as u', 'e.emp_unt_id', '=', 'u.unt_id')
+            ->select(
+                'e.emp_id',
+                'e.emp_name',
+                'e.emp_title',
+                'e.emp_rank',
+                'e.emp_unt_id',
+                'e.emp_status',
+                'e.emp_lastdt',
+                'e.emp_hed_id',
+                'u.unt_name as dept_name',
+                'u.unt_namesh as dept_short'
+            );
 
         if ($user) {
             $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
@@ -67,6 +79,11 @@ class SalaryGenerationService
         $excluded = [];
 
         foreach ($candidates as $emp) {
+            $emp->emp_grade = DB::table('hr.contracts')
+                ->where('ctr_num', $emp->emp_id)
+                ->orderByDesc('ctr_id')
+                ->value('ctr_grade') ?: ($emp->emp_rank ?: '-');
+
             if ($isFutureMonth) {
                 $excluded[] = [
                     'employee' => $emp,
@@ -91,12 +108,9 @@ class SalaryGenerationService
             }
 
             // Check 3: Active contract/plan check (via FIS getSalaryMatrix)
+            // If employee has no active contract or contract plan, completely omit them from the list
             $matrix = $this->fis->getSalaryMatrix($emp->emp_id, $salMonthDate);
             if (empty($matrix) || !isset($matrix[11])) {
-                $excluded[] = [
-                    'employee' => $emp,
-                    'reason'   => 'No Contract/Plan',
-                ];
                 continue;
             }
 
@@ -109,10 +123,6 @@ class SalaryGenerationService
             }
 
             if (empty($groupRows)) {
-                $excluded[] = [
-                    'employee' => $emp,
-                    'reason'   => 'No Contract/Plan',
-                ];
                 continue;
             }
 
@@ -168,19 +178,15 @@ class SalaryGenerationService
                 continue;
             }
 
-            // Check 6: Multiple Bank Accounts (hr.bnkaccounts where bac_selforpay = true)
-            $bankAccounts = DB::table('hr.bnkaccounts')
+            // Bank Accounts: retrieve all accounts for employee, prioritizing primary selection
+            $allBankAccounts = DB::table('hr.bnkaccounts')
                 ->where('bac_emp_id', $emp->emp_id)
-                ->where('bac_selforpay', true)
+                ->orderByDesc('bac_selforpay')
+                ->orderByDesc('bac_id')
                 ->get();
 
-            if ($bankAccounts->count() > 1) {
-                $excluded[] = [
-                    'employee' => $emp,
-                    'reason'   => 'Multiple Bank Accounts',
-                ];
-                continue;
-            }
+            // Select primary if flagged, otherwise fallback to first available account
+            $selectedBank = $allBankAccounts->firstWhere('bac_selforpay', true) ?? $allBankAccounts->first();
 
             // Calculate dues and payment breakdown
             $dues = (float) $this->fis->calculateArrDues($emp->emp_id, $salMonthDate);
@@ -224,11 +230,19 @@ class SalaryGenerationService
                 $bankDetail = '(Pay by Cheque)';
                 $bankTitle = strtoupper($emp->emp_name);
 
-                if ($bankAccounts->count() === 1) {
-                    $bac = $bankAccounts->first();
-                    $bankTitle = $bac->bac_acctitle;
-                    if ($bac->bac_bnkname === 'Meezan Bank Ltd') {
-                        $bankDetail = trim($bac->bac_accnum . ' (' . $bac->bac_bchcode . ')');
+                if ($selectedBank) {
+                    if (!empty($selectedBank->bac_acctitle)) {
+                        $bankTitle = trim($selectedBank->bac_acctitle);
+                    }
+                    $accNum = trim((string)($selectedBank->bac_accnum ?? ''));
+                    $bchCode = trim((string)($selectedBank->bac_bchcode ?? ''));
+
+                    if (!empty($accNum)) {
+                        if (!empty($bchCode)) {
+                            $bankDetail = "{$accNum} ({$bchCode})";
+                        } else {
+                            $bankDetail = $accNum;
+                        }
                     }
                 }
 
@@ -243,9 +257,16 @@ class SalaryGenerationService
 
                 $effUntId = (int) DB::table('cen.heads')->where('hed_id', $effHedId)->value('hed_unt_id');
 
+                $objection = $this->checkObjectionsOnExp($effHedId, $g['head_id'] ?? $emp->emp_hed_id, $sudoHed, $finalSal);
+
+                $ctrGrade = !empty($g['ctr_id']) 
+                    ? (DB::table('hr.contracts')->where('ctr_id', (int)$g['ctr_id'])->value('ctr_grade') ?: $emp->emp_grade)
+                    : $emp->emp_grade;
+
                 $breakdown[] = [
                     'group_idx'       => $idx,
                     'ctr_id'          => $g['ctr_id'],
+                    'grade'           => $ctrGrade ?: '-',
                     'start'           => $g['start'],
                     'end'             => $g['end'],
                     'salary'          => (int) round($finalSal, 0),
@@ -266,11 +287,12 @@ class SalaryGenerationService
                     'effunt_id'       => $effUntId,
                     'sudohed'         => $sudoHed,
                     'hed_id'          => $g['head_id'] ?? $emp->emp_hed_id,
-                    'empnamecomp'     => trim(trim(($emp->emp_title ?? '') . ' ' . ($emp->emp_rank ?? '')) . ' ' . $emp->emp_name) ?: $emp->emp_name,
+                    'empnamecomp'     => $emp->emp_name,
                     'bnkaccdetail'    => $bankDetail,
                     'bnkacctitle'     => $bankTitle,
                     'absent'          => $g['absent'],
                     'unpaid'          => $g['unpaid'],
+                    'budget_objection'=> $objection,
                 ];
             }
 
@@ -283,13 +305,18 @@ class SalaryGenerationService
                 continue;
             }
 
+            $candObjections = array_filter(array_column($breakdown, 'budget_objection'));
+
             $included[] = [
                 'employee'         => $emp,
                 'total_salary'     => (int) round($totalNetSalary, 0),
                 'breakdown'        => $breakdown,
+                'budget_objection' => !empty($candObjections) ? implode('; ', $candObjections) : null,
                 'matrix_summary'   => $matrix[11],
             ];
         }
+
+        $budgetWarningsCount = count(array_filter($included, fn($x) => !empty($x['budget_objection'])));
 
         return [
             'month'     => $salMonthDate,
@@ -299,6 +326,7 @@ class SalaryGenerationService
                 'total_candidates' => count($candidates),
                 'eligible'         => count($included),
                 'excluded'         => count($excluded),
+                'budget_warnings'  => $budgetWarningsCount,
             ],
         ];
     }
@@ -329,7 +357,7 @@ class SalaryGenerationService
             abort(403, 'Unauthorized. One or more selected employees are outside your division unit scope.');
         }
 
-        $preview = $this->previewSalary($salMonth, null, $user);
+        $preview = $this->previewSalary($salMonth, (int) $user->acc_unt_id, $user);
         $eligibleMap = collect($preview['included'])->keyBy(fn($item) => $item['employee']->emp_id);
 
         $createdRequisitions = [];
@@ -390,6 +418,66 @@ class SalaryGenerationService
             'generated' => count($createdRequisitions),
             'items'     => $createdRequisitions,
         ];
+    }
+
+    protected array $headStatusCache = [];
+
+    /**
+     * Evaluate AnyObjectionsOnExp (Legacy AccountChecks.bas:5).
+     * Checks whether the proposed expenditure exceeds the budget limits of the project or effective head / CSRF.
+     *
+     * @param int $fromHeadId Effective spending head (srq_effhed_id)
+     * @param int|null $forHeadId Project head (srq_hed_id)
+     * @param string|null $sudoHead Sudohead indicator ('CHRF' or null)
+     * @param float $amount Amount to spend (salary)
+     * @return string|null Returns objection message if exceeded, or null if budget is sufficient
+     */
+    public function checkObjectionsOnExp(int $fromHeadId, ?int $forHeadId, ?string $sudoHead, float $amount): ?string
+    {
+        $objections = [];
+
+        // 1. Check For Head (Project Budget Limit)
+        if (empty($sudoHead) && !empty($forHeadId) && (int)$forHeadId > 0) {
+            $forHeadId = (int)$forHeadId;
+            if (!isset($this->headStatusCache[$forHeadId])) {
+                $this->headStatusCache[$forHeadId] = $this->fis->getHeadStatus($forHeadId);
+            }
+            $forStatus = $this->headStatusCache[$forHeadId];
+            $prjCanBeSpent = (float)($forStatus->prj_can_be_spent ?? 0);
+            if ($amount > $prjCanBeSpent) {
+                $over = round($amount - $prjCanBeSpent, 2);
+                $headCode = $forStatus->head_code ?? ('Head #' . $forHeadId);
+                $objections[] = "Rs. " . number_format($over) . " above max spent limit for the project ({$headCode})";
+            }
+        }
+
+        // 2. Check From Head (Effective Head Budget Limit: PCC or CSRF)
+        if (!empty($fromHeadId) && (int)$fromHeadId > 0) {
+            $fromHeadId = (int)$fromHeadId;
+            if (!isset($this->headStatusCache[$fromHeadId])) {
+                $this->headStatusCache[$fromHeadId] = $this->fis->getHeadStatus($fromHeadId);
+            }
+            $fromStatus = $this->headStatusCache[$fromHeadId];
+            $headCode = $fromStatus->head_code ?? ('Head #' . $fromHeadId);
+
+            if (!empty($sudoHead)) {
+                // CSRF / CHRF
+                $cfCanBeSpent = (float)($fromStatus->cf_can_be_spent ?? 0);
+                if ($amount > $cfCanBeSpent) {
+                    $over = round($amount - $cfCanBeSpent, 2);
+                    $objections[] = "Rs. " . number_format($over) . " above max spent limit from CSRF ({$headCode})";
+                }
+            } else {
+                // PCC / Project Account
+                $pccCanBeSpent = (float)($fromStatus->pcc_can_be_spent ?? 0);
+                if ($amount > $pccCanBeSpent) {
+                    $over = round($amount - $pccCanBeSpent, 2);
+                    $objections[] = "Rs. " . number_format($over) . " above max spent limit from the project ({$headCode})";
+                }
+            }
+        }
+
+        return !empty($objections) ? implode(" | ", $objections) : null;
     }
 
     /**

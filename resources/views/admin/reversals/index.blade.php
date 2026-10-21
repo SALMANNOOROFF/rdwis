@@ -168,16 +168,18 @@
             
             {{-- Tabs --}}
             <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
-                @if($canViewDraft)
-                    <a href="{{ route('admin.reversals.draft') }}" class="rev-tab-btn {{ ($tab ?? 'open') === 'draft' ? 'active' : '' }}">
-                        <i class="fas fa-file-alt"></i> Draft
-                        <span class="badge badge-pill {{ ($tab ?? 'open') === 'draft' ? 'badge-light text-dark' : 'badge-secondary' }}">{{ $reversalsDraftCount ?? 0 }}</span>
+                @if(!($isCommand ?? false))
+                    @if($canViewDraft)
+                        <a href="{{ route('admin.reversals.draft') }}" class="rev-tab-btn {{ ($tab ?? 'open') === 'draft' ? 'active' : '' }}">
+                            <i class="fas fa-file-alt"></i> Draft
+                            <span class="badge badge-pill {{ ($tab ?? 'open') === 'draft' ? 'badge-light text-dark' : 'badge-secondary' }}">{{ $reversalsDraftCount ?? 0 }}</span>
+                        </a>
+                    @endif
+                    <a href="{{ route('admin.reversals.open') }}" class="rev-tab-btn {{ ($tab ?? 'open') === 'open' ? 'active' : '' }}">
+                        <i class="fas fa-folder-open"></i> Open
+                        <span class="badge badge-pill {{ ($tab ?? 'open') === 'open' ? 'badge-light text-dark' : 'badge-primary' }}">{{ $reversalsOpenCount ?? 0 }}</span>
                     </a>
                 @endif
-                <a href="{{ route('admin.reversals.open') }}" class="rev-tab-btn {{ ($tab ?? 'open') === 'open' ? 'active' : '' }}">
-                    <i class="fas fa-folder-open"></i> Open
-                    <span class="badge badge-pill {{ ($tab ?? 'open') === 'open' ? 'badge-light text-dark' : 'badge-primary' }}">{{ $reversalsOpenCount ?? 0 }}</span>
-                </a>
                 <a href="{{ route('admin.reversals.closed') }}" class="rev-tab-btn {{ ($tab ?? 'open') === 'closed' ? 'active' : '' }}">
                     <i class="fas fa-check-circle"></i> Closed
                     <span class="badge badge-pill {{ ($tab ?? 'open') === 'closed' ? 'badge-light text-dark' : 'badge-success' }}">{{ $reversalsClosedCount ?? 0 }}</span>
@@ -213,8 +215,8 @@
                 </div>
             @endif
 
-            {{-- SO IT Division-wise Filter Bar --}}
-            @if($isItStaff && !empty($divisionBreakdown))
+            {{-- SO IT & Command Division-wise Filter Bar --}}
+            @if(($isItStaff || ($isCommand ?? false)) && !empty($divisionBreakdown))
                 <div class="card shadow-sm border mb-3" style="border-radius: 8px; border-color: #e2e8f0 !important;">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between flex-wrap mb-2" style="gap: 8px;">

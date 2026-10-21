@@ -170,7 +170,7 @@ class PurchaseApprovalController extends Controller
     public function action(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:forward,forward_negative,return,approve,reject,save_draft,dproc_save,float_to_proc,reshare_to_proc',
+            'action' => 'required|in:forward,forward_negative,return,approve,reject,cancel,save_draft,dproc_save,float_to_proc,reshare_to_proc',
             'remarks' => 'nullable|string',
             'target_status' => 'nullable|string',
         ]);
@@ -188,7 +188,8 @@ class PurchaseApprovalController extends Controller
             );
 
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => true, 'message' => 'Remarks saved successfully!']);
+                $msg = $request->action === 'cancel' ? 'Purchase case has been cancelled successfully.' : 'Action completed successfully!';
+                return response()->json(['success' => true, 'message' => $msg]);
             }
 
             $user = Auth::user();
@@ -208,6 +209,44 @@ class PurchaseApprovalController extends Controller
         } catch (\Exception $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+            return back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cancel a purchase case directly from dashboard queue or show view
+     */
+    public function cancel(Request $request, $id)
+    {
+        $request->validate([
+            'remarks' => 'required|string|max:1000',
+        ]);
+
+        $purchase = Purchase::findOrFail($id);
+        $this->authorize('processAction', [$purchase, 'cancel']);
+
+        try {
+            $this->approvalService->processDecision(
+                $case = $purchase,
+                $action = 'cancel',
+                $remarks = $request->remarks
+            );
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Purchase Case #PC-' . $id . ' has been cancelled successfully.'
+                ]);
+            }
+
+            return back()->with('success', 'Purchase Case #PC-' . $id . ' has been cancelled.');
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 422);
             }
             return back()->with('error', 'Error: ' . $e->getMessage());
         }

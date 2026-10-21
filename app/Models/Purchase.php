@@ -44,9 +44,78 @@ class Purchase extends Model
     'pcs_recomm',
     'pcs_intunt_id',
     'pcs_transtype',
-    'pcs_noloan'
+    'pcs_noloan',
+    'pcs_approvedtg',
+    'pcs_mtss_sent',
+    'pcs_mtss_date',
+    'pcs_fulfillment_status'
 ];
 
+    protected $casts = [
+        'pcs_mtss_sent' => 'boolean',
+        'pcs_mtss_date' => 'datetime',
+        'pcs_approvedtg' => 'datetime',
+    ];
+
+    /**
+     * Check if case documents were submitted/sent to MTSS
+     */
+    public function isSentToMtss(): bool
+    {
+        return (bool) ($this->pcs_mtss_sent ?? false);
+    }
+
+    /**
+     * Accessor: Get the Carbon date of approval
+     */
+    public function getApprovedDateAttribute(): ?\Carbon\Carbon
+    {
+        if (!empty($this->pcs_approvedtg)) {
+            return \Carbon\Carbon::parse($this->pcs_approvedtg);
+        }
+
+        // Check PurDecisions if already loaded or relation exists
+        if ($this->relationLoaded('decisions') && $this->decisions) {
+            $dec = $this->decisions->first(function($d) {
+                return in_array(strtolower((string)$d->pdec_action), ['approve', 'approved']) 
+                    || strtolower((string)$d->pdec_to_status) === 'approved';
+            });
+            if ($dec && $dec->created_at) {
+                return \Carbon\Carbon::parse($dec->created_at);
+            }
+        }
+
+        // Fallback: if status is Approved and pcs_date exists
+        if (strtolower(trim((string)$this->pcs_status)) === 'approved') {
+            return !empty($this->pcs_date) ? \Carbon\Carbon::parse($this->pcs_date) : null;
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Check if this purchase case is funded by CSRF (Central Shared Resource Fund / CHRF)
+     */
+    public function isCsrf(): bool
+    {
+        $sudo = strtoupper(trim((string) ($this->pcs_sudohed ?? '')));
+        if (in_array($sudo, ['CHRF', 'CSRF', 'CF'], true)) {
+            return true;
+        }
+
+        $intUnt = (int) ($this->pcs_intunt_id ?? 0);
+        $unt = (int) ($this->pcs_unt_id ?? 0);
+        if ($intUnt >= 800000 || $unt >= 800000) {
+            return true;
+        }
+
+        if (empty($this->pcs_hed_id) && !empty($this->pcs_effhed_id)) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Relationship: Purchase belongs to a Project (Head)
@@ -409,11 +478,6 @@ class Purchase extends Model
     public function effectiveHead()
     {
         return $this->belongsTo(CenHead::class, 'pcs_effhed_id', 'hed_id');
-    }
-
-    public function project()
-    {
-        return $this->belongsTo(Project::class, 'pcs_hed_id', 'prj_id');
     }
 
     /**

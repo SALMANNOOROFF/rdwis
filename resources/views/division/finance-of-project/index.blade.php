@@ -79,20 +79,45 @@
         }
     </style>
 
+    @php
+        $closedStatuses = ['closed', 'completed', 'cancelled'];
+        $fopOpenCount = 0;
+        $fopClosedCount = 0;
+        foreach($projects as $p) {
+            $st = strtolower(trim($p['status'] ?? ''));
+            if (in_array($st, $closedStatuses)) {
+                $fopClosedCount++;
+            } else {
+                $fopOpenCount++;
+            }
+        }
+        $fopTotalCount = count($projects);
+    @endphp
+
     <div class="container-fluid px-3 px-md-4">
 
-        {{-- ================= TOP HEADER ================= --}}
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        {{-- ================= TOP HEADER & STATUS TABS ================= --}}
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom" style="gap: 12px;">
             <div>
                 <h3 class="m-0 text-dark font-weight-bold d-flex align-items-center" style="letter-spacing: 0.5px;">
                     <i class="fas fa-chart-pie text-warning mr-2"></i> Project Financing
                 </h3>
-                <small class="text-muted font-weight-bold">Consolidated Portfolio & Subhead Financial Intelligence</small>
+                <small class="text-muted font-weight-bold">
+                    Consolidated Portfolio & Subhead Financial Intelligence (<span id="visibleProjectsCount" class="text-dark font-weight-bold">{{ $fopTotalCount }}</span> visible)
+                </small>
             </div>
-            <div>
-                <span class="badge badge-primary px-3 py-2 font-weight-bold shadow-sm" style="font-size: 0.85rem; border-radius: 20px;">
-                    <i class="fas fa-layer-group mr-1"></i> <span id="visibleProjectsCount">{{ count($projects) }}</span> Projects
-                </span>
+
+            {{-- Live Status Tabs --}}
+            <div class="btn-group shadow-sm" role="group" id="fopStatusGroup">
+                <button type="button" class="btn btn-sm btn-primary font-weight-bold fop-status-btn active" data-status="all" style="padding: 5px 16px;">
+                    <i class="fas fa-layer-group mr-1"></i> All <span class="badge badge-light text-primary ml-1" id="fop-badge-all">({{ $fopTotalCount }})</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold fop-status-btn" data-status="open" style="padding: 5px 16px;">
+                    <i class="fas fa-folder-open mr-1"></i> Open <span class="badge badge-light text-secondary ml-1" id="fop-badge-open">({{ $fopOpenCount }})</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary font-weight-bold fop-status-btn" data-status="closed" style="padding: 5px 16px;">
+                    <i class="fas fa-check-circle mr-1"></i> Closed <span class="badge badge-light text-secondary ml-1" id="fop-badge-closed">({{ $fopClosedCount }})</span>
+                </button>
             </div>
         </div>
 
@@ -137,8 +162,8 @@
                     </label>
                     <div class="input-group input-group-sm">
                         <input type="text" id="projectSearchInput" class="form-control form-control-sm rounded-pill shadow-sm"
-                               placeholder="Search by Head Code, Project Title, Division..."
-                               style="height: 38px; padding-left: 16px; font-weight: 600;">
+                               placeholder="Live search by Head Code, Project Title, Division, Status..."
+                               style="height: 38px; padding-left: 16px; font-weight: 600;" autocomplete="off">
                         <div class="input-group-append" style="margin-left: -35px; z-index: 5;">
                             <button class="btn btn-link text-muted pr-2" type="button" id="clearSearchBtn" title="Clear Search" style="display: none;">
                                 <i class="fas fa-times-circle"></i>
@@ -194,11 +219,18 @@
                     </thead>
                     <tbody id="projectsTableBody">
                         @forelse($projects as $prj)
+                        @php
+                            $rawStatus = strtolower(trim($prj['status'] ?? ''));
+                            $isClosed = in_array($rawStatus, $closedStatuses);
+                            $statusCat = $isClosed ? 'closed' : 'open';
+                            $searchString = strtolower($prj['head_code'] . ' ' . $prj['title'] . ' ' . $prj['division'] . ' ' . ($prj['status'] ?? '') . ' ' . $prj['prj_id'] . ' ' . $prj['head_id']);
+                        @endphp
                         <tr class="project-row"
                             data-head-id="{{ $prj['head_id'] }}"
                             data-prj-id="{{ $prj['prj_id'] }}"
                             data-unt-id="{{ $prj['unt_id'] }}"
-                            data-search="{{ strtolower($prj['head_code'] . ' ' . $prj['title'] . ' ' . $prj['division'] . ' ' . $prj['status']) }}">
+                            data-status="{{ $statusCat }}"
+                            data-search="{{ $searchString }}">
                             
                             {{-- 1. DETAIL VIEW (First Column) --}}
                             <td class="text-center">
@@ -212,16 +244,21 @@
 
                             {{-- 2. Head Code & Division Only --}}
                             <td>
-                                <div class="d-flex align-items-center justify-content-between" style="gap: 6px;">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 4px;">
                                     <a href="{{ route('projects.financial_view', $prj['prj_id'] ?: $prj['head_id']) }}"
                                        class="font-weight-bold text-primary text-decoration-none" style="font-size: 0.95rem;" title="{{ $prj['title'] }}">
                                         {{ $prj['head_code'] }}
                                     </a>
-                                    @if(!empty($prj['division']))
-                                        <span class="badge badge-light border text-secondary font-weight-bold px-2 py-0.5" style="font-size: 11px;">
-                                            {{ $prj['division'] }}
+                                    <div class="d-flex align-items-center" style="gap: 4px;">
+                                        @if(!empty($prj['division']))
+                                            <span class="badge badge-light border text-secondary font-weight-bold px-1.5 py-0.5" style="font-size: 10.5px;">
+                                                {{ $prj['division'] }}
+                                            </span>
+                                        @endif
+                                        <span class="badge {{ $isClosed ? 'badge-secondary' : 'badge-success' }} text-uppercase" style="font-size: 9.5px;">
+                                            {{ $prj['status'] ?: ($isClosed ? 'Closed' : 'Open') }}
                                         </span>
-                                    @endif
+                                    </div>
                                 </div>
                             </td>
 
@@ -342,6 +379,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const rows = document.querySelectorAll('#projectsTableBody tr.project-row');
     const noMatchRow = document.getElementById('noMatchRow');
     const visibleCountEl = document.getElementById('visibleProjectsCount');
+    const statusButtons = document.querySelectorAll('.fop-status-btn');
+
+    const origCounts = {
+        all: {{ $fopTotalCount }},
+        open: {{ $fopOpenCount }},
+        closed: {{ $fopClosedCount }}
+    };
+
+    let currentStatus = 'all';
 
     function applyFilters() {
         const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -353,23 +399,65 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         let visibleCount = 0;
+        let allMatches = 0;
+        let openMatches = 0;
+        let closedMatches = 0;
 
         rows.forEach(function(row) {
             const searchData = row.getAttribute('data-search') || '';
             const untId = row.getAttribute('data-unt-id') || '';
             const headId = row.getAttribute('data-head-id') || '';
+            const statusCat = row.getAttribute('data-status') || '';
 
             const matchesSearch = query === '' || searchData.includes(query);
             const matchesDiv = selectedDiv === 'all' || untId === selectedDiv;
             const matchesHead = selectedHead === 'all' || headId === selectedHead;
 
-            if (matchesSearch && matchesDiv && matchesHead) {
+            const baseMatch = matchesSearch && matchesDiv && matchesHead;
+
+            if (baseMatch) {
+                allMatches++;
+                if (statusCat === 'open') openMatches++;
+                if (statusCat === 'closed') closedMatches++;
+            }
+
+            // CRITICAL REQUIREMENT:
+            // "chahy wo all mein hu open mein hu ya close mein hun please ye chez dekhu or kkry du"
+            // If user types in search bar: search across ALL statuses (open, closed, all)!
+            // If search is empty: respect the selected status tab (all, open, closed)
+            let show = false;
+            if (query) {
+                show = baseMatch;
+            } else {
+                if (currentStatus === 'all') {
+                    show = baseMatch;
+                } else {
+                    show = baseMatch && (statusCat === currentStatus);
+                }
+            }
+
+            if (show) {
                 row.style.display = '';
                 visibleCount++;
             } else {
                 row.style.display = 'none';
             }
         });
+
+        // Update count badges
+        const badgeAll = document.getElementById('fop-badge-all');
+        const badgeOpen = document.getElementById('fop-badge-open');
+        const badgeClosed = document.getElementById('fop-badge-closed');
+
+        if (query) {
+            if (badgeAll) badgeAll.textContent = `(${allMatches})`;
+            if (badgeOpen) badgeOpen.textContent = `(${openMatches})`;
+            if (badgeClosed) badgeClosed.textContent = `(${closedMatches})`;
+        } else {
+            if (badgeAll) badgeAll.textContent = `(${origCounts.all})`;
+            if (badgeOpen) badgeOpen.textContent = `(${origCounts.open})`;
+            if (badgeClosed) badgeClosed.textContent = `(${origCounts.closed})`;
+        }
 
         if (noMatchRow) {
             noMatchRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
@@ -379,6 +467,21 @@ document.addEventListener("DOMContentLoaded", function() {
             visibleCountEl.textContent = visibleCount;
         }
     }
+
+    // Status tab clicks
+    statusButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            statusButtons.forEach(b => {
+                b.classList.remove('btn-primary', 'active');
+                b.classList.add('btn-outline-primary');
+            });
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary', 'active');
+
+            currentStatus = this.getAttribute('data-status');
+            applyFilters();
+        });
+    });
 
     if (searchInput) {
         searchInput.addEventListener('input', applyFilters);
@@ -394,7 +497,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (divisionFilter) {
         divisionFilter.addEventListener('change', function() {
-            // Update project dropdown options according to division
             const divId = this.value;
             if (projectFilter) {
                 const projOptions = projectFilter.querySelectorAll('option');
@@ -426,9 +528,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 const projOptions = projectFilter.querySelectorAll('option');
                 projOptions.forEach(function(opt) { opt.style.display = ''; });
             }
+            statusButtons.forEach(b => {
+                const s = b.getAttribute('data-status');
+                if (s === 'all') {
+                    b.classList.remove('btn-outline-primary');
+                    b.classList.add('btn-primary', 'active');
+                } else {
+                    b.classList.remove('btn-primary', 'active');
+                    b.classList.add('btn-outline-primary');
+                }
+            });
+            currentStatus = 'all';
             applyFilters();
         });
     }
+
+    // Initial load
+    applyFilters();
 });
 </script>
 @endpush

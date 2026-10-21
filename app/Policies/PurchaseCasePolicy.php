@@ -39,11 +39,12 @@ class PurchaseCasePolicy
 
         $context = UserAccessContext::forUser($user);
 
-        // Procurement, Finance, and Command officers have case visibility across divisions
+        // Procurement, Finance, IT, and Command officers have case visibility across divisions
         $userArea = (string) ($user->acc_untarea ?? '');
         if (
             AreaDefinition::isProcurement($userArea) ||
             AreaDefinition::isFinance($userArea) ||
+            AreaDefinition::isIt($userArea) ||
             $context->isCommand() ||
             $context->isSord()
         ) {
@@ -95,11 +96,43 @@ class PurchaseCasePolicy
      */
     public function cancel(CenAccount $user, Purchase $case): bool
     {
-        if (! RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_CANCEL)) {
+        // 1. Leadership (MD, DDG, DG, DLOG) can NEVER cancel cases
+        if ((method_exists($user, 'isMdDdgDg') && $user->isMdDdgDg()) || (method_exists($user, 'isDlog') && $user->isDlog())) {
             return false;
         }
 
-        return $this->scopeService->canAccessUnit($user, (int) ($case->pcs_unt_id ?? 0));
+        // 2. Cases can ONLY be cancelled when in Draft or Returned (pending action) status
+        $status = strtolower(trim((string) ($case->pcs_status ?? '')));
+        if (! in_array($status, ['draft', 'returned', 'action required'], true)) {
+            return false;
+        }
+
+        // 3. Only Division or Finance (or SuperAdmin) can cancel
+        $context = UserAccessContext::forUser($user);
+        if ($context->isSuperAdmin()) {
+            return true;
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        if (in_array($userArea, ['fin', 'finance'], true) || (method_exists($user, 'isFinance') && $user->isFinance())) {
+            return true;
+        }
+
+        $isDivision = in_array($userArea, ['prj', 'rdwprj'], true) || (method_exists($user, 'isDivision') && $user->isDivision());
+        if ($isDivision) {
+            $unitId = (int) ($user->acc_unt_id ?? 0);
+            $caseUnit = (int) ($case->pcs_unt_id ?? 0);
+            $caseIntUnit = (int) ($case->pcs_intunt_id ?? 0);
+            if ($unitId > 0 && ($unitId === $caseUnit || $unitId === $caseIntUnit)) {
+                return true;
+            }
+
+            if ($this->scopeService->canAccessUnit($user, $caseUnit)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -118,25 +151,35 @@ class PurchaseCasePolicy
             return false;
         }
 
+        if ($action === 'approve') {
+            // Approval is strictly restricted to Finance and HR (or SuperAdmin)
+            if ($context->isSuperAdmin()) {
+                return true;
+            }
+
+            $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+            return in_array($userArea, ['fin', 'finance', 'hr'], true);
+        }
+
         if ($action === 'cancel') {
             return $this->cancel($user, $case);
         }
 
-        if ($action === 'save_draft') {
-            return $this->update($user, $case);
+        if (in_array($action, ['reject', 'not_approved'], true)) {
+            if ($context->isSuperAdmin()) {
+                return true;
+            }
+
+            $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+            if (in_array($userArea, ['fin', 'finance', 'hr'], true)) {
+                return true;
+            }
+
+            return $context->isCommand() || RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_CANCEL);
         }
 
-        if ($action === 'approve') {
-            // Approval is strictly restricted to Command Officers (MD, DDG, DG) or SuperAdmin
-            if (! ($context->isCommand() || $context->isSuperAdmin())) {
-                return false;
-            }
-
-            // Must satisfy financial threshold limits via PurchaseApprovalService
-            $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
-            if (! app(\App\Services\PurchaseApprovalService::class)->canApprove($userArea, (float)($case->pcs_price ?? 0), $case)) {
-                return false;
-            }
+        if ($action === 'save_draft') {
+            return $this->update($user, $case);
         }
 
         // Disallow actions on already finalized cases
@@ -208,7 +251,15 @@ class PurchaseCasePolicy
                 || $context->isSuperAdmin();
         }
 
-        // 7. Other Autonomous Depts (IS, IT, Admin)
+        // 7. DLOG Stage
+        if ($currentStage === 'DLOG') {
+            return ($context->isDlog() && RolePermissionMap::hasPermission($user, PermissionRegistry::PURCHASE_DLOG_ACTION))
+                || $context->isSuperAdmin()
+                || $context->isMd()
+                || $context->isDg();
+        }
+
+        // 8. Other Autonomous Depts (IS, IT, Admin)
         if ($currentStage === 'IS') {
             return $userArea === 'is' || $context->isCommand();
         }

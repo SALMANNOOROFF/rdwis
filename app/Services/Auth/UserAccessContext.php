@@ -65,13 +65,42 @@ class UserAccessContext
     }
 
     /**
-     * Check if user is a Command Officer (MD, DDG, DG) via semantic designation/role.
+     * Check if user is Director Logistics (DLOG).
+     */
+    public function isDlog(): bool
+    {
+        if (! $this->user) return false;
+        if (method_exists($this->user, 'isDlog') && $this->user->isDlog()) {
+            return true;
+        }
+
+        $desig = strtoupper(trim((string) ($this->user->acc_desig ?? '')));
+        $desigShort = strtoupper(trim((string) ($this->user->acc_desigshort ?? '')));
+        $auth = strtolower(trim((string) ($this->user->acc_auth ?? '')));
+        $area = strtolower(trim((string) ($this->user->acc_untarea ?? '')));
+        $username = strtolower(trim((string) ($this->user->acc_username ?? '')));
+
+        return str_contains($desig, 'DIRECTOR LOGISTICS')
+            || str_contains($desig, 'DIRECTOR LOG')
+            || in_array($desigShort, ['DLOG', 'DIR LOG', 'D LOG', 'DIR LOGISTICS'], true)
+            || preg_match('/\b(DLOG)\b/i', $desig)
+            || in_array($auth, ['dlog', 'log'], true)
+            || in_array($area, ['log', 'dlog', 'logistics'], true)
+            || in_array($username, ['dlog', 'logistics'], true);
+    }
+
+    /**
+     * Check if user is a Command Officer (MD, DDG, DG, DLOG) via semantic designation/role.
      * ZERO hardcoded personal usernames.
      */
     public function isCommand(): bool
     {
         if (! $this->user) {
             return false;
+        }
+
+        if ($this->isDlog()) {
+            return true;
         }
 
         $desig = strtoupper(trim((string) ($this->user->acc_desig ?? '')));
@@ -190,7 +219,7 @@ class UserAccessContext
         }
 
         $area = strtolower(trim((string) ($this->user->acc_untarea ?? '')));
-        return $area === AreaDefinition::PROJECTS;
+        return in_array($area, [AreaDefinition::PROJECTS, 'adm', 'admin'], true);
     }
 
     /**
@@ -289,6 +318,10 @@ class UserAccessContext
             return $this->roleSlug = 'COMMAND_DDG';
         }
 
+        if ($this->isDlog()) {
+            return $this->roleSlug = 'COMMAND_DLOG';
+        }
+
         if ($this->isSord()) {
             return $this->roleSlug = 'SORD';
         }
@@ -301,6 +334,14 @@ class UserAccessContext
         // Director R&D
         if (str_contains($desig, 'DIRECTOR R&D') || in_array($desigShort, ['DR&D', 'DIR R&D'], true)) {
             return $this->roleSlug = 'DEPT_DIRECTOR_RD';
+        }
+
+        // When in My Department mode, central officers take on divisional director/officer role
+        if (method_exists($this->user, 'isMyDepartmentMode') && $this->user->isMyDepartmentMode()) {
+            if ($desigType === 'lead' || str_contains($desig, 'DIRECTOR') || str_contains($desig, 'MANAGER')) {
+                return $this->roleSlug = 'DIV_DIRECTOR';
+            }
+            return $this->roleSlug = 'DIV_OFFICER';
         }
 
         // Procurement (Evaluated before Finance because Unit 810000 historically carried unt_area='fin')
@@ -335,15 +376,15 @@ class UserAccessContext
             return $this->roleSlug = 'IT_OFFICER';
         }
 
-        // Division in Projects area
-        if ($area === AreaDefinition::PROJECTS) {
-            if ($desigType === 'lead' || str_contains($desig, 'DIRECTOR')) {
+        // Division in Projects area or Physical Administration (functions as division)
+        if ($area === AreaDefinition::PROJECTS || in_array($area, ['adm', 'admin'], true)) {
+            if ($desigType === 'lead' || str_contains($desig, 'DIRECTOR') || str_contains($desig, 'MANAGER')) {
                 return $this->roleSlug = 'DIV_DIRECTOR';
             }
             return $this->roleSlug = 'DIV_OFFICER';
         }
 
-        // Physical Administration / IS / MTSS / General fallback
+        // Physical Administration fallback
         if ($area === AreaDefinition::ADMIN) {
             return $this->roleSlug = 'ADMIN_DEPT';
         }

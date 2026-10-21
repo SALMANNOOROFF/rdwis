@@ -106,22 +106,35 @@
 </style>
 
 <div class="content-wrapper finance-hub px-4">
+    <!-- Top Prominent Shifter Toggle (Purchase Case vs Salary Order Commitments) -->
+    <div class="d-flex justify-content-center mb-4">
+        <div class="p-1 d-inline-flex" style="background: rgba(15, 23, 42, 0.95); border: 2px solid rgba(0, 191, 255, 0.35); border-radius: 14px; box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6); gap: 6px;">
+            <a href="{{ route('fin.payments.index', ['type' => 'purchase', 'tab' => $tab, 'unit_id' => $unitFilter]) }}" 
+               class="btn px-4 py-2 rajdhani font-weight-bold d-flex align-items-center {{ ($typeFilter ?? 'purchase') === 'purchase' ? 'btn-info shadow' : 'text-muted' }}" 
+               style="border-radius: 10px; font-size: 15px; letter-spacing: 0.8px; transition: all 0.25s; {{ ($typeFilter ?? 'purchase') === 'purchase' ? 'box-shadow: 0 0 15px rgba(0, 191, 255, 0.45);' : '' }}">
+                <i class="fas fa-shopping-cart mr-2"></i> PURCHASE CASE COMMITMENTS
+            </a>
+            <a href="{{ route('fin.payments.index', ['type' => 'salary', 'tab' => $tab, 'unit_id' => $unitFilter]) }}" 
+               class="btn px-4 py-2 rajdhani font-weight-bold d-flex align-items-center {{ ($typeFilter ?? 'purchase') === 'salary' ? 'btn-warning text-dark shadow' : 'text-muted' }}" 
+               style="border-radius: 10px; font-size: 15px; letter-spacing: 0.8px; transition: all 0.25s; {{ ($typeFilter ?? 'purchase') === 'salary' ? 'box-shadow: 0 0 15px rgba(234, 179, 8, 0.45); font-weight: 800;' : '' }}">
+                <i class="fas fa-money-check-alt mr-2"></i> SALARY ORDER COMMITMENTS
+            </a>
+        </div>
+    </div>
+
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap" style="gap: 12px;">
         <div>
             <h2 class="text-white rajdhani font-weight-bold mb-1">
                 @if(($typeFilter ?? 'purchase') === 'salary')
                     {{ $tab === 'Closed' ? 'Closed' : 'Open' }} Commitments - Salary Orders
                 @else
-                    Purchase Case Commitments
+                    {{ $tab === 'Closed' ? 'Closed' : 'Open' }} Commitments - Purchase Cases
                 @endif
             </h2>
             <p class="text-muted small mb-0">{{ ($typeFilter ?? 'purchase') === 'salary' ? 'Salary Order Commitments — Disburse monthly salary orders, record payments, and manage salary liabilities.' : 'Record disbursements, monitor remaining liabilities, and manage payments against sanctioned purchase cases.' }}</p>
         </div>
         <div class="d-flex align-items-center" style="gap: 8px;">
-            <a href="{{ route('divhr.salary.requisitions.index') }}" class="btn btn-outline-warning btn-sm rajdhani font-weight-bold">
-                <i class="fas fa-file-invoice-dollar mr-1"></i> Salary Requisitions
-            </a>
             <a href="{{ route('divhr.salary.orders.index') }}" class="btn btn-outline-info btn-sm rajdhani font-weight-bold">
                 <i class="fas fa-receipt mr-1"></i> Salary Orders
             </a>
@@ -206,27 +219,69 @@
             {{-- DEDICATED SALARY COMMITMENTS VIEW (fin_commitments_u_so - Screenshot 5) --}}
             {{-- ============================================================ --}}
             @if($tab === 'Open')
-                <div class="d-flex align-items-center justify-content-end mb-3" style="gap: 10px;">
-                    <label class="text-white rajdhani font-weight-bold mb-0" style="font-size: 14px;">Payment date:</label>
-                    <input type="date" id="salary_payment_date" class="form-control form-control-cyber form-control-sm" style="width: 170px;" value="{{ date('Y-m-d') }}">
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap" style="gap: 12px;">
+                    <div class="d-flex align-items-center" style="gap: 8px;">
+                        <button type="button" id="btn-bulk-pay-salary" class="btn btn-sm btn-success font-weight-bold px-3 shadow-sm rajdhani" style="display: none; font-size: 13.5px;">
+                            <i class="fas fa-check-double mr-1"></i> PAY SELECTED (<span id="selected-salary-count">0</span>)
+                        </button>
+                        <button type="button" id="btn-pay-all-salary" class="btn btn-sm btn-outline-success font-weight-bold px-3 rajdhani" style="font-size: 13.5px;">
+                            <i class="fas fa-money-bill-wave mr-1"></i> PAY ALL
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center" style="gap: 10px;">
+                        <label class="text-white rajdhani font-weight-bold mb-0" style="font-size: 14.5px;">Payment date:</label>
+                        <input type="date" id="salary_payment_date" class="form-control form-control-cyber form-control-sm font-weight-bold text-warning" style="width: 175px; font-size: 14px;" value="{{ date('Y-m-d') }}">
+                    </div>
                 </div>
             @endif
 
             <div class="table-responsive">
-                <table class="table table-cyber mb-0">
+                <table class="table table-cyber mb-0" id="salary-commitments-table">
                     <thead>
                         <tr>
+                            @if($tab === 'Open')
+                                <th style="width: 38px;" class="text-center">
+                                    <input type="checkbox" id="check-all-salary-cmt" title="Select All">
+                                </th>
+                            @endif
                             <th>Order ID</th>
                             <th>Employee ID</th>
                             <th>Employee Name</th>
-                            <th>Project</th>
+                            <th>Project Code</th>
                             <th>Division</th>
-                            <th>Paid From</th>
+                            <th>Paid From (Head)</th>
                             <th>Division</th>
                             <th class="text-right">Salary</th>
                             <th>Month</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Action</th>
+                        </tr>
+                        {{-- Per-Column Filter Row --}}
+                        <tr class="salary-filter-row" style="background: rgba(15, 23, 42, 0.95); border-bottom: 2px solid #334155;">
+                            @if($tab === 'Open')
+                                <th class="p-1 text-center align-middle" style="width: 38px;">
+                                    <button type="button" class="btn btn-xs btn-outline-info btn-clear-salary-filters p-0" title="Reset Filters" style="width: 24px; height: 24px; line-height: 22px;">
+                                        <i class="fas fa-undo-alt" style="font-size: 10px;"></i>
+                                    </button>
+                                </th>
+                            @endif
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 1 : 0 }}" placeholder="Order..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 2 : 1 }}" placeholder="Emp ID..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 3 : 2 }}" placeholder="Name..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 4 : 3 }}" placeholder="Project..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 5 : 4 }}" placeholder="Division..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 6 : 5 }}" placeholder="Head..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 7 : 6 }}" placeholder="Division..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 8 : 7 }}" placeholder="Salary..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 9 : 8 }}" placeholder="Month..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1"><input type="text" class="form-control form-control-cyber form-control-sm salary-col-filter" data-col="{{ $tab === 'Open' ? 10 : 9 }}" placeholder="Status..." style="height: 26px; font-size: 11px; padding: 2px 6px;"></th>
+                            <th class="p-1 text-center align-middle">
+                                @if($tab !== 'Open')
+                                    <button type="button" class="btn btn-xs btn-outline-info btn-clear-salary-filters p-0" title="Reset Filters" style="width: 24px; height: 24px; line-height: 22px;">
+                                        <i class="fas fa-undo-alt" style="font-size: 10px;"></i>
+                                    </button>
+                                @endif
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -234,52 +289,84 @@
                             @php
                                 $salaryAmt = (float)($c->sor_salary ?: abs($c->cmt_amount));
                                 $salMonth = $c->sor_month ? date('M y', strtotime($c->sor_month)) : ($c->cmt_date ? date('M y', strtotime($c->cmt_date)) : '');
+                                $pCode = $c->for_hed_code ?: ($c->eff_hed_code ?: '-');
+                                $pName = ($c->for_hed_name && $c->for_hed_name !== 'xxx' && $c->for_hed_name !== $pCode) ? $c->for_hed_name : null;
+                                $eCode = $c->eff_hed_code ?: ($c->for_hed_code ?: '-');
+                                $eName = ($c->eff_hed_name && $c->eff_hed_name !== 'xxx' && $c->eff_hed_name !== $eCode) ? $c->eff_hed_name : null;
+                                $displayName = $c->emp_clean_name ?: ($c->sor_empnamecomp ?: 'N/A');
                             @endphp
-                            <tr>
+                            <tr class="salary-row">
+                                @if($tab === 'Open')
+                                    <td class="text-center">
+                                        <input type="checkbox" class="salary-cmt-checkbox" value="{{ $c->cmt_id }}">
+                                    </td>
+                                @endif
                                 <td class="rajdhani text-info font-weight-bold">
                                     <a href="{{ route('divhr.salary.orders.show', $c->sor_id ?? $c->cmt_docid) }}" class="text-info text-decoration-none" title="View Order">
                                         #{{ $c->sor_id ?? $c->cmt_docid }}
                                     </a>
                                 </td>
                                 <td class="font-monospace text-muted small">{{ $c->sor_emp_id }}</td>
-                                <td class="font-weight-bold text-white">{{ $c->sor_empnamecomp }}</td>
-                                <td>{{ $c->for_hed_name ?? ($c->eff_hed_name ?? '-') }}</td>
+                                <td class="font-weight-bold text-white">{{ $displayName }}</td>
+                                <td>
+                                    <div>
+                                        <span class="font-weight-bold font-monospace text-info" style="font-size: 13.5px; letter-spacing: 0.5px;">{{ $pCode }}</span>
+                                        @if($pName)
+                                            <div class="small text-muted" style="font-size: 11px;">{{ $pName }}</div>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="text-muted small">{{ $c->for_unt_namesh ?? ($c->for_unt_name ?? '') }}</td>
-                                <td>{{ $c->eff_hed_name ?? '-' }}</td>
+                                <td>
+                                    <div>
+                                        <span class="font-weight-bold font-monospace text-warning" style="font-size: 13.5px; letter-spacing: 0.5px;">{{ $eCode }}</span>
+                                        @if($eName)
+                                            <div class="small text-muted" style="font-size: 11px;">{{ $eName }}</div>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="text-muted small">{{ $c->eff_unt_namesh ?? ($c->eff_unt_name ?? '') }}</td>
                                 <td class="text-right rajdhani font-weight-bold text-warning" style="font-size: 15px;">{{ number_format($salaryAmt) }}</td>
                                 <td class="rajdhani text-white">{{ $salMonth }}</td>
                                 <td class="text-center">
                                     @if($c->cmt_status === 'Awaited')
-                                        <span class="badge badge-warning px-2 py-1 rajdhani">AWAITED</span>
+                                        <span class="badge badge-warning px-2 py-1 rajdhani font-weight-bold">AWAITED</span>
                                     @elseif($c->cmt_status === 'Paid')
-                                        <span class="badge badge-success px-2 py-1 rajdhani">PAID</span>
+                                        <span class="badge badge-success px-2 py-1 rajdhani font-weight-bold">PAID</span>
                                     @else
                                         <span class="badge badge-secondary px-2 py-1 rajdhani">{{ $c->cmt_status }}</span>
                                     @endif
                                 </td>
                                 <td class="text-center">
                                     @if($c->cmt_status === 'Awaited')
-                                        <form method="POST" action="{{ route('fin.commitments.salary.pay', $c->cmt_id) }}" class="d-inline pay-salary-form" onsubmit="return handleSalaryPay(this, '{{ $c->cmt_id }}', '{{ $c->sor_empnamecomp }}', '{{ number_format($salaryAmt) }}');">
+                                        <form method="POST" action="{{ route('fin.commitments.salary.pay', $c->cmt_id) }}" class="d-inline pay-salary-form" onsubmit="return handleSalaryPay(this, '{{ $c->cmt_id }}', '{{ addslashes($displayName) }}', '{{ number_format($salaryAmt) }}');">
                                             @csrf
                                             <input type="hidden" name="trn_date" class="row-trn-date" value="{{ date('Y-m-d') }}">
-                                            <button type="submit" class="btn btn-sm btn-success font-weight-bold px-3 shadow-sm" style="font-size: 12.5px;">
+                                            <button type="submit" class="btn btn-sm btn-success font-weight-bold px-3 shadow-sm rajdhani" style="font-size: 13px;">
                                                 Paid
                                             </button>
                                         </form>
                                     @else
-                                        <span class="text-success small font-weight-bold"><i class="fas fa-check-circle mr-1"></i> Paid</span>
+                                        {{-- Legacy Screenshot 3: Revert icon button --}}
+                                        <button type="button" class="btn btn-xs btn-outline-secondary text-light px-2" title="Payment Disbursed (fin.transactions)" onclick="alert('Commitment #{{ $c->cmt_id }} already settled and recorded in transactions.');">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center py-5 text-muted">
+                                <td colspan="{{ $tab === 'Open' ? 12 : 11 }}" class="text-center py-5 text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 text-secondary d-block"></i>
                                     No salary commitments found for tab <strong>{{ $tab }}</strong>.
                                 </td>
                             </tr>
                         @endforelse
+                        <tr id="salary-no-filter-match" style="display: none;">
+                            <td colspan="{{ $tab === 'Open' ? 12 : 11 }}" class="text-center py-4 text-warning">
+                                <i class="fas fa-filter mr-2"></i> No records match the column filter criteria.
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -384,9 +471,17 @@
         <div class="mt-4 d-flex justify-content-center">
             {{ $commitments->appends(['tab' => $tab, 'type' => $typeFilter ?? 'purchase', 'unit_id' => $unitFilter, 'search' => $search])->links('pagination::bootstrap-4') }}
         </div>
-    </div>
 </div>
+@endsection
 
+{{-- Hidden Form for Bulk Pay Salary Commitments --}}
+<form id="bulkPaySalaryForm" method="POST" action="{{ route('fin.commitments.salary.bulk_pay') }}" style="display: none;">
+    @csrf
+    <input type="hidden" name="trn_date" id="bulk_trn_date" value="{{ date('Y-m-d') }}">
+    <div id="bulkPaySalaryInputs"></div>
+</form>
+
+@push('scripts')
 <script>
 function handleSalaryPay(form, cmtId, empName, salary) {
     var pDate = $('#salary_payment_date').val();
@@ -397,5 +492,130 @@ function handleSalaryPay(form, cmtId, empName, salary) {
     $(form).find('.row-trn-date').val(pDate);
     return confirm('Disburse salary for ' + empName + ' (PKR ' + salary + ') on date ' + pDate + '?');
 }
+
+$(document).ready(function() {
+    function updateSalarySelectState() {
+        var count = $('.salary-cmt-checkbox:checked').length;
+        $('#selected-salary-count').text(count);
+        if (count > 0) {
+            $('#btn-bulk-pay-salary').fadeIn();
+        } else {
+            $('#btn-bulk-pay-salary').hide();
+        }
+    }
+
+    $('#check-all-salary-cmt').on('change', function() {
+        $('.salary-cmt-checkbox').prop('checked', $(this).is(':checked'));
+        updateSalarySelectState();
+    });
+
+    $(document).on('change', '.salary-cmt-checkbox', function() {
+        updateSalarySelectState();
+        if (!$(this).is(':checked')) {
+            $('#check-all-salary-cmt').prop('checked', false);
+        } else if ($('.salary-cmt-checkbox:checked').length === $('.salary-cmt-checkbox').length) {
+            $('#check-all-salary-cmt').prop('checked', true);
+        }
+    });
+
+    $('#btn-bulk-pay-salary').on('click', function() {
+        var selected = [];
+        $('.salary-cmt-checkbox:checked').each(function() {
+            selected.push($(this).val());
+        });
+        if (selected.length === 0) return;
+
+        var pDate = $('#salary_payment_date').val();
+        if (!pDate) {
+            alert('Please select a payment date first.');
+            return;
+        }
+
+        if (!confirm('Disburse payment for ' + selected.length + ' selected salary order(s) on ' + pDate + '?')) {
+            return;
+        }
+
+        $('#bulk_trn_date').val(pDate);
+        var $cont = $('#bulkPaySalaryInputs');
+        $cont.empty();
+        selected.forEach(function(id) {
+            $cont.append('<input type="hidden" name="cmt_ids[]" value="' + id + '">');
+        });
+        $('#bulkPaySalaryForm').submit();
+    });
+
+    $('#btn-pay-all-salary').on('click', function() {
+        var $boxes = $('.salary-cmt-checkbox');
+        if ($boxes.length === 0) {
+            alert('No open salary commitments available to pay.');
+            return;
+        }
+        var pDate = $('#salary_payment_date').val();
+        if (!pDate) {
+            alert('Please select a payment date first.');
+            return;
+        }
+        if (!confirm('Are you sure you want to disburse payment for ALL ' + $boxes.length + ' open salary commitment(s) on ' + pDate + '?')) {
+            return;
+        }
+        $boxes.prop('checked', true);
+        updateSalarySelectState();
+        $('#btn-bulk-pay-salary').trigger('click');
+    });
+
+    // ── Per-Column Filtering for Salary Commitments ────────────────────────
+    function applySalaryFilters() {
+        var activeFilters = [];
+        $('.salary-col-filter').each(function() {
+            var val = $.trim($(this).val()).toLowerCase();
+            if (val !== '') {
+                activeFilters.push({
+                    col: parseInt($(this).data('col'), 10),
+                    val: val
+                });
+            }
+        });
+
+        var visibleCount = 0;
+        $('#salary-commitments-table tbody tr.salary-row').each(function() {
+            var $row = $(this);
+            var matches = true;
+
+            for (var i = 0; i < activeFilters.length; i++) {
+                var f = activeFilters[i];
+                var cellText = $.trim($row.children('td').eq(f.col).text()).toLowerCase();
+                if (cellText.indexOf(f.val) === -1) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                $row.show();
+                visibleCount++;
+            } else {
+                $row.hide();
+                $row.find('.salary-cmt-checkbox').prop('checked', false);
+            }
+        });
+
+        if (activeFilters.length > 0 && visibleCount === 0) {
+            $('#salary-no-filter-match').show();
+        } else {
+            $('#salary-no-filter-match').hide();
+        }
+
+        updateSalarySelectState();
+    }
+
+    $(document).on('input', '.salary-col-filter', function() {
+        applySalaryFilters();
+    });
+
+    $(document).on('click', '.btn-clear-salary-filters', function() {
+        $('.salary-col-filter').val('');
+        applySalaryFilters();
+    });
+});
 </script>
-@endsection
+@endpush

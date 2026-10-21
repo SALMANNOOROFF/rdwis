@@ -26,7 +26,8 @@ class FinanceOfProjectController extends Controller
         if (!$user) return redirect()->route('login');
 
         $context = \App\Services\Auth\UserAccessContext::forUser($user);
-        $isGlobalViewer = $context->isCommand() || $context->isSuperAdmin() || $user->isSORD() || strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'fin';
+        $isCentralMyDept = method_exists($user, 'isCentralDepartment') && $user->isCentralDepartment() && $user->isMyDepartmentMode();
+        $isGlobalViewer = ($context->isCommand() || $context->isSuperAdmin() || $user->isSORD() || strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'fin') && !$isCentralMyDept;
 
         // Query heads joined with projects and units
         $headsQuery = DB::table('cen.heads as h')
@@ -44,11 +45,21 @@ class FinanceOfProjectController extends Controller
                 'p.prj_aprvdt'
             );
 
-        // Apply dynamic data scope strictly to user domain
-        app(\App\Services\Auth\DataScopeService::class)->applyScope($headsQuery, $user, 'h.hed_unt_id');
+        if ($isCentralMyDept) {
+            // In My Department mode, central departments see CSRF funding heads
+            $headsQuery->whereExists(function($sq) {
+                $sq->select(DB::raw(1))
+                   ->from('fin.sharesalloc as s')
+                   ->whereColumn('s.sha_hed_id', 'h.hed_id')
+                   ->where('s.sha_cf', '>', 0);
+            });
+        } else {
+            // Apply dynamic data scope strictly to user domain
+            app(\App\Services\Auth\DataScopeService::class)->applyScope($headsQuery, $user, 'h.hed_unt_id');
 
-        if ($request->filled('division_id') && $request->division_id !== 'all') {
-            $headsQuery->where('h.hed_unt_id', $request->division_id);
+            if ($request->filled('division_id') && $request->division_id !== 'all') {
+                $headsQuery->where('h.hed_unt_id', $request->division_id);
+            }
         }
 
         $heads = $headsQuery->orderBy('h.hed_code')->get();
@@ -64,14 +75,15 @@ class FinanceOfProjectController extends Controller
             ->select('u.unt_id', 'u.unt_name', 'u.unt_namesh')
             ->orderBy('u.unt_name');
 
-        if (!$isGlobalViewer) {
+        if (!$isGlobalViewer && !$isCentralMyDept) {
             app(\App\Services\Auth\DataScopeService::class)->applyScope($divisionsQuery, $user, 'u.unt_id');
         }
         $divisions = $divisionsQuery->get();
 
         // Determine selected head and active tab
         $selectedHeadId = $request->query('head_id');
-        $activeTab = $request->query('tab', 'status');
+        $defaultTab = $isCentralMyDept ? 'csrf' : 'status';
+        $activeTab = $request->query('tab', $defaultTab);
 
         if (!$selectedHeadId && $heads->isNotEmpty() && $activeTab !== 'overview') {
             $selectedHeadId = $heads->first()->hed_id;

@@ -583,176 +583,90 @@
                             </h5>
                             
                             <div class="row">
-                                {{-- EQUIPMENT --}}
-                                <div class="col-md-4 mb-3 mb-md-0">
-                                    <div class="subhead-gauge-box h-100" style="padding: 16px 10px;">
-                                        <div class="d-flex justify-content-center mb-2">
-                                            <svg width="70" height="70" viewBox="0 0 54 54" style="transform: rotate(-90deg);">
-                                                <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
-                                                <circle cx="27" cy="27" r="22" stroke="#16a34a" stroke-width="5" fill="none"
-                                                        stroke-dasharray="138.23" stroke-dashoffset="{{ 138.23 * (1 - ($finData['equip_pct'] / 100)) }}"
-                                                        stroke-linecap="round" />
-                                                <text x="27" y="-23" text-anchor="middle" fill="#16a34a" font-size="12" font-weight="bold" font-family="'Rajdhani', sans-serif" style="transform: rotate(90deg);">{{ $finData['equip_pct'] }}%</text>
-                                            </svg>
-                                        </div>
-                                        <div class="font-weight-bold text-dark rajdhani mb-2" style="font-size: 1.15rem; letter-spacing: 0.5px;">EQUIPMENT</div>
+                                @forelse($subheads as $sh)
+                                    @php
+                                        $shName = is_array($sh) ? ($sh['name'] ?? 'N/A') : ($sh->name ?? 'N/A');
+                                        $shAlloc = (float)(is_array($sh) ? ($sh['allocation'] ?? 0) : ($sh->allocation ?? 0));
+                                        $shExp = (float)(is_array($sh) ? ($sh['expenditure'] ?? 0) : ($sh->expenditure ?? 0));
+                                        $shCmt = (float)(is_array($sh) ? ($sh['commitments'] ?? 0) : ($sh->commitments ?? 0));
+                                        $shInProcess = (float)(is_array($sh) ? ($sh['in_process'] ?? 0) : ($sh->in_process ?? 0));
+                                        $shRemaining = (float)(is_array($sh) ? ($sh['can_be_spent'] ?? ($sh['remaining'] ?? 0)) : ($sh->can_be_spent ?? ($sh->remaining ?? 0)));
+                                        $shPct = $shAlloc > 0 ? min(100, round(($shExp / $shAlloc) * 100)) : 0;
 
-                                        {{-- CLEAN TEXT-FORM BREAKDOWN --}}
-                                        <div class="pt-2 border-top text-left" style="border-color: #e2e8f0 !important; font-size: 11.5px; line-height: 1.8;">
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Alloc:</span>
-                                                <span class="font-weight-bold text-dark font-mono" style="white-space: nowrap;">{{ number_format($finData['equip_alloc'] ?? 0) }}</span>
+                                        // Theme color per subhead type
+                                        $color = '#16a34a';
+                                        if (stripos($shName, 'hr') !== false || stripos($shName, 'staff') !== false || stripos($shName, 'personnel') !== false) {
+                                            $color = '#0284c7';
+                                        } elseif (stripos($shName, 'misc') !== false) {
+                                            $color = '#d97706';
+                                        } elseif (stripos($shName, 'construct') !== false) {
+                                            $color = '#8b5cf6';
+                                        } elseif (stripos($shName, 'vrc') !== false) {
+                                            $color = '#ec4899';
+                                        }
+
+                                        $colClass = count($subheads) <= 2 ? 'col-md-6' : (count($subheads) == 3 ? 'col-md-4' : 'col-md-4 col-sm-6 mb-3');
+                                    @endphp
+                                    <div class="{{ $colClass }} mb-3 mb-md-0">
+                                        <div class="subhead-gauge-box h-100" style="padding: 16px 10px;">
+                                            <div class="d-flex justify-content-center mb-2">
+                                                <svg width="70" height="70" viewBox="0 0 54 54" style="transform: rotate(-90deg);">
+                                                    <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
+                                                    <circle cx="27" cy="27" r="22" stroke="{{ $color }}" stroke-width="5" fill="none"
+                                                            stroke-dasharray="138.23" stroke-dashoffset="{{ 138.23 * (1 - ($shPct / 100)) }}"
+                                                            stroke-linecap="round" />
+                                                    <text x="27" y="-23" text-anchor="middle" fill="{{ $color }}" font-size="12" font-weight="bold" font-family="'Rajdhani', sans-serif" style="transform: rotate(90deg);">{{ $shPct }}%</text>
+                                                </svg>
                                             </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['equip'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'Equipment']) }}" target="_blank" class="btn-drill-link btn-drill-red ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Equipment Expenditure"><i class="fas fa-search"></i></a>
-                                                    @endif
+                                            <div class="font-weight-bold text-dark rajdhani mb-2 text-uppercase" style="font-size: 1.15rem; letter-spacing: 0.5px;">{{ $shName }}</div>
+
+                                            {{-- CLEAN TEXT-FORM BREAKDOWN --}}
+                                            <div class="pt-2 border-top text-left" style="border-color: #e2e8f0 !important; font-size: 11.5px; line-height: 1.8;">
+                                                <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                    <span class="text-muted font-weight-bold" style="white-space: nowrap;">Alloc:</span>
+                                                    <span class="font-weight-bold text-dark font-mono" style="white-space: nowrap;">{{ number_format($shAlloc) }}</span>
                                                 </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['equip_cmt'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'commitments', 'Equipment']) }}" target="_blank" class="btn-drill-link btn-drill-amber ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Equipment Commitments"><i class="fas fa-search"></i></a>
-                                                    @endif
+                                                <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                    <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
+                                                    <div class="d-inline-flex align-items-center">
+                                                        <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($shExp) }}</span>
+                                                        @if($headRecord)
+                                                        <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', $shName]) }}" target="_blank" class="btn-drill-link btn-drill-red ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View {{ $shName }} Expenditure"><i class="fas fa-search"></i></a>
+                                                        @endif
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['equip_ipc'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'in-process', 'Equipment']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Equipment In Process"><i class="fas fa-search"></i></a>
-                                                    @endif
+                                                <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                    <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
+                                                    <div class="d-inline-flex align-items-center">
+                                                        <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($shCmt) }}</span>
+                                                        @if($headRecord)
+                                                        <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'commitments', $shName]) }}" target="_blank" class="btn-drill-link btn-drill-amber ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View {{ $shName }} Commitments"><i class="fas fa-search"></i></a>
+                                                        @endif
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
-                                                <span class="font-weight-bold font-mono {{ ($finData['equip_remaining'] ?? 0) >= 0 ? 'text-success' : 'text-danger' }}" style="white-space: nowrap;">
-                                                    {{ number_format($finData['equip_remaining'] ?? 0) }}
-                                                </span>
+                                                <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
+                                                    <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
+                                                    <div class="d-inline-flex align-items-center">
+                                                        <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($shInProcess) }}</span>
+                                                        @if($headRecord)
+                                                        <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'in-process', $shName]) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View {{ $shName }} In Process"><i class="fas fa-search"></i></a>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
+                                                    <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
+                                                    <span class="font-weight-bold font-mono {{ $shRemaining >= 0 ? 'text-success' : 'text-danger' }}" style="white-space: nowrap;">
+                                                        {{ number_format($shRemaining) }}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                {{-- HR --}}
-                                <div class="col-md-4 mb-3 mb-md-0">
-                                    <div class="subhead-gauge-box h-100" style="padding: 16px 10px;">
-                                        <div class="d-flex justify-content-center mb-2">
-                                            <svg width="70" height="70" viewBox="0 0 54 54" style="transform: rotate(-90deg);">
-                                                <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
-                                                <circle cx="27" cy="27" r="22" stroke="#0284c7" stroke-width="5" fill="none"
-                                                        stroke-dasharray="138.23" stroke-dashoffset="{{ 138.23 * (1 - ($finData['hr_pct'] / 100)) }}"
-                                                        stroke-linecap="round" />
-                                                <text x="27" y="-23" text-anchor="middle" fill="#0284c7" font-size="12" font-weight="bold" font-family="'Rajdhani', sans-serif" style="transform: rotate(90deg);">{{ $finData['hr_pct'] }}%</text>
-                                            </svg>
-                                        </div>
-                                        <div class="font-weight-bold text-dark rajdhani mb-2" style="font-size: 1.15rem; letter-spacing: 0.5px;">HR / STAFF</div>
-
-                                        {{-- CLEAN TEXT-FORM BREAKDOWN --}}
-                                        <div class="pt-2 border-top text-left" style="border-color: #e2e8f0 !important; font-size: 11.5px; line-height: 1.8;">
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Alloc:</span>
-                                                <span class="font-weight-bold text-dark font-mono" style="white-space: nowrap;">{{ number_format($finData['hr_alloc'] ?? 0) }}</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['hr'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'HR']) }}" target="_blank" class="btn-drill-link btn-drill-red ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View HR Expenditure"><i class="fas fa-search"></i></a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['hr_cmt'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'commitments', 'HR']) }}" target="_blank" class="btn-drill-link btn-drill-amber ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View HR Commitments"><i class="fas fa-search"></i></a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['hr_ipc'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'in-process', 'HR']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View HR In Process"><i class="fas fa-search"></i></a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
-                                                <span class="font-weight-bold font-mono {{ ($finData['hr_remaining'] ?? 0) >= 0 ? 'text-success' : 'text-danger' }}" style="white-space: nowrap;">
-                                                    {{ number_format($finData['hr_remaining'] ?? 0) }}
-                                                </span>
-                                            </div>
-                                        </div>
+                                @empty
+                                    <div class="col-12 text-center text-muted py-3">
+                                        <i class="fas fa-info-circle mr-1"></i> No subhead breakdown configured for this project.
                                     </div>
-                                </div>
-
-                                {{-- MISC --}}
-                                <div class="col-md-4">
-                                    <div class="subhead-gauge-box h-100" style="padding: 16px 10px;">
-                                        <div class="d-flex justify-content-center mb-2">
-                                            <svg width="70" height="70" viewBox="0 0 54 54" style="transform: rotate(-90deg);">
-                                                <circle cx="27" cy="27" r="22" stroke="#e2e8f0" stroke-width="5" fill="none" />
-                                                <circle cx="27" cy="27" r="22" stroke="#d97706" stroke-width="5" fill="none"
-                                                        stroke-dasharray="138.23" stroke-dashoffset="{{ 138.23 * (1 - ($finData['misc_pct'] / 100)) }}"
-                                                        stroke-linecap="round" />
-                                                <text x="27" y="-23" text-anchor="middle" fill="#d97706" font-size="12" font-weight="bold" font-family="'Rajdhani', sans-serif" style="transform: rotate(90deg);">{{ $finData['misc_pct'] }}%</text>
-                                            </svg>
-                                        </div>
-                                        <div class="font-weight-bold text-dark rajdhani mb-2" style="font-size: 1.15rem; letter-spacing: 0.5px;">MISC</div>
-
-                                        {{-- CLEAN TEXT-FORM BREAKDOWN --}}
-                                        <div class="pt-2 border-top text-left" style="border-color: #e2e8f0 !important; font-size: 11.5px; line-height: 1.8;">
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Alloc:</span>
-                                                <span class="font-weight-bold text-dark font-mono" style="white-space: nowrap;">{{ number_format($finData['misc_alloc'] ?? 0) }}</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Spent:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold text-danger font-mono" style="white-space: nowrap;">{{ number_format($finData['misc'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'expenditure', 'Misc']) }}" target="_blank" class="btn-drill-link btn-drill-red ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Misc Expenditure"><i class="fas fa-search"></i></a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Commit:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold font-mono" style="color: #d97706; white-space: nowrap;">{{ number_format($finData['misc_cmt'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'commitments', 'Misc']) }}" target="_blank" class="btn-drill-link btn-drill-amber ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Misc Commitments"><i class="fas fa-search"></i></a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center" style="gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">In Process:</span>
-                                                <div class="d-inline-flex align-items-center">
-                                                    <span class="font-weight-bold text-secondary font-mono" style="white-space: nowrap;">{{ number_format($finData['misc_ipc'] ?? 0) }}</span>
-                                                    @if($headRecord)
-                                                    <a href="{{ route('division.finance-of-project.drilldown', [$headRecord->hed_id, 'subhead', 'in-process', 'Misc']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="width: 17px; height: 17px; font-size: 0.6rem;" title="View Misc In Process"><i class="fas fa-search"></i></a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center border-top mt-1 pt-1" style="border-color: #e2e8f0 !important; gap: 6px;">
-                                                <span class="text-muted font-weight-bold" style="white-space: nowrap;">Remaining:</span>
-                                                <span class="font-weight-bold font-mono {{ ($finData['misc_remaining'] ?? 0) >= 0 ? 'text-success' : 'text-danger' }}" style="white-space: nowrap;">
-                                                    {{ number_format($finData['misc_remaining'] ?? 0) }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                @endforelse
                             </div>
                         </div>
 
@@ -1279,209 +1193,370 @@
             </div>
 
             {{-- ======================================================== --}}
-            {{-- TAB 3: MILESTONES & FUNDINGS MATRIX --}}
+            {{-- TAB 3: MILESTONES & FUNDINGS (UNIFIED TOGGLE VIEW) --}}
             {{-- ======================================================== --}}
             <div class="tab-pane fade" id="tab-milestones" role="tabpanel">
-                
-                {{-- 1. FUNDINGS MATRIX TABLE MATCHING LEGACY IMAGE 2 --}}
-                <div class="fin-table-card mb-4">
+
+                @php
+                    $grossAlloc = (float)($head->allocation ?? 0);
+                    $rdwShareRatio = $grossAlloc > 0 ? ((float)($head->rdw_share ?? 0) / $grossAlloc) : 0;
+                    $mtssShareRatio = $grossAlloc > 0 ? ((float)($head->mtss_share ?? 0) / $grossAlloc) : 0;
+                    $csrfShareRatio = $grossAlloc > 0 ? ((float)($head->csrf_share ?? 0) / $grossAlloc) : 0;
+
+                    $totMilestoneAmt = 0;
+                    $totRdwShare = 0;
+                    $totMtssShare = 0;
+                    $totCsrfShare = 0;
+
+                    foreach($milestones as $m) {
+                        $mCost = (float)($m->mct_cost ?: $m->msn_cost);
+                        $totMilestoneAmt += $mCost;
+                        $totRdwShare += ($mCost * $rdwShareRatio);
+                        $totMtssShare += ($mCost * $mtssShareRatio);
+                        $totCsrfShare += ($mCost * $csrfShareRatio);
+                    }
+
+                    // Calculate received totals from installments
+                    $totReceivedInflow = 0;
+                    $totReceivedMtss = 0;
+                    $totReceivedRdw = 0;
+                    $totReceivedCsrf = 0;
+                    $totReceivedPrj = 0;
+
+                    foreach($installments as $ins) {
+                        $insInward = (float)($ins->inward ?: (($ins->shi_pcc ?? 0) + ($ins->shi_cf ?? 0) + ($ins->mtss_share ?? 0)));
+                        $insMtss = (float)($ins->mtss_share ?? 0);
+                        $insRdw = $insInward - $insMtss;
+                        $insCf = (float)($ins->shi_cf ?? 0);
+                        $insPrj = $insRdw - $insCf;
+
+                        $totReceivedInflow += $insInward;
+                        $totReceivedMtss += $insMtss;
+                        $totReceivedRdw += $insRdw;
+                        $totReceivedCsrf += $insCf;
+                        $totReceivedPrj += $insPrj;
+                    }
+
+                    if ($totReceivedInflow == 0 && ($head->received ?? 0) > 0) {
+                        $totReceivedInflow = (float)($head->received ?? 0);
+                        $totReceivedMtss = (float)($head->received ?? 0) - (float)($head->acc_received ?? 0);
+                        $totReceivedRdw = (float)($head->acc_received ?? 0);
+                        $totReceivedCsrf = (float)($head->cf_received ?? 0);
+                        $totReceivedPrj = (float)($head->pcc_received ?? 0);
+                    }
+                @endphp
+
+                <div class="fin-table-card mb-4 shadow-sm" style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                    {{-- CARD HEADER WITH TOGGLE BUTTON --}}
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: #f8fafc; border-color: #e2e8f0 !important;">
-                        <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
-                            <i class="fas fa-money-check-alt text-success mr-2"></i> FUNDINGS MATRIX (ALLOCATION & INFLOW BY SHARE)
-                        </h5>
-                        <span class="badge badge-success px-3 py-1 font-weight-bold rajdhani" style="font-size: 0.85rem;">
-                            Multi-Scope Funding
-                        </span>
+                        <div class="d-flex align-items-center">
+                            <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px; font-size: 1.25rem;">
+                                <i id="fundingHeaderIcon" class="fas fa-money-check-alt text-success mr-2"></i>
+                                <span id="fundingHeaderTitle">FUNDINGS</span>
+                            </h5>
+                            <span id="fundingHeaderBadge" class="badge badge-success px-2.5 py-1 font-weight-bold rajdhani ml-2.5" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                                Tranches & Inflow
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <button type="button" id="btnToggleFundingView" onclick="toggleFundingViewMode()" class="btn btn-outline-primary font-weight-bold px-3.5 py-1.5 rounded-pill shadow-sm" style="font-size: 0.9rem; transition: all 0.2s ease;">
+                                <i id="toggleBtnIcon" class="fas fa-tasks mr-1.5"></i>
+                                <span id="toggleBtnLabel">Milestone Costs</span>
+                            </button>
+                            <a href="{{ route('projects.print_fundings_milestones', $project->prj_id) }}" target="_blank" class="btn btn-outline-dark font-weight-bold px-3 py-1.5 rounded-pill shadow-sm ml-2" style="font-size: 0.9rem;" title="Print Fundings & Milestones (Landscape)">
+                                <i class="fas fa-print mr-1"></i> Print
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered fundings-matrix-table m-0">
-                            <thead>
-                                <tr>
-                                    <th width="15%" class="text-left">CATEGORY</th>
-                                    <th width="17%">TOTAL ALLOCATION</th>
-                                    <th width="17%" style="color: #dc2626;">MTSS SHARE</th>
-                                    <th width="17%" style="color: #0284c7;">RDW SHARE</th>
-                                    <th width="17%" style="color: #d97706;">CSRF SHARE</th>
-                                    <th width="17%" style="color: #16a34a;">PROJECT SHARE</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-left font-weight-bold bg-light">Allocation</td>
-                                    <td class="font-weight-bold text-dark" style="background: #f1f5f9;">Rs. {{ number_format($head->allocation ?? 0) }}</td>
-                                    <td class="text-danger font-weight-bold">Rs. {{ number_format($head->mtss_share ?? 0) }}</td>
-                                    <td class="font-weight-bold" style="color: #0284c7;">Rs. {{ number_format($head->rdw_share ?? 0) }}</td>
-                                    <td class="font-weight-bold" style="color: #d97706;">Rs. {{ number_format($head->csrf_share ?? 0) }}</td>
-                                    <td class="font-weight-bold" style="color: #16a34a;">Rs. {{ number_format($head->prj_share ?? 0) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-left font-weight-bold bg-light">Received (Inflow)</td>
-                                    <td class="font-weight-bold text-dark">Rs. {{ number_format($head->received ?? 0) }}</td>
-                                    <td class="text-muted">Rs. 0</td>
-                                    <td class="font-weight-bold" style="color: #0284c7;">Rs. {{ number_format($head->acc_received ?? 0) }}</td>
-                                    <td class="font-weight-bold" style="color: #d97706;">Rs. {{ number_format($head->cf_received ?? 0) }}</td>
-                                    <td class="font-weight-bold" style="color: #16a34a;">Rs. {{ number_format($head->pcc_received ?? 0) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {{-- 2. MILESTONES TABLE --}}
-                <div class="fin-table-card mb-4">
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: #f8fafc; border-color: #e2e8f0 !important;">
-                        <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
-                            <i class="fas fa-tasks text-primary mr-2"></i> PROJECT MILESTONES & COST ALLOCATION
-                        </h5>
-                        <span class="badge badge-info px-3 py-1 font-weight-bold rajdhani" style="font-size: 0.85rem;">
-                            {{ count($milestones) }} Total Milestones
-                        </span>
-                    </div>
-
-                    @php
-                        $grossAlloc = (float)($head->allocation ?? 0);
-                        $rdwShareRatio = $grossAlloc > 0 ? ((float)($head->rdw_share ?? 0) / $grossAlloc) : 0;
-                        $mtssShareRatio = $grossAlloc > 0 ? ((float)($head->mtss_share ?? 0) / $grossAlloc) : 0;
-                        $csrfShareRatio = $grossAlloc > 0 ? ((float)($head->csrf_share ?? 0) / $grossAlloc) : 0;
-
-                        $totMilestoneAmt = 0;
-                        $totRdwShare = 0;
-                        $totMtssShare = 0;
-                        $totCsrfShare = 0;
-                    @endphp
-                    <div class="table-responsive">
-                        <table class="table fin-table w-100 m-0">
-                            <thead>
-                                <tr>
-                                    <th class="pl-3" style="width: 7%;">MS #</th>
-                                    <th style="width: 27%;">DESCRIPTION</th>
-                                    <th class="text-right" style="width: 14%; color: #0284c7;">MILESTONE AMOUNT</th>
-                                    <th class="text-right" style="width: 12%; color: #16a34a;">RDW SHARE</th>
-                                    <th class="text-right" style="width: 11%; color: #dc2626;">MTSS SHARE</th>
-                                    <th class="text-right" style="width: 11%; color: #d97706;">CSRF SHARE</th>
-                                    <th style="width: 9%;">TARGET DATE</th>
-                                    <th class="pr-3 text-center" style="width: 9%;">STATUS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($milestones as $m)
-                                    @php
-                                        $mCost = (float)($m->mct_cost ?: $m->msn_cost);
-                                        $mRdw = $mCost * $rdwShareRatio;
-                                        $mMtss = $mCost * $mtssShareRatio;
-                                        $mCsrf = $mCost * $csrfShareRatio;
-
-                                        $totMilestoneAmt += $mCost;
-                                        $totRdwShare += $mRdw;
-                                        $totMtssShare += $mMtss;
-                                        $totCsrfShare += $mCsrf;
-                                    @endphp
-                                    <tr>
-                                        <td class="pl-3 font-weight-bold text-primary">MS-{{ $loop->iteration }}</td>
-                                        <td class="font-weight-bold text-dark">{{ $m->msn_desc }}</td>
-                                        <td class="text-right font-weight-bold text-primary" style="font-size: 1.02rem;">
-                                            Rs. {{ number_format($mCost, 2) }}
+                    {{-- ======================================================== --}}
+                    {{-- 1. FUNDINGS VIEW (DEFAULT - EXACT MATCH WITH USER SCREENSHOT) --}}
+                    {{-- ======================================================== --}}
+                    <div id="viewFundingsContainer">
+                        
+                        {{-- SUMMARY ROWS (ALLOCATION & RECEIVED) --}}
+                        <div class="table-responsive border-bottom" style="background: #ffffff;">
+                            <table class="table fundings-summary-table m-0" style="border-collapse: separate; font-size: 0.95rem;">
+                                <thead>
+                                    <tr style="background: #e2e8f0; color: #475569; font-size: 0.85rem; letter-spacing: 0.5px;">
+                                        <th style="width: 11%; padding: 9px 14px;" class="text-left font-weight-bold"></th>
+                                        <th style="width: 12%; padding: 9px 14px;" class="text-right font-weight-bold text-dark">Total</th>
+                                        <th style="width: 12%; padding: 9px 14px; color: #dc2626;" class="text-right font-weight-bold">MTSS Share</th>
+                                        <th style="width: 12%; padding: 9px 14px; color: #0284c7;" class="text-right font-weight-bold">RDW Share</th>
+                                        <th style="width: 11%; padding: 9px 14px; color: #d97706;" class="text-right font-weight-bold">CSRF Share</th>
+                                        <th style="width: 12%; padding: 9px 14px; color: #16a34a;" class="text-right font-weight-bold">Project Share</th>
+                                        <th style="width: 7%; padding: 9px 10px;" class="text-center font-weight-bold">Milestone</th>
+                                        <th style="width: 13%; padding: 9px 14px;" class="text-right font-weight-bold text-dark">Cost</th>
+                                        <th style="width: 10%; padding: 9px 14px;" class="text-center font-weight-bold">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{-- ROW 1: ALLOCATION --}}
+                                    <tr style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
+                                        <td class="font-weight-bold text-dark text-left pl-3" style="font-size: 1rem;">Allocation</td>
+                                        <td class="text-right font-weight-bold text-dark font-mono" style="font-size: 1rem;">{{ number_format($head->allocation ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #dc2626;">{{ number_format($head->mtss_share ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #0284c7;">{{ number_format($head->rdw_share ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #d97706;">{{ number_format($head->csrf_share ?? 0) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #16a34a;">{{ number_format($head->prj_share ?? 0) }}</td>
+                                        <td class="text-center text-muted font-weight-bold">—</td>
+                                        <td class="text-right">
+                                            <span class="badge px-3 py-1.5 text-white font-weight-bold font-mono shadow-sm" style="background: #be123c; font-size: 0.95rem; border-radius: 4px; letter-spacing: 0.5px;">
+                                                {{ number_format($totMilestoneAmt) }}
+                                            </span>
                                         </td>
-                                        <td class="text-right font-weight-bold text-success">
-                                            Rs. {{ number_format($mRdw, 2) }}
-                                        </td>
-                                        <td class="text-right font-weight-bold text-danger">
-                                            Rs. {{ number_format($mMtss, 2) }}
-                                        </td>
-                                        <td class="text-right font-weight-bold" style="color: #d97706;">
-                                            Rs. {{ number_format($mCsrf, 2) }}
-                                        </td>
-                                        <td class="text-dark font-weight-bold small">
-                                            {{ $m->msn_targetdt ? \Carbon\Carbon::parse($m->msn_targetdt)->format('d M Y') : 'N/A' }}
-                                        </td>
-                                        <td class="pr-3 text-center">
-                                            @if(strtolower(trim($m->msn_status ?? '')) === 'achieved' || strtolower(trim($m->msn_status ?? '')) === 'completed')
-                                                <span class="badge badge-success px-2.5 py-1 font-weight-bold">COMPLETED</span>
-                                            @elseif(strtolower(trim($m->msn_status ?? '')) === 'in progress')
-                                                <span class="badge badge-warning px-2.5 py-1 font-weight-bold text-dark">IN PROGRESS</span>
-                                            @else
-                                                <span class="badge badge-secondary px-2.5 py-1 font-weight-bold">{{ strtoupper($m->msn_status ?: 'PENDING') }}</span>
-                                            @endif
+                                        <td class="text-center">
+                                            <span class="badge badge-light border text-muted px-2.5 py-1 font-weight-bold" title="Total Milestones">{{ count($milestones) }}</span>
                                         </td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted py-4 font-weight-bold">No milestones recorded for this project.</td>
+                                    {{-- ROW 2: RECEIVED --}}
+                                    <tr style="background: #f8fafc;">
+                                        <td class="font-weight-bold text-dark text-left pl-3" style="font-size: 1rem;">Received</td>
+                                        <td class="text-right font-weight-bold text-dark font-mono" style="font-size: 1rem;">{{ number_format($totReceivedInflow) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #dc2626;">{{ number_format($totReceivedMtss) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #0284c7;">{{ number_format($totReceivedRdw) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #d97706;">{{ number_format($totReceivedCsrf) }}</td>
+                                        <td class="text-right font-weight-bold font-mono" style="color: #16a34a;">{{ number_format($totReceivedPrj) }}</td>
+                                        <td class="text-center text-muted">—</td>
+                                        <td class="text-right text-muted font-mono">—</td>
+                                        <td class="text-center text-muted">—</td>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                            @if(count($milestones) > 0)
-                            <tfoot style="background: #f8fafc; border-top: 2px solid #cbd5e1;">
-                                <tr class="font-weight-bold">
-                                    <td colspan="2" class="pl-3 text-dark text-uppercase rajdhani" style="font-size: 1rem; letter-spacing: 0.5px;">TOTAL MILESTONES COST</td>
-                                    <td class="text-right text-primary" style="font-size: 1.05rem;">Rs. {{ number_format($totMilestoneAmt, 2) }}</td>
-                                    <td class="text-right text-success" style="font-size: 1.05rem;">Rs. {{ number_format($totRdwShare, 2) }}</td>
-                                    <td class="text-right text-danger" style="font-size: 1.05rem;">Rs. {{ number_format($totMtssShare, 2) }}</td>
-                                    <td class="text-right" style="color: #d97706; font-size: 1.05rem;">Rs. {{ number_format($totCsrfShare, 2) }}</td>
-                                    <td colspan="2"></td>
-                                </tr>
-                            </tfoot>
-                            @endif
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- TRANCHES & INSTALLMENTS TABLE --}}
+                        <div class="table-responsive p-3" style="background: #f8fafc;">
+                            <div class="border rounded shadow-xs" style="background: #ffffff; overflow: hidden; border-color: #cbd5e1 !important;">
+                                <table class="table fin-table w-100 m-0" style="font-size: 0.92rem;">
+                                    <thead>
+                                        <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                                            <th style="width: 11%;" class="pl-3 font-weight-bold text-dark">DATE</th>
+                                            <th style="width: 12%;" class="text-right font-weight-bold text-dark">TOTAL</th>
+                                            <th style="width: 12%; color: #dc2626;" class="text-right font-weight-bold">MTSS SHARE</th>
+                                            <th style="width: 12%; color: #0284c7;" class="text-right font-weight-bold">RDW SHARE</th>
+                                            <th style="width: 11%; color: #d97706;" class="text-right font-weight-bold">CSRF SHARE</th>
+                                            <th style="width: 12%; color: #16a34a;" class="text-right font-weight-bold">PROJECT SHARE</th>
+                                            <th style="width: 7%;" class="text-center font-weight-bold text-dark">MILESTONE</th>
+                                            <th style="width: 13%;" class="text-right font-weight-bold text-dark">COST</th>
+                                            <th style="width: 10%;" class="text-center font-weight-bold text-dark">STATUS</th>
+                                            <th style="width: 7%;" class="pr-3 text-right font-weight-bold text-muted">REF #</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($installments as $ins)
+                                            @php
+                                                $insInward = (float)($ins->inward ?: (($ins->shi_pcc ?? 0) + ($ins->shi_cf ?? 0) + ($ins->mtss_share ?? 0)));
+                                                $insMtss = (float)($ins->mtss_share ?? 0);
+                                                $insRdw = $insInward - $insMtss;
+                                                $insCf = (float)($ins->shi_cf ?? 0);
+                                                $insPrj = $insRdw - $insCf;
+                                                $dateFormatted = !empty($ins->trn_date) ? \Carbon\Carbon::parse($ins->trn_date)->format('d M y') : 'N/A';
+                                                $msnCostVal = (float)($ins->mct_cost ?? 0);
+                                                $msnStatusStr = trim($ins->msn_status ?? '');
+                                            @endphp
+                                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                                <td class="pl-3 font-weight-bold text-dark font-mono">
+                                                    {{ $dateFormatted }}
+                                                </td>
+                                                <td class="text-right font-weight-bold text-dark font-mono">
+                                                    {{ number_format($insInward) }}
+                                                </td>
+                                                <td class="text-right font-weight-bold font-mono" style="color: #dc2626;">
+                                                    {{ number_format($insMtss) }}
+                                                </td>
+                                                <td class="text-right font-weight-bold font-mono" style="color: #0284c7;">
+                                                    {{ number_format($insRdw) }}
+                                                </td>
+                                                <td class="text-right font-weight-bold font-mono" style="color: #d97706;">
+                                                    {{ number_format($insCf) }}
+                                                </td>
+                                                <td class="text-right font-weight-bold font-mono" style="color: #16a34a;">
+                                                    {{ number_format($insPrj) }}
+                                                </td>
+                                                <td class="text-center font-weight-bold font-mono">
+                                                    @if(!empty($ins->mct_msn_id))
+                                                        <span class="badge badge-primary px-2.5 py-0.5" style="font-size: 0.85rem;">{{ $ins->mct_msn_id }}</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-right font-weight-bold font-mono" style="color: #0284c7;">
+                                                    @if($msnCostVal > 0)
+                                                        {{ number_format($msnCostVal) }}
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if(strtolower($msnStatusStr) === 'completed' || strtolower($msnStatusStr) === 'achieved')
+                                                        <span class="badge badge-success px-2.5 py-1 font-weight-bold">Completed</span>
+                                                    @elseif(strtolower($msnStatusStr) === 'in progress')
+                                                        <span class="badge badge-warning text-dark px-2.5 py-1 font-weight-bold">In Progress</span>
+                                                    @elseif(!empty($msnStatusStr))
+                                                        <span class="badge badge-secondary px-2.5 py-1 font-weight-bold">{{ ucfirst($msnStatusStr) }}</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="pr-3 text-right text-muted font-mono small">
+                                                    #{{ $ins->shi_id }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="10" class="text-center text-muted py-5 font-weight-bold">
+                                                    <i class="fas fa-info-circle mr-1"></i> No funding tranches or installments recorded for this project head.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                    @if(count($installments) > 0)
+                                    <tfoot style="background: #f8fafc; border-top: 2px solid #cbd5e1;">
+                                        <tr class="font-weight-bold">
+                                            <td class="pl-3 text-dark text-uppercase rajdhani" style="font-size: 0.95rem; letter-spacing: 0.5px;">TOTAL RECEIVED</td>
+                                            <td class="text-right text-dark font-mono" style="font-size: 1rem;">{{ number_format($totReceivedInflow) }}</td>
+                                            <td class="text-right font-mono" style="color: #dc2626; font-size: 1rem;">{{ number_format($totReceivedMtss) }}</td>
+                                            <td class="text-right font-mono" style="color: #0284c7; font-size: 1rem;">{{ number_format($totReceivedRdw) }}</td>
+                                            <td class="text-right font-mono" style="color: #d97706; font-size: 1rem;">{{ number_format($totReceivedCsrf) }}</td>
+                                            <td class="text-right font-mono" style="color: #16a34a; font-size: 1rem;">{{ number_format($totReceivedPrj) }}</td>
+                                            <td colspan="4"></td>
+                                        </tr>
+                                    </tfoot>
+                                    @endif
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
+
+                    {{-- ======================================================== --}}
+                    {{-- 2. MILESTONE COSTS VIEW (TOGGLED VIA BUTTON)            --}}
+                    {{-- ======================================================== --}}
+                    <div id="viewMilestoneCostsContainer" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table fin-table w-100 m-0">
+                                <thead>
+                                    <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                                        <th class="pl-3" style="width: 7%;">MS #</th>
+                                        <th style="width: 27%;">DESCRIPTION</th>
+                                        <th class="text-right" style="width: 14%; color: #0284c7;">MILESTONE AMOUNT</th>
+                                        <th class="text-right" style="width: 12%; color: #16a34a;">RDW SHARE</th>
+                                        <th class="text-right" style="width: 11%; color: #dc2626;">MTSS SHARE</th>
+                                        <th class="text-right" style="width: 11%; color: #d97706;">CSRF SHARE</th>
+                                        <th style="width: 9%;">TARGET DATE</th>
+                                        <th class="pr-3 text-center" style="width: 9%;">STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($milestones as $m)
+                                        @php
+                                            $mCost = (float)($m->mct_cost ?: $m->msn_cost);
+                                            $mRdw = $mCost * $rdwShareRatio;
+                                            $mMtss = $mCost * $mtssShareRatio;
+                                            $mCsrf = $mCost * $csrfShareRatio;
+                                        @endphp
+                                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                                            <td class="pl-3 font-weight-bold text-primary font-mono">MS-{{ $loop->iteration }}</td>
+                                            <td class="font-weight-bold text-dark">{{ $m->msn_desc }}</td>
+                                            <td class="text-right font-weight-bold text-primary font-mono" style="font-size: 1rem;">
+                                                Rs. {{ number_format($mCost, 2) }}
+                                            </td>
+                                            <td class="text-right font-weight-bold text-success font-mono">
+                                                Rs. {{ number_format($mRdw, 2) }}
+                                            </td>
+                                            <td class="text-right font-weight-bold text-danger font-mono">
+                                                Rs. {{ number_format($mMtss, 2) }}
+                                            </td>
+                                            <td class="text-right font-weight-bold font-mono" style="color: #d97706;">
+                                                Rs. {{ number_format($mCsrf, 2) }}
+                                            </td>
+                                            <td class="text-dark font-weight-bold small font-mono">
+                                                {{ $m->msn_targetdt ? \Carbon\Carbon::parse($m->msn_targetdt)->format('d M Y') : 'N/A' }}
+                                            </td>
+                                            <td class="pr-3 text-center">
+                                                @if(strtolower(trim($m->msn_status ?? '')) === 'achieved' || strtolower(trim($m->msn_status ?? '')) === 'completed')
+                                                    <span class="badge badge-success px-2.5 py-1 font-weight-bold">COMPLETED</span>
+                                                @elseif(strtolower(trim($m->msn_status ?? '')) === 'in progress')
+                                                    <span class="badge badge-warning px-2.5 py-1 font-weight-bold text-dark">IN PROGRESS</span>
+                                                @else
+                                                    <span class="badge badge-secondary px-2.5 py-1 font-weight-bold">{{ strtoupper($m->msn_status ?: 'PENDING') }}</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-5 font-weight-bold">
+                                                <i class="fas fa-info-circle mr-1"></i> No milestones recorded for this project.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                @if(count($milestones) > 0)
+                                <tfoot style="background: #f8fafc; border-top: 2px solid #cbd5e1;">
+                                    <tr class="font-weight-bold">
+                                        <td colspan="2" class="pl-3 text-dark text-uppercase rajdhani" style="font-size: 1rem; letter-spacing: 0.5px;">TOTAL MILESTONES COST</td>
+                                        <td class="text-right text-primary font-mono" style="font-size: 1.05rem;">Rs. {{ number_format($totMilestoneAmt, 2) }}</td>
+                                        <td class="text-right text-success font-mono" style="font-size: 1.05rem;">Rs. {{ number_format($totRdwShare, 2) }}</td>
+                                        <td class="text-right text-danger font-mono" style="font-size: 1.05rem;">Rs. {{ number_format($totMtssShare, 2) }}</td>
+                                        <td class="text-right font-mono" style="color: #d97706; font-size: 1.05rem;">Rs. {{ number_format($totCsrfShare, 2) }}</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tfoot>
+                                @endif
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
 
-                {{-- 3. TRANCHES & INSTALLMENTS TABLE --}}
-                @if(count($installments) > 0)
-                <div class="fin-table-card mb-4">
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: #f8fafc; border-color: #e2e8f0 !important;">
-                        <h5 class="font-weight-bold text-dark mb-0 rajdhani" style="letter-spacing: 1px;">
-                            <i class="fas fa-money-check-alt text-success mr-2"></i> FUNDING TRANCHES & INSTALLMENTS
-                        </h5>
-                        <span class="badge badge-success px-3 py-1 font-weight-bold rajdhani" style="font-size: 0.85rem;">
-                            {{ count($installments) }} Tranches
-                        </span>
-                    </div>
+                <script>
+                    window.toggleFundingViewMode = function() {
+                        var viewFundings = document.getElementById('viewFundingsContainer');
+                        var viewMilestoneCosts = document.getElementById('viewMilestoneCostsContainer');
+                        var fundingHeaderTitle = document.getElementById('fundingHeaderTitle');
+                        var fundingHeaderIcon = document.getElementById('fundingHeaderIcon');
+                        var fundingHeaderBadge = document.getElementById('fundingHeaderBadge');
+                        var btnToggle = document.getElementById('btnToggleFundingView');
+                        var toggleBtnIcon = document.getElementById('toggleBtnIcon');
+                        var toggleBtnLabel = document.getElementById('toggleBtnLabel');
 
-                    <div class="table-responsive">
-                        <table class="table fin-table w-100 m-0">
-                            <thead>
-                                <tr>
-                                    <th class="pl-3" style="width: 8%;">ID</th>
-                                    <th style="width: 15%;">TRANSACTION DATE</th>
-                                    <th style="width: 32%;">TRANCHE / MILESTONE REF</th>
-                                    <th class="text-right" style="width: 15%; color: #0284c7;">PCC SHARE</th>
-                                    <th class="text-right" style="width: 15%; color: #d97706;">CSRF SHARE</th>
-                                    <th class="text-right pr-3" style="width: 15%; color: #16a34a;">TOTAL AMOUNT</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($installments as $ins)
-                                    @php
-                                        $tot = (float)($ins->shi_prj ?: (($ins->shi_pcc ?? 0) + ($ins->shi_cf ?? 0)));
-                                        $dateStr = !empty($ins->trn_date) ? \Carbon\Carbon::parse($ins->trn_date)->format('d M Y') : 'N/A';
-                                    @endphp
-                                    <tr>
-                                        <td class="pl-3 font-weight-bold text-primary">#{{ $ins->shi_id }}</td>
-                                        <td class="font-weight-bold text-dark">{{ $dateStr }}</td>
-                                        <td class="font-weight-bold text-dark">
-                                            {{ $ins->msn_desc ?: ($ins->trn_desc ?: 'Funding Tranche #' . $ins->shi_id) }}
-                                            @if(!empty($ins->trn_docref))
-                                                <span class="badge badge-light border text-muted ml-1">{{ $ins->trn_docref }}</span>
-                                            @endif
-                                        </td>
-                                        <td class="text-right font-weight-bold" style="color: #0284c7;">
-                                            Rs. {{ number_format($ins->shi_pcc ?? 0, 2) }}
-                                        </td>
-                                        <td class="text-right font-weight-bold" style="color: #d97706;">
-                                            Rs. {{ number_format($ins->shi_cf ?? 0, 2) }}
-                                        </td>
-                                        <td class="text-right pr-3 font-weight-bold text-success" style="font-size: 1.05rem;">
-                                            Rs. {{ number_format($tot, 2) }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                @endif
+                        if (!viewFundings || !viewMilestoneCosts) return;
+
+                        var isFundingsVisible = (viewFundings.style.display !== 'none');
+
+                        if (isFundingsVisible) {
+                            viewFundings.style.display = 'none';
+                            viewMilestoneCosts.style.display = 'block';
+
+                            if (fundingHeaderTitle) fundingHeaderTitle.textContent = 'PROJECT MILESTONES & COST ALLOCATION';
+                            if (fundingHeaderIcon) fundingHeaderIcon.className = 'fas fa-tasks text-primary mr-2';
+                            if (fundingHeaderBadge) {
+                                fundingHeaderBadge.className = 'badge badge-info px-2.5 py-1 font-weight-bold rajdhani ml-2.5';
+                                fundingHeaderBadge.textContent = 'Milestones & Targets';
+                            }
+
+                            if (btnToggle) btnToggle.className = 'btn btn-outline-success font-weight-bold px-3.5 py-1.5 rounded-pill shadow-sm';
+                            if (toggleBtnIcon) toggleBtnIcon.className = 'fas fa-money-check-alt mr-1.5';
+                            if (toggleBtnLabel) toggleBtnLabel.textContent = 'Fundings';
+                        } else {
+                            viewMilestoneCosts.style.display = 'none';
+                            viewFundings.style.display = 'block';
+
+                            if (fundingHeaderTitle) fundingHeaderTitle.textContent = 'FUNDINGS';
+                            if (fundingHeaderIcon) fundingHeaderIcon.className = 'fas fa-money-check-alt text-success mr-2';
+                            if (fundingHeaderBadge) {
+                                fundingHeaderBadge.className = 'badge badge-success px-2.5 py-1 font-weight-bold rajdhani ml-2.5';
+                                fundingHeaderBadge.textContent = 'Tranches & Inflow';
+                            }
+
+                            if (btnToggle) btnToggle.className = 'btn btn-outline-primary font-weight-bold px-3.5 py-1.5 rounded-pill shadow-sm';
+                            if (toggleBtnIcon) toggleBtnIcon.className = 'fas fa-tasks mr-1.5';
+                            if (toggleBtnLabel) toggleBtnLabel.textContent = 'Milestone Costs';
+                        }
+                    };
+                </script>
 
             </div>
 
@@ -2446,8 +2521,55 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Upload failed: ' + (err.message || 'Please try again.'));
                 }
             });
-        });
+        }
     }
+
+    // 7. TOGGLE BETWEEN FUNDINGS VIEW AND MILESTONE COSTS VIEW
+    window.toggleFundingViewMode = function() {
+        const viewFundings = document.getElementById('viewFundingsContainer');
+        const viewMilestoneCosts = document.getElementById('viewMilestoneCostsContainer');
+        const fundingHeaderTitle = document.getElementById('fundingHeaderTitle');
+        const fundingHeaderIcon = document.getElementById('fundingHeaderIcon');
+        const fundingHeaderBadge = document.getElementById('fundingHeaderBadge');
+        const btnToggle = document.getElementById('btnToggleFundingView');
+        const toggleBtnIcon = document.getElementById('toggleBtnIcon');
+        const toggleBtnLabel = document.getElementById('toggleBtnLabel');
+
+        if (!viewFundings || !viewMilestoneCosts) return;
+
+        // If Fundings is currently visible, switch to Milestone Costs
+        const isFundingsVisible = (viewFundings.style.display !== 'none');
+
+        if (isFundingsVisible) {
+            viewFundings.style.display = 'none';
+            viewMilestoneCosts.style.display = 'block';
+
+            if (fundingHeaderTitle) fundingHeaderTitle.textContent = 'PROJECT MILESTONES & COST ALLOCATION';
+            if (fundingHeaderIcon) fundingHeaderIcon.className = 'fas fa-tasks text-primary mr-2';
+            if (fundingHeaderBadge) {
+                fundingHeaderBadge.className = 'badge badge-info px-2.5 py-1 font-weight-bold rajdhani ml-2.5';
+                fundingHeaderBadge.textContent = 'Milestones & Targets';
+            }
+
+            if (btnToggle) btnToggle.className = 'btn btn-outline-success font-weight-bold px-3.5 py-1.5 rounded-pill shadow-sm';
+            if (toggleBtnIcon) toggleBtnIcon.className = 'fas fa-money-check-alt mr-1.5';
+            if (toggleBtnLabel) toggleBtnLabel.textContent = 'Fundings';
+        } else {
+            viewMilestoneCosts.style.display = 'none';
+            viewFundings.style.display = 'block';
+
+            if (fundingHeaderTitle) fundingHeaderTitle.textContent = 'FUNDINGS';
+            if (fundingHeaderIcon) fundingHeaderIcon.className = 'fas fa-money-check-alt text-success mr-2';
+            if (fundingHeaderBadge) {
+                fundingHeaderBadge.className = 'badge badge-success px-2.5 py-1 font-weight-bold rajdhani ml-2.5';
+                fundingHeaderBadge.textContent = 'Tranches & Inflow';
+            }
+
+            if (btnToggle) btnToggle.className = 'btn btn-outline-primary font-weight-bold px-3.5 py-1.5 rounded-pill shadow-sm';
+            if (toggleBtnIcon) toggleBtnIcon.className = 'fas fa-tasks mr-1.5';
+            if (toggleBtnLabel) toggleBtnLabel.textContent = 'Milestone Costs';
+        }
+    };
 });
 </script>
 @endpush

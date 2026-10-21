@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Formal Comparative Statement - #{{ $purchase->pcs_id }}</title>
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
     <style>
         @page { size: A4 landscape; margin: 10mm; }
+        * { box-sizing: border-box; }
         body {
             background-color: #fff;
             margin: 0;
@@ -29,6 +31,19 @@
             text-align: center;
             margin-bottom: 20px;
             font-size: 10pt;
+            line-height: 1.6;
+        }
+        .live-editable {
+            font-weight: bold;
+            border-bottom: 1.5px dashed #2563eb;
+            padding: 0 4px;
+            outline: none;
+            cursor: text;
+            transition: background 0.2s;
+        }
+        .live-editable:hover, .live-editable:focus {
+            background: #eff6ff;
+            border-bottom: 1.5px solid #1d4ed8;
         }
         table {
             width: 100%;
@@ -46,59 +61,116 @@
             font-weight: bold;
             text-align: center;
         }
-        .sig-container {
-            margin-top: 45px;
-            display: flex;
-            justify-content: space-around;
+        .computer-gen-note {
+            margin-top: 35px;
+            padding-top: 12px;
+            border-top: 1px dashed #94a3b8;
+            font-size: 8.5pt;
+            color: #334155;
+            font-style: italic;
         }
-        .sig-box {
-            width: 180px;
-            text-align: center;
-            border-top: 1px solid #000;
-            padding-top: 5px;
-            font-weight: bold;
-        }
-        @media print {
-            body { padding: 0; }
-            .print-btn { display: none; }
-        }
-        .print-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #5F7858;
+
+        /* Top Action Bar (Screen Only) */
+        .cs-top-bar {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #0f172a;
             color: #ffffff;
+            padding: 10px 20px;
+            margin: -20px -20px 20px -20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            z-index: 99999;
+            gap: 12px;
+        }
+        .cs-btn {
             border: none;
-            padding: 10px 22px;
+            padding: 7px 16px;
             cursor: pointer;
-            border-radius: 6px;
-            font-size: 13px;
+            border-radius: 5px;
+            font-size: 12px;
             font-weight: bold;
             font-family: Arial, sans-serif;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+            gap: 6px;
+            text-decoration: none;
             transition: all 0.2s ease;
-            z-index: 99999;
         }
-        .print-btn:hover {
-            background: #465941;
+        .cs-btn-back {
+            background: rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
+        }
+        .cs-btn-back:hover {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+        }
+        .cs-btn-save {
+            background: #2563eb;
+            color: #ffffff;
+        }
+        .cs-btn-save:hover {
+            background: #1d4ed8;
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
+        .cs-btn-print {
+            background: #15803d;
+            color: #ffffff;
+        }
+        .cs-btn-print:hover {
+            background: #166534;
+            transform: translateY(-1px);
+        }
+
+        @media print {
+            body { padding: 0; margin: 0; }
+            .cs-top-bar { display: none !important; }
+            .live-editable {
+                border-bottom: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+            }
         }
     </style>
 </head>
 <body>
 
-    <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Formal Statement</button>
+    {{-- Top Action Bar (Screen Only) --}}
+    <div class="cs-top-bar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <a href="javascript:history.back()" class="cs-btn cs-btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Case #{{ $purchase->pcs_id }}
+            </a>
+            <span style="font-size: 12px; color: #94a3b8; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
+                Live DB Connected
+            </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="cs-btn cs-btn-save" id="btnSaveCsDetails" onclick="saveLiveCsDetails()">
+                <i class="fas fa-save"></i> Save Details to DB
+            </button>
+            <button type="button" class="cs-btn cs-btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Statement
+            </button>
+        </div>
+    </div>
 
     <div class="container">
         <div class="main-title">
             COMPARATIVE STATEMENT OF PROCUREMENT OF MATERIAL FOR {{ strtoupper($purchase->pcs_title) }}
         </div>
         <div class="subtitle">
-            Following firms participated in bidding on {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y') }} against RFQ No R&D/Projects/Proc/{{ $purchase->pcs_id }} dated {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y') }}.
+            Following firms participated in bidding on 
+            <span id="csBiddingDate" contenteditable="true" class="live-editable" title="Click to edit Bidding Date (Live DB)">{{ $biddingDate }}</span> 
+            against RFQ No 
+            <span id="csRfqNo" contenteditable="true" class="live-editable" title="Click to edit RFQ No (Live DB)">{{ $rfqNo }}</span> 
+            dated 
+            <span id="csRfqDate" contenteditable="true" class="live-editable" title="Click to edit RFQ Date (Live DB)">{{ $rfqDate }}</span>.
         </div>
 
         <table>
@@ -154,18 +226,21 @@
                     if ($qTot <= 0 && $qBase > 0) {
                         $qTot = $qBase + $qSst + $qGst;
                     }
+
+                    $firmDisplayName = $firmRow?->frm_name ?: ($q->firm?->frm_name ?: ($q->qte_firmname ?: 'N/A'));
+                    $quotationNumber = $q->qte_num ?: ($q->qte_refno ?? 'N/A');
                 @endphp
                 <tr>
                     <td style="text-align: center;">{{ $idx + 1 }}</td>
                     <td style="font-weight: bold;">
-                        M/s {{ strtoupper($q->firm->frm_name ?? $q->qte_firmname) }}
+                        M/s {{ strtoupper($firmDisplayName) }}
                         @if($q->qte_recomm || $idx === 0)
                             <span style="font-size: 8pt; color: #166534; font-weight: bold; display: block;">({{ $q->qte_recomm ? 'Recommended' : 'Lowest / L-1' }})</span>
                         @endif
                     </td>
                     <td>
-                        {{ \Carbon\Carbon::parse($q->qte_date)->format('d-M-Y') }}<br>
-                        {{ $q->qte_refno ?? 'N/A' }}
+                        {{ $q->qte_date ? \Carbon\Carbon::parse($q->qte_date)->format('d-M-Y') : 'N/A' }}<br>
+                        <strong>{{ $quotationNumber }}</strong>
                     </td>
                     <td style="text-align: right; font-weight: bold;">
                         {{ number_format($qTot, 2) }}
@@ -242,13 +317,64 @@
         </div>
         @endif
 
-        <div class="sig-container">
-            <div class="sig-box">Dir Procurement</div>
-            <div class="sig-box">Dir {{ $purchase->unit?->unt_namesh ?: 'Initiating Div' }}</div>
-            <div class="sig-box">Dir Finance</div>
-            <div class="sig-box">MD(R&D)</div>
+        <div class="computer-gen-note" style="margin-top: 35px; padding-top: 12px; border-top: 1px dashed #94a3b8; font-size: 8.5pt; color: #334155; font-style: italic;">
+            Note: Computer generated documents do not require signature
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
+    <script>
+        function saveLiveCsDetails() {
+            const btn = document.getElementById('btnSaveCsDetails');
+            const biddingDateEl = document.getElementById('csBiddingDate');
+            const rfqNoEl = document.getElementById('csRfqNo');
+            const rfqDateEl = document.getElementById('csRfqDate');
+
+            const biddingDate = biddingDateEl ? biddingDateEl.innerText.trim() : '';
+            const rfqNo = rfqNoEl ? rfqNoEl.innerText.trim() : '';
+            const rfqDate = rfqDateEl ? rfqDateEl.innerText.trim() : '';
+
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                btn.disabled = true;
+            }
+
+            const token = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+
+            fetch('{{ route("purchase.cs_formal.save", $purchase->pcs_id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    bidding_date: biddingDate,
+                    rfq_no: rfqNo,
+                    rfq_date: rfqDate
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                    setTimeout(() => {
+                        btn.innerHTML = origHtml;
+                        btn.disabled = false;
+                    }, 2000);
+                }
+                alert(data.message || 'Details saved to database successfully!');
+            })
+            .catch(err => {
+                if (btn) {
+                    btn.innerHTML = origHtml;
+                    btn.disabled = false;
+                }
+                alert('Failed to save details: ' + (err.message || 'Unknown error'));
+            });
+        }
+    </script>
 </body>
 </html>

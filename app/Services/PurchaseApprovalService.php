@@ -27,12 +27,14 @@ class PurchaseApprovalService
                 'Division' => ['next' => 'DProc',    'area' => 'proc'],
                 'DProc'    => ['next' => 'Division', 'area' => 'prj'],
                 'DFinance' => ['next' => 'MD',       'area' => 'rdw'],
+                'DLOG'     => ['next' => 'MD',       'area' => 'rdw'],
                 'MD'       => ['next' => 'DDG',      'area' => 'hqs'],
                 'DDG'      => ['next' => 'DG',       'area' => 'nrdi'],
-                'DG'       => ['next' => 'Approved', 'area' => null],
+                'DG'       => ['next' => 'DFinance', 'area' => 'fin'],
             ],
             'return_chain' => [
                 'DFinance' => 'Division',
+                'DLOG'     => 'MD',
                 'MD'       => 'DFinance',
                 'DDG'      => 'MD',
                 'DG'       => 'DDG',
@@ -41,6 +43,7 @@ class PurchaseApprovalService
                 'Division' => true,
                 'DProc'    => true,
                 'DFinance' => true,
+                'DLOG'     => true,
                 'MD'       => true,
                 'DDG'      => true,
                 'DG'       => true,
@@ -129,6 +132,7 @@ class PurchaseApprovalService
         'Division'  => 'Division (Initiator)',
         'DProc'     => 'Director Procurement',
         'DFinance'  => 'Director Finance',
+        'DLOG'      => 'Director Logistics (DLOG)',
         'MD'        => 'MD Office',
         'DDG'       => 'DDG Office',
         'DG'        => 'Director General',
@@ -145,6 +149,7 @@ class PurchaseApprovalService
         'Division'  => 'prj',
         'DProc'     => 'proc',
         'DFinance'  => 'fin',
+        'DLOG'      => 'log',
         'MD'        => 'rdw',
         'DDG'       => 'hqs',
         'DG'        => 'nrdi',
@@ -165,6 +170,9 @@ class PurchaseApprovalService
         'proc'      => 'DProc',     // Special: collaborative, not in forward chain
         'prc'       => 'DProc',
         'fin'       => 'DFinance',
+        'log'       => 'DLOG',
+        'dlog'      => 'DLOG',
+        'logistics' => 'DLOG',
         'rdw'       => 'MD',
         'hqs'       => 'DDG',
         'nrdi'      => 'DG',
@@ -245,9 +253,10 @@ class PurchaseApprovalService
             $isTargetDg = $accContext->isDg() || $area === 'nrdi';
             $isTargetDdg = $accContext->isDdg() || $area === 'hqs';
             $isTargetMd = $accContext->isMd() || $area === 'rdw';
+            $isTargetDlog = $accContext->isDlog() || in_array($area, ['log', 'dlog', 'logistics'], true);
 
             if (! $isCommand) {
-                if ($isTargetDg || $isTargetDdg) {
+                if ($isTargetDg || $isTargetDdg || $isTargetDlog) {
                     continue;
                 }
             }
@@ -264,6 +273,9 @@ class PurchaseApprovalService
             } elseif ($isTargetMd) {
                 $stage = 'MD';
                 $deptName = 'Managing Director (MD Office)';
+            } elseif ($isTargetDlog) {
+                $stage = 'DLOG';
+                $deptName = 'Director Logistics (DLOG)';
             } elseif ($area === 'proc') {
                 $stage = 'DProc';
                 $deptName = 'Procurement Department (DProc)';
@@ -302,6 +314,42 @@ class PurchaseApprovalService
                 'desig'    => $acc->acc_desig,
                 'badge'    => $acc->acc_desigshort ?: strtoupper($area),
                 'area'     => $area,
+            ];
+        }
+
+        // If no explicit DLOG account exists yet in cen.accounts, provide role-based destination for DLOG so MD / DDG can forward to DLOG
+        $hasDlogAccount = false;
+        $hasDdgAccount = false;
+        foreach ($list as $item) {
+            if ($item['stage'] === 'DLOG') {
+                $hasDlogAccount = true;
+            }
+            if ($item['stage'] === 'DDG') {
+                $hasDdgAccount = true;
+            }
+        }
+        if (!$hasDlogAccount && $isCommand) {
+            $list['role_dlog'] = [
+                'code'     => 'role_dlog',
+                'stage'    => 'DLOG',
+                'acc_id'   => null,
+                'name'     => 'Director Logistics (DLOG)',
+                'director' => 'Director Logistics',
+                'desig'    => 'Director Logistics',
+                'badge'    => 'DLOG',
+                'area'     => 'log',
+            ];
+        }
+        if (!$hasDdgAccount && $isCommand) {
+            $list['role_ddg'] = [
+                'code'     => 'role_ddg',
+                'stage'    => 'DDG',
+                'acc_id'   => null,
+                'name'     => 'Deputy Director General (DDG Office)',
+                'director' => 'Deputy Director General',
+                'desig'    => 'Deputy Director General',
+                'badge'    => 'DDG',
+                'area'     => 'hqs',
             ];
         }
 
@@ -371,6 +419,7 @@ class PurchaseApprovalService
                     $uArea = strtolower(trim($targetAcc->acc_untarea ?? ''));
                     $uRole = (int) ($targetAcc->acc_role ?? 0);
                     $desig = strtolower(trim($targetAcc->acc_desigshort ?? ''));
+                    $desigFull = strtolower(trim($targetAcc->acc_desig ?? ''));
 
                     if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg'))) {
                         $resolvedStage = 'DG';
@@ -378,6 +427,8 @@ class PurchaseApprovalService
                         $resolvedStage = 'DDG';
                     } elseif ($uArea === 'rdw' || $uRole === 160000 || str_contains($desig, 'md')) {
                         $resolvedStage = 'MD';
+                    } elseif (str_contains($desig, 'dlog') || in_array($uArea, ['log', 'dlog', 'logistics']) || str_contains($desigFull, 'logistics')) {
+                        $resolvedStage = 'DLOG';
                     } elseif (in_array($uArea, ['proc', 'prc'])) {
                         $resolvedStage = 'DProc';
                     } elseif (in_array($uArea, ['fin', 'finance'])) {
@@ -395,6 +446,14 @@ class PurchaseApprovalService
                     $targetStageName = trim($targetAcc->acc_name) . ' (' . ($targetAcc->acc_desigshort ?: $resolvedStage) . ')';
                     $targetStage = $resolvedStage;
                 }
+            } elseif ($targetStage === 'role_dlog' || $targetStage === 'DLOG') {
+                $resolvedStage = 'DLOG';
+                $targetStageName = 'Director Logistics (DLOG)';
+                $targetStage = 'DLOG';
+            } elseif ($targetStage === 'role_ddg' || $targetStage === 'DDG') {
+                $resolvedStage = 'DDG';
+                $targetStageName = 'Deputy Director General (DDG Office)';
+                $targetStage = 'DDG';
             }
 
             if ($action === 'return') {
@@ -416,7 +475,12 @@ class PurchaseApprovalService
                     $this->notifyReturn($case, $user, $remarks, $toStage);
                 }
 
-            } elseif ($action === 'not_approved' || $action === 'reject' || $action === 'cancel') {
+            } elseif ($action === 'cancel') {
+                $newPcsStatus = 'Cancelled';
+                $toStage = 'Cancelled';
+                $this->closeSubstatus($case);
+
+            } elseif ($action === 'not_approved' || $action === 'reject') {
                 $newPcsStatus = 'Not Approved';
                 $toStage = 'Not Approved';
                 $this->closeSubstatus($case);
@@ -532,6 +596,9 @@ class PurchaseApprovalService
             // 2. Update pcs_status (only when it actually changes and not draft)
             if ($newPcsStatus !== null && $action !== 'save_draft') {
                 $case->pcs_status = $newPcsStatus;
+                if ($newPcsStatus === 'Approved' && empty($case->pcs_approvedtg)) {
+                    $case->pcs_approvedtg = now();
+                }
                 $case->save();
             }
 
@@ -612,14 +679,10 @@ class PurchaseApprovalService
     public function canApprove(string $area, float $amount, ?Purchase $case = null): bool
     {
         $area = strtolower(trim($area));
-        if ($area === 'nrdi') return true; // DG can always approve
-
-        $evalPrice = $case ? $case->effective_evaluation_price : $amount;
-        $mdLimit = $this->getMdThreshold();
-        $ddgLimit = $this->getDdgThreshold();
-
-        if ($area === 'hqs' && $evalPrice <= $ddgLimit) return true;
-        if ($area === 'rdw' && $evalPrice <= $mdLimit) return true;
+        // Strictly Finance and HR are authorized to approve purchase cases
+        if (in_array($area, ['fin', 'finance', 'hr'], true)) {
+            return true;
+        }
 
         return false;
     }
@@ -695,27 +758,21 @@ class PurchaseApprovalService
 
         // 4. MD
         if ($currentArea === 'rdw') {
-            if ($evalPrice <= $mdLimit) {
-                return ['stage' => 'Approved', 'area' => null];
-            }
             $next = is_array($forwardChain['MD'] ?? null) ? ($forwardChain['MD']['next'] ?? 'DDG') : ($forwardChain['MD'] ?? 'DDG');
-            if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
+            if ($next === 'Approved') $next = 'DDG';
             return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'hqs'];
         }
 
         // 5. DDG
         if ($currentArea === 'hqs') {
-            if ($evalPrice <= $ddgLimit) {
-                return ['stage' => 'Approved', 'area' => null];
-            }
             $next = is_array($forwardChain['DDG'] ?? null) ? ($forwardChain['DDG']['next'] ?? 'DG') : ($forwardChain['DDG'] ?? 'DG');
-            if ($next === 'Approved') return ['stage' => 'Approved', 'area' => null];
+            if ($next === 'Approved') $next = 'DG';
             return ['stage' => $next, 'area' => $this->stageToArea[$next] ?? 'nrdi'];
         }
 
-        // 6. DG (Terminal)
+        // 6. DG
         if ($currentArea === 'nrdi') {
-            return ['stage' => 'Approved', 'area' => null];
+            return ['stage' => 'DFinance', 'area' => 'fin'];
         }
 
         return ['stage' => $case->currentSubstatus?->pss_stage ?? 'Division', 'area' => null];
@@ -735,6 +792,7 @@ class PurchaseApprovalService
             'approve' => 'Approved',
             'not_approved' => 'Not Recommended',
             'reject'  => 'Rejected & Closed',
+            'cancel'  => 'Cancelled',
             'hold'    => 'Reverted',
             'float_to_proc' => 'Floated to Procurement Department',
             'dproc_save' => 'Updated with Quotes & Remarks by Procurement',
@@ -743,7 +801,7 @@ class PurchaseApprovalService
 
         $stageDisplay = $case->current_stage_display ?? $case->pcs_status;
         $message = "Case #{$case->pcs_id} has been {$actionPast} by {$actor->acc_name}. Status: {$case->pcs_status} — Currently with: {$stageDisplay}.";
-        if ($action == 'return' || $action == 'not_approved' || $action == 'reject' || $action == 'hold') $message .= " Reason: {$remarks}";
+        if ($action == 'return' || $action == 'not_approved' || $action == 'reject' || $action == 'cancel' || $action == 'hold') $message .= " Reason: {$remarks}";
 
         // Identify Recipients
         $previousActorIds = DB::table('pur.purdecisions')

@@ -83,13 +83,13 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb bg-transparent p-0 mb-1" style="font-size: 12px;">
                         <li class="breadcrumb-item"><a href="{{ url('/') }}" class="text-muted">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.reversals.open') }}" class="text-muted">Data Reversals</a></li>
+                        <li class="breadcrumb-item"><a href="{{ ($isCommand ?? false) ? route('admin.reversals.closed') : route('admin.reversals.open') }}" class="text-muted">Data Reversals</a></li>
                         <li class="breadcrumb-item active text-dark font-weight-bold">Case #{{ $rev->rev_id }}</li>
                     </ol>
                 </nav>
             </div>
             <div>
-                <a href="{{ route('admin.reversals.index', ['tab' => $rev->isDraft() ? 'draft' : ($rev->isFulfilled() || $rev->isCancelled() ? 'closed' : 'open')]) }}" class="btn btn-sm btn-outline-secondary">
+                <a href="{{ ($isCommand ?? false) ? route('admin.reversals.closed') : route('admin.reversals.index', ['tab' => $rev->isDraft() ? 'draft' : ($rev->isFulfilled() || $rev->isCancelled() ? 'closed' : 'open')]) }}" class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-arrow-left mr-1"></i> Back to Listing
                 </a>
             </div>

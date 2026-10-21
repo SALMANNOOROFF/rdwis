@@ -39,14 +39,21 @@ class PurchaseInitiationController extends Controller
         // Fetch all cases initiated by this unit/division with rich context
         $purchases = Purchase::with(['project', 'latestDecision.account', 'items', 'quotes.firm', 'decisions', 'currentSubstatus'])
             ->where(function($q) use ($user, $lower, $upper) {
-                if ($user->isMyDepartmentMode() && $user->acc_unt_id) {
-                    $q->where('pcs_unt_id', $user->acc_unt_id)
-                      ->orWhere('pcs_intunt_id', $user->acc_unt_id);
+                $userUnitId = (int) ($user->acc_unt_id ?? 0);
+                if ($user->isMyDepartmentMode() && $userUnitId) {
+                    $q->where('pcs_unt_id', $userUnitId)
+                      ->orWhere('pcs_intunt_id', $userUnitId);
                 } else {
-                    if ($user->acc_unt_id) {
-                        $q->where('pcs_unt_id', $user->acc_unt_id);
-                    }
-                    $q->orWhereBetween('pcs_unt_id', [$lower, $upper]);
+                    $q->where(function($sub) use ($userUnitId, $lower, $upper) {
+                        if ($userUnitId) {
+                            $sub->where('pcs_unt_id', $userUnitId)
+                                ->orWhere('pcs_intunt_id', $userUnitId);
+                        }
+                        if ($lower > 0 && $upper > 0) {
+                            $sub->orWhereBetween('pcs_unt_id', [$lower, $upper])
+                                ->orWhereBetween('pcs_intunt_id', [$lower, $upper]);
+                        }
+                    });
                 }
             })
             ->orderBy('pcs_id', 'desc')
@@ -170,15 +177,20 @@ class PurchaseInitiationController extends Controller
         $nextAuthority = $service->getNextAuthorityName($purchase, 'prj'); // prj is Division
 
         // Financial Intelligence (Legacy Logic)
+        $headId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
         $finService = app(\App\Services\FinancialIntelligenceService::class);
-        $fin = $finService->getHeadStatus($purchase->pcs_hed_id);
-        $subheads = $finService->getSubheadBreakdown($purchase->pcs_hed_id);
+        $fin = $headId ? $finService->getHeadStatus($headId) : (object)[];
+        $subheads = $headId ? $finService->getSubheadBreakdown($headId) : [];
         $head = $fin;
 
 
         // Recent Approved Cases for the same project/head
         $recentApproved = Purchase::withCount('items')
-            ->where('pcs_hed_id', $purchase->pcs_hed_id)
+            ->where(function($q) use ($headId) {
+                if ($headId) {
+                    $q->where('pcs_hed_id', $headId)->orWhere('pcs_effhed_id', $headId);
+                }
+            })
             ->where(function($q) {
                 $q->whereRaw('LOWER(pcs_status) = ?', ['approved'])
                   ->orWhere('pcs_status', 'Approved');
@@ -239,7 +251,7 @@ class PurchaseInitiationController extends Controller
                 ->get();
         }
 
-        $projectSubheads = DB::table('fin.subheads')->where('sbh_hed_id', $purchase->pcs_hed_id)->pluck('sbh_name')->all();
+        $projectSubheads = $headId ? DB::table('fin.subheads')->where('sbh_hed_id', $headId)->pluck('sbh_name')->all() : [];
 
         return view('nrdi.purchase_cases_new.show', compact('purchase', 'head', 'firms', 'pageTitle', 'canEdit', 'currentAuthority', 'nextAuthority', 'area', 'subheads', 'projectSubheads', 'recentApproved', 'employees'));
     }

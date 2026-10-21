@@ -358,14 +358,13 @@
 
           <!-- Division Salary Generation & Requisitions Buttons -->
           <div class="btn-group btn-group-sm shadow-sm mr-2" role="group">
-            <button type="button" 
+            <a href="{{ route('divhr.salary.requisitions.create', ['month' => $month]) }}" 
                id="btn-generate-salary-from-att"
-               data-toggle="modal" data-target="#generateSalaryModal"
                class="btn btn-sm btn-primary font-weight-bold" 
                style="background: #2563eb; border-color: #1d4ed8; color: #ffffff;" 
                title="Generate Monthly Salary Requisition for {{ $month }}">
               <i class="fas fa-money-check-alt mr-1"></i> Generate Salary
-            </button>
+            </a>
             <a href="{{ route('divhr.salary.requisitions.index', ['month' => $month]) }}" 
                class="btn btn-sm btn-outline-primary font-weight-bold" 
                style="background: #eff6ff; border-color: #93c5fd; color: #1e40af;"
@@ -973,7 +972,7 @@ $(document).ready(function() {
               <div class="font-weight-bold text-dark">${emp.emp_name}</div>
               <div class="small text-muted">${emp.emp_rank || ''} ${emp.emp_title || ''}</div>
             </td>
-            <td class="small font-weight-bold text-secondary">Unit ${emp.emp_unt_id}</td>
+            <td class="small font-weight-bold text-secondary">${emp.dept_name || emp.dept_short || ('Unit ' + emp.emp_unt_id)}</td>
             <td class="text-right font-monospace">${Number(b.ctrsalary || 0).toLocaleString()}</td>
             <td class="text-right font-monospace text-danger">${Number(b.underwork || 0).toLocaleString()}</td>
             <td class="text-right font-monospace font-weight-bold" style="color: #15803d; font-size: 0.95rem;">
@@ -997,7 +996,7 @@ $(document).ready(function() {
           <tr>
             <td class="font-monospace font-weight-bold text-danger">${emp.emp_id || '-'}</td>
             <td>${emp.emp_name || '-'}</td>
-            <td>Unit ${emp.emp_unt_id || '-'}</td>
+            <td>${emp.dept_name || emp.dept_short || ('Unit ' + (emp.emp_unt_id || '-'))}</td>
             <td><span class="badge badge-danger">${ex.reason || 'Excluded'}</span></td>
           </tr>
         `);
@@ -1149,7 +1148,7 @@ $(document).ready(function() {
                     <th style="width: 45px;" class="text-center">#</th>
                     <th style="width: 120px;">Emp ID</th>
                     <th>Employee Name & Title</th>
-                    <th>Unit</th>
+                    <th>Department</th>
                     <th class="text-right">Contract Salary</th>
                     <th class="text-right">Deductions</th>
                     <th class="text-right">Net Salary</th>
@@ -1177,7 +1176,7 @@ $(document).ready(function() {
                       <tr>
                         <th style="width: 120px;">Emp ID</th>
                         <th>Name</th>
-                        <th>Unit</th>
+                        <th>Department</th>
                         <th>Audit Exclusion Reason</th>
                       </tr>
                     </thead>

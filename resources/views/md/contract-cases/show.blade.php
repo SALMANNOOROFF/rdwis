@@ -10,25 +10,34 @@
     $roleTitle = match($role) {
         'DDG' => 'Deputy Director General (DDG)',
         'DG'  => 'Director General (DG)',
+        'DLOG' => 'Director Logistics (DLOG)',
         'Finance' => 'Director Finance',
         'HR' => 'Director HR',
+        'IT' => 'Staff Officer IT (SO IT)',
         'Division' => 'Division Officer',
         default => 'Managing Director (MD)'
     };
     $routePrefix = match($role) {
         'DDG' => 'ddg',
         'DG'  => 'dg',
+        'DLOG' => 'dlog',
         'Finance' => 'finance',
         'HR' => 'hr',
+        'IT' => 'it',
         'Division' => 'division',
         default => 'md'
     };
 
     $currentStage = $case->current_stage ?? $case->currentSubstatus->css_stage ?? $role;
-    $isCaseWithMe = ($currentStage === $role);
-    $canActuallyApprove = ($canApprove ?? false) && ($role === 'DG' || ($authDetails['can_md_approve'] ?? false) || ($authDetails['can_ddg_approve'] ?? false));
+    $isApprovedForHr = ($role === 'HR' && ($currentStage === 'Approved' || $case->ctc_status === 'Approved') && !in_array($case->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']));
+    $isCaseWithMe = ($currentStage === $role) || $isApprovedForHr;
+    $hasEmployee = !empty($case->ctc_emp_id);
+    $departments = $departments ?? \Illuminate\Support\Facades\DB::table('cen.units')->orderBy('unt_name')->get();
+    $canActuallyApprove = in_array($role, ['HR', 'Finance']);
+    $canApprove = in_array($role, ['HR', 'Finance']);
     $nextForwardStage = match($role) {
         'Division' => 'HR',
+        'DLOG' => 'MD',
         'MD' => 'DDG',
         'DDG' => 'DG',
         'Finance' => 'MD',
@@ -45,9 +54,14 @@
 
     $proposedSalary = (float)($case->ctc_newsalary ?? 0);
     $previousSalary = (float)($case->previous_salary ?? 0);
-    $salaryDiff = $proposedSalary - $previousSalary;
+    $approvedSalary = (float)($case->newContract?->ctr_salary ?: ($case->ctc_approvedsalary ?: ($case->ctc_newsalary ?? 0)));
+    $hasApprovedSalary = !empty($case->ctc_approvedsalary) || !empty($case->newContract?->ctr_salary);
+    $isCaseApprovedOrFulfilled = in_array($case->ctc_status, ['Approved', 'Fulfilled', 'Closed']) || ($case->currentSubstatus?->pss_stage === 'Approved');
+    $isSalaryAdjusted = $hasApprovedSalary && ((float)$approvedSalary != (float)$proposedSalary);
+    $effectiveSalary = ($isCaseApprovedOrFulfilled || $hasApprovedSalary) ? $approvedSalary : $proposedSalary;
+    $salaryDiff = $effectiveSalary - $previousSalary;
     $incrementPct = $previousSalary > 0 ? round(($salaryDiff / $previousSalary) * 100, 1) : 0;
-    $annualImpact = $proposedSalary * 12;
+    $annualImpact = $effectiveSalary * 12;
 
     $prevGrade = $case->previous_grade ?: 'N/A';
     $prevJobtitle = $case->previous_jobtitle ?: 'N/A';
@@ -56,8 +70,24 @@
 
     // Employment Type & Probation details
     $empType = $case->ctc_emp_type ?: ($case->ctc_newctrtype == 2 ? 'Part Time' : 'Full Time');
-    $probationMonths = (!empty($case->ctc_newprob) && (int)$case->ctc_newprob > 0) ? (int)$case->ctc_newprob : null;
-    $probationSalary = (!empty($case->ctc_newprobsal) && (float)$case->ctc_newprobsal > 0) ? (float)$case->ctc_newprobsal : null;
+
+    $approvedProbMonths = $case->newContract?->ctr_prob !== null
+        ? (int)$case->newContract->ctr_prob
+        : ($case->ctc_approvedprob !== null ? (int)$case->ctc_approvedprob : null);
+    $probationMonths = $approvedProbMonths !== null ? $approvedProbMonths : ((!empty($case->ctc_newprob) && (int)$case->ctc_newprob > 0) ? (int)$case->ctc_newprob : null);
+
+    $approvedProbSalary = ($case->newContract?->ctr_probsal !== null && (float)$case->newContract->ctr_probsal > 0)
+        ? (float)$case->newContract->ctr_probsal
+        : ((!empty($case->ctc_approvedprobsal) && (float)$case->ctc_approvedprobsal > 0) ? (float)$case->ctc_approvedprobsal : null);
+
+    $probationSalary = $approvedProbSalary !== null
+        ? $approvedProbSalary
+        : ((!empty($case->ctc_newprobsal) && (float)$case->ctc_newprobsal > 0) ? (float)$case->ctc_newprobsal : null);
+
+    // If salary was reduced/adjusted upon approval and probation salary was equal to original proposed salary, align probation salary to approved salary
+    if ($isSalaryAdjusted && $approvedProbSalary === null && $probationSalary == $proposedSalary) {
+        $probationSalary = $effectiveSalary;
+    }
 
     $isHrIsAdmin = $case->is_hr_admin;
 
@@ -245,7 +275,7 @@
 
     $activeProjectCard = $projectCards[0] ?? null;
     $totalContractMonths = $case->tenure_months;
-    $totalContractValue = (float)($case->ctc_price ?: ($proposedSalary * $totalContractMonths));
+    $totalContractValue = (float)($case->ctc_price ?: ($effectiveSalary * $totalContractMonths));
 
     // Prepare Financial Intelligence Data & Subheads Breakdown for project modals
     $projectModalsData = [];
@@ -1088,8 +1118,15 @@ textarea::-webkit-scrollbar-thumb:hover {
 
                                 {{-- Structured Case Cost Grid --}}
                                 <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 5px 24px; text-align: left;">
-                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">Monthly Salary</div>
-                                    <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">{{ number_format($proposedSalary, 2) }}</div>
+                                    <div class="text-muted font-weight-bold" style="font-size: 13px;">{{ $isCaseApprovedOrFulfilled ? 'Approved Monthly Salary' : 'Monthly Salary' }}</div>
+                                    <div class="text-dark font-weight-bold text-right" style="font-size: 15px; color: #0f172a !important;">
+                                        @if($isSalaryAdjusted)
+                                            <span class="text-success font-weight-bold">Rs. {{ number_format($effectiveSalary, 2) }}</span>
+                                            <span class="text-muted d-block small" style="font-size: 10.5px;">(Proposed: Rs. {{ number_format($proposedSalary, 2) }})</span>
+                                        @else
+                                            {{ number_format($effectiveSalary, 2) }}
+                                        @endif
+                                    </div>
                                     
                                     <div class="text-muted font-weight-bold" style="font-size: 13px;">Probation Period</div>
                                     <div class="font-weight-bold text-right {{ $probationMonths ? 'text-warning' : 'text-muted' }}" style="font-size: 14px;">
@@ -1237,18 +1274,27 @@ textarea::-webkit-scrollbar-thumb:hover {
                                             {{-- Row 2: Proposed / Renewed Terms --}}
                                             <tr style="background: #f6faf7;">
                                                 <td>
-                                                    <strong class="text-primary font-weight-bold" style="font-size: 13px;">Proposed Renewal</strong>
+                                                    @if($isCaseApprovedOrFulfilled)
+                                                        <strong class="text-success font-weight-bold" style="font-size: 13px;"><i class="fas fa-check-circle mr-1"></i>Approved Terms</strong>
+                                                    @else
+                                                        <strong class="text-primary font-weight-bold" style="font-size: 13px;">Proposed Renewal</strong>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     <strong class="text-dark font-weight-bold" style="font-size: 15px;">{{ $empDesignation }} ({{ $empGrade }})</strong>
                                                 </td>
                                                 <td class="rajdhani font-weight-bold text-dark" style="font-size: 15px;">
-                                                    {{ $case->ctc_newstartdt ? \Carbon\Carbon::parse($case->ctc_newstartdt)->format('d M, Y') : 'N/A' }}
+                                                    {{ ($case->ctc_approvedstartdt ?: $case->ctc_newstartdt) ? \Carbon\Carbon::parse($case->ctc_approvedstartdt ?: $case->ctc_newstartdt)->format('d M, Y') : 'N/A' }}
                                                     &mdash;
-                                                    {{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M, Y') : 'N/A' }}
+                                                    {{ ($case->ctc_approvedenddt ?: $case->ctc_newenddt) ? \Carbon\Carbon::parse($case->ctc_approvedenddt ?: $case->ctc_newenddt)->format('d M, Y') : 'N/A' }}
                                                 </td>
-                                                <td class="text-right font-weight-bold text-dark rajdhani" style="font-size: 16px;">
-                                                    Rs. {{ number_format($proposedSalary) }}
+                                                <td class="text-right font-weight-bold rajdhani" style="font-size: 16px;">
+                                                    @if($isSalaryAdjusted)
+                                                        <div class="text-success font-weight-bold">Rs. {{ number_format($effectiveSalary) }}</div>
+                                                        <div class="text-muted text-decoration-line-through small" style="font-size: 11px;">Prop: Rs. {{ number_format($proposedSalary) }}</div>
+                                                    @else
+                                                        <span class="text-dark">Rs. {{ number_format($effectiveSalary) }}</span>
+                                                    @endif
                                                 </td>
                                                 <td class="text-right font-weight-bold text-primary rajdhani" style="font-size: 16px;">
                                                     Rs. {{ number_format($annualImpact) }}
@@ -1296,11 +1342,18 @@ textarea::-webkit-scrollbar-thumb:hover {
                                                 <td class="font-weight-bold text-dark" style="font-size: 15px;">{{ $empDesignation }}</td>
                                                 <td class="font-weight-bold text-dark" style="font-size: 15px;">{{ $empGrade }}</td>
                                                 <td class="rajdhani font-weight-bold text-dark" style="font-size: 15px;">
-                                                    {{ $case->ctc_newstartdt ? \Carbon\Carbon::parse($case->ctc_newstartdt)->format('d M, Y') : 'N/A' }}
+                                                    {{ ($case->ctc_approvedstartdt ?: $case->ctc_newstartdt) ? \Carbon\Carbon::parse($case->ctc_approvedstartdt ?: $case->ctc_newstartdt)->format('d M, Y') : 'N/A' }}
                                                     &mdash;
-                                                    {{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M, Y') : 'N/A' }}
+                                                    {{ ($case->ctc_approvedenddt ?: $case->ctc_newenddt) ? \Carbon\Carbon::parse($case->ctc_approvedenddt ?: $case->ctc_newenddt)->format('d M, Y') : 'N/A' }}
                                                 </td>
-                                                <td class="text-right font-weight-bold text-dark rajdhani" style="font-size: 16px;">Rs. {{ number_format($proposedSalary) }}</td>
+                                                <td class="text-right font-weight-bold rajdhani" style="font-size: 16px;">
+                                                    @if($isSalaryAdjusted)
+                                                        <div class="text-success font-weight-bold">Rs. {{ number_format($effectiveSalary) }}</div>
+                                                        <div class="text-muted text-decoration-line-through small" style="font-size: 11px;">Prop: Rs. {{ number_format($proposedSalary) }}</div>
+                                                    @else
+                                                        <span class="text-dark">Rs. {{ number_format($effectiveSalary) }}</span>
+                                                    @endif
+                                                </td>
                                                 <td class="text-right font-weight-bold text-primary rajdhani" style="font-size: 16px;">Rs. {{ number_format($annualImpact) }}</td>
                                             </tr>
                                         </tbody>
@@ -1472,7 +1525,8 @@ textarea::-webkit-scrollbar-thumb:hover {
                                         </div>
                                     </div>
 
-                                    {{-- Send / Forward To Destination Dropdown (Opens Downwards with Real-time Search) --}}
+                                    {{-- Send / Forward To Destination Dropdown (Hidden when case is Approved for HR Fulfillment) --}}
+                                    @if(!$isApprovedForHr && $case->ctc_status !== 'Approved')
                                     <div class="form-group mb-3 position-relative" id="ccDestDropdownContainer">
                                         <label class="font-weight-bold text-muted small mb-1 d-flex justify-content-between" style="font-size: 10px; text-transform: uppercase;">
                                             <span><i class="fas fa-paper-plane text-primary mr-1"></i> Send / Forward To Destination: <span class="text-danger">*</span></span>
@@ -1528,13 +1582,336 @@ textarea::-webkit-scrollbar-thumb:hover {
                                             </div>
                                         </div>
                                     </div>
+                                    @endif
 
                                     {{-- Action Buttons Row: Left = SEND CASE (Prominent), Right = Compact Approve & Compact Cancel (Expanding on hover, ONLY for Approving Authority) --}}
                                     <div class="d-flex align-items-center" style="gap: 8px; width: 100%;">
-                                        @if($role === 'HR' && $case->ctc_status === 'Approved' && $case->ctc_status !== 'Fulfilled')
-                                            <button type="button" onclick="handleAction('fulfill')" class="dg-btn-action dg-btn-success w-100 font-weight-bold" style="height: 40px; font-size: 13px; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center;">
-                                                <i class="fas fa-check-double mr-1.5"></i> FULFILL CONTRACT CASE
-                                            </button>
+                                         @if($isApprovedForHr)
+                                             @if($isHiring && !$hasEmployee)
+                                                 <div class="p-3 rounded border w-100" style="background: #eff6ff; border-color: #93c5fd !important; border-radius: 8px;">
+                                                     <div class="d-flex align-items-center justify-content-between mb-2">
+                                                         <span class="badge badge-primary px-2.5 py-1 font-weight-bold rajdhani" style="font-size: 11.5px; letter-spacing: 0.5px; background: #2563eb;">
+                                                             <i class="fas fa-check-circle mr-1"></i> EXECUTIVE APPROVAL COMPLETE
+                                                         </span>
+                                                         <span class="text-primary font-weight-bold rajdhani small">STEP 1: ADD EMPLOYEE</span>
+                                                     </div>
+                                                     <p class="text-dark small mb-2.5 font-weight-500" style="font-size: 12px; line-height: 1.45;">
+                                                         Candidate <strong>{{ $case->ctc_empnamecomp }}</strong> has been approved. You can now verify/adjust the <strong>Approved Salary</strong> & terms and generate the official Employee ID before contract issuance.
+                                                     </p>
+                                                     <button type="button" class="btn btn-primary w-100 font-weight-bold d-flex align-items-center justify-content-center shadow-sm" onclick="openAddEmployeeModal()" style="height: 42px; font-size: 13.5px; border-radius: 6px; gap: 8px; background: #2563eb; border-color: #2563eb;">
+                                                         <i class="fas fa-user-plus"></i>
+                                                         <span class="rajdhani font-weight-bold" style="letter-spacing: 0.5px;">ADD EMPLOYEE TO SYSTEM</span>
+                                                     </button>
+                                                 </div>
+                                             @else
+                                                 <div class="p-3 rounded border w-100" style="background: #f0fdf4; border-color: #86efac !important; border-radius: 8px;">
+                                                     <div class="d-flex align-items-center justify-content-between mb-2">
+                                                         <span class="badge badge-success px-2.5 py-1 font-weight-bold rajdhani" style="font-size: 11.5px; letter-spacing: 0.5px; background: #16a34a;">
+                                                             <i class="fas fa-check-double mr-1"></i> READY FOR ISSUANCE
+                                                         </span>
+                                                         <span class="text-success font-weight-bold rajdhani small">
+                                                             {{ $isExtension ? 'CONTRACT EXTENSION' : ($isRenewal ? 'CONTRACT RENEWAL' : 'STEP 2: FULFILLMENT') }}
+                                                         </span>
+                                                     </div>
+                                                     @php
+                                                         $empProfileCheck = null;
+                                                         if (!empty($case->ctc_emp_id)) {
+                                                             $empProfileCheck = \App\Services\EmployeeCreationService::checkEmployeeProfileCompleteness($case->ctc_emp_id);
+                                                         }
+                                                         $isProfileIncomplete = $empProfileCheck && !$empProfileCheck['is_complete'];
+                                                     @endphp
+
+                                                     @if($hasEmployee)
+                                                         <div class="p-2 mb-2.5 bg-white rounded border d-flex align-items-center justify-content-between" style="border-color: #bbf7d0 !important; font-size: 12px;">
+                                                             <div class="text-truncate mr-2">
+                                                                 <span class="text-muted small d-block font-weight-bold">LINKED EMPLOYEE:</span>
+                                                                 <strong class="text-dark">{{ $case->ctc_empnamecomp }}</strong>
+                                                             </div>
+                                                             <span class="badge badge-dark px-2.5 py-1 font-mono font-weight-bold" style="font-size: 11.5px; font-family: monospace;">{{ $case->ctc_emp_id }}</span>
+                                                         </div>
+                                                     @endif
+
+                                                     @if($isProfileIncomplete)
+                                                         <div class="alert alert-warning border mb-3 p-3 shadow-sm" style="background: #fffbeb; border-color: #fde68a !important; border-left: 4px solid #f59e0b !important; border-radius: 8px;">
+                                                             <div class="d-flex align-items-start">
+                                                                 <i class="fas fa-exclamation-triangle text-warning mr-2.5 mt-0.5" style="font-size: 18px;"></i>
+                                                                 <div class="flex-grow-1">
+                                                                     <div class="font-weight-bold text-dark rajdhani" style="font-size: 13px; letter-spacing: 0.5px;">
+                                                                         MANDATORY EMPLOYEE PROFILE INCOMPLETE
+                                                                     </div>
+                                                                     <div class="text-muted small mt-1" style="font-size: 11.5px; line-height: 1.45;">
+                                                                         Contract fulfillment is locked until Division completes the mandatory profile sections:
+                                                                         <div class="mt-1">
+                                                                             @foreach($empProfileCheck['missing_sections'] as $sec)
+                                                                                 <span class="badge badge-danger mr-1 mb-1 font-weight-bold" style="font-size: 10px; background: #dc2626;"><i class="fas fa-times-circle mr-1"></i>{{ $sec }}</span>
+                                                                             @endforeach
+                                                                         </div>
+                                                                     </div>
+                                                                     <div class="mt-2">
+                                                                         <a href="{{ route('divhr.employee.edit', $case->ctc_emp_id) }}" target="_blank" class="btn btn-sm btn-outline-dark font-weight-bold rajdhani" style="border-radius: 6px; font-size: 11.5px; background: #ffffff;">
+                                                                             <i class="fas fa-user-edit text-primary mr-1"></i> Open & Complete Employee Profile <i class="fas fa-external-link-alt ml-1 small text-muted"></i>
+                                                                         </a>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                     @endif
+
+                                                     @if($isRenewal || $isRehiring)
+                                                         {{-- Renewal: All Contract Terms (Legacy Editable before Contract Issuance) --}}
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani d-flex justify-content-between" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <span><i class="fas fa-money-bill-wave text-success mr-1"></i> Monthly Salary (Rs.): <span class="text-danger">*</span></span>
+                                                                 </label>
+                                                                 <input type="number" step="any" id="fulfillApprovedSalary" class="form-control form-control-sm font-weight-bold text-success font-mono" style="border-radius: 6px; font-size: 13px; height: 34px; border-color: #86efac;" value="{{ (int)($case->ctc_approvedsalary ?: $case->ctc_newsalary) }}" required>
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-calendar-check text-success mr-1"></i> Formal Signing Date: <span class="text-danger">*</span>
+                                                                 </label>
+                                                                 <input type="date" id="fulfillSignDate" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #86efac;" value="{{ date('Y-m-d') }}" required>
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-user-clock text-warning mr-1"></i> Probation Period (Months):
+                                                                 </label>
+                                                                 <input type="number" min="0" max="24" id="fulfillApprovedProb" class="form-control form-control-sm font-weight-bold" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #cbd5e1;" value="{{ $probationMonths ?? 0 }}">
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-coins text-warning mr-1"></i> Probation Salary (Rs.):
+                                                                 </label>
+                                                                 <input type="number" step="any" id="fulfillApprovedProbSal" class="form-control form-control-sm font-weight-bold text-warning font-mono" style="border-radius: 6px; font-size: 13px; height: 34px; border-color: #cbd5e1;" value="{{ (int)($probationSalary ?: ($case->ctc_approvedsalary ?: $case->ctc_newsalary)) }}">
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-calendar-alt text-primary mr-1"></i> Contract Start Date: <span class="text-danger">*</span>
+                                                                 </label>
+                                                                 <input type="date" id="fulfillStartDate" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #cbd5e1;" value="{{ $case->ctc_approvedstartdt ?: $case->ctc_newstartdt }}" required>
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-calendar-times text-danger mr-1"></i> Contract End Date: <span class="text-danger">*</span>
+                                                                 </label>
+                                                                 <input type="date" id="fulfillEndDate" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #cbd5e1;" value="{{ $case->ctc_approvedenddt ?: $case->ctc_newenddt }}" required>
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-user-tag text-secondary mr-1"></i> Job Title / Designation:
+                                                                 </label>
+                                                                 <input type="text" id="fulfillJobTitle" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;" value="{{ $case->ctc_approvedjobtitle ?: $case->ctc_newjobtitle }}">
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-layer-group text-secondary mr-1"></i> Grade / Rank:
+                                                                 </label>
+                                                                 <input type="text" id="fulfillGrade" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;" value="{{ $case->ctc_approvedgrade ?: $case->ctc_newgrade }}">
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="form-group mb-2">
+                                                             <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                 <i class="fas fa-file-contract text-secondary mr-1"></i> Contract Type:
+                                                             </label>
+                                                             <select id="fulfillCtrType" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;">
+                                                                 @php
+                                                                     $currType = (int)($case->ctc_approvedctrtype ?: ($case->ctc_newctrtype ?: 1));
+                                                                 @endphp
+                                                                 <option value="1" {{ $currType === 1 ? 'selected' : '' }}>1 - Full Time Contract</option>
+                                                                 <option value="2" {{ $currType === 2 ? 'selected' : '' }}>2 - Part Time Contract</option>
+                                                                 <option value="3" {{ $currType === 3 ? 'selected' : '' }}>3 - Project Based Contract</option>
+                                                             </select>
+                                                         </div>
+
+                                                         @php
+                                                            $showMismatchNotice = false;
+                                                            $defaultMismatchReason = '';
+                                                            if (!empty($activeContract)) {
+                                                                $oldEndDt = $activeContract->ctr_termindt ? \Carbon\Carbon::parse($activeContract->ctr_termindt) : ($activeContract->ctr_enddt ? \Carbon\Carbon::parse($activeContract->ctr_enddt) : null);
+                                                                $newStartDt = $case->ctc_approvedstartdt ? \Carbon\Carbon::parse($case->ctc_approvedstartdt) : ($case->ctc_newstartdt ? \Carbon\Carbon::parse($case->ctc_newstartdt) : null);
+                                                                if ($oldEndDt && $newStartDt && !$newStartDt->isSameDay($oldEndDt->copy()->addDay())) {
+                                                                    $showMismatchNotice = true;
+                                                                    $defaultMismatchReason = $case->ctc_terminremarks ?: ('Contract renewed early with effect from ' . $newStartDt->format('d-M-Y') . ' as approved by competent authority.');
+                                                                }
+                                                            }
+                                                        @endphp
+                                                        @if($showMismatchNotice)
+                                                            <div class="form-group mb-2.5">
+                                                                <label class="font-weight-bold text-warning small mb-1 rajdhani" style="font-size: 11.5px; text-transform: uppercase;">
+                                                                    <i class="fas fa-exclamation-triangle text-warning mr-1"></i> Early Renewal / Date Mismatch Reason:
+                                                                </label>
+                                                                <textarea id="fulfillTerminRemarks" class="form-control form-control-sm border-warning" rows="2" style="border-radius: 6px; font-size: 12px;" placeholder="Reason for early renewal / date mismatch...">{{ $defaultMismatchReason }}</textarea>
+                                                                <small class="text-muted font-italic d-block mt-0.5" style="font-size: 10.5px;">Previous contract ends on a different date than renewal start date.</small>
+                                                            </div>
+                                                        @else
+                                                            <div class="form-group mb-2.5">
+                                                                <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                    <i class="fas fa-comment-alt text-secondary mr-1"></i> Renewal Remarks:
+                                                                </label>
+                                                                <textarea id="fulfillTerminRemarks" class="form-control form-control-sm" rows="2" style="border-radius: 6px; font-size: 12px;" placeholder="Optional remarks on renewal...">{{ $case->ctc_terminremarks }}</textarea>
+                                                            </div>
+                                                        @endif
+                                                        @if($isProfileIncomplete)
+                                                            <button type="button" disabled class="btn btn-secondary w-100 font-weight-bold d-flex align-items-center justify-content-center shadow-sm" style="height: 42px; font-size: 13px; border-radius: 6px; gap: 8px; cursor: not-allowed; opacity: 0.75;" title="Fulfillment blocked: Division must fill mandatory profile sections (Personal 1, Personal 2, Education).">
+                                                                <i class="fas fa-lock"></i>
+                                                                <span class="rajdhani font-weight-bold" style="letter-spacing: 0.5px;">FULFILLMENT BLOCKED (PROFILE INCOMPLETE)</span>
+                                                            </button>
+                                                        @else
+                                                            <button type="button" onclick="submitFulfillment()" class="btn btn-success w-100 font-weight-bold d-flex align-items-center justify-content-center shadow-sm" style="height: 42px; font-size: 13.5px; border-radius: 6px; gap: 8px; background: #15803d; border-color: #15803d;">
+                                                                <i class="fas fa-sync-alt"></i>
+                                                                <span class="rajdhani font-weight-bold" style="letter-spacing: 0.5px;">FULFILL & ISSUE RENEWAL</span>
+                                                            </button>
+                                                        @endif
+                                                     @elseif($isExtension)
+                                                         {{-- Extension: All Extension Terms Editable --}}
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-calendar-times text-primary mr-1"></i> Extended Until (End Date): <span class="text-danger">*</span>
+                                                                 </label>
+                                                                 <input type="date" id="fulfillEndDate" class="form-control form-control-sm font-weight-bold" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #86efac;" value="{{ $case->ctc_approvedenddt ?: $case->ctc_newenddt }}" required>
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-money-bill-wave text-success mr-1"></i> Monthly Salary (Rs.):
+                                                                 </label>
+                                                                 <input type="number" step="any" id="fulfillApprovedSalary" class="form-control form-control-sm font-weight-bold text-success font-mono" style="border-radius: 6px; font-size: 13px; height: 34px;" value="{{ (int)($case->ctc_approvedsalary ?: $case->ctc_newsalary) }}">
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-user-tag text-secondary mr-1"></i> Job Title / Designation:
+                                                                 </label>
+                                                                 <input type="text" id="fulfillJobTitle" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;" value="{{ $case->ctc_approvedjobtitle ?: $case->ctc_newjobtitle }}">
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-layer-group text-secondary mr-1"></i> Grade / Rank:
+                                                                 </label>
+                                                                 <input type="text" id="fulfillGrade" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;" value="{{ $case->ctc_approvedgrade ?: $case->ctc_newgrade }}">
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="form-group mb-2.5">
+                                                             <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                 <i class="fas fa-comment-alt text-primary mr-1"></i> Reason for Extension: <span class="text-danger">*</span>
+                                                             </label>
+                                                             <textarea id="fulfillTerminRemarks" class="form-control form-control-sm" rows="2" style="border-radius: 6px; font-size: 12px; border-color: #86efac;" placeholder="Reason for extending contract tenure..." required>{{ $case->ctc_terminremarks }}</textarea>
+                                                         </div>
+
+                                                         @if($isProfileIncomplete)
+                                                             <button type="button" disabled class="btn btn-secondary w-100 font-weight-bold d-flex align-items-center justify-content-center shadow-sm" style="height: 42px; font-size: 13px; border-radius: 6px; gap: 8px; cursor: not-allowed; opacity: 0.75;" title="Fulfillment blocked: Division must fill mandatory profile sections (Personal 1, Personal 2, Education).">
+                                                                 <i class="fas fa-lock"></i>
+                                                                 <span class="rajdhani font-weight-bold" style="letter-spacing: 0.5px;">FULFILLMENT BLOCKED (PROFILE INCOMPLETE)</span>
+                                                             </button>
+                                                         @else
+                                                             <button type="button" onclick="submitFulfillment()" class="btn btn-success w-100 font-weight-bold d-flex align-items-center justify-content-center shadow-sm" style="height: 42px; font-size: 13.5px; border-radius: 6px; gap: 8px; background: #15803d; border-color: #15803d;">
+                                                                 <i class="fas fa-calendar-plus"></i>
+                                                                 <span class="rajdhani font-weight-bold" style="letter-spacing: 0.5px;">FULFILL & EXTEND CONTRACT</span>
+                                                             </button>
+                                                         @endif
+                                                     @else
+                                                         {{-- Default / Hiring (Step 2 - New Hiring with Full Editable Terms & Probation) --}}
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani d-flex justify-content-between" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <span><i class="fas fa-money-bill-wave text-success mr-1"></i> Monthly Salary (Rs.): <span class="text-danger">*</span></span>
+                                                                 </label>
+                                                                 <input type="number" step="any" id="fulfillApprovedSalary" class="form-control form-control-sm font-weight-bold text-success font-mono" style="border-radius: 6px; font-size: 13px; height: 34px; border-color: #86efac;" value="{{ (int)($case->ctc_approvedsalary ?: $case->ctc_newsalary) }}" required>
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-calendar-check text-success mr-1"></i> Formal Signing Date: <span class="text-danger">*</span>
+                                                                 </label>
+                                                                 <input type="date" id="fulfillSignDate" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #86efac;" value="{{ date('Y-m-d') }}" required>
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-user-clock text-warning mr-1"></i> Probation Period (Months):
+                                                                 </label>
+                                                                 <input type="number" min="0" max="24" id="fulfillApprovedProb" class="form-control form-control-sm font-weight-bold" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #cbd5e1;" value="{{ $probationMonths ?? 0 }}">
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-coins text-warning mr-1"></i> Probation Salary (Rs.):
+                                                                 </label>
+                                                                 <input type="number" step="any" id="fulfillApprovedProbSal" class="form-control form-control-sm font-weight-bold text-warning font-mono" style="border-radius: 6px; font-size: 13px; height: 34px; border-color: #cbd5e1;" value="{{ (int)($probationSalary ?: ($case->ctc_approvedsalary ?: $case->ctc_newsalary)) }}">
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-calendar-alt text-primary mr-1"></i> Contract Start Date: <span class="text-danger">*</span>
+                                                                 </label>
+                                                                 <input type="date" id="fulfillStartDate" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #cbd5e1;" value="{{ $case->ctc_approvedstartdt ?: $case->ctc_newstartdt }}" required>
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-calendar-times text-danger mr-1"></i> Contract End Date: <span class="text-danger">*</span>
+                                                                 </label>
+                                                                 <input type="date" id="fulfillEndDate" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px; border-color: #cbd5e1;" value="{{ $case->ctc_approvedenddt ?: $case->ctc_newenddt }}" required>
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row">
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-user-tag text-secondary mr-1"></i> Job Title / Designation:
+                                                                 </label>
+                                                                 <input type="text" id="fulfillJobTitle" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;" value="{{ $case->ctc_approvedjobtitle ?: $case->ctc_newjobtitle }}">
+                                                             </div>
+                                                             <div class="col-md-6 form-group mb-2">
+                                                                 <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                     <i class="fas fa-layer-group text-secondary mr-1"></i> Grade / Rank:
+                                                                 </label>
+                                                                 <input type="text" id="fulfillGrade" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;" value="{{ $case->ctc_approvedgrade ?: $case->ctc_newgrade }}">
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="form-group mb-2">
+                                                             <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11px; text-transform: uppercase;">
+                                                                 <i class="fas fa-file-contract text-secondary mr-1"></i> Contract Type:
+                                                             </label>
+                                                             <select id="fulfillCtrType" class="form-control form-control-sm" style="border-radius: 6px; font-size: 12px; height: 34px;">
+                                                                 @php
+                                                                     $currType = (int)($case->ctc_approvedctrtype ?: ($case->ctc_newctrtype ?: 1));
+                                                                 @endphp
+                                                                 <option value="1" {{ $currType === 1 ? 'selected' : '' }}>1 - Full Time Contract</option>
+                                                                 <option value="2" {{ $currType === 2 ? 'selected' : '' }}>2 - Part Time Contract</option>
+                                                                 <option value="3" {{ $currType === 3 ? 'selected' : '' }}>3 - Project Based Contract</option>
+                                                             </select>
+                                                         </div>
+
+                                                         @if($isProfileIncomplete)
+                                                             <button type="button" disabled class="btn btn-secondary w-100 font-weight-bold d-flex align-items-center justify-content-center shadow-sm" style="height: 42px; font-size: 13px; border-radius: 6px; gap: 8px; cursor: not-allowed; opacity: 0.75;" title="Fulfillment blocked: Division must fill mandatory profile sections (Personal 1, Personal 2, Education).">
+                                                                 <i class="fas fa-lock"></i>
+                                                                 <span class="rajdhani font-weight-bold" style="letter-spacing: 0.5px;">FULFILLMENT BLOCKED (PROFILE INCOMPLETE)</span>
+                                                             </button>
+                                                         @else
+                                                             <button type="button" onclick="submitFulfillment()" class="btn btn-success w-100 font-weight-bold d-flex align-items-center justify-content-center shadow-sm" style="height: 42px; font-size: 13.5px; border-radius: 6px; gap: 8px; background: #15803d; border-color: #15803d;">
+                                                                 <i class="fas fa-file-signature"></i>
+                                                                 <span class="rajdhani font-weight-bold" style="letter-spacing: 0.5px;">FULFILL & ISSUE CONTRACT</span>
+                                                             </button>
+                                                         @endif
+                                                     @endif
+                                                 </div>
+                                             @endif
                                         @else
                                             {{-- Left: Prominent Send Case Button --}}
                                             <button type="button" onclick="handleAction('forward')" id="btnForward" class="btn-action-send flex-grow-1" style="height: 40px; font-size: 13.5px; letter-spacing: 0.6px; display: inline-flex; align-items: center; justify-content: center;">
@@ -2268,6 +2645,148 @@ body.fin-modal-open > .modal-backdrop {
 </div>
 @endforeach
 
+{{-- ═══════════════════════════════════════════════════════════════════════ --}}
+{{-- ADD EMPLOYEE MODAL (Legacy Hg Hiring Flow with Editable Approved Terms) --}}
+{{-- ═══════════════════════════════════════════════════════════════════════ --}}
+<div class="modal fade" id="modalAddEmployee" tabindex="-1" role="dialog" aria-labelledby="modalAddEmployeeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div class="modal-header py-3 px-4" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title font-weight-bold text-dark rajdhani mb-0" id="modalAddEmployeeLabel" style="font-size: 17px;">
+                    <i class="fas fa-id-card mr-2 text-primary"></i> ADD EMPLOYEE RECORD (HIRING CASE #{{ $case->ctc_id }})
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formAddEmployee">
+                @csrf
+                <div class="modal-body p-4" style="max-height: 75vh; overflow-y: auto;">
+                    {{-- Live Employee ID Preview Card --}}
+                    <div class="p-3 mb-3.5 rounded border text-center shadow-sm" style="background: #f1f5f9; border-color: #cbd5e1 !important;">
+                        <span class="text-muted small text-uppercase font-weight-bold d-block mb-1 rajdhani" style="letter-spacing: 0.8px;">Generated Official Employee ID (Live Preview)</span>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span class="badge badge-dark px-3.5 py-1.5 font-weight-bold" style="font-size: 1.35rem; letter-spacing: 1.5px; font-family: monospace;" id="previewEmpIdBadge">--/--/--/----</span>
+                        </div>
+                    </div>
+
+                    {{-- Section 1: Candidate Basic Info --}}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">
+                                Candidate Full Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="emp_name" id="modalEmpName" class="form-control" style="border-radius: 6px; font-size: 13px;" value="{{ $case->ctc_empnamecomp }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">
+                                Department / Unit <span class="badge badge-light border text-muted ml-1" style="font-size: 10px;"><i class="fas fa-lock mr-1"></i>LOCKED</span>
+                            </label>
+                            @php
+                                $targetUnitId = $case->ctc_approvedunt_id ?: ($case->ctc_newunt_id ?: $case->ctc_unt_id);
+                                $deptObj = isset($departments) ? $departments->firstWhere('unt_id', $targetUnitId) : null;
+                                $deptLabel = $deptObj ? ($deptObj->unt_name . ' (' . ($deptObj->unt_namesh ?: 'Unit ' . $targetUnitId) . ')') : ($case->division_name ?: 'Approved Unit ' . $targetUnitId);
+                            @endphp
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-light text-muted border-right-0" style="border-radius: 6px 0 0 6px; font-size: 13px;">
+                                        <i class="fas fa-building text-secondary"></i>
+                                    </span>
+                                </div>
+                                <input type="text" class="form-control bg-light border-left-0 text-dark font-weight-bold" style="border-radius: 0 6px 6px 0; font-size: 13px; cursor: not-allowed;" value="{{ $deptLabel }}" readonly disabled>
+                            </div>
+                            <input type="hidden" name="emp_unt_id" id="modalEmpUntId" value="{{ $targetUnitId }}">
+                            <small class="text-muted" style="font-size: 11px;">Fixed to approved department from contract case.</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">
+                                CNIC (National ID) <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="emp_cnic" id="modalEmpCnic" class="form-control font-mono font-weight-bold text-primary" style="border-radius: 6px; font-size: 13px;" placeholder="42101-1234567-1" value="{{ $case->ctc_cnic ?: ($case->candidate_cnic ?: '') }}" required>
+                            <small class="text-muted" style="font-size: 11px;">Pre-filled from case initiation. Format: <code>XXXXX-XXXXXXX-X</code></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">
+                                Joining Date / Start Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="emp_joindt" id="modalEmpJoinDt" class="form-control" style="border-radius: 6px; font-size: 13px;" value="{{ $case->ctc_approvedstartdt ?: $case->ctc_newstartdt }}" required>
+                        </div>
+                    </div>
+
+                    {{-- Section 2: Approved Terms & Salary Adjustment Panel --}}
+                    <div class="p-3 mb-3 rounded border" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="rajdhani font-weight-bold text-dark" style="font-size: 13px; letter-spacing: 0.5px;">
+                                <i class="fas fa-coins text-success mr-1"></i> APPROVED TERMS & SALARY
+                            </span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11.5px; text-transform: uppercase;">
+                                    Approved Monthly Salary (Rs.) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" step="any" name="ctc_approvedsalary" id="modalApprovedSalary" class="form-control font-weight-bold text-success font-mono" style="border-radius: 6px; font-size: 14px;" value="{{ (int)($case->ctc_approvedsalary ?: $case->ctc_newsalary) }}" required>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11.5px; text-transform: uppercase;">
+                                    Probation Salary (Rs.)
+                                </label>
+                                <input type="number" step="any" name="ctc_approvedprobsal" id="modalApprovedProbSal" class="form-control font-mono" style="border-radius: 6px; font-size: 13px;" value="{{ (int)($case->ctc_approvedprobsal ?: $case->ctc_newprobsal) }}">
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 11.5px; text-transform: uppercase;">
+                                    Probation Months
+                                </label>
+                                <input type="number" name="ctc_approvedprob" id="modalApprovedProb" class="form-control" style="border-radius: 6px; font-size: 13px;" value="{{ $case->ctc_approvedprob ?: ($case->ctc_newprob ?: 3) }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Section 3: Designation, Grade & Tenure --}}
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">Job Title / Designation</label>
+                            <input type="text" name="emp_title" id="modalEmpTitle" class="form-control" style="border-radius: 6px; font-size: 13px;" value="{{ $case->ctc_approvedjobtitle ?: $case->ctc_newjobtitle }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">Grade / Rank</label>
+                            <input type="text" name="emp_rank" id="modalEmpRank" class="form-control" style="border-radius: 6px; font-size: 13px;" value="{{ $case->ctc_approvedgrade ?: $case->ctc_newgrade }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">Contract End Date</label>
+                            <input type="date" name="ctc_approvedenddt" id="modalApprovedEndDt" class="form-control" style="border-radius: 6px; font-size: 13px;" value="{{ $case->ctc_approvedenddt ?: $case->ctc_newenddt }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">Contract Type</label>
+                            <select name="ctc_approvedctrtype" id="modalApprovedCtrType" class="form-control" style="border-radius: 6px; font-size: 13px;">
+                                @php
+                                    $currType = (int)($case->ctc_approvedctrtype ?: ($case->ctc_newctrtype ?: 1));
+                                @endphp
+                                <option value="1" {{ $currType === 1 ? 'selected' : '' }}>1 - Full Time Contract</option>
+                                <option value="2" {{ $currType === 2 ? 'selected' : '' }}>2 - Part Time Contract</option>
+                                <option value="3" {{ $currType === 3 ? 'selected' : '' }}>3 - Project Based Contract</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2.5 px-4" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px;">
+                    <button type="button" class="btn btn-secondary px-3.5 py-1.5 font-weight-bold rajdhani" data-dismiss="modal" style="border-radius: 6px; font-size: 12.5px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 py-1.5 font-weight-bold rajdhani" id="btnSaveEmployee" style="background: #2563eb; border-color: #2563eb; border-radius: 6px; font-size: 13px;">
+                        <i class="fas fa-save mr-1.5"></i> SAVE & LINK EMPLOYEE
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 $(document).ready(function() {
@@ -2650,6 +3169,264 @@ $(document).ready(function() {
                 Swal.fire({ icon: 'error', title: 'Upload Failed', text: err, confirmButtonColor: '#5F7858' });
             }
         });
+    });
+
+    // ── Live Employee ID Generator (Legacy Access Formula) ────────
+    const deptMapData = @json($deptMap ?? []);
+
+    function updateEmpIdPreview() {
+        const untId = $('#modalEmpUntId').val();
+        const joinDt = $('#modalEmpJoinDt').val();
+        const cnic = ($('#modalEmpCnic').val() || '').trim();
+
+        let deptNum = deptMapData[untId] || String(untId).padStart(2, '0').slice(-2);
+        
+        let yy = '--', mm = '--';
+        if (joinDt) {
+            const parts = joinDt.split('-');
+            if (parts.length === 3) {
+                yy = parts[0].slice(-2);
+                mm = parts[1];
+            }
+        }
+
+        let suffix = '----';
+        if (/^\d{5}-\d{7}-\d{1}$/.test(cnic)) {
+            const mid = cnic.substring(10, 13);
+            const last = cnic.slice(-1);
+            suffix = mid + last;
+        } else {
+            const digits = cnic.replace(/\D/g, '');
+            if (digits.length === 13) {
+                const mid = digits.substring(9, 12);
+                const last = digits.slice(-1);
+                suffix = mid + last;
+            }
+        }
+
+        const previewId = `${deptNum}-${yy}-${mm}-${suffix}`;
+        $('#previewEmpIdBadge').text(previewId);
+    }
+
+    $('#modalEmpUntId, #modalEmpJoinDt, #modalEmpCnic').on('input change', updateEmpIdPreview);
+    $('#modalAddEmployee').on('shown.bs.modal', updateEmpIdPreview);
+
+    // ── Open Add Employee Modal (Strictly Requires Remarks First) ─
+    window.openAddEmployeeModal = function() {
+        const userRemarks = ($('#decisionRemarks').val() || '').trim();
+        if (!userRemarks) {
+            Swal.fire({
+                title: 'Remarks Required!',
+                text: 'Please write your remarks in the Action Box above before adding the employee.',
+                icon: 'warning',
+                confirmButtonColor: '#2563eb'
+            });
+            $('#decisionRemarks').focus();
+            return;
+        }
+        $('#modalAddEmployee').modal('show');
+    };
+
+    // ── Save Employee via AJAX (Strictly Saves User Remarks) ────────
+    $('#formAddEmployee').on('submit', function(e) {
+        e.preventDefault();
+
+        const userRemarks = ($('#decisionRemarks').val() || '').trim();
+        if (!userRemarks) {
+            Swal.fire({
+                title: 'Remarks Required!',
+                text: 'Please write your remarks in the Action Box above before adding the employee.',
+                icon: 'warning',
+                confirmButtonColor: '#2563eb'
+            });
+            $('#modalAddEmployee').modal('hide');
+            $('#decisionRemarks').focus();
+            return;
+        }
+
+        const cnic = $('#modalEmpCnic').val().trim();
+        const joinDt = $('#modalEmpJoinDt').val();
+        const name = $('#modalEmpName').val().trim();
+        const unitId = $('#modalEmpUntId').val();
+
+        if (!cnic || !joinDt || !name || !unitId) {
+            Swal.fire('Required Fields', 'Please fill in mandatory fields: Candidate Name, Department, CNIC, and Joining Date.', 'warning');
+            return;
+        }
+
+        const btn = $('#btnSaveEmployee');
+        const origHtml = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1.5"></i> Registering...');
+
+        // Format remarks matching conversation trail numbering
+        let formattedRemarks = userRemarks;
+        const cleanedLines = userRemarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        if (cleanedLines.length > 0) {
+            const startNum = {{ $nextRemarkNumber ?? 1 }};
+            let liItems = cleanedLines.map(line => `<li>${line.replace(/^\d+\.\s*/, '').trim()}</li>`).join('');
+            formattedRemarks = `<ol start="${startNum}">${liItems}</ol>`;
+        }
+
+        const formData = $(this).serialize() + '&remarks=' + encodeURIComponent(formattedRemarks);
+
+        $.ajax({
+            url: "{{ route('hr.contract-cases.add-employee', $case->ctc_id) }}",
+            method: 'POST',
+            data: formData,
+            success: function(resp) {
+                $('#modalAddEmployee').modal('hide');
+                Swal.fire({
+                    title: 'Employee Registered!',
+                    text: resp.message || 'Employee record created and linked successfully.',
+                    icon: 'success',
+                    confirmButtonColor: '#2563eb',
+                }).then(() => {
+                    window.location.reload();
+                });
+            },
+            error: function(err) {
+                btn.prop('disabled', false).html(origHtml);
+                const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Failed to register employee record.';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    });
+
+    // ── Submit Fulfillment with Formal Signing Date & Terms ───────
+    window.submitFulfillment = function() {
+        const userDecisionRemarks = ($('#decisionRemarks').val() || '').trim();
+        if (!userDecisionRemarks) {
+            Swal.fire({
+                title: 'Remarks Required!',
+                text: 'Please write your remarks in the Action Box above before fulfilling the contract case.',
+                icon: 'warning',
+                confirmButtonColor: '#15803d'
+            });
+            $('#decisionRemarks').focus();
+            return;
+        }
+
+        const isExtension = {{ $isExtension ? 'true' : 'false' }};
+        const signDate = $('#fulfillSignDate').val();
+        const approvedSal = $('#fulfillApprovedSalary').val();
+        const approvedProb = $('#fulfillApprovedProb').val();
+        const approvedProbSal = $('#fulfillApprovedProbSal').val();
+        const startDate = $('#fulfillStartDate').val();
+        const endDate = $('#fulfillEndDate').val();
+        const jobTitle = ($('#fulfillJobTitle').val() || '').trim();
+        const grade = ($('#fulfillGrade').val() || '').trim();
+        const ctrType = $('#fulfillCtrType').val();
+        const terminRemarks = ($('#fulfillTerminRemarks').val() || '').trim();
+
+        if (isExtension && !terminRemarks) {
+            Swal.fire('Reason Required', 'Please enter reason for contract extension.', 'warning');
+            $('#fulfillTerminRemarks').focus();
+            return;
+        }
+
+        if (!isExtension && !signDate) {
+            Swal.fire('Signing Date Required', 'Please select the formal contract signing date.', 'warning');
+            $('#fulfillSignDate').focus();
+            return;
+        }
+
+        const actionText = isExtension ? 'Extend Contract?' : 'Issue & Fulfill Contract?';
+        const confirmMsg = isExtension 
+            ? 'This will extend the employee contract tenure and mark the case as Fulfilled.' 
+            : 'This will issue the new contract with approved salary in the employee roster and mark the case as Fulfilled.';
+
+        Swal.fire({
+            title: actionText,
+            text: confirmMsg,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: isExtension ? 'Yes, Extend Contract' : 'Yes, Issue Contract',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#15803d',
+        }).then((res) => {
+            if (res.isConfirmed) {
+                Swal.fire({
+                    title: 'Processing Fulfillment...',
+                    text: 'Updating contract and employee records...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                const postData = {
+                    _token: '{{ csrf_token() }}',
+                    ctc_newsigndt: signDate
+                };
+                if (approvedSal) {
+                    postData.ctc_approvedsalary = approvedSal;
+                }
+                if (approvedProb !== undefined && approvedProb !== '') {
+                    postData.ctc_approvedprob = approvedProb;
+                }
+                if (approvedProbSal !== undefined && approvedProbSal !== '') {
+                    postData.ctc_approvedprobsal = approvedProbSal;
+                }
+                if (startDate) {
+                    postData.ctc_approvedstartdt = startDate;
+                }
+                if (endDate) {
+                    postData.ctc_approvedenddt = endDate;
+                }
+                if (jobTitle) {
+                    postData.ctc_approvedjobtitle = jobTitle;
+                }
+                if (grade) {
+                    postData.ctc_approvedgrade = grade;
+                }
+                if (ctrType) {
+                    postData.ctc_approvedctrtype = ctrType;
+                }
+                if (terminRemarks) {
+                    postData.ctc_terminremarks = terminRemarks;
+                }
+
+                // Format remarks matching conversation trail numbering
+                const cleanedLines = userDecisionRemarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                if (cleanedLines.length > 0) {
+                    const startNum = {{ $nextRemarkNumber ?? 1 }};
+                    let liItems = cleanedLines.map(line => `<li>${line.replace(/^\d+\.\s*/, '').trim()}</li>`).join('');
+                    postData.remarks = `<ol start="${startNum}">${liItems}</ol>`;
+                } else {
+                    postData.remarks = userDecisionRemarks;
+                }
+
+                $.ajax({
+                    url: "{{ route('hr.contract-cases.fulfill', $case->ctc_id) }}",
+                    method: 'POST',
+                    data: postData,
+                    success: function(resp) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: resp.message || 'Contract Case fulfilled successfully.',
+                            icon: 'success',
+                            confirmButtonColor: '#15803d',
+                        }).then(() => {
+                            window.location.href = "{{ route('hr.contract-cases.index') }}";
+                        });
+                    },
+                    error: function(err) {
+                        const msg = err.responseJSON && err.responseJSON.message ? err.responseJSON.message : 'Failed to fulfill contract case.';
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            }
+        });
+    };
+
+    // Auto-sync probation salary when approved salary changes (unless user explicitly edited it)
+    $(document).on('input', '#fulfillApprovedSalary', function() {
+        const newSal = $(this).val();
+        const probSalInput = $('#fulfillApprovedProbSal');
+        if (probSalInput.length && !probSalInput.data('user-modified')) {
+            probSalInput.val(newSal);
+        }
+    });
+    $(document).on('input', '#fulfillApprovedProbSal', function() {
+        $(this).data('user-modified', true);
     });
 });
 

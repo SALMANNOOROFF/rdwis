@@ -20,6 +20,11 @@ class AdminReversalController extends Controller
     {
         $this->authorize('viewAny', AudRev::class);
 
+        $context = UserAccessContext::forUser(auth()->user());
+        if ($context->isCommand()) {
+            return $this->closed($request);
+        }
+
         $tab = strtolower(trim((string) $request->query('tab', $request->query('status', 'open'))));
 
         if ($tab === 'draft') {
@@ -35,7 +40,7 @@ class AdminReversalController extends Controller
 
     /**
      * Draft revisions tab.
-     * Accessible to non-IT division/department users. SO IT accounts do not view drafts.
+     * Accessible to non-IT division/department users. SO IT accounts and Command Officers do not view drafts.
      */
     public function draft(Request $request)
     {
@@ -43,6 +48,12 @@ class AdminReversalController extends Controller
 
         $user = auth()->user();
         $context = UserAccessContext::forUser($user);
+
+        // Command officers (DLOG, DDG, DG, MD) only view Closed reversals
+        if ($context->isCommand()) {
+            return redirect()->route('admin.reversals.closed');
+        }
+
         $userUnitId = (int) ($user->acc_unt_id ?? 0);
         $userArea = (string) ($user->acc_untarea ?? '');
         $isItStaff = ($userUnitId === 860000 || AreaDefinition::isIt($userArea) || in_array($context->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
@@ -61,6 +72,13 @@ class AdminReversalController extends Controller
     public function open(Request $request)
     {
         $this->authorize('viewAny', AudRev::class);
+
+        $context = UserAccessContext::forUser(auth()->user());
+
+        // Command officers (DLOG, DDG, DG, MD) only view Closed reversals
+        if ($context->isCommand()) {
+            return redirect()->route('admin.reversals.closed');
+        }
 
         return $this->renderListing($request, 'open');
     }
@@ -95,8 +113,14 @@ class AdminReversalController extends Controller
         $userUnitId = (int) ($user->acc_unt_id ?? 0);
         $userArea = (string) ($user->acc_untarea ?? '');
         $isItStaff = ($userUnitId === 860000 || AreaDefinition::isIt($userArea) || in_array($context->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
+        $isCommand = $context->isCommand();
 
-        return view('admin.reversals.show', compact('rev', 'isItStaff'));
+        if ($isCommand && !($rev->isFulfilled() || $rev->isCancelled())) {
+            return redirect()->route('admin.reversals.closed')
+                ->withErrors(['access' => 'Command view can only access closed reversals.']);
+        }
+
+        return view('admin.reversals.show', compact('rev', 'isItStaff', 'isCommand'));
     }
 
     /**
@@ -237,21 +261,56 @@ class AdminReversalController extends Controller
 
         // Global visibility: SuperAdmin, Command, IT Staff (unit 860000 / IT roles)
         $isItStaff = ($userUnitId === 860000 || AreaDefinition::isIt($userArea) || in_array($context->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
-        $isGlobal = ($context->isSuperAdmin() || $context->isCommand());
+        $isCommand = $context->isCommand();
+        $isGlobal = ($context->isSuperAdmin() || $isCommand);
+
+        // Command officers (DLOG, DDG, DG, MD) are strictly limited to the Closed tab
+        if ($isCommand) {
+            $tab = 'closed';
+        }
 
         // SO IT does not view drafts - redirect to open
         if ($isItStaff && $tab === 'draft') {
             return redirect()->route('admin.reversals.open');
         }
 
-        $canViewDraft = ! $isItStaff;
+        $canViewDraft = ! $isItStaff && ! $isCommand;
 
         $baseQuery = AudRev::query();
 
         $divisionBreakdown = [];
         $selectedDivision = $request->query('division', $request->query('unit_id', ''));
 
-        if ($isItStaff) {
+        if ($isCommand) {
+            // Command View (DLOG, DDG, DG, MD): strictly sees only Closed cases across the entire organization
+            $baseQuery->whereIn('rev_status', ['Fulfilled', 'Cancelled']);
+            $reversalsDraftCount = 0;
+            $reversalsOpenCount = 0;
+            $reversalsClosedCount = AudRev::whereIn('rev_status', ['Fulfilled', 'Cancelled'])->count();
+            $reversalsFulfilledCount = AudRev::where('rev_status', 'Fulfilled')->count();
+            $reversalsCancelledCount = AudRev::where('rev_status', 'Cancelled')->count();
+
+            // Division-wise breakdown for closed cases
+            $divStatsQuery = AudRev::query()->whereIn('rev_status', ['Fulfilled', 'Cancelled']);
+            $rawCounts = (clone $divStatsQuery)
+                ->selectRaw('COALESCE(rev_unt_id, rev_intunt_id) as unit_id, count(*) as count')
+                ->groupBy('unit_id')
+                ->pluck('count', 'unit_id');
+
+            if ($rawCounts->isNotEmpty()) {
+                $units = \App\Models\Unit::whereIn('unt_id', $rawCounts->keys())
+                    ->get(['unt_id', 'unt_namesh', 'unt_name']);
+
+                foreach ($units as $u) {
+                    $divisionBreakdown[] = [
+                        'unit_id' => $u->unt_id,
+                        'name' => $u->unt_namesh ?? $u->unt_name,
+                        'count' => (int) ($rawCounts[$u->unt_id] ?? 0),
+                    ];
+                }
+                usort($divisionBreakdown, fn($a, $b) => $b['count'] <=> $a['count']);
+            }
+        } elseif ($isItStaff) {
             // SO IT sees all Open and Closed cases across all divisions/departments, but never Drafts
             $baseQuery->where('rev_status', '!=', 'Draft');
             $reversalsDraftCount = 0;
@@ -351,6 +410,7 @@ class AdminReversalController extends Controller
             'tab',
             'status',
             'isItStaff',
+            'isCommand',
             'canViewDraft',
             'divisionBreakdown',
             'selectedDivision',

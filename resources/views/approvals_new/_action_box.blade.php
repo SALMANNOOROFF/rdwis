@@ -3,9 +3,10 @@
     $userArea = strtolower(trim((string) ($u?->acc_untarea ?? '')));
     if (in_array($userArea, ['proc', 'prc'], true)) $userArea = 'proc';
     $service = app(\App\Services\PurchaseApprovalService::class);
-    $area = $area ?? $userArea;
-    $canApprove = $service->canApprove($area, (float)($purchase->pcs_price ?? 0), $purchase);
-    $destinations = $service->getAvailableDestinations($userArea);
+    $isDlog = (method_exists($u, 'isDlog') && $u->isDlog()) || in_array($userArea, ['log', 'dlog', 'logistics'], true);
+    $checkArea = $isDlog ? 'log' : ($area ?? $userArea);
+    $canApprove = in_array($userArea, ['fin', 'finance', 'hr'], true);
+    $destinations = $service->getAvailableDestinations($checkArea);
     
     // Determine if this user's stage matches the case's current substatus stage
     $currentStage = $purchase->currentSubstatus?->pss_stage;
@@ -27,13 +28,14 @@
         'prj', 'rdwprj', 'division' => ['Division'],
         'proc' => ['DProc', 'Division'],
         'fin'  => ['DFinance'],
+        'log', 'dlog', 'logistics' => ['DLOG'],
         'rdw'  => ['MD'],
         'hqs'  => ['DDG'],
         'nrdi' => ['DG'],
         'is'   => ['IS'],
         'it'   => ['IT'],
         'adm', 'admin' => ['Admin'],
-        default => ['None']
+        default => (method_exists($u, 'isDlog') && $u->isDlog()) ? ['DLOG'] : ['None']
     };
 
     if ($isFinalized || $iTookLatestAction) {

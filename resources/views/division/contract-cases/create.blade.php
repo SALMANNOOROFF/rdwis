@@ -452,8 +452,16 @@
 
                             <div class="row mb-4">
                                 <div class="col-6">
-                                    <label class="rd-form-label">CNIC</label>
-                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" placeholder="99999-9999999-9">
+                                    <label class="rd-form-label">
+                                        CNIC
+                                        @if(strtoupper($type) === 'HG')
+                                            <span class="required-star text-danger">*</span>
+                                        @endif
+                                    </label>
+                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" placeholder="99999-9999999-9" {{ strtoupper($type) === 'HG' ? 'required' : '' }}>
+                                    @if(strtoupper($type) === 'HG')
+                                        <small class="text-muted d-block mt-0.5" style="font-size: 11px;">Mandatory for generating official Employee ID upon approval.</small>
+                                    @endif
                                 </div>
                                 <div class="col-6">
                                     <label class="rd-form-label">Contact Number</label>
@@ -708,10 +716,8 @@ $(document).ready(function() {
 
                     $('#active-case-message').html(`
                         ${msg}
-                        <div class="mt-2">
-                            <button type="button" class="btn btn-danger btn-sm font-weight-bold btn-cancel-active-case" data-id="${activeCaseId}" style="border-radius: 6px;">
-                                <i class="fas fa-ban mr-1"></i> CANCEL OPEN CASE #CC-${activeCaseId}
-                            </button>
+                        <div class="mt-2 text-muted small">
+                            <i class="fas fa-info-circle mr-1 text-info"></i> Open cases cannot be cancelled. Please track or complete existing case #CC-${activeCaseId}.
                         </div>
                     `);
                     $('#active-case-alert').removeClass('d-none');
@@ -719,17 +725,10 @@ $(document).ready(function() {
 
                     Swal.fire({
                         title: 'Active Case In Progress',
-                        html: `${msg}<br><br><strong class="text-danger">Would you like to cancel open case #CC-${activeCaseId} now to initiate a new case?</strong>`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: `<i class="fas fa-ban mr-1"></i> Cancel Case #CC-${activeCaseId}`,
-                        confirmButtonColor: '#ef4444',
-                        cancelButtonText: 'Keep Existing Case',
-                        cancelButtonColor: '#94a3b8'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            cancelActiveCase(activeCaseId);
-                        }
+                        html: `${msg}<br><br><span class="text-muted">An active case is already in progress for this employee. Open cases cannot be cancelled.</span>`,
+                        icon: 'info',
+                        confirmButtonText: 'Understood',
+                        confirmButtonColor: '#3b82f6'
                     });
                     return;
                 }

@@ -390,12 +390,31 @@
                             <div class="data-grid-cell data-grid-value">{{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M Y') : 'N/A' }}</div>
                         </div>
 
-                        @if($case->ctc_newprob > 0)
+                        @php
+                            $dispProbMonths = $case->newContract?->ctr_prob !== null
+                                ? (int)$case->newContract->ctr_prob
+                                : ($case->ctc_approvedprob !== null ? (int)$case->ctc_approvedprob : (int)$case->ctc_newprob);
+
+                            $approvedProbSal = ($case->newContract?->ctr_probsal !== null && (float)$case->newContract->ctr_probsal > 0)
+                                ? (float)$case->newContract->ctr_probsal
+                                : (($case->ctc_approvedprobsal !== null && (float)$case->ctc_approvedprobsal > 0) ? (float)$case->ctc_approvedprobsal : null);
+
+                            $effectiveCaseSal = $case->newContract?->ctr_salary ?: ($case->ctc_approvedsalary ?: $case->ctc_newsalary);
+                            $dispProbSalary = $approvedProbSal !== null 
+                                ? $approvedProbSal 
+                                : ((float)($case->ctc_newprobsal ?: $effectiveCaseSal));
+
+                            if ($case->ctc_approvedsalary && $case->ctc_approvedsalary != $case->ctc_newsalary && $approvedProbSal === null && $dispProbSalary == $case->ctc_newsalary) {
+                                $dispProbSalary = (float)$case->ctc_approvedsalary;
+                            }
+                        @endphp
+
+                        @if($dispProbMonths > 0)
                             <div class="data-grid-table">
                                 <div class="data-grid-cell data-grid-label">Probation Period</div>
-                                <div class="data-grid-cell data-grid-value">{{ $case->ctc_newprob }} Months</div>
+                                <div class="data-grid-cell data-grid-value">{{ $dispProbMonths }} {{ Str::plural('Month', $dispProbMonths) }}</div>
                                 <div class="data-grid-cell data-grid-label">Probation Salary</div>
-                                <div class="data-grid-cell data-grid-value">Rs. {{ number_format((float)($case->ctc_newprobsal ?: $case->ctc_newsalary)) }}</div>
+                                <div class="data-grid-cell data-grid-value">Rs. {{ number_format($dispProbSalary) }}</div>
                             </div>
                         @endif
 
@@ -616,25 +635,30 @@
                             <input type="text" name="emp_name" id="modalEmpName" class="form-control" style="border-radius: 8px;" value="{{ $case->ctc_empnamecomp }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="rd-form-label font-weight-bold">Department / Unit <span class="text-danger">*</span></label>
-                            <select name="emp_unt_id" id="modalEmpUntId" class="form-control" style="border-radius: 8px;" required>
-                                @php
-                                    $targetUnitId = $case->ctc_approvedunt_id ?: ($case->ctc_newunt_id ?: $case->ctc_unt_id);
-                                @endphp
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept->unt_id }}" {{ $targetUnitId == $dept->unt_id ? 'selected' : '' }}>
-                                        {{ $dept->unt_name }} ({{ $dept->unt_namesh }})
-                                    </option>
-                                @endforeach
-                            </select>
+                            <label class="rd-form-label font-weight-bold">Department / Unit <span class="badge badge-light border text-muted ml-1" style="font-size: 10px;"><i class="fas fa-lock mr-1"></i>LOCKED</span></label>
+                            @php
+                                $targetUnitId = $case->ctc_approvedunt_id ?: ($case->ctc_newunt_id ?: $case->ctc_unt_id);
+                                $deptObj = isset($departments) ? $departments->firstWhere('unt_id', $targetUnitId) : null;
+                                $deptLabel = $deptObj ? ($deptObj->unt_name . ' (' . ($deptObj->unt_namesh ?: 'Unit ' . $targetUnitId) . ')') : ($case->division_name ?: 'Approved Unit ' . $targetUnitId);
+                            @endphp
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-light text-muted border-right-0" style="border-radius: 8px 0 0 8px; font-size: 13px;">
+                                        <i class="fas fa-building text-secondary"></i>
+                                    </span>
+                                </div>
+                                <input type="text" class="form-control bg-light border-left-0 text-dark font-weight-bold" style="border-radius: 0 8px 8px 0; font-size: 13px; cursor: not-allowed;" value="{{ $deptLabel }}" readonly disabled>
+                            </div>
+                            <input type="hidden" name="emp_unt_id" id="modalEmpUntId" value="{{ $targetUnitId }}">
+                            <small class="text-muted" style="font-size: 11px;">Fixed to approved department from contract case.</small>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="rd-form-label font-weight-bold">CNIC (with dashes) <span class="text-danger">*</span></label>
-                            <input type="text" name="emp_cnic" id="modalEmpCnic" class="form-control" style="border-radius: 8px; font-family: monospace;" placeholder="42101-1234567-1" value="{{ $case->ctc_cnic }}" required>
-                            <small class="text-muted">Standard format: <code>XXXXX-XXXXXXX-X</code></small>
+                            <input type="text" name="emp_cnic" id="modalEmpCnic" class="form-control font-weight-bold text-primary" style="border-radius: 8px; font-family: monospace;" placeholder="42101-1234567-1" value="{{ $case->ctc_cnic ?: ($case->candidate_cnic ?: '') }}" required>
+                            <small class="text-muted">Pre-filled from case initiation. Standard format: <code>XXXXX-XXXXXXX-X</code></small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="rd-form-label font-weight-bold">Joining Date <span class="text-danger">*</span></label>

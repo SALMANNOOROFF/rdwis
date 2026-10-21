@@ -256,14 +256,25 @@
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="rd-form-label">Department / Unit <span class="text-danger">*</span></label>
-              <select name="emp_unt_id" class="rd-input" required>
-                @foreach($departments as $d)
-                  <option value="{{ $d->unt_id }}" {{ $emp->emp_unt_id == $d->unt_id ? 'selected' : '' }}>
-                    {{ $d->unt_name }} ({{ $d->unt_namesh }})
-                  </option>
-                @endforeach
-              </select>
+              <label class="rd-form-label">
+                Department / Unit
+                <span class="badge badge-light border text-muted ml-1" style="font-size: 10px; font-weight: 600;">
+                  <i class="fas fa-lock text-secondary mr-1"></i>Bound to Contract Case
+                </span>
+              </label>
+              @php
+                $empDept = $departments->firstWhere('unt_id', $emp->emp_unt_id);
+                $deptText = $empDept ? ($empDept->unt_name . ' (' . ($empDept->unt_namesh ?: 'Unit ' . $emp->emp_unt_id) . ')') : 'Unit ' . $emp->emp_unt_id;
+              @endphp
+              <div class="input-group">
+                <input type="text" class="rd-input bg-light font-weight-bold text-dark" readonly 
+                       value="{{ $deptText }}" 
+                       style="cursor: not-allowed; border-color: #cbd5e1; background-color: #f8fafc !important;">
+                <input type="hidden" name="emp_unt_id" value="{{ $emp->emp_unt_id }}">
+              </div>
+              <small class="text-muted" style="font-size: 11px;">
+                <i class="fas fa-shield-alt text-info mr-1"></i>Department is locked to the approved contract case and cannot be manually altered.
+              </small>
             </div>
             <div class="col-md-6 mb-3">
               <label class="rd-form-label">
@@ -852,12 +863,13 @@
             <table class="grid-table" id="table-bank">
               <thead>
                 <tr>
-                  <th style="width: 20%;">Bank Name</th>
-                  <th style="width: 18%;">Account Title</th>
-                  <th style="width: 20%;">Account Number / IBAN</th>
-                  <th style="width: 16%;">Branch Name</th>
-                  <th style="width: 12%;">Branch City</th>
-                  <th style="width: 10%;">Primary for Salary</th>
+                  <th style="width: 18%;">Bank Name</th>
+                  <th style="width: 17%;">Account Title</th>
+                  <th style="width: 18%;">Account Number / IBAN</th>
+                  <th style="width: 10%;">Branch Code</th>
+                  <th style="width: 14%;">Branch Name</th>
+                  <th style="width: 10%;">Branch City</th>
+                  <th style="width: 9%;">Primary for Salary</th>
                   <th style="width: 4%;"></th>
                 </tr>
               </thead>
@@ -867,10 +879,11 @@
                     <td><input type="text" name="bank_accounts[{{ $idx }}][bac_bnkname]" class="rd-input" value="{{ $ba->bac_bnkname }}" placeholder="e.g. Habib Bank Limited"></td>
                     <td><input type="text" name="bank_accounts[{{ $idx }}][bac_acctitle]" class="rd-input" value="{{ $ba->bac_acctitle }}" placeholder="Account Title"></td>
                     <td><input type="text" name="bank_accounts[{{ $idx }}][bac_accnum]" class="rd-input" value="{{ $ba->bac_accnum }}" placeholder="PK00HABB0000000000000000"></td>
+                    <td><input type="text" name="bank_accounts[{{ $idx }}][bac_bchcode]" class="rd-input" value="{{ $ba->bac_bchcode }}" placeholder="e.g. 0101"></td>
                     <td><input type="text" name="bank_accounts[{{ $idx }}][bac_bchname]" class="rd-input" value="{{ $ba->bac_bchname }}" placeholder="Branch Name"></td>
                     <td><input type="text" name="bank_accounts[{{ $idx }}][bac_bchcity]" class="rd-input" value="{{ $ba->bac_bchcity ?? 'Karachi' }}"></td>
                     <td class="text-center">
-                      <input type="checkbox" name="bank_accounts[{{ $idx }}][bac_selforpay]" value="1" {{ !empty($ba->bac_selforpay) ? 'checked' : '' }} style="transform: scale(1.3);">
+                      <input type="checkbox" name="bank_accounts[{{ $idx }}][bac_selforpay]" class="bank-primary-check" value="1" {{ !empty($ba->bac_selforpay) ? 'checked' : '' }} style="transform: scale(1.3);">
                     </td>
                     <td class="text-center">
                       <button type="button" class="btn-remove-row"><i class="fas fa-trash-alt"></i></button>
@@ -878,7 +891,7 @@
                   </tr>
                 @empty
                   <tr class="no-records-row">
-                    <td colspan="7" class="text-center text-muted py-3">No bank accounts recorded. Click "Add Bank Account" to create.</td>
+                    <td colspan="8" class="text-center text-muted py-3">No bank accounts recorded. Click "Add Bank Account" to create.</td>
                   </tr>
                 @endforelse
               </tbody>
@@ -1054,15 +1067,18 @@ $(document).ready(function() {
   $('#btn-add-bank').click(function() {
     clearEmptyRow('#table-bank');
     const idx = Date.now();
+    const existingAccounts = $('#table-bank tbody tr:not(.no-records-row)').length;
+    const isFirst = existingAccounts === 0;
     const html = `
       <tr>
         <td><input type="text" name="bank_accounts[${idx}][bac_bnkname]" class="rd-input" placeholder="Bank Name"></td>
         <td><input type="text" name="bank_accounts[${idx}][bac_acctitle]" class="rd-input" placeholder="Account Title"></td>
         <td><input type="text" name="bank_accounts[${idx}][bac_accnum]" class="rd-input" placeholder="Account Number / IBAN"></td>
+        <td><input type="text" name="bank_accounts[${idx}][bac_bchcode]" class="rd-input" placeholder="e.g. 0101"></td>
         <td><input type="text" name="bank_accounts[${idx}][bac_bchname]" class="rd-input" placeholder="Branch Name"></td>
         <td><input type="text" name="bank_accounts[${idx}][bac_bchcity]" class="rd-input" value="Karachi"></td>
         <td class="text-center">
-          <input type="checkbox" name="bank_accounts[${idx}][bac_selforpay]" value="1" checked style="transform: scale(1.3);">
+          <input type="checkbox" name="bank_accounts[${idx}][bac_selforpay]" class="bank-primary-check" value="1" ${isFirst ? 'checked' : ''} style="transform: scale(1.3);">
         </td>
         <td class="text-center">
           <button type="button" class="btn-remove-row"><i class="fas fa-trash-alt"></i></button>
@@ -1070,6 +1086,13 @@ $(document).ready(function() {
       </tr>
     `;
     $('#table-bank tbody').append(html);
+  });
+
+  // Ensure single primary account selection in UI
+  $(document).on('change', '.bank-primary-check', function() {
+    if ($(this).is(':checked')) {
+      $('.bank-primary-check').not(this).prop('checked', false);
+    }
   });
 
   // ── Auto-format CNIC Inputs (XXXXX-XXXXXXX-X) ──────────────

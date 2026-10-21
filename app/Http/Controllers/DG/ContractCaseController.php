@@ -65,7 +65,7 @@ class ContractCaseController extends Controller
 
         $authorityRole = 'DG';
         $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
-        $canApprove = true;
+        $canApprove = false;
 
         return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
     }
@@ -73,8 +73,14 @@ class ContractCaseController extends Controller
     public function approve($id, Request $request)
     {
         $case = HrCtrCase::findOrFail($id);
-        $this->authorize('processAction', [$case, 'approve']);
         $user = Auth::user();
+        if (!$this->approvalService->canApprove('DG', $case)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Approval authority is restricted to HR and Finance."
+            ], 403);
+        }
+
         $remarks = $request->input('remarks');
         if (empty(trim($remarks ?? ''))) {
             return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);

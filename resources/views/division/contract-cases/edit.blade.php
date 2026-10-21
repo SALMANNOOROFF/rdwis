@@ -624,9 +624,15 @@
                             <i class="fas fa-info-circle text-warning mr-1"></i> Saving revision updates the terms in Division. You can release back to HR when ready.
                         </div>
                          <div class="d-flex gap-2 align-items-center">
+                             @php
+                                 $loggedUser = auth()->user();
+                                 $isLeader = $loggedUser && ((method_exists($loggedUser, 'isMdDdgDg') && $loggedUser->isMdDdgDg()) || (method_exists($loggedUser, 'isDlog') && $loggedUser->isDlog()));
+                             @endphp
+                             @if(!$isLeader)
                              <button type="button" class="btn btn-outline-danger btn-sm font-weight-bold px-3 py-2 mr-2" id="btn-cancel-this-case" style="border-radius: 8px;">
                                  <i class="fas fa-ban mr-1"></i> CANCEL CASE
                              </button>
+                             @endif
                              <a href="{{ route('division.contract-cases.show', $case->ctc_id) }}" class="btn-action-cancel mr-2">Back to View</a>
                              <button type="button" class="btn-action-update" id="btn-update-case">
                                  <i class="fas fa-save"></i> Save Revision

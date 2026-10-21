@@ -275,6 +275,10 @@ class DivHrController extends Controller
             ->where('emp_id', $id)
             ->first();
 
+        if (!$emp) {
+            abort(404, 'Employee record not found or outside authorized scope.');
+        }
+
         $base = DB::table('hr.salreqs as s')
             ->leftJoin('hr.emps as e', 'e.emp_id', '=', 's.srq_emp_id')
             ->leftJoin('cen.units as u', function ($join) {
@@ -313,7 +317,8 @@ class DivHrController extends Controller
             }
         }
 
-        $monthRef = $base ? $base->srq_month : Carbon::now()->toDateString();
+        $todayStr = Carbon::today()->toDateString();
+        // 1. Prioritize contract currently active today (or not early-terminated before today)
         $currentContract = DB::table('hr.contracts as c')
             ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
             ->leftJoin('prj.projects as cp', function ($join) {
@@ -323,7 +328,7 @@ class DivHrController extends Controller
             })
             ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
             ->where('c.ctr_num', $id)
-            ->whereRaw('? between c.ctr_startdt and c.ctr_enddt', [$monthRef])
+            ->whereRaw('? between c.ctr_startdt and COALESCE(c.ctr_termindt, c.ctr_enddt)', [$todayStr])
             ->orderBy('c.ctr_enddt', 'desc')
             ->select(
                 'c.*', 
@@ -335,7 +340,7 @@ class DivHrController extends Controller
             )
             ->first();
 
-        // If not found in current active window, get the latest contract
+        // 2. If not found in current active window, get the latest contract by start date / ID
         if (!$currentContract) {
             $currentContract = DB::table('hr.contracts as c')
                 ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
@@ -895,7 +900,7 @@ class DivHrController extends Controller
             'bank_accounts'      => 'nullable|array',
         ]);
 
-        DB::transaction(function () use ($id, $request, $validated) {
+        DB::transaction(function () use ($id, $request, $validated, $emp) {
             $cleanCnic = function (?string $val): ?string {
                 if (empty($val)) return null;
                 $val = trim($val);
@@ -945,7 +950,7 @@ class DivHrController extends Controller
                 'emp_name'     => mb_substr($validated['emp_name'], 0, 200),
                 'emp_cnic'     => $cleanCnic($validated['emp_cnic']) ?? mb_substr($validated['emp_cnic'], 0, 15),
                 'emp_joindt'   => $validated['emp_joindt'],
-                'emp_unt_id'   => (int)$validated['emp_unt_id'],
+                'emp_unt_id'   => $emp->emp_unt_id,
                 'emp_hed_id'   => $emp->emp_hed_id,
                 'emp_status'   => $validated['emp_status'],
                 'emp_rank'     => !empty($validated['emp_rank']) ? mb_substr($validated['emp_rank'], 0, 100) : null,
@@ -1114,17 +1119,32 @@ class DivHrController extends Controller
             // 10. Sync Bank Accounts (hr.bnkaccounts)
             DB::table('hr.bnkaccounts')->where('bac_emp_id', $id)->delete();
             if (!empty($validated['bank_accounts'])) {
+                $hasPrimary = false;
+                foreach ($validated['bank_accounts'] as $ba) {
+                    if (!empty($ba['bac_selforpay'])) {
+                        $hasPrimary = true;
+                        break;
+                    }
+                }
+
+                $firstAssigned = false;
                 foreach ($validated['bank_accounts'] as $ba) {
                     if (!empty($ba['bac_bnkname']) || !empty($ba['bac_accnum'])) {
+                        $isPrimary = !empty($ba['bac_selforpay']);
+                        if (!$hasPrimary && !$firstAssigned) {
+                            $isPrimary = true;
+                            $firstAssigned = true;
+                        }
+
                         DB::table('hr.bnkaccounts')->insert([
                             'bac_emp_id'    => $id,
                             'bac_bnkname'   => $ba['bac_bnkname'] ?? '',
                             'bac_bchname'   => $ba['bac_bchname'] ?? '',
-                            'bac_bchcode'   => $ba['bac_bchcode'] ?? null,
+                            'bac_bchcode'   => !empty($ba['bac_bchcode']) ? trim($ba['bac_bchcode']) : null,
                             'bac_acctitle'  => $ba['bac_acctitle'] ?? '',
                             'bac_accnum'    => $ba['bac_accnum'] ?? '',
                             'bac_bchcity'   => $ba['bac_bchcity'] ?? 'Karachi',
-                            'bac_selforpay' => !empty($ba['bac_selforpay']) ? true : false,
+                            'bac_selforpay' => $isPrimary,
                         ]);
                     }
                 }

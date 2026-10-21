@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/zoom-scale.css') }}?v={{ filemtime(public_path('css/zoom-scale.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/rdwis-ai-robot.css') }}?v={{ filemtime(public_path('css/rdwis-ai-robot.css')) }}">
     <!-- SweetAlert2 -->
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.all.min.js') }}"></script>
@@ -37,6 +37,84 @@
             overflow-x: hidden;
             width: 100%;
             height: 100%;
+        }
+
+        /* ── Sidebar: strictly bounded viewport height & fully scrollable on all screens ── */
+        .main-sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            z-index: 1038 !important;
+        }
+
+        .main-sidebar .brand-link {
+            flex-shrink: 0 !important;
+            height: 57px !important;
+            min-height: 57px !important;
+        }
+
+        .main-sidebar .sidebar {
+            flex: 1 1 auto !important;
+            height: calc(100% - 57px) !important;
+            max-height: calc(100% - 57px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+        }
+
+        /* OverlayScrollbars compatibility if initialized by AdminLTE */
+        .main-sidebar .sidebar.os-host {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .main-sidebar .sidebar .os-padding,
+        .main-sidebar .sidebar .os-viewport {
+            height: 100% !important;
+            max-height: 100% !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        /* Visible, modern & sleek custom scrollbar for sidebar */
+        .main-sidebar .sidebar,
+        .main-sidebar .sidebar .os-viewport {
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(148, 163, 184, 0.45) transparent !important;
+        }
+
+        .main-sidebar .sidebar::-webkit-scrollbar,
+        .main-sidebar .sidebar .os-viewport::-webkit-scrollbar {
+            width: 6px !important;
+            display: block !important;
+        }
+
+        .main-sidebar .sidebar::-webkit-scrollbar-track,
+        .main-sidebar .sidebar .os-viewport::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+
+        .main-sidebar .sidebar::-webkit-scrollbar-thumb,
+        .main-sidebar .sidebar .os-viewport::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.45) !important;
+            border-radius: 6px !important;
+        }
+
+        .main-sidebar .sidebar::-webkit-scrollbar-thumb:hover,
+        .main-sidebar .sidebar .os-viewport::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.8) !important;
+        }
+
+        /* Extra bottom breathing room so the last items are always fully visible and easily clickable */
+        .main-sidebar .sidebar .nav-sidebar {
+            padding-bottom: 85px !important;
         }
 
         @keyframes pulse-red-glow {
@@ -733,40 +811,34 @@
         {{-- ========================================================= --}}
         {{-- CENTRAL DEPARTMENTS SCOPE SWITCHER (All Depts vs My Dept) --}}
         {{-- ========================================================= --}}
-        @if(Auth::check() && Auth::user()->isCentralDepartment())
+        @if(Auth::check() && Auth::user()->isCentralDepartment() && !in_array(strtolower(trim((string)(Auth::user()->acc_untarea ?? ''))), ['adm', 'admin'], true))
         @php
             $isMyDept = Auth::user()->isMyDepartmentMode();
             $deptName = Auth::user()->acc_untname ?? Auth::user()->acc_untnamesh ?? 'My Department';
         @endphp
         <div class="dept-scope-switcher-wrapper px-2 mb-2">
-            <div class="card mb-0 shadow-sm border-0" style="background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(10px); border-radius: 8px; border: 1px solid rgba(255,255,255,0.15) !important;">
+            <div class="card mb-0 shadow border-0" style="background: #0f172a !important; border: 1px solid #334155 !important; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.3) !important;">
                 <div class="card-body p-2 text-center">
-                    <div class="d-flex align-items-center justify-content-between mb-1">
-                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;">Active Scope</span>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #38bdf8 !important;">
+                            <i class="fas fa-sliders-h mr-1"></i> ACTIVE SCOPE
+                        </span>
                         @if($isMyDept)
-                            <span class="badge badge-success px-2 py-0.5" style="font-size: 10px; font-weight: 600; border-radius: 12px; box-shadow: 0 0 8px rgba(34,197,94,0.4);">
+                            <span class="badge text-white font-weight-bold px-2 py-0.5" style="font-size: 11px; background: #16a34a !important; border-radius: 12px; box-shadow: 0 2px 6px rgba(22,163,74,0.4);">
                                 <i class="fas fa-building mr-1"></i> My Dept
                             </span>
                         @else
-                            <span class="badge badge-info px-2 py-0.5" style="font-size: 10px; font-weight: 600; border-radius: 12px; box-shadow: 0 0 8px rgba(6,182,212,0.4);">
+                            <span class="badge text-white font-weight-bold px-2 py-0.5" style="font-size: 11px; background: #0284c7 !important; border-radius: 12px; box-shadow: 0 2px 6px rgba(2,132,199,0.4);">
                                 <i class="fas fa-globe mr-1"></i> All Depts
                             </span>
                         @endif
                     </div>
-                    
-                    <div class="text-left mb-2 text-truncate" style="font-size: 11.5px; color: #f1f5f9; font-weight: 600;" title="{{ $isMyDept ? $deptName : 'Global Directorate' }}">
-                        @if($isMyDept)
-                            <i class="fas fa-layer-group text-success mr-1"></i> <span>{{ $deptName }}</span>
-                        @else
-                            <i class="fas fa-shield-alt text-info mr-1"></i> <span>Global Directorate</span>
-                        @endif
-                    </div>
 
-                    <button type="button" class="btn btn-block btn-xs font-weight-bold d-flex align-items-center justify-content-center py-1 {{ $isMyDept ? 'btn-outline-info text-info' : 'btn-outline-success text-success' }}" 
-                            style="border-radius: 6px; font-size: 11px; transition: all 0.2s;"
+                    <button type="button" class="btn btn-block btn-sm font-weight-bold text-white shadow d-flex align-items-center justify-content-center py-1.5" 
+                            style="{{ $isMyDept ? 'background: #0284c7 !important; border: 1px solid #38bdf8 !important;' : 'background: #16a34a !important; border: 1px solid #4ade80 !important;' }} border-radius: 7px; font-size: 12px; transition: all 0.2s;"
                             data-toggle="modal" data-target="#deptScopeSwitchModal">
                         <i class="fas fa-exchange-alt mr-1.5"></i>
-                        {{ $isMyDept ? 'Switch to All Depts' : 'Switch to My Dept' }}
+                        <span>{{ $isMyDept ? 'Switch to All Depts' : 'Switch to My Dept' }}</span>
                     </button>
                 </div>
             </div>
@@ -780,6 +852,21 @@
               $sbPur = $sbBadges['pur'] ?? 0;
               $sbCtr = $sbBadges['ctr'] ?? 0;
               $sbHr  = $sbBadges['hr'] ?? 0;
+              $sbFsh = 0;
+              try {
+                  $uFsh = Auth::user();
+                  if ($uFsh) {
+                      $fshQ = \App\Models\FundShift::query();
+                      if ($uFsh->isDivision() && !$uFsh->isCentralDepartment()) {
+                          $fshQ->where('fsh_current_stage', 'Division');
+                      } elseif ($uFsh->isFinance()) {
+                          $fshQ->where('fsh_current_stage', 'Finance');
+                      } elseif ($uFsh->isMdDdgDg()) {
+                          $fshQ->whereIn('fsh_current_stage', ['MD', 'DDG', 'DG']);
+                      }
+                      $sbFsh = $fshQ->count();
+                  }
+              } catch (\Throwable $e) {}
           @endphp
           
           @if(Auth::user()->acc_username === 'superadminrdw' || session('impersonated_by_god'))
@@ -1004,6 +1091,13 @@
             </li>
 
             <li class="nav-item">
+                <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
+                    <i class="fas fa-random nav-icon text-info"></i>
+                    <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a href="{{ route('purchase.receipts.index') }}" class="nav-link {{ Request::routeIs('purchase.receipts.*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-receipt text-success"></i>
                     <p>Purchase Receipts</p>
@@ -1024,8 +1118,8 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
+            <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-users text-primary"></i>
                     <p>Human Resources <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                 </a>
@@ -1033,21 +1127,6 @@
                     <li class="nav-item">
                         <a href="{{ route('divhr.employelist') }}" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') ? 'active' : '' }}">
                             <i class="fas fa-user-tie nav-icon text-info"></i><p>Hired Employees <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('hr.navy_civilians') }}" class="nav-link {{ Request::routeIs('hr.navy_civilians') ? 'active' : '' }}">
-                            <i class="fas fa-user-shield nav-icon text-success"></i><p>Navy Civilians</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                            <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN Officers</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                            <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / Sailors</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -1112,8 +1191,8 @@
                </a>
            </li>
 
-           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
-               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
+           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.attendance*') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
+               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.attendance*') || Request::routeIs('divhr.attendance*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-users text-primary"></i>
                    <p>Human Resources <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                </a>
@@ -1124,27 +1203,12 @@
                        </a>
                    </li>
                    <li class="nav-item">
-                       <a href="{{ route('hr.navy_civilians') }}" class="nav-link {{ Request::routeIs('hr.navy_civilians') ? 'active' : '' }}">
-                           <i class="fas fa-user-shield nav-icon text-success"></i><p>Navy Civilians</p>
-                       </a>
-                   </li>
-                   <li class="nav-item">
-                       <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN Officers</p>
-                       </a>
-                   </li>
-                   <li class="nav-item">
-                       <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / Sailors</p>
-                       </a>
-                   </li>
-                   <li class="nav-item">
                         <a href="{{ route('hr.attendance') }}" class="nav-link {{ Request::routeIs('hr.attendance*') || Request::routeIs('divhr.attendance*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-check text-success"></i>
                             <p>Attendance</p>
                         </a>
                     </li>
-                   @if(!Auth::user()->isMdDdgDg())
+                   @if(Auth::user()->isMyDepartmentMode() && !Auth::user()->isMdDdgDg())
                    <li class="nav-item">
                        <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                            <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
@@ -1169,10 +1233,11 @@
                </a>
            </li>
 
-      @elseif(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['nrdi', 'proc', 'prc', 'fin', 'rdw', 'hqs']))
+      @elseif(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['nrdi', 'proc', 'prc', 'fin', 'rdw', 'hqs', 'log', 'dlog', 'logistics']) || (Auth::user() && method_exists(Auth::user(), 'isDlog') && Auth::user()->isDlog()))
           @php
               $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
               $isProc = in_array($area, ['proc', 'prc'], true);
+              $isDlog = (Auth::user() && method_exists(Auth::user(), 'isDlog') && Auth::user()->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true);
           @endphp
           <li class="nav-header">{{ $isProc ? 'Procurement Directorate' : 'Command View' }}</li>
 
@@ -1221,12 +1286,18 @@
 
           @if(!$isProc)
           <li class="nav-item">
-              <a href="{{ route('nrdi.contract_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases_new.*') ? 'active' : '' }}">
+              <a href="{{ route('nrdi.contract_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.contract_cases_new.*') || Request::routeIs('*contract-cases*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-file-signature text-warning"></i>
                   <p>Hiring Cases <span class="badge badge-blinking-red badge-ctr-parent badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
               </a>
           </li>
 
+          <li class="nav-item">
+              <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-random text-info"></i>
+                  <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
+              </a>
+          </li>
 
           @endif
 
@@ -1252,9 +1323,8 @@
           </li>
 
            @if(!$isProc)
-           {{-- HUMAN RESOURCES (For MD, DDG, DG, Finance) --}}
-           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') ? 'menu-open' : '' }}">
-               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('hr.navy_civilians') || Request::routeIs('hr.pn_officers') || Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
+           <li class="nav-item {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('divhr.salary.requisitions*') ? 'menu-open' : '' }}">
+               <a href="#" class="nav-link {{ Request::routeIs('divhr.employelist*') || Request::routeIs('divhr.employeedetail*') || Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                    <i class="nav-icon fas fa-users text-primary"></i>
                    <p>Human Resources <span class="badge badge-blinking-red badge-hr-parent {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span> <i class="right fas fa-angle-left"></i></p>
                </a>
@@ -1264,22 +1334,7 @@
                            <i class="fas fa-user-tie nav-icon text-info"></i><p>Hired Employees <span class="badge badge-blinking-red badge-hr-child {{ $sbHr > 0 ? '' : 'd-none' }} ml-1">{{ $sbHr }}</span></p>
                        </a>
                    </li>
-                   <li class="nav-item">
-                       <a href="{{ route('hr.navy_civilians') }}" class="nav-link {{ Request::routeIs('hr.navy_civilians') ? 'active' : '' }}">
-                           <i class="fas fa-user-shield nav-icon text-success"></i><p>Navy Civilians</p>
-                       </a>
-                   </li>
-                   <li class="nav-item">
-                       <a href="{{ route('hr.pn_officers') }}" class="nav-link {{ Request::routeIs('hr.pn_officers') ? 'active' : '' }}">
-                           <i class="fas fa-user-astronaut nav-icon text-warning"></i><p>PN Officers</p>
-                       </a>
-                   </li>
-                   <li class="nav-item">
-                       <a href="{{ route('hr.pn_sailors') }}" class="nav-link {{ Request::routeIs('hr.pn_sailors') ? 'active' : '' }}">
-                           <i class="fas fa-anchor nav-icon text-cyan"></i><p>PN CPO / Sailors</p>
-                       </a>
-                   </li>
-                    @if(!Auth::user()->isMdDdgDg())
+                    @if(Auth::user()->isMyDepartmentMode() && !Auth::user()->isMdDdgDg())
                    <li class="nav-item">
                        <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions*') ? 'active' : '' }}">
                            <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i><p>Salary Requisitions</p>
@@ -1297,35 +1352,26 @@
                   <p>Accounts</p>
               </a>
           </li>
-          <li class="nav-item {{ Request::routeIs('fin.payments.*') || Request::routeIs('fin.commitments.*') || Request::routeIs('divhr.salary.*') ? 'menu-open' : '' }}">
-              <a href="#" class="nav-link">
+          <li class="nav-item">
+              <a href="{{ route('fin.payments.index') }}" class="nav-link {{ Request::routeIs('fin.payments.*') || Request::routeIs('fin.commitments.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
-                  <p>
-                      Commitments
-                      <i class="right fas fa-angle-left"></i>
-                  </p>
+                  <p>Commitments</p>
               </a>
-              <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                      <a href="{{ route('fin.payments.index') }}" class="nav-link {{ Request::routeIs('fin.payments.*') ? 'active' : '' }}">
-                          <i class="fas fa-shopping-cart nav-icon text-info"></i>
-                          <p>Purchase Case</p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions.*') ? 'active' : '' }}">
-                          <i class="fas fa-file-invoice-dollar nav-icon text-warning"></i>
-                          <p>Salary Requisitions</p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a href="{{ route('divhr.salary.orders.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.orders.*') ? 'active' : '' }}">
-                          <i class="fas fa-money-check-alt nav-icon text-success"></i>
-                          <p>Salary Orders</p>
-                      </a>
-                  </li>
-              </ul>
           </li>
+          <li class="nav-item">
+              <a href="{{ route('divhr.salary.orders.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.orders.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-receipt text-success"></i>
+                  <p>Salary Orders</p>
+              </a>
+          </li>
+          @if(Auth::user()->isMyDepartmentMode() && !Auth::user()->isMdDdgDg())
+          <li class="nav-item">
+              <a href="{{ route('divhr.salary.requisitions.index') }}" class="nav-link {{ Request::routeIs('divhr.salary.requisitions.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-file-invoice-dollar text-warning"></i>
+                  <p>Salary Requisitions (My Dept)</p>
+              </a>
+          </li>
+          @endif
 
           {{-- Verification Sub-screens (Salary Verification & Salary Heads) --}}
           <li class="nav-item {{ Request::routeIs('fin.verification.*') ? 'menu-open' : '' }}">
@@ -1412,6 +1458,27 @@
               <a href="{{ route('admin.accounts.index') }}" class="nav-link {{ Request::routeIs('admin.accounts.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-users-cog"></i>
                   <p>Accounts</p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('nrdi.purchase_cases_new.index') }}" class="nav-link {{ Request::routeIs('nrdi.purchase_cases_new.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-shopping-cart text-info"></i>
+                  <p>Purchase Cases <span class="badge badge-blinking-red badge-pur-parent badge-pur-child {{ $sbPur > 0 ? '' : 'd-none' }} ml-1">{{ $sbPur }}</span></p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('it.contract-cases.index') }}" class="nav-link {{ Request::routeIs('it.contract-cases.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-file-signature text-warning"></i>
+                  <p>Hiring Cases <span class="badge badge-blinking-red badge-ctr-parent badge-ctr-child {{ $sbCtr > 0 ? '' : 'd-none' }} ml-1">{{ $sbCtr }}</span></p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-random text-info"></i>
+                  <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
               </a>
           </li>
 
@@ -1541,10 +1608,14 @@
                       $sbUserUnitId = (int) ($currentUser->acc_unt_id ?? 0);
                       $sbUserArea = (string) ($currentUser->acc_untarea ?? '');
                       $sbIsItStaff = ($sbUserUnitId === 860000 || \App\Services\Auth\AreaDefinition::isIt($sbUserArea) || in_array($sbContext->getRoleSlug(), ['IT_ADMIN', 'IT_OFFICER'], true));
-                      $sbIsGlobal = ($sbContext->isSuperAdmin() || $sbContext->isCommand());
+                      $sbIsCommand = $sbContext->isCommand();
+                      $sbIsGlobal = ($sbContext->isSuperAdmin() || $sbIsCommand);
 
                       if ($sbIsItStaff) {
                           $sbReversalsBadgeCount = \App\Models\AudRev::whereIn('rev_status', ['In Process', 'Under Revision'])->count();
+                      } elseif ($sbIsCommand) {
+                          // Command View (DLOG, DDG, DG, MD) strictly sees closed reversals (no pending action required)
+                          $sbReversalsBadgeCount = 0;
                       } else {
                           $revQuery = \App\Models\AudRev::query();
                           if (!$sbIsGlobal) {
@@ -1567,7 +1638,7 @@
 
           @if(! $sbIsItStaff)
           <li class="nav-item">
-              <a href="{{ route('admin.reversals.index') }}" class="nav-link {{ Request::routeIs('admin.reversals.*') ? 'active' : '' }}" style="border-radius: 6px; margin: 1px 6px; padding: 6px 10px;">
+              <a href="{{ ($sbIsCommand ?? false) ? route('admin.reversals.closed') : route('admin.reversals.index') }}" class="nav-link {{ Request::routeIs('admin.reversals.*') ? 'active' : '' }}" style="border-radius: 6px; margin: 1px 6px; padding: 6px 10px;">
                   <i class="nav-icon fas fa-history text-warning" style="font-size: 13px; margin-right: 6px;"></i>
                   <p style="font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                       Reversals
@@ -1626,6 +1697,29 @@
   <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
   <script src="{{ asset('dist/js/adminlte.js') }}"></script>
   <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
+
+  <script>
+    // Robust Sidebar Scrolling on all screens & zoom levels
+    $(document).ready(function() {
+      function refreshSidebarScroll() {
+        var $sidebar = $('.main-sidebar .sidebar');
+        if ($sidebar.length && typeof $.fn.overlayScrollbars !== 'undefined') {
+          var os = $sidebar.overlayScrollbars();
+          if (os) {
+            os.update();
+          }
+        }
+      }
+
+      refreshSidebarScroll();
+      $(window).on('resize orientationchange', refreshSidebarScroll);
+
+      // Re-calculate after any treeview opens/closes
+      $(document).on('expanded.lte.treeview collapsed.lte.treeview', function() {
+        setTimeout(refreshSidebarScroll, 300);
+      });
+    });
+  </script>
 
 
 
@@ -2028,57 +2122,33 @@
             });
         }
     </script>
+    @endif
+
     @if(Auth::check() && Auth::user()->isCentralDepartment())
     {{-- Department Scope Switch Confirmation Modal --}}
     <div class="modal fade" id="deptScopeSwitchModal" tabindex="-1" role="dialog" aria-labelledby="deptScopeSwitchModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
             <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
                 <form action="{{ route('user.toggle_scope') }}" method="POST">
                     @csrf
                     <input type="hidden" name="scope" value="{{ Auth::user()->isMyDepartmentMode() ? 'all' : 'my' }}">
-                    <div class="modal-header {{ Auth::user()->isMyDepartmentMode() ? 'bg-info text-white' : 'bg-success text-white' }} py-3">
-                        <h5 class="modal-title font-weight-bold" id="deptScopeSwitchModalLabel" style="font-size: 16px;">
-                            <i class="fas fa-exchange-alt mr-2"></i>
-                            {{ Auth::user()->isMyDepartmentMode() ? 'Switch to All Departments Mode?' : 'Switch to My Department Mode?' }}
-                        </h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <div class="modal-header {{ Auth::user()->isMyDepartmentMode() ? 'bg-info text-white' : 'bg-success text-white' }} py-2 px-3">
+                        <h6 class="modal-title font-weight-bold mb-0" id="deptScopeSwitchModalLabel" style="font-size: 14px;">
+                            <i class="fas fa-exchange-alt mr-1.5"></i>
+                            {{ Auth::user()->isMyDepartmentMode() ? 'Switch to All Depts?' : 'Switch to My Dept?' }}
+                        </h6>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="font-size: 18px; opacity: 0.9;">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body p-4 text-dark text-left" style="background-color: #ffffff;">
-                        @if(Auth::user()->isMyDepartmentMode())
-                            <div class="d-flex align-items-start mb-3">
-                                <div class="mr-3 text-info" style="font-size: 32px; line-height: 1;">
-                                    <i class="fas fa-globe"></i>
-                                </div>
-                                <div>
-                                    <h6 class="font-weight-bold text-dark mb-1" style="font-size: 15px;">Global Directorate Access</h6>
-                                    <p class="text-muted mb-0" style="font-size: 13px; line-height: 1.5;">
-                                        Switching to <strong>All Departments</strong> will restore your full organization-wide view (All division cases, central oversight, approvals, and comprehensive directorate reports).
-                                    </p>
-                                </div>
-                            </div>
-                        @else
-                            <div class="d-flex align-items-start mb-3">
-                                <div class="mr-3 text-success" style="font-size: 32px; line-height: 1;">
-                                    <i class="fas fa-building"></i>
-                                </div>
-                                <div>
-                                    <h6 class="font-weight-bold text-dark mb-1" style="font-size: 15px;">Scoped Departmental View ({{ Auth::user()->acc_untname ?? Auth::user()->acc_untnamesh ?? 'My Department' }})</h6>
-                                    <p class="text-muted mb-0" style="font-size: 13px; line-height: 1.5;">
-                                        In <strong>My Department</strong> mode, your sidebar navigation and data scope will collapse to your department only (exactly like a technical division). Any purchase or hiring cases you create will be funded from <strong>CSRF</strong>.
-                                    </p>
-                                </div>
-                            </div>
-                        @endif
-                        <div class="alert alert-light border mb-0 text-muted d-flex align-items-center" style="font-size: 12px; border-radius: 6px;">
-                            <i class="fas fa-info-circle mr-2 text-primary" style="font-size: 14px;"></i>
-                            <span>You can toggle between modes anytime from the top of the sidebar.</span>
-                        </div>
+                    <div class="modal-body p-3 text-center text-dark" style="background-color: #ffffff;">
+                        <p class="mb-0 text-muted" style="font-size: 13.5px;">
+                            Switch to <strong>{{ Auth::user()->isMyDepartmentMode() ? 'All Departments' : 'My Department' }}</strong> mode?
+                        </p>
                     </div>
-                    <div class="modal-footer bg-light py-2">
+                    <div class="modal-footer bg-light py-2 px-3 d-flex justify-content-between">
                         <button type="button" class="btn btn-secondary btn-sm font-weight-bold px-3" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn {{ Auth::user()->isMyDepartmentMode() ? 'btn-info' : 'btn-success' }} btn-sm font-weight-bold px-4">
+                        <button type="submit" class="btn {{ Auth::user()->isMyDepartmentMode() ? 'btn-info' : 'btn-success' }} btn-sm font-weight-bold px-3">
                             <i class="fas fa-check mr-1"></i> Confirm & Switch
                         </button>
                     </div>

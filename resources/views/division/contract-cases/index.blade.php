@@ -157,24 +157,41 @@
         <div class="container-fluid px-4">
             <!-- Main Hub Table -->
             <div class="card bg-transparent border-0">
-                <div class="card-header bg-transparent border-0 p-0 mb-3">
-                    <ul class="nav nav-pills" id="hubTabs" role="tablist">
+                <div class="card-header bg-transparent border-0 p-0 mb-3 d-flex flex-wrap justify-content-between align-items-center">
+                    <ul class="nav nav-pills mb-2 mb-md-0" id="hubTabs" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link hub-tab-btn active" data-toggle="tab" href="#action-req">
-                                <i class="fas fa-folder-open mr-2"></i> ACTION REQUIRED ({{ collect($actionReqCases)->count() }})
+                                <i class="fas fa-folder-open mr-2"></i> ACTION REQUIRED <span class="tab-count-badge">({{ collect($actionReqCases)->count() }})</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link hub-tab-btn" data-toggle="tab" href="#initiated">
-                                <i class="fas fa-stream mr-2"></i> UNDER REVIEW ({{ collect($initiatedCases)->count() }})
+                                <i class="fas fa-stream mr-2"></i> UNDER REVIEW <span class="tab-count-badge">({{ collect($initiatedCases)->count() }})</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link hub-tab-btn" data-toggle="tab" href="#completed">
-                                <i class="fas fa-check-circle mr-2"></i> CLOSED / ARCHIVE ({{ collect($completedCases)->count() }})
+                                <i class="fas fa-check-circle mr-2"></i> CLOSED / ARCHIVE <span class="tab-count-badge">({{ collect($completedCases)->count() }})</span>
                             </a>
                         </li>
                     </ul>
+
+                    {{-- Compact Inline Live Search Bar --}}
+                    <div class="search-box-inline" style="min-width: 260px; max-width: 340px;">
+                        <div class="input-group shadow-sm" style="border-radius: 20px; overflow: hidden; border: 1.5px solid var(--rd-border, #cbd5e1); background: #ffffff;">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white border-0 text-muted pl-3 pr-2 py-1">
+                                    <i class="fas fa-search text-primary" style="font-size: 13px;"></i>
+                                </span>
+                            </div>
+                            <input type="text" id="globalHubSearch" class="form-control border-0 py-1 font-weight-500" style="font-size: 13px; box-shadow: none;" placeholder="Search ID, name, project..." autocomplete="off">
+                            <div class="input-group-append" id="clearSearchGroup" style="display: none;">
+                                <button class="btn btn-white border-0 text-muted px-2 py-1" type="button" id="clearGlobalSearch" title="Clear Search">
+                                    <i class="fas fa-times-circle text-danger" style="font-size: 12px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="tab-content">
@@ -231,13 +248,20 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-right pr-4">
+                                                        @php
+                                                            $loggedUser = auth()->user();
+                                                            $isLeader = $loggedUser && ((method_exists($loggedUser, 'isMdDdgDg') && $loggedUser->isMdDdgDg()) || (method_exists($loggedUser, 'isDlog') && $loggedUser->isDlog()));
+                                                            $canCancelCtc = !$isLeader && ($p->ctc_status === 'Under Revision' || $p->ctc_status === 'Draft');
+                                                        @endphp
                                                         @if($p->ctc_status === 'Under Revision' || $p->ctc_status === 'Draft')
                                                             <a href="{{ route('division.contract-cases.edit', $p->ctc_id) }}" class="btn btn-outline-warning btn-sm font-weight-bold mr-1" style="border-radius: 6px; font-size: 11px;">
                                                                 <i class="fas fa-edit mr-1"></i> REVISE
                                                             </a>
+                                                            @if($canCancelCtc)
                                                             <button type="button" class="btn btn-outline-danger btn-sm font-weight-bold mr-1 btn-cancel-row-case" data-id="{{ $p->ctc_id }}" style="border-radius: 6px; font-size: 11px;">
                                                                 <i class="fas fa-ban mr-1"></i> CANCEL
                                                             </button>
+                                                            @endif
                                                         @endif
                                                         <a href="{{ route('division.contract-cases.show', $p->ctc_id) }}" class="btn btn-primary btn-sm font-weight-bold" style="border-radius: 6px; font-size: 11px;">
                                                             <i class="fas fa-external-link-alt mr-1"></i> OPEN & RELEASE
@@ -439,6 +463,89 @@ $(document).ready(function() {
                 });
             }
         });
+    // ── Live Universal Search across all tabs and contract cases ───────
+    const $search = $('#globalHubSearch');
+    const $clearBtn = $('#clearGlobalSearch');
+    const $clearGroup = $('#clearSearchGroup');
+
+    const tabOrigCounts = {
+        'action-req': {{ collect($actionReqCases)->count() }},
+        'initiated': {{ collect($initiatedCases)->count() }},
+        'completed': {{ collect($completedCases)->count() }}
+    };
+
+    function performSearch() {
+        const query = $search.val().trim().toLowerCase();
+        
+        if (!query) {
+            $clearGroup.hide();
+
+            // Restore all rows in tabs
+            $('#action-req tbody tr').show();
+            $('#initiated tbody tr').show();
+            $('#completed tbody tr').show();
+
+            // Restore tab pill labels
+            $('#hubTabs a[href="#action-req"] .tab-count-badge').text(`(${tabOrigCounts['action-req']})`);
+            $('#hubTabs a[href="#initiated"] .tab-count-badge').text(`(${tabOrigCounts['initiated']})`);
+            $('#hubTabs a[href="#completed"] .tab-count-badge').text(`(${tabOrigCounts['completed']})`);
+            return;
+        }
+
+        $clearGroup.show();
+
+        let tabMatches = { 'action-req': 0, 'initiated': 0, 'completed': 0 };
+        const tabConfigs = [
+            { id: 'action-req' },
+            { id: 'initiated' },
+            { id: 'completed' }
+        ];
+
+        tabConfigs.forEach(tab => {
+            const $tabPane = $(`#${tab.id}`);
+            const $rows = $tabPane.find('tbody tr');
+
+            $rows.each(function() {
+                const $row = $(this);
+                const caseId = ($row.attr('data-id') || '').toLowerCase();
+                const rowText = $row.text().toLowerCase();
+
+                const isMatch = caseId === query || 
+                                `cc-${caseId}` === query || 
+                                caseId.includes(query) || 
+                                rowText.includes(query);
+
+                if (isMatch) {
+                    $row.show();
+                    tabMatches[tab.id]++;
+                } else {
+                    $row.hide();
+                }
+            });
+        });
+
+        // Update tab link badges
+        $('#hubTabs a[href="#action-req"] .tab-count-badge').text(`(${tabMatches['action-req']})`);
+        $('#hubTabs a[href="#initiated"] .tab-count-badge').text(`(${tabMatches['initiated']})`);
+        $('#hubTabs a[href="#completed"] .tab-count-badge').text(`(${tabMatches['completed']})`);
+
+        // If active tab has 0 matches, auto switch to the tab that has matches
+        const activeTabHref = $('#hubTabs .nav-link.active').attr('href');
+        const activeTabId = activeTabHref ? activeTabHref.replace('#', '') : '';
+        if (tabMatches[activeTabId] === 0) {
+            for (let t of ['action-req', 'initiated', 'completed']) {
+                if (tabMatches[t] > 0) {
+                    $(`#hubTabs a[href="#${t}"]`).tab('show');
+                    break;
+                }
+            }
+        }
+    }
+
+    $search.on('input', performSearch);
+    $clearBtn.on('click', function() {
+        $search.val('').focus();
+        performSearch();
     });
 });
 </script>

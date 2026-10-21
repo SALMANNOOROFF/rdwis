@@ -134,9 +134,10 @@ class PurchaseProcurementController extends Controller
             ->findOrFail($id);
 
         // Financial Intelligence (Legacy Logic)
+        $headId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
         $finService = app(\App\Services\FinancialIntelligenceService::class);
-        $fin = $finService->getHeadStatus($purchase->pcs_hed_id);
-        $subheads = $finService->getSubheadBreakdown($purchase->pcs_hed_id);
+        $fin = $headId ? $finService->getHeadStatus($headId) : (object)[];
+        $subheads = $headId ? $finService->getSubheadBreakdown($headId) : [];
         $head = $fin;
         
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
@@ -163,7 +164,7 @@ class PurchaseProcurementController extends Controller
                 ->get();
         }
 
-        $projectSubheads = DB::table('fin.subheads')->where('sbh_hed_id', $purchase->pcs_hed_id)->pluck('sbh_name')->all();
+        $projectSubheads = $headId ? DB::table('fin.subheads')->where('sbh_hed_id', $headId)->pluck('sbh_name')->all() : [];
 
         return view('nrdi.purchase_cases_new.show', compact(
             'purchase', 'head', 'canApprove', 'area', 'pageTitle', 'divisionName', 'canEdit', 'firms', 'subheads',

@@ -737,8 +737,80 @@ class PurchaseController extends Controller
 
     public function csFormal($id)
     {
-        $purchase = Purchase::with(['unit', 'quotes.firm', 'noQuotes.firm', 'project', 'items'])->findOrFail($id);
-        return view('purchase.initiation.cs_formal', compact('purchase'));
+        $purchase = Purchase::with(['unit', 'quotes.firm', 'noQuotes.firm', 'project', 'items', 'itLetter'])->findOrFail($id);
+
+        $savedLetter = $purchase->itLetter ?? \App\Models\PurItLetter::where('pit_pcs_id', $purchase->pcs_id)->first();
+
+        // 1. Live RFQ Number: from PurItLetter or generated convention
+        $rfqNo = $savedLetter?->pit_refno ?: ('R&D/Projects/Proc/' . $purchase->pcs_id);
+
+        // 2. Live RFQ Date: from PurItLetter, releasedtg, or pcs_date
+        if (!empty($savedLetter?->pit_date)) {
+            $rfqDateRaw = $savedLetter->pit_date;
+            try {
+                $rfqDate = \Carbon\Carbon::parse($rfqDateRaw)->format('d/F/Y');
+            } catch (\Exception $e) {
+                $rfqDate = $rfqDateRaw;
+            }
+        } elseif (!empty($purchase->pcs_releasedtg)) {
+            $rfqDate = \Carbon\Carbon::parse($purchase->pcs_releasedtg)->format('d/F/Y');
+        } elseif (!empty($purchase->pcs_date)) {
+            $rfqDate = \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y');
+        } else {
+            $rfqDate = date('d/F/Y');
+        }
+
+        // 3. Live Bidding Date: from savedLetter (pit_para2), max quotation date, or pcs_date
+        if (!empty($savedLetter?->pit_para2)) {
+            $biddingDateRaw = $savedLetter->pit_para2;
+            try {
+                $biddingDate = \Carbon\Carbon::parse($biddingDateRaw)->format('d/F/Y');
+            } catch (\Exception $e) {
+                $biddingDate = $biddingDateRaw;
+            }
+        } elseif ($purchase->quotes && $purchase->quotes->whereNotNull('qte_date')->count() > 0) {
+            $maxQuoteDate = $purchase->quotes->whereNotNull('qte_date')->max('qte_date');
+            $biddingDate = \Carbon\Carbon::parse($maxQuoteDate)->format('d/F/Y');
+        } elseif (!empty($purchase->pcs_date)) {
+            $biddingDate = \Carbon\Carbon::parse($purchase->pcs_date)->format('d/F/Y');
+        } else {
+            $biddingDate = date('d/F/Y');
+        }
+
+        return view('purchase.initiation.cs_formal', compact('purchase', 'savedLetter', 'rfqNo', 'rfqDate', 'biddingDate'));
+    }
+
+    public function saveCsFormal(Request $request, $id)
+    {
+        $purchase = Purchase::findOrFail($id);
+
+        $validated = $request->validate([
+            'rfq_no'       => 'nullable|string|max:255',
+            'rfq_date'     => 'nullable|string|max:255',
+            'bidding_date' => 'nullable|string|max:255',
+        ]);
+
+        $itLetter = \App\Models\PurItLetter::firstOrNew(['pit_pcs_id' => $purchase->pcs_id]);
+        if (!empty($validated['rfq_no'])) {
+            $itLetter->pit_refno = trim($validated['rfq_no']);
+        }
+        if (!empty($validated['rfq_date'])) {
+            $itLetter->pit_date = trim($validated['rfq_date']);
+        }
+        if (!empty($validated['bidding_date'])) {
+            $itLetter->pit_para2 = trim($validated['bidding_date']);
+        }
+        $itLetter->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Formal Comparative Statement details saved to database successfully!',
+            'data'    => [
+                'rfq_no'       => $itLetter->pit_refno,
+                'rfq_date'     => $itLetter->pit_date,
+                'bidding_date' => $itLetter->pit_para2,
+            ]
+        ]);
     }
 
     public function itAnnex($id)

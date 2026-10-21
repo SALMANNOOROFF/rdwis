@@ -65,7 +65,7 @@ class ContractCaseController extends Controller
 
         $authorityRole = 'DDG';
         $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
-        $canApprove = $this->approvalService->canApprove('DDG', $case);
+        $canApprove = false;
 
         return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
     }

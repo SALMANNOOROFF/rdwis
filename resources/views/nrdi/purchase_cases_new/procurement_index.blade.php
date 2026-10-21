@@ -36,9 +36,29 @@
 
         {{-- Queue Table --}}
         <div class="metric-card mb-5 overflow-hidden shadow-lg" style="border-top: 5px solid var(--rd-primary);">
-            <div class="p-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(to right, #0f172a, #101c3d) !important;">
+            <div class="p-3 d-flex flex-wrap justify-content-between align-items-center gap-2" style="background: linear-gradient(to right, #0f172a, #101c3d) !important;">
                 <h6 class="m-0 rajdhani text-white font-weight-bold"><i class="fas fa-inbox mr-2 text-primary"></i> INCOMING SCRUTINY QUEUE</h6>
-                <div class="badge badge-dark rajdhani px-4 py-2" style="font-size: 10px; border: 1px solid var(--rd-border);">PENDING: {{ $caseCount }}</div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    {{-- Compact Inline Live Search Bar --}}
+                    <div class="search-box-inline mr-3" style="min-width: 250px; max-width: 320px;">
+                        <div class="input-group shadow-sm" style="border-radius: 20px; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06);">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-transparent border-0 text-primary pl-3 pr-2 py-1">
+                                    <i class="fas fa-search" style="font-size: 13px;"></i>
+                                </span>
+                            </div>
+                            <input type="text" id="globalHubSearch" class="form-control bg-transparent border-0 py-1 text-white font-weight-500" style="font-size: 13px; box-shadow: none;" placeholder="Search ID, title, unit..." autocomplete="off">
+                            <div class="input-group-append" id="clearSearchGroup" style="display: none;">
+                                <button class="btn btn-transparent border-0 text-muted px-2 py-1" type="button" id="clearGlobalSearch" title="Clear Search">
+                                    <i class="fas fa-times-circle text-danger" style="font-size: 12px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="badge badge-dark rajdhani px-4 py-2" id="pendingQueueBadge" style="font-size: 10px; border: 1px solid var(--rd-border);">PENDING: {{ $caseCount }}</div>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table dg-case-table mb-0">
@@ -54,7 +74,7 @@
                     </thead>
                     <tbody>
                         @forelse($purchases as $p)
-                        <tr>
+                        <tr data-id="{{ $p->pcs_id }}">
                             <td class="pl-4">
                                 <div class="badge badge-primary px-2 py-1 rajdhani" style="font-size: 10px; opacity: 0.8 !important;">PC-{{ $p->pcs_id }}</div>
                             </td>
@@ -70,9 +90,14 @@
                                 </div>
                                 <div class="text-muted" style="font-size: 10px;">{{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}</div>
                             </td>
-                            <td class="text-right font-weight-bold small text-muted">{{ $p->project->prj_code ?? 'N/A' }}</td>
+                            <td class="text-right font-weight-bold small text-muted">
+                                {{ $p->project->prj_code ?? ($p->effectiveHead->hed_code ?? 'N/A') }}
+                                @if(method_exists($p, 'isCsrf') && $p->isCsrf())
+                                    <span class="badge text-white font-weight-bold ml-1" style="background: #dc2626 !important; font-size: 10px; padding: 1px 5px; border-radius: 3px;">CSRF</span>
+                                @endif
+                            </td>
                             <td class="text-right font-weight-bold text-primary rajdhani" style="font-size: 16px;">Rs. {{ number_format($p->pcs_price) }}</td>
-                            <td class="text-right pr-4">
+                            <td class="text-right pr-4" style="white-space: nowrap;">
                                 <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-primary btn-sm rounded-pill px-4 rajdhani font-weight-bold" style="font-size: 11px; box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);">
                                     <i class="fas fa-search-plus mr-1"></i> SCRUTINIZE
                                 </a>
@@ -111,7 +136,7 @@
                     </thead>
                     <tbody>
                         @forelse($processed as $p)
-                        <tr>
+                        <tr data-id="{{ $p->pcs_id }}">
                             <td class="pl-4">#{{ $p->pcs_id }}</td>
                             <td class="small font-weight-bold text-white">{{ $unitNameMap[$p->pcs_unt_id] ?? 'N/A' }}</td>
                             <td>
@@ -143,4 +168,112 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('globalHubSearch');
+    const clearBtn = document.getElementById('clearGlobalSearch');
+    const clearGroup = document.getElementById('clearSearchGroup');
+    const pendingBadge = document.getElementById('pendingQueueBadge');
+    const origPendingCount = {{ $caseCount }};
+
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function () {
+        const val = this.value.toLowerCase().trim();
+        const numericId = val.replace(/[^0-9]/g, '');
+
+        if (val.length > 0) {
+            clearGroup.style.display = 'block';
+        } else {
+            clearGroup.style.display = 'none';
+            document.querySelectorAll('.metric-card table tbody tr[data-id]').forEach(r => r.style.display = '');
+            if (pendingBadge) pendingBadge.textContent = 'PENDING: ' + origPendingCount;
+            return;
+        }
+
+        let pendingMatches = 0;
+        const incomingRows = document.querySelectorAll('.metric-card:first-of-type table tbody tr[data-id]');
+        incomingRows.forEach(row => {
+            const rowText = row.innerText.toLowerCase();
+            const caseId = (row.getAttribute('data-id') || '').trim();
+            const matchesText = rowText.includes(val);
+            const matchesId = numericId && (caseId === numericId || ('pc-' + caseId) === val);
+
+            if (matchesText || matchesId) {
+                row.style.display = '';
+                pendingMatches++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (pendingBadge) pendingBadge.textContent = 'PENDING: ' + pendingMatches;
+
+        // Also filter recent history rows
+        const historyRows = document.querySelectorAll('.metric-card.mt-5 table tbody tr[data-id]');
+        historyRows.forEach(row => {
+            const rowText = row.innerText.toLowerCase();
+            const caseId = (row.getAttribute('data-id') || '').trim();
+            const matchesText = rowText.includes(val);
+            const matchesId = numericId && caseId === numericId;
+
+            if (matchesText || matchesId) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    clearBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    });
+
+    // ── Purchase Case Cancel Handler ──
+    $(document).on('click', '.btn-cancel-purchase-case', function(e) {
+        e.preventDefault();
+        const caseId = $(this).data('id');
+
+        Swal.fire({
+            title: `Cancel Purchase Case #PC-${caseId}`,
+            input: 'textarea',
+            inputLabel: 'Reason for Cancellation (Required)',
+            inputPlaceholder: 'Specify formal remarks for cancelling this case...',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Cancel Case',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'Cancellation remarks are mandatory!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `{{ url('purchase-cases') }}/${caseId}/cancel`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value
+                    },
+                    success: function(res) {
+                        Swal.fire('Cancelled', res.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to cancel purchase case.';
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
 @endsection

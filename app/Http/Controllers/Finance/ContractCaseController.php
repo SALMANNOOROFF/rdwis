@@ -64,9 +64,28 @@ class ContractCaseController extends Controller
 
         $authorityRole = 'Finance';
         $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
-        $canApprove = false;
+        $canApprove = true;
 
         return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove'));
+    }
+
+    public function approve($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'approve']);
+        $user = Auth::user();
+
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+
+        $this->approvalService->approve($case, $user, $request->all(), $remarks);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contract Case approved successfully by Finance.'
+        ]);
     }
 
     public function forward($id, Request $request)
@@ -123,6 +142,24 @@ class ContractCaseController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Case marked as Not Approved.'
+        ]);
+    }
+
+    public function cancel($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'cancel']);
+        $user = Auth::user();
+        $remarks = $request->input('remarks', 'Cancelled by Finance');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Cancellation remarks are mandatory.'], 422);
+        }
+
+        $this->approvalService->cancel($case, $user, $remarks);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contract Case #CC-' . $id . ' has been cancelled successfully.'
         ]);
     }
 }

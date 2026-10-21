@@ -4,7 +4,7 @@
     if (in_array($userArea, ['proc', 'prc'], true)) $userArea = 'proc';
     $service = app(\App\Services\PurchaseApprovalService::class);
     $area = strtolower(trim($area ?? Auth::user()->acc_untarea));
-    $canApprove = $service->canApprove($area, (float)($purchase->pcs_price ?? 0), $purchase);
+    $canApprove = in_array($userArea, ['fin', 'finance', 'hr'], true);
     $nextAuthName = $service->getNextAuthorityName($purchase, $area);
     $returnTargets = $service->getReturnTargets($purchase);
     

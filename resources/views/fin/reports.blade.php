@@ -1,4 +1,4 @@
-﻿@extends('welcome')
+@extends('welcome')
 
 @section('content')
 <style>
@@ -340,6 +340,9 @@
 
         <!-- Action Panel -->
         <div class="d-flex justify-content-end gap-3 mt-2 flex-wrap" style="gap: 12px;">
+            <a id="btn-print-official" href="javascript:void(0)" class="btn btn-sm btn-outline-info px-4 d-none" style="border-radius: 20px; height: 38px; font-weight: 600; display: inline-flex; align-items: center;" target="_blank">
+                <i class="fas fa-print mr-1"></i> Print Official Sheet
+            </a>
             <button id="btn-reset" class="btn btn-sm btn-outline-secondary px-4" style="border-radius: 20px; height: 38px; font-weight: 600;">
                 <i class="fas fa-undo mr-1"></i> Reset
             </button>
@@ -360,6 +363,9 @@
             </span>
             <span class="text-muted text-xs" id="records-counter">0 records loaded</span>
         </div>
+
+        <!-- Dynamic Top Grand Totals KPI Summary Bar -->
+        <div id="report-top-kpis" class="d-none mb-3"></div>
 
         <div class="rd-table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid var(--rd-border); border-radius: 8px;">
             <div id="table-placeholder" class="text-center py-5 text-muted">
@@ -451,27 +457,24 @@
             head_name: 'Head Name'
         },
         csrf_status: {
-            prj_code: 'Project Code',
-            prj_title: 'Project Title',
-            hed_code: 'Head Code',
-            cf_share: 'CF Share',
-            cf_received: 'CF Received',
-            cf_expenditure: 'CF Spent',
-            cf_balance: 'CF Balance',
-            cf_commitments: 'CF Commitments',
-            cf_in_process: 'CF In Process',
-            cf_available: 'CF Available'
+            division: 'Division',
+            project: 'Project',
+            allocation: 'Allocation (Rs)',
+            received: 'Received (Rs)',
+            expenditure: 'Expenditure (Rs)',
+            commitment: 'Commitment (Rs)',
+            in_process: 'In Process (Rs)',
+            available: 'Available (Rs)',
+            remaining: 'Remaining / Yet to be Received (Rs)'
         },
         monthly_return: {
-            trn_id: 'Transaction ID',
-            trn_date: 'Transaction Date',
-            trn_amount1: 'Amount 1',
-            trn_amount2: 'Amount 2',
-            trn_tax1: 'Tax 1',
-            trn_balance: 'Balance',
-            trn_transtype: 'Transaction Type',
-            head_code: 'Head Code',
-            head_name: 'Head Name'
+            head: 'Head',
+            allocation: 'Allocation (M)',
+            mtss_share: 'MTSS Share (M)',
+            nrdi_share: 'NRDI Share (M)',
+            received: 'Received (M)',
+            expended: 'Expended (M)',
+            balance_with_mtss: 'Balance With MTSS (M)'
         },
         pcs_awaiting_payment: {
             pcs_id: 'PC ID',
@@ -632,6 +635,16 @@
         cf_commitments: { label: 'CF Commitments', class: 'text-right' },
         cf_in_process: { label: 'CF In Process', class: 'text-right' },
         cf_available: { label: 'CF Available', class: 'text-right font-weight-bold text-info' },
+        
+        // Official Sheet Formats (Monthly Return & CSRF Status)
+        head: { label: 'Head', class: 'text-left font-weight-bold text-white' },
+        project: { label: 'Project', class: 'text-left font-weight-bold text-cyan' },
+        nrdi_share: { label: 'NRDI Share (M)', class: 'text-right' },
+        expended: { label: 'Expended (M)', class: 'text-right text-danger' },
+        balance_with_mtss: { label: 'Balance With MTSS (M)', class: 'text-right font-weight-bold text-cyan' },
+        commitment: { label: 'Commitment', class: 'text-right' },
+        in_process: { label: 'In Process', class: 'text-right' },
+        remaining: { label: 'Remaining', class: 'text-right font-weight-bold text-warning' },
         trn_id: { label: 'Transaction ID', class: 'text-left font-weight-bold text-white' },
         trn_date: { label: 'Transaction Date', class: 'text-muted' },
         trn_amount1: { label: 'Amount 1', class: 'text-right' },
@@ -922,9 +935,11 @@
     function renderTable(data, columns) {
         const thead = $('#table-headers');
         const tbody = $('#table-body');
+        const reportType = $('#report-type').val();
         
         thead.empty();
         tbody.empty();
+        $('#report-top-kpis').addClass('d-none').empty();
 
         if (data.length === 0) {
             showEmptyPlaceholder('No records found for the selected filters.');
@@ -937,27 +952,144 @@
             thead.append(`<th class="${meta.class || ''}" style="${meta.style || ''}">${meta.label}</th>`);
         });
 
-        // Build Table Rows
-        data.forEach(row => {
-            let rowHtml = '<tr>';
+        if (reportType === 'monthly_return' || reportType === 'csrf_status') {
+            // Group records by division & compute subtotals + grand totals
+            const groups = {};
+            const grandTotals = {};
+            const numCols = reportType === 'monthly_return'
+                ? ['allocation', 'mtss_share', 'nrdi_share', 'received', 'expended', 'balance_with_mtss']
+                : ['allocation', 'received', 'expenditure', 'commitment', 'in_process', 'available', 'remaining'];
+
+            numCols.forEach(c => grandTotals[c] = 0);
+
+            data.forEach(row => {
+                const div = row.division || 'Other';
+                if (!groups[div]) {
+                    groups[div] = {
+                        totals: {},
+                        items: []
+                    };
+                    numCols.forEach(c => groups[div].totals[c] = 0);
+                }
+                groups[div].items.push(row);
+                numCols.forEach(c => {
+                    const n = parseFloat(row[c] || 0);
+                    groups[div].totals[c] += n;
+                    grandTotals[c] += n;
+                });
+            });
+
+            // 1. Render Top KPI Summary Card
+            let kpiHtml = `<div class="card p-3 mb-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #0d1b2a, #1b263b); border: 1px solid #415a77 !important; border-radius: 8px;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-xs text-cyan font-weight-bold text-uppercase"><i class="fas fa-chart-pie mr-1"></i> ${reportType === 'monthly_return' ? "Annex 'A' Grand Totals (Millions of Rs)" : "CSRF Status Grand Totals (Rs)"}</span>
+                    <span class="badge badge-primary px-2 py-0.5 text-xs">${data.length} Records Across ${Object.keys(groups).length} Divisions</span>
+                </div>
+                <div class="row text-center">`;
+
+            if (reportType === 'monthly_return') {
+                kpiHtml += `
+                    <div class="col-6 col-md-2 mb-2"><span class="text-xs text-muted d-block text-uppercase">Allocation</span><strong class="text-info font-weight-bold" style="font-size: 1.05rem;">${grandTotals.allocation.toFixed(2)}M</strong></div>
+                    <div class="col-6 col-md-2 mb-2"><span class="text-xs text-muted d-block text-uppercase">MTSS Share</span><strong class="text-white font-weight-bold" style="font-size: 1.05rem;">${grandTotals.mtss_share.toFixed(2)}M</strong></div>
+                    <div class="col-6 col-md-2 mb-2"><span class="text-xs text-muted d-block text-uppercase">NRDI Share</span><strong class="text-white font-weight-bold" style="font-size: 1.05rem;">${grandTotals.nrdi_share.toFixed(2)}M</strong></div>
+                    <div class="col-6 col-md-2 mb-2"><span class="text-xs text-muted d-block text-uppercase">Received</span><strong class="text-success font-weight-bold" style="font-size: 1.05rem;">${grandTotals.received.toFixed(2)}M</strong></div>
+                    <div class="col-6 col-md-2 mb-2"><span class="text-xs text-muted d-block text-uppercase">Expended</span><strong class="text-danger font-weight-bold" style="font-size: 1.05rem;">${grandTotals.expended.toFixed(2)}M</strong></div>
+                    <div class="col-6 col-md-2 mb-2"><span class="text-xs text-muted d-block text-uppercase">Balance MTSS</span><strong class="text-cyan font-weight-bold" style="font-size: 1.05rem;">${grandTotals.balance_with_mtss.toFixed(2)}M</strong></div>
+                `;
+            } else {
+                kpiHtml += `
+                    <div class="col-6 col-md mb-2"><span class="text-xs text-muted d-block text-uppercase">Allocation</span><strong class="text-info font-weight-bold">${formatMoney(grandTotals.allocation)}</strong></div>
+                    <div class="col-6 col-md mb-2"><span class="text-xs text-muted d-block text-uppercase">Received</span><strong class="text-success font-weight-bold">${formatMoney(grandTotals.received)}</strong></div>
+                    <div class="col-6 col-md mb-2"><span class="text-xs text-muted d-block text-uppercase">Expenditure</span><strong class="text-danger font-weight-bold">${formatMoney(grandTotals.expenditure)}</strong></div>
+                    <div class="col-6 col-md mb-2"><span class="text-xs text-muted d-block text-uppercase">Commitment</span><strong class="text-white font-weight-bold">${formatMoney(grandTotals.commitment)}</strong></div>
+                    <div class="col-6 col-md mb-2"><span class="text-xs text-muted d-block text-uppercase">In Process</span><strong class="text-warning font-weight-bold">${formatMoney(grandTotals.in_process)}</strong></div>
+                    <div class="col-6 col-md mb-2"><span class="text-xs text-muted d-block text-uppercase">Available</span><strong class="text-cyan font-weight-bold">${formatMoney(grandTotals.available)}</strong></div>
+                    <div class="col-6 col-md mb-2"><span class="text-xs text-muted d-block text-uppercase">Remaining</span><strong class="text-warning font-weight-bold">${formatMoney(grandTotals.remaining)}</strong></div>
+                `;
+            }
+            kpiHtml += `</div></div>`;
+            $('#report-top-kpis').html(kpiHtml).removeClass('d-none');
+
+            // 2. Render Groups with Division Separator Row & Subtotals
+            for (const divName in groups) {
+                const group = groups[divName];
+                let divRow = `<tr style="background: rgba(0, 191, 255, 0.22); border-top: 2px solid #00BFFF; border-bottom: 1px solid rgba(0, 191, 255, 0.5);">`;
+                columns.forEach(col => {
+                    const meta = columnMeta[col] || { class: '' };
+                    if (col === 'division' || col === 'project' || col === 'head') {
+                        divRow += `<td class="font-weight-bold text-white text-left" style="font-size: 0.95rem;">
+                            <i class="fas fa-sitemap text-cyan mr-1"></i> ${divName} <span class="badge badge-secondary ml-1 font-weight-normal text-xs">${group.items.length} accounts</span>
+                        </td>`;
+                    } else if (numCols.includes(col)) {
+                        const val = reportType === 'monthly_return' ? group.totals[col].toFixed(2) : formatMoney(group.totals[col]);
+                        divRow += `<td class="${meta.class || ''} font-weight-bold text-cyan" style="font-size: 0.95rem;">${val}</td>`;
+                    } else {
+                        divRow += `<td></td>`;
+                    }
+                });
+                divRow += `</tr>`;
+                tbody.append(divRow);
+
+                // Individual Items
+                group.items.forEach(row => {
+                    let rowHtml = '<tr>';
+                    columns.forEach(col => {
+                        const meta = columnMeta[col] || { class: '' };
+                        let val = row[col];
+
+                        if (reportType === 'monthly_return' && numCols.includes(col)) {
+                            val = isNaN(Number(val)) ? val : Number(val).toFixed(2);
+                        } else if (numCols.includes(col)) {
+                            val = formatMoney(val);
+                        }
+
+                        const indent = (col === 'project' || col === 'head') ? 'padding-left: 24px; font-weight: 500;' : '';
+                        rowHtml += `<td class="${meta.class || ''}" style="${meta.style || ''}; ${indent}">${val !== null && val !== undefined ? val : 'N/A'}</td>`;
+                    });
+                    rowHtml += '</tr>';
+                    tbody.append(rowHtml);
+                });
+            }
+
+            // 3. Grand Total Row in Table Footer
+            let footHtml = `<tr class="font-weight-bold" style="background: #0d1b2a; border-top: 2px solid #00BFFF; border-bottom: 2px solid #00BFFF; color: #fff;">`;
             columns.forEach(col => {
                 const meta = columnMeta[col] || { class: '' };
-                let val = row[col];
-
-                // Formatting adjustments
-                if (['price', 'total_value', 'approved_budget', 'allocation', 'spent_prj', 'spent_cf', 'total_spent', 'remaining', 'commitments', 'in_process', 'sha_cf', 'sha_pcc', 'sha_prj', 'sha_prj_sal', 'sha_prj_pur', 'sbh_alloc', 'cf_share', 'cf_received', 'cf_expenditure', 'cf_balance', 'cf_commitments', 'cf_in_process', 'cf_available', 'trn_amount1', 'trn_amount2', 'trn_tax1', 'trn_balance', 'amount', 'from_old_val', 'from_new_val', 'to_old_val', 'to_new_val', 'pcs_price', 'pcs_intprice', 'pcs_midprice', 'received', 'expenditure', 'cf_expenditure', 'balance', 'available', 'csrf_share', 'equipment_share', 'rdw_share', 'hr_share', 'misc_share'].includes(col)) {
-                    val = formatMoney(val);
-                } else if (['status', 'pcs_status', 'acc_status', 'emp_status'].includes(col)) {
-                    val = `<span class="badge badge-secondary px-2.5 py-1" style="background: rgba(0, 191, 255, 0.12); border: 1px solid rgba(0, 191, 255, 0.35); color: #00BFFF; border-radius: 20px;">${val}</span>`;
-                } else if (col === 'emp_locked' || col === 'emp_cleared') {
-                    val = val ? '<span class="text-success font-weight-bold"><i class="fas fa-check-circle"></i> Yes</span>' : '<span class="text-muted"><i class="fas fa-times-circle"></i> No</span>';
+                if (col === 'division' || col === 'project' || col === 'head') {
+                    footHtml += `<td class="font-weight-bold text-warning text-left" style="font-size: 1rem;"><i class="fas fa-calculator mr-1"></i> Grand Total</td>`;
+                } else if (numCols.includes(col)) {
+                    const val = reportType === 'monthly_return' ? grandTotals[col].toFixed(2) : formatMoney(grandTotals[col]);
+                    footHtml += `<td class="${meta.class || ''} font-weight-bold text-warning" style="font-size: 1rem;">${val}</td>`;
+                } else {
+                    footHtml += `<td></td>`;
                 }
-
-                rowHtml += `<td class="${meta.class || ''}" style="${meta.style || ''}">${val !== null && val !== undefined ? val : 'N/A'}</td>`;
             });
-            rowHtml += '</tr>';
-            tbody.append(rowHtml);
-        });
+            footHtml += `</tr>`;
+            tbody.append(footHtml);
+
+        } else {
+            // Build Table Rows for other standard reports
+            data.forEach(row => {
+                let rowHtml = '<tr>';
+                columns.forEach(col => {
+                    const meta = columnMeta[col] || { class: '' };
+                    let val = row[col];
+
+                    // Formatting adjustments
+                    if (['price', 'total_value', 'approved_budget', 'allocation', 'spent_prj', 'spent_cf', 'total_spent', 'remaining', 'commitments', 'in_process', 'commitment', 'sha_cf', 'sha_pcc', 'sha_prj', 'sha_prj_sal', 'sha_prj_pur', 'sbh_alloc', 'cf_share', 'cf_received', 'cf_expenditure', 'cf_balance', 'cf_commitments', 'cf_in_process', 'cf_available', 'trn_amount1', 'trn_amount2', 'trn_tax1', 'trn_balance', 'amount', 'from_old_val', 'from_new_val', 'to_old_val', 'to_new_val', 'pcs_price', 'pcs_intprice', 'pcs_midprice', 'received', 'expenditure', 'cf_expenditure', 'balance', 'available', 'csrf_share', 'equipment_share', 'rdw_share', 'hr_share', 'misc_share'].includes(col)) {
+                        val = formatMoney(val);
+                    } else if (['status', 'pcs_status', 'acc_status', 'emp_status'].includes(col)) {
+                        val = `<span class="badge badge-secondary px-2.5 py-1" style="background: rgba(0, 191, 255, 0.12); border: 1px solid rgba(0, 191, 255, 0.35); color: #00BFFF; border-radius: 20px;">${val}</span>`;
+                    } else if (col === 'emp_locked' || col === 'emp_cleared') {
+                        val = val ? '<span class="text-success font-weight-bold"><i class="fas fa-check-circle"></i> Yes</span>' : '<span class="text-muted"><i class="fas fa-times-circle"></i> No</span>';
+                    }
+
+                    rowHtml += `<td class="${meta.class || ''}" style="${meta.style || ''}">${val !== null && val !== undefined ? val : 'N/A'}</td>`;
+                });
+                rowHtml += '</tr>';
+                tbody.append(rowHtml);
+            });
+        }
 
         $('#records-counter').text(`${data.length} records loaded`);
         $('#output-table').removeClass('d-none');
@@ -1017,7 +1149,8 @@
         
         $('.col-checkbox').prop('checked', true);
 
-        // Clear output table
+        // Clear output table & top KPIs
+        $('#report-top-kpis').addClass('d-none').empty();
         $('#output-table').addClass('d-none');
         $('#table-placeholder').removeClass('d-none').html(`
             <i class="fas fa-table mb-3 text-cyan" style="font-size: 3rem;"></i><br>
@@ -1050,6 +1183,7 @@
                 $('.columns-grid').empty();
                 showHideFilters('');
                 $('#btn-generate, #btn-export').prop('disabled', true).addClass('opacity-50');
+                $('#btn-print-official').addClass('d-none');
                 $('#output-table').addClass('d-none');
                 $('#table-placeholder').removeClass('d-none').html(`
                     <i class="fas fa-table mb-3 text-cyan" style="font-size: 3rem;"></i><br>
@@ -1063,9 +1197,40 @@
             updateColumnsCheckboxList(reportType);
             updateStatusOptions(reportType);
             showHideFilters(reportType);
+
+            // Handle Official Print Button
+            if (reportType === 'monthly_return') {
+                $('#btn-print-official').removeClass('d-none').attr('href', '{{ route("fin.reports.print_monthly_return") }}');
+                $('#btn-print-official').html('<i class="fas fa-print mr-1"></i> Print Annex \'A\' (Monthly Return)');
+            } else if (reportType === 'csrf_status') {
+                $('#btn-print-official').removeClass('d-none').attr('href', '{{ route("fin.reports.print_csrf_status") }}');
+                $('#btn-print-official').html('<i class="fas fa-print mr-1"></i> Print CSRF Status Sheet');
+            } else {
+                $('#btn-print-official').addClass('d-none');
+            }
             
             // Auto click Select All columns to refresh checkboxes state
             $('#col-select-all').trigger('click');
+        });
+
+        // Dynamic URL update on click of Print Official Sheet
+        $('#btn-print-official').click(function(e) {
+            const reportType = $('#report-type').val();
+            const divId = $('#division-dropdown').val();
+            let base = '';
+            if (reportType === 'monthly_return') {
+                base = '{{ route("fin.reports.print_monthly_return") }}';
+            } else if (reportType === 'csrf_status') {
+                base = '{{ route("fin.reports.print_csrf_status") }}';
+            }
+            if (base) {
+                const qs = new URLSearchParams();
+                if (divId && divId !== 'All') qs.set('unit_id', divId);
+                const startDt = $('#start-date').val();
+                if (startDt) qs.set('month', startDt);
+                const fullUrl = qs.toString() ? (base + '?' + qs.toString()) : base;
+                $(this).attr('href', fullUrl);
+            }
         });
 
         // Trigger initial setup (Empty by default)

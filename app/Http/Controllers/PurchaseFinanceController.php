@@ -82,9 +82,10 @@ class PurchaseFinanceController extends Controller
             ->findOrFail($id);
 
         // Financial Intelligence (Legacy Logic)
+        $headId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
         $finService = app(\App\Services\FinancialIntelligenceService::class);
-        $fin = $finService->getHeadStatus($purchase->pcs_hed_id);
-        $subheads = $finService->getSubheadBreakdown($purchase->pcs_hed_id);
+        $fin = $headId ? $finService->getHeadStatus($headId) : (object)[];
+        $subheads = $headId ? $finService->getSubheadBreakdown($headId) : [];
         $head = $fin;
         
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');

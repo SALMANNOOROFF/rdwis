@@ -40,9 +40,9 @@ class DataRevisionPolicy
             return true;
         }
 
-        // 2. Command Officers (DG, MD, DDG) have global organization visibility
+        // 2. Command Officers (DG, MD, DDG, DLOG) can only view Closed reversal records
         if ($context->isCommand()) {
-            return true;
+            return in_array($rev->rev_status, ['Fulfilled', 'Cancelled'], true);
         }
 
         $userUnitId = (int) ($user->acc_unt_id ?? 0);

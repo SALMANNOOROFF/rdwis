@@ -65,7 +65,7 @@
 
                         <div class="col-md-3 mb-1">
                              <label class="small text-muted mb-0">Search</label>
-                             <input type="text" id="codeSearch" class="form-control form-control-sm" placeholder="Code or Title..." onkeyup="applyFilters()">
+                             <input type="text" id="codeSearch" class="form-control form-control-sm" placeholder="Code or Title..." onkeyup="applyFilters()" oninput="applyFilters()">
                         </div>
 
                          <div class="col-md-3 mb-2">
@@ -394,28 +394,36 @@
                     effectiveStatus = 'closed';
                 }
 
-                // Main Status Filter
-                if (currentMainStatus !== 'all') {
-                    if (currentMainStatus === 'open' && (effectiveStatus === 'closed' || effectiveStatus === 'draft')) show = false;
-                    else if (currentMainStatus === 'closed' && effectiveStatus !== 'closed') show = false;
+                // If codeSearch is active, search across ALL projects regardless of Open/Closed tab!
+                if (codeSearch) {
+                    const rowText = row.innerText.toLowerCase();
+                    if (!code.includes(codeSearch) && !title.includes(codeSearch) && !rowText.includes(codeSearch)) {
+                        show = false;
+                    }
+                } else {
+                    // Main Status Filter (Only apply if search is empty)
+                    if (currentMainStatus !== 'all') {
+                        if (currentMainStatus === 'open' && (effectiveStatus === 'closed' || effectiveStatus === 'draft')) show = false;
+                        else if (currentMainStatus === 'closed' && effectiveStatus !== 'closed') show = false;
+                    }
+
+                    // MPR Status Filter
+                    if (mprStatusFilter !== 'all' && mprStatus !== mprStatusFilter) show = false;
                 }
-
-                // MPR Status Filter
-                if (mprStatusFilter !== 'all' && mprStatus !== mprStatusFilter) show = false;
-
-                // Search Filter
-                if (codeSearch && !code.includes(codeSearch) && !title.includes(codeSearch)) show = false;
                 
                 row.style.display = show ? 'table-row' : 'none';
                 if(show) visibleRowsInGroup++;
             });
 
-            // 3. Auto-Hide Group if no matching rows
+            // 3. Auto-Hide Group if no matching rows (or expand if search matches)
             if (visibleRowsInGroup === 0) {
                 group.style.display = 'none';
-                projectBody.classList.remove('show'); // Collapse empty groups
+                projectBody.classList.remove('show');
             } else {
-                group.style.display = ''; // Show header
+                group.style.display = '';
+                if (codeSearch) {
+                    projectBody.classList.add('show');
+                }
                 totalVisible += visibleRowsInGroup;
             }
         });

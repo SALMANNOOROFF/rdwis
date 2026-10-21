@@ -351,7 +351,20 @@ class FinanceReportsController extends Controller
                 'sbh_name' => 'Subhead Name',
                 'sbh_alloc' => 'Allocation (Rs)',
 
-                // Monthly Return & Fund Shifting / Transfers
+                // CSRF Status
+                'division' => 'Division',
+                'project' => 'Project',
+                'commitment' => 'Commitment (Rs)',
+                'in_process' => 'In Process (Rs)',
+
+                // Monthly Return (Annex 'A')
+                'head' => 'Head',
+                'mtss_share' => 'MTSS Share (M)',
+                'nrdi_share' => 'NRDI Share (M)',
+                'expended' => 'Expended (M)',
+                'balance_with_mtss' => 'Balance With MTSS (M)',
+
+                // Fund Shifting / Transfers
                 'trn_id' => 'Transaction ID',
                 'trn_date' => 'Transaction Date',
                 'trn_amount1' => 'Amount 1 (Rs)',
@@ -440,7 +453,11 @@ class FinanceReportsController extends Controller
                     $val = is_array($row) ? ($row[$col] ?? '') : ($row->$col ?? '');
                     
                     // Format monetary amounts if outputting raw numeric prices
-                    if (in_array($col, ['price', 'total_value', 'approved_budget', 'allocation', 'spent_prj', 'spent_cf', 'total_spent', 'remaining', 'commitments', 'in_process', 'sha_cf', 'sha_pcc', 'sha_prj', 'sha_prj_sal', 'sha_prj_pur', 'sbh_alloc', 'cf_share', 'cf_received', 'cf_expenditure', 'cf_balance', 'cf_commitments', 'cf_in_process', 'cf_available', 'trn_amount1', 'trn_amount2', 'trn_tax1', 'trn_balance', 'amount', 'from_old_val', 'from_new_val', 'to_old_val', 'to_new_val', 'pcs_price', 'pcs_intprice', 'pcs_midprice', 'received', 'expenditure', 'cf_expenditure', 'balance', 'available', 'csrf_share', 'equipment_share', 'rdw_share', 'hr_share', 'misc_share'], true)) {
+                    if ($type === 'monthly_return') {
+                        if (is_numeric($val) && in_array($col, ['allocation', 'mtss_share', 'nrdi_share', 'received', 'expended', 'balance_with_mtss'], true)) {
+                            $val = number_format((float)$val, 2);
+                        }
+                    } elseif (in_array($col, ['price', 'total_value', 'approved_budget', 'allocation', 'spent_prj', 'spent_cf', 'total_spent', 'remaining', 'commitments', 'in_process', 'commitment', 'sha_cf', 'sha_pcc', 'sha_prj', 'sha_prj_sal', 'sha_prj_pur', 'sbh_alloc', 'cf_share', 'cf_received', 'cf_expenditure', 'cf_balance', 'cf_commitments', 'cf_in_process', 'cf_available', 'trn_amount1', 'trn_amount2', 'trn_tax1', 'trn_balance', 'amount', 'from_old_val', 'from_new_val', 'to_old_val', 'to_new_val', 'pcs_price', 'pcs_intprice', 'pcs_midprice', 'received', 'expenditure', 'cf_expenditure', 'balance', 'available', 'csrf_share', 'equipment_share', 'rdw_share', 'hr_share', 'misc_share'], true)) {
                         $val = 'Rs ' . number_format((float)$val, 0);
                     }
                     
@@ -953,10 +970,17 @@ class FinanceReportsController extends Controller
 
         } elseif ($type === 'csrf_status') {
             $query = DB::table('cen.heads as h')
-                ->join('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
+                ->leftJoin('cen.units as u', 'h.hed_unt_id', '=', 'u.unt_id')
+                ->leftJoin('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
+                ->leftJoin('cen.units as pu', 'p.prj_unt_id', '=', 'pu.unt_id')
+                ->where('h.hed_type', 'Project')
+                ->whereNull('h.hed_closedt')
                 ->select(
                     'h.hed_id',
                     'h.hed_code',
+                    'h.hed_name',
+                    DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other') as div_sh"),
+                    DB::raw("COALESCE(u.unt_name, pu.unt_name, 'Other') as div_name"),
                     'p.prj_code',
                     'p.prj_title'
                 );
@@ -976,43 +1000,57 @@ class FinanceReportsController extends Controller
                 $query->where('p.prj_id', (int)$projectId);
             }
 
-            if ($limit) {
-                $query->limit($limit);
-            }
-
-            $heads = $query->orderBy('h.hed_id', 'desc')->get();
+            $heads = $query->orderBy(DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other')"))->orderBy('h.hed_code')->get();
             $results = [];
             foreach ($heads as $h) {
                 $fin = $this->finService->getHeadStatus($h->hed_id);
+                $alloc = (float)($fin->cf_share ?? 0);
+                $rec = (float)($fin->cf_received ?? 0);
+                $exp = (float)abs($fin->cf_expenditure ?? 0);
+                $cmt = (float)($fin->cf_commitments ?? 0);
+                $inP = (float)($fin->cf_in_process ?? 0);
+                $avail = (float)($fin->cf_available ?? ($rec - $exp - $cmt - $inP));
+                $rem = (float)($fin->cf_yet_to_be_received ?? ($alloc - $rec));
+
+                if ($alloc == 0 && $rec == 0 && $exp == 0 && $cmt == 0 && $inP == 0) {
+                    continue;
+                }
+
+                $div = $this->getDivisionLabel($h->div_sh, $h->div_name);
+
                 $results[] = [
-                    'prj_code' => $h->prj_code,
-                    'prj_title' => $h->prj_title,
-                    'hed_code' => $h->hed_code,
-                    'cf_share' => (float)($fin->cf_share ?? 0),
-                    'cf_received' => (float)($fin->cf_received ?? 0),
-                    'cf_expenditure' => (float)abs($fin->cf_expenditure ?? 0),
-                    'cf_balance' => (float)($fin->cf_balance ?? 0),
-                    'cf_commitments' => (float)($fin->cf_commitments ?? 0),
-                    'cf_in_process' => (float)($fin->cf_in_process ?? 0),
-                    'cf_available' => (float)($fin->cf_available ?? 0)
+                    'division' => $div,
+                    'project' => $h->hed_code,
+                    'allocation' => $alloc,
+                    'received' => $rec,
+                    'expenditure' => $exp,
+                    'commitment' => $cmt,
+                    'in_process' => $inP,
+                    'available' => $avail,
+                    'remaining' => $rem
                 ];
             }
+
+            if ($limit && count($results) > $limit) {
+                $results = array_slice($results, 0, $limit);
+            }
+
             return $results;
 
         } elseif ($type === 'monthly_return') {
-            $query = DB::table('fin.transactions as t')
-                ->join('fin.commitments as c', 't.trn_cmt_id', '=', 'c.cmt_id')
-                ->join('cen.heads as h', 'c.cmt_hed_id', '=', 'h.hed_id')
+            $query = DB::table('cen.heads as h')
+                ->leftJoin('cen.units as u', 'h.hed_unt_id', '=', 'u.unt_id')
+                ->leftJoin('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
+                ->leftJoin('cen.units as pu', 'p.prj_unt_id', '=', 'pu.unt_id')
+                ->where('h.hed_type', 'Project')
+                ->whereNull('h.hed_closedt')
                 ->select(
-                    't.trn_id',
-                    't.trn_date',
-                    't.trn_amount1',
-                    't.trn_amount2',
-                    't.trn_tax1',
-                    't.trn_balance',
-                    't.trn_transtype',
-                    'h.hed_code as head_code',
-                    'h.hed_name as head_name'
+                    'h.hed_id',
+                    'h.hed_code',
+                    'h.hed_name',
+                    DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other') as div_sh"),
+                    DB::raw("COALESCE(u.unt_name, pu.unt_name, 'Other') as div_name"),
+                    'p.prj_code'
                 );
 
             if ($isHqUser) {
@@ -1027,21 +1065,44 @@ class FinanceReportsController extends Controller
             }
 
             if (!empty($projectId) && $projectId !== 'All') {
-                $query->where('h.hed_prj_id', (int)$projectId);
+                $query->where('p.prj_id', (int)$projectId);
             }
 
-            if (!empty($startDate)) {
-                $query->where('t.trn_date', '>=', $startDate);
-            }
-            if (!empty($endDate)) {
-                $query->where('t.trn_date', '<=', $endDate);
+            $heads = $query->orderBy(DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other')"))->orderBy('h.hed_code')->get();
+            $results = [];
+            foreach ($heads as $h) {
+                $fin = $this->finService->getHeadStatus($h->hed_id);
+                $rawAlloc = (float)($fin->allocation ?? 0);
+                if ($rawAlloc == 0) {
+                    continue;
+                }
+
+                $alloc = round($rawAlloc / 1000000, 2);
+                $mtss = round(((float)($fin->mtss_share ?? 0)) / 1000000, 2);
+                $nrdi = round($alloc - $mtss, 2);
+                $rec = round(((float)($fin->received ?? 0)) / 1000000, 2);
+                $exp = round(((float)($fin->expenditure ?? 0)) / 1000000, 2);
+                $bal = round($rec - $exp, 2);
+
+                $div = $this->getDivisionLabel($h->div_sh, $h->div_name);
+
+                $results[] = [
+                    'division' => $div,
+                    'head' => $h->hed_code,
+                    'allocation' => $alloc,
+                    'mtss_share' => $mtss,
+                    'nrdi_share' => $nrdi,
+                    'received' => $rec,
+                    'expended' => $exp,
+                    'balance_with_mtss' => $bal
+                ];
             }
 
-            if ($limit) {
-                $query->limit($limit);
+            if ($limit && count($results) > $limit) {
+                $results = array_slice($results, 0, $limit);
             }
 
-            return $query->orderBy('t.trn_date', 'desc')->get()->toArray();
+            return $results;
 
         } elseif ($type === 'pcs_awaiting_payment') {
             $query = DB::table('pur.purcases as pc')
@@ -1413,5 +1474,233 @@ class FinanceReportsController extends Controller
         }
         
         return [];
+    }
+
+    /**
+     * Map internal division codes to standardized display labels (e.g., Comm, Enab, NWS)
+     */
+    private function getDivisionLabel(?string $untNamesh, ?string $untName): string
+    {
+        $map = [
+            'C#' => 'Comm (C3)',
+            'AI & Emers' => 'Enab (AI & Emers)',
+            'UWT div' => 'NWS (Under Water Tech)',
+            'S & UAV' => 'S & UAV (Sensors & UAV)',
+            'R & EW' => 'R & EW (Radar & EW)',
+            'Ex Sys Div' => 'Ex Sys (Ex Systems)'
+        ];
+
+        if ($untNamesh && isset($map[$untNamesh])) {
+            return $map[$untNamesh];
+        }
+
+        return $untName ?: ($untNamesh ?: 'Other');
+    }
+
+    /**
+     * Printable Annex 'A' Monthly Return Sheet
+     */
+    public function printMonthlyReturn(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        $query = DB::table('cen.heads as h')
+            ->leftJoin('cen.units as u', 'h.hed_unt_id', '=', 'u.unt_id')
+            ->leftJoin('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
+            ->leftJoin('cen.units as pu', 'p.prj_unt_id', '=', 'pu.unt_id')
+            ->where('h.hed_type', 'Project')
+            ->whereNull('h.hed_closedt')
+            ->select(
+                'h.hed_id',
+                'h.hed_code',
+                'h.hed_name',
+                DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other') as div_sh"),
+                DB::raw("COALESCE(u.unt_name, pu.unt_name, 'Other') as div_name")
+            )
+            ->orderBy(DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other')"))
+            ->orderBy('h.hed_code');
+
+        if ($request->filled('unit_id') && $request->query('unit_id') !== 'All') {
+            $query->where('h.hed_unt_id', (int)$request->query('unit_id'));
+        }
+
+        $heads = $query->get();
+
+        $groupedRecords = [];
+        $grandTotals = [
+            'allocation' => 0,
+            'mtss_share' => 0,
+            'nrdi_share' => 0,
+            'received' => 0,
+            'expended' => 0,
+            'balance_with_mtss' => 0
+        ];
+
+        foreach ($heads as $h) {
+            $fin = $this->finService->getHeadStatus($h->hed_id);
+            $rawAlloc = (float)($fin->allocation ?? 0);
+            if ($rawAlloc == 0) {
+                continue;
+            }
+
+            $alloc = round($rawAlloc / 1000000, 2);
+            $mtss = round(((float)($fin->mtss_share ?? 0)) / 1000000, 2);
+            $nrdi = round($alloc - $mtss, 2);
+            $rec = round(((float)($fin->received ?? 0)) / 1000000, 2);
+            $exp = round(((float)($fin->expenditure ?? 0)) / 1000000, 2);
+            $bal = round($rec - $exp, 2);
+
+            $div = $this->getDivisionLabel($h->div_sh, $h->div_name);
+
+            if (!isset($groupedRecords[$div])) {
+                $groupedRecords[$div] = [
+                    'totals' => [
+                        'allocation' => 0,
+                        'mtss_share' => 0,
+                        'nrdi_share' => 0,
+                        'received' => 0,
+                        'expended' => 0,
+                        'balance_with_mtss' => 0
+                    ],
+                    'items' => []
+                ];
+            }
+
+            $groupedRecords[$div]['items'][] = [
+                'head' => $h->hed_code,
+                'allocation' => $alloc,
+                'mtss_share' => $mtss,
+                'nrdi_share' => $nrdi,
+                'received' => $rec,
+                'expended' => $exp,
+                'balance_with_mtss' => $bal
+            ];
+
+            // Division Subtotals
+            $groupedRecords[$div]['totals']['allocation'] += $alloc;
+            $groupedRecords[$div]['totals']['mtss_share'] += $mtss;
+            $groupedRecords[$div]['totals']['nrdi_share'] += $nrdi;
+            $groupedRecords[$div]['totals']['received'] += $rec;
+            $groupedRecords[$div]['totals']['expended'] += $exp;
+            $groupedRecords[$div]['totals']['balance_with_mtss'] += $bal;
+
+            // Grand Totals
+            $grandTotals['allocation'] += $alloc;
+            $grandTotals['mtss_share'] += $mtss;
+            $grandTotals['nrdi_share'] += $nrdi;
+            $grandTotals['received'] += $rec;
+            $grandTotals['expended'] += $exp;
+            $grandTotals['balance_with_mtss'] += $bal;
+        }
+
+        $monthFormatted = $request->query('month') ? date('M y', strtotime($request->query('month'))) : now()->format('M y');
+
+        return view('finance.reports.printable_monthly_return', compact('groupedRecords', 'grandTotals', 'monthFormatted'));
+    }
+
+    /**
+     * Printable CSRF Status Sheet
+     */
+    public function printCsrfStatus(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        $query = DB::table('cen.heads as h')
+            ->leftJoin('cen.units as u', 'h.hed_unt_id', '=', 'u.unt_id')
+            ->leftJoin('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
+            ->leftJoin('cen.units as pu', 'p.prj_unt_id', '=', 'pu.unt_id')
+            ->where('h.hed_type', 'Project')
+            ->whereNull('h.hed_closedt')
+            ->select(
+                'h.hed_id',
+                'h.hed_code',
+                'h.hed_name',
+                DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other') as div_sh"),
+                DB::raw("COALESCE(u.unt_name, pu.unt_name, 'Other') as div_name")
+            )
+            ->orderBy(DB::raw("COALESCE(u.unt_namesh, pu.unt_namesh, 'Other')"))
+            ->orderBy('h.hed_code');
+
+        if ($request->filled('unit_id') && $request->query('unit_id') !== 'All') {
+            $query->where('h.hed_unt_id', (int)$request->query('unit_id'));
+        }
+
+        $heads = $query->get();
+
+        $groupedRecords = [];
+        $grandTotals = [
+            'allocation' => 0,
+            'received' => 0,
+            'expenditure' => 0,
+            'commitment' => 0,
+            'in_process' => 0,
+            'available' => 0,
+            'remaining' => 0
+        ];
+
+        foreach ($heads as $h) {
+            $fin = $this->finService->getHeadStatus($h->hed_id);
+            $alloc = (float)($fin->cf_share ?? 0);
+            $rec = (float)($fin->cf_received ?? 0);
+            $exp = (float)abs($fin->cf_expenditure ?? 0);
+            $cmt = (float)($fin->cf_commitments ?? 0);
+            $inP = (float)($fin->cf_in_process ?? 0);
+            $avail = (float)($fin->cf_available ?? ($rec - $exp - $cmt - $inP));
+            $rem = (float)($fin->cf_yet_to_be_received ?? ($alloc - $rec));
+
+            if ($alloc == 0 && $rec == 0 && $exp == 0 && $cmt == 0 && $inP == 0) {
+                continue;
+            }
+
+            $div = $this->getDivisionLabel($h->div_sh, $h->div_name);
+
+            if (!isset($groupedRecords[$div])) {
+                $groupedRecords[$div] = [
+                    'totals' => [
+                        'allocation' => 0,
+                        'received' => 0,
+                        'expenditure' => 0,
+                        'commitment' => 0,
+                        'in_process' => 0,
+                        'available' => 0,
+                        'remaining' => 0
+                    ],
+                    'items' => []
+                ];
+            }
+
+            $groupedRecords[$div]['items'][] = [
+                'project' => $h->hed_code,
+                'allocation' => $alloc,
+                'received' => $rec,
+                'expenditure' => $exp,
+                'commitment' => $cmt,
+                'in_process' => $inP,
+                'available' => $avail,
+                'remaining' => $rem
+            ];
+
+            // Division Totals
+            $groupedRecords[$div]['totals']['allocation'] += $alloc;
+            $groupedRecords[$div]['totals']['received'] += $rec;
+            $groupedRecords[$div]['totals']['expenditure'] += $exp;
+            $groupedRecords[$div]['totals']['commitment'] += $cmt;
+            $groupedRecords[$div]['totals']['in_process'] += $inP;
+            $groupedRecords[$div]['totals']['available'] += $avail;
+            $groupedRecords[$div]['totals']['remaining'] += $rem;
+
+            // Grand Totals
+            $grandTotals['allocation'] += $alloc;
+            $grandTotals['received'] += $rec;
+            $grandTotals['expenditure'] += $exp;
+            $grandTotals['commitment'] += $cmt;
+            $grandTotals['in_process'] += $inP;
+            $grandTotals['available'] += $avail;
+            $grandTotals['remaining'] += $rem;
+        }
+
+        return view('finance.reports.printable_csrf_status', compact('groupedRecords', 'grandTotals'));
     }
 }

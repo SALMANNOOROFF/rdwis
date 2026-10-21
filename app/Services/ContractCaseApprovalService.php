@@ -18,6 +18,7 @@ class ContractCaseApprovalService
         'Division'     => 'Draft',
         'HR'           => 'Under HR Scrutiny',
         'Finance'      => 'Under Finance Scrutiny',
+        'DLOG'         => 'Under Approval',
         'MD'           => 'Under Approval',
         'DDG'          => 'Under Approval',
         'DG'           => 'Under Approval',
@@ -172,10 +173,12 @@ class ContractCaseApprovalService
                     $uRole = (int) ($targetAcc->acc_role ?? 0);
                     $desig = strtolower(trim($targetAcc->acc_desigshort ?? ''));
 
-                    if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg'))) {
+                    if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg') && !str_contains($desig, 'dlog'))) {
                         $nextStage = 'DG';
                     } elseif (str_contains($desig, 'ddg')) {
                         $nextStage = 'DDG';
+                    } elseif (str_contains($desig, 'dlog') || in_array($uArea, ['log', 'dlog', 'logistics'])) {
+                        $nextStage = 'DLOG';
                     } elseif ($uArea === 'rdw' || $uRole === 160000 || str_contains($desig, 'md')) {
                         $nextStage = 'MD';
                     } elseif (in_array($uArea, ['fin', 'finance'])) {
@@ -193,6 +196,16 @@ class ContractCaseApprovalService
                     }
 
                     $targetStageName = trim($targetAcc->acc_name) . ' (' . ($targetAcc->acc_desigshort ?: $nextStage) . ')';
+                }
+            } elseif (!empty($targetStage) && (str_starts_with($targetStage, 'role_') || in_array($targetStage, ['DDG', 'DLOG', 'DG', 'MD']))) {
+                if ($targetStage === 'role_ddg' || $targetStage === 'DDG') {
+                    $nextStage = 'DDG';
+                    $targetStageName = 'Deputy Director General (DDG Office)';
+                } elseif ($targetStage === 'role_dlog' || $targetStage === 'DLOG') {
+                    $nextStage = 'DLOG';
+                    $targetStageName = 'Director Logistics (DLOG Office)';
+                } else {
+                    $nextStage = strtoupper(str_replace('role_', '', $targetStage));
                 }
             }
 
@@ -245,6 +258,7 @@ class ContractCaseApprovalService
                     'IS'       => 'Information System Department (IS)',
                     'IT'       => 'Information Technology Department (IT)',
                     'Projects' => 'Projects Department',
+                    'DLOG'     => 'Director Logistics (DLOG)',
                     'MD'       => 'MD Office',
                     'DDG'      => 'DDG Office',
                     'DG'       => 'Director General (DG)',
@@ -269,10 +283,15 @@ class ContractCaseApprovalService
     {
         DB::transaction(function () use ($case, $user, $data, $remarks) {
             // Update approved terms if submitted
+            $approvedSalary = (isset($data['ctc_approvedsalary']) && is_numeric($data['ctc_approvedsalary']) && (float)$data['ctc_approvedsalary'] > 0)
+                ? (float)$data['ctc_approvedsalary']
+                : (float)($case->ctc_approvedsalary ?: $case->ctc_newsalary);
+
             $updates = [
                 'ctc_approvedstartdt' => $data['ctc_approvedstartdt'] ?? $case->ctc_newstartdt,
                 'ctc_approvedenddt'   => $data['ctc_approvedenddt'] ?? $case->ctc_newenddt,
-                'ctc_approvedsalary'  => $data['ctc_approvedsalary'] ?? $case->ctc_newsalary,
+                'ctc_approvedsalary'  => $approvedSalary,
+                'ctc_price'           => $approvedSalary * 12,
                 'ctc_approvedgrade'   => $data['ctc_approvedgrade'] ?? $case->ctc_newgrade,
                 'ctc_approvedjobtitle'=> $data['ctc_approvedjobtitle'] ?? $case->ctc_newjobtitle,
                 'ctc_approvedprob'    => $data['ctc_approvedprob'] ?? $case->ctc_newprob,
@@ -336,10 +355,12 @@ class ContractCaseApprovalService
                     $uRole = (int) ($targetAcc->acc_role ?? 0);
                     $desig = strtolower(trim($targetAcc->acc_desigshort ?? ''));
 
-                    if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg'))) {
+                    if ($uRole === 100000 || (str_contains($desig, 'dg') && !str_contains($desig, 'ddg') && !str_contains($desig, 'dlog'))) {
                         $destStage = 'DG';
                     } elseif (str_contains($desig, 'ddg')) {
                         $destStage = 'DDG';
+                    } elseif (str_contains($desig, 'dlog') || in_array($uArea, ['log', 'dlog', 'logistics'])) {
+                        $destStage = 'DLOG';
                     } elseif ($uArea === 'rdw' || $uRole === 160000 || str_contains($desig, 'md')) {
                         $destStage = 'MD';
                     } elseif (in_array($uArea, ['fin', 'finance'])) {
@@ -463,9 +484,10 @@ class ContractCaseApprovalService
             $isTargetDg = $accContext->isDg() || $area === 'nrdi';
             $isTargetDdg = $accContext->isDdg() || $area === 'hqs';
             $isTargetMd = $accContext->isMd() || $area === 'rdw';
+            $isTargetDlog = (method_exists($accContext, 'isDlog') && $accContext->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true);
 
             if ($isDivision) {
-                if ($isTargetDg || $isTargetDdg) {
+                if ($isTargetDg || $isTargetDdg || $isTargetDlog) {
                     continue;
                 }
             }
@@ -479,6 +501,9 @@ class ContractCaseApprovalService
             } elseif ($isTargetDdg) {
                 $stage = 'DDG';
                 $deptName = 'Deputy Director General (DDG Office)';
+            } elseif ($isTargetDlog) {
+                $stage = 'DLOG';
+                $deptName = 'Director Logistics (DLOG Office)';
             } elseif ($isTargetMd) {
                 $stage = 'MD';
                 $deptName = 'Managing Director (MD Office)';
@@ -517,6 +542,41 @@ class ContractCaseApprovalService
                 'desig'    => $acc->acc_desig,
                 'badge'    => $acc->acc_desigshort ?: strtoupper($area),
                 'area'     => $area,
+            ];
+        }
+
+        $hasDdgAccount = false;
+        $hasDlogAccount = false;
+        foreach ($list as $item) {
+            if ($item['stage'] === 'DDG') {
+                $hasDdgAccount = true;
+            }
+            if ($item['stage'] === 'DLOG') {
+                $hasDlogAccount = true;
+            }
+        }
+        if (!$hasDdgAccount && !$isDivision) {
+            $list['role_ddg'] = [
+                'code'     => 'role_ddg',
+                'stage'    => 'DDG',
+                'acc_id'   => null,
+                'name'     => 'Deputy Director General (DDG Office)',
+                'director' => 'Deputy Director General',
+                'desig'    => 'Deputy Director General',
+                'badge'    => 'DDG',
+                'area'     => 'hqs',
+            ];
+        }
+        if (!$hasDlogAccount && !$isDivision) {
+            $list['role_dlog'] = [
+                'code'     => 'role_dlog',
+                'stage'    => 'DLOG',
+                'acc_id'   => null,
+                'name'     => 'Director Logistics (DLOG Office)',
+                'director' => 'Director Logistics',
+                'desig'    => 'Director Logistics',
+                'badge'    => 'DLOG',
+                'area'     => 'log',
             ];
         }
 
@@ -664,18 +724,9 @@ class ContractCaseApprovalService
     public function canApprove(string $role, HrCtrCase $case): bool
     {
         $role = strtoupper(trim($role));
-        if (in_array($role, ['DG', 'NRDI'])) {
+        // Strictly Finance and HR are the approving authorities
+        if (in_array($role, ['HR', 'FINANCE', 'FIN'])) {
             return true;
-        }
-
-        $required = $this->getRequiredAuthority($case);
-
-        if (in_array($role, ['DDG', 'HQS'])) {
-            return in_array($required, ['MD', 'DDG']);
-        }
-
-        if (in_array($role, ['MD', 'RDW'])) {
-            return $required === 'MD';
         }
 
         return false;
@@ -712,6 +763,7 @@ class ContractCaseApprovalService
             'ddg_grade_lvl'    => $ddgGradeLimit,
             'required_stage'   => $required,
             'can_md_approve'   => ($salary <= $mdSalaryLimit && $caseGradeLevel <= $mdGradeLimit),
+            'can_dlog_approve' => ($salary <= $mdSalaryLimit && $caseGradeLevel <= $mdGradeLimit),
             'can_ddg_approve'  => ($salary <= $ddgSalaryLimit && $caseGradeLevel <= $ddgGradeLimit),
             'can_dg_approve'   => true,
         ];

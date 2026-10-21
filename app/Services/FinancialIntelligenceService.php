@@ -707,8 +707,7 @@ class FinancialIntelligenceService
     {
         $dt = new \DateTime($date);
         if ($attStartDay >= 21 && $attStartDay <= 27) {
-            $prev = clone $dt;
-            $prev->modify('-1 month');
+            $prev = (new \DateTime($date))->modify('first day of this month')->modify('-1 month');
             return $prev->format("Y-m-") . sprintf("%02d", $attStartDay);
         } else {
             return $dt->format("Y-m-01");
@@ -997,7 +996,7 @@ class FinancialIntelligenceService
     public function calculateArrDues($empId, $salMonth)
     {
         $dues = 0;
-        $dtMonth = (new \DateTime($salMonth))->modify('-1 month')->format('Y-m-t');
+        $dtMonth = (new \DateTime($salMonth))->modify('first day of this month')->modify('-1 month')->format('Y-m-t');
         
         $salOrders = $this->getEmpSalOrders($empId);
         $extExpenses = $this->getEmpExtExpenses($empId);
@@ -1036,7 +1035,7 @@ class FinancialIntelligenceService
                 $paid += (float)$ext->ecp_amount;
             }
 
-            $prevMonthEnd = (new \DateTime($dtMonth))->modify('-1 month')->format('Y-m-t');
+            $prevMonthEnd = (new \DateTime($dtMonth))->modify('first day of this month')->modify('-1 month')->format('Y-m-t');
             $prevMonthDays = (int)(new \DateTime($prevMonthEnd))->format('d');
             
             if ((int)$matrix[11]['unpaid'] === $prevMonthDays && $paid == 0.0) {
@@ -1050,7 +1049,7 @@ class FinancialIntelligenceService
                 break;
             }
             
-            $dtMonth = (new \DateTime($dtMonth))->modify('-1 month')->format('Y-m-t');
+            $dtMonth = (new \DateTime($dtMonth))->modify('first day of this month')->modify('-1 month')->format('Y-m-t');
         }
 
         return max(0, $dues);

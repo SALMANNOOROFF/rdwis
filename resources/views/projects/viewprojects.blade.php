@@ -244,29 +244,36 @@
     }
 
     function applyFilters() {
-        const codeSearch = document.getElementById('codeSearch').value.toLowerCase();
+        const codeSearch = (document.getElementById('codeSearch').value || '').toLowerCase().trim();
         const dateFrom = document.getElementById('dateFrom').value;
         const dateTo = document.getElementById('dateTo').value;
         const rows = document.querySelectorAll('.project-row');
         let visibleCount = 0;
 
         rows.forEach(row => {
-            const code = row.dataset.code;
-            const title = row.dataset.title;
-            const status = row.dataset.status;
-            const docStatus = row.dataset.docstatus;
-            const date = row.dataset.date;
+            const code = row.dataset.code || '';
+            const title = row.dataset.title || '';
+            const status = row.dataset.status || '';
+            const docStatus = row.dataset.docstatus || '';
+            const date = row.dataset.date || '';
+            const rowText = row.innerText.toLowerCase();
             
             let show = true;
 
-            // Main Status Filter
-            if (currentMainStatus !== 'all') {
-                if (currentMainStatus === 'open' && status !== 'open') show = false;
-                else if (currentMainStatus === 'closed' && status !== 'closed') show = false;
+            // Search Filter (Code, Title, or any text in row)
+            // When user types in search bar, search across ALL projects regardless of Open/Closed tab!
+            if (codeSearch) {
+                const matches = code.includes(codeSearch) || 
+                                title.includes(codeSearch) || 
+                                rowText.includes(codeSearch);
+                if (!matches) show = false;
+            } else {
+                // Main Status Filter (Only apply if search is empty)
+                if (currentMainStatus !== 'all') {
+                    if (currentMainStatus === 'open' && status !== 'open') show = false;
+                    else if (currentMainStatus === 'closed' && status !== 'closed') show = false;
+                }
             }
-
-            // Search Filter (Code or Title)
-            if (codeSearch && !code.includes(codeSearch) && !title.includes(codeSearch)) show = false;
             
             // Date Filter
             if (dateFrom && date < dateFrom) show = false;
@@ -276,11 +283,17 @@
             if(show) visibleCount++;
         });
 
-        const label = currentMainStatus === 'open' ? 'Open Projects' : (currentMainStatus === 'closed' ? 'Closed Projects' : 'All Projects');
+        const label = codeSearch 
+            ? `Search Results for "${codeSearch}"` 
+            : (currentMainStatus === 'open' ? 'Open Projects' : (currentMainStatus === 'closed' ? 'Closed Projects' : 'All Projects'));
         document.getElementById('page-heading').innerHTML = `<i class="fas fa-folder-open mr-1"></i> ${label} (${visibleCount})`;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('codeSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
         applyFilters();
     });
 </script>

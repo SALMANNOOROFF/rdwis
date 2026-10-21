@@ -55,7 +55,15 @@
                     </div>
                     <div class="card-body py-3">
                         <div class="row">
-                            <div class="col-md-4"><label class="label-sm">Budget Head Code</label><div class="value-sm">{{ $purchase->project->prj_code ?? 'CENTRAL' }}</div></div>
+                            <div class="col-md-4">
+                                <label class="label-sm">Budget Head Code</label>
+                                <div class="value-sm d-flex align-items-center">
+                                    <span>{{ $purchase->project->prj_code ?? ($purchase->effectiveHead?->hed_code ?? 'CENTRAL') }}</span>
+                                    @if(method_exists($purchase, 'isCsrf') && $purchase->isCsrf())
+                                        <span class="badge text-white font-weight-bold ml-1.5 shadow-sm" style="background: #dc2626 !important; font-size: 10px; padding: 2px 6px; border-radius: 4px;">CSRF</span>
+                                    @endif
+                                </div>
+                            </div>
                             <div class="col-md-4"><label class="label-sm">Approved Project Cost</label><div class="value-sm">{{ number_format($purchase->project->prj_cost ?? 0) }}</div></div>
                             <div class="col-md-4"><label class="label-sm">Utilization After Approval</label><div class="value-sm text-success">{{ number_format(($head->hed_balance ?? 0) - $purchase->pcs_price) }} (Projected)</div></div>
                         </div>

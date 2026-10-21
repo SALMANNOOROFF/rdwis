@@ -288,7 +288,7 @@ class EmployeeCreationService
         $empIdInfo = $this->generateEmpId($unitId, $joinDate, $normalizedCnic);
         $empId = $empIdInfo['emp_id'];
 
-        return DB::transaction(function () use ($case, $user, $empId, $normalizedCnic, $name, $unitId, $joinDate, $title, $rank, $empIdInfo) {
+        return DB::transaction(function () use ($case, $user, $empId, $normalizedCnic, $name, $unitId, $joinDate, $title, $rank, $empIdInfo, $data) {
             // Check if emp_id or CNIC already exists in hr.emps
             $existingById = DB::table('hr.emps')->where('emp_id', $empId)->first();
             if ($existingById) {
@@ -339,21 +339,45 @@ class EmployeeCreationService
             // 4. Attendance backfill from joining month through current month
             $this->addInAttendanceSheet($empId, $name, $unitId, $joinDate);
 
-            // 5. Update contract case with new emp_id
+            // 5. Update contract case with new emp_id and legacy approved terms
+            $caseUpdates = [
+                'ctc_emp_id'          => $empId,
+                'ctc_cnic'            => $normalizedCnic,
+                'ctc_empnamecomp'     => $name,
+                'ctc_approvedunt_id'  => $unitId,
+                'ctc_approvedstartdt' => $joinDate,
+                'ctc_approvedjobtitle'=> $title,
+                'ctc_approvedgrade'   => $rank,
+            ];
+            if (isset($data['ctc_approvedsalary']) && is_numeric($data['ctc_approvedsalary'])) {
+                $caseUpdates['ctc_approvedsalary'] = (float)$data['ctc_approvedsalary'];
+            }
+            if (isset($data['ctc_approvedprobsal']) && is_numeric($data['ctc_approvedprobsal'])) {
+                $caseUpdates['ctc_approvedprobsal'] = (float)$data['ctc_approvedprobsal'];
+            }
+            if (isset($data['ctc_approvedprob']) && is_numeric($data['ctc_approvedprob'])) {
+                $caseUpdates['ctc_approvedprob'] = (int)$data['ctc_approvedprob'];
+            }
+            if (!empty($data['ctc_approvedenddt'])) {
+                $caseUpdates['ctc_approvedenddt'] = $data['ctc_approvedenddt'];
+            }
+            if (!empty($data['ctc_approvedctrtype'])) {
+                $caseUpdates['ctc_approvedctrtype'] = (int)$data['ctc_approvedctrtype'];
+            }
+
             DB::table('hr.ctrcases')
                 ->where('ctc_id', $case->ctc_id)
-                ->update([
-                    'ctc_emp_id'      => $empId,
-                    'ctc_cnic'        => $normalizedCnic,
-                    'ctc_empnamecomp' => $name,
-                ]);
+                ->update($caseUpdates);
 
-            // 6. Record audit remark in hr.ctrcaseremarks
-            $fallbackNotice = $empIdInfo['is_fallback'] ? " (Unconfirmed Dept #{$unitId} Fallback Used)" : "";
+            // 6. Record audit remark in hr.ctrcaseremarks (Strictly user-entered remarks only)
+            $userRemarks = trim((string)($data['remarks'] ?? ''));
+            if (empty($userRemarks)) {
+                throw new InvalidArgumentException('Remarks are required when adding employee record.');
+            }
             $this->approvalService->recordRemark(
                 $case,
                 $user,
-                "Employee {$empId} created and linked to contract case by HR{$fallbackNotice}.",
+                $userRemarks,
                 'Approved'
             );
 
@@ -361,5 +385,71 @@ class EmployeeCreationService
 
             return HrEmployee::where('emp_id', $empId)->first();
         });
+    }
+
+    /**
+     * Check if mandatory employee profile sections (Personal 1, Personal 2, Education) have been filled by Division.
+     */
+    public static function checkEmployeeProfileCompleteness(?string $empId): array
+    {
+        if (empty($empId)) {
+            return [
+                'is_complete' => false,
+                'missing'     => ['Employee record has not been generated yet']
+            ];
+        }
+
+        $emp = DB::table('hr.emps')->where('emp_id', $empId)->first();
+        if (!$emp) {
+            return [
+                'is_complete' => false,
+                'missing'     => ["Employee record ({$empId}) not found in system"]
+            ];
+        }
+
+        $missing = [];
+
+        // 1. Core Profile
+        if (empty(trim((string)$emp->emp_name))) $missing[] = 'Core: Full Name';
+        if (empty(trim((string)$emp->emp_cnic))) $missing[] = 'Core: CNIC';
+        if (empty(trim((string)$emp->emp_joindt))) $missing[] = 'Core: Joining Date';
+
+        // 2. Personal 1 (hr.empsexta: Father Name, DOB, Gender, Mobile, Permanent Address)
+        $empA = DB::table('hr.empsexta')->where('empexta_emp_id', $empId)->first();
+        if (!$empA) {
+            $missing[] = 'Personal 1: Father Name, Date of Birth, Gender, Mobile, and Address';
+        } else {
+            if (empty(trim((string)$empA->emp_father))) $missing[] = 'Personal 1: Father Name';
+            if (empty(trim((string)$empA->emp_dob))) $missing[] = 'Personal 1: Date of Birth';
+            if (empty(trim((string)$empA->emp_gender))) $missing[] = 'Personal 1: Gender';
+            if (empty(trim((string)$empA->emp_mobile))) $missing[] = 'Personal 1: Mobile Number';
+            if (empty(trim((string)$empA->emp_paddress))) $missing[] = 'Personal 1: Permanent Address';
+        }
+
+        // 3. Personal 2 (hr.empsextb: Next of Kin Name & Relation)
+        $empB = DB::table('hr.empsextb')->where('empextb_emp_id', $empId)->first();
+        if (!$empB) {
+            $missing[] = 'Personal 2: Next of Kin Name & Relation';
+        } else {
+            $rel = !empty($empB->emp_nokrelation) ? $empB->emp_nokrelation : ($empB->emp_nokrel ?? '');
+            if (empty(trim((string)$empB->emp_nokname))) $missing[] = 'Personal 2: Next of Kin Name';
+            if (empty(trim((string)$rel))) $missing[] = 'Personal 2: Next of Kin Relation';
+        }
+
+        // 4. Education (hr.qualifs: At least one Degree/Education record)
+        $eduCount = DB::table('hr.qualifs')
+            ->where('qlf_emp_id', $empId)
+            ->whereIn('qlf_type', ['Degree', 'Education'])
+            ->count();
+        if ($eduCount === 0) {
+            $missing[] = 'Education: At least one Degree or Educational Qualification';
+        }
+
+        return [
+            'is_complete'      => empty($missing),
+            'missing'          => $missing,
+            'missing_sections' => $missing,
+            'emp_id'           => $empId
+        ];
     }
 }

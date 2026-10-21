@@ -46,7 +46,10 @@
                     <div class="mt-2 text-muted rajdhani" style="font-size: 14px; letter-spacing: 0.5px;">
                         <span class="text-primary font-weight-bold">UNIT:</span> {{ $divisionName }} 
                         <span class="mx-3 text-dark">|</span>
-                        <span class="text-primary font-weight-bold">HEAD:</span> {{ $purchase->project->prj_code ?? 'N/A' }}
+                        <span class="text-primary font-weight-bold">HEAD:</span> {{ $purchase->project->prj_code ?? ($purchase->effectiveHead?->hed_code ?? 'N/A') }}
+                        @if(method_exists($purchase, 'isCsrf') && $purchase->isCsrf())
+                            <span class="badge text-white font-weight-bold ml-1.5 shadow-sm" style="background: #dc2626 !important; font-size: 11px; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.5px;">CSRF</span>
+                        @endif
                         <span class="mx-3 text-dark">|</span>
                         <span class="text-primary font-weight-bold">DATE:</span> {{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}
                     </div>

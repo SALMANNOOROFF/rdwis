@@ -295,7 +295,7 @@
             <div class="relative w-36 h-36 mx-auto rounded-2xl overflow-hidden border-4 border-surface2 shadow-lg" style="background: #e2e8f0;">
               <img alt="{{ $emp->emp_name ?? 'Employee' }}"
                 class="w-full h-full object-cover"
-                src="{{ \App\Facades\FileStorage::url($emp->emp_photodest) ?: asset('dist/img/avatar.png') }}"
+                src="{{ \App\Facades\FileStorage::url($emp?->emp_photodest) ?: asset('dist/img/avatar.png') }}"
                 onerror="this.onerror=null; this.src='{{ asset('dist/img/avatar.png') }}';" />
               
               {{-- Hover Overlay to Upload / Change Photo --}}
@@ -642,8 +642,13 @@
                         <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('M Y') : '—' }}</td>
                         <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('M Y') : '—' }}</td>
                         <td class="px-2 py-2 text-center whitespace-nowrap">
-                          <!-- Stopped Red Circle Indicator -->
-                          <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm" title="Completed / Past Contract"></span>
+                          @if(($c->status_label ?? '') === 'Active')
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" title="Active Contract"></span>
+                          @elseif(($c->status_label ?? '') === 'Future')
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm" title="Future Contract"></span>
+                          @else
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm" title="Completed / Past Contract"></span>
+                          @endif
                         </td>
                       </tr>
                     @empty

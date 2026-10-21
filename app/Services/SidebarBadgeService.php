@@ -75,6 +75,14 @@ class SidebarBadgeService
             $purCount = Purchase::atStage('DFinance')
                 ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
                 ->count();
+        } elseif ((method_exists($user, 'isDlog') && $user->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true)) {
+            $purCount = Purchase::atStage('DLOG')
+                ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+                ->count();
+        } elseif ($area === 'it') {
+            $purCount = Purchase::atStage('IT')
+                ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
+                ->count();
         } elseif (in_array($area, ['rdw', 'hqs', 'nrdi'])) {
             $stageMap = [
                 'rdw'  => 'MD',
@@ -130,6 +138,14 @@ class SidebarBadgeService
                 ->count();
         } elseif ($area === 'nrdi') {
             $ctrCount = \App\Models\HrCtrCase::atStage('DG')
+                ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
+                ->count();
+        } elseif ((method_exists($user, 'isDlog') && $user->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true)) {
+            $ctrCount = \App\Models\HrCtrCase::atStage('DLOG')
+                ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
+                ->count();
+        } elseif ($area === 'it') {
+            $ctrCount = \App\Models\HrCtrCase::atStage('IT')
                 ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled'])
                 ->count();
         } else {

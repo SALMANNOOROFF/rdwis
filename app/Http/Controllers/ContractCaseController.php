@@ -49,18 +49,25 @@ class ContractCaseController extends Controller
         }
 
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isDlog = (method_exists($user, 'isDlog') && $user->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true);
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        $isDdg = $context->isDdg() || $area === 'hqs';
 
         // Route to the specialized dashboards built for Contract Cases
-        if ($area === 'hr') {
+        if ($isDlog) {
+            return redirect()->route('dlog.contract-cases.index');
+        } elseif ($isDdg) {
+            return redirect()->route('ddg.contract-cases.index');
+        } elseif ($area === 'hr') {
             return redirect()->route('hr.contract-cases.index');
         } elseif ($area === 'fin') {
             return redirect()->route('finance.contract-cases.index');
         } elseif ($area === 'rdw') {
             return redirect()->route('md.contract-cases.index');
-        } elseif ($area === 'hqs') {
-            return redirect()->route('ddg.contract-cases.index');
         } elseif ($area === 'nrdi') {
             return redirect()->route('dg.contract-cases.index');
+        } elseif ($area === 'it') {
+            return redirect()->route('it.contract-cases.index');
         } else {
             // Default to Division Initiator dashboard
             return redirect()->route('division.contract-cases.index');

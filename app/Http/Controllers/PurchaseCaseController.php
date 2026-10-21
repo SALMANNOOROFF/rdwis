@@ -23,18 +23,85 @@ class PurchaseCaseController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $area = strtolower(trim($user->acc_untarea));
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
         if (in_array($area, ['proc', 'prc'], true)) $area = 'proc';
         $pageTitle = 'Purchase Scrutiny Hub';
         
         $isDivision = in_array($area, ['prj', 'rdwprj', 'division', 'initiation'], true) || (method_exists($user, 'isDivision') && $user->isDivision());
+        $isDlog = (method_exists($user, 'isDlog') && $user->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true);
 
-        if ($isDivision) {
+        if ($isDlog) {
+            $pageTitle = 'Director Logistics (DLOG) Approval Portal';
+
+            // 1. Pending (Action Required): Strictly cases forwarded to DLOG by MD / DDG (current stage is DLOG)
+            // If MD or DDG has not forwarded any case to DLOG, queue remains completely empty
+            $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus', 'decisions'])
+                ->atStage(['DLOG'])
+                ->whereNotIn('pcs_status', ['Approved', 'Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected'])
+                ->orderBy('pcs_id', 'desc')
+                ->get();
+
+            $pending = $pending->filter(function($case) use ($user) {
+                $latest = $case->latestDecision;
+                if ($latest && (int)$latest->pdec_acc_id === (int)$user->acc_id && in_array($latest->pdec_action, ['forward', 'forward_negative', 'return', 'float_to_proc', 'reshare_to_proc'])) {
+                    return false;
+                }
+                return true;
+            });
+
+            $pendingIds = $pending->pluck('pcs_id')->toArray();
+
+            // 2. Open: Active pipeline cases that were routed through DLOG (and DLOG has already processed/forwarded)
+            $open = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus', 'decisions'])
+                ->where(function($q) use ($user) {
+                    $q->whereHas('decisions', function($d) use ($user) {
+                        $d->where('pdec_acc_id', $user->acc_id)
+                          ->orWhere('pdec_to_status', 'LIKE', '%DLOG%');
+                    })->orWhereHas('substatusHistory', function($s) {
+                        $s->where('pss_stage', 'DLOG');
+                    });
+                })
+                ->whereNotIn('pcs_status', ['Draft', 'Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected'])
+                ->whereNotIn('pcs_id', $pendingIds)
+                ->orderBy('pcs_id', 'desc')
+                ->get();
+
+            // 3. Closed: Finalized cases that were routed through DLOG
+            $closed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus', 'decisions'])
+                ->where(function($q) use ($user) {
+                    $q->whereHas('decisions', function($d) use ($user) {
+                        $d->where('pdec_acc_id', $user->acc_id)
+                          ->orWhere('pdec_to_status', 'LIKE', '%DLOG%');
+                    })->orWhereHas('substatusHistory', function($s) {
+                        $s->where('pss_stage', 'DLOG');
+                    });
+                })
+                ->whereIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected'])
+                ->orderBy('pcs_id', 'desc')
+                ->get();
+
+            $actionTaken = collect([]);
+            $actionTakenCount = 0;
+
+        } elseif ($isDivision) {
             $pageTitle = 'Division Purchase Cases Hub';
             [$lower, $upper] = $user->acc_lowers == 0
                 ? [$user->acc_lowerm, $user->acc_upperm]
                 : [$user->acc_lowers, $user->acc_uppers];
             $psTypes = app(\App\Services\PurchaseApprovalService::class)->getAssignedCaseTypes('PS');
+            $userUnitId = (int) ($user->acc_unt_id ?? 0);
+            $divisionScope = function($q) use ($userUnitId, $lower, $upper) {
+                $q->where(function($sub) use ($userUnitId, $lower, $upper) {
+                    if ($userUnitId > 0) {
+                        $sub->where('pcs_unt_id', $userUnitId)
+                            ->orWhere('pcs_intunt_id', $userUnitId);
+                    }
+                    if ($lower > 0 && $upper > 0) {
+                        $sub->orWhereBetween('pcs_unt_id', [$lower, $upper])
+                            ->orWhereBetween('pcs_intunt_id', [$lower, $upper]);
+                    }
+                });
+            };
 
             if ($area === 'prj') {
                 // Division Initiator View
@@ -43,7 +110,7 @@ class PurchaseCaseController extends Controller
                 // - Non-PS draft cases (directly releasable)
                 // - PS draft cases: not floated yet, OR DProc has saved (dproc_save) and returned to Division
                 $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus', 'decisions'])
-                    ->whereBetween('pcs_unt_id', [$lower, $upper])
+                    ->where($divisionScope)
                     ->where(function($q) use ($psTypes) {
                         $q->where('pcs_status', 'Returned')
                           ->orWhere(function($sub) use ($psTypes) {
@@ -68,7 +135,7 @@ class PurchaseCaseController extends Controller
                 // - Non-PS draft cases
                 // - PS draft cases: not floated yet, OR DProc has saved (dproc_save) and returned to Division
                 $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus', 'decisions'])
-                    ->whereBetween('pcs_unt_id', [$lower, $upper])
+                    ->where($divisionScope)
                     ->where(function($q) {
                         $q->where('pcs_status', 'Returned')
                           ->orWhere(function($sub) {
@@ -100,7 +167,7 @@ class PurchaseCaseController extends Controller
 
             // 2. Open: Active cases currently in pipeline (waiting with DProc or moving through HQ)
             $open = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus', 'decisions'])
-                ->whereBetween('pcs_unt_id', [$lower, $upper])
+                ->where($divisionScope)
                 ->whereNotIn('pcs_status', ['Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
                 ->whereNotIn('pcs_id', $pendingIds)
                 ->orderBy('pcs_id', 'desc')
@@ -108,7 +175,7 @@ class PurchaseCaseController extends Controller
 
             // 3. Closed: Truly finalized cases
             $closed = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
-                ->whereBetween('pcs_unt_id', [$lower, $upper])
+                ->where($divisionScope)
                 ->whereIn('pcs_status', ['Fulfilled', 'Completed', 'Cancelled', 'Rejected'])
                 ->orderBy('pcs_id', 'desc')
                 ->get();
@@ -192,8 +259,15 @@ class PurchaseCaseController extends Controller
                 'it'   => 'Information Technology Queue',
                 'adm'  => 'Administration Department Queue',
             ];
-            $targetStages = $stageMap[$area] ?? [];
-            $pageTitle = $titleMap[$area] ?? 'Purchase Scrutiny Hub';
+            $context = \App\Services\Auth\UserAccessContext::forUser($user);
+            $isDdg = $context->isDdg() || $area === 'hqs';
+            if ($isDdg) {
+                $targetStages = ['DDG'];
+                $pageTitle = 'DDG Approval Portal';
+            } else {
+                $targetStages = $stageMap[$area] ?? [];
+                $pageTitle = $titleMap[$area] ?? 'Purchase Scrutiny Hub';
+            }
 
             $pending = Purchase::with(['unit', 'project', 'latestDecision.account', 'currentSubstatus'])
                 ->atStage($targetStages)
@@ -276,7 +350,11 @@ class PurchaseCaseController extends Controller
         $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name');
 
         // Check if user is authorized to approve
-        $canApprove = $this->approvalService->canApprove($area, (float)($purchase->pcs_price ?? 0), $purchase);
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        $isDlog = (method_exists($user, 'isDlog') && $user->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true);
+        $isDdg = $context->isDdg() || $area === 'hqs';
+        $checkArea = $isDlog ? 'log' : ($isDdg ? 'hqs' : $area);
+        $canApprove = $this->approvalService->canApprove($checkArea, (float)($purchase->pcs_price ?? 0), $purchase);
         $firms = \App\Models\Firm::orderBy('frm_name')->get();
 
 
@@ -287,17 +365,25 @@ class PurchaseCaseController extends Controller
             'rdw'  => 'MD Approval Case',
             'hqs'  => 'DDG Approval Case',
             'nrdi' => 'DG Approval Case',
+            'log'  => 'Director Logistics (DLOG) Scrutiny Case',
+            'dlog' => 'Director Logistics (DLOG) Scrutiny Case',
+            'it'   => 'Staff Officer IT (SO IT) Scrutiny Case',
         ];
-        $pageTitle = $titleMap[$area] ?? 'Purchase Case Details';
+        $pageTitle = ($isDlog ? 'Director Logistics (DLOG) Scrutiny Case' : ($isDdg ? 'DDG Approval Case' : null)) ?? ($titleMap[$area] ?? 'Purchase Case Details');
 
         // Financial Intelligence (Legacy Logic)
+        $headId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
         $finService = app(\App\Services\FinancialIntelligenceService::class);
-        $head = $finService->getHeadStatus($purchase->pcs_hed_id);
-        $subheads = $finService->getSubheadBreakdown($purchase->pcs_hed_id);
+        $head = $headId ? $finService->getHeadStatus($headId) : (object)[];
+        $subheads = $headId ? $finService->getSubheadBreakdown($headId) : [];
 
         // Recent Approved Cases for the same project/head
         $recentApproved = Purchase::withCount('items')
-            ->where('pcs_hed_id', $purchase->pcs_hed_id)
+            ->where(function($q) use ($headId) {
+                if ($headId) {
+                    $q->where('pcs_hed_id', $headId)->orWhere('pcs_effhed_id', $headId);
+                }
+            })
             ->where(function($q) {
                 $q->whereRaw('LOWER(pcs_status) = ?', ['approved'])
                   ->orWhere('pcs_status', 'Approved');
@@ -385,4 +471,70 @@ class PurchaseCaseController extends Controller
             return back()->with('error', 'Error: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Toggle or update MTSS submission status for an approved purchase case (Finance only)
+     */
+    public function toggleMtss(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $area = strtolower(trim((string)($user->acc_untarea ?? '')));
+        $isFinance = in_array($area, ['fin', 'finance', 'dfinance'], true) 
+            || (method_exists($user, 'isFinance') && $user->isFinance());
+
+        if (!$isFinance) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Permission denied. Only Finance Directorate can submit documents to MTSS.'
+            ], 403);
+        }
+
+        $purchase = Purchase::findOrFail($id);
+
+        if (strtolower(trim((string)$purchase->pcs_status)) !== 'approved') {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Only Approved purchase cases can be marked as sent to MTSS.'
+            ], 422);
+        }
+
+        if ($request->has('status')) {
+            $newStatus = (bool) $request->input('status');
+        } else {
+            $newStatus = !$purchase->pcs_mtss_sent;
+        }
+
+        $purchase->pcs_mtss_sent = $newStatus;
+        $purchase->pcs_mtss_date = $newStatus ? now() : null;
+        $purchase->save();
+
+        // Audit Trail Decision
+        try {
+            \App\Models\PurDecision::create([
+                'pdec_pcs_id'      => $purchase->pcs_id,
+                'pdec_acc_id'      => $user->acc_id,
+                'pdec_role'        => $user->acc_desigshort ?: 'Finance',
+                'pdec_action'      => $newStatus ? 'send_to_mtss' : 'revert_mtss',
+                'pdec_from_status' => $purchase->pcs_status,
+                'pdec_to_status'   => $purchase->pcs_status,
+                'pdec_remarks'     => $newStatus ? 'Case documents submitted/sent to MTSS' : 'MTSS submission reverted',
+                'pdec_amount'      => $purchase->pcs_price,
+            ]);
+        } catch (\Throwable $t) {
+            // Log decision failure silently if optional
+        }
+
+        return response()->json([
+            'success' => true,
+            'pcs_id' => $purchase->pcs_id,
+            'is_sent' => $newStatus,
+            'date_formatted' => $purchase->pcs_mtss_date ? \Carbon\Carbon::parse($purchase->pcs_mtss_date)->format('d M, Y') : null,
+            'message' => $newStatus ? 'Case documents marked as Sent to MTSS.' : 'MTSS submission reverted.'
+        ]);
+    }
 }
+

@@ -95,12 +95,31 @@ class ContractCaseController extends Controller
 
         $authorityRole = 'HR';
         $authDetails = $this->approvalService->getApprovalAuthorityDetails($case);
-        $canApprove = false;
+        $canApprove = true;
         $strength = [];
         $deptMap = EmployeeCreationService::getDepartmentMap();
         $departments = DB::table('cen.units')->orderBy('unt_name')->get();
 
         return view('md.contract-cases.show', compact('case', 'authorityRole', 'authDetails', 'canApprove', 'strength', 'deptMap', 'departments'));
+    }
+
+    public function approve($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'approve']);
+        $user = Auth::user();
+
+        $remarks = $request->input('remarks');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Remarks are mandatory.'], 422);
+        }
+
+        $this->approvalService->approve($case, $user, $request->all(), $remarks);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contract Case approved successfully by HR.'
+        ]);
     }
 
     public function addEmployee($id, Request $request)
@@ -116,12 +135,17 @@ class ContractCaseController extends Controller
         }
 
         $validated = $request->validate([
-            'emp_cnic'   => ['required', 'string', 'regex:/^(\d{5}-\d{7}-\d{1}|\d{13})$/'],
-            'emp_joindt' => 'required|date',
-            'emp_name'   => 'required|string|max:200',
-            'emp_unt_id' => 'required|integer',
-            'emp_title'  => 'nullable|string|max:255',
-            'emp_rank'   => 'nullable|string|max:100',
+            'emp_cnic'            => ['required', 'string', 'regex:/^(\d{5}-\d{7}-\d{1}|\d{13})$/'],
+            'emp_joindt'          => 'required|date',
+            'emp_name'            => 'required|string|max:200',
+            'emp_unt_id'          => 'required|integer',
+            'emp_title'           => 'nullable|string|max:255',
+            'emp_rank'            => 'nullable|string|max:100',
+            'ctc_approvedsalary'  => 'nullable|numeric|min:0',
+            'ctc_approvedprobsal' => 'nullable|numeric|min:0',
+            'ctc_approvedprob'    => 'nullable|integer|min:0',
+            'ctc_approvedenddt'   => 'nullable|date',
+            'ctc_approvedctrtype' => 'nullable|integer',
         ], [
             'emp_cnic.required'   => 'Please enter CNIC.',
             'emp_cnic.regex'      => 'Please enter a valid CNIC (e.g. 42101-1234567-1 or 13 digits).',
@@ -242,6 +266,24 @@ class ContractCaseController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Case marked as Not Approved.'
+        ]);
+    }
+
+    public function cancel($id, Request $request)
+    {
+        $case = HrCtrCase::findOrFail($id);
+        $this->authorize('processAction', [$case, 'cancel']);
+        $user = Auth::user();
+        $remarks = $request->input('remarks', 'Cancelled by HR');
+        if (empty(trim($remarks ?? ''))) {
+            return response()->json(['success' => false, 'message' => 'Cancellation remarks are mandatory.'], 422);
+        }
+
+        $this->approvalService->cancel($case, $user, $remarks);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contract Case #CC-' . $id . ' has been cancelled successfully.'
         ]);
     }
 }

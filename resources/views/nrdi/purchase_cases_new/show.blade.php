@@ -7,36 +7,52 @@
 
     $caseValue      = (float)($purchase->live_value ?? ($purchase->pcs_price ?? ($winnerQuote?->qte_price ?? 0)));
     
-    // Pure Project Allocation & Metrics (Excluding CSRF share / accounts)
-    $finAllocation  = (float)($head->pcc_share ?? ($head->prj_share ?? 0));
-    if ($finAllocation <= 0 && isset($head->rdw_share)) {
-        $rdw = (float)($head->rdw_share ?? 0);
-        $cf  = (float)($head->cf_share ?? ($head->csrf_share ?? 0));
-        if ($rdw > 0) {
-            $finAllocation = max(0, $rdw - $cf);
-        }
-    }
-    if ($finAllocation <= 0) {
-        $finAllocation = (float)($head->allocation ?? 0);
-    }
-    if ($finAllocation <= 0 && !empty($purchase->project)) {
-        $finAllocation = (float)($purchase->project->prj_aprvcost ?: ($purchase->project->prj_cost ?? 0));
-    }
+    $isCsrfCase      = method_exists($purchase, 'isCsrf') ? $purchase->isCsrf() : false;
+    $effectiveHeadId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
+    $drillScope      = $isCsrfCase ? 'csrf' : 'pcc';
 
-    $finReceived        = isset($head->pcc_received) ? (float)$head->pcc_received : (float)($head->received ?? 0);
-    $finExpenditure     = isset($head->pcc_expenditure) ? (float)$head->pcc_expenditure : (float)($head->expenditure ?? 0);
-    $finBalance         = isset($head->pcc_balance) ? (float)$head->pcc_balance : ($finReceived - $finExpenditure);
-    $finCommitments     = isset($head->pcc_commitments) ? (float)$head->pcc_commitments : (float)($head->commitments ?? 0);
-    $finInProcess       = isset($head->pcc_in_process) ? (float)$head->pcc_in_process : (float)($head->in_process ?? 0);
-    $finAvailable       = isset($head->pcc_available) ? (float)$head->pcc_available : ($finBalance - $finCommitments - $finInProcess);
-    $finYetToBeReceived = isset($head->pcc_yet_to_be_received) ? (float)$head->pcc_yet_to_be_received : (float)($head->yet_to_be_received ?? ($finAllocation - $finReceived));
-    $finRemaining       = (float)($head->acc_remaining ?? ($head->pcc_can_be_spent ?? ($head->remaining ?? ($head->prj_remaining ?? ($finAllocation - $finExpenditure - $finCommitments - $finInProcess)))));
+    if ($isCsrfCase) {
+        $finAllocation      = (float)($head->cf_share ?? ($head->csrf_share ?? 0));
+        $finReceived        = (float)($head->cf_received ?? 0);
+        $finExpenditure     = (float)($head->cf_expenditure ?? 0);
+        $finBalance         = (float)($head->cf_balance ?? ($finReceived - $finExpenditure));
+        $finCommitments     = (float)($head->cf_commitments ?? 0);
+        $finInProcess       = (float)($head->cf_in_process ?? 0);
+        $finAvailable       = (float)($head->cf_available ?? ($finBalance - $finCommitments - $finInProcess));
+        $finYetToBeReceived = (float)($head->cf_yet_to_be_received ?? ($finAllocation - $finReceived));
+        $finRemaining       = (float)($head->cf_can_be_spent ?? ($finAllocation - $finExpenditure - $finCommitments - $finInProcess));
+    } else {
+        // Pure Project Allocation & Metrics (Excluding CSRF share / accounts)
+        $finAllocation  = (float)($head->pcc_share ?? ($head->prj_share ?? 0));
+        if ($finAllocation <= 0 && isset($head->rdw_share)) {
+            $rdw = (float)($head->rdw_share ?? 0);
+            $cf  = (float)($head->cf_share ?? ($head->csrf_share ?? 0));
+            if ($rdw > 0) {
+                $finAllocation = max(0, $rdw - $cf);
+            }
+        }
+        if ($finAllocation <= 0) {
+            $finAllocation = (float)($head->allocation ?? 0);
+        }
+        if ($finAllocation <= 0 && !empty($purchase->project)) {
+            $finAllocation = (float)($purchase->project->prj_aprvcost ?: ($purchase->project->prj_cost ?? 0));
+        }
+
+        $finReceived        = isset($head->pcc_received) ? (float)$head->pcc_received : (float)($head->received ?? 0);
+        $finExpenditure     = isset($head->pcc_expenditure) ? (float)$head->pcc_expenditure : (float)($head->expenditure ?? 0);
+        $finBalance         = isset($head->pcc_balance) ? (float)$head->pcc_balance : ($finReceived - $finExpenditure);
+        $finCommitments     = isset($head->pcc_commitments) ? (float)$head->pcc_commitments : (float)($head->commitments ?? 0);
+        $finInProcess       = isset($head->pcc_in_process) ? (float)$head->pcc_in_process : (float)($head->in_process ?? 0);
+        $finAvailable       = isset($head->pcc_available) ? (float)$head->pcc_available : ($finBalance - $finCommitments - $finInProcess);
+        $finYetToBeReceived = isset($head->pcc_yet_to_be_received) ? (float)$head->pcc_yet_to_be_received : (float)($head->yet_to_be_received ?? ($finAllocation - $finReceived));
+        $finRemaining       = (float)($head->acc_remaining ?? ($head->pcc_can_be_spent ?? ($head->remaining ?? ($head->prj_remaining ?? ($finAllocation - $finExpenditure - $finCommitments - $finInProcess)))));
+    }
 
     // Milestones Breakdown for Financial Review
     $finRecCompleted = (float)($head->receivable_completed ?? 0);
     $finRecCurrent   = (float)($head->receivable_current ?? 0);
 
-    $prjId = $purchase->project?->prj_id ?? (DB::table('cen.heads')->where('hed_id', $purchase->pcs_hed_id)->value('hed_prj_id') ?? $purchase->pcs_hed_id);
+    $prjId = $purchase->project?->prj_id ?? (DB::table('cen.heads')->where('hed_id', $effectiveHeadId)->value('hed_prj_id') ?? $effectiveHeadId);
     
     $currMilestone = null;
     if ($prjId) {
@@ -717,24 +733,24 @@
                                 <div class="d-flex flex-column" style="gap: 8px; font-size: 13px;">
                                     <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
                                         <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-hashtag text-primary mr-2"></i>CASE ID:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">#{{ $purchase->pcs_id }}</span></div>
-                                        @if(!empty($purchase->pcs_sudohed) && $purchase->pcs_sudohed === 'CHRF')
-                                            <span class="badge badge-warning text-dark shadow-sm font-weight-bold" style="background: #fef08a; border: 1px solid #facc15; font-size: 11px; padding: 3px 8px; border-radius: 4px;">
-                                                <i class="fas fa-coins text-warning mr-1" style="color: #b45309 !important;"></i> CSRF Case (Funded via CSRF)
-                                            </span>
-                                        @endif
                                     </div>
                                     <div><strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="far fa-calendar-alt text-primary mr-2"></i>DATE:</strong> <span class="text-dark font-weight-bold" style="color: #0f172a !important;">{{ \Carbon\Carbon::parse($purchase->pcs_date)->format('d M, Y') }}</span></div>
-                                    <div class="d-flex align-items-center">
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                         <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-project-diagram text-primary mr-2"></i>PROJECT:</strong> 
                                         <span class="badge badge-light border px-2 py-1 font-weight-bold" style="font-size: 12.5px; color: #0f172a; background: #f8fafc; border-color: #cbd5e1 !important;">
-                                            @if(!empty($purchase->pcs_sudohed) && $purchase->pcs_sudohed === 'CHRF')
+                                            @if($isCsrfCase)
                                                 CSRF Fund @if($purchase->effectiveHead) ({{ $purchase->effectiveHead->hed_code }}) @elseif($purchase->pcs_effhed_id) (#{{ $purchase->pcs_effhed_id }}) @endif
                                             @else
-                                                {{ $purchase->project?->prj_code ?? ($purchase->head?->hed_code ?? $purchase->pcs_hed_id) }}
+                                                {{ $purchase->project?->prj_code ?? ($purchase->head?->hed_code ?? ($purchase->effectiveHead?->hed_code ?? $purchase->pcs_hed_id)) }}
                                             @endif
                                         </span>
+                                        @if($isCsrfCase)
+                                            <span class="badge text-white font-weight-bold shadow-sm" style="background: #dc2626 !important; font-size: 11px; padding: 2.5px 7px; border-radius: 4px; letter-spacing: 0.5px;" title="Funded via CSRF">
+                                                CSRF
+                                            </span>
+                                        @endif
                                         @php
-                                            $navHedId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
+                                            $navHedId = $effectiveHeadId;
                                         @endphp
                                         @if($navHedId)
                                         <div class="dropdown d-inline-block ml-1">
@@ -762,8 +778,8 @@
                                         <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> 
                                         <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                             <span class="view-only text-dark font-weight-bold" id="pcSubheadView" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span>
-                                            @if($purchase->subhead_display && $purchase->pcs_hed_id)
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $purchase->subhead_display]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm" style="font-size: 12px; height: 22px; width: 22px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="View {{ $purchase->subhead_display }} Financial Breakdown">
+                                            @if($purchase->subhead_display && $effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'expenditure', $purchase->subhead_display]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm" style="font-size: 12px; height: 22px; width: 22px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="View {{ $purchase->subhead_display }} Financial Breakdown">
                                                     <i class="fas fa-chart-bar"></i>
                                                 </a>
                                             @endif
@@ -891,12 +907,18 @@
                                     
                                     <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">EXPENDITURE</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Project Expenditure Breakdown">
-                                            {{ number_format($finExpenditure) }}
-                                        </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Project Expenditure Breakdown">
-                                            <i class="fas fa-external-link-alt"></i>
-                                        </a>
+                                        @if($effectiveHeadId)
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, $drillScope, 'expenditure']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Expenditure Breakdown">
+                                                {{ number_format($finExpenditure) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, $drillScope, 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Expenditure Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        @else
+                                            <span class="font-weight-bold" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;">
+                                                {{ number_format($finExpenditure) }}
+                                            </span>
+                                        @endif
                                     </div>
                                     
                                     <div class="text-muted font-weight-bold d-flex flex-column justify-content-center" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">
@@ -909,22 +931,34 @@
                                     
                                     <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">COMMITMENTS</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Project Commitments Breakdown">
-                                            {{ number_format($finCommitments) }}
-                                        </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Project Commitments Breakdown">
-                                            <i class="fas fa-external-link-alt"></i>
-                                        </a>
+                                        @if($effectiveHeadId)
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, $drillScope, 'commitments']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Commitments Breakdown">
+                                                {{ number_format($finCommitments) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, $drillScope, 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Commitments Breakdown">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        @else
+                                            <span class="font-weight-bold" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;">
+                                                {{ number_format($finCommitments) }}
+                                            </span>
+                                        @endif
                                     </div>
                                     
                                     <div class="text-muted font-weight-bold" style="font-size: 11px; letter-spacing: 0.4px; color: #475569 !important;">IN PROCESS</div>
                                     <div class="text-right d-flex justify-content-end align-items-center">
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View Project In-Process Cases">
-                                            {{ number_format($finInProcess) }}
-                                        </a>
-                                        <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View Project In-Process Cases">
-                                            <i class="fas fa-external-link-alt"></i>
-                                        </a>
+                                        @if($effectiveHeadId)
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, $drillScope, 'in-process']) }}" target="_blank" class="font-weight-bold text-decoration-none" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;" title="View In-Process Cases">
+                                                {{ number_format($finInProcess) }}
+                                            </a>
+                                            <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, $drillScope, 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray ml-1" style="padding: 1px 4px; font-size: 9px;" title="View In-Process Cases">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        @else
+                                            <span class="font-weight-bold" style="font-size: 13.5px; white-space: nowrap; color: #0f172a !important;">
+                                                {{ number_format($finInProcess) }}
+                                            </span>
+                                        @endif
                                     </div>
                                     
                                     <div class="text-muted font-weight-bold border-top pt-1" style="font-size: 11px; color: #475569 !important; border-color: #cbd5e1 !important; letter-spacing: 0.4px;">AVAILABLE</div>
@@ -1690,12 +1724,14 @@
                             <i class="fas fa-project-diagram"></i> Project Details
                         </a>
                         @endif
-                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(22,163,74,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(22,163,74,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(22,163,74,0.25)';">
+                        @if($effectiveHeadId)
+                        <a href="{{ route('projects.financial_view', $effectiveHeadId) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(22,163,74,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(22,163,74,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(22,163,74,0.25)';">
                             <i class="fas fa-paperclip"></i> Files & Attachments
                         </a>
-                        <a href="{{ route('projects.financial_view', $purchase->pcs_hed_id) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(217,119,6,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(217,119,6,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(217,119,6,0.25)';">
+                        <a href="{{ route('projects.financial_view', $effectiveHeadId) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(217,119,6,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(217,119,6,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(217,119,6,0.25)';">
                             <i class="fas fa-coins"></i> Milestone Costs
                         </a>
+                        @endif
                     </div>
                 </div>
                 <button type="button" class="close text-dark opacity-50 hover-opacity-100" data-dismiss="modal" style="font-size: 24px; padding: 12px 18px;">&times;</button>
@@ -1756,28 +1792,40 @@
                                     <tr style="border-bottom: 1px solid #e2e8f0;">
                                         <td class="pl-3 py-2 font-weight-bold text-danger">Expenditure</td>
                                         <td class="text-right py-2 text-danger font-weight-bold">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View Project Expenditure Breakdown">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'pcc', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View Project Expenditure Breakdown">
+                                                    {{ number_format($head->pcc_expenditure ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="View Project Expenditure Breakdown">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->pcc_expenditure ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="View Project Expenditure Breakdown">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                         <td class="text-right py-2 text-danger font-weight-bold">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View CSRF Expenditure Breakdown">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'csrf', 'expenditure']) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="View CSRF Expenditure Breakdown">
+                                                    {{ number_format($head->cf_expenditure ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'csrf', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF Expenditure Breakdown">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->cf_expenditure ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF Expenditure Breakdown">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                         <td class="text-right pr-3 py-2" style="color: #15803d; font-weight: 800;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Expenditure Breakdown">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'acc', 'expenditure']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Expenditure Breakdown">
+                                                    {{ number_format($head->prj_expenditure ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'acc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total Expenditure Breakdown">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->prj_expenditure ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'expenditure']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total Expenditure Breakdown">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                     </tr>
                                     <tr style="background: rgba(37,99,235,0.05); border-bottom: 1px solid #e2e8f0;">
@@ -1789,55 +1837,79 @@
                                     <tr style="border-bottom: 1px solid #e2e8f0;">
                                         <td class="pl-3 py-2 font-weight-bold" style="color: #b45309;">Commitments</td>
                                         <td class="text-right py-2 font-weight-bold" style="color: #b45309;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View Project Commitments Breakdown">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'pcc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View Project Commitments Breakdown">
+                                                    {{ number_format($head->pcc_commitments ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="View Project Commitments Breakdown">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->pcc_commitments ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="View Project Commitments Breakdown">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                         <td class="text-right py-2 font-weight-bold" style="color: #b45309;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View CSRF Commitments Breakdown">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'csrf', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #b45309;" title="View CSRF Commitments Breakdown">
+                                                    {{ number_format($head->cf_commitments ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'csrf', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF Commitments Breakdown">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->cf_commitments ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF Commitments Breakdown">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                         <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Commitments Breakdown">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'acc', 'commitments']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total Commitments Breakdown">
+                                                    {{ number_format($head->prj_commitments ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'acc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total Commitments Breakdown">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->prj_commitments ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'commitments']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total Commitments Breakdown">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid #e2e8f0;">
                                         <td class="pl-3 py-2 font-weight-bold text-secondary">In Process</td>
                                         <td class="text-right py-2 font-weight-bold text-secondary">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View Project In-Process Cases">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'pcc', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View Project In-Process Cases">
+                                                    {{ number_format($head->pcc_in_process ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="View Project In-Process Cases">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->pcc_in_process ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'pcc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="View Project In-Process Cases">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                         <td class="text-right py-2 font-weight-bold text-secondary">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View CSRF In-Process Cases">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'csrf', 'in-process']) }}" target="_blank" class="text-muted text-decoration-none font-weight-bold" title="View CSRF In-Process Cases">
+                                                    {{ number_format($head->cf_in_process ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'csrf', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF In-Process Cases">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->cf_in_process ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'csrf', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="View CSRF In-Process Cases">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                         <td class="text-right pr-3 py-2 font-weight-bold" style="color: #15803d;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total In-Process Cases">
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'acc', 'in-process']) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #15803d;" title="View Total In-Process Cases">
+                                                    {{ number_format($head->prj_in_process ?? 0) }}
+                                                </a>
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'acc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total In-Process Cases">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            @else
                                                 {{ number_format($head->prj_in_process ?? 0) }}
-                                            </a>
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'acc', 'in-process']) }}" target="_blank" class="btn-drill-link btn-drill-green" style="width: 22px; height: 22px; font-size: 11px;" title="View Total In-Process Cases">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            @endif
                                         </td>
                                     </tr>
                                     <tr style="background: rgba(22,163,74,0.08); border-bottom: 1px solid #e2e8f0;">
@@ -1965,41 +2037,57 @@
                                         </td>
                                         <td class="text-right py-2 font-weight-bold text-danger align-middle" style="white-space: nowrap; font-size: 14.5px;">
                                             <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="Drilldown {{ $sName }} Expenditure">
+                                                @if($effectiveHeadId)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'expenditure', $sName]) }}" target="_blank" class="text-danger text-decoration-none font-weight-bold" title="Drilldown {{ $sName }} Expenditure">
+                                                        {{ number_format($sExp) }}
+                                                    </a>
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'expenditure', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} Expenditure">
+                                                        <i class="fas fa-search"></i>
+                                                    </a>
+                                                @else
                                                     {{ number_format($sExp) }}
-                                                </a>
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-red" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} Expenditure">
-                                                    <i class="fas fa-search"></i>
-                                                </a>
+                                                @endif
                                             </div>
                                         </td>
                                         <td class="text-right py-2 font-weight-bold align-middle" style="color: #d97706; white-space: nowrap; font-size: 14.5px;">
                                             <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #d97706;" title="Drilldown {{ $sName }} Commitments">
+                                                @if($effectiveHeadId)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'commitments', $sName]) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #d97706;" title="Drilldown {{ $sName }} Commitments">
+                                                        {{ number_format($sCmt) }}
+                                                    </a>
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'commitments', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} Commitments">
+                                                        <i class="fas fa-search"></i>
+                                                    </a>
+                                                @else
                                                     {{ number_format($sCmt) }}
-                                                </a>
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'commitments', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-amber" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} Commitments">
-                                                    <i class="fas fa-search"></i>
-                                                </a>
+                                                @endif
                                             </div>
                                         </td>
                                         <td class="text-right py-2 font-weight-bold align-middle" style="color: #475569; white-space: nowrap; font-size: 14.5px;">
                                             <div class="d-inline-flex align-items-center justify-content-end" style="gap: 5px; white-space: nowrap;">
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #475569;" title="Drilldown {{ $sName }} In-Process">
+                                                @if($effectiveHeadId)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'in-process', $sName]) }}" target="_blank" class="text-decoration-none font-weight-bold" style="color: #475569;" title="Drilldown {{ $sName }} In-Process">
+                                                        {{ number_format($sIpc) }}
+                                                    </a>
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'in-process', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} In-Process">
+                                                        <i class="fas fa-search"></i>
+                                                    </a>
+                                                @else
                                                     {{ number_format($sIpc) }}
-                                                </a>
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'in-process', $sName]) }}" target="_blank" class="btn-drill-link btn-drill-gray" style="width: 22px; height: 22px; font-size: 11px;" title="Drilldown {{ $sName }} In-Process">
-                                                    <i class="fas fa-search"></i>
-                                                </a>
+                                                @endif
                                             </div>
                                         </td>
                                         <td class="text-right py-2 font-weight-bold align-middle {{ $sRem < 0 ? 'text-danger' : 'text-success' }}" style="white-space: nowrap; font-size: 14.5px;">
                                             {{ number_format($sRem) }}
                                         </td>
                                         <td class="text-center pr-3 py-2 align-middle" style="white-space: nowrap;">
-                                            <a href="{{ route('division.finance-of-project.drilldown', [$purchase->pcs_hed_id, 'subhead', 'expenditure', $sName]) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-1 px-2.5" style="font-size: 12px; font-weight: 800; border-radius: 4px;" title="View Full {{ $sName }} Breakdown">
-                                                <i class="fas fa-external-link-alt mr-1"></i> VIEW
-                                            </a>
+                                            @if($effectiveHeadId)
+                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'expenditure', $sName]) }}" target="_blank" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-1 px-2.5" style="font-size: 12px; font-weight: 800; border-radius: 4px;" title="View Full {{ $sName }} Breakdown">
+                                                    <i class="fas fa-external-link-alt mr-1"></i> VIEW
+                                                </a>
+                                            @else
+                                                <span class="text-muted">--</span>
+                                            @endif
                                         </td>
                                     </tr>
                                     @empty

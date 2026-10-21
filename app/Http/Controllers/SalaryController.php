@@ -55,14 +55,13 @@ class SalaryController extends Controller
             return redirect()->route('login');
         }
 
-        $month = $request->query('month', now()->format('Y-m'));
-        $unitId = $request->query('unit_id');
+        $month = now()->format('Y-m');
+        $unitId = $user->acc_unt_id;
 
         [$lower, $upper] = $this->getUserBounds($user);
 
         $units = DB::table('cen.units')
-            ->whereBetween('unt_id', [$lower, $upper])
-            ->orderBy('unt_namesh')
+            ->where('unt_id', $unitId)
             ->get();
 
         return view('hr.salary.requisitions.create', compact('month', 'unitId', 'units'));
@@ -79,13 +78,9 @@ class SalaryController extends Controller
             return response()->json(['error' => 'Unauthenticated'], 401);
         }
 
-        $request->validate([
-            'month'   => ['required', 'date_format:Y-m'],
-            'unit_id' => ['nullable', 'integer'],
-        ]);
-
-        $month = $request->input('month');
-        $unitScope = $request->filled('unit_id') ? (int) $request->input('unit_id') : null;
+        // Strictly enforce current month and user division scope
+        $month = now()->format('Y-m');
+        $unitScope = (int) $user->acc_unt_id;
 
         $preview = $this->salaryService->previewSalary($month, $unitScope, $user);
 
@@ -110,11 +105,11 @@ class SalaryController extends Controller
             'emp_ids.*' => ['required', 'string'],
         ]);
 
-        $month = $request->input('month');
+        $month = now()->format('Y-m');
         $empIds = $request->input('emp_ids');
 
         // Pre-flight duplicate check: surface exact conflicting employee IDs and period
-        $preview = $this->salaryService->previewSalary($month, null, $user);
+        $preview = $this->salaryService->previewSalary($month, (int) $user->acc_unt_id, $user);
         $excludedMap = collect($preview['excluded'])->keyBy(fn($x) => $x['employee']->emp_id);
 
         $conflicts = [];
@@ -165,6 +160,28 @@ class SalaryController extends Controller
 
         if ($req->srq_status !== 'Draft') {
             return back()->with('error', "Cannot release requisition #{$srqId} with status '{$req->srq_status}'. Only 'Draft' requisitions can be released.");
+        }
+
+        // Pre-Release Budget Check (Legacy AccountChecks.bas AnyObjectionsOnExp)
+        $groupReqs = HrSalReq::where('srq_id', $srqId)
+            ->orWhere('srq_parent', $srqId)
+            ->get();
+
+        $objections = [];
+        foreach ($groupReqs as $gr) {
+            $obj = $this->salaryService->checkObjectionsOnExp(
+                (int)$gr->srq_effhed_id,
+                $gr->srq_hed_id ? (int)$gr->srq_hed_id : null,
+                $gr->srq_sudohed,
+                (float)$gr->srq_salary
+            );
+            if ($obj) {
+                $objections[] = "Employee {$gr->srq_empnamecomp} ({$gr->srq_emp_id}): {$obj}";
+            }
+        }
+
+        if (!empty($objections)) {
+            return back()->with('error', "Pre-Release Budget Warning! " . implode(' | ', $objections));
         }
 
         $this->salaryService->releaseRequisitions($srqId);
@@ -299,8 +316,42 @@ class SalaryController extends Controller
 
         $this->salaryService->approveSalaryOrders($sorId, $user);
 
-        return redirect()->route('divhr.salary.orders.show', $sorId)
-            ->with('success', "Salary order #{$sorId} approved and negative liability commitment created successfully.");
+        return back()->with('success', "Salary order #{$sorId} approved and commitment created successfully.");
+    }
+
+    /**
+     * Bulk Approve Salary Orders POST endpoint (Draft -> Approved).
+     */
+    public function bulkApproveOrders(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if (($user->acc_auth ?? '') !== 'approver' || strtolower(trim((string) ($user->acc_untarea ?? ''))) !== 'fin') {
+            abort(403, 'Finance approver authorization required to approve salary orders.');
+        }
+
+        $request->validate([
+            'sor_ids'   => ['required', 'array', 'min:1'],
+            'sor_ids.*' => ['required', 'integer'],
+        ]);
+
+        $sorIds = $request->input('sor_ids');
+        $approvedCount = 0;
+
+        DB::transaction(function () use ($sorIds, $user, &$approvedCount) {
+            foreach ($sorIds as $sorId) {
+                $order = FinSalOrder::find($sorId);
+                if ($order && $order->sor_status === 'Draft') {
+                    $this->salaryService->approveSalaryOrders($sorId, $user);
+                    $approvedCount++;
+                }
+            }
+        });
+
+        return back()->with('success', "Successfully approved {$approvedCount} salary order(s) and created commitments.");
     }
 
     /**
@@ -484,6 +535,123 @@ class SalaryController extends Controller
         $audit = $this->salaryService->getCommitmentVerifications($month);
 
         return view('hr.salary.commitments.verify', compact('audit', 'month'));
+    }
+
+    /**
+     * Bank Batch Payment Scroll (Legacy fin_salorders_u_doc2).
+     * Grouped by effhed_code and division with Meezan Bank Accounts vs Cheque totals.
+     */
+    public function bankPaymentScroll(Request $request)
+    {
+        $this->authorize('viewAny', FinSalOrder::class);
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        if (strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'hr') {
+            abort(403, 'Unauthorized. HR does not have access to Bank Payment Scrolls.');
+        }
+
+        [$lower, $upper] = $this->getUserBounds($user);
+
+        // Month handling: if not specified, default to latest available order month
+        $month = $request->query('month');
+        if (empty($month)) {
+            $latestMonth = DB::table('fin.salorders')->max('sor_month');
+            $month = $latestMonth ? Carbon::parse($latestMonth)->format('Y-m') : now()->format('Y-m');
+        }
+
+        $monthDate = Carbon::parse($month)->endOfMonth()->toDateString();
+        $status = $request->query('status', 'All');
+
+        $latestContractsSub = DB::table('hr.contracts')
+            ->select('ctr_num', DB::raw('MAX(ctr_id) as max_ctr_id'))
+            ->groupBy('ctr_num');
+
+        $query = DB::table('fin.salorders as sor')
+            ->join('cen.heads as effhed', 'effhed.hed_id', '=', 'sor.sor_effhed_id')
+            ->leftJoin('cen.units as effunt', 'effunt.unt_id', '=', 'effhed.hed_unt_id')
+            ->leftJoin('cen.heads as hed', 'hed.hed_id', '=', 'sor.sor_hed_id')
+            ->leftJoin('cen.units as unt', 'unt.unt_id', '=', 'sor.sor_unt_id')
+            ->leftJoin('hr.emps as emp', 'emp.emp_id', '=', 'sor.sor_emp_id')
+            ->leftJoinSub($latestContractsSub, 'lc', function($join) {
+                $join->on('lc.ctr_num', '=', 'sor.sor_emp_id');
+            })
+            ->leftJoin('hr.contracts as ctr', 'ctr.ctr_id', '=', 'lc.max_ctr_id')
+            ->whereBetween('sor.sor_unt_id', [$lower, $upper])
+            ->where('sor.sor_month', $monthDate);
+
+        if ($status === 'Draft') {
+            $query->where('sor.sor_status', 'Draft');
+        } elseif (in_array($status, ['Open', 'Approved'], true)) {
+            $query->whereIn('sor.sor_status', ['Open', 'Approved', 'In Process']);
+        } elseif (in_array($status, ['Closed', 'Fulfilled'], true)) {
+            $query->whereIn('sor.sor_status', ['Closed', 'Fulfilled']);
+        }
+
+        $rows = $query->select(
+            'sor.*',
+            'effhed.hed_code as effhed_code',
+            'effhed.hed_name as effhed_name',
+            'effunt.unt_namesh as effunt_namesh',
+            'effunt.unt_name as effunt_name',
+            'hed.hed_code as hed_code',
+            'hed.hed_name as hed_name',
+            'unt.unt_namesh as unt_namesh',
+            'unt.unt_name as unt_name',
+            'emp.emp_cnic',
+            'emp.emp_joindt',
+            'emp.emp_rank',
+            'emp.emp_title',
+            'ctr.ctr_jobtitle',
+            'ctr.ctr_grade',
+            'ctr.ctr_startdt',
+            'ctr.ctr_enddt'
+        )
+        ->orderBy('effhed.hed_code')
+        ->orderBy('sor.sor_id')
+        ->get();
+
+        // Group rows by effhed_id (matching GroupHeader0 of legacy report)
+        $grouped = $rows->groupBy('sor_effhed_id')->map(function ($groupRows) {
+            $first = $groupRows->first();
+            $effhedCode = $first->effhed_code ?? 'N/A';
+            $effuntNamesh = $first->effunt_namesh ?? 'Central';
+            $title = "To be paid From {$effhedCode} account ({$effuntNamesh} Division)";
+
+            return [
+                'effhed_id'     => $first->sor_effhed_id,
+                'effhed_code'   => $effhedCode,
+                'effunt_namesh' => $effuntNamesh,
+                'header_title'  => $title,
+                'orders'        => $groupRows,
+                'person_count'  => $groupRows->count(),
+                'total_salary'  => $groupRows->sum('sor_salary'),
+            ];
+        });
+
+        $totalPersons = $rows->count();
+        $grandTotalSalary = $rows->sum('sor_salary');
+
+        // Available months for quick filtering
+        $availableMonths = DB::table('fin.salorders')
+            ->distinct()
+            ->orderBy('sor_month', 'desc')
+            ->pluck('sor_month')
+            ->map(fn($m) => Carbon::parse($m)->format('Y-m'))
+            ->unique();
+
+        return view('hr.salary.orders.bank_scroll', compact(
+            'grouped',
+            'rows',
+            'month',
+            'monthDate',
+            'status',
+            'totalPersons',
+            'grandTotalSalary',
+            'availableMonths'
+        ));
     }
 
     /**

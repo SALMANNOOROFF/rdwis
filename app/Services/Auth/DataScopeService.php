@@ -80,11 +80,29 @@ class DataScopeService
             AreaDefinition::isFinance($area) ||
             AreaDefinition::isHr($area) ||
             AreaDefinition::isProcurement($area) ||
-            in_array($area, ['fin', 'hr', 'proc', 'prc', 'rdw', 'hqs', 'it', 'adm'], true) ||
+            in_array($area, ['fin', 'hr', 'proc', 'prc', 'rdw', 'hqs', 'it', 'is', 'adm'], true) ||
+            (method_exists($account, 'isCentralDepartment') && $account->isCentralDepartment()) ||
+            (int) ($account->acc_unt_id ?? 0) >= 800000 ||
             str_contains($desig, 'FINANCE') ||
             str_contains($desig, 'PROCUREMENT') ||
             str_contains($desig, 'HUMAN RESOURCE')
         ) {
+            // When in My Department mode, strictly scope down to their own department unit:
+            if (method_exists($account, 'isMyDepartmentMode') && $account->isMyDepartmentMode()) {
+                $userUnitId = (int) ($account->acc_unt_id ?? 0);
+                $lowers = (int) ($account->acc_lowers ?? 0);
+                $uppers = (int) ($account->acc_uppers ?? 0);
+                $lower = $lowers > 0 ? $lowers : $userUnitId;
+                $upper = ($uppers > 0 && $uppers >= $lowers) ? $uppers : $userUnitId;
+                return [
+                    'lower' => $lower,
+                    'upper' => $upper,
+                    'is_wide' => false,
+                    'is_single' => ($lower === $upper || $lower === $userUnitId),
+                    'specific_units' => [$userUnitId],
+                ];
+            }
+
             return [
                 'lower' => 0,
                 'upper' => 99999999,
@@ -212,6 +230,52 @@ class DataScopeService
      */
     public function scopePurchases($query, Authenticatable|CenAccount|User $account, string $unitColumn = 'pcs_unt_id')
     {
-        return $this->applyScope($query, $account, $unitColumn);
+        $userUnitId = (int) ($account->acc_unt_id ?? 0);
+        if (method_exists($account, 'isMyDepartmentMode') && $account->isMyDepartmentMode()) {
+            return $query->where(function($q) use ($userUnitId, $unitColumn) {
+                $q->where($unitColumn, $userUnitId)
+                  ->orWhere('pcs_intunt_id', $userUnitId);
+            });
+        }
+
+        $scope = $this->resolveScope($account);
+
+        // If wide scope, no unit filter needed
+        if ($scope['is_wide']) {
+            return $query;
+        }
+
+        // If explicitly resolved specific unit IDs (e.g. SORD division list)
+        if ($scope['specific_units'] !== null) {
+            if (empty($scope['specific_units'])) {
+                return $query->whereRaw('1 = 0');
+            }
+            return $query->where(function($q) use ($scope, $userUnitId, $unitColumn) {
+                $q->whereIn($unitColumn, $scope['specific_units'])
+                  ->orWhereIn('pcs_intunt_id', $scope['specific_units']);
+                if ($userUnitId > 0) {
+                    $q->orWhere($unitColumn, $userUnitId)
+                      ->orWhere('pcs_intunt_id', $userUnitId);
+                }
+            });
+        }
+
+        // If single unit
+        if ($scope['is_single']) {
+            return $query->where(function($q) use ($scope, $unitColumn) {
+                $q->where($unitColumn, $scope['lower'])
+                  ->orWhere('pcs_intunt_id', $scope['lower']);
+            });
+        }
+
+        // Between bounds
+        return $query->where(function($q) use ($scope, $userUnitId, $unitColumn) {
+            $q->whereBetween($unitColumn, [$scope['lower'], $scope['upper']])
+              ->orWhereBetween('pcs_intunt_id', [$scope['lower'], $scope['upper']]);
+            if ($userUnitId > 0) {
+                $q->orWhere($unitColumn, $userUnitId)
+                  ->orWhere('pcs_intunt_id', $userUnitId);
+            }
+        });
     }
 }

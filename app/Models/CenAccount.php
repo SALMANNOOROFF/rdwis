@@ -541,11 +541,15 @@ class CenAccount extends Authenticatable
         $area = $this->normalizedArea();
 
         return in_array($untId, [800000, 810000, 820000, 840000, 860000, 880000], true)
-            || in_array($area, ['proc', 'prc', 'fin', 'finance', 'hr', 'is', 'it', 'admin'], true);
+            || in_array($area, ['proc', 'prc', 'fin', 'finance', 'hr', 'is', 'it', 'admin', 'adm'], true);
     }
 
     public function isMyDepartmentMode(): bool
     {
+        if (in_array($this->normalizedArea(), ['adm', 'admin'], true)) {
+            return true;
+        }
+
         return $this->isCentralDepartment() && session('active_dept_scope') === 'my';
     }
 
@@ -560,7 +564,7 @@ class CenAccount extends Authenticatable
             return true;
         }
 
-        return $this->normalizedArea() === 'prj';
+        return in_array($this->normalizedArea(), ['prj', 'adm', 'admin'], true);
     }
 
     public function isFinance(): bool
@@ -606,22 +610,32 @@ class CenAccount extends Authenticatable
     public function canAccessArea(string $area): bool
     {
         $userArea = $this->normalizedArea();
-        $areas = [$userArea];
-
-        if (in_array($userArea, ['rdwprj', 'prjrdw'], true)) {
-            $areas = ['rdw', 'prj', 'rdwprj', 'prjrdw'];
-        }
+        $areas = \App\Services\Auth\AreaDefinition::getAllowedRouteAreas($userArea);
 
         return in_array(strtolower(trim($area)), $areas, true);
     }
 
     public function canSeeRecord(int $unitId): bool
     {
+        if ($this->isMyDepartmentMode()) {
+            return $unitId === (int) ($this->acc_unt_id ?? 0);
+        }
+
         if ($this->acc_lowers == 0) {
             return $unitId >= $this->acc_lowerm && $unitId <= $this->acc_upperm;
         }
 
         return $unitId >= $this->acc_lowers && $unitId <= $this->acc_uppers;
+    }
+
+    public function isSingleUnitAccess(): bool
+    {
+        return $this->acc_access === 'single';
+    }
+
+    public function isMultiUnitAccess(): bool
+    {
+        return $this->acc_access === 'multiple';
     }
 
     public function unitRange(): array
@@ -635,10 +649,40 @@ class CenAccount extends Authenticatable
     }
 
     /**
-     * Check if user is Managing Director (MD), Deputy Director General (DDG), or Director General (DG).
+     * Check if user is Director Logistics (DLOG).
+     */
+    public function isDlog(): bool
+    {
+        $desig = strtoupper(trim((string) ($this->acc_desig ?? '')));
+        $auth = strtolower(trim((string) ($this->acc_auth ?? '')));
+        $username = strtolower(trim((string) ($this->acc_username ?? '')));
+        $desigShort = strtoupper(trim((string) ($this->acc_desigshort ?? '')));
+        $area = strtolower(trim((string) ($this->acc_untarea ?? '')));
+
+        if (
+            str_contains($desig, 'DIRECTOR LOGISTICS') ||
+            str_contains($desig, 'DIRECTOR LOG') ||
+            in_array($desigShort, ['DLOG', 'DIR LOG', 'D LOG', 'DIR LOGISTICS'], true) ||
+            preg_match('/\b(DLOG)\b/i', $desig) ||
+            in_array($auth, ['dlog', 'log'], true) ||
+            in_array($area, ['log', 'dlog', 'logistics'], true) ||
+            in_array($username, ['dlog', 'logistics'], true)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user is Managing Director (MD), Deputy Director General (DDG), or Director General (DG), or Director Logistics (DLOG).
      */
     public function isMdDdgDg(): bool
     {
+        if ($this->isDlog()) {
+            return true;
+        }
+
         $desig = strtoupper(trim((string) ($this->acc_desig ?? '')));
         $auth = strtolower(trim((string) ($this->acc_auth ?? '')));
         $username = strtolower(trim((string) ($this->acc_username ?? '')));

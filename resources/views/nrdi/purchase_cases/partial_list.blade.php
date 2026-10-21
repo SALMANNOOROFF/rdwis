@@ -17,10 +17,25 @@
 @endphp
 <tr class="hub-row div-row-{{ $p->pcs_unt_id }}">
     {{-- 1. Action View Button --}}
-    <td class="text-center">
+    <td class="text-center" style="white-space: nowrap;">
         <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; white-space: nowrap; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important;" title="View Case">
             <i class="fas fa-eye mr-1"></i> View
         </a>
+        @php
+            $loggedUser = auth()->user();
+            $isLeader = $loggedUser && ((method_exists($loggedUser, 'isMdDdgDg') && $loggedUser->isMdDdgDg()) || (method_exists($loggedUser, 'isDlog') && $loggedUser->isDlog()));
+            $userArea = strtolower(trim((string)($loggedUser->acc_untarea ?? '')));
+            $isDivision = $loggedUser && ((method_exists($loggedUser, 'isDivision') && $loggedUser->isDivision()) || in_array($userArea, ['prj', 'rdwprj'], true));
+            $isFinance = $loggedUser && ((method_exists($loggedUser, 'isFinance') && $loggedUser->isFinance()) || in_array($userArea, ['fin', 'finance', 'dfinance'], true));
+            $caseStatusLower = strtolower(trim((string)($p->pcs_status ?? '')));
+            $isDraftOrPending = in_array($caseStatusLower, ['draft', 'returned', 'action required'], true) || str_contains($caseStatusLower, 'draft') || str_contains($caseStatusLower, 'returned');
+            $canCancelThis = !$isLeader && ($isDivision || $isFinance) && ($type ?? '') !== 'closed' && ($type ?? '') !== 'open' && $isDraftOrPending;
+        @endphp
+        @if($canCancelThis)
+            <button type="button" class="btn btn-xs btn-outline-danger font-weight-bold ml-1 btn-cancel-purchase-case" data-id="{{ $p->pcs_id }}" title="Cancel Purchase Case" style="border-radius: 4px; font-size: 0.76rem; padding: 2px 6px;">
+                <i class="fas fa-ban"></i> Cancel
+            </button>
+        @endif
     </td>
 
     {{-- 2. Title & Ref --}}

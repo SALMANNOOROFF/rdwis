@@ -20,6 +20,7 @@ class PermissionRegistry
     public const PURCHASE_MD_ACTION = 'purchase.md_action';
     public const PURCHASE_DDG_ACTION = 'purchase.ddg_action';
     public const PURCHASE_DG_ACTION = 'purchase.dg_action';
+    public const PURCHASE_DLOG_ACTION = 'purchase.dlog_action';
     public const PURCHASE_CANCEL = 'purchase.cancel';
     public const PURCHASE_GOODS_RECEIPT = 'purchase.goods_receipt';
 
@@ -41,6 +42,7 @@ class PermissionRegistry
     public const CONTRACT_MD_ACTION = 'contract.md_action';
     public const CONTRACT_DDG_ACTION = 'contract.ddg_action';
     public const CONTRACT_DG_ACTION = 'contract.dg_action';
+    public const CONTRACT_DLOG_ACTION = 'contract.dlog_action';
 
     // Finance & Salary permissions
     public const FINANCE_VIEW = 'finance.view';
@@ -119,6 +121,7 @@ class PermissionRegistry
             self::CONTRACT_MD_ACTION,
             self::CONTRACT_DDG_ACTION,
             self::CONTRACT_DG_ACTION,
+            self::CONTRACT_DLOG_ACTION,
 
             self::FINANCE_VIEW,
             self::FINANCE_COMMITMENTS_VIEW,

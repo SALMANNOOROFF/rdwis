@@ -67,7 +67,16 @@
                             </td>
                             <td class="text-right small text-muted font-weight-bold text-nowrap">{{ $p->project->prj_code ?? 'CENTRAL' }}</td>
                             <td class="text-right font-weight-bold text-success rajdhani" style="font-size: 16px;">Rs. {{ number_format($p->pcs_price) }}</td>
-                            <td class="text-right pr-4">
+                            <td class="text-right pr-4" style="white-space: nowrap;">
+                                @php
+                                    $loggedUser = auth()->user();
+                                    $isLeader = $loggedUser && ((method_exists($loggedUser, 'isMdDdgDg') && $loggedUser->isMdDdgDg()) || (method_exists($loggedUser, 'isDlog') && $loggedUser->isDlog()));
+                                @endphp
+                                @if(!$isLeader)
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 rajdhani font-weight-bold mr-1 btn-cancel-purchase-case" data-id="{{ $p->pcs_id }}" style="font-size: 11px;">
+                                    <i class="fas fa-ban mr-1"></i> CANCEL
+                                </button>
+                                @endif
                                 <a href="{{ route($detailsRouteName, $p->pcs_id) }}" class="btn btn-success btn-sm rounded-pill px-3 rajdhani font-weight-bold" style="font-size: 11px; background: #28a745; border-color: #28a745;">
                                     <i class="fas fa-check-circle mr-1"></i> REVIEW & MOVE
                                 </a>
@@ -88,3 +97,51 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $(document).on('click', '.btn-cancel-purchase-case', function(e) {
+        e.preventDefault();
+        const caseId = $(this).data('id');
+
+        Swal.fire({
+            title: `Cancel Purchase Case #PC-${caseId}`,
+            input: 'textarea',
+            inputLabel: 'Reason for Cancellation (Required)',
+            inputPlaceholder: 'Specify formal remarks for cancelling this case...',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Cancel Case',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'Cancellation remarks are mandatory!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `{{ url('purchase-cases') }}/${caseId}/cancel`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value
+                    },
+                    success: function(res) {
+                        Swal.fire('Cancelled', res.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to cancel purchase case.';
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+@endpush

@@ -30,10 +30,14 @@ class PurCaseSubstatus extends Model
     const STAGE_DISPLAY_NAMES = [
         'Division'  => 'Division (Initiator)',
         'DProc'     => 'Director Procurement',
-        'DFinance'  => 'Director Finance',
+        'DFinance'  => 'Finance Directorate',
         'MD'        => 'MD Office',
         'DDG'       => 'DDG Office',
         'DG'        => 'Director General',
+        'DLOG'      => 'Director Logistics (DLOG)',
+        'IT'        => 'Information Technology Department (IT)',
+        'IS'        => 'Information System Department (IS)',
+        'Admin'     => 'Administration Department (Admin)',
     ];
 
     /**
@@ -46,6 +50,8 @@ class PurCaseSubstatus extends Model
         'MD'        => 'rdw',
         'DDG'       => 'hqs',
         'DG'        => 'nrdi',
+        'DLOG'      => 'log',
+        'IT'        => 'it',
     ];
 
     /**
@@ -59,6 +65,9 @@ class PurCaseSubstatus extends Model
         'rdw'  => 'MD',
         'hqs'  => 'DDG',
         'nrdi' => 'DG',
+        'log'  => 'DLOG',
+        'dlog' => 'DLOG',
+        'it'   => 'IT',
     ];
 
     /**

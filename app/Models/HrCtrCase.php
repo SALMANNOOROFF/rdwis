@@ -265,6 +265,8 @@ class HrCtrCase extends Model
             'Division'     => 'Division Office' . ($this->division_short ? ' (' . $this->division_short . ')' : ''),
             'HR'           => 'HR Directorate (Scrutiny)',
             'Finance'      => 'Finance Directorate (Scrutiny)',
+            'DLOG'         => 'Director Logistics (DLOG)',
+            'IT'           => 'Information Technology Department (IT)',
             'MD'           => 'MD Office (Under Review)',
             'DDG'          => 'DDG Office (Under Review)',
             'DG'           => 'DG Office (Final Review)',
@@ -365,6 +367,13 @@ class HrCtrCase extends Model
         }
         if (!empty($this->ctc_emp_id)) {
             $val = \Illuminate\Support\Facades\DB::table('hr.emps')->where('emp_id', $this->ctc_emp_id)->value('emp_cnic');
+            if (!empty($val)) return $val;
+        }
+        if (!empty($this->ctc_empnamecomp)) {
+            $val = \Illuminate\Support\Facades\DB::table('hr.applicants')
+                ->where('apl_name', $this->ctc_empnamecomp)
+                ->orderBy('apl_id', 'desc')
+                ->value('apl_cnic');
             if (!empty($val)) return $val;
         }
         return null;

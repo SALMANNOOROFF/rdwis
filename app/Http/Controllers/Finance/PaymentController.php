@@ -71,11 +71,16 @@ class PaymentController extends Controller
                 $join->on('c.cmt_docid', '=', 's.sor_id')
                      ->where('c.cmt_type', '=', 'Sa');
             })
-            ->leftJoin('cen.heads as eh', 'c.cmt_effhed_id', '=', 'eh.hed_id')
+            ->leftJoin('cen.heads as eh', function ($j) {
+                $j->on(DB::raw('COALESCE(c.cmt_effhed_id, s.sor_effhed_id)'), '=', 'eh.hed_id');
+            })
             ->leftJoin('cen.units as eu', 'eh.hed_unt_id', '=', 'eu.unt_id')
-            ->leftJoin('cen.heads as fh', 'c.cmt_hed_id', '=', 'fh.hed_id')
+            ->leftJoin('cen.heads as fh', function ($j) {
+                $j->on(DB::raw('COALESCE(c.cmt_hed_id, s.sor_hed_id)'), '=', 'fh.hed_id');
+            })
             ->leftJoin('cen.units as fu', 'fh.hed_unt_id', '=', 'fu.unt_id')
             ->leftJoin('cen.units as su', 's.sor_effunt_id', '=', 'su.unt_id')
+            ->leftJoin('hr.emps as emp', 's.sor_emp_id', '=', 'emp.emp_id')
             ->where(function ($w) use ($lower, $upper) {
                 $w->whereBetween('s.sor_effunt_id', [$lower, $upper])
                   ->orWhereBetween('s.sor_unt_id', [$lower, $upper]);
@@ -93,12 +98,13 @@ class PaymentController extends Controller
                 's.sor_id',
                 's.sor_emp_id',
                 's.sor_empnamecomp',
+                'emp.emp_name as emp_clean_name',
                 's.sor_month',
                 's.sor_salary',
                 's.sor_transtype',
                 's.sor_noloan',
                 's.sor_id as pcs_id',
-                DB::raw("'Salary: ' || s.sor_empnamecomp || ' (' || to_char(s.sor_month, 'Mon-YYYY') || ')' as pcs_title"),
+                DB::raw("'Salary: ' || COALESCE(emp.emp_name, s.sor_empnamecomp) || ' (' || to_char(s.sor_month, 'Mon-YYYY') || ')' as pcs_title"),
                 DB::raw("'Sa' as pcs_type"),
                 's.sor_id as pcs_minute',
                 's.sor_month as pcs_date',
@@ -193,6 +199,7 @@ class PaymentController extends Controller
             $query->where(function ($q) use ($search, $typeFilter) {
                 if ($typeFilter === 'salary') {
                     $q->where('s.sor_empnamecomp', 'ILIKE', "%{$search}%")
+                      ->orWhere('emp.emp_name', 'ILIKE', "%{$search}%")
                       ->orWhere('s.sor_emp_id', 'ILIKE', "%{$search}%")
                       ->orWhere('s.sor_bnkacctitle', 'ILIKE', "%{$search}%");
                 } else {
@@ -621,6 +628,78 @@ class PaymentController extends Controller
         });
 
         return back()->with('success', "Salary commitment #{$commitment->cmt_id} (Order #{$sor->sor_id} - {$sor->sor_empnamecomp}) marked as Paid successfully.");
+    }
+
+    /**
+     * Bulk Pay for Salary Order Commitments (fin_commitments_u_so.bas cmdPaid_Click batch).
+     */
+    public function bulkPaySalaryCommitments(Request $request)
+    {
+        $this->ensureFinanceAuthorized();
+
+        $trnDate = $request->input('trn_date') ?? $request->input('payment_date') ?? date('Y-m-d');
+        $request->merge(['trn_date' => $trnDate]);
+
+        $request->validate([
+            'trn_date' => 'required|date',
+            'cmt_ids'  => 'required|array|min:1',
+            'cmt_ids.*'=> 'required|integer',
+        ]);
+
+        $cmtIds = $request->input('cmt_ids');
+        $paidCount = 0;
+
+        DB::transaction(function () use ($cmtIds, $trnDate, &$paidCount) {
+            foreach ($cmtIds as $cmtId) {
+                $commitment = DB::table('fin.commitments')
+                    ->where('cmt_id', $cmtId)
+                    ->where('cmt_type', 'Sa')
+                    ->where('cmt_status', 'Awaited')
+                    ->first();
+
+                if (!$commitment) continue;
+
+                $sor = DB::table('fin.salorders')->where('sor_id', $commitment->cmt_docid)->first();
+                if (!$sor) continue;
+
+                $lastSeq = DB::table('fin.transactions')
+                    ->where('trn_cmt_id', $commitment->cmt_id)
+                    ->max('trn_seq') ?? 0;
+
+                DB::table('fin.transactions')->insert([
+                    'trn_cmt_id'    => $commitment->cmt_id,
+                    'trn_date'      => $trnDate,
+                    'trn_amount1'   => -1 * abs((float)$sor->sor_salary),
+                    'trn_tax1'      => 0,
+                    'trn_amount2'   => -1 * abs((float)$sor->sor_salary),
+                    'trn_balance'   => 0,
+                    'trn_seq'       => $lastSeq + 1,
+                    'trn_transtype' => $sor->sor_transtype ?? 1,
+                    'trn_noloan'    => $sor->sor_noloan ?? false,
+                ]);
+
+                DB::table('fin.salorders')->where('sor_id', $sor->sor_id)->update([
+                    'sor_status'   => 'Fulfilled',
+                    'sor_closedtg' => now(),
+                ]);
+
+                if ($sor->sor_srq_id) {
+                    DB::table('hr.salreqs')->where('srq_id', $sor->sor_srq_id)->update([
+                        'srq_fulfilment' => $sor->sor_salary,
+                        'srq_status'     => 'Fulfilled',
+                        'srq_closedtg'   => now(),
+                    ]);
+                }
+
+                DB::table('fin.commitments')->where('cmt_id', $commitment->cmt_id)->update([
+                    'cmt_status' => 'Paid',
+                ]);
+
+                $paidCount++;
+            }
+        });
+
+        return back()->with('success', "Successfully marked {$paidCount} salary order commitment(s) as Paid on {$trnDate}.");
     }
 
     /**

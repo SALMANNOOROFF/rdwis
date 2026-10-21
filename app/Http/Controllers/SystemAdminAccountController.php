@@ -93,9 +93,15 @@ class SystemAdminAccountController extends Controller
             'unit_id' => 'required|integer',
         ]);
 
-        $roles = Role::where('rol_unt_id', $request->unit_id)
-            ->orderBy('rol_level')
-            ->get(['rol_level', 'rol_desig', 'rol_desigshort', 'rol_access', 'rol_auth', 'rol_desigtype', 'rol_reportlevel']);
+        $roles = Role::where(function($q) use ($request) {
+            $q->where('rol_unt_id', $request->unit_id);
+            if (in_array((int)$request->unit_id, [100000, 160000, 810000], true)) {
+                $q->orWhere('rol_desigshort', 'DLOG')
+                  ->orWhereIn('rol_desigshort', ['DDG', 'DDG NRDI']);
+            }
+        })
+        ->orderBy('rol_level')
+        ->get(['rol_level', 'rol_desig', 'rol_desigshort', 'rol_access', 'rol_auth', 'rol_desigtype', 'rol_reportlevel']);
 
         return response()->json($roles);
     }
@@ -116,9 +122,15 @@ class SystemAdminAccountController extends Controller
 
         $unit = Unit::findOrFail($request->unit_id);
 
-        $role = Role::where('rol_unt_id', $unit->unt_id)
-            ->where('rol_desig', $request->role_desig)
-            ->first();
+        $role = Role::where(function($q) use ($unit) {
+            $q->where('rol_unt_id', $unit->unt_id);
+            if (in_array((int)$unit->unt_id, [100000, 160000, 810000], true)) {
+                $q->orWhere('rol_desigshort', 'DLOG')
+                  ->orWhereIn('rol_desigshort', ['DDG', 'DDG NRDI']);
+            }
+        })
+        ->where('rol_desig', $request->role_desig)
+        ->first();
 
         if (!$role) {
             return back()->withErrors([
@@ -142,7 +154,7 @@ class SystemAdminAccountController extends Controller
         $acc_lowers = $unit->unt_lowers;
         $acc_uppers = $unit->unt_uppers;
 
-        if (in_array($role->rol_desigshort, ['MD', 'DG', 'SME', 'DP&C', 'DDG', 'DDG NRDI'], true)) {
+        if (in_array($role->rol_desigshort, ['MD', 'DG', 'SME', 'DP&C', 'DDG', 'DDG NRDI', 'DLOG'], true)) {
             $acc_lowers = 0;
             $acc_uppers = 0;
         }
@@ -150,6 +162,10 @@ class SystemAdminAccountController extends Controller
         $area = $unit->unt_area;
         if ($role->rol_desigshort === 'SO R&D') {
             $area = 'rdwprj';
+        } elseif ($role->rol_desigshort === 'DLOG') {
+            $area = 'log';
+        } elseif (in_array($role->rol_desigshort, ['DDG', 'DDG NRDI', 'DDG NRD'], true)) {
+            $area = 'hqs';
         }
 
         $account = new CenAccount();

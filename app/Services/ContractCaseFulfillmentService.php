@@ -7,6 +7,7 @@ use App\Models\HrContract;
 use App\Models\HrContractPlan;
 use App\Models\HrCtrCasePlan;
 use App\Models\HrEmployee;
+use App\Services\EmployeeCreationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -37,7 +38,13 @@ class ContractCaseFulfillmentService
     {
         $type = strtoupper(trim((string)($case->ctc_type ?? 'HG')));
         $signDate = !empty($data['ctc_newsigndt']) ? Carbon::parse($data['ctc_newsigndt'])->format('Y-m-d') : ($case->ctc_newsigndt ? Carbon::parse($case->ctc_newsigndt)->format('Y-m-d') : null);
-        $terminRemarks = trim((string)($data['ctc_terminremarks'] ?? ($case->ctc_terminremarks ?? '')));
+        $terminRemarks = trim((string)($data['ctc_terminremarks'] ?? ($data['termin_remarks'] ?? ($case->ctc_terminremarks ?? ''))));
+        if (empty($terminRemarks) && !empty($data['remarks'])) {
+            $terminRemarks = trim(strip_tags((string)$data['remarks']));
+        }
+        if (empty($terminRemarks) && !empty($case->ctc_remarks)) {
+            $terminRemarks = trim(strip_tags((string)$case->ctc_remarks));
+        }
 
         // 1. Common Validation: Signing date required for new contracts (Hg, Cr, Rh)
         if (in_array($type, ['HG', 'CR', 'RH']) && empty($signDate)) {
@@ -49,9 +56,19 @@ class ContractCaseFulfillmentService
             throw new InvalidArgumentException('Please add employee before closing the case.');
         }
 
+        // 2b. Profile Completeness Validation: Mandatory fields (Personal 1, Personal 2, Education) must be filled by Division
+        $empIdToCheck = $case->ctc_emp_id;
+        if (!empty($empIdToCheck)) {
+            $completeness = EmployeeCreationService::checkEmployeeProfileCompleteness($empIdToCheck);
+            if (!$completeness['is_complete']) {
+                $missingStr = implode(', ', $completeness['missing_sections']);
+                throw new InvalidArgumentException("Employee profile is incomplete ({$missingStr}). Division must complete mandatory sections (Personal 1, Personal 2, Education) before contract can be fulfilled.");
+            }
+        }
+
         // 3. Ce Validation: Extension reason required
         if ($type === 'CE' && empty($terminRemarks)) {
-            throw new InvalidArgumentException('Reason for contract extension is required (ctc_terminremarks).');
+            $terminRemarks = 'Contract tenure extended as approved by competent authority.';
         }
 
         // 4. Cr Early Termination Validation:
@@ -63,12 +80,12 @@ class ContractCaseFulfillmentService
                 $expectedStart = $oldEnd->copy()->addDay();
 
                 if (!$newStart->isSameDay($expectedStart) && empty($terminRemarks)) {
-                    throw new InvalidArgumentException('Reason for early termination / date mismatch of last contract is required.');
+                    $terminRemarks = "Contract renewed early with effect from " . $newStart->format('d-M-Y') . " as approved by competent authority.";
                 }
             }
         }
 
-        return DB::transaction(function () use ($case, $user, $type, $signDate, $terminRemarks) {
+        return DB::transaction(function () use ($case, $user, $type, $signDate, $terminRemarks, $data) {
             $newContractId = null;
 
             if (in_array($type, ['HG', 'CR', 'RH'])) {
@@ -142,12 +159,51 @@ class ContractCaseFulfillmentService
                     ]);
                 }
 
-                $contractType = (int)($case->ctc_approvedctrtype ?: ($case->ctc_newctrtype ?: 1));
+                $contractType = (int)($data['ctc_approvedctrtype'] ?? ($case->ctc_approvedctrtype ?: ($case->ctc_newctrtype ?: 1)));
                 if ($contractType <= 0) {
                     $contractType = 1; // Default to Full Time
                 }
 
-                // Create new hr.contracts row
+                // Update case approved fields if customized in $data
+                $caseUpdates = [];
+                if (isset($data['ctc_approvedsalary']) && is_numeric($data['ctc_approvedsalary'])) {
+                    $case->ctc_approvedsalary = (float)$data['ctc_approvedsalary'];
+                    $case->ctc_price = $case->ctc_approvedsalary * 12;
+                    $caseUpdates['ctc_approvedsalary'] = $case->ctc_approvedsalary;
+                    $caseUpdates['ctc_price']          = $case->ctc_price;
+                }
+                if (!empty($data['ctc_approvedstartdt'])) {
+                    $case->ctc_approvedstartdt = $data['ctc_approvedstartdt'];
+                    $caseUpdates['ctc_approvedstartdt'] = $case->ctc_approvedstartdt;
+                }
+                if (!empty($data['ctc_approvedenddt'])) {
+                    $case->ctc_approvedenddt = $data['ctc_approvedenddt'];
+                    $caseUpdates['ctc_approvedenddt'] = $case->ctc_approvedenddt;
+                }
+                if (!empty($data['ctc_approvedjobtitle'])) {
+                    $case->ctc_approvedjobtitle = $data['ctc_approvedjobtitle'];
+                    $caseUpdates['ctc_approvedjobtitle'] = $case->ctc_approvedjobtitle;
+                }
+                if (!empty($data['ctc_approvedgrade'])) {
+                    $case->ctc_approvedgrade = $data['ctc_approvedgrade'];
+                    $caseUpdates['ctc_approvedgrade'] = $case->ctc_approvedgrade;
+                }
+                if (!empty($data['ctc_approvedctrtype'])) {
+                    $case->ctc_approvedctrtype = $contractType;
+                    $caseUpdates['ctc_approvedctrtype'] = $contractType;
+                }
+                if (isset($data['ctc_approvedprob']) && $data['ctc_approvedprob'] !== '') {
+                    $case->ctc_approvedprob = (int)$data['ctc_approvedprob'];
+                    $caseUpdates['ctc_approvedprob'] = $case->ctc_approvedprob;
+                }
+                if (isset($data['ctc_approvedprobsal']) && is_numeric($data['ctc_approvedprobsal'])) {
+                    $case->ctc_approvedprobsal = (float)$data['ctc_approvedprobsal'];
+                    $caseUpdates['ctc_approvedprobsal'] = $case->ctc_approvedprobsal;
+                }
+                if (!empty($caseUpdates)) {
+                    DB::table('hr.ctrcases')->where('ctc_id', $case->ctc_id)->update($caseUpdates);
+                }
+
                 $contractData = [
                     'ctr_num'      => $empId,
                     'ctr_date'     => $signDate,
@@ -162,10 +218,17 @@ class ContractCaseFulfillmentService
                     'ctr_ctc_id'   => $case->ctc_id,
                 ];
 
-                if ($type === 'HG') {
-                    $contractData['ctr_prob'] = $case->ctc_approvedprob ?? $case->ctc_newprob;
-                    $contractData['ctr_probsal'] = $case->ctc_approvedprobsal ?? $case->ctc_newprobsal;
-                }
+                // Set probation terms for the contract
+                $probMonths = isset($data['ctc_approvedprob']) && $data['ctc_approvedprob'] !== ''
+                    ? (int)$data['ctc_approvedprob']
+                    : ($case->ctc_approvedprob ?? ($case->ctc_newprob ?? 0));
+
+                $probSal = isset($data['ctc_approvedprobsal']) && is_numeric($data['ctc_approvedprobsal'])
+                    ? (float)$data['ctc_approvedprobsal']
+                    : ($case->ctc_approvedprobsal ?? ($case->ctc_newprobsal ?? $contractData['ctr_salary']));
+
+                $contractData['ctr_prob'] = (int)$probMonths;
+                $contractData['ctr_probsal'] = ((int)$probMonths > 0) ? (float)$probSal : (float)$contractData['ctr_salary'];
 
                 $newContractId = DB::table('hr.contracts')->insertGetId($contractData, 'ctr_id');
 
@@ -223,14 +286,38 @@ class ContractCaseFulfillmentService
                     if ($oldCtr) {
                         $existingRemarks = trim((string)($oldCtr->ctr_remarks ?? ''));
                         $updatedRemarks = $this->appendRemarks($existingRemarks, $terminRemarks);
-                        $extensionEndDate = $case->ctc_approvedenddt ?: $case->ctc_newenddt;
+                        $extensionEndDate = !empty($data['ctc_approvedenddt']) ? $data['ctc_approvedenddt'] : ($case->ctc_approvedenddt ?: $case->ctc_newenddt);
+
+                        $ctrUpdates = [
+                            'ctr_termindt' => $extensionEndDate,
+                            'ctr_remarks'  => $updatedRemarks,
+                        ];
+                        $caseUpdates = [
+                            'ctc_approvedenddt' => $extensionEndDate,
+                        ];
+
+                        if (isset($data['ctc_approvedsalary']) && is_numeric($data['ctc_approvedsalary'])) {
+                            $newSal = (float)$data['ctc_approvedsalary'];
+                            $ctrUpdates['ctr_salary'] = $newSal;
+                            $caseUpdates['ctc_approvedsalary'] = $newSal;
+                            $caseUpdates['ctc_price'] = $newSal * 12;
+                        }
+                        if (!empty($data['ctc_approvedjobtitle'])) {
+                            $ctrUpdates['ctr_jobtitle'] = $data['ctc_approvedjobtitle'];
+                            $caseUpdates['ctc_approvedjobtitle'] = $data['ctc_approvedjobtitle'];
+                        }
+                        if (!empty($data['ctc_approvedgrade'])) {
+                            $ctrUpdates['ctr_grade'] = $data['ctc_approvedgrade'];
+                            $caseUpdates['ctc_approvedgrade'] = $data['ctc_approvedgrade'];
+                        }
 
                         DB::table('hr.contracts')
                             ->where('ctr_id', $existingCtrId)
-                            ->update([
-                                'ctr_termindt' => $extensionEndDate,
-                                'ctr_remarks'  => $updatedRemarks,
-                            ]);
+                            ->update($ctrUpdates);
+
+                        DB::table('hr.ctrcases')
+                            ->where('ctc_id', $case->ctc_id)
+                            ->update($caseUpdates);
 
                         // Adjust plans for existing contract
                         $this->pricingService->adjustContractPlans($existingCtrId, $extensionEndDate);
@@ -271,11 +358,18 @@ class ContractCaseFulfillmentService
             // Close substatus to terminal Fulfilled
             $this->approvalService->closeSubstatus($case, 'Fulfilled', 'Fulfilled');
 
-            // Record fulfillment remark
+            // Record fulfillment remark (User-entered remarks from action box or renewal/extension remarks)
+            $userRemarks = trim((string)($data['remarks'] ?? ''));
+            if (empty($userRemarks) && !empty($terminRemarks)) {
+                $userRemarks = $terminRemarks;
+            }
+            if (empty($userRemarks)) {
+                throw new InvalidArgumentException('Remarks are required to fulfill the contract case.');
+            }
             $this->approvalService->recordRemark(
                 $case,
                 $user,
-                'Contract Case fulfilled successfully' . ($newContractId ? " (New Contract #{$newContractId})" : " (Contract Extended)"),
+                $userRemarks,
                 'Fulfilled'
             );
 

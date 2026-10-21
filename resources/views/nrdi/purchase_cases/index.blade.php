@@ -252,6 +252,49 @@ document.addEventListener('DOMContentLoaded', function() {
             updateDynamicCounts();
         });
     });
+
+    // ── Purchase Case Cancel Handler ──
+    $(document).on('click', '.btn-cancel-purchase-case', function(e) {
+        e.preventDefault();
+        const caseId = $(this).data('id');
+
+        Swal.fire({
+            title: `Cancel Purchase Case #PC-${caseId}`,
+            input: 'textarea',
+            inputLabel: 'Reason for Cancellation (Required)',
+            inputPlaceholder: 'Specify formal remarks for cancelling this case...',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Cancel Case',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'Cancellation remarks are mandatory!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `{{ url('purchase-cases') }}/${caseId}/cancel`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        remarks: result.value
+                    },
+                    success: function(res) {
+                        Swal.fire('Cancelled', res.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to cancel purchase case.';
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            }
+        });
+    });
 });
 </script>
 @endsection

@@ -45,7 +45,7 @@
             </tr>
             <tr>
                 <td style="padding: 4px 10px; font-weight: 700;">MTSS Share</td>
-                <td style="padding: 4px 10px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($head->pcc_share ?? $head->mtss_share ?? 0) }}</td>
+                <td style="padding: 4px 10px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($head->mtss_share ?? 0) }}</td>
             </tr>
             <tr>
                 <td style="padding: 4px 10px; font-weight: 700;">RDW Share</td>
@@ -62,7 +62,7 @@
             {{-- Header above table --}}
             <div style="text-align: center; width: 140px; margin-bottom: 4px;">
                 <div style="font-weight: 800; font-size: 11pt;">Project</div>
-                <div style="font-weight: 700; font-size: 10.5pt;" class="text-mono">{{ number_format($head->pcc_received ?? 0) }}</div>
+                <div style="font-weight: 700; font-size: 10.5pt;" class="text-mono">{{ number_format($head->pcc_share ?? $head->prj_share ?? 0) }}</div>
             </div>
 
             <div style="display: flex; align-items: flex-start;">
@@ -111,7 +111,7 @@
             {{-- Header above table --}}
             <div style="text-align: center; width: 140px; margin-bottom: 4px;">
                 <div style="font-weight: 800; font-size: 11pt;">CSRF</div>
-                <div style="font-weight: 700; font-size: 10.5pt;" class="text-mono">{{ number_format($head->cf_received ?? 0) }}</div>
+                <div style="font-weight: 700; font-size: 10.5pt;" class="text-mono">{{ number_format($head->csrf_share ?? $head->cf_share ?? 0) }}</div>
             </div>
 
             <div style="display: flex; align-items: flex-start;">
@@ -234,41 +234,43 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td style="padding: 5px 10px; font-weight: 700;">Equipment / Hardware</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['equip_alloc'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['equip'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['equip_cmt'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['equip_ipc'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($finData['equip_remaining'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: center; font-weight: 700;">{{ $finData['equip_pct'] }}%</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 10px; font-weight: 700;">HR / Personnel / Staff</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['hr_alloc'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['hr'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['hr_cmt'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['hr_ipc'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($finData['hr_remaining'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: center; font-weight: 700;">{{ $finData['hr_pct'] }}%</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 10px; font-weight: 700;">Miscellaneous / Operational</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['misc_alloc'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['misc'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['misc_cmt'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($finData['misc_ipc'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($finData['misc_remaining'] ?? 0) }}</td>
-                    <td style="padding: 5px 10px; text-align: center; font-weight: 700;">{{ $finData['misc_pct'] }}%</td>
-                </tr>
                 @php
-                    $totSubAlloc = ($finData['equip_alloc'] ?? 0) + ($finData['hr_alloc'] ?? 0) + ($finData['misc_alloc'] ?? 0);
-                    $totSubExp = ($finData['equip'] ?? 0) + ($finData['hr'] ?? 0) + ($finData['misc'] ?? 0);
-                    $totSubCmt = ($finData['equip_cmt'] ?? 0) + ($finData['hr_cmt'] ?? 0) + ($finData['misc_cmt'] ?? 0);
-                    $totSubIpc = ($finData['equip_ipc'] ?? 0) + ($finData['hr_ipc'] ?? 0) + ($finData['misc_ipc'] ?? 0);
-                    $totSubRem = ($finData['equip_remaining'] ?? 0) + ($finData['hr_remaining'] ?? 0) + ($finData['misc_remaining'] ?? 0);
-                    $totSubPct = $totSubAlloc > 0 ? round(($totSubExp / $totSubAlloc) * 100) : 0;
+                    $totSubAlloc = 0;
+                    $totSubExp = 0;
+                    $totSubCmt = 0;
+                    $totSubIpc = 0;
+                    $totSubRem = 0;
                 @endphp
+                @forelse($subheads as $sh)
+                    @php
+                        $shName = is_array($sh) ? ($sh['name'] ?? 'N/A') : ($sh->name ?? 'N/A');
+                        $shAlloc = (float)(is_array($sh) ? ($sh['allocation'] ?? 0) : ($sh->allocation ?? 0));
+                        $shExp = (float)(is_array($sh) ? ($sh['expenditure'] ?? 0) : ($sh->expenditure ?? 0));
+                        $shCmt = (float)(is_array($sh) ? ($sh['commitments'] ?? 0) : ($sh->commitments ?? 0));
+                        $shIpc = (float)(is_array($sh) ? ($sh['in_process'] ?? 0) : ($sh->in_process ?? 0));
+                        $shRemaining = (float)(is_array($sh) ? ($sh['can_be_spent'] ?? ($sh['remaining'] ?? 0)) : ($sh->can_be_spent ?? ($sh->remaining ?? 0)));
+                        $shPct = $shAlloc > 0 ? min(100, round(($shExp / $shAlloc) * 100)) : 0;
+
+                        $totSubAlloc += $shAlloc;
+                        $totSubExp += $shExp;
+                        $totSubCmt += $shCmt;
+                        $totSubIpc += $shIpc;
+                        $totSubRem += $shRemaining;
+                    @endphp
+                    <tr>
+                        <td style="padding: 5px 10px; font-weight: 700;">{{ $shName }}</td>
+                        <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($shAlloc) }}</td>
+                        <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($shExp) }}</td>
+                        <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($shCmt) }}</td>
+                        <td style="padding: 5px 10px; text-align: right;" class="text-mono">{{ number_format($shIpc) }}</td>
+                        <td style="padding: 5px 10px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($shRemaining) }}</td>
+                        <td style="padding: 5px 10px; text-align: center; font-weight: 700;">{{ $shPct }}%</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" style="padding: 8px 10px; text-align: center; color: #64748b;">No subheads configured</td>
+                    </tr>
+                @endforelse
                 <tr style="background: #f1f5f9; font-weight: 800;">
                     <td style="padding: 6px 10px;">TOTAL SUBHEADS</td>
                     <td style="padding: 6px 10px; text-align: right;" class="text-mono">{{ number_format($totSubAlloc) }}</td>
@@ -276,13 +278,154 @@
                     <td style="padding: 6px 10px; text-align: right;" class="text-mono">{{ number_format($totSubCmt) }}</td>
                     <td style="padding: 6px 10px; text-align: right;" class="text-mono">{{ number_format($totSubIpc) }}</td>
                     <td style="padding: 6px 10px; text-align: right;" class="text-mono">{{ number_format($totSubRem) }}</td>
-                    <td style="padding: 6px 10px; text-align: center;">{{ $totSubPct }}%</td>
+                    <td style="padding: 6px 10px; text-align: center;">{{ $totSubAlloc > 0 ? round(($totSubExp / $totSubAlloc) * 100) : 0 }}%</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    {{-- 7. OFFICIAL SIGNATURES BLOCK --}}
+    @if(isset($installments) && count($installments) > 0)
+    {{-- 7. FUNDINGS & TRANCHES BREAKDOWN --}}
+    <div style="margin-top: 20px; margin-bottom: 24px; page-break-inside: avoid;">
+        <div style="font-weight: 800; font-size: 10.5pt; text-transform: uppercase; border-bottom: 1.5px solid #000; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;">
+            <span>7. Fundings & Inflow Tranches Breakdown</span>
+            <span style="font-size: 8.5pt; font-weight: 600;">{{ count($installments) }} Tranches Recorded</span>
+        </div>
+        <table class="table-bordered-black" style="width: 100%; font-size: 9pt;">
+            <thead>
+                <tr style="background: #f1f5f9;">
+                    <th style="padding: 5px 8px; text-align: left; font-weight: 800;">Date</th>
+                    <th style="padding: 5px 8px; text-align: right; font-weight: 800;">Total Inflow</th>
+                    <th style="padding: 5px 8px; text-align: right; font-weight: 800;">MTSS Share</th>
+                    <th style="padding: 5px 8px; text-align: right; font-weight: 800;">RDW Share</th>
+                    <th style="padding: 5px 8px; text-align: right; font-weight: 800;">CSRF Share</th>
+                    <th style="padding: 5px 8px; text-align: right; font-weight: 800;">Project Share</th>
+                    <th style="padding: 5px 8px; text-align: center; font-weight: 800;">Milestone #</th>
+                    <th style="padding: 5px 8px; text-align: right; font-weight: 800;">Milestone Cost</th>
+                    <th style="padding: 5px 8px; text-align: center; font-weight: 800;">Status</th>
+                    <th style="padding: 5px 8px; text-align: right; font-weight: 800;">Ref #</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $prtTotInflow = 0;
+                    $prtTotMtss = 0;
+                    $prtTotRdw = 0;
+                    $prtTotCsrf = 0;
+                    $prtTotPrj = 0;
+                @endphp
+                @foreach($installments as $ins)
+                    @php
+                        $insInward = (float)($ins->inward ?: (($ins->shi_pcc ?? 0) + ($ins->shi_cf ?? 0) + ($ins->mtss_share ?? 0)));
+                        $insMtss = (float)($ins->mtss_share ?? 0);
+                        $insRdw = $insInward - $insMtss;
+                        $insCf = (float)($ins->shi_cf ?? 0);
+                        $insPrj = $insRdw - $insCf;
+                        $dateFormatted = !empty($ins->trn_date) ? \Carbon\Carbon::parse($ins->trn_date)->format('d-M-Y') : 'N/A';
+                        $msnCostVal = (float)($ins->mct_cost ?? 0);
+
+                        $prtTotInflow += $insInward;
+                        $prtTotMtss += $insMtss;
+                        $prtTotRdw += $insRdw;
+                        $prtTotCsrf += $insCf;
+                        $prtTotPrj += $insPrj;
+                    @endphp
+                    <tr>
+                        <td style="padding: 4px 8px; text-align: left;" class="text-mono">{{ $dateFormatted }}</td>
+                        <td style="padding: 4px 8px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($insInward) }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ number_format($insMtss) }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ number_format($insRdw) }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ number_format($insCf) }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ number_format($insPrj) }}</td>
+                        <td style="padding: 4px 8px; text-align: center; font-weight: 700;">{{ $ins->mct_msn_id ?: '—' }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ $msnCostVal > 0 ? number_format($msnCostVal) : '—' }}</td>
+                        <td style="padding: 4px 8px; text-align: center;">{{ $ins->msn_status ?: '—' }}</td>
+                        <td style="padding: 4px 8px; text-align: right; color: #475569;" class="text-mono">#{{ $ins->shi_id }}</td>
+                    </tr>
+                @endforeach
+                <tr style="background: #f1f5f9; font-weight: 800;">
+                    <td style="padding: 5px 8px; text-align: left;">TOTAL RECEIVED</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($prtTotInflow) }}</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($prtTotMtss) }}</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($prtTotRdw) }}</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($prtTotCsrf) }}</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($prtTotPrj) }}</td>
+                    <td colspan="4"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    @if(isset($milestones) && count($milestones) > 0)
+    {{-- 8. PROJECT MILESTONES & COST ALLOCATION --}}
+    <div style="margin-top: 20px; margin-bottom: 24px; page-break-inside: avoid;">
+        <div style="font-weight: 800; font-size: 10.5pt; text-transform: uppercase; border-bottom: 1.5px solid #000; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;">
+            <span>8. Project Milestones & Cost Allocation</span>
+            <span style="font-size: 8.5pt; font-weight: 600;">{{ count($milestones) }} Total Milestones</span>
+        </div>
+        <table class="table-bordered-black" style="width: 100%; font-size: 9pt;">
+            <thead>
+                <tr style="background: #f1f5f9;">
+                    <th style="padding: 5px 8px; width: 6%; text-align: center; font-weight: 800;">MS #</th>
+                    <th style="padding: 5px 8px; width: 34%; text-align: left; font-weight: 800;">Description</th>
+                    <th style="padding: 5px 8px; width: 14%; text-align: right; font-weight: 800;">Milestone Amount</th>
+                    <th style="padding: 5px 8px; width: 12%; text-align: right; font-weight: 800;">RDW Share</th>
+                    <th style="padding: 5px 8px; width: 11%; text-align: right; font-weight: 800;">MTSS Share</th>
+                    <th style="padding: 5px 8px; width: 11%; text-align: right; font-weight: 800;">CSRF Share</th>
+                    <th style="padding: 5px 8px; width: 8%; text-align: center; font-weight: 800;">Target Date</th>
+                    <th style="padding: 5px 8px; width: 6%; text-align: center; font-weight: 800;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $grossAlloc = (float)($head->allocation ?? 0);
+                    $rdwShareRatio = $grossAlloc > 0 ? ((float)($head->rdw_share ?? 0) / $grossAlloc) : 0;
+                    $mtssShareRatio = $grossAlloc > 0 ? ((float)($head->mtss_share ?? 0) / $grossAlloc) : 0;
+                    $csrfShareRatio = $grossAlloc > 0 ? ((float)($head->csrf_share ?? 0) / $grossAlloc) : 0;
+
+                    $totMsnCost = 0;
+                    $totMsnRdw = 0;
+                    $totMsnMtss = 0;
+                    $totMsnCsrf = 0;
+                @endphp
+                @foreach($milestones as $m)
+                    @php
+                        $mCost = (float)($m->mct_cost ?: $m->msn_cost);
+                        $mRdw = $mCost * $rdwShareRatio;
+                        $mMtss = $mCost * $mtssShareRatio;
+                        $mCsrf = $mCost * $csrfShareRatio;
+
+                        $totMsnCost += $mCost;
+                        $totMsnRdw += $mRdw;
+                        $totMsnMtss += $mMtss;
+                        $totMsnCsrf += $mCsrf;
+                    @endphp
+                    <tr>
+                        <td style="padding: 4px 8px; text-align: center; font-weight: 700;">MS-{{ $loop->iteration }}</td>
+                        <td style="padding: 4px 8px; text-align: left; font-weight: 600;">{{ $m->msn_desc }}</td>
+                        <td style="padding: 4px 8px; text-align: right; font-weight: 700;" class="text-mono">{{ number_format($mCost, 2) }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ number_format($mRdw, 2) }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ number_format($mMtss, 2) }}</td>
+                        <td style="padding: 4px 8px; text-align: right;" class="text-mono">{{ number_format($mCsrf, 2) }}</td>
+                        <td style="padding: 4px 8px; text-align: center;" class="text-mono">{{ $m->msn_targetdt ? \Carbon\Carbon::parse($m->msn_targetdt)->format('d-M-Y') : 'N/A' }}</td>
+                        <td style="padding: 4px 8px; text-align: center; font-weight: 700;">{{ strtoupper($m->msn_status ?: 'PENDING') }}</td>
+                    </tr>
+                @endforeach
+                <tr style="background: #f1f5f9; font-weight: 800;">
+                    <td colspan="2" style="padding: 5px 8px; text-align: left;">TOTAL MILESTONES COST</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($totMsnCost, 2) }}</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($totMsnRdw, 2) }}</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($totMsnMtss, 2) }}</td>
+                    <td style="padding: 5px 8px; text-align: right;" class="text-mono">{{ number_format($totMsnCsrf, 2) }}</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- 9. OFFICIAL SIGNATURES BLOCK --}}
     <div style="margin-top: 45px; display: flex; justify-content: space-between; page-break-inside: avoid; padding: 0 20px;">
         <div style="text-align: center; width: 190px;">
             <div style="border-top: 1.5px solid #000; padding-top: 6px; font-size: 9.5pt; font-weight: 700;">Prepared By</div>

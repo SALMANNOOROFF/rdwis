@@ -15,6 +15,7 @@ class AreaDefinition
     public const ADMIN = 'adm';
     public const IS = 'is';
     public const MTSS = 'mtss';
+    public const LOGISTICS = 'log';
 
     /**
      * Stored database area values in cen.accounts and cen.units:
@@ -107,6 +108,15 @@ class AreaDefinition
     }
 
     /**
+     * Determine if an area string corresponds to Logistics (log, dlog, logistics).
+     */
+    public static function isLogistics(?string $area): bool
+    {
+        $cleaned = strtolower(trim((string) $area));
+        return in_array($cleaned, ['log', 'dlog', 'logistics'], true);
+    }
+
+    /**
      * Get all route area aliases allowed for a given user account area.
      * Preserves exact current CheckArea middleware mappings without hardcoded usernames.
      *
@@ -118,6 +128,11 @@ class AreaDefinition
         $userArea = strtolower(trim((string) $userArea));
         $allowed = [$userArea];
 
+        // Logistics Directorate (DLOG) Mapping
+        if (in_array($userArea, ['log', 'dlog', 'logistics'], true)) {
+            $allowed = ['log', 'dlog', 'nrdi', 'rdw', 'prj', 'hqs'];
+        }
+
         // RDW / SORD Mapping
         if (in_array($userArea, ['rdw', 'rdwprj', 'prjrdw'], true)) {
             $allowed = ['rdw', 'prj', 'rdwprj', 'prjrdw'];
@@ -125,7 +140,7 @@ class AreaDefinition
 
         // DG / NRDI Mapping (Full Access across organizational wings)
         if ($userArea === 'nrdi') {
-            $allowed = ['nrdi', 'prj', 'hr', 'fin', 'rdw', 'rdwprj', 'prjrdw', 'proc', 'prc', 'hqs'];
+            $allowed = ['nrdi', 'prj', 'hr', 'fin', 'rdw', 'rdwprj', 'prjrdw', 'proc', 'prc', 'hqs', 'log', 'dlog'];
         }
 
         // Procurement Department Mapping (both proc and prc)
@@ -140,7 +155,7 @@ class AreaDefinition
 
         // HQs / DDG Mapping
         if ($userArea === 'hqs') {
-            $allowed = ['hqs', 'prj', 'rdw'];
+            $allowed = ['hqs', 'prj', 'rdw', 'log', 'dlog'];
         }
 
         // HR Department Mapping
@@ -150,7 +165,12 @@ class AreaDefinition
 
         // IT Department Mapping
         if ($userArea === 'it') {
-            $allowed = ['it', 'admin'];
+            $allowed = ['it', 'admin', 'nrdi'];
+        }
+
+        // Administration Department Mapping (Physical Admin - functions like Division)
+        if (in_array($userArea, ['adm', 'admin'], true)) {
+            $allowed = ['adm', 'admin', 'prj'];
         }
 
         return array_values(array_unique($allowed));

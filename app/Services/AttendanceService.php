@@ -428,9 +428,15 @@ class AttendanceService
     public function getAttendanceGrid(Authenticatable|User|CenAccount $user, string $month, string $mode = 'm'): array
     {
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
-        $isCentral = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs'], true);
+        $isCentral = in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'it', 'is', 'adm', 'proc', 'prc'], true);
 
-        if ($mode === 's' || !$isCentral) {
+        if (method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode()) {
+            $unitId = (int) ($user->acc_unt_id ?? 0);
+            $lowers = (int) ($user->acc_lowers ?? 0);
+            $uppers = (int) ($user->acc_uppers ?? 0);
+            $lower = $lowers > 0 ? $lowers : $unitId;
+            $upper = ($uppers > 0 && $uppers >= $lowers) ? $uppers : $unitId;
+        } elseif ($mode === 's' || !$isCentral) {
             $lower = (int)$user->acc_lowers === 0 ? (int)$user->acc_lowerm : (int)$user->acc_lowers;
             $upper = (int)$user->acc_lowers === 0 ? (int)$user->acc_upperm : (int)$user->acc_uppers;
         } else {

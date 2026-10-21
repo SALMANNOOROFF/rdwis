@@ -14,8 +14,20 @@
         <strong class="text-primary">Orders</strong>
       </div>
     </div>
-    <div class="d-flex align-items-center" style="gap: 8px;">
+    <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+      @if(($status ?? 'Draft') === 'Draft' && strtolower(trim((string) (auth()->user()->acc_untarea ?? ''))) === 'fin' && (auth()->user()->acc_auth ?? '') === 'approver')
+        <button type="button" id="btn-bulk-approve" class="btn btn-sm btn-success font-weight-bold shadow-sm" style="display: none;">
+          <i class="fas fa-check-double mr-1"></i> Approve Selected (<span id="selected-orders-count">0</span>)
+        </button>
+        <button type="button" id="btn-approve-all" class="btn btn-sm btn-outline-success font-weight-bold">
+          <i class="fas fa-tasks mr-1"></i> Approve All
+        </button>
+      @endif
+
       {{-- Legacy Top Buttons from Screenshot 4 (fin_salorders_u) --}}
+      <a href="{{ route('divhr.salary.orders.bank_scroll', ['month' => $month, 'status' => $status]) }}" target="_blank" class="btn btn-sm btn-outline-success font-weight-bold" title="Bank Batch Payment Scroll (Legacy fin_salorders_u_doc2)">
+        <i class="fas fa-university mr-1"></i> Bank Scroll (Doc 2)
+      </a>
       <a href="{{ route('fin.reports.index') }}" class="btn btn-sm btn-outline-secondary font-weight-bold">
         <i class="fas fa-file-alt mr-1"></i> Minute
       </a>
@@ -26,9 +38,6 @@
         <i class="fas fa-user-clock mr-1"></i> Remaining Employees
       </button>
 
-      <a href="{{ route('divhr.salary.requisitions.index') }}" class="btn btn-sm btn-outline-primary font-weight-bold">
-        <i class="fas fa-file-invoice-dollar mr-1"></i> Salary Requisitions
-      </a>
       <a href="{{ route('divhr.salary.commitments.verify') }}" class="btn btn-sm btn-outline-info font-weight-bold">
         <i class="fas fa-shield-alt mr-1"></i> Audit Commitments
       </a>
@@ -89,6 +98,11 @@
         <table class="table table-hover mb-0 align-middle" style="font-size: 13px;">
           <thead style="background: #f8fafc; color: #475569; border-bottom: 2px solid #e2e8f0;">
             <tr>
+              @if(($status ?? 'Draft') === 'Draft')
+                <th style="width: 40px;" class="text-center">
+                  <input type="checkbox" id="check-all-orders" title="Select All">
+                </th>
+              @endif
               <th style="width: 90px;">Order</th>
               <th>Employee</th>
               <th>Department</th>
@@ -102,6 +116,35 @@
               <th class="text-center">Order Status (sor_status)</th>
               <th class="text-center">Commitment (cmt_status)</th>
               <th style="width: 170px;" class="text-center">Actions</th>
+            </tr>
+            {{-- Column Filter Row --}}
+            <tr class="sor-filter-row" style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+              @if(($status ?? 'Draft') === 'Draft')
+                <th class="p-1 text-center align-middle" style="width: 40px;">
+                  <button type="button" class="btn btn-xs btn-outline-secondary btn-clear-sor-filters p-0" title="Reset Filters" style="width: 22px; height: 22px; line-height: 20px;">
+                    <i class="fas fa-undo-alt" style="font-size: 10px;"></i>
+                  </button>
+                </th>
+              @endif
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 1 : 0 }}" placeholder="Order..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 2 : 1 }}" placeholder="Emp / Name..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 3 : 2 }}" placeholder="Dept / Head..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 4 : 3 }}" placeholder="Contract..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 5 : 4 }}" placeholder="Calc..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 6 : 5 }}" placeholder="Payable..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1 text-center" style="width: 40px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 8 : 7 }}" placeholder="Account..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 9 : 8 }}" placeholder="Remarks..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 10 : 9 }}" placeholder="Add. Remarks..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 11 : 10 }}" placeholder="Status..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1"><input type="text" class="form-control form-control-sm sor-col-filter" data-col="{{ ($status ?? 'Draft') === 'Draft' ? 12 : 11 }}" placeholder="Commitment..." style="height: 26px; font-size: 11px; padding: 2px 4px;"></th>
+              <th class="p-1 text-center align-middle">
+                @if(($status ?? 'Draft') !== 'Draft')
+                  <button type="button" class="btn btn-xs btn-outline-secondary btn-clear-sor-filters p-0" title="Reset Filters" style="width: 22px; height: 22px; line-height: 20px;">
+                    <i class="fas fa-undo-alt" style="font-size: 10px;"></i>
+                  </button>
+                @endif
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -130,8 +173,18 @@
                     : ($o->sor_date ? \Carbon\Carbon::parse($o->sor_date)->format('d M y') : '');
                 $salMonth = \Carbon\Carbon::parse($o->sor_month)->format('M y');
                 $isFinanceApprover = strtolower(trim((string) (auth()->user()->acc_untarea ?? ''))) === 'fin' && (auth()->user()->acc_auth ?? '') === 'approver';
+                $displayName = $o->employee->emp_name ?? ($o->sor_empnamecomp ?: 'N/A');
               @endphp
-              <tr>
+              <tr class="sor-row">
+                @if(($status ?? 'Draft') === 'Draft')
+                  <td class="text-center">
+                    @if($o->sor_status === 'Draft' && $isFinanceApprover)
+                      <input type="checkbox" class="order-checkbox" value="{{ $o->sor_id }}">
+                    @else
+                      <span class="text-muted small">-</span>
+                    @endif
+                  </td>
+                @endif
                 {{-- 1. Order --}}
                 <td>
                   <div class="font-weight-bold" style="color: #1e293b;">#{{ $o->sor_id }}</div>
@@ -143,13 +196,13 @@
                 {{-- 2. Employee --}}
                 <td>
                   <div class="small text-muted font-monospace" style="font-size: 11.5px;">{{ $o->sor_emp_id }}</div>
-                  <div class="font-weight-bold text-dark">{{ $o->sor_empnamecomp ?: ($o->employee->emp_name ?? 'N/A') }}</div>
+                  <div class="font-weight-bold text-dark">{{ $displayName }}</div>
                 </td>
 
                 {{-- 3. Department --}}
                 <td>
-                  <div class="font-weight-bold text-dark">
-                    {{ $o->head->hed_name ?? ($o->effectiveHead->hed_name ?? 'Central') }}
+                  <div class="font-weight-bold text-dark font-monospace" style="font-size: 13.5px; letter-spacing: 0.5px;">
+                    {{ $o->head->hed_code ?? ($o->effectiveHead->hed_code ?? ($o->head->hed_name ?? ($o->effectiveHead->hed_name ?? 'Central'))) }}
                     @if($o->sor_sudohed === 'CHRF')
                       <span class="badge badge-warning text-dark font-weight-bold ml-1" style="font-size: 10px; background: #fef08a; border: 1px solid #facc15;" title="Paid From CSRF">* CSRF</span>
                     @endif
@@ -171,7 +224,7 @@
                 {{-- 6. Payable --}}
                 <td>
                   <div class="font-weight-bold text-dark" style="font-size: 14px;">{{ number_format($o->sor_salary) }}</div>
-                  <div class="small text-muted" style="font-size: 11px;">{{ $o->effectiveHead->hed_name ?? ($o->head->hed_name ?? '') }}</div>
+                  <div class="small text-muted font-monospace" style="font-size: 11px;">{{ $o->effectiveHead->hed_code ?? ($o->head->hed_code ?? ($o->effectiveHead->hed_name ?? '')) }}</div>
                 </td>
 
                 {{-- 7. Verified Checkbox --}}
@@ -244,12 +297,17 @@
               </tr>
             @empty
               <tr>
-                <td colspan="13" class="text-center py-5 text-muted">
+                <td colspan="{{ ($status ?? 'Draft') === 'Draft' ? 14 : 13 }}" class="text-center py-5 text-muted">
                   <i class="fas fa-inbox fa-3x mb-3 text-light" style="color: #cbd5e1 !important;"></i>
                   <div class="font-weight-bold">No salary orders found for the selected filters.</div>
                 </td>
               </tr>
             @endforelse
+            <tr id="sor-no-filter-match" style="display: none;">
+              <td colspan="{{ ($status ?? 'Draft') === 'Draft' ? 14 : 13 }}" class="text-center py-4 text-muted">
+                <i class="fas fa-filter mr-2"></i> No salary orders match the column filter criteria.
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -297,8 +355,73 @@
 {{-- Include Cancellation Modal --}}
 @include('hr.salary.partials.cancel_modal')
 
+{{-- Hidden Bulk Approve Form --}}
+<form id="bulkApproveForm" method="POST" action="{{ route('divhr.salary.orders.bulk_approve') }}" style="display: none;">
+  @csrf
+  <div id="bulkApproveInputs"></div>
+</form>
+@endsection
+
+@push('scripts')
 <script>
 $(document).ready(function() {
+  function updateBulkApproveState() {
+    const checked = $('.order-checkbox:checked').length;
+    $('#selected-orders-count').text(checked);
+    if (checked > 0) {
+      $('#btn-bulk-approve').fadeIn();
+    } else {
+      $('#btn-bulk-approve').hide();
+    }
+  }
+
+  $('#check-all-orders').on('change', function() {
+    $('.order-checkbox').prop('checked', $(this).is(':checked'));
+    updateBulkApproveState();
+  });
+
+  $(document).on('change', '.order-checkbox', function() {
+    updateBulkApproveState();
+    if (!$(this).is(':checked')) {
+      $('#check-all-orders').prop('checked', false);
+    } else if ($('.order-checkbox:checked').length === $('.order-checkbox').length) {
+      $('#check-all-orders').prop('checked', true);
+    }
+  });
+
+  $('#btn-bulk-approve').on('click', function() {
+    const selected = [];
+    $('.order-checkbox:checked').each(function() {
+      selected.push($(this).val());
+    });
+    if (selected.length === 0) return;
+
+    if (!confirm('Are you sure you want to approve ' + selected.length + ' selected salary order(s)?')) {
+      return;
+    }
+
+    const $container = $('#bulkApproveInputs');
+    $container.empty();
+    selected.forEach(function(id) {
+      $container.append('<input type="hidden" name="sor_ids[]" value="' + id + '">');
+    });
+    $('#bulkApproveForm').submit();
+  });
+
+  $('#btn-approve-all').on('click', function() {
+    const $boxes = $('.order-checkbox');
+    if ($boxes.length === 0) {
+      alert('No draft salary orders available to approve.');
+      return;
+    }
+    if (!confirm('Are you sure you want to approve all ' + $boxes.length + ' draft salary order(s)?')) {
+      return;
+    }
+    $boxes.prop('checked', true);
+    updateBulkApproveState();
+    $('#btn-bulk-approve').trigger('click');
+  });
+
   $('.btn-trigger-cancel').on('click', function() {
     const actionUrl = $(this).data('action');
     const desc = $(this).data('desc');
@@ -308,6 +431,61 @@ $(document).ready(function() {
     $('#cancel-modal-title').text('Cancel Salary Order');
     $('#cancel-modal-warning').text('Cancelling this salary order will cascade to all related child orders and cancel any associated Awaited commitments.');
     $('#cancelModal').modal('show');
+  });
+
+  // ── Per-Column Filtering for Salary Orders ────────────────────────
+  function applySorFilters() {
+    var activeFilters = [];
+    $('.sor-col-filter').each(function() {
+      var val = $.trim($(this).val()).toLowerCase();
+      if (val !== '') {
+        activeFilters.push({
+          col: parseInt($(this).data('col'), 10),
+          val: val
+        });
+      }
+    });
+
+    var visibleCount = 0;
+    $('.table tbody tr.sor-row').each(function() {
+      var $row = $(this);
+      var matches = true;
+
+      for (var i = 0; i < activeFilters.length; i++) {
+        var f = activeFilters[i];
+        var $cell = $row.children('td').eq(f.col);
+        var cellText = ($cell.find('input').length ? ($cell.find('input').val() + ' ' + $cell.text()) : $cell.text()).toLowerCase();
+        if (cellText.indexOf(f.val) === -1) {
+          matches = false;
+          break;
+        }
+      }
+
+      if (matches) {
+        $row.show();
+        visibleCount++;
+      } else {
+        $row.hide();
+        $row.find('.order-checkbox').prop('checked', false);
+      }
+    });
+
+    if (activeFilters.length > 0 && visibleCount === 0) {
+      $('#sor-no-filter-match').show();
+    } else {
+      $('#sor-no-filter-match').hide();
+    }
+
+    updateBulkApproveState();
+  }
+
+  $(document).on('input', '.sor-col-filter', function() {
+    applySorFilters();
+  });
+
+  $(document).on('click', '.btn-clear-sor-filters', function() {
+    $('.sor-col-filter').val('');
+    applySorFilters();
   });
 });
 
@@ -328,4 +506,4 @@ function saveSorRemarks(input) {
   });
 }
 </script>
-@endsection
+@endpush

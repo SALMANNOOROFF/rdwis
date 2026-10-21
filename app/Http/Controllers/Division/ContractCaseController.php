@@ -61,18 +61,18 @@ class ContractCaseController extends Controller
             return $stage === 'Division' || in_array($c->ctc_status, ['Draft', 'Under Revision']);
         });
 
-        // 2. Open / In Progress: Cases currently in HQ Scrutiny & Approval Pipeline
-        $initiatedCases = $cases->filter(function ($c) {
-            $stage = $c->current_stage;
-            return in_array($stage, ['HR', 'Finance', 'MD', 'DDG', 'DG', 'Approved'])
-                && !in_array($c->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
-        });
-
         // 3. Completed / Archive: Finalized cases
         $completedCases = $cases->filter(function ($c) {
             $stage = $c->current_stage;
             return in_array($stage, ['Fulfilled', 'Not Approved', 'Cancelled'])
                 || in_array($c->ctc_status, ['Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
+        });
+
+        // 2. Open / In Progress / Under Review: Cases currently in HQ Scrutiny & Approval Pipeline (HR, Finance, DLOG, IT, MD, DDG, DG, Approved)
+        $actionReqIds = $actionReqCases->pluck('ctc_id')->toArray();
+        $completedIds = $completedCases->pluck('ctc_id')->toArray();
+        $initiatedCases = $cases->filter(function ($c) use ($actionReqIds, $completedIds) {
+            return !in_array($c->ctc_id, $actionReqIds) && !in_array($c->ctc_id, $completedIds);
         });
 
         return view('division.contract-cases.index', compact('cases', 'actionReqCases', 'initiatedCases', 'completedCases'));
@@ -303,6 +303,14 @@ class ContractCaseController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Reason for contract extension (ctc_terminremarks) is required for extension cases.'
+            ], 422);
+        }
+
+        // Hg validation: candidate CNIC mandatory
+        if ($type === 'HG' && empty(trim((string)($validated['ctc_cnic'] ?? '')))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Candidate CNIC is mandatory for new hiring cases.'
             ], 422);
         }
 

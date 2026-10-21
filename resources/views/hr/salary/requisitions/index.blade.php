@@ -127,12 +127,12 @@
                 {{-- 2. Employee --}}
                 <td>
                   <div class="small text-muted font-monospace" style="font-size: 11.5px;">{{ $r->srq_emp_id }}</div>
-                  <div class="font-weight-bold text-dark">{{ $r->srq_empnamecomp ?: ($r->employee->emp_name ?? 'N/A') }}</div>
+                  <div class="font-weight-bold text-dark">{{ $r->employee->emp_name ?? ($r->srq_empnamecomp ?: 'N/A') }}</div>
                 </td>
 
                 {{-- 3. Project --}}
                 <td>
-                  <div class="font-weight-bold text-dark">{{ $r->head->hed_name ?? ($r->effectiveHead->hed_name ?? 'Central') }}</div>
+                  <div class="font-weight-bold text-dark font-monospace" style="font-size: 13.5px; letter-spacing: 0.5px;">{{ $r->head->hed_code ?? ($r->effectiveHead->hed_code ?? ($r->head->hed_name ?? ($r->effectiveHead->hed_name ?? 'Central'))) }}</div>
                   <div class="small text-muted" style="font-size: 11px;">{{ $r->unit->unt_namesh ?? ($r->unit->unt_name ?? '') }}</div>
                 </td>
 
@@ -145,7 +145,7 @@
                 {{-- 5. Payable (Red bold font matching legacy Screenshot 2) --}}
                 <td>
                   <div class="font-weight-bold text-danger" style="font-size: 14px;">{{ number_format($r->srq_salary) }}</div>
-                  <div class="small text-muted" style="font-size: 11px;">{{ $r->effectiveHead->hed_name ?? ($r->head->hed_name ?? '') }}</div>
+                  <div class="small text-muted font-monospace" style="font-size: 11px;">{{ $r->effectiveHead->hed_code ?? ($r->head->hed_code ?? ($r->effectiveHead->hed_name ?? '')) }}</div>
                 </td>
 
                 {{-- 6. Meezan Account Details --}}

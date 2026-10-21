@@ -74,10 +74,10 @@ class ContractCasePricingService
     {
         $plans = HrCtrCasePlan::where('ccp_ctc_id', $case->ctc_id)->orderBy('ccp_startdt')->get();
 
-        $salary = (float)($case->ctc_newsalary ?? 0);
-        $probMonths = (int)($case->ctc_newprob ?? 0);
-        $probSalary = (float)($case->ctc_newprobsal ?? $salary);
-        $startDate = $case->ctc_newstartdt ? Carbon::parse($case->ctc_newstartdt) : null;
+        $salary = (float)($case->ctc_approvedsalary ?: ($case->ctc_newsalary ?? 0));
+        $probMonths = (int)($case->ctc_approvedprob ?: ($case->ctc_newprob ?? 0));
+        $probSalary = (float)($case->ctc_approvedprobsal ?: ($case->ctc_newprobsal ?? $salary));
+        $startDate = ($case->ctc_approvedstartdt ?: $case->ctc_newstartdt) ? Carbon::parse($case->ctc_approvedstartdt ?: $case->ctc_newstartdt) : null;
 
         // If probSalary is not set or 0, default to normal salary
         if ($probSalary <= 0) {
@@ -118,10 +118,10 @@ class ContractCasePricingService
 
                 $totalPrice += round($sliceAmount, 2);
             }
-        } elseif ($case->ctc_newstartdt && $case->ctc_newenddt) {
+        } elseif (($case->ctc_approvedstartdt ?: $case->ctc_newstartdt) && ($case->ctc_approvedenddt ?: $case->ctc_newenddt)) {
             // Fallback calculation if no plans generated yet
-            $start = Carbon::parse($case->ctc_newstartdt);
-            $end = Carbon::parse($case->ctc_newenddt);
+            $start = Carbon::parse($case->ctc_approvedstartdt ?: $case->ctc_newstartdt);
+            $end = Carbon::parse($case->ctc_approvedenddt ?: $case->ctc_newenddt);
             $current = $start->copy();
 
             while ($current->lte($end)) {

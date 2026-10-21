@@ -25,27 +25,82 @@
   }
 }
 
-/* ── Sidebar: force full viewport height regardless of zoom ── */
+/* ── Sidebar: strictly bounded viewport height & fully scrollable on all screens ── */
 .main-sidebar {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   bottom: 0 !important;
-  height: auto !important;
-  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  z-index: 1038 !important;
 }
 
-/* ── Hide sidebar scrollbar (still scrollable with mousewheel) ── */
-.main-sidebar,
-.main-sidebar .sidebar {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-  overflow-x: hidden !important;
+.main-sidebar .brand-link {
+  flex-shrink: 0 !important;
+  height: 57px !important;
+  min-height: 57px !important;
 }
-.main-sidebar::-webkit-scrollbar,
-.main-sidebar .sidebar::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
+
+.main-sidebar .sidebar {
+  flex: 1 1 auto !important;
+  height: calc(100% - 57px) !important;
+  max-height: calc(100% - 57px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+/* OverlayScrollbars compatibility if initialized by AdminLTE */
+.main-sidebar .sidebar.os-host {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.main-sidebar .sidebar .os-padding,
+.main-sidebar .sidebar .os-viewport {
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Visible, modern & sleek custom scrollbar for sidebar */
+.main-sidebar .sidebar,
+.main-sidebar .sidebar .os-viewport {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent !important;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar,
+.main-sidebar .sidebar .os-viewport::-webkit-scrollbar {
+  width: 6px !important;
+  display: block !important;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar-track,
+.main-sidebar .sidebar .os-viewport::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar-thumb,
+.main-sidebar .sidebar .os-viewport::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45) !important;
+  border-radius: 6px !important;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar-thumb:hover,
+.main-sidebar .sidebar .os-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8) !important;
+}
+
+/* Extra bottom breathing room so the last items are always fully visible and easily clickable */
+.main-sidebar .sidebar .nav-sidebar {
+  padding-bottom: 85px !important;
 }
 
 /* ── Prevent outer horizontal scroll ── */

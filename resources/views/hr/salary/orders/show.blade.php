@@ -108,6 +108,12 @@
               <div class="small font-monospace text-primary">{{ $order->sor_emp_id }}</div>
             </div>
             <div class="col-md-3 col-6 mb-2">
+              <div class="text-xs text-uppercase font-weight-bold text-muted">Project / Head</div>
+              <div class="h6 font-weight-bold text-primary mb-0 font-monospace">
+                {{ $order->head->hed_code ?? ($order->effectiveHead->hed_code ?? ($order->head->hed_name ?? ($order->effectiveHead->hed_name ?? 'Central'))) }}
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-2">
               <div class="text-xs text-uppercase font-weight-bold text-muted">Salary Period</div>
               <div class="h6 font-weight-bold text-dark mb-0">{{ \Carbon\Carbon::parse($order->sor_month)->format('F Y') }}</div>
             </div>

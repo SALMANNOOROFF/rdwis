@@ -64,7 +64,7 @@
                     <th style="width: 40px;" class="text-center">#</th>
                     <th>Employee ID</th>
                     <th>Name / Designation</th>
-                    <th>Unit</th>
+                    <th>Department</th>
                     <th>Contract Salary</th>
                     <th>Deductions</th>
                     <th>Net Salary</th>
@@ -100,7 +100,7 @@
                     <th style="width: 40px;" class="text-center">#</th>
                     <th>Employee ID</th>
                     <th>Name / Designation</th>
-                    <th>Unit</th>
+                    <th>Department</th>
                     <th>Specific Exclusion Reason</th>
                   </tr>
                 </thead>

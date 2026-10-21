@@ -357,12 +357,31 @@
                             <div class="data-grid-cell data-grid-value">{{ $case->ctc_newenddt ? \Carbon\Carbon::parse($case->ctc_newenddt)->format('d M Y') : 'N/A' }}</div>
                         </div>
 
-                        @if($case->ctc_newprob > 0)
+                        @php
+                            $dispProbMonths = $case->newContract?->ctr_prob !== null
+                                ? (int)$case->newContract->ctr_prob
+                                : ($case->ctc_approvedprob !== null ? (int)$case->ctc_approvedprob : (int)$case->ctc_newprob);
+
+                            $approvedProbSal = ($case->newContract?->ctr_probsal !== null && (float)$case->newContract->ctr_probsal > 0)
+                                ? (float)$case->newContract->ctr_probsal
+                                : (($case->ctc_approvedprobsal !== null && (float)$case->ctc_approvedprobsal > 0) ? (float)$case->ctc_approvedprobsal : null);
+
+                            $effectiveCaseSal = $case->newContract?->ctr_salary ?: ($case->ctc_approvedsalary ?: $case->ctc_newsalary);
+                            $dispProbSalary = $approvedProbSal !== null 
+                                ? $approvedProbSal 
+                                : ((float)($case->ctc_newprobsal ?: $effectiveCaseSal));
+
+                            if ($case->ctc_approvedsalary && $case->ctc_approvedsalary != $case->ctc_newsalary && $approvedProbSal === null && $dispProbSalary == $case->ctc_newsalary) {
+                                $dispProbSalary = (float)$case->ctc_approvedsalary;
+                            }
+                        @endphp
+
+                        @if($dispProbMonths > 0)
                             <div class="data-grid-table">
                                 <div class="data-grid-cell data-grid-label">Probation Period</div>
-                                <div class="data-grid-cell data-grid-value">{{ $case->ctc_newprob }} Months</div>
+                                <div class="data-grid-cell data-grid-value">{{ $dispProbMonths }} {{ Str::plural('Month', $dispProbMonths) }}</div>
                                 <div class="data-grid-cell data-grid-label">Probation Salary</div>
-                                <div class="data-grid-cell data-grid-value">Rs. {{ number_format((float)($case->ctc_newprobsal ?: $case->ctc_newsalary)) }}</div>
+                                <div class="data-grid-cell data-grid-value">Rs. {{ number_format($dispProbSalary) }}</div>
                             </div>
                         @endif
 
@@ -453,9 +472,15 @@
                                     <button type="submit" class="btn-release-action"><i class="fas fa-paper-plane"></i> Release to HR</button>
                                 </form>
 
+                                @php
+                                    $loggedUser = auth()->user();
+                                    $isLeader = $loggedUser && ((method_exists($loggedUser, 'isMdDdgDg') && $loggedUser->isMdDdgDg()) || (method_exists($loggedUser, 'isDlog') && $loggedUser->isDlog()));
+                                @endphp
+                                @if(!$isLeader)
                                 <button type="button" class="btn-cancel-draft mt-2" id="btn-cancel-case">
                                     <i class="fas fa-ban mr-1"></i> CANCEL CASE
                                 </button>
+                                @endif
                             </div>
                         </div>
                     @else

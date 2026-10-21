@@ -27,8 +27,38 @@ class DashboardController extends Controller
         $unitId = $user->acc_unt_id;
         $finService = app(\App\Services\FinancialIntelligenceService::class);
 
-        // 1. Project Stats
-        $projects = Project::where('prj_unt_id', $unitId)->get();
+        $isCentralMyDept = method_exists($user, 'isCentralDepartment') && $user->isCentralDepartment() && $user->isMyDepartmentMode();
+
+        // 1. Fetch Heads & Projects
+        if ($isCentralMyDept) {
+            // Central Department in My Department mode: funded via CSRF (Central Shared Resource Fund)
+            $heads = DB::table('cen.heads as h')
+                ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+                ->join('fin.sharesalloc as s', 's.sha_hed_id', '=', 'h.hed_id')
+                ->where('s.sha_cf', '>', 0)
+                ->select(
+                    'h.hed_id',
+                    'h.hed_prj_id',
+                    'h.hed_code',
+                    'p.prj_title',
+                    'p.prj_status',
+                    'p.prj_aprvdt',
+                    's.sha_cf'
+                )
+                ->orderBy('p.prj_aprvdt', 'desc')
+                ->get();
+
+            $prjIds = $heads->pluck('hed_prj_id')->unique()->filter()->values()->all();
+            $projects = Project::whereIn('prj_id', $prjIds)->get();
+        } else {
+            $projects = Project::where('prj_unt_id', $unitId)->get();
+            $heads = DB::table('cen.heads as h')
+                ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+                ->where('h.hed_unt_id', $unitId)
+                ->select('h.hed_id', 'h.hed_prj_id', 'h.hed_code', 'p.prj_title', 'p.prj_status', 'p.prj_aprvdt')
+                ->get();
+        }
+
         $totalProjects = $projects->count();
         $approvedProjects = $projects->where('prj_status', 'Approved')->count();
         $completedProjects = $projects->where('prj_status', 'Completed')->count();
@@ -40,13 +70,6 @@ class DashboardController extends Controller
             'in_process' => $inProcessProjects,
             'completed' => $completedProjects
         ];
-
-        // 2. Fetch Projects and Detailed Financials
-        $heads = DB::table('cen.heads as h')
-            ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
-            ->where('h.hed_unt_id', $unitId)
-            ->select('h.hed_id', 'h.hed_prj_id', 'h.hed_code', 'p.prj_title', 'p.prj_status', 'p.prj_aprvdt')
-            ->get();
 
         $unit = DB::table('cen.units')->where('unt_id', $unitId)->select('unt_id', 'unt_name', 'unt_namesh')->first();
 
@@ -60,11 +83,19 @@ class DashboardController extends Controller
         foreach ($heads as $h) {
             $fin = $finService->getHeadStatus($h->hed_id);
             
-            $appr = (float)($fin->prj_share ?? 0);
-            $spent = (float)($fin->prj_expenditure ?? 0);
-            $rem = (float)($fin->prj_remaining ?? 0);
-            $comm = (float)($fin->prj_commitments ?? 0);
-            $inp = (float)($fin->prj_in_process ?? 0);
+            if ($isCentralMyDept) {
+                $appr = (float)($fin->csrf_share ?? $fin->cf_share ?? $h->sha_cf ?? 0);
+                $spent = (float)($fin->cf_expenditure ?? 0);
+                $rem = (float)($fin->cf_remaining ?? max(0, $appr - abs($spent)));
+                $comm = (float)($fin->cf_commitments ?? 0);
+                $inp = (float)($fin->cf_in_process ?? 0);
+            } else {
+                $appr = (float)($fin->prj_share ?? 0);
+                $spent = (float)($fin->prj_expenditure ?? 0);
+                $rem = (float)($fin->prj_remaining ?? 0);
+                $comm = (float)($fin->prj_commitments ?? 0);
+                $inp = (float)($fin->prj_in_process ?? 0);
+            }
 
             $totalAmount += $appr;
             $totalSpent += $spent;
@@ -90,7 +121,7 @@ class DashboardController extends Controller
                 'prj_in_process' => $fin->prj_in_process ?? 0,
                 
                 // Details (CSRF Scope)
-                'csrf_share' => $fin->csrf_share ?? 0,
+                'csrf_share' => $fin->csrf_share ?? $fin->cf_share ?? 0,
                 'cf_expenditure' => $fin->cf_expenditure ?? 0,
                 'cf_commitments' => $fin->cf_commitments ?? 0,
                 'cf_in_process' => $fin->cf_in_process ?? 0,
@@ -126,6 +157,17 @@ class DashboardController extends Controller
                 'remaining' => $rem,
                 'burn_rate' => $burnRate
             ];
+        }
+
+        // For central department, include active departmental employees in team count
+        if ($isCentralMyDept) {
+            $deptStaffCount = DB::table('hr.emps')
+                ->where('emp_unt_id', $unitId)
+                ->whereRaw('LOWER(emp_status) IN (?, ?)', ['active', 'current'])
+                ->count();
+            if ($deptStaffCount > 0 && !empty($projectsList)) {
+                $projectsList[0]['team_count'] += $deptStaffCount;
+            }
         }
 
         $totalRemaining = $totalAmount - abs($totalSpent);
@@ -171,7 +213,14 @@ class DashboardController extends Controller
             ")->first();
 
         // 6. Hiring Cases 
-        $hiringCases = 0;
+        $hiringCases = DB::table('hr.ctrcases')
+            ->where(function($q) use ($unitId) {
+                $q->where('ctc_divisionid', $unitId)
+                  ->orWhere('ctc_unt_id', $unitId)
+                  ->orWhere('ctc_approvedunt_id', $unitId);
+            })
+            ->whereNotIn(DB::raw('LOWER(ctc_status)'), ['closed', 'completed', 'cancelled', 'rejected'])
+            ->count();
 
         return response()->json([
             'unit' => $unit,
@@ -218,7 +267,8 @@ class DashboardController extends Controller
         }
 
         $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
-        $isHqUser = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw'], true);
+        $isDlog = (method_exists($user, 'isDlog') && $user->isDlog()) || in_array($userArea, ['log', 'dlog', 'logistics'], true);
+        $isHqUser = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw'], true) || $isDlog;
 
         if ($isHqUser) {
             $lower = 0;
@@ -378,6 +428,8 @@ class DashboardController extends Controller
             'hqs'  => 'DDG',
             'nrdi' => 'DG',
             'proc' => 'DProc',
+            'log'  => 'DLOG',
+            'dlog' => 'DLOG',
         ];
         $ctrStageMap = [
             'fin'  => 'Finance',
@@ -385,10 +437,17 @@ class DashboardController extends Controller
             'hqs'  => 'DDG',
             'nrdi' => 'DG',
             'hr'   => 'HR',
+            'log'  => 'DLOG',
+            'dlog' => 'DLOG',
         ];
 
-        $targetStage = $stageMap[$userArea] ?? null;
-        $targetCtrStage = $ctrStageMap[$userArea] ?? null;
+        if ($isDlog) {
+            $targetStage = 'DLOG';
+            $targetCtrStage = 'DLOG';
+        } else {
+            $targetStage = $stageMap[$userArea] ?? null;
+            $targetCtrStage = $ctrStageMap[$userArea] ?? null;
+        }
 
         if ($userArea === 'hr') {
             $pendingPurchaseCases = 0;

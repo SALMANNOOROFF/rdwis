@@ -142,6 +142,14 @@ Route::middleware('auth')->group(function () {
                 return redirect()->route('sord.dashboard');
             }
 
+            if (method_exists($u, 'isMyDepartmentMode') && $u->isMyDepartmentMode()) {
+                return redirect()->route('dashboard');
+            }
+
+            if (method_exists($u, 'isDlog') && $u->isDlog()) {
+                return redirect()->route('nrdi.dashboard');
+            }
+
             $area = strtolower(trim((string) ($u?->acc_untarea ?? '')));
 
             return match ($area) {
@@ -151,6 +159,7 @@ Route::middleware('auth')->group(function () {
                 'nrdi' => redirect()->route('nrdi.dashboard'),
                 'rdw' => redirect()->route('nrdi.dashboard'), // MD lands on HQ Dashboard
                 'hqs' => redirect()->route('nrdi.dashboard'), // DDG lands on HQ Dashboard
+                'log', 'dlog' => redirect()->route('nrdi.dashboard'), // DLOG lands on HQ Dashboard
                 'proc', 'prc' => redirect()->route('nrdi.procurement.purchase_cases.index'), // DProc lands on Procurement Scrutiny Hub
                 default => redirect()->route('dashboard'),
             };
@@ -172,6 +181,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchase/case/{id}/case-detail', [PurchaseController::class, 'caseDetail'])->name('purchase.case_detail');
         Route::get('/purchase/case/{id}/market-research', [PurchaseController::class, 'marketResearch'])->name('purchase.market_research');
         Route::get('/purchase/case/{id}/cs-formal', [PurchaseController::class, 'csFormal'])->name('purchase.cs_formal');
+        Route::post('/purchase/case/{id}/cs-formal/save', [PurchaseController::class, 'saveCsFormal'])->name('purchase.cs_formal.save');
         Route::get('/purchase/case/{id}/it-annex', [PurchaseController::class, 'itAnnex'])->name('purchase.it_annex');
         Route::post('/purchase/case/{id}/it-letter/create', [PurchaseController::class, 'createItLetter'])->name('purchase.it_letter.create');
         Route::post('/purchase/case/{id}/it-letter/save', [PurchaseController::class, 'saveItLetter'])->name('purchase.it_letter.save');
@@ -182,11 +192,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/get-next-minute/{headId}', [PurchaseController::class, 'getNextMinuteNumber'])->name('get.next.minute');
         Route::get('/minute-sheet', function () { return view('purchase.new_case.minutesheet'); })->name('minutesheet');
         Route::get('/print-minute', function () { return view('purchase.new_case.print_minute'); })->name('purchase.new_case.print_minute');
+        Route::post('/purchase-cases-new/{id}/toggle-mtss', [\App\Http\Controllers\PurchaseCaseController::class, 'toggleMtss'])->name('purchase_cases_new.toggle_mtss_direct');
 
         // Universal Project Financial View Route (Full Page)
         Route::get('/project/{id}/financial-view', [ProjectController::class, 'financialView'])->name('projects.financial_view');
         Route::get('/project/{id}/financial-view-page', [ProjectController::class, 'financialView'])->name('projects.financial-view');
         Route::get('/project/{id}/print-financial-summary', [ProjectController::class, 'printFinancialSummary'])->name('projects.print_financial_summary');
+        Route::get('/project/{id}/print-fundings-milestones', [ProjectController::class, 'printFundingsMilestones'])->name('projects.print_fundings_milestones');
         Route::get('/openprojectdetails/{id}/financial-view', [ProjectController::class, 'financialView']);
 
         Route::get('/sord/dashboard', [\App\Http\Controllers\DashboardController::class, 'sord'])
@@ -222,7 +234,7 @@ Route::middleware('auth')->group(function () {
             ]);
         })->name('hr.pn_sailors');
 
-        Route::prefix('nrdi')->middleware('area:nrdi,rdw,hqs,proc,prc,fin,hr,prj,rdwprj,it')->name('nrdi.')->group(function () {
+        Route::prefix('nrdi')->middleware('area:nrdi,rdw,hqs,proc,prc,fin,hr,prj,rdwprj,it,log,dlog')->name('nrdi.')->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboard'])->name('dashboard');
             Route::get('/dashboard-data', [\App\Http\Controllers\DashboardController::class, 'nrdiDashboardData'])->name('dashboard.data');
             // Redirect old routes to modern hubs
@@ -235,6 +247,7 @@ Route::middleware('auth')->group(function () {
             })->name('purchase_cases.index');
             Route::get('/purchase-cases/{id}', [\App\Http\Controllers\PurchaseApprovalController::class, 'show'])->name('purchase_cases.show');
             Route::post('/purchase-cases/{id}/action', [\App\Http\Controllers\PurchaseApprovalController::class, 'action'])->name('purchase_cases.action');
+            Route::post('/purchase-cases/{id}/cancel', [\App\Http\Controllers\PurchaseApprovalController::class, 'cancel'])->name('purchase_cases.cancel');
 
             // Director Procurement Specialized Routes
             Route::prefix('procurement')->name('procurement.')->group(function () {
@@ -288,10 +301,12 @@ Route::middleware('auth')->group(function () {
                 // Wildcard routes must come last
                 Route::get('/{id}', [\App\Http\Controllers\PurchaseCaseController::class, 'show'])->name('show');
                 Route::post('/{id}/action', [\App\Http\Controllers\PurchaseCaseController::class, 'action'])->name('action');
+                Route::post('/{id}/toggle-mtss', [\App\Http\Controllers\PurchaseCaseController::class, 'toggleMtss'])->name('toggle_mtss');
                 // Common Scrutiny Reports (Accessible by all modules)
                 Route::get('/case/{id}/case-detail', [\App\Http\Controllers\PurchaseController::class, 'caseDetail']);
                 Route::get('/case/{id}/market-research', [\App\Http\Controllers\PurchaseController::class, 'marketResearch']);
                 Route::get('/case/{id}/cs-formal', [\App\Http\Controllers\PurchaseController::class, 'csFormal']);
+                Route::post('/case/{id}/cs-formal/save', [\App\Http\Controllers\PurchaseController::class, 'saveCsFormal']);
                 Route::get('/case/{id}/it-annex', [\App\Http\Controllers\PurchaseController::class, 'itAnnex']);
                 Route::post('/case/{id}/it-letter/save', [\App\Http\Controllers\PurchaseController::class, 'saveItLetter']);
             });
@@ -359,6 +374,8 @@ Route::middleware('auth')->group(function () {
                 ->name('hr.contract-cases.show');
             Route::post('/contract-cases/{id}/forward', [\App\Http\Controllers\HR\ContractCaseController::class, 'forward'])
                 ->name('hr.contract-cases.forward');
+            Route::post('/contract-cases/{id}/approve', [\App\Http\Controllers\HR\ContractCaseController::class, 'approve'])
+                ->name('hr.contract-cases.approve');
             Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\HR\ContractCaseController::class, 'return'])
                 ->name('hr.contract-cases.return');
             Route::post('/contract-cases/{id}/fulfill', [\App\Http\Controllers\HR\ContractCaseController::class, 'fulfill'])
@@ -369,6 +386,8 @@ Route::middleware('auth')->group(function () {
                 ->name('hr.contract-cases.preview-emp-id');
             Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\HR\ContractCaseController::class, 'reject'])
                 ->name('hr.contract-cases.reject');
+            Route::post('/contract-cases/{id}/cancel', [\App\Http\Controllers\HR\ContractCaseController::class, 'cancel'])
+                ->name('hr.contract-cases.cancel');
 
             // HR Reports (Single Page like Finance Reports)
             Route::get('/reports', [DivHrController::class, 'hrReportsIndex'])->name('hr.reports.index');
@@ -383,10 +402,14 @@ Route::middleware('auth')->group(function () {
                 ->name('finance.contract-cases.show');
             Route::post('/contract-cases/{id}/forward', [\App\Http\Controllers\Finance\ContractCaseController::class, 'forward'])
                 ->name('finance.contract-cases.forward');
+            Route::post('/contract-cases/{id}/approve', [\App\Http\Controllers\Finance\ContractCaseController::class, 'approve'])
+                ->name('finance.contract-cases.approve');
             Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\Finance\ContractCaseController::class, 'return'])
                 ->name('finance.contract-cases.return');
             Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\Finance\ContractCaseController::class, 'reject'])
                 ->name('finance.contract-cases.reject');
+            Route::post('/contract-cases/{id}/cancel', [\App\Http\Controllers\Finance\ContractCaseController::class, 'cancel'])
+                ->name('finance.contract-cases.cancel');
         });
 
         // --- MD CONTRACT CASE ROUTES ---
@@ -406,7 +429,7 @@ Route::middleware('auth')->group(function () {
         });
 
         // --- DDG CONTRACT CASE ROUTES ---
-        Route::prefix('ddg')->middleware('area:hqs')->group(function () {
+        Route::prefix('ddg')->middleware('area:hqs,nrdi')->group(function () {
             Route::get('/contract-cases', [\App\Http\Controllers\DDG\ContractCaseController::class, 'index'])
                 ->name('ddg.contract-cases.index');
             Route::get('/contract-cases/{id}', [\App\Http\Controllers\DDG\ContractCaseController::class, 'show'])
@@ -436,6 +459,37 @@ Route::middleware('auth')->group(function () {
             Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\DG\ContractCaseController::class, 'reject'])
                 ->name('dg.contract-cases.reject');
         });
+
+        // --- DLOG CONTRACT CASE ROUTES ---
+        Route::prefix('dlog')->middleware('area:log,dlog')->group(function () {
+            Route::get('/contract-cases', [\App\Http\Controllers\DLOG\ContractCaseController::class, 'index'])
+                ->name('dlog.contract-cases.index');
+            Route::get('/contract-cases/{id}', [\App\Http\Controllers\DLOG\ContractCaseController::class, 'show'])
+                ->name('dlog.contract-cases.show');
+            Route::post('/contract-cases/{id}/approve', [\App\Http\Controllers\DLOG\ContractCaseController::class, 'approve'])
+                ->name('dlog.contract-cases.approve');
+            Route::post('/contract-cases/{id}/forward', [\App\Http\Controllers\DLOG\ContractCaseController::class, 'forward'])
+                ->name('dlog.contract-cases.forward');
+            Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\DLOG\ContractCaseController::class, 'return'])
+                ->name('dlog.contract-cases.return');
+            Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\DLOG\ContractCaseController::class, 'reject'])
+                ->name('dlog.contract-cases.reject');
+        });
+
+        // --- IT CONTRACT CASE ROUTES ---
+        Route::prefix('it')->middleware('area:it')->group(function () {
+            Route::get('/contract-cases', [\App\Http\Controllers\IT\ContractCaseController::class, 'index'])
+                ->name('it.contract-cases.index');
+            Route::get('/contract-cases/{id}', [\App\Http\Controllers\IT\ContractCaseController::class, 'show'])
+                ->name('it.contract-cases.show');
+            Route::post('/contract-cases/{id}/forward', [\App\Http\Controllers\IT\ContractCaseController::class, 'forward'])
+                ->name('it.contract-cases.forward');
+            Route::post('/contract-cases/{id}/return', [\App\Http\Controllers\IT\ContractCaseController::class, 'return'])
+                ->name('it.contract-cases.return');
+            Route::post('/contract-cases/{id}/reject', [\App\Http\Controllers\IT\ContractCaseController::class, 'reject'])
+                ->name('it.contract-cases.reject');
+        });
+
 
         Route::group([
             'middleware' => [
@@ -518,6 +572,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pc-initiation/case/{id}', [\App\Http\Controllers\PurchaseInitiationController::class, 'show'])->name('purchase.initiation.show');
         Route::post('/pc-initiation/case/{id}/save', [\App\Http\Controllers\PurchaseInitiationController::class, 'save'])->name('purchase.initiation.save');
         Route::get('/pc-initiation/statuses', [\App\Http\Controllers\PurchaseInitiationController::class, 'getStatuses'])->name('purchase.initiation.statuses');
+        Route::post('/purchase-cases/{id}/cancel', [\App\Http\Controllers\PurchaseApprovalController::class, 'cancel']);
         
         Route::get('/viewpurchasecase', [PurchaseController::class, 'index'])->name('viewpurchasecase');
         Route::get('/purchase/select', [PurchaseController::class, 'select'])
@@ -615,7 +670,7 @@ Route::middleware('auth')->group(function () {
         });
 
         // HR (hr area)
-        Route::middleware('area:hr,prj,rdwprj,fin,rdw,hqs,nrdi,it')->group(function () {
+        Route::middleware('area:hr,prj,rdwprj,fin,rdw,hqs,nrdi,it,adm,admin')->group(function () {
 
             Route::get('/divhr/employelist', [DivHrController::class, 'employeelist'])->name('divhr.employelist');
             Route::prefix('divhr')->group(function () {
@@ -681,6 +736,11 @@ Route::middleware('auth')->group(function () {
 
                     Route::get('/orders', [\App\Http\Controllers\SalaryController::class, 'ordersIndex'])
                         ->name('divhr.salary.orders.index');
+                    Route::post('/orders/bulk-approve', [\App\Http\Controllers\SalaryController::class, 'bulkApproveOrders'])
+                        ->name('divhr.salary.orders.bulk_approve')
+                        ->middleware('approver');
+                    Route::get('/orders/bank-scroll', [\App\Http\Controllers\SalaryController::class, 'bankPaymentScroll'])
+                        ->name('divhr.salary.orders.bank_scroll');
                     Route::get('/orders/{sor_id}', [\App\Http\Controllers\SalaryController::class, 'orderShow'])
                         ->name('divhr.salary.orders.show');
                     Route::post('/orders/{sor_id}/approve', [\App\Http\Controllers\SalaryController::class, 'approveOrder'])
@@ -837,6 +897,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('/payments/{cmt_id}', [\App\Http\Controllers\Finance\PaymentController::class, 'show'])->name('payments.show');
                 Route::post('/payments/{cmt_id}/transaction', [\App\Http\Controllers\Finance\PaymentController::class, 'storeTransaction'])->name('payments.store_transaction');
                 Route::post('/commitments/salary/{cmt_id}/pay', [\App\Http\Controllers\Finance\PaymentController::class, 'paySalaryCommitment'])->name('commitments.salary.pay');
+                Route::post('/commitments/salary/bulk-pay', [\App\Http\Controllers\Finance\PaymentController::class, 'bulkPaySalaryCommitments'])->name('commitments.salary.bulk_pay');
 
                 // VERIFICATION SUB-SCREENS (Salary Verification & Salary Heads)
                 Route::prefix('verification')->name('verification.')->group(function () {
@@ -859,10 +920,12 @@ Route::middleware('auth')->group(function () {
             });
             
             // Finance Reports (Accessible to HQ, Divisions, Fin)
-            Route::middleware(['area:fin,prj,rdwprj,hqs,rdw,nrdi,it'])->group(function () {
+            Route::middleware(['area:fin,prj,rdwprj,hqs,rdw,nrdi,it,adm,admin'])->group(function () {
                 Route::get('/reports', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'index'])->name('reports.index');
                 Route::get('/reports/data', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'getReportData'])->name('reports.data');
                 Route::get('/reports/export', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'exportExcel'])->name('reports.export');
+                Route::get('/reports/print-monthly-return', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'printMonthlyReturn'])->name('reports.print_monthly_return');
+                Route::get('/reports/print-csrf-status', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'printCsrfStatus'])->name('reports.print_csrf_status');
             });
         });
 
@@ -905,6 +968,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/support/tickets/{id}', [\App\Http\Controllers\SupportTicketController::class, 'show'])->name('support.tickets.show');
     Route::post('/support/tickets/{id}/reply', [\App\Http\Controllers\SupportTicketController::class, 'reply'])->name('support.tickets.reply');
     Route::post('/support/tickets/{id}/status', [\App\Http\Controllers\SupportTicketController::class, 'updateStatus'])->name('support.tickets.status');
+
+    // =========================================================
+    // FUND SHIFTING / REAPPROPRIATION (Data Reversal Parity)
+    // =========================================================
+    Route::prefix('fund-shifting')
+        ->name('fund_shifting.')
+        ->middleware(['area:prj,nrdi,it,fin,hr,proc,prc,rdw,hqs,adm,admin'])
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\FundShiftingController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\FundShiftingController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\FundShiftingController::class, 'store'])->name('store');
+            Route::get('/subheads/{headId}', [\App\Http\Controllers\FundShiftingController::class, 'getSubheads'])->name('subheads');
+            Route::get('/history/{projectId}', [\App\Http\Controllers\FundShiftingController::class, 'history'])->name('history');
+            Route::get('/{id}', [\App\Http\Controllers\FundShiftingController::class, 'show'])->name('show');
+            Route::post('/{id}/forward', [\App\Http\Controllers\FundShiftingController::class, 'forward'])->name('forward');
+            Route::post('/{id}/approve', [\App\Http\Controllers\FundShiftingController::class, 'approve'])->name('approve');
+            Route::post('/{id}/return', [\App\Http\Controllers\FundShiftingController::class, 'return'])->name('return');
+            Route::post('/{id}/cancel', [\App\Http\Controllers\FundShiftingController::class, 'cancel'])->name('cancel');
+            Route::post('/{id}/implement', [\App\Http\Controllers\FundShiftingController::class, 'implement'])->name('implement');
+        });
 
     }); // End force password change
 }); // End Auth
