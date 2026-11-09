@@ -188,7 +188,7 @@ def kill_existing_servers():
 # ----------------------------------------------------------
 
 def is_domain_in_hosts(ip):
-    """Check if our domain is already in the hosts file."""
+    """Check if our domain is already in the hosts file with the CURRENT IP."""
     try:
         with open(HOSTS_FILE, "r") as f:
             content = f.read()
@@ -196,7 +196,7 @@ def is_domain_in_hosts(ip):
             line = line.strip()
             if line and not line.startswith("#"):
                 parts = line.split()
-                if len(parts) >= 2 and LOCAL_DOMAIN in parts[1:]:
+                if len(parts) >= 2 and parts[0] == ip and LOCAL_DOMAIN in parts[1:]:
                     return True
     except Exception:
         pass
@@ -204,12 +204,12 @@ def is_domain_in_hosts(ip):
 
 
 def add_domain_to_hosts(ip):
-    """Add local domain to Windows hosts file."""
+    """Add or update local domain in Windows hosts file."""
     if is_domain_in_hosts(ip):
-        print(f"[OK] Domain '{LOCAL_DOMAIN}' already in hosts file")
+        print(f"[OK] Domain '{LOCAL_DOMAIN}' already correctly mapped to {ip} in hosts file")
         return True
 
-    print(f"[>>] Adding '{LOCAL_DOMAIN} -> {ip}' to Windows hosts file...")
+    print(f"[>>] Updating '{LOCAL_DOMAIN} -> {ip}' in Windows hosts file...")
 
     try:
         with open(HOSTS_FILE, "r") as f:
@@ -231,7 +231,7 @@ def add_domain_to_hosts(ip):
         with open(HOSTS_FILE, "w") as f:
             f.write("\n".join(new_lines))
 
-        print(f"[OK] Domain '{LOCAL_DOMAIN}' added to hosts file")
+        print(f"[OK] Domain '{LOCAL_DOMAIN}' updated in hosts file -> {ip}")
         return True
 
     except PermissionError:
@@ -259,10 +259,10 @@ def get_caddy_env():
 
 
 def is_cert_in_store():
-    """Check if Caddy root CA is trusted."""
+    """Check if Caddy root CA is trusted in Windows machine or user store."""
     try:
         result = subprocess.run(
-            ["certutil", "-verifystore", "Root"],
+            ["certutil", "-store", "Root"],
             capture_output=True, text=True, timeout=15
         )
         if "Caddy" in result.stdout:
@@ -272,7 +272,7 @@ def is_cert_in_store():
 
     try:
         result = subprocess.run(
-            ["certutil", "-user", "-verifystore", "Root"],
+            ["certutil", "-user", "-store", "Root"],
             capture_output=True, text=True, timeout=15
         )
         if "Caddy" in result.stdout:

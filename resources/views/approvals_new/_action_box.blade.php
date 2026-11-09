@@ -38,12 +38,16 @@
         default => (method_exists($u, 'isDlog') && $u->isDlog()) ? ['DLOG'] : ['None']
     };
 
+    $hasReversed = $purchase->decisions->contains('pdec_action', 'reverse_case');
+    $isFinanceUser = in_array($userArea, ['fin', 'finance'], true) || ($u?->acc_username === 'superadminrdw');
+    $canReverse = $isFinanceUser && in_array(strtolower(trim($purchase->pcs_status)), ['approved', 'fulfilled', 'completed', 'partially fulfilled', 'closed'], true);
+
     if ($isFinalized || $iTookLatestAction) {
         $isCaseWithMe = false;
     } elseif ($userArea === 'proc') {
         $isCaseWithMe = ($currentStage === 'DProc') || ($isDraft && $hasFloated && !$hasDProcSaved);
     } elseif ($isInitiator) {
-        $isWaitingWithProc = ($hasFloated && !$hasDProcSaved && strtolower(trim($purchase->pcs_type ?? 'ps')) === 'ps');
+        $isWaitingWithProc = ($hasFloated && !$hasDProcSaved && !$hasReversed && strtolower(trim($purchase->pcs_type ?? 'ps')) === 'ps');
         $isCaseWithMe = ($currentStage === 'Division' || $isDraft || $isReturned) && !$isWaitingWithProc;
     } else {
         $isCaseWithMe = in_array($currentStage, $expectedStages);
@@ -51,17 +55,22 @@
 
     $currentStatusDisplay = $purchase->current_stage_display ?? $service->getStatusDisplayName($purchase->pcs_status);
 
-    // Calculate the next numbering for the list:
+    // Calculate the next numbering for the list (Pure sequential continuous numbering 1, 2, 3...):
     $liCount = 0;
-    foreach($purchase->decisions as $dec) {
-        if ($dec->pdec_action === 'save_draft') continue;
-        if (strpos($dec->pdec_remarks, '<li') !== false) {
-            $liCount += substr_count($dec->pdec_remarks, '<li');
-        } else if (!empty(trim(strip_tags($dec->pdec_remarks)))) {
+    foreach($purchase->decisions->where('pdec_action', '!=', 'save_draft')->sortBy('created_at') as $dec) {
+        $rawRemarks = $dec->pdec_remarks ?? '';
+        if (strpos($rawRemarks, '<li') !== false) {
+            $liCount += max(1, substr_count($rawRemarks, '<li'));
+        } elseif (!empty(trim(strip_tags($rawRemarks)))) {
+            $lines = explode("\n", trim(strip_tags($rawRemarks)));
+            $c = 0;
+            foreach ($lines as $l) { if (!empty(trim($l))) $c++; }
+            $liCount += max(1, $c);
+        } else {
             $liCount += 1;
         }
     }
-    $nextRemarkNumber = 4 + $liCount + 1;
+    $nextRemarkNumber = $liCount + 1;
 @endphp
 
 @if($isCaseWithMe)
@@ -99,7 +108,7 @@
                     </span>
                 </div>
             </div>
-            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;"></textarea>
+            <textarea id="inlineRemarks" class="form-control" placeholder="Para {{ $nextRemarkNumber }}. Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;"></textarea>
             
             {{-- User Quick Remarks (Custom shortcuts) --}}
             <div class="mt-2">
@@ -401,19 +410,26 @@
     });
 
     function getNextLocalNumber() {
-        if (!inlineRemarks) return 2;
+        if (!inlineRemarks) return nextNum + 1;
         const matches = inlineRemarks.value.match(/^\d+(?=\.)/gm);
         if (matches && matches.length > 0) {
             return Math.max(...matches.map(Number)) + 1;
         }
-        return 2;
+        return nextNum + 1;
     }
 
-    // Auto-initialize with numbering 1. on first focus if empty
+    // Auto-initialize with numbering (nextNum.) on first focus if empty
     if (inlineRemarks) {
+        const prefix = nextNum + ". ";
+
+        // Migrate any pre-loaded draft starting with 1. to nextNum. if nextNum > 1
+        if (inlineRemarks.value.trim().startsWith('1. ') && nextNum > 1) {
+            inlineRemarks.value = inlineRemarks.value.replace(/^1\.\s*/, prefix);
+        }
+
         inlineRemarks.addEventListener('focus', function() {
             if (this.value.trim() === '') {
-                this.value = "1. ";
+                this.value = prefix;
             }
         });
 
@@ -450,7 +466,6 @@
         });
 
         inlineRemarks.addEventListener('input', function() {
-            const prefix = "1. ";
             if (!this.value.startsWith(prefix) && this.value.trim() !== '') {
                 const currentVal = this.value;
                 if (currentVal.length < prefix.length) {
@@ -553,6 +568,29 @@
         }
     };
 </script>
+@elseif($canReverse)
+<div class="mb-4 p-3 border rounded shadow-sm" style="background: #fffbeb; border: 1.5px solid #fef3c7; border-left: 4px solid #f59e0b !important; border-radius: 8px;">
+    <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 12px;">
+        <div class="d-flex align-items-center">
+            <div class="mr-3 text-warning">
+                <i class="fas fa-undo-alt" style="font-size: 24px; color: #d97706;"></i>
+            </div>
+            <div>
+                <div class="font-weight-bold text-dark rajdhani" style="font-size: 14px; letter-spacing: 0.5px;">
+                    REVERSE CASE TO UNDER PROCESS
+                </div>
+                <div class="text-muted" style="font-size: 12px; margin-top: 2px;">
+                    This case is currently <strong>{{ $purchase->pcs_status }}</strong>. As Finance authority, you can reverse this case to <strong>Under Process</strong> to amend items, adjust subheads, or re-route through the approval chain.
+                </div>
+            </div>
+        </div>
+        <div>
+            <button type="button" class="btn btn-warning btn-sm font-weight-bold rajdhani px-3 shadow-sm text-dark" style="font-size: 12.5px; letter-spacing: 0.5px; height: 36px; display: inline-flex; align-items: center; gap: 6px; border-radius: 6px;" data-toggle="modal" data-target="#reversePurchaseCaseModal">
+                <i class="fas fa-undo-alt"></i> REVERSE CASE
+            </button>
+        </div>
+    </div>
+</div>
 @elseif(!$isFinalized)
 <div class="mb-4 p-3 border rounded shadow-sm" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-left: 4px solid #64748b !important; border-radius: 8px;">
     <div class="d-flex align-items-center">

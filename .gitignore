@@ -34,3 +34,10 @@ scratch/
 tests/
 test/
 
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Runtime backup logs
+storage_backup_latest_log.txt

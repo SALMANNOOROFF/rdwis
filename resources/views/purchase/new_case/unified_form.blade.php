@@ -6,7 +6,7 @@
     $themes = [
         'Ps' => ['icon' => 'fa-boxes', 'color' => '#2563eb', 'bg' => '#eff6ff', 'label' => 'Major Purchase (With Quotes)'],
         'Pt' => ['icon' => 'fa-receipt', 'color' => '#059669', 'bg' => '#ecfdf5', 'label' => 'Incidental Exp. (Without Quotes)'],
-        'Rb' => ['icon' => 'fa-plane-departure', 'color' => '#d97706', 'bg' => '#fffbeb', 'label' => 'TA/DA Claim'],
+        'Rb' => ['icon' => 'fa-plane-departure', 'color' => '#d97706', 'bg' => '#fffbeb', 'label' => 'TA/DA / Bonus / Award / Honorarium'],
     ];
     $theme = $themes[$type] ?? $themes['Ps'];
 @endphp
@@ -609,7 +609,7 @@
                     <div class="dyn-row dyn-row-tada p-3 mb-2 rounded" data-idx="0" style="background: #f8fafc; border: 1.5px solid #e2e8f0; display: block;">
                       <div class="d-flex justify-content-between align-items-center mb-2">
                         <div style="font-size:13px;font-weight:700;color:#0f172a;font-family:'Rajdhani',sans-serif;">
-                          <i class="fas fa-user-check text-warning mr-1"></i> Line #<span class="row-serial">1</span>: TA/DA Employee Selection
+                          <i class="fas fa-user-check text-warning mr-1"></i> Line #<span class="row-serial">1</span>: Employee Allowance / Travel / Award Selection
                         </div>
                         <button type="button" class="btn-rm-row" tabindex="-1" style="visibility:hidden" onclick="removeItemRow(this)"><i class="fas fa-times"></i></button>
                       </div>
@@ -634,17 +634,23 @@
                         </div>
                       </div>
                       <div class="row">
-                        <div class="col-md-7">
+                        <div class="col-md-5">
                           <label class="soft-label mb-1" style="font-size:10px;">Item Description (Auto-filled)</label>
                           <textarea name="items[0][desc]" id="item_desc_0" class="soft-input item-desc" rows="2" placeholder="Select employee & click 'Add Emp Details' above..." required style="min-height:54px; font-size:12px;"></textarea>
                         </div>
                         <div class="col-md-2">
-                          <label class="soft-label mb-1" style="font-size:10px;">Days (Qty) <span class="text-danger">*</span></label>
+                          <label class="soft-label mb-1" style="font-size:10px;">Unit <span class="text-danger">*</span></label>
+                          <select name="items[0][unit]" id="item_unit_0" class="soft-select item-unit font-weight-bold" style="height:36px; font-size:12px;">
+                            <option value="Days" selected>Days</option>
+                            <option value="Qty">Qty</option>
+                          </select>
+                        </div>
+                        <div class="col-md-2">
+                          <label class="soft-label mb-1" style="font-size:10px;">Days / Qty <span class="text-danger">*</span></label>
                           <input type="number" name="items[0][qty]" id="item_qty_0" class="soft-input item-qty font-weight-bold" value="1" min="1" oninput="calculateDirectItemTotals()" required>
-                          <input type="hidden" name="items[0][unit]" value="Days">
                         </div>
                         <div class="col-md-3">
-                          <label class="soft-label mb-1" style="font-size:10px;">Daily Rate (Auto-calc) <span class="text-danger">*</span></label>
+                          <label class="soft-label mb-1" style="font-size:10px;">Daily Rate / Rate <span class="text-danger">*</span></label>
                           <input type="number" step="any" name="items[0][price]" id="item_price_0" class="soft-input item-price font-weight-bold text-success" placeholder="PKR 0" oninput="calculateDirectItemTotals()" required>
                         </div>
                       </div>
@@ -653,14 +659,23 @@
                           <label class="soft-label mb-1">Type</label>
                           <select name="items[0][type]" class="soft-select">
                             <option value="3" selected>Service (3)</option>
+                            <option value="3">Travel (3)</option>
+                            <option value="3">Course / Training (3)</option>
+                            <option value="3">Allowance / Bonus (3)</option>
                           </select>
                         </div>
                         <div class="col-md-4">
                           <label class="soft-label mb-1">Subtype</label>
                           <select name="items[0][subtype]" class="soft-select">
+                            <option value="Inland Course">Inland Course</option>
+                            <option value="Overseas Course">Overseas Course</option>
                             <option value="Travelling/Boarding/Lodging" selected>Travelling/Boarding/Lodging</option>
-                            <option value="Travel">Travel</option>
-                            <option value="Meals/Refreshments">Meals/Refreshments</option>
+                            <option value="Visa / Passport Expenses">Visa / Passport Expenses</option>
+                            <option value="Ticket / Airfare">Ticket / Airfare</option>
+                            <option value="Daily Allowance (DA)">Daily Allowance (DA)</option>
+                            <option value="Meals / Refreshments">Meals / Refreshments</option>
+                            <option value="Bonus / Performance Award">Bonus / Performance Award</option>
+                            <option value="Honorarium / Special Duty">Honorarium / Special Duty</option>
                           </select>
                         </div>
                         <div class="col-md-4">
@@ -1244,7 +1259,7 @@
           row.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-2">
               <div style="font-size:13px;font-weight:700;color:#0f172a;font-family:'Rajdhani',sans-serif;">
-                <i class="fas fa-user-check text-warning mr-1"></i> Line #<span class="row-serial">${serial}</span>: TA/DA Employee Selection
+                <i class="fas fa-user-check text-warning mr-1"></i> Line #<span class="row-serial">${serial}</span>: Employee Allowance / Travel / Award Selection
               </div>
               <button type="button" class="btn-rm-row" onclick="removeItemRow(this)"><i class="fas fa-times"></i></button>
             </div>
@@ -1262,17 +1277,23 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-md-7">
+              <div class="col-md-5">
                 <label class="soft-label mb-1" style="font-size:10px;">Item Description (Auto-filled)</label>
                 <textarea name="items[${newIdx}][desc]" id="item_desc_${newIdx}" class="soft-input item-desc" rows="2" placeholder="Select employee & click 'Load Details' above..." required style="min-height:54px; font-size:12px;"></textarea>
               </div>
               <div class="col-md-2">
-                <label class="soft-label mb-1" style="font-size:10px;">Days (Qty) <span class="text-danger">*</span></label>
+                <label class="soft-label mb-1" style="font-size:10px;">Unit <span class="text-danger">*</span></label>
+                <select name="items[${newIdx}][unit]" id="item_unit_${newIdx}" class="soft-select item-unit font-weight-bold" style="height:36px; font-size:12px;">
+                  <option value="Days" selected>Days</option>
+                  <option value="Qty">Qty</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="soft-label mb-1" style="font-size:10px;">Days / Qty <span class="text-danger">*</span></label>
                 <input type="number" name="items[${newIdx}][qty]" id="item_qty_${newIdx}" class="soft-input item-qty font-weight-bold" value="1" min="1" oninput="calculateDirectItemTotals()" required>
-                <input type="hidden" name="items[${newIdx}][unit]" value="Days">
               </div>
               <div class="col-md-3">
-                <label class="soft-label mb-1" style="font-size:10px;">Daily Rate (Auto-calc) <span class="text-danger">*</span></label>
+                <label class="soft-label mb-1" style="font-size:10px;">Daily Rate / Rate <span class="text-danger">*</span></label>
                 <input type="number" step="any" name="items[${newIdx}][price]" id="item_price_${newIdx}" class="soft-input item-price font-weight-bold text-success" placeholder="PKR 0" oninput="calculateDirectItemTotals()" required>
               </div>
             </div>
@@ -1281,14 +1302,23 @@
                 <label class="soft-label mb-1">Type</label>
                 <select name="items[${newIdx}][type]" class="soft-select">
                   <option value="3" selected>Service (3)</option>
+                  <option value="3">Travel (3)</option>
+                  <option value="3">Course / Training (3)</option>
+                  <option value="3">Allowance / Bonus (3)</option>
                 </select>
               </div>
               <div class="col-md-4">
                 <label class="soft-label mb-1">Subtype</label>
                 <select name="items[${newIdx}][subtype]" class="soft-select">
+                  <option value="Inland Course">Inland Course</option>
+                  <option value="Overseas Course">Overseas Course</option>
                   <option value="Travelling/Boarding/Lodging" selected>Travelling/Boarding/Lodging</option>
-                  <option value="Travel">Travel</option>
-                  <option value="Meals/Refreshments">Meals/Refreshments</option>
+                  <option value="Visa / Passport Expenses">Visa / Passport Expenses</option>
+                  <option value="Ticket / Airfare">Ticket / Airfare</option>
+                  <option value="Daily Allowance (DA)">Daily Allowance (DA)</option>
+                  <option value="Meals / Refreshments">Meals / Refreshments</option>
+                  <option value="Bonus / Performance Award">Bonus / Performance Award</option>
+                  <option value="Honorarium / Special Duty">Honorarium / Special Duty</option>
                 </select>
               </div>
               <div class="col-md-4">

@@ -202,16 +202,46 @@ class EmployeeCreationService
             if (!$alreadyExists) {
                 // 3. Build day columns from template row (copy 'Z' for weekends, 'X' for off days)
                 $dayData = [];
+                $joinDt = Carbon::parse($joinDate);
+                $isJoiningMonth = ($cursor->format('Y-m') === $joinDt->format('Y-m'));
+                $joinDayOfMonth = (int) $joinDt->format('j');
+                $daysInMonth = (int) $cursor->copy()->endOfMonth()->format('j');
+
                 for ($d = 1; $d <= 31; $d++) {
                     $col = "att_{$d}";
                     $val = $templateRow->$col ?? null;
-                    $dayData[$col] = in_array($val, ['Z', 'X']) ? $val : null;
+
+                    if (in_array($val, ['Z', 'X'])) {
+                        // Keep system codes (weekends, invalid days)
+                        $dayData[$col] = $val;
+                    } elseif ($isJoiningMonth && $d < $joinDayOfMonth && $d <= $daysInMonth) {
+                        // Pre-joining days: mark as 'N' (Not Applicable)
+                        // Check if it's a weekend first — weekends stay 'Z'
+                        $dayDt = $cursor->copy()->addDays($d - 1);
+                        $dayData[$col] = $dayDt->isWeekend() ? 'Z' : 'N';
+                    } else {
+                        $dayData[$col] = null;
+                    }
                 }
 
-                // 4. Determine lock status based on month difference from now
-                $diffMonths = $cursor->diffInMonths($currentMonth);
-                $locked1 = $diffMonths >= 1;
-                $locked2 = $diffMonths >= 2;
+                // 4. Determine lock status:
+                // Pre-cutoff (Days 1..25 / locked1) depends on current month's salary.
+                // Post-cutoff (Days 26..31 / locked2) belongs to NEXT month's payroll cycle and depends on next month's salary!
+                $hasFulfilledCurrent = DB::table('hr.salreqs')
+                    ->where('srq_emp_id', $empId)
+                    ->where('srq_month', $monthEndStr)
+                    ->whereIn('srq_status', ['Fulfilled', 'Closed'])
+                    ->exists();
+
+                $nextMonthEndStr = $cursor->copy()->addMonth()->endOfMonth()->toDateString();
+                $hasFulfilledNext = DB::table('hr.salreqs')
+                    ->where('srq_emp_id', $empId)
+                    ->where('srq_month', $nextMonthEndStr)
+                    ->whereIn('srq_status', ['Fulfilled', 'Closed'])
+                    ->exists();
+
+                $locked1 = $hasFulfilledCurrent;
+                $locked2 = $hasFulfilledNext;
 
                 $insertData = array_merge([
                     'att_emp_id'      => $empId,
@@ -372,7 +402,13 @@ class EmployeeCreationService
             // 6. Record audit remark in hr.ctrcaseremarks (Strictly user-entered remarks only)
             $userRemarks = trim((string)($data['remarks'] ?? ''));
             if (empty($userRemarks)) {
-                throw new InvalidArgumentException('Remarks are required when adding employee record.');
+                $userRemarks = trim((string)request('remarks', ''));
+            }
+            if (empty($userRemarks)) {
+                $userRemarks = trim((string)request('decisionRemarks', ''));
+            }
+            if (empty($userRemarks)) {
+                $userRemarks = 'Employee record registered in system and linked to hiring case #' . $case->ctc_id . '.';
             }
             $this->approvalService->recordRemark(
                 $case,

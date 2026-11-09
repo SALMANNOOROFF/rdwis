@@ -316,7 +316,10 @@ class FinanceOfProjectController extends Controller
                          ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO']);
             } elseif ($scope === 'subhead') {
                 $expQuery->where('c.cmt_hed_id', $headId)
-                         ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO']);
+                         ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO'])
+                         ->where(function($q) {
+                             $q->whereNull('c.cmt_sudohed')->orWhere('c.cmt_sudohed', '=', '');
+                         });
                 if ($subhead) {
                     if (strcasecmp(trim((string)$subhead), 'Misc') === 0) {
                         if (!empty($otherSubheads)) {
@@ -400,7 +403,15 @@ class FinanceOfProjectController extends Controller
                 $amt2 = abs((float) ($row->trn_amount2 ?: $row->trn_amount1)) * $ratio * $multiplier;
 
                 $rawShd = !empty(trim((string)$row->subhead)) ? $row->subhead : ($row->cmt_sudohed ?: ($row->cmt_type === 'Sa' ? 'HR' : null));
-                if ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0) {
+                if ($scope === 'csrf' || !empty(trim((string)$row->cmt_sudohed))) {
+                    if ($row->cmt_type === 'Sa' || in_array(strtoupper(trim((string)$rawShd)), ['HR', 'CHRF'])) {
+                        $resolvedSubhead = 'HR (CSRF)';
+                    } elseif (!empty($rawShd) && $rawShd !== 'Misc') {
+                        $resolvedSubhead = $rawShd . ' (CSRF)';
+                    } else {
+                        $resolvedSubhead = 'CSRF';
+                    }
+                } elseif ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0) {
                     $resolvedSubhead = 'Misc';
                 } else {
                     $resolvedSubhead = $rawShd ?: 'Misc';
@@ -494,7 +505,10 @@ class FinanceOfProjectController extends Controller
             } elseif ($scope === 'prj') {
                 $cmtQuery->where('c.cmt_hed_id', $headId);
             } elseif ($scope === 'subhead') {
-                $cmtQuery->where('c.cmt_hed_id', $headId);
+                $cmtQuery->where('c.cmt_hed_id', $headId)
+                         ->where(function($q) {
+                             $q->whereNull('c.cmt_sudohed')->orWhere('c.cmt_sudohed', '=', '');
+                         });
                 if ($subhead) {
                     if (strcasecmp(trim((string)$subhead), 'Misc') === 0) {
                         if (!empty($otherSubheads)) {
@@ -569,7 +583,15 @@ class FinanceOfProjectController extends Controller
                 $outstanding = max(0, $cmtAmt - $paidAmt);
 
                 $rawShd = !empty(trim((string)$row->subhead)) ? $row->subhead : ($row->cmt_sudohed ?: ($row->cmt_type === 'Sa' ? 'HR' : null));
-                if ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0) {
+                if ($scope === 'csrf' || !empty(trim((string)$row->cmt_sudohed))) {
+                    if ($row->cmt_type === 'Sa' || in_array(strtoupper(trim((string)$rawShd)), ['HR', 'CHRF'])) {
+                        $resolvedSubhead = 'HR (CSRF)';
+                    } elseif (!empty($rawShd) && $rawShd !== 'Misc') {
+                        $resolvedSubhead = $rawShd . ' (CSRF)';
+                    } else {
+                        $resolvedSubhead = 'CSRF';
+                    }
+                } elseif ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0) {
                     $resolvedSubhead = 'Misc';
                 } else {
                     $resolvedSubhead = $rawShd ?: 'Misc';
@@ -650,7 +672,10 @@ class FinanceOfProjectController extends Controller
             } elseif ($scope === 'prj') {
                 $ipcQuery->where('ipc.hed_id', $headId);
             } elseif ($scope === 'subhead') {
-                $ipcQuery->where('ipc.hed_id', $headId);
+                $ipcQuery->where('ipc.hed_id', $headId)
+                         ->where(function($q) {
+                             $q->whereNull('ipc.sudohed')->orWhere('ipc.sudohed', '=', '');
+                         });
                 if ($subhead) {
                     if (strcasecmp(trim((string)$subhead), 'Equipment') === 0) {
                         $ipcQuery->where(function($q) {
@@ -716,7 +741,15 @@ class FinanceOfProjectController extends Controller
                     ? $row->subhead
                     : (!empty(trim((string)$row->sudohed)) ? $row->sudohed : (in_array(strtolower($row->doctype), ['ps', 'mat', 'pur']) ? 'Equipment' : 'Misc'));
 
-                if ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0 && (empty($row->subhead) || strcasecmp(trim((string)$row->subhead), 'Misc') === 0)) {
+                if ($scope === 'csrf' || !empty(trim((string)$row->sudohed))) {
+                    if ($row->doctype === 'Sa' || in_array(strtoupper(trim((string)$resolvedSubhead)), ['HR', 'CHRF'])) {
+                        $resolvedSubhead = 'HR (CSRF)';
+                    } elseif (!empty($resolvedSubhead) && $resolvedSubhead !== 'Misc') {
+                        $resolvedSubhead = $resolvedSubhead . ' (CSRF)';
+                    } else {
+                        $resolvedSubhead = 'CSRF';
+                    }
+                } elseif ($scope === 'subhead' && strcasecmp(trim((string)$subhead), 'Misc') === 0 && (empty($row->subhead) || strcasecmp(trim((string)$row->subhead), 'Misc') === 0)) {
                     $resolvedSubhead = 'Misc';
                 }
 

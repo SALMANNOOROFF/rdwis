@@ -508,10 +508,7 @@ class PurchaseInitiationController extends Controller
             if ($op === 'save_metadata') {
                 if ($request->filled('subhead')) {
                     $subhead = trim((string)$request->input('subhead'));
-                    DB::table('pur.purcases_shd')->updateOrInsert(
-                        ['pcd_pcs_id' => $purchase->pcs_id],
-                        ['pcd_subhead' => $subhead, 'pcd_type' => $purchase->pcs_type ?: 'Ps', 'pcd_ratio' => 1.0]
-                    );
+                    $this->syncCaseSubheads($purchase->pcs_id, $subhead);
                 }
                 if ($request->filled('pcs_frm_id')) {
                     $purchase->pcs_frm_id = (int)$request->input('pcs_frm_id');
@@ -643,6 +640,7 @@ class PurchaseInitiationController extends Controller
                 }
 
                 $this->recalcCasePricing($purchase->pcs_id);
+                $this->syncCaseSubheads($purchase->pcs_id);
                 return ['ok' => true, 'message' => 'Item added.', 'pcsId' => (int) $purchase->pcs_id];
             }
 
@@ -716,6 +714,7 @@ class PurchaseInitiationController extends Controller
                     ]);
 
                 $this->recalcCasePricing($purchase->pcs_id);
+                $this->syncCaseSubheads($purchase->pcs_id);
                 return ['ok' => true, 'message' => 'Item updated successfully.', 'pcsId' => (int) $purchase->pcs_id];
             }
 
@@ -744,6 +743,7 @@ class PurchaseInitiationController extends Controller
                 DB::table('pur.quoteitems')->where('qti_pci_id', $pciId)->delete();
                 DB::table('pur.purcaseitems')->where('pci_pcs_id', $purchase->pcs_id)->where('pci_id', $pciId)->delete();
                 $this->recalcCasePricing($purchase->pcs_id);
+                $this->syncCaseSubheads($purchase->pcs_id);
                 return ['ok' => true, 'message' => 'Item deleted.', 'pcsId' => (int) $purchase->pcs_id];
             }
 
@@ -1124,6 +1124,92 @@ class PurchaseInitiationController extends Controller
 
         $pricing->markRecommended($pcsId, $current ? (int) $current : null);
         $pricing->applyRecommendedQuote($pcsId, $declaredTax);
+    }
+
+    /**
+     * Synchronize pur.purcases_shd (and fin.docs_shd) based on item subheads and pricing.
+     * If $forceSubhead is provided, updates all item lines to that subhead as well.
+     */
+    protected function syncCaseSubheads(int $pcsId, ?string $forceSubhead = null): void
+    {
+        $case = DB::table('pur.purcases')->where('pcs_id', $pcsId)->first();
+        if (!$case) return;
+
+        $caseType = $case->pcs_type ?: 'Ps';
+
+        if (!empty($forceSubhead)) {
+            $forceSubhead = trim($forceSubhead);
+            // 1. Force update all item lines to this subhead
+            DB::table('pur.purcaseitems')
+                ->where('pci_pcs_id', $pcsId)
+                ->update(['pci_subhead' => $forceSubhead]);
+
+            // 2. Set purcases_shd with single row at 1.0 ratio
+            DB::table('pur.purcases_shd')->where('pcd_pcs_id', $pcsId)->delete();
+            DB::table('pur.purcases_shd')->insert([
+                'pcd_pcs_id'  => $pcsId,
+                'pcd_subhead' => $forceSubhead,
+                'pcd_ratio'   => 1.0,
+                'pcd_type'    => $caseType,
+            ]);
+            return;
+        }
+
+        // Auto-sync from item lines
+        $items = DB::table('pur.purcaseitems')
+            ->where('pci_pcs_id', $pcsId)
+            ->get();
+
+        if ($items->isEmpty()) {
+            return;
+        }
+
+        $subheadCosts = [];
+        $totalCost = 0.0;
+
+        foreach ($items as $item) {
+            $sh = trim((string)($item->pci_subhead ?: ''));
+            if (empty($sh)) {
+                $sh = ($caseType === 'Ps') ? 'Equipment' : 'Misc';
+            }
+            $cost = (float)($item->pci_qty ?: 1) * (float)($item->pci_price ?: 0);
+            if ($cost < 0) $cost = 0;
+            $subheadCosts[$sh] = ($subheadCosts[$sh] ?? 0.0) + $cost;
+            $totalCost += $cost;
+        }
+
+        DB::table('pur.purcases_shd')->where('pcd_pcs_id', $pcsId)->delete();
+
+        $subheadCount = count($subheadCosts);
+        if ($totalCost <= 0 || $subheadCount === 1) {
+            $singleSubhead = array_key_first($subheadCosts) ?: (($caseType === 'Ps') ? 'Equipment' : 'Misc');
+            DB::table('pur.purcases_shd')->insert([
+                'pcd_pcs_id'  => $pcsId,
+                'pcd_subhead' => $singleSubhead,
+                'pcd_ratio'   => 1.0,
+                'pcd_type'    => $caseType,
+            ]);
+        } else {
+            $allocatedRatio = 0.0;
+            $keys = array_keys($subheadCosts);
+            $lastIndex = $subheadCount - 1;
+
+            foreach ($keys as $idx => $shName) {
+                if ($idx === $lastIndex) {
+                    $ratio = round(max(0.0, 1.0 - $allocatedRatio), 4);
+                } else {
+                    $ratio = round($subheadCosts[$shName] / $totalCost, 4);
+                    $allocatedRatio += $ratio;
+                }
+
+                DB::table('pur.purcases_shd')->insert([
+                    'pcd_pcs_id'  => $pcsId,
+                    'pcd_subhead' => $shName,
+                    'pcd_ratio'   => $ratio,
+                    'pcd_type'    => $caseType,
+                ]);
+            }
+        }
     }
 
     /**

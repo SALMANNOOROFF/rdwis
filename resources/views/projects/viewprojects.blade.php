@@ -34,11 +34,17 @@
                             <input type="date" id="dateTo" class="form-control form-control-sm" onchange="applyFilters()">
                         </div>
                         <div class="col-md-5 col-12 mb-2">
+                             @php
+                                 $initialStatus = strtolower(request()->query('status', 'all'));
+                                 if (!in_array($initialStatus, ['all', 'open', 'closed'])) {
+                                     $initialStatus = 'all';
+                                 }
+                             @endphp
                              <label class="small text-muted mb-0">Status Filter</label>
                              <div class="btn-group btn-block shadow-sm">
-                                <button class="btn btn-sm btn-outline-primary filter-btn-main" onclick="setMainFilter('all', this)">All</button>
-                                <button class="btn btn-sm btn-outline-primary active filter-btn-main" onclick="setMainFilter('open', this)">Open</button>
-                                <button class="btn btn-sm btn-outline-success filter-btn-main" onclick="setMainFilter('closed', this)">Closed</button>
+                                <button class="btn btn-sm btn-outline-primary {{ $initialStatus === 'all' ? 'active' : '' }} filter-btn-main" onclick="setMainFilter('all', this)">All</button>
+                                <button class="btn btn-sm btn-outline-primary {{ $initialStatus === 'open' ? 'active' : '' }} filter-btn-main" onclick="setMainFilter('open', this)">Open</button>
+                                <button class="btn btn-sm btn-outline-success {{ $initialStatus === 'closed' ? 'active' : '' }} filter-btn-main" onclick="setMainFilter('closed', this)">Closed</button>
                             </div>
                         </div>
                     </div>
@@ -234,7 +240,7 @@
 </div>
 
 <script>
-    let currentMainStatus = 'open';
+    let currentMainStatus = '{{ $initialStatus }}';
 
     function setMainFilter(status, btn) {
         currentMainStatus = status;

@@ -256,38 +256,96 @@
       letter-spacing: 0.8px;
     }
 
-    /* Print Styles */
+    /* Print Styles (TKT-2026-0029: Blank Page Removal & Precise A4 Pagination) */
     @media print {
       @page {
         size: A4 portrait;
-        margin: 12mm 16mm;
+        margin: 10mm 14mm 8mm 14mm;
       }
-      .no-print {
+      .no-print,
+      .sc-navbar,
+      header {
         display: none !important;
       }
-      body {
+      html, body {
         background: #ffffff !important;
+        color: #000000 !important;
         padding: 0 !important;
+        margin: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
-      .sc-viewport {
+      .sc-viewport,
+      .sc-sheets-container,
+      .contract-wrapper {
         padding: 0 !important;
+        margin: 0 !important;
+        margin-bottom: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        display: block !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
       }
       .sc-a4-sheet {
         box-shadow: none !important;
         border: none !important;
         width: 100% !important;
-        min-height: 270mm !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
         margin: 0 !important;
-        padding: 0 0 16mm 0 !important;
+        margin-bottom: 0 !important;
+        padding: 0 0 10mm 0 !important;
         page-break-after: always !important;
         break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
       }
-      .sc-a4-sheet:last-child {
-        page-break-after: auto !important;
-        break-after: auto !important;
+      .sc-a4-sheet:last-child,
+      .sc-a4-sheet:only-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-before: auto !important;
+        break-before: auto !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+      }
+      /* Signature block and final footer page-break avoid */
+      .sc-footer,
+      .sc-final-footer,
+      .sc-signatures-container,
+      .sc-endorsement-container,
+      .sc-a4-sheet:last-child .sc-footer,
+      .sc-a4-sheet:only-child .sc-footer {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        margin-bottom: 0 !important;
       }
       .sc-header-blue, .sc-footer-blue {
         color: #1d70b8 !important;
+      }
+      .print-hidden-sheet {
+        display: none !important;
       }
     }
   </style>
@@ -343,8 +401,11 @@
         </select>
       </div>
 
-      <button type="button" onclick="window.print()" class="btn-print-a4">
+      <button type="button" onclick="scPrintAll()" class="btn-print-a4" title="Print all contract pages cleanly without trailing blank page">
         <i class="fas fa-print"></i> Print Contract (A4)
+      </button>
+      <button type="button" onclick="scPrintCurrentPage()" class="btn-print-a4" style="background: #0284c7; margin-left: 6px;" title="Print single active page only (no extra blank page)">
+        <i class="fas fa-file-alt"></i> Print Single Page
       </button>
     </div>
 
@@ -352,7 +413,7 @@
 
   {{-- MAIN VIEWPORT & A4 SHEETS --}}
   <main class="sc-viewport">
-    <div class="sc-sheets-container" id="serviceContractPrintArea">
+    <div class="sc-sheets-container contract-wrapper" id="serviceContractPrintArea">
 
       @php
         $c = $selectedContract;
@@ -734,7 +795,7 @@
         </div>
 
         {{-- Signatures Grid --}}
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 45px; padding: 0 10px;">
+        <div class="sc-signatures-container" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 35px; padding: 0 10px;">
           {{-- Left: GM NRDI, MTSS Karachi Office --}}
           <div style="text-align: center; width: 260px;">
             <div style="border-bottom: 1.5px solid #000; margin-bottom: 8px; width: 100%;"></div>
@@ -757,7 +818,7 @@
         </div>
 
         {{-- Center: Endorsement by RD Wing Party III --}}
-        <div style="text-align: center; margin-bottom: 40px;">
+        <div class="sc-endorsement-container" style="text-align: center; margin-bottom: 30px;">
           <div style="display: inline-block; text-align: center; min-width: 250px;">
             <div style="font-weight: bold; text-decoration: underline; text-underline-offset: 3px;">Endorsement by RD Wing</div>
             <div style="font-weight: bold; text-decoration: underline; text-underline-offset: 3px; margin-bottom: 24px;">Party III</div>
@@ -769,7 +830,7 @@
         </div>
 
         {{-- Page 4 Footer --}}
-        <div class="sc-footer">
+        <div class="sc-footer sc-final-footer">
           <div class="sc-footer-num">4 of 4</div>
           <div class="sc-footer-blue">CONFIDENTIAL</div>
         </div>
@@ -779,6 +840,8 @@
   </main>
 
   <script>
+    let scActivePageNum = 1;
+
     function switchPageContract(ctrId) {
       if (ctrId) {
         window.location.href = "{{ url('/divhr/employee/' . $id . '/service-contract') }}/" + ctrId;
@@ -786,10 +849,35 @@
     }
 
     function scScrollToPage(pageNum) {
+      scActivePageNum = pageNum;
       const pageEl = document.getElementById('scPage' + pageNum);
       if (pageEl) {
         pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    }
+
+    function scPrintAll() {
+      document.querySelectorAll('.sc-a4-sheet').forEach(function(el) {
+        el.classList.remove('print-hidden-sheet');
+      });
+      window.print();
+    }
+
+    function scPrintCurrentPage(pageNum) {
+      const targetPage = pageNum || scActivePageNum || 1;
+      document.querySelectorAll('.sc-a4-sheet').forEach(function(el) {
+        if (el.id === 'scPage' + targetPage) {
+          el.classList.remove('print-hidden-sheet');
+        } else {
+          el.classList.add('print-hidden-sheet');
+        }
+      });
+      window.print();
+      setTimeout(function() {
+        document.querySelectorAll('.sc-a4-sheet').forEach(function(el) {
+          el.classList.remove('print-hidden-sheet');
+        });
+      }, 1000);
     }
   </script>
 </body>

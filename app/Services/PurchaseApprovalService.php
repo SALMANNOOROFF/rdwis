@@ -228,7 +228,8 @@ class PurchaseApprovalService
         $currArea = strtolower(trim((string) ($currentUser?->acc_untarea ?? (is_string($currentUserOrRole) ? $currentUserOrRole : ''))));
         if (in_array($currArea, ['proc', 'prc'], true)) $currArea = 'proc';
         $currContext = $currentUser ? \App\Services\Auth\UserAccessContext::forUser($currentUser) : null;
-        $isCommand = $currContext?->isCommand() ?? in_array($currArea, ['rdw', 'hqs', 'nrdi'], true);
+        $isDlogUser = ($currContext?->isDlog() ?? false) || in_array($currArea, ['log', 'dlog', 'logistics'], true);
+        $isCommand = ($currContext?->isCommand() ?? false) || in_array($currArea, ['rdw', 'hqs', 'nrdi'], true) || $isDlogUser;
 
         $accounts = \App\Models\CenAccount::whereRaw("LOWER(acc_status) = 'active'")
             ->when($currentUser, fn($q) => $q->where('acc_id', '!=', $currentUser->acc_id))
@@ -657,6 +658,88 @@ class PurchaseApprovalService
                 if ($accId) {
                     \App\Models\UserCaseDraftRemark::clearDraft($accId, 'purchase', (int) $case->pcs_id);
                 }
+            }
+
+            return $case;
+        });
+    }
+
+    /**
+     * Reverse an Approved, Fulfilled, or Closed purchase case back to Under Process (DFinance).
+     * Releases unexecuted commitments so funds remain categorized under In Process (IPC),
+     * and lands the case directly into the Finance user's Pending Actions queue.
+     *
+     * @param Purchase $case
+     * @param CenAccount $user
+     * @param string $remarks
+     * @return Purchase
+     * @throws \Exception
+     */
+    public function reverseCase(Purchase $case, CenAccount $user, string $remarks): Purchase
+    {
+        return DB::transaction(function () use ($case, $user, $remarks) {
+            $prevStatus = $case->pcs_status;
+
+            // 1. Release unexecuted Awaited commitments from fin.commitments
+            // This safely returns unlinked awaited amounts from Commitments into In Process (IPC)
+            $commitments = DB::table('fin.commitments')
+                ->where('cmt_docid', $case->pcs_id)
+                ->whereIn('cmt_type', ['Ps', 'Pt', 'Rb', $case->pcs_type])
+                ->where('cmt_status', 'Awaited')
+                ->get();
+
+            foreach ($commitments as $cmt) {
+                $hasTx = DB::table('fin.transactions')
+                    ->where('trn_cmt_id', $cmt->cmt_id)
+                    ->exists();
+
+                if (!$hasTx) {
+                    DB::table('fin.commitments')->where('cmt_id', $cmt->cmt_id)->delete();
+                }
+            }
+
+            // 3. Update Purchase record to Under Approval (Under Process)
+            $case->pcs_status = 'Under Approval';
+            $case->pcs_approvedtg = null;
+            $case->save();
+
+            // 4. Update/Create Substatus to DFinance (Pending)
+            // This places the case directly into the Finance User's Pending Actions queue
+            $this->transitionSubstatus($case, 'DFinance');
+
+            // 5. Delete any existing draft remarks for this user on this case
+            PurDecision::where('pdec_pcs_id', $case->pcs_id)
+                ->where('pdec_acc_id', $user->acc_id)
+                ->where('pdec_action', 'save_draft')
+                ->delete();
+
+            // 6. Log Decision in pur_decisions with English remarks
+            $cleanRemarks = trim($remarks);
+            $userRole = $user->acc_desigshort ?: 'Director Finance';
+            $logRemarks = "[CASE REVERSED] Case reversed to Under Process by {$user->acc_name} ({$userRole}). Reason: {$cleanRemarks}";
+
+            PurDecision::create([
+                'pdec_pcs_id'      => $case->pcs_id,
+                'pdec_acc_id'      => $user->acc_id,
+                'pdec_role'        => $userRole,
+                'pdec_action'      => 'reverse_case',
+                'pdec_from_status' => $prevStatus,
+                'pdec_to_status'   => 'Under Process (Finance)',
+                'pdec_remarks'     => $logRemarks,
+                'pdec_amount'      => $case->pcs_price,
+            ]);
+
+            // 7. Notification for audit tracking
+            PurNotification::create([
+                'pnt_acc_id'  => $user->acc_id,
+                'pnt_pcs_id'  => $case->pcs_id,
+                'pnt_message' => "Purchase Case #{$case->pcs_id} has been reversed to Under Process.",
+            ]);
+
+            // Auto-clear private draft remarks
+            $accId = (int) ($user->acc_id ?? 0);
+            if ($accId) {
+                \App\Models\UserCaseDraftRemark::clearDraft($accId, 'purchase', (int) $case->pcs_id);
             }
 
             return $case;

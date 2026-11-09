@@ -454,12 +454,12 @@
                                 <div class="col-6">
                                     <label class="rd-form-label">
                                         CNIC
-                                        @if(strtoupper($type) === 'HG')
+                                        @if(in_array(strtoupper($type), ['HG', 'HR', 'HN']))
                                             <span class="required-star text-danger">*</span>
                                         @endif
                                     </label>
-                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" placeholder="99999-9999999-9" {{ strtoupper($type) === 'HG' ? 'required' : '' }}>
-                                    @if(strtoupper($type) === 'HG')
+                                    <input type="text" name="ctc_cnic" id="ctc_cnic" class="rd-form-control cnic-mask" placeholder="99999-9999999-9" {{ in_array(strtoupper($type), ['HG', 'HR', 'HN']) ? 'required' : '' }}>
+                                    @if(in_array(strtoupper($type), ['HG', 'HR', 'HN']))
                                         <small class="text-muted d-block mt-0.5" style="font-size: 11px;">Mandatory for generating official Employee ID upon approval.</small>
                                     @endif
                                 </div>

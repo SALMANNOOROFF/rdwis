@@ -452,6 +452,23 @@
                                     <i class="fas fa-edit mr-1"></i> Edit Case
                                 </a>
                             </div>
+                            @php
+                                $prevRemarkCount = 0;
+                                foreach($case->remarksHistory->sortBy('crr_dtg') as $rem) {
+                                    $raw = $rem->crr_remarks ?? '';
+                                    if (strpos($raw, '<li') !== false) {
+                                        $prevRemarkCount += max(1, substr_count($raw, '<li'));
+                                    } elseif (!empty(trim(strip_tags($raw)))) {
+                                        $lines = explode("\n", trim(strip_tags($raw)));
+                                        $c = 0;
+                                        foreach ($lines as $l) { if (!empty(trim($l))) $c++; }
+                                        $prevRemarkCount += max(1, $c);
+                                    } else {
+                                        $prevRemarkCount += 1;
+                                    }
+                                }
+                                $divNextRemarkNumber = $prevRemarkCount + 1;
+                            @endphp
                             <div class="p-4">
                                 <p class="text-muted small mb-3 font-weight-500">
                                     Provide formal release remarks to initiate scrutiny with the HR department.
@@ -467,7 +484,7 @@
                                                 'targetTextarea' => '#divReleaseRemarks'
                                             ])
                                         </div>
-                                        <textarea id="divReleaseRemarks" name="remarks" class="rd-textarea" rows="3" placeholder="Enter remarks or justification for HR Scrutiny..." required></textarea>
+                                        <textarea id="divReleaseRemarks" name="remarks" class="rd-textarea" rows="3" placeholder="Para {{ $divNextRemarkNumber }}. Enter remarks or justification for HR Scrutiny..." required></textarea>
                                     </div>
                                     <button type="submit" class="btn-release-action"><i class="fas fa-paper-plane"></i> Release to HR</button>
                                 </form>
@@ -537,10 +554,95 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
+    const divNextNum = {{ $divNextRemarkNumber }};
+    const divRemarks = document.getElementById('divReleaseRemarks');
+
+    function getNextDivLocalNumber() {
+        if (!divRemarks) return divNextNum + 1;
+        const matches = divRemarks.value.match(/^\d+(?=\.)/gm);
+        if (matches && matches.length > 0) {
+            return Math.max(...matches.map(Number)) + 1;
+        }
+        return divNextNum + 1;
+    }
+
+    if (divRemarks) {
+        const prefix = divNextNum + ". ";
+
+        if (divRemarks.value.trim().startsWith('1. ') && divNextNum > 1) {
+            divRemarks.value = divRemarks.value.replace(/^1\.\s*/, prefix);
+        }
+
+        divRemarks.addEventListener('focus', function() {
+            if (this.value.trim() === '') {
+                this.value = prefix;
+            }
+        });
+
+        divRemarks.addEventListener('keydown', function(e) {
+            const selectionStart = this.selectionStart;
+            const text = this.value;
+            const lastNewline = text.lastIndexOf('\n', selectionStart - 1);
+            const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+            const currentLine = text.substring(lineStart, selectionStart);
+            const match = currentLine.match(/^\d+\. /);
+
+            if (match && selectionStart < lineStart + match[0].length) {
+                if (e.key === 'Backspace' || e.key === 'Delete' || (e.key.length === 1 && e.key !== 'Enter')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+            
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentLine.trim().length > (match ? match[0].trim().length : 0)) {
+                    const nextNumLocal = getNextDivLocalNumber();
+                    const newNumber = "\n" + nextNumLocal + ". ";
+                    const before = text.substring(0, selectionStart);
+                    const after = text.substring(selectionStart);
+                    this.value = before + newNumber + after;
+                    this.selectionStart = this.selectionEnd = before.length + newNumber.length;
+                }
+            }
+            
+            if (e.key === 'Backspace' && match && selectionStart === lineStart + match[0].length) {
+                e.preventDefault();
+            }
+        });
+
+        divRemarks.addEventListener('input', function() {
+            if (!this.value.startsWith(prefix) && this.value.trim() !== '') {
+                const currentVal = this.value;
+                if (currentVal.length < prefix.length) {
+                    this.value = prefix;
+                } else {
+                    this.value = prefix + currentVal.replace(/^\d+\.?\s*/, '');
+                }
+                this.selectionStart = this.selectionEnd = prefix.length;
+            }
+        });
+    }
+
     // ── Release to HR ─────────────────────────────────────────
     $('#releaseForm').submit(function(e) {
         e.preventDefault();
-        const formData = $(this).serialize();
+        
+        let rawRemarks = (divRemarks ? divRemarks.value : '').trim();
+        let lines = rawRemarks.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let cleanedLines = lines.map(line => line.replace(/^\d+\.\s*/, '').trim()).filter(l => l.length > 0);
+        if (cleanedLines.length === 0) {
+            Swal.fire({ title: 'Remarks Required!', text: 'Please enter remarks before releasing.', icon: 'warning' });
+            if (divRemarks) divRemarks.focus();
+            return;
+        }
+
+        let liItems = cleanedLines.map(line => `<li>${line}</li>`).join('');
+        let finalHtml = `<ol start="${divNextNum}">${liItems}</ol>`;
+
+        const formFields = $(this).serializeArray().filter(item => item.name !== 'remarks');
+        formFields.push({ name: 'remarks', value: finalHtml });
+        const formData = $.param(formFields);
 
         Swal.fire({
             title: 'Release to HR',

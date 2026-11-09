@@ -390,6 +390,7 @@ class PurchaseCaseController extends Controller
             })
             ->where('pcs_id', '!=', $purchase->pcs_id)
             ->orderBy('pcs_date', 'desc')
+            ->orderBy('pcs_id', 'desc')
             ->limit(10)
             ->get();
 
@@ -402,6 +403,7 @@ class PurchaseCaseController extends Controller
                 })
                 ->where('pcs_id', '!=', $purchase->pcs_id)
                 ->orderBy('pcs_date', 'desc')
+                ->orderBy('pcs_id', 'desc')
                 ->limit(10)
                 ->get();
         }
@@ -473,6 +475,39 @@ class PurchaseCaseController extends Controller
     }
 
     /**
+     * Reverse an Approved, Fulfilled, or Closed purchase case to Under Process (Finance)
+     */
+    public function reverse(Request $request, $id)
+    {
+        $request->validate([
+            'remarks' => 'required|string|min:3|max:2000',
+        ]);
+
+        $purchase = Purchase::findOrFail($id);
+        $this->authorize('reverse', $purchase);
+
+        try {
+            $user = Auth::user();
+            $this->approvalService->reverseCase($purchase, $user, $request->remarks);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Purchase case reversed to Under Process successfully! The case is now in your Pending Actions queue.'
+                ]);
+            }
+
+            return redirect()->route('nrdi.purchase_cases_new.finance.show', $purchase->pcs_id)
+                ->with('success', 'Purchase case reversed to Under Process successfully! The case is now in your Pending Actions queue.');
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+            return back()->with('error', 'Reversal failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Toggle or update MTSS submission status for an approved purchase case (Finance only)
      */
     public function toggleMtss(Request $request, $id)
@@ -506,6 +541,17 @@ class PurchaseCaseController extends Controller
             $newStatus = (bool) $request->input('status');
         } else {
             $newStatus = !$purchase->pcs_mtss_sent;
+        }
+
+        // Prevent accidental unsend: require explicit 'unsend' confirmation phrase
+        if ($purchase->pcs_mtss_sent && !$newStatus) {
+            $confirmPhrase = strtolower(trim((string)$request->input('confirm_phrase', '')));
+            if ($confirmPhrase !== 'unsend') {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Confirmation failed. You must type 'unsend' to revert MTSS submission status."
+                ], 422);
+            }
         }
 
         $purchase->pcs_mtss_sent = $newStatus;

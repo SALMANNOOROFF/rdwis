@@ -49,6 +49,11 @@
                         $icon = 'fa-hand-paper'; 
                         $actionText = 'Case Reverted for Corrections'; 
                     }
+                    elseif($act == 'reverse_case' || $act == 'reverse') {
+                        $color = 'warning';
+                        $icon = 'fa-undo-alt';
+                        $actionText = 'Case Changed to Under Process';
+                    }
                     
                     // Get Display Names for statuses
                     $fromStatus = $service->getStatusDisplayName($decision->pdec_from_status);
@@ -73,7 +78,7 @@
                             <div class="d-flex align-items-center">
                                 <span class="trail-action" style="font-size: 11px; color: var(--rd-text2);">
                                     <span style="font-weight: 800; color: #fff;">{{ $actionText }}</span> 
-                                    @if($actionText !== 'Case Reverted for Corrections')
+                                    @if(!in_array($actionText, ['Case Reverted for Corrections', 'Case Changed to Under Process']))
                                         to <span style="font-weight: 700; color: var(--rd-{{$color}});">{{ $toStatus }}</span>
                                     @endif
                                 </span>

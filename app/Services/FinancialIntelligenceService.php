@@ -450,6 +450,7 @@ class FinancialIntelligenceService
             ->get();
 
         // Subhead Expenditures split (Ps, Pt, Rb, Sa, TO transactions ratio-split)
+        // Strictly exclude CSRF/CHRF (cmt_sudohed) so CSRF never contaminates project subheads
         $subheadExpendituresRows = DB::table('fin.commitments as c')
             ->join('fin.transactions as t', 'c.cmt_id', '=', 't.trn_cmt_id')
             ->leftJoin('fin.docs_shd as shd', function ($join) {
@@ -458,6 +459,10 @@ class FinancialIntelligenceService
             })
             ->where('c.cmt_hed_id', $headId)
             ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO'])
+            ->where(function ($q) {
+                $q->whereNull('c.cmt_sudohed')
+                  ->orWhere('c.cmt_sudohed', '=', '');
+            })
             ->select(
                 DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN c.cmt_type = 'Sa' THEN 'HR' ELSE NULL END) as subhead"),
                 DB::raw('SUM(ROUND((CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) * COALESCE(shd.ratio, 1.0), 2)) as total')
@@ -471,7 +476,7 @@ class FinancialIntelligenceService
             $subheadExpenditures[$key] = round(abs((float) $row->total), 2);
         }
 
-        // Subhead Commitments split
+        // Subhead Commitments split - strictly exclude CSRF/CHRF (cmt_sudohed)
         $paidSubhead = DB::table('fin.transactions as t')
             ->join('fin.commitments as c', 't.trn_cmt_id', '=', 'c.cmt_id')
             ->leftJoin('fin.docs_shd as shd', function ($join) {
@@ -481,6 +486,10 @@ class FinancialIntelligenceService
             ->where('c.cmt_hed_id', $headId)
             ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
             ->where('c.cmt_status', 'Awaited')
+            ->where(function ($q) {
+                $q->whereNull('c.cmt_sudohed')
+                  ->orWhere('c.cmt_sudohed', '=', '');
+            })
             ->select(
                 'c.cmt_id',
                 'c.cmt_type',
@@ -498,6 +507,10 @@ class FinancialIntelligenceService
             ->where('c.cmt_hed_id', $headId)
             ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
             ->where('c.cmt_status', 'Awaited')
+            ->where(function ($q) {
+                $q->whereNull('c.cmt_sudohed')
+                  ->orWhere('c.cmt_sudohed', '=', '');
+            })
             ->select('c.cmt_id', 'c.cmt_type', 'shd.subhead', 'c.cmt_amount', 'shd.ratio')
             ->get();
 
@@ -523,13 +536,17 @@ class FinancialIntelligenceService
             $subheadCommitments[$key] += $net;
         }
 
-        // Subhead In Process split
+        // Subhead In Process split - strictly exclude CSRF/CHRF (ipc.sudohed)
         $subheadInProcessRows = DB::table('fin.docs_ipc as ipc')
             ->leftJoin('fin.docs_shd as shd', function ($join) {
                 $join->on('ipc.doctype', '=', 'shd.doc_type')
                      ->on('ipc.docid', '=', 'shd.doc_id');
             })
             ->where('ipc.hed_id', $headId)
+            ->where(function ($q) {
+                $q->whereNull('ipc.sudohed')
+                  ->orWhere('ipc.sudohed', '=', '');
+            })
             ->select(
                 DB::raw("COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN ipc.doctype IN ('Ps', 'mat', 'pur') THEN 'Equipment' WHEN ipc.doctype = 'Sa' THEN 'HR' ELSE 'Misc' END) as subhead"),
                 DB::raw('SUM(ROUND((CASE WHEN ipc.transtype = 1 THEN ipc.amount1 ELSE ipc.amount2 END) * COALESCE(shd.ratio, 1.0), 2)) as total')
@@ -768,7 +785,8 @@ class FinancialIntelligenceService
 
         $tempPeriods = [];
         foreach ($relevantContracts as $c) {
-            $isProject = ($c['ctr_unt_id'] >= 200000 && $c['ctr_unt_id'] < 800000);
+            $hasPlan = !empty($c['cpn_startdt']) && !empty($c['cpn_enddt']);
+            $isProject = ($c['ctr_unt_id'] >= 200000 && $c['ctr_unt_id'] < 800000) || $hasPlan;
             $start = $isProject ? $c['cpn_startdt'] : $c['ctr_effstartdt'];
             $end = $isProject ? $c['cpn_enddt'] : $c['ctr_effenddt'];
             
@@ -827,6 +845,7 @@ class FinancialIntelligenceService
                     }
                 }
             }
+            unset($p);
         };
 
         $probDone = [];
@@ -848,6 +867,7 @@ class FinancialIntelligenceService
                 $p['type'] = 0;
             }
         }
+        unset($p);
 
         $salheadApplicable = $this->getGlobalVar('salhead_applicable') === 'True';
         $isProject = false;
@@ -865,6 +885,7 @@ class FinancialIntelligenceService
                         $p['effhed_id'] = $headStr;
                     }
                 }
+                unset($p);
             }
         }
 
@@ -877,7 +898,7 @@ class FinancialIntelligenceService
                 if ($p['type'] != 4) {
                     $attSummary = $this->getEmpAttendanceSummary($empId, $p['start'], $p['end']);
                     $absent = $attSummary['A'];
-                    $unpaid = $attSummary['U'];
+                    $unpaid = $attSummary['U'] + ($attSummary['N'] ?? 0);
                 }
 
                 $calDays = (int) (new \DateTime($dtTo))->diff(new \DateTime($dtFrom))->days + 1;
@@ -923,7 +944,8 @@ class FinancialIntelligenceService
                     'absent' => 0,
                     'unpaid' => 0,
                     'prorated_salary' => 0.0,
-                    'underwork' => 0.0
+                    'underwork' => 0.0,
+                    'head_id' => $p['head_id'] ?? ($effhed === 'NULL' ? null : $effhed),
                 ];
             }
             $groups[$effhed]['ctr_ids'][] = $p['ctr_id'];
@@ -947,7 +969,7 @@ class FinancialIntelligenceService
                 'unpaid' => $g['unpaid'],
                 'prorated_salary' => $g['prorated_salary'],
                 'underwork' => $g['underwork'],
-                'head_id' => null,
+                'head_id' => $g['head_id'] ?? ($effhed === 'NULL' ? null : $effhed),
                 'effhed_id' => $effhed === 'NULL' ? null : $effhed
             ];
             $rowIdx++;
@@ -1052,7 +1074,7 @@ class FinancialIntelligenceService
             $dtMonth = (new \DateTime($dtMonth))->modify('first day of this month')->modify('-1 month')->format('Y-m-t');
         }
 
-        return max(0, $dues);
+        return round($dues, 2);
     }
 
     public function getPrjSalForecast($headId)

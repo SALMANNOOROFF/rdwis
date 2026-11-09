@@ -170,7 +170,7 @@ class HrCtrCase extends Model
 
     public function getDefaultProjectNameAttribute(): string
     {
-        return $this->is_hr_admin ? 'Center Special Research Fund (CSRF)' : 'Project will be allocated on next pay';
+        return $this->is_hr_admin ? 'Central Service Resource Fund (CSRF)' : 'Project will be allocated on next pay';
     }
 
     public function getProjectCodeAttribute(): string
@@ -192,7 +192,7 @@ class HrCtrCase extends Model
     public function getProjectNameAttribute(): string
     {
         if ($this->is_hr_admin) {
-            return 'Center Special Research Fund (CSRF)';
+            return 'Central Service Resource Fund (CSRF)';
         }
         $plan = $this->casePlans->first();
         if ($plan && $plan->project && !empty($plan->project->prj_name)) {

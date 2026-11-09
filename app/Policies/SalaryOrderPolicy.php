@@ -21,21 +21,28 @@ class SalaryOrderPolicy
 
     public function viewAny(CenAccount $user): bool
     {
-        return RolePermissionMap::hasPermission($user, PermissionRegistry::SALARY_VIEW);
+        if (RolePermissionMap::hasPermission($user, PermissionRegistry::SALARY_VIEW)) {
+            return true;
+        }
+
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $unitId = (int) ($user->acc_unt_id ?? 0);
+        return in_array($area, ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi'], true) || $unitId >= 800000;
     }
 
     public function view(CenAccount $user, FinSalOrder $order): bool
     {
-        if (! RolePermissionMap::hasPermission($user, PermissionRegistry::SALARY_VIEW)) {
-            return false;
+        $context = UserAccessContext::forUser($user);
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $unitId = (int) ($user->acc_unt_id ?? 0);
+
+        // HR, Finance, and Command have multi-unit visibility
+        if (AreaDefinition::isFinance($userArea) || in_array($userArea, ['hr', 'fin', 'adm', 'admin', 'is', 'it'], true) || $unitId >= 800000 || $context->isCommand()) {
+            return true;
         }
 
-        $context = UserAccessContext::forUser($user);
-        $userArea = (string) ($user->acc_untarea ?? '');
-
-        // Finance and Command have multi-unit visibility
-        if (AreaDefinition::isFinance($userArea) || $context->isCommand()) {
-            return true;
+        if (! RolePermissionMap::hasPermission($user, PermissionRegistry::SALARY_VIEW)) {
+            return false;
         }
 
         return $this->scopeService->canAccessUnit($user, (int) ($order->sor_unt_id ?? 0))
@@ -44,18 +51,36 @@ class SalaryOrderPolicy
 
     public function generate(CenAccount $user): bool
     {
-        return RolePermissionMap::hasPermission($user, PermissionRegistry::SALARY_GENERATE);
+        if (RolePermissionMap::hasPermission($user, PermissionRegistry::SALARY_GENERATE)) {
+            return true;
+        }
+
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $unitId = (int) ($user->acc_unt_id ?? 0);
+
+        // HR and Central department users with approver authority can generate salary
+        if (in_array($area, ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi'], true) || $unitId >= 800000) {
+            $context = UserAccessContext::forUser($user);
+            return $context->isApprover() || $context->isEditor() || $context->isSuperAdmin();
+        }
+
+        return false;
     }
 
     public function override(CenAccount $user, FinSalOrder $order): bool
     {
         $context = UserAccessContext::forUser($user);
-        if ($context->isSuperAdmin()) {
+        if ($context->isSuperAdmin() || $context->isCommand()) {
             return true;
         }
 
         if (! $context->isApprover()) {
             return false;
+        }
+
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        if (in_array($area, ['fin', 'finance', 'hr', 'adm', 'admin', 'is', 'it'], true) || ((int)($user->acc_unt_id ?? 0) >= 800000)) {
+            return true;
         }
 
         return RolePermissionMap::hasPermission($user, PermissionRegistry::SALARY_OVERRIDE);

@@ -398,27 +398,67 @@
 
         <div
           class="bg-surface border border-border1 rounded-xl p-4">
-          <div class="flex items-center gap-2 mb-2">
-            <i class="fas fa-chart-pie text-primary text-lg mr-1.5"></i>
-            <h3 class="font-bold text-text1 text-sm">Leave Utilization</h3>
-          </div>
-          <div class="flex flex-col items-center">
-            <div style="width:70px;height:70px;border-radius:50%;background:conic-gradient(var(--rd-primary-600) 0 50%,var(--rd-primary-400) 50% 57.5%,var(--rd-primary-200) 57.5% 62.5%,var(--rd-neutral-300) 62.5% 100%);position:relative;" class="relative mb-3">
-              <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-text1">25/40d</span>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-1.5">
+              <i class="fas fa-chart-pie text-primary text-base"></i>
+              <h3 class="font-bold text-text1 text-sm">Leave Utilization</h3>
             </div>
-            <div class="flex flex-wrap justify-center gap-x-2 gap-y-1 text-[9px] text-text2">
-              <div class="flex items-center gap-1">
-                <span class="w-2 h-2 bg-primary rounded-full"></span>
-                <span>Annual 20/25d</span>
+            <span class="text-[10px] text-text3 font-mono font-semibold" title="Contract Tenure">
+              {{ $leaveStats['start_date'] ? ($leaveStats['start_date'].' - '.$leaveStats['end_date']) : 'Yearly' }}
+            </span>
+          </div>
+
+          @php
+            $totalAllowed = $leaveStats['total_allowed'] ?? 30;
+            $usedLeaves = $leaveStats['utilized'] ?? 0;
+            $remLeaves = $leaveStats['remaining'] ?? 30;
+            $abs = $leaveStats['absent'] ?? 0;
+            $unp = $leaveStats['unpaid'] ?? 0;
+            $na = $leaveStats['not_applicable'] ?? 0;
+            $workDays = $leaveStats['working_days'] ?? 0;
+            $daysPassed = $leaveStats['days_passed'] ?? 0;
+            $contractDays = $leaveStats['contract_days'] ?? 365;
+
+            // Donut chart angles (based on 30 allowed leaves)
+            $usedAngle = min(360, (int)round(($usedLeaves / max(1, $totalAllowed)) * 360));
+          @endphp
+
+          <div class="flex flex-col items-center">
+            <div style="width:78px;height:78px;border-radius:50%;background:conic-gradient(#10b981 0 {{ $usedAngle }}deg, #e2e8f0 {{ $usedAngle }}deg 360deg);position:relative;" class="relative mb-2.5 shadow-inner">
+              <div class="absolute inset-[9px] bg-surface rounded-full flex flex-col items-center justify-center">
+                <span class="text-[11px] font-black text-text1 leading-none">{{ $usedLeaves }}/{{ $totalAllowed }}</span>
+                <span class="text-[8px] text-text3 uppercase font-bold mt-0.5">Leaves</span>
               </div>
-              <div class="flex items-center gap-1">
-                <span class="w-2 h-2 bg-blue-400 rounded-full"></span>
-                <span>Sick 3/10d</span>
+            </div>
+
+            <div class="w-full text-center mb-2 pb-2 border-b border-border1">
+              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <i class="fas fa-check mr-1"></i>{{ $remLeaves }} Paid Leaves Remaining
+              </span>
+            </div>
+
+            <div class="w-full grid grid-cols-2 gap-x-2 gap-y-1.5 text-[10px] text-text2">
+              <div class="flex items-center justify-between p-1 rounded bg-surface2/60">
+                <span class="flex items-center gap-1 font-medium"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Leaves (`L`)</span>
+                <strong class="font-bold text-text1 font-mono">{{ $usedLeaves }}d</strong>
               </div>
-              <div class="flex items-center gap-1">
-                <span class="w-2 h-2 bg-blue-300 rounded-full"></span>
-                <span>Casual 2/5d</span>
+              <div class="flex items-center justify-between p-1 rounded bg-surface2/60">
+                <span class="flex items-center gap-1 font-medium"><span class="w-2 h-2 bg-rose-500 rounded-full"></span>Absents (`A`)</span>
+                <strong class="font-bold text-rose-600 font-mono">{{ $abs }}d</strong>
               </div>
+              <div class="flex items-center justify-between p-1 rounded bg-surface2/60">
+                <span class="flex items-center gap-1 font-medium"><span class="w-2 h-2 bg-slate-400 rounded-full"></span>Not App (`N`)</span>
+                <strong class="font-bold text-slate-700 font-mono">{{ $na }}d</strong>
+              </div>
+              <div class="flex items-center justify-between p-1 rounded bg-surface2/60">
+                <span class="flex items-center gap-1 font-medium"><span class="w-2 h-2 bg-amber-500 rounded-full"></span>Unpaid (`U`)</span>
+                <strong class="font-bold text-amber-600 font-mono">{{ $unp }}d</strong>
+              </div>
+            </div>
+
+            <div class="w-full mt-2 pt-1.5 border-t border-border1 flex items-center justify-between text-[9px] text-text3">
+              <span>Working Days (till today): <strong class="text-text1 font-bold">{{ $workDays }}d</strong></span>
+              <span>Day {{ $daysPassed }} / {{ $contractDays }}</span>
             </div>
           </div>
         </div>
@@ -432,8 +472,47 @@
               <div class="flex items-center gap-2">
                 <i class="fas fa-file-contract text-primary text-lg mr-1.5"></i>
                 <h3 class="font-bold text-text1">Contract Details</h3>
+                @php
+                  $curCaseType = strtolower(trim((string)($currentContract?->ctr_case_type ?? '')));
+                @endphp
+                @if($curCaseType === 'ce')
+                  <span class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <i class="fas fa-calendar-plus mr-1"></i>Extended
+                  </span>
+                @elseif($curCaseType === 'cr')
+                  <span class="px-2 py-0.5 text-[9px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                    <i class="fas fa-sync-alt mr-1"></i>Renewed
+                  </span>
+                @endif
               </div>
               <div class="flex items-center gap-2 ml-auto">
+                @php
+                  $curUser = auth()->user();
+                  $curArea = strtolower(trim((string)($curUser->acc_untarea ?? '')));
+                  $curDesig = strtolower(trim((string)($curUser->acc_desig ?? '')));
+                  $curUnt = (int)($curUser->acc_unt_id ?? 0);
+                  $isHrOrFinanceUser = $curUser && (
+                    $curUser->isHr() ||
+                    $curUser->isFinance() ||
+                    in_array($curArea, ['hr', 'fin', 'finance'], true) ||
+                    in_array($curUnt, [820000, 840000], true) ||
+                    str_contains($curDesig, 'hr') ||
+                    str_contains($curDesig, 'finance') ||
+                    str_contains($curArea, 'hr') ||
+                    str_contains($curArea, 'fin')
+                  );
+                @endphp
+                @php
+                  $isMyDept = method_exists($curUser, 'isMyDepartmentMode') && $curUser->isMyDepartmentMode();
+                  $showSalaryHeads = !$isHrOrFinanceUser || $isMyDept || ($curUser && method_exists($curUser, 'isHr') && $curUser->isHr());
+                @endphp
+                @if($showSalaryHeads)
+                  <a href="{{ url('/divhr/employee/' . ($emp->emp_id ?? $id) . '/salary-heads') }}"
+                    title="Manage Monthly Salary Heads / Project Allocation"
+                    class="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer text-decoration-none">
+                    <i class="fas fa-layer-group text-emerald-600"></i> Salary Heads
+                  </a>
+                @endif
                 @if(($contractsHistory ?? collect())->count() <= 1)
                   <a href="{{ url('/divhr/employee/' . ($emp->emp_id ?? $id) . '/service-contract') }}" target="_blank"
                     title="View & Print Official Service Contract"
@@ -528,8 +607,11 @@
                 <div>
                   <p class="text-[9px] text-text3 uppercase tracking-widest mb-1 font-bold">End Date</p>
                   <div class="flex items-center gap-2">
+                    @php
+                      $effEnd = $currentContract?->ctr_termindt ?: $currentContract?->ctr_enddt;
+                    @endphp
                     <p class="font-semibold text-text1 text-xs">
-                      {{ !empty($currentContract?->ctr_enddt) ? \Carbon\Carbon::parse($currentContract?->ctr_enddt)->format('d-M-Y') : '—' }}
+                      {{ !empty($effEnd) ? \Carbon\Carbon::parse($effEnd)->format('d-M-Y') : '—' }}
                     </p>
                     <!-- Blinking Green Indicator for Active Contract -->
                     <span class="relative flex h-2.5 w-2.5 ml-1" title="Active Contract">
@@ -555,29 +637,57 @@
                   @endif
                 </div>
                 <div>
-                  <p class="text-[10px] text-text2 uppercase tracking-widest mb-1.5 font-bold">Probation Period</p>
+                  <p class="text-[10px] text-text2 uppercase tracking-widest mb-1 font-bold">Probation Period</p>
                   @php
-                    $probRaw = $currentContract?->ctr_prob ?? null;
-                    $probPct = null;
-                    if (is_numeric($probRaw) && $probRaw >= 0 && $probRaw <= 100) {
-                      $probPct = (int)$probRaw;
-                    } elseif (!empty($probRaw) && !empty($currentContract?->ctr_startdt)) {
-                      $months = (int)$probRaw;
-                      $daysTotal = max(1, $months * 30);
-                      $daysPassed = \Carbon\Carbon::parse($currentContract?->ctr_startdt)->diffInDays(now());
-                      $probPct = max(0, min(100, (int)round(($daysPassed / $daysTotal) * 100)));
+                    $probMonths = (int)($currentContract?->ctr_prob ?? 0);
+                    $probSal = (float)($currentContract?->ctr_probsal ?? 0);
+                    $probEndDate = null;
+                    $isOnProbation = false;
+                    $isProbationCompleted = false;
+
+                    if ($probMonths > 0 && !empty($currentContract?->ctr_startdt)) {
+                        $probEndDate = \Carbon\Carbon::parse($currentContract->ctr_startdt)->addMonths($probMonths)->subDay();
+                        if (now()->lessThanOrEqualTo($probEndDate)) {
+                            $isOnProbation = true;
+                        } else {
+                            $isProbationCompleted = true;
+                        }
                     }
                   @endphp
-                  <div class="w-full bg-surface2 h-2 rounded-full overflow-hidden mt-1.5">
-                    <div class="bg-emerald-500 h-full flex items-center justify-end pr-1.5" style="width: {{ $probPct ?? 0 }}%">
-                      <span class="text-[7px] text-white font-bold">{{ $probPct !== null ? ($probPct.'%') : '—' }}</span>
+
+                  @if($isOnProbation)
+                    <div class="mt-0.5">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                        Currently on Probation Period
+                      </span>
+                      <div class="text-[11px] text-text2 mt-1">
+                        @if($probSal > 0)
+                          Salary: <strong class="text-text1">PKR {{ number_format($probSal) }}</strong>
+                        @endif
+                        @if($probEndDate)
+                          <span class="text-text3 text-[10px] block mt-0.5">Valid till: <strong class="text-emerald-700">{{ $probEndDate->format('d-M-Y') }}</strong> ({{ $probMonths }} Months)</span>
+                        @endif
+                      </div>
                     </div>
-                  </div>
+                  @elseif($isProbationCompleted)
+                    <div class="mt-0.5">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                        <i class="fas fa-check-circle text-emerald-600 mr-1.5"></i>
+                        Probation Period is Completed
+                      </span>
+                      @if($probEndDate)
+                        <span class="text-[10px] text-text3 block mt-1">Completed on: {{ $probEndDate->format('d-M-Y') }}</span>
+                      @endif
+                    </div>
+                  @else
+                    <div class="text-xs text-text3 font-medium mt-1">— None</div>
+                  @endif
                 </div>
               </div>
             </div>
             <div class="flex-1 min-h-0">
-              <h4 class="text-[10px] text-text3 uppercase tracking-widest mb-3 font-bold">Previous Contracts History</h4>
+              <h4 class="text-[10px] text-text3 uppercase tracking-widest mb-3 font-bold">Contracts History</h4>
               <div id="contractsWrapper"
                 class="border border-border1 rounded-xl relative contracts-scroll overflow-hidden" style="height: 185px; max-height: 220px; overflow-y: auto;">
                 <table class="w-full text-left text-[11px] table-fixed">
@@ -613,19 +723,28 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border1">
-                    @php
-                      $prevContracts = ($contractsHistory ?? collect())->filter(function($c) use ($currentContract) {
-                        return !$currentContract || $c->ctr_id != $currentContract->ctr_id;
-                      });
-                    @endphp
-                    @forelse($prevContracts as $c)
+                    @forelse(($contractsHistory ?? collect()) as $c)
                       @php
                         $cHead = $c->ctr_hed_code ?: ($c->ctr_prj_code ?? null);
                         $cPrj = $c->ctr_prj_title ?: ($c->ctr_hed_name ?: ($c->ctr_hed_code ?: ($c->ctr_prj_code ?? null)));
+                        $isCurrent = $currentContract && ($c->ctr_id == $currentContract->ctr_id);
+                        $caseType = strtolower(trim((string)($c->ctr_case_type ?? '')));
+                        $cEnd = $c->ctr_termindt ?: $c->ctr_enddt;
                       @endphp
-                      <tr class="hover:bg-surface2/50 transition-colors">
+                      <tr class="{{ $isCurrent ? 'bg-sky-50/40 hover:bg-sky-50/70' : 'hover:bg-surface2/50' }} transition-colors">
                         <td class="px-2.5 py-2 font-medium text-text1">
-                          <span class="font-bold block text-[11px] leading-tight" title="{{ $c->ctr_jobtitle ?? '—' }}">{{ $c->ctr_jobtitle ?? '—' }}</span>
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="font-bold text-[11px] leading-tight" title="{{ $c->ctr_jobtitle ?? '—' }}">{{ $c->ctr_jobtitle ?? '—' }}</span>
+                            @if($caseType === 'ce')
+                              <span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Extension</span>
+                            @elseif($caseType === 'cr')
+                              <span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Renewal</span>
+                            @elseif($isCurrent)
+                              <span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-sky-100 text-sky-800 border border-sky-300">Current</span>
+                            @else
+                              <span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-slate-100 text-slate-700 border border-slate-200">Original</span>
+                            @endif
+                          </div>
                           @if(!empty($c->ctr_grade))
                             <span class="text-[9px] text-text3 block font-semibold">{{ $c->ctr_grade }}</span>
                           @endif
@@ -640,7 +759,7 @@
                         </td>
                         <td class="px-2.5 py-2 font-bold text-text1 whitespace-nowrap">{{ $c->ctr_salary ? number_format($c->ctr_salary) : '—' }}</td>
                         <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_startdt) ? \Carbon\Carbon::parse($c->ctr_startdt)->format('M Y') : '—' }}</td>
-                        <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($c->ctr_enddt) ? \Carbon\Carbon::parse($c->ctr_enddt)->format('M Y') : '—' }}</td>
+                        <td class="px-2 py-2 text-text2 whitespace-nowrap">{{ !empty($cEnd) ? \Carbon\Carbon::parse($cEnd)->format('M Y') : '—' }}</td>
                         <td class="px-2 py-2 text-center whitespace-nowrap">
                           @if(($c->status_label ?? '') === 'Active')
                             <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" title="Active Contract"></span>
@@ -652,7 +771,7 @@
                         </td>
                       </tr>
                     @empty
-                      <tr><td colspan="6" class="px-3 py-4 text-center text-text3">No previous contracts recorded</td></tr>
+                      <tr><td colspan="6" class="px-3 py-4 text-center text-text3">No contracts recorded</td></tr>
                     @endforelse
                   </tbody>
                 </table>

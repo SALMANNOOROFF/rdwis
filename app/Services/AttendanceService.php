@@ -26,7 +26,7 @@ class AttendanceService
     /**
      * Active leave/absence codes subject to holiday absorption.
      */
-    public const ABSORPTION_CODES = ['A', 'L', 'U', 'T'];
+    public const ABSORPTION_CODES = ['A', 'L', 'U', 'T', 'N'];
 
     /**
      * Legacy minimum floor date.
@@ -138,24 +138,180 @@ class AttendanceService
     }
 
     /**
+     * Cache for resolved paid months per employee.
+     */
+    protected array $paidMonthsCache = [];
+
+    /**
+     * Get all paid months for an employee (including past months covered by subsequent arrears).
+     *
+     * @param string $empId
+     * @return array Array of Y-m strings, e.g. ['2024-08', '2024-09', ...]
+     */
+    public function getPaidMonthsForEmployee(string $empId): array
+    {
+        return array_keys($this->getPaidMonthsDetailsForEmployee($empId));
+    }
+
+    /**
+     * Get full details of all paid months for an employee (direct + arrears-covered).
+     *
+     * @param string $empId
+     * @return array Keyed by 'Y-m', with 'type' ('direct'|'arrears'), 'req_id', 'amount', etc.
+     */
+    public function getPaidMonthsDetailsForEmployee(string $empId): array
+    {
+        if (isset($this->paidMonthsCache[$empId])) {
+            return $this->paidMonthsCache[$empId];
+        }
+
+        $reqs = DB::table('hr.salreqs')
+            ->where('srq_emp_id', $empId)
+            ->whereIn('srq_status', ['Fulfilled', 'Closed'])
+            ->orderBy('srq_month', 'asc')
+            ->get();
+
+        $paidMonths = [];
+
+        // Direct month payments (only from regular salary requisitions with gross salary > 0)
+        foreach ($reqs as $r) {
+            $hasGross = (float)($r->srq_grosalary ?? $r->srq_salary) > 0;
+            $isStandaloneArrears = in_array($r->srq_remarks2 ?? '', ['ARREARS_ONLY', 'CLEARANCE'], true) 
+                || in_array($r->srq_sudohed ?? '', ['ARREAR', 'CLEARANCE'], true)
+                || ((float)($r->srq_grosalary ?? 0) == 0 && (float)($r->srq_arrears ?? 0) > 0);
+
+            if ($hasGross && !$isStandaloneArrears) {
+                $mStr = Carbon::parse($r->srq_month)->format('Y-m');
+                $paidMonths[$mStr] = [
+                    'type'    => 'direct',
+                    'amount'  => (float)$r->srq_salary,
+                    'req_id'  => $r->srq_id,
+                    'status'  => $r->srq_status,
+                    'month'   => $mStr,
+                ];
+            }
+        }
+
+        $emp = DB::table('hr.emps')->where('emp_id', $empId)->first();
+        $joinDate = $emp && !empty($emp->emp_joindt) ? Carbon::parse($emp->emp_joindt)->startOfMonth() : null;
+
+        // Resolve months covered by subsequent arrears payments
+        foreach ($reqs as $r) {
+            $arrears = (float)($r->srq_arrears ?? 0);
+            if ($arrears <= 0) continue;
+
+            $cur = Carbon::parse($r->srq_month)->subMonth()->startOfMonth();
+            $remArrears = $arrears;
+            $ctrSal = (float)($r->srq_ctrsalary ?: $remArrears);
+
+            while ($remArrears > 0) {
+                if ($joinDate && $cur->lt($joinDate)) {
+                    break;
+                }
+                $mStr = $cur->format('Y-m');
+                if (!isset($paidMonths[$mStr])) {
+                    $slice = min($remArrears, $ctrSal > 0 ? $ctrSal : $remArrears);
+                    $paidMonths[$mStr] = [
+                        'type'    => 'arrears',
+                        'amount'  => $slice,
+                        'paid_in' => $r->srq_month,
+                        'req_id'  => $r->srq_id,
+                        'status'  => 'Fulfilled',
+                        'month'   => $mStr,
+                    ];
+                    $remArrears -= $slice;
+                }
+                $cur->subMonth();
+            }
+        }
+
+        ksort($paidMonths);
+        $this->paidMonthsCache[$empId] = $paidMonths;
+        return $paidMonths;
+    }
+
+    /**
      * Check if a specific cell/day is locked split by payroll cutoff day.
-     * Mirrors legacy PrepareAttendanceSheet (hr_attendance_u.bas:67-74):
-     *   - If day < cutoff AND att_locked1 = 1 -> locked
-     *   - If day >= cutoff AND att_locked2 = 1 -> locked
+     * Mirrors legacy PrepareAttendanceSheet (hr_attendance_u.bas:67-74) with dynamic payroll cycle logic:
+     *   - Day 1 to Cutoff-1 (e.g. 1..25): Belongs to CURRENT month's salary.
+     *     Locked ONLY if current month's salary is Fulfilled/Closed (or covered by arrears) AND att_locked1 = true.
+     *   - Day Cutoff to End (e.g. 26..31): Belongs to NEXT month's salary.
+     *     Locked ONLY if NEXT month's salary is Fulfilled/Closed (or covered by arrears) AND att_locked2 = true.
+     * Unpaid / newly added employees remain open for editing so HR can record working days.
      */
     public function isCellLocked(HrAttendance $row, int $day): bool
     {
         $cutoff = $this->getPayrollCutoffDay();
+        $empId = (string) $row->att_emp_id;
 
-        if ($day < $cutoff && (bool)$row->att_locked1) {
-            return true;
+        // Daily Date-Time Lock Rules:
+        // 1. Previous days: Strictly LOCKED across the board. ONLY specifically unlocked if Finance has unlocked this day.
+        // 2. Today: Open during the day, auto-locks at 5:00 PM (17:00).
+        // 3. Future days: Strictly LOCKED (cannot mark future attendance).
+        $cellDate = $row->att_startdt ? Carbon::parse($row->att_startdt)->setDay($day) : null;
+        if ($cellDate) {
+            $today = Carbon::today();
+            $isPast5pm = Carbon::now()->format('H:i') >= '17:00';
+
+            // Check if explicit unlock exists in dedicated hr.attendance_unlocks table
+            $hasUnlockRemark = DB::table('hr.attendance_unlocks')
+                ->where('aul_att_id', $row->att_id)
+                ->where('aul_day', $day)
+                ->where('aul_is_active', true)
+                ->exists();
+
+            // Fallback check for legacy remarks with [FINANCE_UNLOCKED]
+            if (!$hasUnlockRemark) {
+                $hasUnlockRemark = DB::table('hr.attendanceremarks')
+                    ->where('atr_att_id', $row->att_id)
+                    ->where('atr_attday', $day)
+                    ->where('atr_remarks', 'like', '%[FINANCE_UNLOCKED]%')
+                    ->exists();
+            }
+
+            if ($cellDate->equalTo($today)) {
+                // Today: open during day, auto-lock after 17:00 (5:00 PM) unless Finance unlocked
+                if ($isPast5pm) {
+                    if (!$hasUnlockRemark) {
+                        return true;
+                    }
+                } else {
+                    return false; // Open today before 5:00 PM!
+                }
+            } elseif ($cellDate->lessThan($today)) {
+                // ALL PREVIOUS DAYS ARE STRICTLY LOCKED!
+                // Only specifically unlocked if Finance has unlocked this day
+                if ($hasUnlockRemark) {
+                    return false;
+                }
+                return true;
+            } elseif ($cellDate->greaterThan($today)) {
+                // Future days are locked
+                return true;
+            }
         }
 
-        if ($day >= $cutoff && (bool)$row->att_locked2) {
-            return true;
-        }
+        if ($day < $cutoff) {
+            $currentMonth = $row->att_enddt ? Carbon::parse($row->att_enddt)->format('Y-m') : null;
+            if ($currentMonth) {
+                if (!in_array($currentMonth, $paidMonths, true)) {
+                    return false;
+                }
+            }
 
-        return false;
+            return (bool)($row->att_locked1 ?? true);
+        } else {
+            $nextMonth = $row->att_startdt 
+                ? Carbon::parse($row->att_startdt)->addMonth()->format('Y-m') 
+                : null;
+            if ($nextMonth) {
+                if (!in_array($nextMonth, $paidMonths, true)) {
+                    return false;
+                }
+            }
+
+            return (bool)($row->att_locked2 ?? true);
+        }
     }
 
     /**
@@ -167,7 +323,8 @@ class AttendanceService
             return $this->isCellLocked($row, $day);
         }
 
-        return (bool)($row->att_locked1 && $row->att_locked2);
+        $daysInMonth = $row->att_enddt ? (int)Carbon::parse($row->att_enddt)->format('d') : 30;
+        return $this->isCellLocked($row, 1) && $this->isCellLocked($row, $daysInMonth);
     }
 
     /**
@@ -279,15 +436,53 @@ class AttendanceService
 
             if (!$alreadyExists) {
                 $dayData = [];
+                $joinDt = Carbon::parse($joinDate);
+                $isJoiningMonth = ($cursor->format('Y-m') === $joinDt->format('Y-m'));
+                $joinDayOfMonth = (int) $joinDt->format('j');
+                $daysInThisMonth = (int) $cursor->copy()->endOfMonth()->format('j');
+
                 for ($d = 1; $d <= 31; $d++) {
                     $col = "att_{$d}";
                     $val = $templateRow->$col ?? null;
-                    $dayData[$col] = in_array($val, ['Z', 'X'], true) ? $val : null;
+
+                    if (in_array($val, ['Z', 'X'], true)) {
+                        $dayData[$col] = $val;
+                    } elseif ($isJoiningMonth && $d < $joinDayOfMonth && $d <= $daysInThisMonth) {
+                        // Pre-joining days: mark as 'N' (Not Applicable)
+                        $dayDt = $cursor->copy()->addDays($d - 1);
+                        $dayData[$col] = $dayDt->isWeekend() ? 'Z' : 'N';
+                    } else {
+                        $dayData[$col] = null;
+                    }
                 }
 
-                $diffMonths = $cursor->diffInMonths($currentMonth);
-                $locked1 = $diffMonths >= 1;
-                $locked2 = $diffMonths >= 2;
+                // Dynamic logic: Pre-cutoff (Days 1..25) locked ONLY if current REGULAR salary fulfilled (gross > 0).
+                // Standalone Arrears / Clearance payouts do NOT lock daily attendance!
+                $hasFulfilledCurrent = DB::table('hr.salreqs')
+                    ->where('srq_emp_id', $empId)
+                    ->where('srq_month', $monthEndStr)
+                    ->whereIn('srq_status', ['Fulfilled', 'Closed'])
+                    ->where('srq_grosalary', '>', 0)
+                    ->where(function($q) {
+                        $q->whereNull('srq_remarks2')
+                          ->orWhereNotIn('srq_remarks2', ['ARREARS_ONLY', 'CLEARANCE']);
+                    })
+                    ->exists();
+
+                $nextMonthEndStr = $cursor->copy()->addMonth()->endOfMonth()->toDateString();
+                $hasFulfilledNext = DB::table('hr.salreqs')
+                    ->where('srq_emp_id', $empId)
+                    ->where('srq_month', $nextMonthEndStr)
+                    ->whereIn('srq_status', ['Fulfilled', 'Closed'])
+                    ->where('srq_grosalary', '>', 0)
+                    ->where(function($q) {
+                        $q->whereNull('srq_remarks2')
+                          ->orWhereNotIn('srq_remarks2', ['ARREARS_ONLY', 'CLEARANCE']);
+                    })
+                    ->exists();
+
+                $locked1 = $hasFulfilledCurrent;
+                $locked2 = $hasFulfilledNext;
 
                 $insertData = array_merge([
                     'att_emp_id'      => $empId,
@@ -446,12 +641,29 @@ class AttendanceService
 
         $first = Carbon::parse($month . '-01')->startOfMonth();
         $last = $first->copy()->endOfMonth();
+        $nextMonthEnd = $first->copy()->addMonth()->endOfMonth()->toDateString();
         $days = (int) $first->daysInMonth;
 
         $rows = collect(DB::select("
-            SELECT e.emp_id, e.emp_name, e.emp_unt_id,
+            SELECT e.emp_id, e.emp_name, e.emp_unt_id, e.emp_joindt,
                    a.att_id, a.att_emp_id, a.att_empnamecomp, a.att_unt_id,
                    a.att_startdt, a.att_enddt, a.att_locked1, a.att_locked2,
+                   EXISTS (
+                       SELECT 1 FROM hr.salreqs srq 
+                       WHERE srq.srq_emp_id::text = e.emp_id::text 
+                         AND srq.srq_month = ?::date
+                         AND srq.srq_status IN ('Fulfilled', 'Closed')
+                         AND COALESCE(srq.srq_grosalary, srq.srq_salary, 0) > 0
+                         AND (srq.srq_remarks2 IS NULL OR srq.srq_remarks2 NOT IN ('ARREARS_ONLY', 'CLEARANCE'))
+                   ) AS is_salary_fulfilled,
+                   EXISTS (
+                       SELECT 1 FROM hr.salreqs srq2 
+                       WHERE srq2.srq_emp_id::text = e.emp_id::text 
+                         AND srq2.srq_month = ?::date
+                         AND srq2.srq_status IN ('Fulfilled', 'Closed')
+                         AND COALESCE(srq2.srq_grosalary, srq2.srq_salary, 0) > 0
+                         AND (srq2.srq_remarks2 IS NULL OR srq2.srq_remarks2 NOT IN ('ARREARS_ONLY', 'CLEARANCE'))
+                   ) AS is_next_salary_fulfilled,
                    a.att_1, a.att_2, a.att_3, a.att_4, a.att_5, a.att_6, a.att_7, a.att_8, a.att_9, a.att_10,
                    a.att_11, a.att_12, a.att_13, a.att_14, a.att_15, a.att_16, a.att_17, a.att_18, a.att_19, a.att_20,
                    a.att_21, a.att_22, a.att_23, a.att_24, a.att_25, a.att_26, a.att_27, a.att_28, a.att_29, a.att_30, a.att_31
@@ -468,36 +680,135 @@ class AttendanceService
             WHERE e.emp_unt_id BETWEEN ? AND ?
               AND LOWER(e.emp_status) IN ('active', 'current')
             ORDER BY e.emp_name ASC
-        ", [$last->toDateString(), $first->toDateString(), $lower, $upper]));
+        ", [$last->toDateString(), $nextMonthEnd, $last->toDateString(), $first->toDateString(), $lower, $upper]));
+
+        // Filter: only show employees whose joining date falls within or before this month
+        $rows = $rows->filter(function ($r) use ($last) {
+            if (empty($r->emp_joindt)) {
+                return true; // No join date = always show
+            }
+            $joinMonth = Carbon::parse($r->emp_joindt)->startOfMonth();
+            $gridMonth = Carbon::parse($last)->startOfMonth();
+            return $joinMonth->lte($gridMonth);
+        });
 
         $cutoffDay = $this->getPayrollCutoffDay();
 
-        $data = $rows->map(function ($r) use ($days, $cutoffDay, $first, $user) {
+        $attIds = $rows->pluck('att_id')->filter()->unique()->toArray();
+        $financeUnlockedDays = [];
+        if (!empty($attIds)) {
+            // 1. Dedicated hr.attendance_unlocks records
+            $unlockRows = DB::table('hr.attendance_unlocks')
+                ->whereIn('aul_att_id', $attIds)
+                ->where('aul_is_active', true)
+                ->get(['aul_att_id', 'aul_day']);
+            foreach ($unlockRows as $uRow) {
+                $financeUnlockedDays[$uRow->aul_att_id][$uRow->aul_day] = true;
+            }
+
+            // 2. Legacy fallback from hr.attendanceremarks
+            $legacyUnlockRows = DB::table('hr.attendanceremarks')
+                ->whereIn('atr_att_id', $attIds)
+                ->where('atr_remarks', 'like', '%[FINANCE_UNLOCKED]%')
+                ->get(['atr_att_id', 'atr_attday']);
+            foreach ($legacyUnlockRows as $uRow) {
+                $financeUnlockedDays[$uRow->atr_att_id][$uRow->atr_attday] = true;
+            }
+        }
+
+        $data = $rows->map(function ($r) use ($days, $cutoffDay, $first, $user, $financeUnlockedDays) {
             $vals = [];
             $lockedDays = [];
+            $isCurrentPaid = (bool)($r->is_salary_fulfilled ?? false);
+            $isNextPaid = (bool)($r->is_next_salary_fulfilled ?? false);
+
+            // Determine joining day within this month (for pre-joining 'N' marking)
+            $joinDayInMonth = null;
+            if (!empty($r->emp_joindt)) {
+                $joinDt = Carbon::parse($r->emp_joindt);
+                $monthStart = $first->copy()->startOfMonth();
+                $monthEnd = $first->copy()->endOfMonth();
+                // Only apply if joining date falls within this specific month
+                if ($joinDt->between($monthStart, $monthEnd)) {
+                    $joinDayInMonth = (int) $joinDt->format('j'); // day of month (1-31)
+                }
+            }
+
             for ($d = 1; $d <= 31; $d++) {
                 $col = 'att_' . $d;
                 $rawVal = isset($r->$col) && $r->$col !== null ? strtoupper(trim($r->$col)) : null;
                 $isWeekend = false;
+                $cellDate = null;
                 if ($d <= $days) {
-                    $dayDt = $first->copy()->addDays($d - 1);
-                    $isWeekend = $dayDt->isWeekend(); // Saturday or Sunday
+                    $cellDate = $first->copy()->addDays($d - 1);
+                    $isWeekend = $cellDate->isWeekend(); // Saturday or Sunday
                 }
 
-                // If Saturday or Sunday, ALWAYS treat as 'Z' (weekend)
-                $val = $isWeekend ? 'Z' : $rawVal;
+                // Pre-joining days: mark as 'N' (Not Applicable) and lock them
+                $isPreJoining = ($joinDayInMonth !== null && $d < $joinDayInMonth && $d <= $days);
+
+                if ($isPreJoining && !$isWeekend) {
+                    $val = 'N';
+                } elseif ($isWeekend) {
+                    // If Saturday or Sunday, ALWAYS treat as 'Z' (weekend)
+                    $val = 'Z';
+                } else {
+                    $val = $rawVal;
+                }
                 $vals[$d] = $val;
 
-                // Per-cell locking: Cutoff locking OR weekend OR existing 'Z' public holiday OR 'X'
-                $isCutoffLocked = ($d < $cutoffDay && (bool)($r->att_locked1 ?? false)) ||
-                                  ($d >= $cutoffDay && (bool)($r->att_locked2 ?? false));
-                $lockedDays[$d] = $isCutoffLocked || $isWeekend || $val === 'Z' || $val === 'X';
+                // Per-cell locking: Cutoff locking applies per payroll cycle!
+                // Pre-cutoff (Days 1..Cutoff-1): Locked if CURRENT month's salary is fulfilled AND att_locked1 = true
+                // Post-cutoff (Days Cutoff..End): Locked if NEXT month's salary is fulfilled AND att_locked2 = true
+                $isPreCutoffLocked = ($d < $cutoffDay) && $isCurrentPaid && (bool)($r->att_locked1 ?? true);
+                $isPostCutoffLocked = ($d >= $cutoffDay) && $isNextPaid && (bool)($r->att_locked2 ?? true);
+                $isCutoffLocked = $isPreCutoffLocked || $isPostCutoffLocked;
+
+                // Date-Time & Finance Unlock Rules:
+                $today = Carbon::today();
+                $isPast5pm = Carbon::now()->format('H:i') >= '17:00';
+                $isFinUnlocked = !empty($r->att_id) && !empty($financeUnlockedDays[$r->att_id][$d]);
+                $isBasicLocked = $isWeekend || $val === 'Z' || $val === 'X' || $isPreJoining;
+
+                if ($isBasicLocked || $cellDate === null) {
+                    $cellLocked = true;
+                } elseif ($cellDate->lt($today)) {
+                    // ALL PREVIOUS DAYS ARE STRICTLY LOCKED!
+                    // Only specifically unlocked if Finance has unlocked this day
+                    $cellLocked = !$isFinUnlocked;
+                } elseif ($cellDate->eq($today)) {
+                    // TODAY: Open during daytime, auto-locks at 5:00 PM (17:00)
+                    if ($isPast5pm) {
+                        $cellLocked = !$isFinUnlocked;
+                    } else {
+                        $cellLocked = false; // Open today before 5:00 PM!
+                    }
+                } else {
+                    // FUTURE DAYS: Locked (cannot mark future attendance)
+                    $cellLocked = true;
+                }
+
+                if ($isCutoffLocked) {
+                    $cellLocked = true;
+                }
+
+                $lockedDays[$d] = $cellLocked;
             }
 
+            // Count present days: ONLY explicit 'P' counts as present (empty/null does NOT count)
             $present = 0;
+            $unmarked = 0;
             for ($d = 1; $d <= $days; $d++) {
-                if (($vals[$d] ?? '') === 'P') {
+                $v = $vals[$d] ?? '';
+                if ($v === 'P') {
                     $present++;
+                }
+                // Count unmarked working days (not weekend, not holiday, not X, not N, but empty)
+                if (($v === '' || $v === null) && !($lockedDays[$d] ?? false)) {
+                    $dayDt = $first->copy()->addDays($d - 1);
+                    if (!$dayDt->isWeekend()) {
+                        $unmarked++;
+                    }
                 }
             }
 
@@ -507,12 +818,13 @@ class AttendanceService
                 'att_id'      => $r->att_id,
                 'unit_id'     => $r->emp_unt_id,
                 'can_edit'    => $this->canUserEditEmployeeAttendance($user, $r->emp_id, (int)$r->emp_unt_id),
-                'locked'      => (bool) ($r->att_locked1 && $r->att_locked2),
-                'locked1'     => (bool) ($r->att_locked1 ?? false),
-                'locked2'     => (bool) ($r->att_locked2 ?? false),
+                'locked'      => ($isCurrentPaid && (bool)($r->att_locked1 ?? false)) && ($isNextPaid && (bool)($r->att_locked2 ?? false)),
+                'locked1'     => $isCurrentPaid && (bool) ($r->att_locked1 ?? false),
+                'locked2'     => $isNextPaid && (bool) ($r->att_locked2 ?? false),
                 'locked_days' => $lockedDays,
                 'vals'        => $vals,
                 'present'     => $present,
+                'unmarked'    => $unmarked,
                 'percent'     => $days > 0 ? round($present * 100 / $days) : 0,
             ];
         });
@@ -923,18 +1235,25 @@ class AttendanceService
         $counts = [
             'P' => 0, 'W' => 0, 'T' => 0, 'A' => 0, 'L' => 0,
             'U' => 0, 'N' => 0, 'Z' => 0, 'Q' => 0, 'X' => 0,
+            'E' => 0, // Empty/unmarked working days
         ];
 
         foreach ($arr as $item) {
             $c = $item['char'];
-            if (!isset($counts[$c])) {
+            if ($c === null || $c === '' || $c === 'Q') {
+                // Empty/unmarked cell on a working day
+                $counts['E']++;
+                $counts['Q']++;
+            } elseif (!isset($counts[$c])) {
                 $counts[$c] = 0;
+                $counts[$c]++;
+            } else {
+                $counts[$c]++;
             }
-            $counts[$c]++;
         }
 
         $counts['total_days'] = count($arr);
-        $counts['working_days'] = $counts['total_days'] - $counts['Z'] - $counts['X'];
+        $counts['working_days'] = $counts['total_days'] - $counts['Z'] - $counts['X'] - ($counts['N'] ?? 0);
 
         return $counts;
     }

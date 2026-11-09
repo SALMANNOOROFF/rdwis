@@ -209,9 +209,15 @@ class FundShiftingService
         }
 
         $isMd = (method_exists($user, 'isMd') && $user->isMd()) || strtolower(trim((string) ($user->acc_untarea ?? ''))) === 'rdw';
+        $isDlog = (method_exists($user, 'isDlog') && $user->isDlog()) || in_array(strtolower(trim((string) ($user->acc_untarea ?? ''))), ['log', 'dlog', 'logistics'], true);
+        $isCommand = (method_exists($user, 'isCommand') && $user->isCommand()) || in_array(strtolower(trim((string) ($user->acc_untarea ?? ''))), ['rdw', 'hqs', 'nrdi'], true);
+        $isFinance = (method_exists($user, 'isFinance') && $user->isFinance()) || in_array(strtolower(trim((string) ($user->acc_untarea ?? ''))), ['fin', 'finance'], true);
+        $isSuperAdmin = method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin();
 
-        // Filter out upper command (DDG, DG, DLOG) for non-MD users
-        if (! $isMd) {
+        $canSeeCommand = $isMd || $isDlog || $isCommand || $isFinance || $isSuperAdmin;
+
+        // Filter out upper command (DDG, DG, DLOG) for non-authorized users (like ordinary division users)
+        if (! $canSeeCommand) {
             foreach ($dests as $key => $d) {
                 $st = strtoupper($d['stage'] ?? '');
                 $badge = strtoupper($d['badge'] ?? '');

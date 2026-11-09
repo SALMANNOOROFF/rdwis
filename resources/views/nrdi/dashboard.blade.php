@@ -273,17 +273,7 @@
 
     <!-- KPI Metric Cards Grid -->
     <div class="row mb-4">
-        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-            <div class="card-cyber card-purple px-3 py-3 h-100">
-                <div class="kpi-title d-flex justify-content-between align-items-center">
-                    <span>Pending Actions</span>
-                    <i class="fas fa-clock" style="font-size: 13px; color: var(--rd-accent, #5F7858);"></i>
-                </div>
-                <div class="kpi-value" id="kpi-pending-cases" style="color: var(--rd-accent, #5F7858);">0</div>
-                <div class="kpi-sub" id="kpi-pending-cases-sub">0 Purchase • 0 Contract</div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="col-xl col-lg-4 col-md-6 mb-3">
             <div class="card-cyber card-blue px-3 py-3 h-100">
                 <div class="kpi-title d-flex justify-content-between align-items-center">
                     <span>Active HR / Staff</span>
@@ -293,28 +283,28 @@
                 <div class="kpi-sub" id="kpi-employees-sub">Active personnel</div>
             </div>
         </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="col-xl col-lg-4 col-md-6 mb-3">
             <div class="card-cyber card-cyan px-3 py-3 h-100">
                 <div class="kpi-title">Approved Budget</div>
                 <div class="kpi-value" id="kpi-budget">Rs 0</div>
                 <div class="kpi-sub">Total allocated funds</div>
             </div>
         </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="col-xl col-lg-4 col-md-6 mb-3">
             <div class="card-cyber card-amber px-3 py-3 h-100">
                 <div class="kpi-title">Total Utilized</div>
                 <div class="kpi-value" id="kpi-utilized">Rs 0</div>
                 <div class="kpi-sub">Evaluated expenses</div>
             </div>
         </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="col-xl col-lg-4 col-md-6 mb-3">
             <div class="card-cyber card-green px-3 py-3 h-100">
                 <div class="kpi-title">Remaining Balance</div>
                 <div class="kpi-value" id="kpi-remaining">Rs 0</div>
                 <div class="kpi-sub">Active buffer</div>
             </div>
         </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="col-xl col-lg-4 col-md-6 mb-3">
             <div class="card-cyber card-red px-3 py-3 h-100">
                 <div class="kpi-title">Procurement Credit</div>
                 <div class="kpi-value" id="kpi-credit">Rs 0</div>
@@ -514,13 +504,6 @@
                 $('#dashboard-error-banner').addClass('d-none');
                 
                 // Update KPI Cards
-                const pendingPur = Number(apiData.kpis.pendingPurchaseCases || 0);
-                const pendingCtr = Number(apiData.kpis.pendingContractCases || 0);
-                const totalPending = Number(apiData.kpis.pendingCases ?? (pendingPur + pendingCtr));
-                
-                $('#kpi-pending-cases').text(totalPending);
-                $('#kpi-pending-cases-sub').text(`${pendingPur} Purchase • ${pendingCtr} Contract`);
-
                 const empsTotal = Number(apiData.kpis.employeesTotal || 0);
                 const empsHired = Number(apiData.kpis.employeesHired || 0);
                 $('#kpi-employees').text(empsTotal);

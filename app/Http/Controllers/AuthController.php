@@ -83,26 +83,45 @@ class AuthController extends Controller
 
     public function changePassword(Request $request)
     {
-        $defaultPassword = (string) config('auth.default_password', '12345');
-
-        $request->validate([
-            'password' => ['required', 'string', 'min:5', 'confirmed', Rule::notIn([$defaultPassword])],
-        ]);
-
         $user = Auth::user();
         if (! $user) {
             return redirect()->route('login');
         }
 
-        $user->acc_pass = CenAccount::hashPassword((string) ($user?->acc_username ?? ''), $request->input('password'));
+        $defaultPassword = (string) config('auth.default_password', '12345');
+
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:5', 'confirmed', Rule::notIn([$defaultPassword])],
+        ], [
+            'current_password.required' => 'Please enter your current password.',
+            'password.required' => 'Please enter a new password.',
+            'password.min' => 'New password must be at least 5 characters.',
+            'password.confirmed' => 'New password confirmation does not match.',
+            'password.not_in' => 'You cannot use the default password (' . $defaultPassword . ') as your new password.',
+        ]);
+
+        if (! CenAccount::verifyPassword((string) ($user->acc_username ?? ''), (string) $request->input('current_password'), (string) ($user->acc_pass ?? ''))) {
+            return back()->withErrors([
+                'current_password' => 'The current password you entered is incorrect.',
+            ])->withInput();
+        }
+
+        if (CenAccount::verifyPassword((string) ($user->acc_username ?? ''), (string) $request->input('password'), (string) ($user->acc_pass ?? ''))) {
+            return back()->withErrors([
+                'password' => 'The new password must be different from your current password.',
+            ])->withInput();
+        }
+
+        $user->acc_pass = CenAccount::hashPassword((string) ($user->acc_username ?? ''), (string) $request->input('password'));
         $user->save();
 
         $intended = $request->session()->pull('password_change.intended');
-        if (is_string($intended) && $intended !== '') {
-            return redirect($intended);
+        if (is_string($intended) && $intended !== '' && $intended !== route('password.change')) {
+            return redirect($intended)->with('success', 'Your password has been updated successfully!');
         }
 
-        return redirect()->to($this->redirectBasedOnArea());
+        return redirect()->route('password.change')->with('success', 'Your password has been updated successfully!');
     }
 
     private function redirectBasedOnArea(): string

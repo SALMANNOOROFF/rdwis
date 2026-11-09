@@ -31,7 +31,7 @@ class DashboardController extends Controller
 
         // 1. Fetch Heads & Projects
         if ($isCentralMyDept) {
-            // Central Department in My Department mode: funded via CSRF (Central Shared Resource Fund)
+            // Central Department in My Department mode: funded via CSRF (Central Service Resource Fund)
             $heads = DB::table('cen.heads as h')
                 ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
                 ->join('fin.sharesalloc as s', 's.sha_hed_id', '=', 'h.hed_id')
@@ -422,81 +422,27 @@ class DashboardController extends Controller
 
         $projectsOngoing = max(0, $projectsTotal - $projectsCompleted);
 
-        $stageMap = [
-            'fin'  => 'DFinance',
-            'rdw'  => 'MD',
-            'hqs'  => 'DDG',
-            'nrdi' => 'DG',
-            'proc' => 'DProc',
-            'log'  => 'DLOG',
-            'dlog' => 'DLOG',
-        ];
-        $ctrStageMap = [
-            'fin'  => 'Finance',
-            'rdw'  => 'MD',
-            'hqs'  => 'DDG',
-            'nrdi' => 'DG',
-            'hr'   => 'HR',
-            'log'  => 'DLOG',
-            'dlog' => 'DLOG',
-        ];
-
-        if ($isDlog) {
-            $targetStage = 'DLOG';
-            $targetCtrStage = 'DLOG';
-        } else {
-            $targetStage = $stageMap[$userArea] ?? null;
-            $targetCtrStage = $ctrStageMap[$userArea] ?? null;
+        // Generic Pending Purchase & Contract Cases across all active workflow stages
+        $purQuery = DB::table('pur.purcases')
+            ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected']);
+        if ($selectedProject) {
+            $purQuery->where('pcs_hed_id', $selectedProject['id']);
+        } elseif (!empty($selectedUnitIds)) {
+            $purQuery->whereIn('pcs_unt_id', $selectedUnitIds);
         }
+        $pendingPurchaseCases = (int) $purQuery->count();
 
-        if ($userArea === 'hr') {
-            $pendingPurchaseCases = 0;
-        } elseif ($targetStage) {
-            $purQuery = \App\Models\Purchase::atStage($targetStage)
-                ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected']);
-            if ($selectedProject) {
-                $purQuery->where('pcs_hed_id', $selectedProject['id']);
-            } elseif (!empty($selectedUnitIds)) {
-                $purQuery->whereIn('pcs_unt_id', $selectedUnitIds);
-            }
-            $pendingPurchaseCases = (int) $purQuery->count();
-        } else {
-            $purQuery = DB::table('pur.purcases')->whereIn('pcs_status', ['Draft', 'Returned']);
-            if ($selectedProject) {
-                $purQuery->where('pcs_hed_id', $selectedProject['id']);
-            } elseif (!empty($selectedUnitIds)) {
-                $purQuery->whereIn('pcs_unt_id', $selectedUnitIds);
-            }
-            $pendingPurchaseCases = (int) $purQuery->count();
+        $ctrQuery = DB::table('hr.ctrcases')
+            ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
+        if ($selectedProject) {
+            $ctrQuery->where('ctc_prj_id', $selectedProject['id']);
+        } elseif (!empty($selectedUnitIds)) {
+            $ctrQuery->where(function($q) use ($selectedUnitIds) {
+                $q->whereIn('ctc_unt_id', $selectedUnitIds)
+                  ->orWhereIn('ctc_divisionid', $selectedUnitIds);
+            });
         }
-
-        if (in_array($userArea, ['proc', 'prc'], true)) {
-            $pendingContractCases = 0;
-        } elseif ($targetCtrStage) {
-            $ctrQuery = \App\Models\HrCtrCase::whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
-            if ($selectedProject) {
-                $ctrQuery->where('ctc_prj_id', $selectedProject['id']);
-            } elseif (!empty($selectedUnitIds)) {
-                $ctrQuery->where(function($q) use ($selectedUnitIds) {
-                    $q->whereIn('ctc_unt_id', $selectedUnitIds)
-                      ->orWhereIn('ctc_divisionid', $selectedUnitIds);
-                });
-            }
-            $pendingContractCases = (int) $ctrQuery->get()->filter(function($c) use ($targetCtrStage) {
-                return $c->current_stage === $targetCtrStage;
-            })->count();
-        } else {
-            $ctrQuery = DB::table('hr.ctrcases')->whereIn('ctc_status', ['Draft', 'Returned', 'Under Revision']);
-            if ($selectedProject) {
-                $ctrQuery->where('ctc_prj_id', $selectedProject['id']);
-            } elseif (!empty($selectedUnitIds)) {
-                $ctrQuery->where(function($q) use ($selectedUnitIds) {
-                    $q->whereIn('ctc_unt_id', $selectedUnitIds)
-                      ->orWhereIn('ctc_divisionid', $selectedUnitIds);
-                });
-            }
-            $pendingContractCases = (int) $ctrQuery->count();
-        }
+        $pendingContractCases = (int) $ctrQuery->count();
 
         $pendingCases = $pendingPurchaseCases + $pendingContractCases;
 

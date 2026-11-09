@@ -31,21 +31,60 @@ class ProjectController extends Controller
             ->unique()
             ->filter()
             ->toArray();
-        $query = Project::whereIn('prj_id', $csrfPrjIds)->with('milestones');
+        $query = Project::whereIn('prj_id', $csrfPrjIds)->with(['milestones', 'unit']);
+    } elseif ($request->filled('division_id') && strtolower(trim((string)$request->division_id)) !== 'all') {
+        $query = Project::where('prj_unt_id', (int) $request->division_id)->with(['milestones', 'unit']);
+    } elseif ($request->filled('division') && strtolower(trim((string)$request->division)) !== 'all') {
+        $divParam = trim((string)$request->division);
+        if (is_numeric($divParam)) {
+            $query = Project::where('prj_unt_id', (int) $divParam)->with(['milestones', 'unit']);
+        } else {
+            // Find unit by name or short name (e.g. 'Sensors', 'Sensors Division', 'S & UAV')
+            $matchedUnitId = DB::table('cen.units')
+                ->where('unt_name', 'ILIKE', "%{$divParam}%")
+                ->orWhere('unt_namesh', 'ILIKE', "%{$divParam}%")
+                ->value('unt_id');
+            if ($matchedUnitId) {
+                $query = Project::where('prj_unt_id', $matchedUnitId)->with(['milestones', 'unit']);
+            } else {
+                $query = Project::whereHas('unit', function($q) use ($divParam) {
+                    $q->where('unt_name', 'ILIKE', "%{$divParam}%")
+                      ->orWhere('unt_namesh', 'ILIKE', "%{$divParam}%");
+                })->with(['milestones', 'unit']);
+            }
+        }
     } else {
-        $query = Project::where('prj_unt_id', $user->acc_unt_id)->with('milestones');
+        $isWideUser = ($user->acc_access === 'multiple') || 
+                      (isset($user->acc_lowers) && (int)$user->acc_lowers === 0 && (int)$user->acc_uppers === 0) || 
+                      (method_exists($user, 'isCommand') && $user->isCommand()) || 
+                      (method_exists($user, 'isSORD') && $user->isSORD());
+        if ($isWideUser) {
+            $query = Project::with(['milestones', 'unit']);
+            app(\App\Services\Auth\DataScopeService::class)->scopeProjects($query, $user);
+        } else {
+            $query = Project::where('prj_unt_id', $user->acc_unt_id)->with(['milestones', 'unit']);
+        }
     }
 
     if (\Illuminate\Support\Facades\Schema::hasTable('doc.documents')) {
         $query->with('document');
     }
 
-    // Filter Logic
-    if ($request->has('status') && $request->status != 'All') {
-        $query->where('prj_status', $request->status);
+    // Filter Logic: On 'ALL' tab, remove status filter so all projects (Open & Closed) show
+    if ($request->filled('status')) {
+        $statusParam = strtolower(trim((string)$request->status));
+        if ($statusParam !== 'all') {
+            if ($statusParam === 'open') {
+                $query->whereNotIn(DB::raw('LOWER(prj_status)'), ['closed', 'completed', 'cancelled']);
+            } elseif ($statusParam === 'closed') {
+                $query->whereIn(DB::raw('LOWER(prj_status)'), ['closed', 'completed', 'cancelled']);
+            } else {
+                $query->where(DB::raw('LOWER(prj_status)'), $statusParam);
+            }
+        }
     }
 
-    $projects = $query->orderBy('prj_id', 'desc')->get();
+    $projects = $query->distinct('prj.projects.prj_id')->orderBy('prj_id', 'desc')->get();
     
     // Attach active employee counts for each project
     $this->attachProjectEmployeeCounts($projects);

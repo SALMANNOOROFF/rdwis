@@ -643,6 +643,26 @@
         .rdwis-ai-toggle-track.active .rdwis-ai-toggle-knob {
             transform: translateX(14px);
         }
+
+        /* Universal Modal & Backdrop Stacking Fix - Prevents Backdrop from Obscuring Modals */
+        .modal {
+            z-index: 1060 !important;
+        }
+        .modal-dialog {
+            z-index: 1065 !important;
+        }
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+        .modal-backdrop.show {
+            z-index: 1040 !important;
+        }
+        #deptScopeSwitchModal {
+            z-index: 1070 !important;
+        }
+        #deptScopeSwitchModal .modal-dialog {
+            z-index: 1075 !important;
+        }
     </style>
   </head>
 
@@ -852,7 +872,9 @@
               $sbPur = $sbBadges['pur'] ?? 0;
               $sbCtr = $sbBadges['ctr'] ?? 0;
               $sbHr  = $sbBadges['hr'] ?? 0;
+              $sbGcs = (int) ($sbBadges['gcs'] ?? 0);
               $sbFsh = 0;
+              $sbSoc = 0;
               try {
                   $uFsh = Auth::user();
                   if ($uFsh) {
@@ -865,6 +887,27 @@
                           $fshQ->whereIn('fsh_current_stage', ['MD', 'DDG', 'DG']);
                       }
                       $sbFsh = $fshQ->count();
+
+                      // Salary Cases Pending Count
+                      $socQ = \App\Models\SalOrderCase::whereNotIn('soc_status', ['Approved', 'Cancelled', 'Closed']);
+                      $uAccId = (int)($uFsh->acc_id ?? 0);
+                      $uArea = strtolower(trim((string)($uFsh->acc_untarea ?? '')));
+                      $uDesigShort = strtoupper(trim((string)($uFsh->acc_desigshort ?? '')));
+                      $socQ->where(function($sq) use ($uFsh, $uAccId, $uArea, $uDesigShort) {
+                          $sq->where('soc_current_acc_id', $uAccId);
+                          if ($uFsh->isFinance() || in_array($uArea, ['fin', 'finance'], true) || ((int)($uFsh->acc_unt_id ?? 0) === 800000)) {
+                              $sq->orWhere('soc_current_stage', 'Finance');
+                          } elseif (in_array($uDesigShort, ['MD', 'MD RDW'], true) || $uAccId === 101 || in_array($uArea, ['rdw', 'md'], true)) {
+                              $sq->orWhere('soc_current_stage', 'MD');
+                          } elseif (in_array($uDesigShort, ['DDG', 'DDG NRDI'], true) || $uAccId === 108 || $uArea === 'hqs') {
+                              $sq->orWhere('soc_current_stage', 'DDG');
+                          } elseif (in_array($uDesigShort, ['DG', 'DG NRDI'], true) || $uAccId === 107 || $uArea === 'nrdi') {
+                              $sq->orWhere('soc_current_stage', 'DG');
+                          } elseif ($uFsh->isDlog() || $uAccId === 106 || in_array($uArea, ['log', 'dlog'], true)) {
+                              $sq->orWhere('soc_current_stage', 'DLOG');
+                          }
+                      });
+                      $sbSoc = $socQ->count();
                   }
               } catch (\Throwable $e) {}
           @endphp
@@ -1046,6 +1089,13 @@
           </a>
       </li>
 
+      <li class="nav-item">
+          <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
+              <i class="fas fa-folder-open nav-icon text-warning"></i>
+              <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+          </a>
+      </li>
+
       {{-- ========================================================= --}}
       {{-- CASE 2: AGAR USER 'DIVISION' KA HAI (Old Sidebar) --}}
       {{-- ========================================================= --}}
@@ -1094,6 +1144,20 @@
                 <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
                     <i class="fas fa-random nav-icon text-info"></i>
                     <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('salary_cases.index') }}" class="nav-link {{ Request::routeIs('salary_cases.*') ? 'active' : '' }}">
+                    <i class="fas fa-file-invoice-dollar nav-icon text-success"></i>
+                    <p>Salary Cases <span class="badge badge-blinking-red {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
+                    <i class="fas fa-folder-open nav-icon text-warning"></i>
+                    <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
                 </a>
             </li>
 
@@ -1233,6 +1297,13 @@
                </a>
            </li>
 
+           <li class="nav-item">
+               <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
+                   <i class="fas fa-folder-open nav-icon text-warning"></i>
+                   <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+               </a>
+           </li>
+
       @elseif(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['nrdi', 'proc', 'prc', 'fin', 'rdw', 'hqs', 'log', 'dlog', 'logistics']) || (Auth::user() && method_exists(Auth::user(), 'isDlog') && Auth::user()->isDlog()))
           @php
               $area = strtolower(trim((string) (Auth::user()->acc_untarea ?? '')));
@@ -1296,6 +1367,20 @@
               <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-random text-info"></i>
                   <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('salary_cases.index') }}" class="nav-link {{ Request::routeIs('salary_cases.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-file-invoice-dollar text-success"></i>
+                  <p>Salary Cases <span class="badge badge-blinking-red {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
+                  <i class="fas fa-folder-open nav-icon text-warning"></i>
+                  <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
               </a>
           </li>
 
@@ -1482,6 +1567,20 @@
               </a>
           </li>
 
+          <li class="nav-item">
+              <a href="{{ route('salary_cases.index') }}" class="nav-link {{ Request::routeIs('salary_cases.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-file-invoice-dollar text-success"></i>
+                  <p>Salary Cases <span class="badge badge-blinking-red {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
+                  <i class="fas fa-folder-open nav-icon text-warning"></i>
+                  <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+              </a>
+          </li>
+
           @php
               $sbItReversalsCount = 0;
               try {
@@ -1658,6 +1757,15 @@
                       @if($sbPendingTickets > 0)
                           <span class="badge badge-warning badge-pill ml-1 font-weight-bold" style="font-size: 9px; padding: 2px 5px;">{{ $sbPendingTickets }}</span>
                       @endif
+                  </p>
+              </a>
+          </li>
+
+          <li class="nav-item">
+              <a href="{{ route('password.change') }}" class="nav-link {{ Request::routeIs('password.change') ? 'active' : '' }}" style="border-radius: 6px; margin: 1px 6px; padding: 6px 10px;">
+                  <i class="nav-icon fas fa-key text-warning" style="font-size: 13px; margin-right: 6px;"></i>
+                  <p style="font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      Change Password
                   </p>
               </a>
           </li>
@@ -2156,8 +2264,28 @@
             </div>
         </div>
     </div>
+    <script>
+        $(document).ready(function() {
+            var $m = $('#deptScopeSwitchModal');
+            if ($m.length) {
+                if ($m.parent()[0] !== document.body) {
+                    $m.appendTo('body');
+                }
+                $m.on('show.bs.modal', function() {
+                    $('.modal-backdrop').remove();
+                });
+                $m.on('shown.bs.modal', function() {
+                    $('.modal-backdrop').css('z-index', '1040');
+                    $m.css('z-index', '1070');
+                });
+                $m.on('hidden.bs.modal', function() {
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open').css('padding-right', '');
+                });
+            }
+        });
+    </script>
     @endif
 
-    @include('pwa.install-banner')
   </body>
 </html>

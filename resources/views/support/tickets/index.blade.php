@@ -15,6 +15,11 @@
                 </p>
             </div>
             <div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
+                @if($isResolver)
+                    <a href="{{ route('support.tickets.print') }}" target="_blank" class="btn btn-sm font-weight-bold shadow-2xs mr-1" style="border-radius: 6px; font-size: 11.5px; background: #0f172a; color: #f8fafc; border: 1px solid #334155;">
+                        <i class="fas fa-print text-warning mr-1"></i> Print Complaints Sheet
+                    </a>
+                @endif
                 <span class="badge badge-light border text-dark font-weight-bold px-2.5 py-1.5 shadow-2xs" style="font-size: 11px; border-radius: 6px;">
                     <i class="fas fa-user-circle text-primary mr-1"></i> {{ $user->acc_username }} 
                     <span class="text-muted font-weight-normal">({{ $userRoleLabel }})</span>
@@ -424,9 +429,14 @@
                     {{-- All Tickets Table with Filter --}}
                     <div class="card border-0 shadow-sm" style="border-radius: 12px; background: #ffffff;">
                         <div class="card-header bg-white py-2.5 px-3 border-bottom d-flex flex-wrap justify-content-between align-items-center" style="gap: 8px;">
-                            <h6 class="mb-0 font-weight-bold text-dark" style="font-size: 13.5px;">
-                                <i class="fas fa-list-alt text-primary mr-1.5"></i> Central Support Queue (All Departments)
-                            </h6>
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <h6 class="mb-0 font-weight-bold text-dark mr-2" style="font-size: 13.5px;">
+                                    <i class="fas fa-list-alt text-primary mr-1.5"></i> Central Support Queue (All Departments)
+                                </h6>
+                                <a href="{{ route('support.tickets.print') }}" target="_blank" class="btn btn-outline-dark btn-xs font-weight-bold px-2 py-1 shadow-2xs" style="border-radius: 4px; font-size: 11px;">
+                                    <i class="fas fa-print text-primary mr-1"></i> Print Complaints Sheet
+                                </a>
+                            </div>
                             <form method="GET" action="{{ route('support.tickets.index') }}" class="form-inline d-flex flex-wrap gap-1 m-0">
                                 <select name="unt_id" class="form-control form-control-sm" onchange="this.form.submit()" style="border-radius: 4px; font-size: 11.5px; height: 30px;">
                                     <option value="all">All Departments</option>

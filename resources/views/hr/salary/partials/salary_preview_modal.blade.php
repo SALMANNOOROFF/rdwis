@@ -83,7 +83,8 @@
             <div class="d-flex align-items-center mb-2" style="gap: 8px;">
               <span class="small font-weight-bold text-muted">Filter by Exclusion Reason:</span>
               <select id="filter-exclusion-reason" class="form-control form-control-sm" style="width: auto; max-width: 320px;">
-                <option value="all">All Exclusion Reasons (7 Checks)</option>
+                <option value="all">All Exclusion Reasons</option>
+                <option value="Attendance Incomplete">Attendance Incomplete</option>
                 <option value="Future Month">1. Future Month</option>
                 <option value="Already Generated">2. Already Generated (Duplicate Guard)</option>
                 <option value="No Contract/Plan">3. No Contract/Plan</option>
@@ -102,10 +103,11 @@
                     <th>Name / Designation</th>
                     <th>Department</th>
                     <th>Specific Exclusion Reason</th>
+                    <th style="width: 140px;" class="text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody id="preview-excluded-tbody">
-                  <tr><td colspan="5" class="text-center text-muted py-3">No excluded candidates.</td></tr>
+                  <tr><td colspan="6" class="text-center text-muted py-3">No excluded candidates.</td></tr>
                 </tbody>
               </table>
             </div>

@@ -278,49 +278,69 @@ class ContractCaseFulfillmentService
                 }
 
             } elseif ($type === 'CE') {
-                // ── PATH B: Extension (Ce) — Update Existing Contract Only ─────────
+                // ── PATH B: Extension (Ce) — Separate Extended Tenure & Cap Previous Contract ─────────
 
                 $existingCtrId = $case->ctc_ctr_id;
                 if ($existingCtrId) {
                     $oldCtr = HrContract::find($existingCtrId);
                     if ($oldCtr) {
-                        $existingRemarks = trim((string)($oldCtr->ctr_remarks ?? ''));
-                        $updatedRemarks = $this->appendRemarks($existingRemarks, $terminRemarks);
                         $extensionEndDate = !empty($data['ctc_approvedenddt']) ? $data['ctc_approvedenddt'] : ($case->ctc_approvedenddt ?: $case->ctc_newenddt);
+                        $extensionStartDate = !empty($data['ctc_approvedstartdt']) ? $data['ctc_approvedstartdt'] : ($case->ctc_approvedstartdt ?: $case->ctc_newstartdt);
+                        $newSal = (isset($data['ctc_approvedsalary']) && is_numeric($data['ctc_approvedsalary'])) ? (float)$data['ctc_approvedsalary'] : (float)($case->ctc_approvedsalary ?: $oldCtr->ctr_salary);
+                        $newJobtitle = !empty($data['ctc_approvedjobtitle']) ? $data['ctc_approvedjobtitle'] : ($case->ctc_approvedjobtitle ?: $oldCtr->ctr_jobtitle);
+                        $newGrade = !empty($data['ctc_approvedgrade']) ? $data['ctc_approvedgrade'] : ($case->ctc_approvedgrade ?: $oldCtr->ctr_grade);
 
-                        $ctrUpdates = [
-                            'ctr_termindt' => $extensionEndDate,
-                            'ctr_remarks'  => $updatedRemarks,
-                        ];
-                        $caseUpdates = [
-                            'ctc_approvedenddt' => $extensionEndDate,
-                        ];
-
-                        if (isset($data['ctc_approvedsalary']) && is_numeric($data['ctc_approvedsalary'])) {
-                            $newSal = (float)$data['ctc_approvedsalary'];
-                            $ctrUpdates['ctr_salary'] = $newSal;
-                            $caseUpdates['ctc_approvedsalary'] = $newSal;
-                            $caseUpdates['ctc_price'] = $newSal * 12;
-                        }
-                        if (!empty($data['ctc_approvedjobtitle'])) {
-                            $ctrUpdates['ctr_jobtitle'] = $data['ctc_approvedjobtitle'];
-                            $caseUpdates['ctc_approvedjobtitle'] = $data['ctc_approvedjobtitle'];
-                        }
-                        if (!empty($data['ctc_approvedgrade'])) {
-                            $ctrUpdates['ctr_grade'] = $data['ctc_approvedgrade'];
-                            $caseUpdates['ctc_approvedgrade'] = $data['ctc_approvedgrade'];
-                        }
-
+                        // 1. Cap old contract end date at extension start date - 1 day
+                        $capEnd = Carbon::parse($extensionStartDate)->copy()->subDay()->format('Y-m-d');
                         DB::table('hr.contracts')
                             ->where('ctr_id', $existingCtrId)
-                            ->update($ctrUpdates);
+                            ->update([
+                                'ctr_enddt'    => $capEnd,
+                                'ctr_termindt' => $capEnd,
+                            ]);
 
+                        // 2. Create new contract row for the extended tenure
+                        $newCtr = HrContract::create([
+                            'ctr_unt_id'   => $case->ctc_approvedunt_id ?: ($oldCtr->ctr_unt_id ?: 1),
+                            'ctr_num'      => $oldCtr->ctr_num,
+                            'ctr_startdt'  => $extensionStartDate,
+                            'ctr_enddt'    => $extensionEndDate,
+                            'ctr_termindt' => $extensionEndDate,
+                            'ctr_date'     => $signDate ?: $extensionStartDate,
+                            'ctr_jobtitle' => $newJobtitle,
+                            'ctr_grade'    => $newGrade,
+                            'ctr_salary'   => $newSal,
+                            'ctr_hed_id'   => $oldCtr->ctr_hed_id,
+                            'ctr_prob'     => null,
+                            'ctr_probsal'  => null,
+                            'ctr_remarks'  => $terminRemarks,
+                            'ctr_path'     => $oldCtr->ctr_path,
+                            'ctr_type'     => $oldCtr->ctr_type ?: 1,
+                            'ctr_ctc_id'   => $case->ctc_id,
+                        ]);
+                        $newContractId = $newCtr->ctr_id;
+
+                        // 3. Update case
                         DB::table('hr.ctrcases')
                             ->where('ctc_id', $case->ctc_id)
-                            ->update($caseUpdates);
+                            ->update([
+                                'ctc_newctr_id'     => $newContractId,
+                                'ctc_approvedenddt' => $extensionEndDate,
+                            ]);
 
-                        // Adjust plans for existing contract
-                        $this->pricingService->adjustContractPlans($existingCtrId, $extensionEndDate);
+                        // 4. Verify in fin.contractsverif
+                        DB::table('fin.contractsverif')->insert([
+                            'cvf_ctr_id' => $newContractId,
+                            'cvf_verif'  => true,
+                            'cvf_dtg'    => now(),
+                        ]);
+
+                        // 5. Adjust/move plans for extended period
+                        $this->pricingService->adjustContractPlans($existingCtrId, $capEnd);
+                        DB::table('hr.contractplans')
+                            ->where('cpn_ctr_id', $existingCtrId)
+                            ->where('cpn_startdt', '>=', $extensionStartDate)
+                            ->update(['cpn_ctr_id' => $newContractId]);
                     }
                 }
             }

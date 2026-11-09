@@ -95,7 +95,7 @@ class Purchase extends Model
 
 
     /**
-     * Check if this purchase case is funded by CSRF (Central Shared Resource Fund / CHRF)
+     * Check if this purchase case is funded by CSRF (Central Service Resource Fund / CHRF)
      */
     public function isCsrf(): bool
     {
@@ -167,61 +167,6 @@ class Purchase extends Model
         return !empty($this->pcs_sudohed) ? $this->pcs_sudohed : ('Head #' . $headId);
     }
 
-    /**
-     * Get the Subhead name(s) associated with this purchase case.
-     */
-    public function getSubheadDisplayAttribute(): string
-    {
-        // 1. Try pur.purcases_shd
-        $shd = \Illuminate\Support\Facades\DB::table('pur.purcases_shd')
-            ->where('pcd_pcs_id', $this->pcs_id)
-            ->whereNotNull('pcd_subhead')
-            ->where('pcd_subhead', '!=', '')
-            ->pluck('pcd_subhead')
-            ->unique()
-            ->values()
-            ->all();
-
-        if (!empty($shd)) {
-            return implode(', ', $shd);
-        }
-
-        // 2. Try purcaseitems (pci_subhead)
-        if ($this->relationLoaded('items')) {
-            $itemShds = $this->items->pluck('pci_subhead')
-                ->filter(fn($v) => !empty(trim((string)$v)))
-                ->unique()
-                ->values()
-                ->all();
-        } else {
-            $itemShds = \Illuminate\Support\Facades\DB::table('pur.purcaseitems')
-                ->where('pci_pcs_id', $this->pcs_id)
-                ->whereNotNull('pci_subhead')
-                ->where('pci_subhead', '!=', '')
-                ->pluck('pci_subhead')
-                ->unique()
-                ->values()
-                ->all();
-        }
-
-        if (!empty($itemShds)) {
-            return implode(', ', $itemShds);
-        }
-
-        // 3. Fallback based on case type
-        $type = strtolower(trim((string)($this->pcs_type ?? '')));
-        if ($type === 'ps') {
-            return 'Equipment';
-        }
-        if (in_array($type, ['pt', 'rb', 'ta', 'tada'], true)) {
-            return 'Misc';
-        }
-        if (in_array($type, ['hr', 'sal', 'salary'], true)) {
-            return 'HR / Staff';
-        }
-
-        return 'Equipment';
-    }
 
     /**
      * Accessor: tax-inclusive case value (legacy pcs_price).
@@ -527,6 +472,44 @@ class Purchase extends Model
         return $query->whereHas('currentSubstatus', function ($q) use ($stages) {
             $q->whereIn('pss_stage', $stages);
         });
+    }
+
+    /**
+     * Accessor: Get consolidated subhead display string.
+     * If items have distinct subheads, returns them comma-separated (e.g. "Equipment, Misc").
+     * Otherwise returns the single subhead from items, or purcases_shd, or fallback.
+     */
+    public function getSubheadDisplayAttribute(): string
+    {
+        $itemSubheads = $this->relationLoaded('items')
+            ? $this->items->pluck('pci_subhead')->filter()->map(fn($s) => trim((string)$s))->unique()->values()
+            : \Illuminate\Support\Facades\DB::table('pur.purcaseitems')
+                ->where('pci_pcs_id', $this->pcs_id)
+                ->whereNotNull('pci_subhead')
+                ->where('pci_subhead', '!=', '')
+                ->distinct()
+                ->pluck('pci_subhead')
+                ->map(fn($s) => trim((string)$s))
+                ->unique()
+                ->values();
+
+        if ($itemSubheads->isNotEmpty()) {
+            return $itemSubheads->implode(', ');
+        }
+
+        $caseSubheads = \Illuminate\Support\Facades\DB::table('pur.purcases_shd')
+            ->where('pcd_pcs_id', $this->pcs_id)
+            ->pluck('pcd_subhead')
+            ->filter()
+            ->map(fn($s) => trim((string)$s))
+            ->unique()
+            ->values();
+
+        if ($caseSubheads->isNotEmpty()) {
+            return $caseSubheads->implode(', ');
+        }
+
+        return ($this->pcs_type === 'Ps') ? 'Equipment' : 'Misc';
     }
 
     /**

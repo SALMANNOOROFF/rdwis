@@ -194,50 +194,6 @@
                 </div>
             @endif
 
-            {{-- Page Header (Exact DG Header match with Purchase Case) --}}
-            <div class="dg-hdr">
-                <div>
-                    <a href="{{ route('fund_shifting.index') }}" class="dg-back-btn">
-                        <i class="fas fa-arrow-left"></i> Back to Listing
-                    </a>
-                    <div class="dg-page-title">
-                        <i class="fas fa-random text-primary mr-1.5"></i> Shifting of Funds Case #FS-{{ $shift->fsh_rev_id ?: $shift->fsh_id }}
-                    </div>
-                    <div class="dg-meta-row mt-1">
-                        <span class="dg-meta-item">
-                            <i class="fas fa-project-diagram mr-1 text-muted"></i>
-                            <strong>[{{ $shift->project->prj_code ?? 'PRJ' }}]</strong> {{ $shift->project->prj_title ?? 'Project' }}
-                        </span>
-                        <span class="text-muted mx-1">&bull;</span>
-                        <span class="dg-meta-item">
-                            <i class="fas fa-tag mr-1 text-muted"></i> Head: <strong>{{ $shift->head->hed_code ?: ($shift->project->prj_code ?? 'N/A') }}</strong>
-                        </span>
-                        <span class="text-muted mx-1">&bull;</span>
-                        <span class="dg-meta-item">
-                            <span class="badge badge-{{ in_array($shift->fsh_status, ['Approved', 'Implemented']) ? 'success' : 'primary' }} px-2.5 py-0.5 font-weight-bold">
-                                {{ $shift->fsh_status }}
-                            </span>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="text-right">
-                    <div class="d-flex align-items-center justify-content-end" style="gap: 8px;">
-                        <button type="button" class="btn btn-xs btn-outline-secondary font-weight-bold px-2.5 py-1 shadow-sm" data-toggle="modal" data-target="#pastShiftsModal" style="border-radius: 6px; font-size: 11px;">
-                            <i class="fas fa-history mr-1 text-primary"></i> PREVIOUS FUNDS SHIFTED <span class="badge badge-light border ml-1">{{ $pastShifts->count() }}</span>
-                        </button>
-                        @if($shift->fsh_rev_id)
-                            <a href="{{ route('admin.reversals.show', $shift->fsh_rev_id) }}" target="_blank" class="btn btn-xs btn-outline-info font-weight-bold px-2.5 py-1 shadow-sm" style="border-radius: 6px; font-size: 11px;">
-                                <i class="fas fa-shield-alt mr-1"></i> DATA REVISION #{{ $shift->fsh_rev_id }}
-                            </a>
-                        @endif
-                    </div>
-                    <div class="dg-case-date text-muted mt-1" style="font-size: 11px;">
-                        Initiated on {{ $shift->created_at ? $shift->created_at->format('d M Y, H:i') : '' }} by {{ $shift->fsh_created_name ?: ($shift->creator->acc_username ?? 'Initiator') }}
-                    </div>
-                </div>
-            </div>
-
             {{-- 2-Column Grid --}}
             <div class="dg-grid">
 
@@ -246,13 +202,8 @@
                 {{-- ========================================================= --}}
                 <div class="dg-box h-100" style="display:flex; flex-direction:column;">
                     <div class="dg-box-hdr">
-                        <div class="dg-sec-label">
-                            <i class="fas fa-exchange-alt fa-xs"></i> FUND SHIFTING PARTICULARS
-                        </div>
-                        <div>
-                            <span class="badge badge-info px-2.5 py-1 text-white font-weight-bold" style="font-size: 11.5px; background: #0284c7;">
-                                <i class="fas fa-map-marker-alt mr-1"></i> Current Holder: {{ $shift->fsh_current_holder ?: ($shift->fsh_current_stage . ' (' . $shift->fsh_status . ')') }}
-                            </span>
+                        <div class="dg-sec-label" style="margin-bottom:0;">
+                            <i class="fas fa-exchange-alt fa-xs"></i> Shifting of Funds Case #FS-{{ $shift->fsh_rev_id ?: $shift->fsh_id }}
                         </div>
                     </div>
 
@@ -456,7 +407,7 @@
                                         <i class="fas fa-check-double mr-1"></i> Fund Shifting Implemented & Fulfilled by IT
                                     </h6>
                                     <div class="font-weight-500 text-dark small">
-                                        Executed on {{ $shift->fsh_implemented_at ? $shift->fsh_implemented_at->format('d M Y, H:i') : 'N/A' }} 
+                                        Executed on {{ $shift->fsh_implemented_at ? $shift->fsh_implemented_at->format('d M Y, h:i A') : 'N/A' }} 
                                         by {{ $shift->implementer->acc_username ?? 'IT Directorate' }}.
                                     </div>
                                     @if($shift->fsh_implementation_notes)
@@ -478,16 +429,93 @@
                 {{-- (Exact Structure matching Purchase Case approvals_new)    --}}
                 {{-- ========================================================= --}}
                 <div class="dg-right">
-                    <div class="dg-panel-r">
-                        <div class="dg-panel-r-hdr py-2 px-3">
+                    <div class="dg-panel-r" style="overflow: visible;">
+                        <div class="dg-panel-r-hdr py-2 px-3 d-flex justify-content-between align-items-center" style="position: relative; border-top-left-radius: 9px; border-top-right-radius: 9px;">
                             <div class="d-flex align-items-center" style="gap: 8px;">
                                 <i class="fas fa-file-alt text-primary" style="font-size: 13px;"></i>
-                                <span class="dg-panel-r-title">Minute</span>
-                            </div>
-                            <div class="d-flex align-items-center" style="gap: 6px;">
+                                <span class="dg-panel-r-title" style="font-size: 12px; font-weight: 700; color: #0f172a !important; letter-spacing: 0.5px; text-transform: uppercase;">Minute</span>
                                 <span class="badge badge-light border text-muted px-2 py-0.5" style="font-size: 10px;">
                                     {{ $shift->decisions->where('fsd_action', '!=', 'Draft Created')->count() }} Entries
                                 </span>
+                            </div>
+
+                            {{-- Case Attachments Dropdown Trigger on Far Right of Minute Header (Exact Purchase Case UI) --}}
+                            <div class="dropdown" id="fshCaseAttachmentsDropdownWrap">
+                                <button type="button" class="btn btn-xs font-weight-bold rajdhani px-2 py-1 d-flex align-items-center dropdown-toggle shadow-none" id="btnCaseAttachmentsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 11px; height: 26px; border-radius: 6px; gap: 5px; background: #ffffff; border: 1.5px solid #cbd5e1; color: #1e293b; cursor: pointer;" title="View or Add Case Attachments">
+                                    <i class="fas fa-paperclip text-primary" style="font-size: 11.5px;"></i>
+                                    <span>CASE ATTACHMENTS</span>
+                                    <span class="badge badge-primary badge-pill ml-1" id="fshCaseAttCountBadge" style="font-size: 9.5px; padding: 2px 6px;">{{ ($attachments ?? collect())->count() }}</span>
+                                </button>
+
+                                <div class="dropdown-menu dropdown-menu-right shadow-lg p-0" aria-labelledby="btnCaseAttachmentsDropdown" style="width: 380px; max-width: 92vw; border-radius: 8px; border: 1.5px solid #cbd5e1; z-index: 1060; margin-top: 5px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;">
+                                    {{-- Dropdown Header with Add Button --}}
+                                    <div class="d-flex justify-content-between align-items-center py-2 px-3 border-bottom" style="background: #f8fafc;">
+                                        <div class="d-flex align-items-center font-weight-bold text-dark rajdhani" style="font-size: 12px; gap: 6px;">
+                                            <i class="fas fa-paperclip text-primary"></i>
+                                            <span>ATTACHED CASE FILES</span>
+                                        </div>
+                                        <button type="button" class="btn btn-xs btn-primary font-weight-bold rajdhani px-2 py-0.5 d-flex align-items-center" data-toggle="modal" data-target="#modalAddFundShiftAttachment" style="font-size: 11px; height: 23px; border-radius: 4px; background: var(--rd-accent, #5F7858) !important; border: none; gap: 4px;" title="Upload New Attachment">
+                                            <i class="fas fa-plus"></i> <span>ADD</span>
+                                        </button>
+                                    </div>
+
+                                    {{-- Dropdown Body: Attachments List --}}
+                                    <div class="px-3 py-2" id="fshCaseAttachmentsList" style="font-size: 11.5px; max-height: 250px; overflow-y: auto;">
+                                        @if(($attachments ?? collect())->count() > 0)
+                                            @foreach($attachments as $fIdx => $fDoc)
+                                                @php
+                                                    $fName = trim((string)($fDoc->iat_type ?: ''));
+                                                    if (empty($fName)) {
+                                                        $fName = basename(str_replace('\\', '/', $fDoc->iat_path));
+                                                    }
+                                                    $ext = strtolower(pathinfo($fDoc->iat_path, PATHINFO_EXTENSION));
+                                                @endphp
+                                                <div class="d-flex justify-content-between align-items-center py-1.5 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: #f1f5f9 !important;">
+                                                    <div class="d-flex align-items-center overflow-hidden mr-2" style="flex: 1; min-width: 0; gap: 6px;">
+                                                        <span class="text-muted font-weight-bold flex-shrink-0" style="font-size: 10px; width: 16px;">{{ $fIdx + 1 }}.</span>
+                                                        @if(in_array($ext, ['pdf']))
+                                                            <i class="far fa-file-pdf text-danger flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @elseif(in_array($ext, ['doc', 'docx']))
+                                                            <i class="far fa-file-word text-primary flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @elseif(in_array($ext, ['xls', 'xlsx']))
+                                                            <i class="far fa-file-excel text-success flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @elseif(in_array($ext, ['png', 'jpg', 'jpeg']))
+                                                            <i class="far fa-file-image text-info flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @else
+                                                            <i class="far fa-file-alt text-secondary flex-shrink-0" style="font-size: 12px;"></i>
+                                                        @endif
+                                                        <span class="text-truncate font-weight-bold text-dark" style="font-size: 11.5px;" title="{{ $fName }}">
+                                                            {{ $fName }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                                                        <a href="{{ route('universal.attachment.view', ['module' => 'ina', 'id' => $fDoc->iat_id]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 font-weight-bold d-inline-flex align-items-center" style="font-size: 11px; height: 22px; border-radius: 4px; gap: 4px;" title="View {{ $fName }}">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </a>
+                                                        @if(\App\Http\Controllers\AttachmentController::canManageAttachment(auth()->user(), 'ina', $shift->fsh_id, $fDoc))
+                                                            <label for="replace_ina_dropdown_{{ $fDoc->iat_id }}" class="btn btn-xs btn-outline-warning py-0 px-1 font-weight-bold mb-0 d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px; cursor: pointer;" title="Replace {{ $fName }}">
+                                                                <i class="fas fa-sync-alt"></i>
+                                                            </label>
+                                                            <input type="file" id="replace_ina_dropdown_{{ $fDoc->iat_id }}" style="display:none;" onchange="window.rdwisDropdownReplace('ina', '{{ $fDoc->iat_id }}', '{{ addslashes($fName) }}', this)">
+                                                            <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1 font-weight-bold d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px;" onclick="window.rdwisDropdownDelete('ina', '{{ $fDoc->iat_id }}', '{{ addslashes($fName) }}', this)" title="Delete {{ $fName }}">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="text-center py-3 text-muted" id="fshNoAttachmentsMsg" style="font-size: 11px;">
+                                                <i class="fas fa-folder-open text-muted mr-1"></i> No case attachments uploaded yet.
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="p-2 border-top bg-light text-center" style="border-color: #e2e8f0 !important;">
+                                        <button type="button" class="btn btn-xs btn-outline-success font-weight-bold w-100 py-1 d-flex align-items-center justify-content-center" data-toggle="modal" data-target="#modalAddFundShiftAttachment" style="font-size: 11px; border-radius: 4px; gap: 5px;">
+                                            <i class="fas fa-plus"></i> <span>ATTACH NEW DOCUMENT</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -810,7 +838,7 @@
                                                 </span>
                                             </div>
                                             <span class="text-muted" style="font-size: 10px; font-weight: 600;">
-                                                {{ $decision->fsd_dtg ? $decision->fsd_dtg->format('d M, h:i A') : '' }}
+                                                {{ $decision->fsd_dtg ? $decision->fsd_dtg->format('d M Y, h:i A') : '' }}
                                             </span>
                                         </div>
                                         <div class="mt-2" style="line-height: 1.5; font-size: 13px; color: #1e293b !important; padding-left: 5px;">
@@ -1224,8 +1252,277 @@ $(document).ready(function() {
             }
         });
     });
+
+    // ── Fund Shifting Attachment Upload Form Handler ────────────
+    $('#formAddFundShiftAttachment').on('submit', async function(e) {
+        e.preventDefault();
+        const $btn = $('#btnSubmitFundShiftAttachment');
+        const origHtml = $btn.html();
+        const fileInput = document.getElementById('fshFileInput');
+        const docTitle = document.getElementById('fshDocTitleInput').value.trim();
+
+        if (!fileInput.files.length) {
+            Swal.fire({ icon: 'warning', title: 'File Required', text: 'Please choose a document file to attach.' });
+            return;
+        }
+
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm mr-1" role="status"></span> Uploading...');
+
+        const fd = new FormData(this);
+
+        try {
+            const res = await fetch("{{ route('universal.attachment.upload') }}", {
+                method: 'POST',
+                body: fd,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await res.json();
+            $btn.prop('disabled', false).html(origHtml);
+
+            if (data.success) {
+                $('#modalAddFundShiftAttachment').modal('hide');
+                this.reset();
+
+                // Increment badge count
+                const $badge = $('#fshCaseAttCountBadge');
+                const currentCount = parseInt($badge.text().trim(), 10) || 0;
+                $badge.text(currentCount + 1);
+
+                // Remove empty state placeholder if present
+                $('#fshNoAttachmentsMsg').remove();
+
+                const slotId = data.slot_id;
+                const viewUrl = data.url;
+                const ext = (fileInput.files[0]?.name.split('.').pop() || '').toLowerCase();
+                let iconClass = 'far fa-file-alt text-secondary';
+                if (ext === 'pdf') iconClass = 'far fa-file-pdf text-danger';
+                else if (['doc', 'docx'].includes(ext)) iconClass = 'far fa-file-word text-primary';
+                else if (['xls', 'xlsx'].includes(ext)) iconClass = 'far fa-file-excel text-success';
+                else if (['png', 'jpg', 'jpeg'].includes(ext)) iconClass = 'far fa-file-image text-info';
+
+                const newIndex = currentCount + 1;
+                const itemHtml = `
+                    <div class="d-flex justify-content-between align-items-center py-1.5 border-bottom" style="border-color: #f1f5f9 !important;">
+                        <div class="d-flex align-items-center overflow-hidden mr-2" style="flex: 1; min-width: 0; gap: 6px;">
+                            <span class="text-muted font-weight-bold flex-shrink-0" style="font-size: 10px; width: 16px;">${newIndex}.</span>
+                            <i class="${iconClass} flex-shrink-0" style="font-size: 12px;"></i>
+                            <span class="text-truncate font-weight-bold text-dark" style="font-size: 11.5px;" title="${docTitle}">
+                                ${docTitle}
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                            <a href="${viewUrl}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 font-weight-bold d-inline-flex align-items-center" style="font-size: 11px; height: 22px; border-radius: 4px; gap: 4px;" title="View ${docTitle}">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <label for="replace_ina_dropdown_${slotId}" class="btn btn-xs btn-outline-warning py-0 px-1 font-weight-bold mb-0 d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px; cursor: pointer;" title="Replace ${docTitle}">
+                                <i class="fas fa-sync-alt"></i>
+                            </label>
+                            <input type="file" id="replace_ina_dropdown_${slotId}" style="display:none;" onchange="window.rdwisDropdownReplace('ina', '${slotId}', '${docTitle.replaceAll("'", "\\'")}', this)">
+                            <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1 font-weight-bold d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px;" onclick="window.rdwisDropdownDelete('ina', '${slotId}', '${docTitle.replaceAll("'", "\\'")}', this)" title="Delete ${docTitle}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                $('#fshCaseAttachmentsList').append(itemHtml);
+
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message || 'Attachment uploaded successfully!',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            } else {
+                throw new Error(data.message || 'Failed to upload attachment.');
+            }
+        } catch (err) {
+            $btn.prop('disabled', false).html(origHtml);
+            if (window.Swal) {
+                Swal.fire({ icon: 'error', title: 'Upload Failed', text: err.message || 'Could not upload attachment.' });
+            } else {
+                alert(err.message || 'Error uploading file');
+            }
+        }
+    });
 });
+
+window.rdwisDropdownReplace = window.rdwisDropdownReplace || function(module, id, docType, inputEl) {
+    if (!inputEl.files || !inputEl.files[0]) return;
+    const file = inputEl.files[0];
+
+    const doUpload = () => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('doc_type', docType);
+        formData.append('_token', '{{ csrf_token() }}');
+
+        fetch(`/universal-attachment/${module}/${id}/replace`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            inputEl.value = '';
+            if (data.success) {
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message || `"${docType}" replaced successfully!`,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                throw new Error(data.message || 'Replace failed');
+            }
+        })
+        .catch(err => {
+            inputEl.value = '';
+            if (window.Swal) {
+                Swal.fire({ icon: 'error', title: 'Replace Failed', text: err.message });
+            } else {
+                alert('Error: ' + err.message);
+            }
+        });
+    };
+
+    if (window.Swal) {
+        Swal.fire({
+            title: 'Replace Document?',
+            text: `Are you sure you want to replace "${docType}" with "${file.name}"?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            confirmButtonText: 'Yes, Replace',
+            cancelButtonText: 'Cancel'
+        }).then(r => {
+            if (r.isConfirmed) doUpload();
+            else inputEl.value = '';
+        });
+    } else {
+        if (confirm(`Are you sure you want to replace "${docType}" with "${file.name}"?`)) doUpload();
+        else inputEl.value = '';
+    }
+};
+
+window.rdwisDropdownDelete = window.rdwisDropdownDelete || function(module, id, docType, btnEl) {
+    const doDelete = () => {
+        const originalBtnHtml = btnEl.innerHTML;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+        btnEl.disabled = true;
+
+        fetch(`/universal-attachment/${module}/${id}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ _token: '{{ csrf_token() }}' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const row = btnEl.closest('.d-flex.justify-content-between');
+                if (row) row.remove();
+                const $badge = $('#fshCaseAttCountBadge');
+                const cur = parseInt($badge.text().trim(), 10) || 1;
+                $badge.text(Math.max(0, cur - 1));
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message || `"${docType}" deleted.`,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            } else {
+                throw new Error(data.message || 'Delete failed');
+            }
+        })
+        .catch(err => {
+            btnEl.innerHTML = originalBtnHtml;
+            btnEl.disabled = false;
+            if (window.Swal) {
+                Swal.fire({ icon: 'error', title: 'Delete Failed', text: err.message });
+            } else {
+                alert('Error: ' + err.message);
+            }
+        });
+    };
+
+    if (window.Swal) {
+        Swal.fire({
+            title: 'Delete Attachment?',
+            text: `Are you sure you want to delete "${docType}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'Yes, Delete',
+            cancelButtonText: 'Cancel'
+        }).then(r => {
+            if (r.isConfirmed) doDelete();
+        });
+    } else {
+        if (confirm(`Are you sure you want to delete "${docType}"?`)) doDelete();
+    }
+};
 </script>
 @endpush
+
+{{-- Modal Add Fund Shift Attachment --}}
+<div class="modal fade" id="modalAddFundShiftAttachment" tabindex="-1" role="dialog" aria-labelledby="modalAddFundShiftAttachmentLabel" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 440px;">
+        <div class="modal-content shadow-lg border-0" style="border-radius: 8px; overflow: hidden;">
+            <div class="modal-header py-2.5 px-3 bg-light border-bottom">
+                <h6 class="modal-title font-weight-bold rajdhani text-dark mb-0" id="modalAddFundShiftAttachmentLabel" style="font-size: 13.5px; letter-spacing: 0.5px;">
+                    <i class="fas fa-paperclip text-primary mr-1"></i> ATTACH CASE FILE (FS-{{ $shift->fsh_id }})
+                </h6>
+                <button type="button" class="close text-muted" data-dismiss="modal" aria-label="Close" style="font-size: 20px; line-height: 1;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formAddFundShiftAttachment" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="module" value="ina">
+                <input type="hidden" name="object_id" value="{{ $shift->fsh_id }}">
+                <div class="modal-body p-3">
+                    <div class="form-group mb-2.5">
+                        <label class="rajdhani font-weight-bold text-dark mb-1" style="font-size: 12px; letter-spacing: 0.3px;">DOCUMENT TITLE / TYPE <span class="text-danger">*</span></label>
+                        <input type="text" name="doc_type" id="fshDocTitleInput" class="form-control form-control-sm" placeholder="e.g. Justification Note, Approval Letter, Reallocation Sheet" required style="border-radius: 4px; font-size: 12px;">
+                    </div>
+                    <div class="form-group mb-1">
+                        <label class="rajdhani font-weight-bold text-dark mb-1" style="font-size: 12px; letter-spacing: 0.3px;">SELECT FILE <span class="text-danger">*</span></label>
+                        <input type="file" name="file" id="fshFileInput" class="form-control-file border p-1.5" required style="border-radius: 4px; font-size: 11.5px; background: #f8fafc;" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
+                        <small class="text-muted d-block mt-1" style="font-size: 10.5px;">Supported: PDF, Word, Excel, Images (Max: 20MB)</small>
+                    </div>
+                </div>
+                <div class="modal-footer py-2 px-3 bg-light border-top d-flex justify-content-between">
+                    <button type="button" class="btn btn-xs btn-outline-secondary font-weight-bold px-3 py-1" data-dismiss="modal" style="border-radius: 4px;">Cancel</button>
+                    <button type="submit" id="btnSubmitFundShiftAttachment" class="btn btn-xs btn-primary font-weight-bold px-3 py-1" style="border-radius: 4px;">
+                        <i class="fas fa-upload mr-1"></i> Upload Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection

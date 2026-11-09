@@ -1,14 +1,15 @@
-const CACHE_NAME = 'rdwis-pwa-v1';
+const CACHE_NAME = 'rdwis-pwa-v3';
 const STATIC_ASSETS = [
     '/offline.html',
     '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(STATIC_ASSETS);
-        }).then(() => self.skipWaiting())
+        })
     );
 });
 

@@ -28,17 +28,22 @@
     // Calculate the next numbering for the list:
     // Main minute sheet ends at paragraph 4.
     $liCount = 0;
-    foreach($purchase->decisions as $dec) {
-        if ($dec->pdec_action === 'save_draft') continue;
-        if (strpos($dec->pdec_remarks, '<li') !== false) {
-            $liCount += substr_count($dec->pdec_remarks, '<li');
-        } else if (!empty(trim(strip_tags($dec->pdec_remarks)))) {
+    foreach($purchase->decisions->where('pdec_action', '!=', 'save_draft')->sortBy('created_at') as $dec) {
+        $rawRemarks = $dec->pdec_remarks ?? '';
+        if (strpos($rawRemarks, '<li') !== false) {
+            $liCount += max(1, substr_count($rawRemarks, '<li'));
+        } elseif (!empty(trim(strip_tags($rawRemarks)))) {
+            $lines = explode("\n", trim(strip_tags($rawRemarks)));
+            $c = 0;
+            foreach ($lines as $l) { if (!empty(trim($l))) $c++; }
+            $liCount += max(1, $c);
+        } else {
             $liCount += 1;
         }
     }
-    $nextRemarkNumber = 4 + $liCount + 1;
+    $nextRemarkNumber = $liCount + 1;
 
-    // Fetch existing draft for this user if any (rendered in textarea as 1. 2. for user ease)
+    // Fetch existing draft for this user if any (rendered in textarea as nextNumOld. nextNumOld+1. for user ease)
     $myDraftDecision = $purchase->decisions->where('pdec_acc_id', $u->acc_id)->where('pdec_action', 'save_draft')->first();
     $existingDraftRaw = '';
     if ($myDraftDecision && !empty($myDraftDecision->pdec_remarks)) {
@@ -46,7 +51,7 @@
         preg_match_all('/<li>(.*?)<\/li>/is', $clean, $matches);
         if (!empty($matches[1])) {
             $lines = [];
-            $curNum = 1;
+            $curNum = $nextRemarkNumber;
             foreach ($matches[1] as $lineContent) {
                 $lines[] = $curNum . ". " . trim(strip_tags($lineContent));
                 $curNum++;
@@ -55,7 +60,7 @@
         } else {
             $existingDraftRaw = trim(strip_tags($myDraftDecision->pdec_remarks));
             if (!preg_match('/^\d+\./', $existingDraftRaw)) {
-                $existingDraftRaw = "1. " . $existingDraftRaw;
+                $existingDraftRaw = $nextRemarkNumber . ". " . $existingDraftRaw;
             }
         }
     }
@@ -85,7 +90,7 @@
         <input type="hidden" name="remarks" id="remarksHiddenInput">
 
         <div class="mb-2">
-            <textarea id="inlineRemarks" class="form-control" placeholder="Type your remarks here..." style="background: var(--rd-neutral-50); color: #fff; font-family: 'Arial', sans-serif; font-size: 11pt; min-height: 70px; border: 1px solid var(--rd-border); border-radius: 6px; padding: 8px 10px; outline: none; box-shadow: none; resize: vertical;">{{ $existingDraftRaw }}</textarea>
+            <textarea id="inlineRemarks" class="form-control" placeholder="Para {{ $nextRemarkNumber }}. Type your remarks here..." style="background: var(--rd-neutral-50); color: #fff; font-family: 'Arial', sans-serif; font-size: 11pt; min-height: 70px; border: 1px solid var(--rd-border); border-radius: 6px; padding: 8px 10px; outline: none; box-shadow: none; resize: vertical;">{{ $existingDraftRaw }}</textarea>
         </div>
 
         <div class="d-flex" style="gap: 10px; width: 100%;">
@@ -190,56 +195,79 @@
     let lastSavedRemarks = inlineRemarksOld.value.trim();
 
     function getNextLocalNumber() {
+        if (!inlineRemarksOld) return nextNumOld + 1;
         const matches = inlineRemarksOld.value.match(/^\d+(?=\.)/gm);
         if (matches && matches.length > 0) {
             return Math.max(...matches.map(Number)) + 1;
         }
-        return 2;
+        return nextNumOld + 1;
     }
 
-    // Auto-initialize with numbering 1. on first focus if empty
-    inlineRemarksOld.addEventListener('focus', function() {
-        if (this.value.trim() === '') {
-            this.value = "1. ";
-            updateGlowState();
-        }
-    });
+    // Auto-initialize with numbering (nextNumOld.) on first focus if empty
+    if (inlineRemarksOld) {
+        const prefixOld = nextNumOld + ". ";
 
-    inlineRemarksOld.addEventListener('keydown', function(e) {
-        const selectionStart = this.selectionStart;
-        const text = this.value;
-        const lastNewline = text.lastIndexOf('\n', selectionStart - 1);
-        const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
-        const currentLine = text.substring(lineStart, selectionStart);
-        const match = currentLine.match(/^\d+\. /);
-
-        if (match && selectionStart < lineStart + match[0].length) {
-            if (e.key === 'Backspace' || e.key === 'Delete' || (e.key.length === 1 && e.key !== 'Enter')) {
-                e.preventDefault(); return;
-            }
+        // Migrate any pre-loaded draft starting with 1. to nextNumOld. if nextNumOld > 1
+        if (inlineRemarksOld.value.trim().startsWith('1. ') && nextNumOld > 1) {
+            inlineRemarksOld.value = inlineRemarksOld.value.replace(/^1\.\s*/, prefixOld);
         }
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            if (currentLine.trim().length > (match ? match[0].trim().length : 0)) {
-                const nextNumLocal = getNextLocalNumber();
-                const newNumber = "\n" + nextNumLocal + ". ";
-                const before = text.substring(0, selectionStart);
-                const after = text.substring(selectionStart);
-                this.value = before + newNumber + after;
-                this.selectionStart = this.selectionEnd = before.length + newNumber.length;
+
+        inlineRemarksOld.addEventListener('focus', function() {
+            if (this.value.trim() === '') {
+                this.value = prefixOld;
                 updateGlowState();
             }
-        }
-        if (e.key === 'Backspace' && match && selectionStart === lineStart + match[0].length) {
-            e.preventDefault();
-        }
-    });
+        });
+
+        inlineRemarksOld.addEventListener('keydown', function(e) {
+            const selectionStart = this.selectionStart;
+            const text = this.value;
+            const lastNewline = text.lastIndexOf('\n', selectionStart - 1);
+            const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+            const currentLine = text.substring(lineStart, selectionStart);
+            const match = currentLine.match(/^\d+\. /);
+
+            if (match && selectionStart < lineStart + match[0].length) {
+                if (e.key === 'Backspace' || e.key === 'Delete' || (e.key.length === 1 && e.key !== 'Enter')) {
+                    e.preventDefault(); return;
+                }
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentLine.trim().length > (match ? match[0].trim().length : 0)) {
+                    const nextNumLocal = getNextLocalNumber();
+                    const newNumber = "\n" + nextNumLocal + ". ";
+                    const before = text.substring(0, selectionStart);
+                    const after = text.substring(selectionStart);
+                    this.value = before + newNumber + after;
+                    this.selectionStart = this.selectionEnd = before.length + newNumber.length;
+                    updateGlowState();
+                }
+            }
+            if (e.key === 'Backspace' && match && selectionStart === lineStart + match[0].length) {
+                e.preventDefault();
+            }
+        });
+
+        inlineRemarksOld.addEventListener('input', function() {
+            if (!this.value.startsWith(prefixOld) && this.value.trim() !== '') {
+                const currentVal = this.value;
+                if (currentVal.length < prefixOld.length) {
+                    this.value = prefixOld;
+                } else {
+                    this.value = prefixOld + currentVal.replace(/^\d+\.?\s*/, '');
+                }
+                this.selectionStart = this.selectionEnd = prefixOld.length;
+            }
+            updateGlowState();
+        });
+    }
 
     function updateGlowState() {
         if (!inlineRemarksOld) return;
         const currentVal = inlineRemarksOld.value.trim();
-        const prefix = "1. ";
-        const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== "1.";
+        const prefix = nextNumOld + ". ";
+        const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== (nextNumOld + ".");
         const isModified = currentVal !== lastSavedRemarks;
 
         if (btnSaveRemarks) {
@@ -260,20 +288,6 @@
 
         if (btnReturn) btnReturn.disabled = !hasContent;
     }
-
-    inlineRemarksOld.addEventListener('input', function() {
-        const prefix = "1. ";
-        if (!this.value.startsWith(prefix) && this.value.trim() !== '') {
-            const currentVal = this.value;
-            if (currentVal.length < prefix.length) {
-                this.value = prefix;
-            } else {
-                this.value = prefix + currentVal.replace(/^\d+\.?\s*/, '');
-            }
-            this.selectionStart = this.selectionEnd = prefix.length;
-        }
-        updateGlowState();
-    });
 
     function buildRemarksHtml() {
         let remarks = inlineRemarksOld.value.trim();

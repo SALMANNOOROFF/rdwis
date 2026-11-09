@@ -45,9 +45,44 @@
 </head>
 <body>
     <div>
-        <h1>No Internet Connection</h1>
-        <p>You are currently offline. Please check your network and try again.</p>
-        <a href="/login" class="btn">Retry</a>
+        <h1>Server Connecting / Offline</h1>
+        <p id="status-text">Server is starting or offline. Please wait or check your connection...</p>
+        <div style="margin-top: 15px;">
+            <a href="/login" class="btn" id="retry-btn">Retry Now</a>
+        </div>
+        <p style="font-size: 12px; color: #5a6275; margin-top: 15px;">
+            Auto-reconnecting every 2 seconds...
+        </p>
     </div>
+
+    <script>
+        function checkServer() {
+            fetch('/login', { method: 'HEAD', cache: 'no-store' })
+                .then(function(res) {
+                    if (res.ok || res.status === 200 || res.status === 302 || res.type === 'opaqueredirect') {
+                        document.getElementById('status-text').innerText = 'Server detected! Redirecting...';
+                        window.location.href = '/login';
+                    } else {
+                        setTimeout(checkServer, 2000);
+                    }
+                })
+                .catch(function() {
+                    setTimeout(checkServer, 2000);
+                });
+        }
+
+        // Start polling immediately
+        setTimeout(checkServer, 1000);
+
+        window.addEventListener('online', function() {
+            window.location.href = '/login';
+        });
+
+        document.getElementById('retry-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            this.innerText = 'Connecting...';
+            window.location.href = '/login';
+        });
+    </script>
 </body>
 </html>

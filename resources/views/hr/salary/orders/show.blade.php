@@ -38,17 +38,18 @@
         </form>
       @endif
 
-      @if(in_array($order->sor_status, ['Approved', 'Fulfilled']))
-        <a href="{{ route('divhr.salary.orders.slip', $order->sor_id) }}" target="_blank" class="btn btn-sm btn-outline-info font-weight-bold px-3 shadow-sm">
-          <i class="fas fa-print mr-1"></i> Print Pay Slip
+      @if(in_array($order->sor_status, ['Approved', 'Fulfilled', 'Closed']) || ($order->commitment && $order->commitment->cmt_status === 'Paid'))
+        <a href="{{ route('divhr.salary.orders.slip', $order->sor_id) }}" target="_blank" class="btn btn-sm btn-dark font-weight-bold px-3 shadow-sm" title="Print Employee Pay Slip">
+          <i class="fas fa-receipt mr-1"></i> Pay Slip
         </a>
       @endif
 
       @if($canCancel)
-        <button type="button" class="btn btn-sm btn-outline-danger btn-trigger-cancel font-weight-bold px-3"
+        <button type="button" class="btn btn-sm btn-outline-warning btn-trigger-cancel font-weight-bold px-3"
                 data-action="{{ route('divhr.salary.orders.cancel', $order->sor_id) }}"
-                data-desc="Salary Order #{{ $order->sor_id }} - {{ $order->sor_empnamecomp }} (Rs. {{ number_format($order->sor_salary) }})">
-          <i class="fas fa-times mr-1"></i> Cancel Order
+                data-desc="Salary Order #{{ $order->sor_id }} - {{ $order->sor_empnamecomp }} (Rs. {{ number_format($order->sor_salary) }})"
+                title="Return Salary Order to Division Draft">
+          <i class="fas fa-undo-alt mr-1"></i> Return Order
         </button>
       @endif
     </div>
@@ -414,8 +415,8 @@ $(document).ready(function() {
 
     $('#cancelModalForm').attr('action', actionUrl);
     $('#cancel-target-desc').text(desc);
-    $('#cancel-modal-title').text('Cancel Salary Order');
-    $('#cancel-modal-warning').text('Cancelling this salary order will mark sor_status as Cancelled and automatically cancel any active awaited commitment in fin.commitments.');
+    $('#cancel-modal-title').text('Return Salary Order to Division');
+    $('#cancel-modal-warning').text('Returning this salary order will revert the requisition back to the Division in Draft stage, release In-Process funds back to Remaining budget, and remove this draft order from Finance.');
     $('#cancelModal').modal('show');
   });
 });

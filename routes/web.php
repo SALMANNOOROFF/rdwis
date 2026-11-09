@@ -111,6 +111,8 @@ Route::middleware('auth')->group(function () {
         ->name('universal.attachment.view');
     Route::post('/universal-attachment/{module}/{id}/delete', [\App\Http\Controllers\AttachmentController::class, 'delete'])
         ->name('universal.attachment.delete');
+    Route::post('/universal-attachment/{module}/{id}/replace', [\App\Http\Controllers\AttachmentController::class, 'replace'])
+        ->name('universal.attachment.replace');
 
     // Contract Case Custom Attachment Upload Route
     Route::post('/contract-cases/{id}/attachments', [\App\Http\Controllers\ContractCaseAttachmentController::class, 'store'])
@@ -301,6 +303,7 @@ Route::middleware('auth')->group(function () {
                 // Wildcard routes must come last
                 Route::get('/{id}', [\App\Http\Controllers\PurchaseCaseController::class, 'show'])->name('show');
                 Route::post('/{id}/action', [\App\Http\Controllers\PurchaseCaseController::class, 'action'])->name('action');
+                Route::post('/{id}/reverse', [\App\Http\Controllers\PurchaseCaseController::class, 'reverse'])->name('reverse');
                 Route::post('/{id}/toggle-mtss', [\App\Http\Controllers\PurchaseCaseController::class, 'toggleMtss'])->name('toggle_mtss');
                 // Common Scrutiny Reports (Accessible by all modules)
                 Route::get('/case/{id}/case-detail', [\App\Http\Controllers\PurchaseController::class, 'caseDetail']);
@@ -682,6 +685,10 @@ Route::middleware('auth')->group(function () {
                     ->name('divhr.employeedetail');
                 Route::get('/employee/{id}/service-contract/{ctrId?}', [DivHrController::class, 'serviceContractView'])
                     ->name('divhr.employee.service_contract');
+                Route::get('/employee/{id}/salary-heads/{ctrId?}', [DivHrController::class, 'salaryHeadsView'])
+                    ->name('divhr.employee.salary_heads');
+                Route::post('/employee/{id}/salary-heads/{ctrId?}', [DivHrController::class, 'updateSalaryHeads'])
+                    ->name('divhr.employee.salary_heads.update');
                 Route::get('/employee/{id}/edit', [DivHrController::class, 'employeeEdit'])
                     ->name('divhr.employee.edit');
                 Route::post('/employee/{id}/update', [DivHrController::class, 'employeeUpdate'])
@@ -728,9 +735,21 @@ Route::middleware('auth')->group(function () {
                     Route::post('/requisitions/{srq_id}/cancel', [\App\Http\Controllers\SalaryController::class, 'cancelRequisition'])
                         ->name('divhr.salary.requisitions.cancel')
                         ->middleware('approver');
+                    Route::delete('/requisitions/{srq_id}', [\App\Http\Controllers\SalaryController::class, 'destroyRequisition'])
+                        ->name('divhr.salary.requisitions.destroy')
+                        ->middleware('approver');
+                    Route::post('/requisitions/{srq_id}/split', [\App\Http\Controllers\SalaryController::class, 'splitRequisition'])
+                        ->name('divhr.salary.requisitions.split')
+                        ->middleware('approver');
+                    Route::get('/heads/{hed_id}/balance', [\App\Http\Controllers\SalaryController::class, 'getHeadBalance'])
+                        ->name('divhr.salary.heads.balance');
                     Route::post('/requisitions/{srq_id}/create-orders', [\App\Http\Controllers\SalaryController::class, 'createOrders'])
                         ->name('divhr.salary.requisitions.create_orders')
                         ->middleware('approver');
+                    Route::get('/requisitions/print', [\App\Http\Controllers\SalaryController::class, 'requisitionsPrintSheet'])
+                        ->name('divhr.salary.requisitions.print');
+                    Route::get('/payslip/{type}/{id}', [\App\Http\Controllers\SalaryController::class, 'payslip'])
+                        ->name('divhr.salary.payslip');
                     Route::patch('/requisitions/{srq_id}/remarks2', [\App\Http\Controllers\SalaryController::class, 'updateRemarks2'])
                         ->name('divhr.salary.requisitions.remarks2');
 
@@ -741,25 +760,46 @@ Route::middleware('auth')->group(function () {
                         ->middleware('approver');
                     Route::get('/orders/bank-scroll', [\App\Http\Controllers\SalaryController::class, 'bankPaymentScroll'])
                         ->name('divhr.salary.orders.bank_scroll');
+                    Route::get('/orders/print-sheet', [\App\Http\Controllers\SalaryController::class, 'ordersPrintSheet'])
+                        ->name('divhr.salary.orders.print_sheet');
+                    Route::get('/orders/export-word', [\App\Http\Controllers\SalaryController::class, 'ordersExportWord'])
+                        ->name('divhr.salary.orders.export_word');
+                    Route::get('/orders/remaining-employees-data', [\App\Http\Controllers\SalaryController::class, 'remainingEmployees'])
+                        ->name('divhr.salary.orders.remaining_employees_data');
+                    Route::patch('/orders/{sor_id}/toggle-check', [\App\Http\Controllers\SalaryController::class, 'toggleCheck'])
+                        ->whereNumber('sor_id')
+                        ->name('divhr.salary.orders.toggle_check');
+
                     Route::get('/orders/{sor_id}', [\App\Http\Controllers\SalaryController::class, 'orderShow'])
+                        ->whereNumber('sor_id')
                         ->name('divhr.salary.orders.show');
+                    Route::get('/orders/{sor_id}/slip', [\App\Http\Controllers\SalaryController::class, 'orderPaySlip'])
+                        ->whereNumber('sor_id')
+                        ->name('divhr.salary.orders.slip');
                     Route::post('/orders/{sor_id}/approve', [\App\Http\Controllers\SalaryController::class, 'approveOrder'])
+                        ->whereNumber('sor_id')
                         ->name('divhr.salary.orders.approve')
                         ->middleware('approver');
                     Route::post('/orders/{sor_id}/cancel', [\App\Http\Controllers\SalaryController::class, 'cancelOrder'])
+                        ->whereNumber('sor_id')
                         ->name('divhr.salary.orders.cancel')
                         ->middleware('approver');
                     Route::patch('/orders/{sor_id}/salary', [\App\Http\Controllers\SalaryController::class, 'updateSalary'])
+                        ->whereNumber('sor_id')
                         ->name('divhr.salary.orders.update_salary')
                         ->middleware('approver');
                     Route::patch('/orders/{sor_id}/remarks2', [\App\Http\Controllers\SalaryController::class, 'updateOrderRemarks2'])
+                        ->whereNumber('sor_id')
                         ->name('divhr.salary.orders.remarks2');
-                    Route::get('/orders/{sor_id}/slip', [\App\Http\Controllers\SalaryController::class, 'slip'])
-                        ->name('divhr.salary.orders.slip');
 
                     Route::get('/commitments/verify', [\App\Http\Controllers\SalaryController::class, 'verifyCommitments'])
                         ->name('divhr.salary.commitments.verify');
                 });
+
+                // Aliases for div/hr/salary/orders path if requested with extra slash
+                Route::patch('/div/hr/salary/orders/{sor_id}/toggle-check', [\App\Http\Controllers\SalaryController::class, 'toggleCheck']);
+                Route::patch('/div/hr/salary/orders/{sor_id}/remarks2', [\App\Http\Controllers\SalaryController::class, 'updateOrderRemarks2']);
+                Route::get('/div/hr/salary/orders/remaining-employees-data', [\App\Http\Controllers\SalaryController::class, 'remainingEmployees']);
 
                 Route::get('/initiate-contract', [DivHrController::class, 'initiateContract'])
                     ->name('divhr.contract.initiate');
@@ -872,6 +912,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [SystemAdminAccountController::class, 'index'])->name('index');
             Route::get('/create', [SystemAdminAccountController::class, 'create'])->name('create');
             Route::post('/', [SystemAdminAccountController::class, 'store'])->name('store');
+            Route::get('/{account}/edit', [SystemAdminAccountController::class, 'edit'])->name('edit');
+            Route::match(['put', 'post'], '/{account}', [SystemAdminAccountController::class, 'update'])->name('update');
             Route::post('/{account}/close', [SystemAdminAccountController::class, 'close'])->name('close');
             Route::post('/{account}/reopen', [SystemAdminAccountController::class, 'reopen'])->name('reopen');
             Route::post('/{account}/reset-password', [SystemAdminAccountController::class, 'resetPassword'])->name('reset_password');
@@ -916,6 +958,13 @@ Route::middleware('auth')->group(function () {
                         ->name('salary-heads.close');
                     Route::post('/salary-heads/{empId}/reverse', [\App\Http\Controllers\Finance\FinanceVerificationController::class, 'reverseSalaryHead'])
                         ->name('salary-heads.reverse');
+                });
+
+                // FINANCE ATTENDANCE UNLOCK (Audited Cell Unlock)
+                Route::prefix('attendance')->name('attendance.')->group(function () {
+                    Route::get('/unlock', [\App\Http\Controllers\Finance\FinanceAttendanceController::class, 'unlockList'])->name('unlock_list');
+                    Route::get('/unlock/{empId}', [\App\Http\Controllers\Finance\FinanceAttendanceController::class, 'unlockEmployee'])->name('unlock_employee');
+                    Route::post('/unlock/{empId}', [\App\Http\Controllers\Finance\FinanceAttendanceController::class, 'saveUnlockDay'])->name('save_unlock_day');
                 });
             });
             
@@ -963,6 +1012,7 @@ Route::middleware('auth')->group(function () {
     // =========================================================
     // COMPLAINTS & SUGGESTIONS SUPPORT TICKETING SYSTEM
     // =========================================================
+    Route::get('/support/tickets/print', [\App\Http\Controllers\SupportTicketController::class, 'printSheet'])->name('support.tickets.print');
     Route::get('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('support.tickets.index');
     Route::post('/support/tickets', [\App\Http\Controllers\SupportTicketController::class, 'store'])->name('support.tickets.store');
     Route::get('/support/tickets/{id}', [\App\Http\Controllers\SupportTicketController::class, 'show'])->name('support.tickets.show');
@@ -987,6 +1037,43 @@ Route::middleware('auth')->group(function () {
             Route::post('/{id}/return', [\App\Http\Controllers\FundShiftingController::class, 'return'])->name('return');
             Route::post('/{id}/cancel', [\App\Http\Controllers\FundShiftingController::class, 'cancel'])->name('cancel');
             Route::post('/{id}/implement', [\App\Http\Controllers\FundShiftingController::class, 'implement'])->name('implement');
+        });
+
+    // =========================================================
+    // SALARY ORDER VERIFICATION CASES (Minute Sheet Workflow)
+    // =========================================================
+    Route::prefix('salary-cases')
+        ->name('salary_cases.')
+        ->middleware(['area:prj,nrdi,it,fin,hr,proc,prc,rdw,hqs,adm,admin'])
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\SalaryCaseController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\SalaryCaseController::class, 'store'])->name('store');
+            Route::get('/{id}', [\App\Http\Controllers\SalaryCaseController::class, 'show'])->name('show');
+            Route::patch('/{id}/draft', [\App\Http\Controllers\SalaryCaseController::class, 'updateDraft'])->name('update_draft');
+            Route::post('/{id}/send', [\App\Http\Controllers\SalaryCaseController::class, 'sendCase'])->name('send');
+            Route::post('/{id}/approve', [\App\Http\Controllers\SalaryCaseController::class, 'approve'])->name('approve');
+            Route::post('/{id}/cancel', [\App\Http\Controllers\SalaryCaseController::class, 'cancel'])->name('cancel');
+            Route::delete('/{id}', [\App\Http\Controllers\SalaryCaseController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}/print', [\App\Http\Controllers\SalaryCaseController::class, 'printMinute'])->name('print');
+            Route::get('/{id}/export-word', [\App\Http\Controllers\SalaryCaseController::class, 'exportWord'])->name('export_word');
+            Route::post('/{id}/sync', [\App\Http\Controllers\SalaryCaseController::class, 'syncOrders'])->name('sync');
+        });
+
+    // =========================================================
+    // UNIVERSAL CASE FILE SYSTEM (E-Office & Note Sheets)
+    // =========================================================
+    Route::prefix('cases')
+        ->name('cases.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\GenericCaseController::class, 'index'])->name('index');
+            Route::post('/initiate', [\App\Http\Controllers\GenericCaseController::class, 'initiate'])->name('initiate');
+            Route::get('/{id}', [\App\Http\Controllers\GenericCaseController::class, 'show'])->name('show');
+            Route::patch('/{id}/draft', [\App\Http\Controllers\GenericCaseController::class, 'updateDraft'])->name('update_draft');
+            Route::post('/{id}/send', [\App\Http\Controllers\GenericCaseController::class, 'sendCase'])->name('send');
+            Route::post('/{id}/approve', [\App\Http\Controllers\GenericCaseController::class, 'approve'])->name('approve');
+            Route::post('/{id}/cancel', [\App\Http\Controllers\GenericCaseController::class, 'cancel'])->name('cancel');
+            Route::post('/{id}/attachments', [\App\Http\Controllers\GenericCaseController::class, 'uploadAttachment'])->name('upload_attachment');
+            Route::get('/{id}/print', [\App\Http\Controllers\GenericCaseController::class, 'print'])->name('print');
         });
 
     }); // End force password change

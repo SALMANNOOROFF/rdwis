@@ -20,9 +20,6 @@
     // Upload permission: Any authenticated user can upload
     $canUpload = $canUpload ?? (Auth::check() && $canEdit);
 
-    // Delete permission: PERMANENTLY DISABLED FOR ALL USERS (No delete anywhere)
-    $canDelete = false;
-
     // Default slots per module if not provided
     if (!isset($defaultSlots)) {
         $defaultSlots = match ($module) {
@@ -99,9 +96,11 @@
                 $hasFile = !empty($filePath);
                 $fileUrl = $hasFile ? \App\Facades\FileStorage::url($filePath) : null;
                 $inputId = "file_input_{$widgetId}_{$slotIndex}";
+                $canManageThis = $hasFile && \App\Http\Controllers\AttachmentController::canManageAttachment(Auth::user(), $module, $objectId, $existing);
+                $replaceInputId = "replace_input_{$widgetId}_{$slotIndex}_{$slotId}";
             @endphp
 
-            <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-bottom" style="background: {{ $hasFile ? '#f0fdf4' : '#ffffff' }}; transition: background 0.15s ease;">
+            <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-bottom rdwis-slot-item" id="slot_item_{{ $widgetId }}_{{ $slotIndex }}" data-slot-name="{{ $slotName }}" style="background: {{ $hasFile ? '#f0fdf4' : '#ffffff' }}; transition: background 0.15s ease;">
                 <div class="d-flex align-items-center overflow-hidden mr-2">
                     <i class="fas {{ $hasFile ? 'fa-check-circle text-success' : 'fa-file-alt text-muted' }} mr-2" style="font-size: 13px; width: 16px;"></i>
                     <span class="text-truncate {{ $hasFile ? 'font-weight-bold text-dark' : 'text-secondary' }}" title="{{ $slotName }}" style="font-size: 13px;">
@@ -109,12 +108,25 @@
                     </span>
                 </div>
 
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center rdwis-slot-actions" style="gap: 4px;">
                     @if($hasFile)
-                        {{-- Live View Button Only (No reload, no delete) --}}
-                        <a href="{{ $fileUrl }}" onclick="window.openLiveDocument('{{ $fileUrl }}', '{{ addslashes($slotName) }}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-success mr-1 shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View {{ $slotName }}">
+                        {{-- Live View Button --}}
+                        <a href="{{ $fileUrl }}" onclick="window.openLiveDocument('{{ $fileUrl }}', '{{ addslashes($slotName) }}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-success shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View {{ $slotName }}">
                             <i class="fas fa-eye mr-1"></i> View
                         </a>
+
+                        @if($canManageThis)
+                            {{-- Replace Button --}}
+                            <label for="{{ $replaceInputId }}" class="btn btn-xs btn-outline-warning shadow-none font-weight-bold mb-0" style="padding: 3px 8px; font-size: 11px; border-radius: 4px; cursor: pointer;" title="Replace {{ $slotName }}">
+                                <i class="fas fa-sync-alt mr-1"></i> Replace
+                            </label>
+                            <input type="file" id="{{ $replaceInputId }}" class="d-none" onchange="window.rdwisReplaceSlotAttachment(this, '{{ $module }}', '{{ $slotId }}', '{{ addslashes($slotName) }}', '{{ $widgetId }}')">
+
+                            {{-- Delete Button --}}
+                            <button type="button" class="btn btn-xs btn-outline-danger shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="window.rdwisDeleteSlotAttachment('{{ $module }}', '{{ $slotId }}', '{{ addslashes($slotName) }}', this, '{{ $widgetId }}', '{{ $inputId }}', false, '{{ $slotIndex }}')" title="Delete {{ $slotName }}">
+                                <i class="fas fa-trash-alt mr-1"></i> Delete
+                            </button>
+                        @endif
                     @else
                         {{-- Upload Button for Empty Slot (No page reload: smooth AJAX upload) --}}
                         @if($canUpload)
@@ -126,7 +138,7 @@
                                 <input type="hidden" name="module" value="{{ $module }}">
                                 <input type="hidden" name="object_id" value="{{ $objectId }}">
                                 <input type="hidden" name="doc_type" value="{{ $slotName }}">
-                                <input type="file" id="{{ $inputId }}" name="file" onchange="window.rdwisUploadSlotFile(this, '{{ $widgetId }}', '{{ addslashes($slotName) }}')">
+                                <input type="file" id="{{ $inputId }}" name="file" onchange="window.rdwisUploadSlotFile(this, '{{ $widgetId }}', '{{ addslashes($slotName) }}', '{{ $slotIndex }}')">
                             </form>
                         @else
                             <span class="badge badge-light text-muted" style="font-size: 11px;">Not Uploaded</span>
@@ -154,20 +166,34 @@
                 $slotId = data_get($customAtt, $pkKey);
                 $hasFile = !empty($filePath);
                 $fileUrl = $hasFile ? \App\Facades\FileStorage::url($filePath) : null;
+                $canManageThis = $hasFile && \App\Http\Controllers\AttachmentController::canManageAttachment(Auth::user(), $module, $objectId, $customAtt);
+                $replaceInputId = "replace_input_{$widgetId}_cust_{$slotId}";
             @endphp
-            <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-bottom" style="background: #f8fafc;">
+            <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-bottom rdwis-slot-item" style="background: #f8fafc;">
                 <div class="d-flex align-items-center overflow-hidden mr-2">
                     <i class="fas fa-paperclip text-info mr-2" style="font-size: 13px; width: 16px;"></i>
                     <span class="text-truncate font-weight-bold text-dark" title="{{ $slotName }}" style="font-size: 13px;">
                         {{ $slotName }}
                     </span>
                 </div>
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center rdwis-slot-actions" style="gap: 4px;">
                     @if($hasFile)
-                        {{-- Live View Button Only (No reload, no delete) --}}
-                        <a href="{{ $fileUrl }}" onclick="window.openLiveDocument('{{ $fileUrl }}', '{{ addslashes($slotName) }}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-info mr-1 shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View {{ $slotName }}">
+                        <a href="{{ $fileUrl }}" onclick="window.openLiveDocument('{{ $fileUrl }}', '{{ addslashes($slotName) }}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-info shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View {{ $slotName }}">
                             <i class="fas fa-eye mr-1"></i> View
                         </a>
+
+                        @if($canManageThis)
+                            {{-- Replace Button --}}
+                            <label for="{{ $replaceInputId }}" class="btn btn-xs btn-outline-warning shadow-none font-weight-bold mb-0" style="padding: 3px 8px; font-size: 11px; border-radius: 4px; cursor: pointer;" title="Replace {{ $slotName }}">
+                                <i class="fas fa-sync-alt mr-1"></i> Replace
+                            </label>
+                            <input type="file" id="{{ $replaceInputId }}" class="d-none" onchange="window.rdwisReplaceSlotAttachment(this, '{{ $module }}', '{{ $slotId }}', '{{ addslashes($slotName) }}', '{{ $widgetId }}')">
+
+                            {{-- Delete Button --}}
+                            <button type="button" class="btn btn-xs btn-outline-danger shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="window.rdwisDeleteSlotAttachment('{{ $module }}', '{{ $slotId }}', '{{ addslashes($slotName) }}', this, '{{ $widgetId }}', null, true, null)" title="Delete {{ $slotName }}">
+                                <i class="fas fa-trash-alt mr-1"></i> Delete
+                            </button>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -223,9 +249,8 @@
 .rd-upload-modal {
     z-index: 1065 !important;
 }
-.rd-upload-modal + .modal-backdrop,
-.modal-backdrop.show {
-    z-index: 1055 !important;
+.rd-upload-modal + .modal-backdrop {
+    z-index: 1060 !important;
 }
 </style>
 
@@ -260,11 +285,227 @@
 if (!window.rdwisAttachmentUploaderInitialized) {
     window.rdwisAttachmentUploaderInitialized = true;
 
-    window.rdwisUploadSlotFile = function(inputEl, widgetId, docType) {
+    // Helper: Replace Slot Attachment
+    window.rdwisReplaceSlotAttachment = function(inputEl, module, id, docType, widgetId) {
+        if (!inputEl.files || !inputEl.files[0]) return;
+        const file = inputEl.files[0];
+        const listItem = inputEl.closest('.rdwis-slot-item');
+        const replaceBtn = listItem ? listItem.querySelector('label[for="' + inputEl.id + '"]') : null;
+
+        const doUpload = () => {
+            const originalBtnHtml = replaceBtn ? replaceBtn.innerHTML : '';
+            if (replaceBtn) {
+                replaceBtn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" role="status"></span>';
+                replaceBtn.style.pointerEvents = 'none';
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('doc_type', docType);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            fetch(`/universal-attachment/${module}/${id}/replace`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (replaceBtn) {
+                    replaceBtn.innerHTML = originalBtnHtml;
+                    replaceBtn.style.pointerEvents = 'auto';
+                }
+                inputEl.value = '';
+
+                if (data.success) {
+                    if (listItem) {
+                        const viewBtn = listItem.querySelector('.rd-live-file-view');
+                        if (viewBtn) {
+                            viewBtn.href = data.url;
+                            viewBtn.setAttribute('onclick', `window.openLiveDocument('${data.url}', '${docType.replace(/'/g, "\\'")}'); return false;`);
+                        }
+                    }
+
+                    if (window.Swal) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || `"${docType}" replaced successfully!`,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    } else {
+                        alert(`"${docType}" replaced successfully!`);
+                    }
+                } else {
+                    throw new Error(data.message || 'Replace failed');
+                }
+            })
+            .catch(err => {
+                if (replaceBtn) {
+                    replaceBtn.innerHTML = originalBtnHtml;
+                    replaceBtn.style.pointerEvents = 'auto';
+                }
+                inputEl.value = '';
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Replace Failed',
+                        text: err.message || 'Could not replace file. You may not have permission.'
+                    });
+                } else {
+                    alert('Error: ' + err.message);
+                }
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Replace Attachment?',
+                text: `Are you sure you want to replace "${docType}" with "${file.name}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Yes, Replace',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    doUpload();
+                } else {
+                    inputEl.value = '';
+                }
+            });
+        } else {
+            if (confirm(`Are you sure you want to replace "${docType}" with "${file.name}"?`)) {
+                doUpload();
+            } else {
+                inputEl.value = '';
+            }
+        }
+    };
+
+    // Helper: Delete Slot Attachment
+    window.rdwisDeleteSlotAttachment = function(module, id, docType, btnEl, widgetId, inputId, isCustom, slotIndex) {
+        const doDelete = () => {
+            const originalBtnHtml = btnEl.innerHTML;
+            btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+            btnEl.disabled = true;
+
+            fetch(`/universal-attachment/${module}/${id}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ _token: '{{ csrf_token() }}' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const widget = document.getElementById(widgetId);
+                    if (widget) {
+                        const badge = widget.querySelector('.card-header .badge');
+                        if (badge) {
+                            badge.textContent = Math.max(0, parseInt(badge.textContent || '1', 10) - 1);
+                        }
+                    }
+
+                    if (isCustom) {
+                        btnEl.closest('.rdwis-slot-item').remove();
+                    } else {
+                        // Revert standard slot to empty upload state
+                        const listItem = btnEl.closest('.rdwis-slot-item');
+                        if (listItem) {
+                            listItem.style.background = '#ffffff';
+                            const iconEl = listItem.querySelector('.fa-check-circle');
+                            if (iconEl) {
+                                iconEl.className = 'fas fa-file-alt text-muted mr-2';
+                            }
+                            const titleEl = listItem.querySelector('.text-truncate');
+                            if (titleEl) {
+                                titleEl.className = 'text-truncate text-secondary';
+                            }
+                            const actionsEl = listItem.querySelector('.rdwis-slot-actions');
+                            if (actionsEl) {
+                                actionsEl.innerHTML = `
+                                    <label for="${inputId}" class="btn btn-xs btn-light border mb-0 shadow-none text-muted upload-slot-btn" style="padding: 4px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; background: #f1f5f9; border-color: #cbd5e1 !important;" title="Click to Upload ${docType}">
+                                        <i class="fas fa-upload text-primary mr-1"></i> Upload
+                                    </label>
+                                    <form action="{{ route('universal.attachment.upload') }}" method="POST" enctype="multipart/form-data" class="d-none" id="form_${inputId}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="module" value="${module}">
+                                        <input type="hidden" name="object_id" value="{{ $objectId }}">
+                                        <input type="hidden" name="doc_type" value="${docType}">
+                                        <input type="file" id="${inputId}" name="file" onchange="window.rdwisUploadSlotFile(this, '${widgetId}', '${docType}', '${slotIndex}')">
+                                    </form>
+                                `;
+                            }
+                        }
+                    }
+
+                    if (window.Swal) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || `"${docType}" deleted successfully.`,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    } else {
+                        alert(`"${docType}" deleted successfully.`);
+                    }
+                } else {
+                    throw new Error(data.message || 'Delete failed');
+                }
+            })
+            .catch(err => {
+                btnEl.innerHTML = originalBtnHtml;
+                btnEl.disabled = false;
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Delete Failed',
+                        text: err.message || 'Could not delete attachment. You may not have permission.'
+                    });
+                } else {
+                    alert('Error: ' + err.message);
+                }
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Delete Attachment?',
+                text: `Are you sure you want to delete "${docType}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    doDelete();
+                }
+            });
+        } else {
+            if (confirm(`Are you sure you want to delete "${docType}"?`)) {
+                doDelete();
+            }
+        }
+    };
+
+    window.rdwisUploadSlotFile = function(inputEl, widgetId, docType, slotIndex) {
         if (!inputEl.files || !inputEl.files[0]) return;
         const file = inputEl.files[0];
         const form = inputEl.closest('form');
-        const listItem = inputEl.closest('.list-group-item');
+        const listItem = inputEl.closest('.rdwis-slot-item');
         const uploadBtn = listItem ? listItem.querySelector('.upload-slot-btn') : null;
         
         const originalBtnHtml = uploadBtn ? uploadBtn.innerHTML : '';
@@ -286,7 +527,11 @@ if (!window.rdwisAttachmentUploaderInitialized) {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Update list item to uploaded state
+                const slotId = data.slot_id || '';
+                const replaceInputId = `replace_input_${widgetId}_${slotIndex}_${slotId}`;
+                const module = '{{ $module }}';
+
+                // Update list item to uploaded state with View, Replace & Delete buttons
                 if (listItem) {
                     listItem.style.background = '#f0fdf4';
                     const iconEl = listItem.querySelector('.fa-file-alt');
@@ -298,12 +543,19 @@ if (!window.rdwisAttachmentUploaderInitialized) {
                         titleEl.classList.remove('text-secondary');
                         titleEl.classList.add('font-weight-bold', 'text-dark');
                     }
-                    const actionContainer = listItem.children[1];
+                    const actionContainer = listItem.querySelector('.rdwis-slot-actions');
                     if (actionContainer) {
                         actionContainer.innerHTML = `
-                            <a href="${data.url}" onclick="window.openLiveDocument('${data.url}', '${docType}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-success mr-1 shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View ${docType}">
+                            <a href="${data.url}" onclick="window.openLiveDocument('${data.url}', '${docType}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-success shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View ${docType}">
                                 <i class="fas fa-eye mr-1"></i> View
                             </a>
+                            <label for="${replaceInputId}" class="btn btn-xs btn-outline-warning shadow-none font-weight-bold mb-0" style="padding: 3px 8px; font-size: 11px; border-radius: 4px; cursor: pointer;" title="Replace ${docType}">
+                                <i class="fas fa-sync-alt mr-1"></i> Replace
+                            </label>
+                            <input type="file" id="${replaceInputId}" class="d-none" onchange="window.rdwisReplaceSlotAttachment(this, '${module}', '${slotId}', '${docType}', '${widgetId}')">
+                            <button type="button" class="btn btn-xs btn-outline-danger shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="window.rdwisDeleteSlotAttachment('${module}', '${slotId}', '${docType}', this, '${widgetId}', '${inputEl.id}', false, '${slotIndex}')" title="Delete ${docType}">
+                                <i class="fas fa-trash-alt mr-1"></i> Delete
+                            </button>
                         `;
                     }
                 }
@@ -389,12 +641,16 @@ if (!window.rdwisAttachmentUploaderInitialized) {
                 }
                 form.reset();
 
+                const slotId = data.slot_id || '';
+                const replaceInputId = `replace_input_${widgetId}_cust_${slotId}`;
+                const module = '{{ $module }}';
+
                 const widget = document.getElementById(widgetId);
                 if (widget) {
                     const listGroup = widget.querySelector('.list-group');
                     if (listGroup) {
                         const newItem = document.createElement('div');
-                        newItem.className = 'list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-bottom';
+                        newItem.className = 'list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-bottom rdwis-slot-item';
                         newItem.style.background = '#f8fafc';
                         newItem.innerHTML = `
                             <div class="d-flex align-items-center overflow-hidden mr-2">
@@ -403,10 +659,17 @@ if (!window.rdwisAttachmentUploaderInitialized) {
                                     ${docType}
                                 </span>
                             </div>
-                            <div class="d-flex align-items-center">
-                                <a href="${data.url}" onclick="window.openLiveDocument('${data.url}', '${docType}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-info mr-1 shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View ${docType}">
+                            <div class="d-flex align-items-center rdwis-slot-actions" style="gap: 4px;">
+                                <a href="${data.url}" onclick="window.openLiveDocument('${data.url}', '${docType}'); return false;" class="rd-live-file-view btn btn-xs btn-outline-info shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" title="Live View ${docType}">
                                     <i class="fas fa-eye mr-1"></i> View
                                 </a>
+                                <label for="${replaceInputId}" class="btn btn-xs btn-outline-warning shadow-none font-weight-bold mb-0" style="padding: 3px 8px; font-size: 11px; border-radius: 4px; cursor: pointer;" title="Replace ${docType}">
+                                    <i class="fas fa-sync-alt mr-1"></i> Replace
+                                </label>
+                                <input type="file" id="${replaceInputId}" class="d-none" onchange="window.rdwisReplaceSlotAttachment(this, '${module}', '${slotId}', '${docType}', '${widgetId}')">
+                                <button type="button" class="btn btn-xs btn-outline-danger shadow-none font-weight-bold" style="padding: 3px 8px; font-size: 11px; border-radius: 4px;" onclick="window.rdwisDeleteSlotAttachment('${module}', '${slotId}', '${docType}', this, '${widgetId}', null, true, null)" title="Delete ${docType}">
+                                    <i class="fas fa-trash-alt mr-1"></i> Delete
+                                </button>
                             </div>
                         `;
                         listGroup.appendChild(newItem);
@@ -452,6 +715,136 @@ if (!window.rdwisAttachmentUploaderInitialized) {
                 alert('Upload failed: ' + (err.message || 'Please try again.'));
             }
         });
+    };
+
+    // Dropdown helpers for Minute Header attachment dropdowns
+    window.rdwisDropdownReplace = function(module, id, docType, inputEl) {
+        if (!inputEl.files || !inputEl.files[0]) return;
+        const file = inputEl.files[0];
+
+        const doUpload = () => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('doc_type', docType);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            fetch(`/universal-attachment/${module}/${id}/replace`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                inputEl.value = '';
+                if (data.success) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || `"${docType}" replaced successfully!`,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    throw new Error(data.message || 'Replace failed');
+                }
+            })
+            .catch(err => {
+                inputEl.value = '';
+                if (window.Swal) {
+                    Swal.fire({ icon: 'error', title: 'Replace Failed', text: err.message });
+                } else {
+                    alert('Error: ' + err.message);
+                }
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Replace Document?',
+                text: `Are you sure you want to replace "${docType}" with "${file.name}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Yes, Replace',
+                cancelButtonText: 'Cancel'
+            }).then(r => {
+                if (r.isConfirmed) doUpload();
+                else inputEl.value = '';
+            });
+        } else {
+            if (confirm(`Are you sure you want to replace "${docType}" with "${file.name}"?`)) doUpload();
+            else inputEl.value = '';
+        }
+    };
+
+    window.rdwisDropdownDelete = function(module, id, docType, btnEl) {
+        const doDelete = () => {
+            const originalBtnHtml = btnEl.innerHTML;
+            btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+            btnEl.disabled = true;
+
+            fetch(`/universal-attachment/${module}/${id}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ _token: '{{ csrf_token() }}' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const row = btnEl.closest('.d-flex.justify-content-between');
+                    if (row) row.remove();
+                    if (window.Swal) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || `"${docType}" deleted.`,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                } else {
+                    throw new Error(data.message || 'Delete failed');
+                }
+            })
+            .catch(err => {
+                btnEl.innerHTML = originalBtnHtml;
+                btnEl.disabled = false;
+                if (window.Swal) {
+                    Swal.fire({ icon: 'error', title: 'Delete Failed', text: err.message });
+                } else {
+                    alert('Error: ' + err.message);
+                }
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Delete Attachment?',
+                text: `Are you sure you want to delete "${docType}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then(r => {
+                if (r.isConfirmed) doDelete();
+            });
+        } else {
+            if (confirm(`Are you sure you want to delete "${docType}"?`)) doDelete();
+        }
     };
 
     window.rdwisAppendFinTableRow = function(docType, fileName, fileUrl) {

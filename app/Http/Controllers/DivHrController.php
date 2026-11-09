@@ -327,6 +327,10 @@ class DivHrController extends Controller
                      ->orOn('cp.prj_id', '=', 'ch.hed_id');
             })
             ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
+            ->leftJoin('hr.ctrcases as tc', function ($join) {
+                $join->on('tc.ctc_newctr_id', '=', 'c.ctr_id')
+                     ->where('tc.ctc_status', '=', 'Fulfilled');
+            })
             ->where('c.ctr_num', $id)
             ->whereRaw('? between c.ctr_startdt and COALESCE(c.ctr_termindt, c.ctr_enddt)', [$todayStr])
             ->orderBy('c.ctr_enddt', 'desc')
@@ -336,7 +340,8 @@ class DivHrController extends Controller
                 'ch.hed_name as ctr_hed_name',
                 'cp.prj_title as ctr_prj_title',
                 'cp.prj_code as ctr_prj_code',
-                'cu.unt_name as ctr_unt_name'
+                'cu.unt_name as ctr_unt_name',
+                'tc.ctc_type as ctr_case_type'
             )
             ->first();
 
@@ -350,6 +355,10 @@ class DivHrController extends Controller
                          ->orOn('cp.prj_id', '=', 'ch.hed_id');
                 })
                 ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
+                ->leftJoin('hr.ctrcases as tc', function ($join) {
+                    $join->on('tc.ctc_newctr_id', '=', 'c.ctr_id')
+                         ->where('tc.ctc_status', '=', 'Fulfilled');
+                })
                 ->where('c.ctr_num', $id)
                 ->orderBy('c.ctr_startdt', 'desc')
                 ->orderBy('c.ctr_id', 'desc')
@@ -359,7 +368,8 @@ class DivHrController extends Controller
                     'ch.hed_name as ctr_hed_name',
                     'cp.prj_title as ctr_prj_title',
                     'cp.prj_code as ctr_prj_code',
-                    'cu.unt_name as ctr_unt_name'
+                    'cu.unt_name as ctr_unt_name',
+                    'tc.ctc_type as ctr_case_type'
                 )
                 ->first();
         }
@@ -446,6 +456,10 @@ class DivHrController extends Controller
                      ->orOn('cp.prj_id', '=', 'ch.hed_id');
             })
             ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
+            ->leftJoin('hr.ctrcases as tc', function ($join) {
+                $join->on('tc.ctc_newctr_id', '=', 'c.ctr_id')
+                     ->where('tc.ctc_status', '=', 'Fulfilled');
+            })
             ->where('c.ctr_num', $id)
             ->orderBy('c.ctr_startdt', 'desc')
             ->orderBy('c.ctr_id', 'desc')
@@ -455,14 +469,16 @@ class DivHrController extends Controller
                 'ch.hed_name as ctr_hed_name',
                 'cp.prj_title as ctr_prj_title',
                 'cp.prj_code as ctr_prj_code',
-                'cu.unt_name as ctr_unt_name'
+                'cu.unt_name as ctr_unt_name',
+                'tc.ctc_type as ctr_case_type'
             )
             ->get()
             ->map(function ($row) {
                 $today = Carbon::today();
-                if ($today->between(Carbon::parse($row->ctr_startdt), Carbon::parse($row->ctr_enddt))) {
+                $effEnd = !empty($row->ctr_termindt) ? Carbon::parse($row->ctr_termindt) : Carbon::parse($row->ctr_enddt);
+                if ($today->between(Carbon::parse($row->ctr_startdt), $effEnd)) {
                     $row->status_label = 'Active';
-                } elseif (Carbon::parse($row->ctr_enddt)->lt($today)) {
+                } elseif ($effEnd->lt($today)) {
                     $row->status_label = 'Completed';
                 } else {
                     $row->status_label = 'Future';
@@ -600,6 +616,44 @@ class DivHrController extends Controller
         }
         $salaryTimeline = array_values($salaryTimeline);
 
+        // Leave utilization for current yearly contract
+        $leaveStats = [
+            'total_allowed' => 30,
+            'utilized'      => 0,
+            'remaining'     => 30,
+            'absent'        => 0,
+            'unpaid'        => 0,
+            'not_applicable'=> 0,
+            'working_days'  => 0,
+            'contract_days' => 365,
+            'days_passed'   => 0,
+            'start_date'    => null,
+            'end_date'      => null,
+        ];
+
+        if ($currentContract && !empty($currentContract->ctr_startdt)) {
+            $cStart = Carbon::parse($currentContract->ctr_startdt);
+            $cEnd = $currentContract->ctr_termindt ? Carbon::parse($currentContract->ctr_termindt) : ($currentContract->ctr_enddt ? Carbon::parse($currentContract->ctr_enddt) : $cStart->copy()->addYear()->subDay());
+            $today = Carbon::today();
+            $evalEnd = $today->lessThan($cEnd) ? $today : $cEnd;
+
+            $leaveStats['start_date'] = $cStart->format('d-M-Y');
+            $leaveStats['end_date'] = $cEnd->format('d-M-Y');
+            $leaveStats['contract_days'] = max(1, $cStart->diffInDays($cEnd) + 1);
+            $leaveStats['days_passed'] = max(0, $cStart->diffInDays($evalEnd) + 1);
+
+            if ($cStart->lessThanOrEqualTo($evalEnd)) {
+                $attService = app(\App\Services\AttendanceService::class);
+                $summary = $attService->getEmpAttendanceSummary($id, $cStart->toDateString(), $evalEnd->toDateString());
+                $leaveStats['utilized'] = (int)($summary['L'] ?? 0);
+                $leaveStats['remaining'] = max(0, 30 - $leaveStats['utilized']);
+                $leaveStats['absent'] = (int)($summary['A'] ?? 0);
+                $leaveStats['unpaid'] = (int)($summary['U'] ?? 0);
+                $leaveStats['not_applicable'] = (int)($summary['N'] ?? 0);
+                $leaveStats['working_days'] = (int)($summary['working_days'] ?? 0);
+            }
+        }
+
         return view('divhr.employee-details', compact(
             'id',
             'emp',
@@ -629,7 +683,8 @@ class DivHrController extends Controller
             'attachments',
             'canEdit',
             'currentContractPlans',
-            'distinctPlanCount'
+            'distinctPlanCount',
+            'leaveStats'
         ));
     }
 
@@ -705,6 +760,416 @@ class DivHrController extends Controller
             'contractsHistory',
             'selectedContract'
         ));
+    }
+
+    /**
+     * View and manage monthly contract salary heads / project allocation for an employee.
+     */
+    public function salaryHeadsView($id, $ctrId = null)
+    {
+        $user = Auth::user();
+        $isGlobalHrViewer = $this->isGlobalHrViewer($user);
+
+        if (!$isGlobalHrViewer) {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $empCheck = DB::table('hr.emps')
+                ->where('emp_id', $id)
+                ->whereBetween('emp_unt_id', [$lower, $upper])
+                ->first();
+            if (!$empCheck) {
+                abort(403, 'Unauthorized access to this employee salary heads.');
+            }
+        }
+
+        $emp = Employee::query()
+            ->leftJoin('cen.heads as h', 'hr.emps.emp_hed_id', '=', 'h.hed_id')
+            ->leftJoin('prj.projects as p', function ($join) {
+                $join->on('p.prj_id', '=', 'h.hed_prj_id')
+                     ->orOn('p.prj_id', '=', 'hr.emps.emp_hed_id')
+                     ->orOn('p.prj_id', '=', 'h.hed_id');
+            })
+            ->leftJoin('cen.units as u', 'hr.emps.emp_unt_id', '=', 'u.unt_id')
+            ->select('hr.emps.*', 'h.hed_code', 'h.hed_name', 'p.prj_title', 'p.prj_code', 'u.unt_name')
+            ->where('emp_id', $id)
+            ->first();
+
+        if (!$emp) {
+            abort(404, 'Employee not found.');
+        }
+
+        // Find the current active/running contract for this employee
+        $todayStr = Carbon::today()->toDateString();
+        $selectedContract = DB::table('hr.contracts as c')
+            ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+            ->leftJoin('prj.projects as cp', function ($join) {
+                $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                     ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                     ->orOn('cp.prj_id', '=', 'ch.hed_id');
+            })
+            ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
+            ->where('c.ctr_num', $id)
+            ->where('c.ctr_startdt', '<=', $todayStr)
+            ->whereRaw('(? <= COALESCE(c.ctr_termindt, c.ctr_enddt))', [$todayStr])
+            ->orderBy('c.ctr_startdt', 'desc')
+            ->orderBy('c.ctr_id', 'desc')
+            ->select(
+                'c.*', 
+                'ch.hed_code as ctr_hed_code', 
+                'ch.hed_name as ctr_hed_name',
+                'cp.prj_title as ctr_prj_title',
+                'cp.prj_code as ctr_prj_code',
+                'cu.unt_name as ctr_unt_name'
+            )
+            ->first();
+
+        // If no active contract today, fallback to the most recent contract
+        if (!$selectedContract) {
+            $selectedContract = DB::table('hr.contracts as c')
+                ->leftJoin('cen.heads as ch', 'ch.hed_id', '=', 'c.ctr_hed_id')
+                ->leftJoin('prj.projects as cp', function ($join) {
+                    $join->on('cp.prj_id', '=', 'ch.hed_prj_id')
+                         ->orOn('cp.prj_id', '=', 'c.ctr_hed_id')
+                         ->orOn('cp.prj_id', '=', 'ch.hed_id');
+                })
+                ->leftJoin('cen.units as cu', 'cu.unt_id', '=', 'c.ctr_unt_id')
+                ->where('c.ctr_num', $id)
+                ->orderBy('c.ctr_startdt', 'desc')
+                ->orderBy('c.ctr_id', 'desc')
+                ->select(
+                    'c.*', 
+                    'ch.hed_code as ctr_hed_code', 
+                    'ch.hed_name as ctr_hed_name',
+                    'cp.prj_title as ctr_prj_title',
+                    'cp.prj_code as ctr_prj_code',
+                    'cu.unt_name as ctr_unt_name'
+                )
+                ->first();
+        }
+
+        $plans = collect();
+        $divisionProjects = collect();
+
+        if ($selectedContract && $selectedContract->ctr_startdt && $selectedContract->ctr_enddt) {
+            $existingPlans = DB::table('hr.contractplans')
+                ->where('cpn_ctr_id', $selectedContract->ctr_id)
+                ->orderBy('cpn_startdt')
+                ->get();
+
+            // Auto-populate missing monthly slices for the entire contract range
+            $start = Carbon::parse($selectedContract->ctr_startdt);
+            $end = Carbon::parse($selectedContract->ctr_termindt ?: $selectedContract->ctr_enddt);
+            $current = $start->copy();
+
+            while ($current->lte($end)) {
+                $mStart = $current->copy()->startOfMonth();
+                if ($mStart->lt($start)) $mStart = $start->copy();
+                $mEnd = $current->copy()->endOfMonth();
+                if ($mEnd->gt($end)) $mEnd = $end->copy();
+
+                $mStartStr = $mStart->format('Y-m-d');
+                $mEndStr = $mEnd->format('Y-m-d');
+
+                $exists = $existingPlans->first(function ($p) use ($mStartStr) {
+                    return $p->cpn_startdt === $mStartStr;
+                });
+
+                if (!$exists) {
+                    DB::table('hr.contractplans')->insert([
+                        'cpn_ctr_id'  => $selectedContract->ctr_id,
+                        'cpn_startdt' => $mStartStr,
+                        'cpn_enddt'   => $mEndStr,
+                        'cpn_hed_id'  => $selectedContract->ctr_hed_id ?: null,
+                    ]);
+                }
+
+                $current->addMonth()->startOfMonth();
+            }
+
+            // Retrieve complete list of plans for this contract
+            $plans = DB::table('hr.contractplans as p')
+                ->leftJoin('cen.heads as h', 'h.hed_id', '=', 'p.cpn_hed_id')
+                ->leftJoin('prj.projects as prj', function ($join) {
+                    $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                         ->orOn('prj.prj_id', '=', 'p.cpn_hed_id')
+                         ->orOn('prj.prj_id', '=', 'h.hed_id');
+                })
+                ->where('p.cpn_ctr_id', $selectedContract->ctr_id)
+                ->select(
+                    'p.*',
+                    'h.hed_code',
+                    'h.hed_name',
+                    'prj.prj_code',
+                    'prj.prj_title'
+                )
+                ->orderBy('p.cpn_startdt', 'asc')
+                ->get();
+
+            // Check if employee belongs to Central Department (HR, Procurement, Admin, IS, etc.)
+            $unitId = $selectedContract->ctr_unt_id ?: $emp->emp_unt_id;
+            $isCentralEmp = ((int)$unitId >= 800000) || DB::table('cen.units')
+                ->where('unt_id', $unitId)
+                ->whereIn(DB::raw('LOWER(unt_area)'), ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi'])
+                ->exists();
+
+            if ($isCentralEmp) {
+                // Central Department employees are funded via CSRF from project heads across RDWIS
+                $divisionProjects = DB::table('cen.heads as h')
+                    ->join('fin.sharesalloc as s', 's.sha_hed_id', '=', 'h.hed_id')
+                    ->leftJoin('prj.projects as prj', function ($join) {
+                        $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                             ->orOn('prj.prj_id', '=', 'h.hed_id');
+                    })
+                    ->where('s.sha_cf', '>', 0)
+                    ->whereNull('h.hed_closedt')
+                    ->select(
+                        'h.hed_id',
+                        'h.hed_code',
+                        DB::raw("CONCAT(COALESCE(h.hed_name, h.hed_code), ' (CSRF)') as hed_name"),
+                        'prj.prj_code',
+                        DB::raw("CONCAT(COALESCE(prj.prj_title, h.hed_name, h.hed_code), ' (CSRF)') as prj_title")
+                    )
+                    ->orderBy('h.hed_code')
+                    ->get()
+                    ->unique('hed_id');
+            } else {
+                // Operational Division Heads / Projects ONLY (belonging strictly to employee/contract division)
+                $divisionProjects = DB::table('cen.heads as h')
+                    ->leftJoin('prj.projects as prj', function ($join) {
+                        $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                             ->orOn('prj.prj_id', '=', 'h.hed_id');
+                    })
+                    ->where(function ($q) use ($unitId) {
+                        $q->where('h.hed_unt_id', $unitId)
+                          ->orWhere('prj.prj_unt_id', $unitId);
+                    })
+                    ->select('h.hed_id', 'h.hed_code', 'h.hed_name', 'prj.prj_code', 'prj.prj_title')
+                    ->orderBy('h.hed_code')
+                    ->get()
+                    ->unique('hed_id');
+            }
+
+            // Find all months for which salary has been PAID (Fulfilled/Closed)
+            // Find all months for which salary has been PAID (Fulfilled/Closed) directly or via arrears
+            // Only these months should be locked. Unpaid past months remain editable.
+            $paidDetails = app(\App\Services\AttendanceService::class)->getPaidMonthsDetailsForEmployee($id);
+            $paidMonths = array_keys($paidDetails);
+
+            // Fetch all salary requisitions for this employee to show all heads (especially if multiple heads in a month)
+            $empReqsByMonth = DB::table('hr.salreqs as s')
+                ->leftJoin('cen.heads as h', 'h.hed_id', '=', 's.srq_hed_id')
+                ->leftJoin('prj.projects as prj', function ($join) {
+                    $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                         ->orOn('prj.prj_id', '=', 's.srq_hed_id')
+                         ->orOn('prj.prj_id', '=', 'h.hed_id');
+                })
+                ->where('s.srq_emp_id', $id)
+                ->whereIn('s.srq_status', ['Draft', 'In Process', 'Fulfilled', 'Closed'])
+                ->select(
+                    's.srq_id',
+                    's.srq_month',
+                    's.srq_status',
+                    's.srq_salary',
+                    's.srq_hed_id',
+                    'h.hed_code',
+                    'h.hed_name',
+                    'prj.prj_code',
+                    'prj.prj_title'
+                )
+                ->get()
+                ->groupBy(function ($r) {
+                    return Carbon::parse($r->srq_month)->format('Y-m');
+                });
+
+            $startOfCurrentMonth = Carbon::today()->startOfMonth()->toDateString();
+
+            // Annotate each monthly plan with locking info
+            // Lock ONLY if salary is paid/fulfilled for that month.
+            // Past months where salary was NOT paid remain unlocked so HR can change the salary head.
+            $plans = $plans->map(function ($plan) use ($paidMonths, $paidDetails, $empReqsByMonth, $startOfCurrentMonth) {
+                $planMonth = Carbon::parse($plan->cpn_startdt)->format('Y-m');
+                $isPastMonth = Carbon::parse($plan->cpn_enddt)->lt($startOfCurrentMonth);
+                $isSalaryPaid = in_array($planMonth, $paidMonths, true);
+                $paidDetail = $paidDetails[$planMonth] ?? null;
+
+                $plan->plan_month = $planMonth;
+                $plan->is_salary_generated = $isSalaryPaid;
+                $plan->is_past_month = $isPastMonth;
+                // ONLY lock if salary is actually paid. Unpaid past months stay open.
+                $plan->is_locked = $isSalaryPaid;
+                $plan->lock_reason = $isSalaryPaid 
+                    ? (($paidDetail && $paidDetail['type'] === 'arrears') ? "Salary Paid via Arrears in {$paidDetail['paid_in']} (Locked)" : 'Salary Paid (Locked)') 
+                    : null;
+                $plan->sal_reqs = $empReqsByMonth->get($planMonth, collect());
+
+                return $plan;
+            });
+        }
+
+        $canEdit = $this->checkCanEditEmployee($user);
+        $targetMonth = request('month') ? Carbon::parse(request('month'))->format('Y-m') : null;
+
+        return view('divhr.salary-heads', compact(
+            'id',
+            'emp',
+            'selectedContract',
+            'plans',
+            'divisionProjects',
+            'targetMonth',
+            'canEdit',
+            'isCentralEmp'
+        ));
+    }
+
+    /**
+     * Save updated salary heads for contract plans.
+     */
+    public function updateSalaryHeads(Request $request, $id, $ctrId = null)
+    {
+        $user = Auth::user();
+        $isGlobalHrViewer = $this->isGlobalHrViewer($user);
+
+        if (!$isGlobalHrViewer) {
+            $lower = $user->acc_lowers == 0 ? $user->acc_lowerm : $user->acc_lowers;
+            $upper = $user->acc_lowers == 0 ? $user->acc_upperm : $user->acc_uppers;
+            $empCheck = DB::table('hr.emps')
+                ->where('emp_id', $id)
+                ->whereBetween('emp_unt_id', [$lower, $upper])
+                ->first();
+            if (!$empCheck) {
+                abort(403, 'Unauthorized access.');
+            }
+        } else {
+            $empCheck = DB::table('hr.emps')->where('emp_id', $id)->first();
+        }
+
+        $todayStr = Carbon::today()->toDateString();
+        // Load current running contract
+        $contract = DB::table('hr.contracts')
+            ->where('ctr_num', $id)
+            ->where('ctr_startdt', '<=', $todayStr)
+            ->whereRaw('(? <= COALESCE(ctr_termindt, ctr_enddt))', [$todayStr])
+            ->orderBy('ctr_startdt', 'desc')
+            ->orderBy('ctr_id', 'desc')
+            ->first();
+
+        if (!$contract) {
+            $contract = DB::table('hr.contracts')
+                ->where('ctr_num', $id)
+                ->orderBy('ctr_startdt', 'desc')
+                ->orderBy('ctr_id', 'desc')
+                ->first();
+        }
+
+        if (!$contract) {
+            return redirect()->back()->with('error', 'No contract found for this employee.');
+        }
+
+        $plansData = $request->input('plans', []);
+        $updatedCount = 0;
+
+        $validPlanRecords = DB::table('hr.contractplans')
+            ->where('cpn_ctr_id', $contract->ctr_id)
+            ->whereIn('cpn_id', array_keys($plansData))
+            ->get()
+            ->keyBy('cpn_id');
+
+        $startOfCurrentMonth = Carbon::today()->startOfMonth()->toDateString();
+        // Only lock months where salary is actually paid/fulfilled
+        $paidMonths = app(\App\Services\AttendanceService::class)->getPaidMonthsForEmployee($id);
+
+        // Allowed projects: division projects OR CSRF project heads for Central employees
+        $unitId = $contract->ctr_unt_id ?: ($empCheck->emp_unt_id ?? 0);
+        $isCentralEmp = ((int)$unitId >= 800000) || DB::table('cen.units')
+            ->where('unt_id', $unitId)
+            ->whereIn(DB::raw('LOWER(unt_area)'), ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi'])
+            ->exists();
+
+        if ($isCentralEmp) {
+            // Central Department employees are funded via CSRF from project heads across RDWIS
+            $allowedHeadIds = DB::table('cen.heads as h')
+                ->join('fin.sharesalloc as s', 's.sha_hed_id', '=', 'h.hed_id')
+                ->where('s.sha_cf', '>', 0)
+                ->whereNull('h.hed_closedt')
+                ->pluck('h.hed_id')
+                ->toArray();
+        } else {
+            // Operational Division Heads / Projects ONLY (belonging strictly to employee/contract division)
+            $allowedHeadIds = DB::table('cen.heads as h')
+                ->leftJoin('prj.projects as prj', function ($join) {
+                    $join->on('prj.prj_id', '=', 'h.hed_prj_id')
+                         ->orOn('prj.prj_id', '=', 'h.hed_id');
+                })
+                ->where(function ($q) use ($unitId) {
+                    $q->where('h.hed_unt_id', $unitId)
+                      ->orWhere('prj.prj_unt_id', $unitId);
+                })
+                ->pluck('h.hed_id')
+                ->toArray();
+        }
+
+        foreach ($plansData as $planId => $headId) {
+            if (!isset($validPlanRecords[$planId])) {
+                continue;
+            }
+
+            $plan = $validPlanRecords[$planId];
+            $planMonth = Carbon::parse($plan->cpn_startdt)->format('Y-m');
+            $isSalaryPaid = in_array($planMonth, $paidMonths);
+
+            // Only block months where salary is actually paid/fulfilled.
+            // Unpaid past months CAN be modified.
+            if ($isSalaryPaid) {
+                continue;
+            }
+
+            $val = !empty($headId) ? (int)$headId : null;
+            if ($val !== null && !in_array($val, $allowedHeadIds)) {
+                continue;
+            }
+
+            DB::table('hr.contractplans')
+                ->where('cpn_id', $planId)
+                ->where('cpn_ctr_id', $contract->ctr_id)
+                ->update(['cpn_hed_id' => $val]);
+
+            $updatedCount++;
+        }
+
+        // Sync active month's head to contract and employee if set
+        $currentPlan = DB::table('hr.contractplans')
+            ->where('cpn_ctr_id', $contract->ctr_id)
+            ->whereRaw('? between cpn_startdt and cpn_enddt', [$todayStr])
+            ->first();
+
+        if ($currentPlan && $currentPlan->cpn_hed_id) {
+            DB::table('hr.contracts')
+                ->where('ctr_id', $contract->ctr_id)
+                ->update(['ctr_hed_id' => $currentPlan->cpn_hed_id]);
+
+            DB::table('hr.emps')
+                ->where('emp_id', $id)
+                ->update(['emp_hed_id' => $currentPlan->cpn_hed_id]);
+
+            // Sync effective head for central / operational employee
+            DB::table('fin.empeffheads')->updateOrInsert(
+                ['eeh_emp_id' => $id],
+                [
+                    'eeh_emphed_id' => $currentPlan->cpn_hed_id,
+                    'eeh_dtg' => now(),
+                    'eeh_status' => 'Open',
+                    'eeh_sudohed' => $isCentralEmp ? 'CHRF' : null,
+                ]
+            );
+        }
+
+        $redirectParams = ['id' => $id];
+        if ($request->filled('target_month')) {
+            $redirectParams['month'] = $request->input('target_month');
+        }
+
+        return redirect()->route('divhr.employee.salary_heads', $redirectParams)
+            ->with('success', "Salary heads updated successfully for {$updatedCount} month(s)!");
     }
 
     public function employeeEdit($id)
@@ -1755,7 +2220,7 @@ class DivHrController extends Controller
     {
         if (!$user) return false;
         $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
-        return in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc', 'it'])
+        return in_array($area, ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc', 'it', 'is', 'adm', 'admin', 'log', 'dlog'])
             || session('impersonated_by_god')
             || strtolower($user->acc_username ?? '') === 'superadminrdw';
     }

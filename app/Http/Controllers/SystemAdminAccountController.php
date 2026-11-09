@@ -199,6 +199,79 @@ class SystemAdminAccountController extends Controller
             ->with('status', 'Account created successfully.');
     }
 
+    public function edit(CenAccount $account)
+    {
+        $units = Unit::orderBy('unt_name')->get();
+
+        return view('admin.accounts.edit', compact('account', 'units'));
+    }
+
+    public function update(Request $request, CenAccount $account)
+    {
+        $request->validate([
+            'username'        => 'required|string|max:50|unique:pgsql.cen.accounts,acc_username,' . $account->acc_id . ',acc_id',
+            'name'            => 'required|string|max:150',
+            'rank'            => 'nullable|string|max:100',
+            'title'           => 'nullable|string|max:20',
+            'unit_id'         => 'required|integer|exists:pgsql.cen.units,unt_id',
+            'acc_desig'       => 'required|string|max:255',
+            'acc_desigshort'  => 'nullable|string|max:50',
+            'acc_desigtype'   => 'nullable|string|max:50',
+            'acc_level'       => 'nullable|integer',
+            'acc_reportlevel' => 'nullable|integer',
+            'auth_level'      => 'required|string|in:viewer,editor,approver',
+            'acc_access'      => 'nullable|string|max:50',
+            'acc_untarea'     => 'nullable|string|max:50',
+            'acc_type'        => 'nullable|string|max:50',
+            'acc_status'      => 'required|string|in:Active,Closed',
+            'acc_lowers'      => 'nullable|integer',
+            'acc_uppers'      => 'nullable|integer',
+            'acc_lowerm'      => 'nullable|integer',
+            'acc_upperm'      => 'nullable|integer',
+            'password'        => 'nullable|string|min:4|max:100',
+        ]);
+
+        $unit = Unit::findOrFail($request->unit_id);
+
+        $account->acc_username    = $request->username;
+        $account->acc_name        = $request->name;
+        $account->acc_rank        = $request->rank ?: null;
+        $account->acc_title       = $request->title ?: null;
+        $account->acc_unt_id      = $unit->unt_id;
+        $account->acc_untname     = $unit->unt_name;
+        $account->acc_untnamesh   = $unit->unt_namesh;
+        $account->acc_unttype     = $unit->unt_type;
+        $account->acc_desig       = $request->acc_desig;
+        $account->acc_desigshort  = $request->acc_desigshort ?: null;
+        $account->acc_desigtype   = $request->acc_desigtype ?: ($account->acc_desigtype ?: 'specific');
+        $account->acc_level       = $request->acc_level !== null ? (int)$request->acc_level : $account->acc_level;
+        $account->acc_reportlevel = $request->acc_reportlevel !== null ? (int)$request->acc_reportlevel : $account->acc_reportlevel;
+        $account->acc_auth        = strtolower(trim((string) $request->auth_level));
+        $account->acc_access      = $request->acc_access ?: ($account->acc_access ?: 'Single');
+        $account->acc_untarea     = strtolower(trim((string) ($request->acc_untarea ?: $unit->unt_area)));
+        $account->acc_type        = $request->acc_type ?: ($account->acc_type ?: 'Standard');
+        $account->acc_status      = $request->acc_status;
+        $account->acc_lowers      = $request->acc_lowers !== null ? (int)$request->acc_lowers : $account->acc_lowers;
+        $account->acc_uppers      = $request->acc_uppers !== null ? (int)$request->acc_uppers : $account->acc_uppers;
+        $account->acc_lowerm      = $request->acc_lowerm !== null ? (int)$request->acc_lowerm : $account->acc_lowerm;
+        $account->acc_upperm      = $request->acc_upperm !== null ? (int)$request->acc_upperm : $account->acc_upperm;
+
+        if ($request->filled('password')) {
+            $account->acc_pass = CenAccount::hashPassword($account->acc_username, (string)$request->password);
+        }
+
+        if ($request->acc_status === 'Closed' && !$account->acc_enddt) {
+            $account->acc_enddt = now();
+        } elseif ($request->acc_status === 'Active') {
+            $account->acc_enddt = null;
+        }
+
+        $account->save();
+
+        return redirect()->route('admin.accounts.index')
+            ->with('status', "Account '{$account->acc_username}' updated successfully.");
+    }
+
     public function close(CenAccount $account)
     {
         $account->acc_status = 'Closed';

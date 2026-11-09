@@ -145,6 +145,7 @@
           <label class="small mb-0 font-weight-bold text-muted text-nowrap">Filter by Reason:</label>
           <select id="filter-exclusion-reason" class="form-control form-control-sm font-weight-bold" style="width: 220px;">
             <option value="all">All Reasons</option>
+            <option value="Attendance Incomplete">Attendance Incomplete</option>
             <option value="Already Generated">Already Generated</option>
             <option value="Salary Head Not Set">Salary Head Not Set</option>
             <option value="Contract Not Verified">Contract Not Verified</option>
@@ -164,6 +165,7 @@
                 <th>Employee Name</th>
                 <th>Grade</th>
                 <th>Exclusion Reason</th>
+                <th style="width: 155px;" class="text-center">Action</th>
               </tr>
             </thead>
             <tbody id="excluded-candidates-tbody"></tbody>
@@ -301,15 +303,49 @@
             </div>
           ` : '';
 
+          const isClearance = item.generation_type === 'clearance';
+          const isArrearsOnly = item.generation_type === 'arrears_only' || item.is_arrears_only;
+
+          let typeBadge = '';
+          if (isClearance) {
+            typeBadge = `<span class="badge badge-danger text-white px-2 py-0.5 ml-1" style="font-size: 10px;"><i class="fas fa-user-slash mr-1"></i> Terminal Clearance</span>`;
+          } else if (isArrearsOnly) {
+            typeBadge = `<span class="badge badge-warning text-dark px-2 py-0.5 ml-1 shadow-sm" style="font-size: 10px; background: #fef08a; border: 1px solid #facc15;"><i class="fas fa-history mr-1"></i> Arrears Only</span>`;
+          }
+
           const arrearsVal = Number(b.arrears || 0);
           const arrearsHtml = arrearsVal > 0
-            ? `<span class="font-monospace text-primary font-weight-bold">+${arrearsVal.toLocaleString()}</span>`
+            ? `<div>
+                <span class="font-monospace text-primary font-weight-bold">+${arrearsVal.toLocaleString()}</span>
+                <div class="text-[10px] text-muted" style="font-size: 11px;">Past Arrears</div>
+               </div>`
             : `<span class="font-monospace text-muted">0</span>`;
 
           const underworkVal = Number(b.underwork || 0);
+          let underworkDetails = [];
+          if (b.absent && b.absent > 0) underworkDetails.push(`${b.absent} abs`);
+          if (b.unpaid && b.unpaid > 0) underworkDetails.push(`${b.unpaid} unp/N`);
+          const underworkSub = underworkDetails.length > 0 ? `<div class="text-[10px] text-danger" style="font-size: 11px;">(${underworkDetails.join(', ')})</div>` : '';
+
           const underworkHtml = underworkVal > 0
-            ? `<span class="font-monospace text-danger">-${underworkVal.toLocaleString()}</span>`
+            ? `<div>
+                <span class="font-monospace text-danger font-weight-bold">-${underworkVal.toLocaleString()}</span>
+                ${underworkSub}
+               </div>`
             : `<span class="font-monospace text-muted">0</span>`;
+
+          const probationBadge = b.is_probation
+            ? `<div class="mt-1">
+                <span class="badge badge-info px-2 py-0.5" style="background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; font-size: 10.5px;">
+                  <i class="fas fa-clock mr-1"></i> Probation${b.probsalary ? ' (Rs. ' + Number(b.probsalary).toLocaleString() + ')' : ''}
+                </span>
+               </div>`
+            : '';
+
+          const isGrossExcluded = (Number(b.grosalary || 0) === 0 && arrearsVal > 0);
+          const ctrSalaryCol = isGrossExcluded
+            ? `<span class="text-muted text-decoration-line-through">${Number(b.ctrsalary || 0).toLocaleString()}</span><div class="text-info font-weight-bold" style="font-size: 10.5px;">(Regular Excluded)</div>`
+            : `${Number(b.ctrsalary || 0).toLocaleString()}`;
 
           const row = `
             <tr>
@@ -318,11 +354,15 @@
               </td>
               <td class="font-monospace font-weight-bold" style="color: #0369a1;">${emp.emp_id}</td>
               <td>
-                <div class="font-weight-bold text-dark">${emp.emp_name || '-'}</div>
+                <div class="font-weight-bold text-dark d-flex align-items-center flex-wrap">
+                  <span>${emp.emp_name || '-'}</span>
+                  ${typeBadge}
+                </div>
+                ${probationBadge}
                 ${budgetWarningHtml}
               </td>
               <td class="font-weight-bold text-dark font-monospace">${formatGrade(emp, b)}</td>
-              <td class="text-right font-monospace">${Number(b.ctrsalary || 0).toLocaleString()}</td>
+              <td class="text-right font-monospace">${ctrSalaryCol}</td>
               <td class="text-right">${underworkHtml}</td>
               <td class="text-right">${arrearsHtml}</td>
               <td class="text-right font-monospace font-weight-bold" style="color: #15803d; font-size: 1rem;">
@@ -347,15 +387,43 @@
 
       const filtered = (reasonFilter === 'all')
         ? excludedList
-        : excludedList.filter(x => x.reason === reasonFilter);
+        : excludedList.filter(x => x.reason === reasonFilter || (x.reason && x.reason.indexOf(reasonFilter) !== -1));
 
       if (filtered.length === 0) {
-        $mExcluded.append('<tr><td colspan="5" class="text-center text-muted py-3 font-italic">No candidates match this exclusion filter.</td></tr>');
+        $mExcluded.append('<tr><td colspan="6" class="text-center text-muted py-3 font-italic">No candidates match this exclusion filter.</td></tr>');
         return;
       }
 
+      const salMonth = $('#select-month').val() || '';
+
       filtered.forEach(function(item, idx) {
         const emp = item.employee || {};
+        let actionCol = '<span class="text-muted small">&mdash;</span>';
+
+        if (item.reason && item.reason.indexOf('Attendance Incomplete') !== -1) {
+          const targetUrl = `/divhr/attendance?month=${encodeURIComponent(salMonth)}`;
+          actionCol = `
+            <a href="${targetUrl}" 
+               target="_blank" 
+               class="btn btn-xs btn-outline-primary font-weight-bold shadow-sm d-inline-flex align-items-center"
+               style="font-size: 11px; padding: 2px 8px; border-radius: 4px;"
+               title="Mark Attendance for ${salMonth}">
+              <i class="fas fa-calendar-check mr-1 text-primary"></i> Mark Attendance
+            </a>
+          `;
+        } else if (item.reason === 'Salary Head Not Set' || (item.reason && item.reason.indexOf('Salary Head') !== -1)) {
+          const targetUrl = `/divhr/employee/${encodeURIComponent(emp.emp_id)}/salary-heads?month=${encodeURIComponent(salMonth)}`;
+          actionCol = `
+            <a href="${targetUrl}" 
+               target="_blank" 
+               class="btn btn-xs btn-outline-success font-weight-bold shadow-sm d-inline-flex align-items-center"
+               style="font-size: 11px; padding: 2px 8px; border-radius: 4px;"
+               title="Set Salary Head for ${emp.emp_name || 'this employee'}">
+              <i class="fas fa-layer-group mr-1 text-success"></i> Set Salary Head
+            </a>
+          `;
+        }
+
         $mExcluded.append(`
           <tr>
             <td class="text-center font-monospace text-muted small">${idx + 1}</td>
@@ -366,6 +434,9 @@
               <span class="badge badge-danger px-2 py-1 shadow-sm" style="font-size: 11px;">
                 <i class="fas fa-exclamation-circle mr-1"></i> ${item.reason}
               </span>
+            </td>
+            <td class="text-center">
+              ${actionCol}
             </td>
           </tr>
         `);
@@ -394,6 +465,7 @@
       $('#btn-generate-salary').prop('disabled', count === 0);
     }
 
+    // Generation Mode change handler
     // Refresh button click
     $('#btn-load-preview').on('click', function(e) {
       e.preventDefault();

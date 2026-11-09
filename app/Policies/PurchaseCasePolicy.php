@@ -136,6 +136,26 @@ class PurchaseCasePolicy
     }
 
     /**
+     * Determine whether the user can reverse an approved/fulfilled purchase case.
+     */
+    public function reverse(CenAccount $user, Purchase $case): bool
+    {
+        $context = UserAccessContext::forUser($user);
+        if ($context->isSuperAdmin()) {
+            return true;
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isFinanceUser = in_array($userArea, ['fin', 'finance'], true) || (method_exists($user, 'isFinance') && $user->isFinance());
+        if (!$isFinanceUser) {
+            return false;
+        }
+
+        $allowedStatuses = ['approved', 'fulfilled', 'completed', 'partially fulfilled', 'closed'];
+        return in_array(strtolower(trim((string) $case->pcs_status)), $allowedStatuses, true);
+    }
+
+    /**
      * Determine whether the user can process an action at the current workflow stage.
      * Evaluates: Permission + Record Scope + Workflow Stage.
      */

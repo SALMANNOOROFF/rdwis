@@ -146,6 +146,7 @@ class ContractCaseController extends Controller
             'ctc_approvedprob'    => 'nullable|integer|min:0',
             'ctc_approvedenddt'   => 'nullable|date',
             'ctc_approvedctrtype' => 'nullable|integer',
+            'remarks'             => 'nullable|string',
         ], [
             'emp_cnic.required'   => 'Please enter CNIC.',
             'emp_cnic.regex'      => 'Please enter a valid CNIC (e.g. 42101-1234567-1 or 13 digits).',
@@ -153,6 +154,8 @@ class ContractCaseController extends Controller
             'emp_name.required'   => 'Please enter employee name.',
             'emp_unt_id.required' => 'Please select department.',
         ]);
+
+        $validated['remarks'] = $request->input('remarks');
 
         try {
             $employee = $this->employeeCreationService->addEmployeeForContractCase($case, $validated, $user);

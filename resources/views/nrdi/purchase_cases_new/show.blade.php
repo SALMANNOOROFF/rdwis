@@ -153,10 +153,14 @@
     $currentStage = $purchase->currentSubstatus?->pss_stage ?? 'Division';
     $isFinalized = in_array(strtolower(trim($purchase->pcs_status)), ['approved', 'rejected', 'cancelled', 'not approved', 'fulfilled', 'completed']);
 
-    // Division can edit before floating or after procurement responds
-    $canEdit     = $isInitiator && $isDraft && (!$hasFloated || $hasDProcSaved);
+    $isFinanceUser = in_array($userArea, ['fin', 'finance'], true) || (Auth::user()?->acc_username === 'superadminrdw');
+    $hasReversed  = $purchase->decisions->where('pdec_action', 'reverse_case')->isNotEmpty();
+    $canReverse   = $isFinanceUser && in_array(strtolower(trim($purchase->pcs_status)), ['approved', 'fulfilled', 'completed', 'partially fulfilled', 'closed'], true);
+
+    // Division can edit before floating, after procurement responds, or if case was returned/reversed back to Division
+    $canEdit     = $isInitiator && ($isDraft || $currentStage === 'Division') && (!$hasFloated || $hasDProcSaved || $hasReversed);
     // DProc can add/manage quotes when case is in Procurement stage, or floated to proc, or collaborative; Division can add quotes when not floated or after procurement responds
-    $canAddQuotes = ($isDProc && !$isFinalized) || ($isInitiator && $isDraft && (!$hasFloated || $hasDProcSaved));
+    $canAddQuotes = ($isDProc && !$isFinalized) || ($isInitiator && ($isDraft || $currentStage === 'Division') && (!$hasFloated || $hasDProcSaved || $hasReversed));
 
     if (request()->is('*procurement*') || (Route::has('nrdi.purchase_cases_new.procurement.index') && ($isDProc || ($area ?? '') === 'proc'))) {
         $backRoute = route('nrdi.purchase_cases_new.procurement.index');
@@ -618,6 +622,47 @@
                                     : route('purchase.tada.reverse', $purchase->pcs_id);
                             @endphp
 
+                            @if($canReverse)
+                                <button type="button" class="btn-hdr-action btn-hdr-reverse rajdhani text-warning" style="border: 1px solid rgba(245, 158, 11, 0.7) !important; background: rgba(245, 158, 11, 0.1) !important; cursor: pointer;" data-toggle="modal" data-target="#reversePurchaseCaseModal">
+                                    <i class="fas fa-undo-alt mr-1"></i> REVERSE CASE
+                                </button>
+
+                                <!-- Reverse Purchase Case Modal (Finance) -->
+                                <div class="modal fade text-left" id="reversePurchaseCaseModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content shadow-lg border-0" style="font-family: inherit; border-radius: 10px; overflow: hidden;">
+                                            <form action="{{ route('nrdi.purchase_cases_new.reverse', $purchase->pcs_id) }}" method="POST">
+                                                @csrf
+                                                <div class="modal-header bg-warning text-dark py-2.5 px-3 d-flex align-items-center justify-content-between">
+                                                    <h6 class="modal-title font-weight-bold mb-0 rajdhani" style="font-size: 15px; letter-spacing: 0.5px;">
+                                                        <i class="fas fa-undo-alt mr-1.5"></i> REVERSE PURCHASE CASE #{{ $purchase->pcs_id }}
+                                                    </h6>
+                                                    <button type="button" class="close text-dark" data-dismiss="modal" style="opacity: 0.8;">&times;</button>
+                                                </div>
+                                                <div class="modal-body p-3">
+                                                    <div class="alert alert-warning py-2 px-2.5 mb-3" style="font-size: 11.5px; border-left: 3px solid #f59e0b; background: #fffbeb; color: #92400e;">
+                                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                        Reversing this case will change its status from <strong>{{ $purchase->pcs_status }}</strong> to <strong>Under Process</strong>, release unexecuted financial commitments, and place it into your <strong>Pending Actions</strong> queue for further routing or adjustments.
+                                                    </div>
+                                                    <div class="form-group mb-0">
+                                                        <label class="font-weight-bold small text-dark rajdhani" style="font-size: 12px; letter-spacing: 0.5px;">
+                                                            REASON FOR REVERSAL <span class="text-danger">*</span>
+                                                        </label>
+                                                        <textarea name="remarks" class="form-control form-control-sm" rows="3" placeholder="Enter reason for reversal (e.g. Subhead re-allocation or item modification required by Division)..." required minlength="3" style="font-size: 12px; border-radius: 6px;"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light py-2 px-3">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary font-weight-bold" data-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-sm btn-warning font-weight-bold px-3 text-dark rajdhani shadow-sm" style="letter-spacing: 0.5px;">
+                                                        <i class="fas fa-check mr-1"></i> Confirm Reversal
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                             @if($isPettyOrTada && Gate::check('initiate', \App\Models\AudRev::class))
                                 <button type="button" class="btn-hdr-action btn-hdr-reverse rajdhani text-danger" style="border: 1px solid rgba(220, 53, 69, 0.6) !important; background: rgba(220, 53, 69, 0.08) !important; cursor: pointer;" data-toggle="modal" data-target="#reversePettyTadaModal">
                                     <i class="fas fa-sync-alt mr-1"></i> REVERSE CASE
@@ -777,26 +822,38 @@
                                     <div class="d-flex align-items-center">
                                         <strong style="color: #475569; width: 140px; display:inline-block; font-weight: 700;"><i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:</strong> 
                                         <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
-                                            <span class="view-only text-dark font-weight-bold" id="pcSubheadView" style="color: #0f172a !important;">{{ $purchase->subhead_display }}</span>
-                                            @if($purchase->subhead_display && $effectiveHeadId)
-                                                <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, ($isCsrfCase ? 'csrf' : 'subhead'), 'expenditure', $purchase->subhead_display]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm" style="font-size: 12px; height: 22px; width: 22px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="View {{ $purchase->subhead_display }} Financial Breakdown">
-                                                    <i class="fas fa-chart-bar"></i>
-                                                </a>
+                                            @if($isCsrfCase)
+                                                <span class="badge badge-warning text-dark font-weight-bold px-2 py-1" style="font-size: 11.5px; background: #fef08a; border: 1px solid #facc15;" title="Central Service Resource Fund - Not attached to project subheads">
+                                                    <i class="fas fa-shield-alt mr-1"></i> CSRF Fund (No Project Subhead)
+                                                </span>
+                                                @if($effectiveHeadId)
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'csrf', 'expenditure', 'CSRF']) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm" style="font-size: 12px; height: 22px; width: 22px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="View CSRF Financial Breakdown">
+                                                        <i class="fas fa-chart-bar"></i>
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <span class="view-only text-dark font-weight-bold" id="pcSubheadView" style="color: #0f172a !important;">{{ $purchase->subhead_display ?: 'Not Set' }}</span>
+                                                @if($purchase->subhead_display && $effectiveHeadId)
+                                                    @php
+                                                        $firstSubhead = trim(explode(',', $purchase->subhead_display)[0]);
+                                                    @endphp
+                                                    <a href="{{ route('division.finance-of-project.drilldown', [$effectiveHeadId, 'subhead', 'expenditure', $firstSubhead]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-1 shadow-sm" style="font-size: 12px; height: 22px; width: 22px; line-height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" title="View Financial Breakdown">
+                                                        <i class="fas fa-chart-bar"></i>
+                                                    </a>
+                                                @endif
                                             @endif
                                         </div>
-                                        @if($canEdit)
+                                        @if($canEdit && !$isCsrfCase)
                                             <form class="edit-only d-flex align-items-center flex-grow-1 pc-metadata-ajax-form ml-2" style="gap:6px; margin:0;" action="{{ route('purchase.initiation.save', $purchase->pcs_id) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="op" value="save_metadata">
-                                                <input type="text" name="subhead" class="form-control form-control-sm" value="{{ $purchase->subhead_display }}" style="font-size: 11px; height: 28px; max-width: 200px;" list="subheadOptionsList" placeholder="Subhead...">
-                                                <datalist id="subheadOptionsList">
-                                                    <option value="Misc">
-                                                    <option value="Equipment">
-                                                    @foreach(($projectSubheads ?? []) as $psh)
-                                                        <option value="{{ $psh }}">
+                                                <select name="subhead" class="form-control form-control-sm" style="font-size: 11px; height: 28px; max-width: 220px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                                                    <option value="">-- Apply to All Items --</option>
+                                                    @foreach(($projectSubheads ?? ['Equipment', 'Misc']) as $psh)
+                                                        <option value="{{ $psh }}" {{ ($purchase->subhead_display === $psh) ? 'selected' : '' }}>{{ $psh }}</option>
                                                     @endforeach
-                                                </datalist>
-                                                <button type="submit" class="btn btn-primary btn-xs font-weight-bold" style="padding: 2px 8px;"><i class="fas fa-save"></i></button>
+                                                </select>
+                                                <button type="submit" class="btn btn-primary btn-xs font-weight-bold" style="padding: 2px 8px; white-space: nowrap; height: 28px;" title="Apply this subhead to entire case"><i class="fas fa-check-double mr-1"></i> Apply to All</button>
                                             </form>
                                         @endif
                                     </div>
@@ -997,7 +1054,7 @@
                                 <div class="dg-sec-label mb-0">
                                     <i class="fas fa-boxes fa-xs mr-1 text-primary"></i> 
                                     @if($purchase->pcs_type === 'Rb')
-                                        TA/DA Employee Allowance Lines
+                                        TA/DA / Bonus / Award / Honorarium Lines
                                     @elseif($purchase->pcs_type === 'Pt')
                                         Incidental Expenditure Items
                                     @else
@@ -1024,7 +1081,7 @@
                                     <div class="d-flex align-items-center mb-2" style="color: var(--rd-primary-700); font-size: 11px; font-weight: 700; letter-spacing: 0.8px;">
                                         <i class="fas fa-plus-circle mr-1 text-primary"></i> 
                                         @if($purchase->pcs_type === 'Rb')
-                                            ADD TA/DA ALLOWANCE LINE FOR EMPLOYEE
+                                            ADD ALLOWANCE / TRAVEL / AWARD LINE FOR EMPLOYEE
                                         @elseif($purchase->pcs_type === 'Pt')
                                             ADD INCIDENTAL EXPENDITURE ITEM
                                         @else
@@ -1033,7 +1090,7 @@
                                     </div>
                                     <form id="pcAddItemForm" class="d-flex flex-column gap-2" style="margin:0;">
                                         @if($purchase->pcs_type === 'Rb')
-                                            <div class="row g-2 align-items-center">
+                                            <div class="row g-2 align-items-center mb-2">
                                                 <div class="col-md-4">
                                                     <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Select Employee *</label>
                                                     <select name="emp_id" id="pcAddEmpSelect" class="form-control form-control-sm" required style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;">
@@ -1043,23 +1100,59 @@
                                                         @endforeach
                                                     </select>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Purpose / Travel Details *</label>
-                                                    <input name="item_desc" id="pcAddEmpDesc" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" required placeholder="e.g. Official visit / TA/DA Allowance">
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Days / Qty</label>
-                                                    <input name="item_qty" id="pcAddEmpQty" type="number" step="1" value="1" class="form-control form-control-sm text-center" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;" required>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Daily Rate (PKR)</label>
-                                                    <input name="item_price" id="pcAddEmpRate" type="number" step="0.01" class="form-control form-control-sm text-right font-weight-bold" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" placeholder="Auto-calculated">
+                                                <div class="col-md-8">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Purpose / Details *</label>
+                                                    <input name="item_desc" id="pcAddEmpDesc" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" required placeholder="e.g. Official visit / Allowance / Award Details">
                                                 </div>
                                             </div>
-                                            <input type="hidden" name="item_subhead" value="Misc">
-                                            <input type="hidden" name="item_qtyunit" value="Days">
-                                            <input type="hidden" name="item_type" value="3">
-                                            <input type="hidden" name="item_subtype" value="Travelling/Boarding/Lodging">
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Type</label>
+                                                    <select name="item_type" id="pcAddEmpType" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;">
+                                                        <option value="3" selected>Service (3)</option>
+                                                        <option value="3">Travel (3)</option>
+                                                        <option value="3">Course / Training (3)</option>
+                                                        <option value="3">Allowance / Bonus (3)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Subtype</label>
+                                                    <select name="item_subtype" id="pcAddEmpSubtype" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;">
+                                                        <option value="Inland Course">Inland Course</option>
+                                                        <option value="Overseas Course">Overseas Course</option>
+                                                        <option value="Travelling/Boarding/Lodging" selected>Travelling/Boarding/Lodging</option>
+                                                        <option value="Visa / Passport Expenses">Visa / Passport Expenses</option>
+                                                        <option value="Ticket / Airfare">Ticket / Airfare</option>
+                                                        <option value="Daily Allowance (DA)">Daily Allowance (DA)</option>
+                                                        <option value="Meals / Refreshments">Meals / Refreshments</option>
+                                                        <option value="Bonus / Performance Award">Bonus / Performance Award</option>
+                                                        <option value="Honorarium / Special Duty">Honorarium / Special Duty</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Subhead</label>
+                                                    <select name="item_subhead" id="pcAddEmpSubhead" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;">
+                                                        @foreach(($projectSubheads ?? ['Equipment', 'Misc']) as $psh)
+                                                            <option value="{{ $psh }}" {{ $psh === 'Misc' ? 'selected' : '' }}>{{ $psh }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-1.5" style="flex: 0 0 12.5%; max-width: 12.5%;">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Unit</label>
+                                                    <select name="item_qtyunit" id="pcAddEmpUnit" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;">
+                                                        <option value="Days" selected>Days</option>
+                                                        <option value="Qty">Qty</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-1.5" style="flex: 0 0 12.5%; max-width: 12.5%;">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Days / Qty *</label>
+                                                    <input name="item_qty" id="pcAddEmpQty" type="number" step="any" value="1" min="1" class="form-control form-control-sm text-center" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;" required>
+                                                </div>
+                                                <div class="col-md-2" style="flex: 0 0 16.666%; max-width: 16.666%;">
+                                                    <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Rate / Amount *</label>
+                                                    <input name="item_price" id="pcAddEmpRate" type="number" step="0.01" class="form-control form-control-sm text-right font-weight-bold" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;" placeholder="PKR 0" required>
+                                                </div>
+                                            </div>
                                         @else
                                             <div class="row g-2 align-items-center">
                                                 <div class="col-md-4">
@@ -1087,7 +1180,11 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <label class="small text-muted mb-0 font-weight-bold" style="font-size: 10.5px;">Subhead</label>
-                                                    <input name="item_subhead" class="form-control form-control-sm" value="{{ $purchase->subhead_display ?: ($purchase->pcs_type === 'Ps' ? 'Equipment' : 'Misc') }}" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 6px;">
+                                                    <select name="item_subhead" id="pcAddItemSubhead" class="form-control form-control-sm" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; height: 28px; font-size: 11px; padding: 2px 4px;">
+                                                        @foreach(($projectSubheads ?? ['Equipment', 'Misc']) as $psh)
+                                                            <option value="{{ $psh }}" {{ (strpos($purchase->subhead_display, $psh) !== false) ? 'selected' : '' }}>{{ $psh }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="row g-2 align-items-center mt-1">
@@ -1232,19 +1329,6 @@
                                 <span class="badge badge-success px-2 py-1 ml-1" style="font-size: 11.5px;">{{ $purchase->subhead_display }}</span>
                             </div>
                         </div>
-                        @elseif($purchase->pcs_type === 'Rb')
-                        {{-- Rb: TA/DA Travel Reimbursement Summary Card --}}
-                        <div class="p-3 mb-4 rounded border d-flex justify-content-between align-items-center" style="background: #fffbeb; border-color: #fde68a !important;">
-                            <div>
-                                <span class="badge badge-warning px-2.5 py-1 mr-2" style="background: #d97706; color: #fff; font-size: 11px;"><i class="fas fa-plane-departure mr-1"></i> TA/DA Travel Reimbursement</span>
-                                <strong class="text-dark" style="font-size: 13px;">Payment Channel:</strong>
-                                <span class="font-weight-bold text-primary ml-1" style="font-size: 13px;">Meezan Bank Account / Cross Cheque</span>
-                            </div>
-                            <div>
-                                <strong class="text-muted small">Budget Subhead:</strong>
-                                <span class="badge badge-success px-2 py-1 ml-1" style="font-size: 11.5px;">{{ $purchase->subhead_display }}</span>
-                            </div>
-                        </div>
                         @endif
 
                         {{-- 3. Terms & Conditions Section --}}
@@ -1348,6 +1432,15 @@
                                                         <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 pc-live-view-quote-btn hover-zoom font-weight-bold" data-url="{{ url('/purchase/quote-attachment/' . $cDoc->pat_id . '/view') }}" data-pat-id="{{ $cDoc->pat_id }}" data-ext="{{ $ext }}" data-file-path="{{ $cDoc->pat_path }}" data-file-name="{{ $cName }}" data-title="{{ $cName }}" style="font-size: 11px; height: 22px; border-radius: 4px;" title="View {{ $cName }}">
                                                             <i class="fas fa-eye mr-1"></i> View
                                                         </button>
+                                                        @if(\App\Http\Controllers\AttachmentController::canManageAttachment(auth()->user(), 'pur', $purchase->pcs_id, $cDoc))
+                                                            <label for="replace_pur_dropdown_{{ $cDoc->pat_id }}" class="btn btn-xs btn-outline-warning py-0 px-1 font-weight-bold mb-0 d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px; cursor: pointer;" title="Replace {{ $cName }}">
+                                                                <i class="fas fa-sync-alt"></i>
+                                                            </label>
+                                                            <input type="file" id="replace_pur_dropdown_{{ $cDoc->pat_id }}" style="display:none;" onchange="window.rdwisDropdownReplace('pur', '{{ $cDoc->pat_id }}', '{{ addslashes($cName) }}', this)">
+                                                            <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1 font-weight-bold d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px;" onclick="window.rdwisDropdownDelete('pur', '{{ $cDoc->pat_id }}', '{{ addslashes($cName) }}', this)" title="Delete {{ $cName }}">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -1385,8 +1478,14 @@
                                     foreach($purchase->decisions->where('pdec_action', '!=', 'save_draft')->sortBy('created_at') as $d) {
                                         $trailRunningNumberMap[$d->pdec_id] = $currSeq;
                                         $count = 1;
-                                        if (!empty($d->pdec_remarks) && strpos($d->pdec_remarks, '<li') !== false) {
-                                            $count = max(1, substr_count($d->pdec_remarks, '<li'));
+                                        $raw = $d->pdec_remarks ?? '';
+                                        if (strpos($raw, '<li') !== false) {
+                                            $count = max(1, substr_count($raw, '<li'));
+                                        } elseif (!empty(trim(strip_tags($raw)))) {
+                                            $lines = explode("\n", trim(strip_tags($raw)));
+                                            $c = 0;
+                                            foreach ($lines as $l) { if (!empty(trim($l))) $c++; }
+                                            $count = max(1, $c);
                                         }
                                         $currSeq += $count;
                                     }
@@ -1404,6 +1503,7 @@
                                         elseif($act == 'dproc_save') { $color = 'info'; $actionVerb = 'Updated Quotations'; }
                                         elseif($act == 'float_to_proc') { $color = 'info'; $actionVerb = 'Floated to Procurement'; }
                                         elseif($act == 'reshare_to_proc') { $color = 'warning'; $actionVerb = 'Reshared to Procurement'; }
+                                        elseif($act == 'reverse_case' || $act == 'reverse') { $color = 'warning'; $actionVerb = 'Case Changed to Under Process'; }
 
                                         $toStatusDisplay = $service->getStatusDisplayName($decision->pdec_to_status);
                                         $startNumber = $trailRunningNumberMap[$decision->pdec_id] ?? 1;
@@ -1415,8 +1515,18 @@
                                             $innerLis = preg_replace('/<\/?(ol|ul)[^>]*>/i', '', $rawRemarks);
                                             $trailHtml = '<ol start="' . $startNumber . '" style="margin-bottom:0; padding-left:18px; color: #1e293b;">' . $innerLis . '</ol>';
                                         } elseif ($hasRemarks) {
-                                            $cleanText = trim(strip_tags($rawRemarks));
-                                            $trailHtml = '<ol start="' . $startNumber . '" style="margin-bottom:0; padding-left:18px; color: #1e293b;"><li>' . e($cleanText) . '</li></ol>';
+                                            $lines = explode("\n", trim(strip_tags($rawRemarks)));
+                                            $cleanLis = [];
+                                            foreach ($lines as $line) {
+                                                $cleanText = trim(preg_replace('/^\d+\.\s*/', '', $line));
+                                                if (!empty($cleanText)) {
+                                                    $cleanLis[] = '<li>' . e($cleanText) . '</li>';
+                                                }
+                                            }
+                                            if (empty($cleanLis)) {
+                                                $cleanLis[] = '<li>' . e(trim(strip_tags($rawRemarks))) . '</li>';
+                                            }
+                                            $trailHtml = '<ol start="' . $startNumber . '" style="margin-bottom:0; padding-left:18px; color: #1e293b;">' . implode('', $cleanLis) . '</ol>';
                                         } else {
                                             $defaultText = '';
                                             if ($decision->pdec_action == 'dproc_save') {
@@ -1425,6 +1535,8 @@
                                                 $defaultText = 'Case floated to Procurement Department for quotation collection.';
                                             } elseif ($decision->pdec_action == 'reshare_to_proc') {
                                                 $defaultText = 'Case reshared to Procurement Department for quotation correction.';
+                                            } elseif ($decision->pdec_action == 'reverse_case' || $decision->pdec_action == 'reverse') {
+                                                $defaultText = 'Case changed to Under Process by ' . ($decision->account->acc_name ?? 'Finance') . '.';
                                             } else {
                                                 $defaultText = 'Case ' . strtolower($actionVerb) . ' to ' . $toStatusDisplay . ' without additional remarks.';
                                             }
@@ -1436,12 +1548,16 @@
                                             <div class="font-weight-bold rajdhani text-dark" style="font-size: 14px; color: #0f172a !important;">
                                                 <i class="fas fa-user-circle text-primary mr-1"></i> {{ $decision->account->acc_name }} 
                                                 <span class="text-muted small ml-1" style="font-weight: 600;">({{ strtoupper($decision->pdec_role) }})</span>
-                                                <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 11px; color: var(--rd-{{$color}}); letter-spacing: 0.5px;">
-                                                    <i class="fas fa-caret-right mr-1"></i>{{ strtoupper($actionVerb) }}@if(!empty($toStatusDisplay) && !in_array($act, ['approve', 'reject', 'not_approved']))<span class="ml-1" style="text-transform: none; font-size: 11px; color: #334155; font-weight: 600;"> to <strong class="text-dark">{{ $toStatusDisplay }}</strong></span>@endif
+                                                <span class="ml-2 pl-2 border-left border-secondary font-weight-bold" style="font-size: 11px; color: {{ $act == 'reverse_case' || $act == 'reverse' ? '#b45309' : 'var(--rd-'.$color.')' }}; letter-spacing: 0.5px;">
+                                                    @if($act == 'reverse_case' || $act == 'reverse')
+                                                        <i class="fas fa-undo-alt mr-1"></i>CASE CHANGED TO UNDER PROCESS
+                                                    @else
+                                                        <i class="fas fa-caret-right mr-1"></i>{{ strtoupper($actionVerb) }}@if(!empty($toStatusDisplay) && !in_array($act, ['approve', 'reject', 'not_approved']))<span class="ml-1" style="text-transform: none; font-size: 11px; color: #334155; font-weight: 600;"> to <strong class="text-dark">{{ $toStatusDisplay }}</strong></span>@endif
+                                                    @endif
                                                 </span>
                                             </div>
                                             <span class="text-muted" style="font-size:10px; font-weight: 600;">
-                                                {{ \Carbon\Carbon::parse($decision->created_at)->format('d M, h:i A') }}
+                                                {{ \Carbon\Carbon::parse($decision->created_at)->format('d M Y, h:i A') }}
                                             </span>
                                         </div>
                                         <div class="mt-2" style="line-height: 1.5; font-size:13px; color: #1e293b !important; padding-left: 5px;">
@@ -1711,24 +1827,47 @@
 <div class="modal fade" id="financialIntelligenceModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 96%; width: 1440px;">
         <div class="modal-content" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.15);">
-            <div class="modal-header border-bottom py-3 px-4 d-flex align-items-center justify-content-between" style="background: #f8fafc; border-color: #e2e8f0 !important;">
-                <div class="d-flex align-items-center">
-                    <div class="mr-3" style="font-size: 26px; color: #1e3a8a;"><i class="fas fa-chart-line"></i></div>
-                    <div>
-                        <h5 class="modal-title rajdhani font-weight-bold mb-0" style="letter-spacing: 1px; font-size: 19px; color: #0f172a;">FINANCIAL INTELLIGENCE REPORT</h5>
-                        <div class="small rajdhani" style="font-size: 13px; font-weight: 600; color: #475569;">{{ $head->head_name ?? ($head->hed_name ?? ($head->prj_code ?? 'N/A')) }} | DATED {{ date('d M y') }} <span class="ml-2 font-weight-bold" style="color: #2563eb;">{{ ($head->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
+            <div class="modal-header border-bottom py-3 px-4 d-flex align-items-center justify-content-between flex-wrap" style="background: #f8fafc; border-color: #e2e8f0 !important; gap: 12px;">
+                <div class="d-flex align-items-center flex-grow-1">
+                    <div class="mr-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: rgba(30,58,138,0.1); font-size: 24px; color: #1e3a8a; flex-shrink: 0;">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="ml-auto d-flex align-items-center mr-4" style="gap: 8px;">
+                    <div>
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+                            <h4 class="modal-title rajdhani font-weight-bold mb-0" style="letter-spacing: 1.2px; font-size: 20px; font-weight: 800; color: #0f172a;">
+                                FINANCIAL INTELLIGENCE REPORT
+                            </h4>
+                            @php
+                                $purHeadCode = $head->head_code ?? ($head->hed_code ?? null);
+                            @endphp
+                            @if(!empty($purHeadCode))
+                                <span class="badge px-3 py-1 font-weight-bold rajdhani text-white shadow-sm" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); font-size: 13.5px; letter-spacing: 0.8px; border-radius: 6px;">
+                                    <i class="fas fa-barcode mr-1.5"></i> HEAD CODE: {{ $purHeadCode }}
+                                </span>
+                            @endif
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap mt-1" style="gap: 8px;">
+                            <span class="font-weight-bold rajdhani" style="font-size: 16px; color: #1e293b; letter-spacing: 0.3px;">
+                                <i class="fas fa-project-diagram text-primary mr-1"></i> {{ $head->head_name ?? ($head->hed_name ?? ($purchase->head_display ?? 'N/A')) }}
+                            </span>
+                            <span class="text-muted">|</span>
+                            <span class="text-muted small rajdhani font-weight-bold" style="font-size: 13px;">DATED {{ date('d M Y') }}</span>
+                            <span class="badge badge-light border font-weight-bold rajdhani" style="color: #2563eb; font-size: 11.5px; border-color: #cbd5e1 !important; border-radius: 4px;">
+                                {{ ($head->trans_type ?? 1) == 1 ? 'Million PKR without GST' : 'PKR with GST' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="ml-auto d-flex align-items-center mr-3 flex-wrap" style="gap: 8px;">
                         @if($prjId)
-                        <a href="{{ route('projects.show', $prjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(37,99,235,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(37,99,235,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(37,99,235,0.25)';">
+                        <a href="{{ route('projects.show', $prjId) }}" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; transition: all 0.2s;">
                             <i class="fas fa-project-diagram"></i> Project Details
                         </a>
                         @endif
                         @if($effectiveHeadId)
-                        <a href="{{ route('projects.financial_view', $effectiveHeadId) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(22,163,74,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(22,163,74,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(22,163,74,0.25)';">
+                        <a href="{{ route('projects.financial_view', $effectiveHeadId) }}#tab-docs" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #fff; border: none; transition: all 0.2s;">
                             <i class="fas fa-paperclip"></i> Files & Attachments
                         </a>
-                        <a href="{{ route('projects.financial_view', $effectiveHeadId) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none; box-shadow: 0 2px 6px rgba(217,119,6,0.25); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(217,119,6,0.35)';" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 6px rgba(217,119,6,0.25)';">
+                        <a href="{{ route('projects.financial_view', $effectiveHeadId) }}#tab-milestones" target="_blank" class="btn btn-sm rajdhani font-weight-bold d-inline-flex align-items-center shadow-sm" style="font-size: 12px; border-radius: 6px; gap: 6px; padding: 6px 14px; letter-spacing: 0.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; border: none; transition: all 0.2s;">
                             <i class="fas fa-coins"></i> Milestone Costs
                         </a>
                         @endif
@@ -1958,15 +2097,15 @@
                             <h6 class="rajdhani font-weight-bold mb-3" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 1.5px;">EXP. SOURCES</h6>
                             <div class="d-flex justify-content-between mb-1.5" style="font-size: 13.5px;">
                                 <span class="rajdhani font-weight-bold" style="color: #475569;">From this account</span>
-                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->exp_this_account) }}</span>
+                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->exp_this_account ?? 0) }}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-1.5" style="font-size: 13.5px;">
                                 <span class="rajdhani font-weight-bold" style="color: #475569;">From other accounts</span>
-                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->exp_other_accounts) }}</span>
+                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->exp_other_accounts ?? 0) }}</span>
                             </div>
                             <div class="d-flex justify-content-between" style="font-size: 13.5px;">
                                 <span class="rajdhani font-weight-bold" style="color: #475569;">Other's exp. this acc.</span>
-                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->others_exp_this_account) }}</span>
+                                <span class="text-dark rajdhani font-weight-bold">{{ number_format($head->others_exp_this_account ?? 0) }}</span>
                             </div>
                         </div>
                     </div>
@@ -2533,6 +2672,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'pat_path' => (string) $a->pat_path,
                 'pat_type' => (string) ($a->pat_type ?: ''),
                 'pat_filename' => basename(str_replace('\\', '/', (string)($a->pat_path ?? ''))),
+                'can_manage' => \App\Http\Controllers\AttachmentController::canManageAttachment(auth()->user(), 'pur', $purchase->pcs_id, $a),
             ])->values(),
             'quote_items' => $quoteItemMap,
         ];
@@ -2615,12 +2755,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 head.innerHTML = `
                     <tr style="background: #fffbeb;">
                         <th class="pl-3" style="width: 42px; color: #92400e;">S.No</th>
-                        <th style="color: #92400e; width: 220px;">Employee Details</th>
-                        <th style="color: #92400e;">Travel Purpose / Details</th>
-                        <th class="text-center" style="width: 95px; color: #92400e;">Subhead</th>
-                        <th class="text-center" style="width: 70px; color: #92400e;">Days</th>
-                        <th class="text-right pr-3" style="width: 130px; color: #92400e;">Total Allowance (PKR)</th>
-                        <th class="text-center pr-3" style="width: 120px; color: #92400e;">Payment Mode</th>
+                        <th style="color: #92400e; width: 190px;">Employee Details</th>
+                        <th style="color: #92400e;">Purpose / Description</th>
+                        <th class="text-center" style="width: 85px; color: #92400e;">Type</th>
+                        <th style="width: 140px; color: #92400e;">Sub-Type</th>
+                        <th class="text-center" style="width: 80px; color: #92400e;">Subhead</th>
+                        <th class="text-center" style="width: 85px; color: #92400e;">Days / Qty</th>
+                        <th class="text-right pr-3" style="width: 140px; color: #92400e;">Total Amount (PKR)</th>
                         <th class="text-right pr-3 edit-only" style="width: 70px; color: #92400e;">Action</th>
                     </tr>
                 `;
@@ -2660,7 +2801,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 2. Render Table Body based on Case Type
         if (items.length === 0) {
-            const colSpan = isRb ? 8 : 10;
+            const colSpan = isRb ? 9 : 10;
             body.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted small">No items added to this case yet.</td></tr>`;
             return;
         }
@@ -2673,6 +2814,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (isRb) {
                 const totalAllowance = baseTotal;
+                const unitStr = it.pci_qtyunit && it.pci_qtyunit !== 'num' ? escapeHtml(it.pci_qtyunit) : 'Days';
+                const subtypeVal = it.pci_subtype || 'Travelling/Boarding/Lodging';
+                let typeBadge = '<span class="badge badge-info px-1.5 py-0.5" style="font-size: 9.5px; background: #0891b2; color:#fff;">Service</span>';
+
                 return `
                     <tr data-pci-id="${it.pci_id}">
                         <td class="pl-3 text-muted font-weight-bold" style="font-size: 11px;">${sNo}</td>
@@ -2685,22 +2830,21 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </td>
                         <td>
-                            <span class="pc-desc-display font-weight-500" style="color: #1e293b; font-size: 11.5px;">${escapeHtml(it.pci_desc || 'TA/DA Allowance')}</span>
+                            <span class="pc-desc-display font-weight-500" style="color: #1e293b; font-size: 11.5px;">${escapeHtml(it.pci_desc || 'Allowance / Travel Details')}</span>
+                        </td>
+                        <td class="text-center">${typeBadge}</td>
+                        <td>
+                            <span class="text-dark font-weight-500" style="font-size: 11px;">${escapeHtml(subtypeVal)}</span>
                         </td>
                         <td class="text-center">
                             <span class="badge badge-light border text-dark" style="font-size: 10px; padding: 2px 5px;">${escapeHtml(it.pci_subhead || state.pcs_subhead || 'Misc')}</span>
                         </td>
                         <td class="text-center font-weight-bold">
-                            <span class="badge px-2 py-0.5" style="font-size: 11px; background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1;">${fmt(qty)} ${it.pci_qtyunit && it.pci_qtyunit !== 'num' ? escapeHtml(it.pci_qtyunit) : (qty > 1 ? 'Days' : 'Day')}</span>
+                            <span class="badge px-2 py-0.5" style="font-size: 11px; background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1;">${fmt(qty)} ${unitStr}</span>
                         </td>
                         <td class="text-right pr-3 font-weight-bold text-success" style="font-size: 12px; color: #16a34a !important;">
                             ${fmt(totalAllowance)}
-                            ${qty > 1 ? `<div class="text-muted font-weight-normal" style="font-size: 9.5px;">(@ ${fmt(rate)}/day)</div>` : ''}
-                        </td>
-                        <td class="text-center pr-3">
-                            <span class="badge badge-warning px-1.5 py-0.5 text-dark" style="background: #fef3c7; border: 1px solid #fde68a; font-size: 9.5px;">
-                                <i class="fas fa-money-check mr-1 text-warning"></i> Meezan Bank
-                            </span>
+                            ${qty > 1 ? `<div class="text-muted font-weight-normal" style="font-size: 9.5px;">(@ ${fmt(rate)} / ${unitStr === 'Days' ? 'day' : 'unit'})</div>` : ''}
                         </td>
                         <td class="text-right pr-3 edit-only">
                             <div class="d-flex justify-content-end gap-1">
@@ -2940,6 +3084,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 pc-live-view-quote-btn hover-zoom font-weight-bold" data-url="${quoteViewBase}/${f.pat_id}/view" data-pat-id="${f.pat_id}" data-ext="${ext}" data-file-path="${f.pat_path || ''}" data-file-name="${(f.pat_filename || f.pat_path || '').replaceAll('"','&quot;')}" data-title="${name.replaceAll('"', '&quot;')}" style="font-size: 11px; height: 22px; border-radius: 4px;" title="View ${name.replaceAll('"', '&quot;')}">
                             <i class="fas fa-eye mr-1"></i> View
                         </button>
+                        ${f.can_manage ? `
+                            <label for="replace_pur_dropdown_${f.pat_id}" class="btn btn-xs btn-outline-warning py-0 px-1 font-weight-bold mb-0 d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px; cursor: pointer;" title="Replace ${name.replaceAll('"', '&quot;')}">
+                                <i class="fas fa-sync-alt"></i>
+                            </label>
+                            <input type="file" id="replace_pur_dropdown_${f.pat_id}" style="display:none;" onchange="window.rdwisDropdownReplace('pur', '${f.pat_id}', '${name.replaceAll("'", "\\'")}', this)">
+                            <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1 font-weight-bold d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px;" onclick="window.rdwisDropdownDelete('pur', '${f.pat_id}', '${name.replaceAll("'", "\\'")}', this)" title="Delete ${name.replaceAll('"', '&quot;')}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -3271,6 +3424,10 @@ document.addEventListener('DOMContentLoaded', function() {
         renderRemarks();
         renderFiles();
         renderPriceBreakdown();
+        if (state.pcs_subhead) {
+            const shView = document.getElementById('pcSubheadView');
+            if (shView) shView.textContent = state.pcs_subhead;
+        }
         if (typeof renderMultiQuoteModal === 'function') {
             renderMultiQuoteModal();
         }
@@ -3383,6 +3540,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const desc = document.getElementById('pcAddEmpDesc')?.value || '';
             const qty = document.getElementById('pcAddEmpQty')?.value || '1';
             const price = document.getElementById('pcAddEmpRate')?.value || '0';
+            const unit = document.getElementById('pcAddEmpUnit')?.value || 'Days';
+            const type = document.getElementById('pcAddEmpType')?.value || '3';
+            const subtype = document.getElementById('pcAddEmpSubtype')?.value || 'Travelling/Boarding/Lodging';
+            const subhead = document.getElementById('pcAddEmpSubhead')?.value || 'Misc';
 
             if (!empId) { toast('Please select an employee'); return; }
 
@@ -3390,10 +3551,10 @@ document.addEventListener('DOMContentLoaded', function() {
             fd.append('item_desc', desc.trim() || 'TA/DA Official Visit');
             fd.append('item_qty', qty);
             fd.append('item_price', price);
-            fd.append('item_qtyunit', 'Days');
-            fd.append('item_subhead', 'Misc');
-            fd.append('item_type', '3');
-            fd.append('item_subtype', 'Travelling/Boarding/Lodging');
+            fd.append('item_qtyunit', unit);
+            fd.append('item_subhead', subhead);
+            fd.append('item_type', type);
+            fd.append('item_subtype', subtype);
         } else {
             const desc = itemForm.querySelector('[name="item_desc"]')?.value || '';
             const qty = itemForm.querySelector('[name="item_qty"]')?.value || '1';
@@ -3442,6 +3603,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const isPs = !isRb && !isPt;
 
             if (isRb) {
+                const curSubtype = it.pci_subtype || 'Travelling/Boarding/Lodging';
+                const curUnit = (it.pci_qtyunit && it.pci_qtyunit !== 'num') ? it.pci_qtyunit : 'Days';
+                const curSubhead = it.pci_subhead || state.pcs_subhead || 'Misc';
+
                 tr.innerHTML = `
                     <td class="pl-3 text-warning font-weight-bold" style="font-size: 11px;"><i class="fas fa-pencil-alt"></i></td>
                     <td>
@@ -3456,23 +3621,51 @@ document.addEventListener('DOMContentLoaded', function() {
                         </select>
                     </td>
                     <td>
-                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Travel Purpose / Details:</div>
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Purpose / Details:</div>
                         <input type="text" class="form-control form-control-sm pc-inline-desc-input" value="${escapeHtml(it.pci_desc)}" style="font-size: 11px; height: 26px; padding: 2px 6px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;" required placeholder="Purpose...">
                     </td>
                     <td class="text-center">
-                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Subhead:</div>
-                        <input type="text" class="form-control form-control-sm pc-inline-subhead-input text-center" value="${escapeHtml(it.pci_subhead || state.pcs_subhead || 'Misc')}" style="font-size: 10.5px; height: 26px; padding: 2px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Type:</div>
+                        <select class="form-control form-control-sm pc-inline-type-select text-center" style="font-size: 10px; height: 26px; padding: 1px 3px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                            <option value="3" selected>Service (3)</option>
+                            <option value="3">Travel (3)</option>
+                            <option value="3">Course / Training (3)</option>
+                            <option value="3">Allowance / Bonus (3)</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Subtype:</div>
+                        <select class="form-control form-control-sm pc-inline-subtype-select" style="font-size: 10.5px; height: 26px; padding: 1px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                            <option value="Inland Course" ${curSubtype === 'Inland Course' ? 'selected' : ''}>Inland Course</option>
+                            <option value="Overseas Course" ${curSubtype === 'Overseas Course' ? 'selected' : ''}>Overseas Course</option>
+                            <option value="Travelling/Boarding/Lodging" ${curSubtype === 'Travelling/Boarding/Lodging' ? 'selected' : ''}>Travelling/Boarding/Lodging</option>
+                            <option value="Visa / Passport Expenses" ${curSubtype === 'Visa / Passport Expenses' ? 'selected' : ''}>Visa / Passport Expenses</option>
+                            <option value="Ticket / Airfare" ${curSubtype === 'Ticket / Airfare' ? 'selected' : ''}>Ticket / Airfare</option>
+                            <option value="Daily Allowance (DA)" ${curSubtype === 'Daily Allowance (DA)' ? 'selected' : ''}>Daily Allowance (DA)</option>
+                            <option value="Meals / Refreshments" ${curSubtype === 'Meals / Refreshments' ? 'selected' : ''}>Meals / Refreshments</option>
+                            <option value="Bonus / Performance Award" ${curSubtype === 'Bonus / Performance Award' ? 'selected' : ''}>Bonus / Performance Award</option>
+                            <option value="Honorarium / Special Duty" ${curSubtype === 'Honorarium / Special Duty' ? 'selected' : ''}>Honorarium / Special Duty</option>
+                        </select>
                     </td>
                     <td class="text-center">
-                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Days:</div>
-                        <input type="number" step="1" class="form-control form-control-sm pc-inline-qty-input text-center" value="${it.pci_qty || 1}" style="font-size: 11px; height: 26px; width: 55px; margin: 0 auto; padding: 2px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;" required>
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Subhead:</div>
+                        <select class="form-control form-control-sm pc-inline-subhead-input text-center" style="font-size: 10.5px; height: 26px; padding: 1px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                            ${((allSubheads && allSubheads.length) ? allSubheads : ['Misc', 'Equipment']).map(sh => `<option value="${escapeHtml(sh)}" ${(curSubhead === sh || (!curSubhead && sh === 'Misc')) ? 'selected' : ''}>${escapeHtml(sh)}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="text-center">
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Days / Qty:</div>
+                        <div class="d-flex align-items-center" style="gap: 2px;">
+                            <input type="number" step="any" class="form-control form-control-sm pc-inline-qty-input text-center" value="${it.pci_qty || 1}" style="font-size: 11px; height: 26px; width: 44px; padding: 2px 2px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;" required>
+                            <select class="form-control form-control-sm pc-inline-unit-select" style="font-size: 10px; height: 26px; width: 50px; padding: 1px 2px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;">
+                                <option value="Days" ${curUnit === 'Days' ? 'selected' : ''}>Days</option>
+                                <option value="Qty" ${curUnit === 'Qty' ? 'selected' : ''}>Qty</option>
+                            </select>
+                        </div>
                     </td>
                     <td class="text-right pr-3">
-                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Daily Rate (PKR):</div>
+                        <div class="small font-weight-bold text-muted mb-0.5" style="font-size: 10px;">Rate / Amount:</div>
                         <input type="number" step="0.01" class="form-control form-control-sm pc-inline-price-input text-right font-weight-bold" value="${it.pci_price || 0}" style="font-size: 11px; height: 26px; width: 90px; margin-left: auto; padding: 2px 4px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1;" required>
-                    </td>
-                    <td class="text-center pr-3">
-                        <span class="badge badge-warning px-1.5 py-0.5 text-dark" style="background: #fef3c7; border: 1px solid #fde68a; font-size: 9.5px;">Meezan Bank</span>
                     </td>
                     <td class="text-right pr-3">
                         <div class="d-flex justify-content-end gap-1">
@@ -3501,6 +3694,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // For Ps and Pt cases:
+            const itemSubhead = it.pci_subhead || state.pcs_subhead || '';
+            let subheadOpts = (allSubheads && allSubheads.length > 0) ? [...allSubheads] : ['Equipment', 'Misc'];
+            if (itemSubhead && !subheadOpts.includes(itemSubhead)) {
+                subheadOpts.push(itemSubhead);
+            }
+
             tr.innerHTML = `
                 <td class="pl-3 text-warning font-weight-bold" style="font-size: 11px;"><i class="fas fa-pencil-alt"></i></td>
                 <td>
@@ -3523,7 +3722,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     </select>
                 </td>
                 <td>
-                    <input type="text" class="form-control form-control-sm pc-inline-subhead-input" value="${escapeHtml(it.pci_subhead || state.pcs_subhead)}" list="subheadOptionsList" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 10.5px; height: 26px; padding: 2px 6px;">
+                    <select class="form-control form-control-sm pc-inline-subhead-input" style="background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 10.5px; height: 26px; padding: 1px 4px;">
+                        ${subheadOpts.map(sh => `<option value="${escapeHtml(sh)}" ${(itemSubhead === sh || (!itemSubhead && (sh === 'Equipment' || sh === state.pcs_subhead))) ? 'selected' : ''}>${escapeHtml(sh)}</option>`).join('')}
+                    </select>
                 </td>
                 <td class="text-center">
                     <input type="number" step="0.01" class="form-control form-control-sm pc-inline-qty-input text-center" value="${it.pci_qty}" style="width: 52px; background: #ffffff; color: #0f172a; border: 1.5px solid #cbd5e1; font-size: 11px; height: 26px; margin: 0 auto; padding: 2px 4px;" required>
@@ -3559,18 +3760,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (state.pcs_type === 'Rb') {
                 const empId = tr.querySelector('.pc-inline-emp-select')?.value || '';
                 const desc = tr.querySelector('.pc-inline-desc-input')?.value || '';
+                const type = tr.querySelector('.pc-inline-type-select')?.value || '3';
+                const subtype = tr.querySelector('.pc-inline-subtype-select')?.value || 'Travelling/Boarding/Lodging';
                 const subhead = tr.querySelector('.pc-inline-subhead-input')?.value || 'Misc';
                 const qty = tr.querySelector('.pc-inline-qty-input')?.value || '1';
+                const unit = tr.querySelector('.pc-inline-unit-select')?.value || 'Days';
                 const price = tr.querySelector('.pc-inline-price-input')?.value || '0';
 
                 fd.append('emp_id', empId);
                 fd.append('item_desc', desc.trim() || 'TA/DA Allowance');
+                fd.append('item_type', type);
+                fd.append('item_subtype', subtype);
                 fd.append('item_subhead', subhead);
                 fd.append('item_qty', qty);
+                fd.append('item_qtyunit', unit);
                 fd.append('item_price', price);
-                fd.append('item_qtyunit', 'Days');
-                fd.append('item_type', '3');
-                fd.append('item_subtype', 'Travelling/Boarding/Lodging');
             } else {
                 const desc = tr.querySelector('.pc-inline-desc-input')?.value || '';
                 const type = tr.querySelector('.pc-inline-type-select')?.value || '7';
@@ -4597,6 +4801,139 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => {
                 alert('Failed to create RFQ Letter: ' + err.message);
             });
+        }
+    };
+
+    window.rdwisDropdownReplace = window.rdwisDropdownReplace || function(module, id, docType, inputEl) {
+        if (!inputEl.files || !inputEl.files[0]) return;
+        const file = inputEl.files[0];
+
+        const doUpload = () => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('doc_type', docType);
+            formData.append('_token', @json(csrf_token()));
+
+            fetch(`/universal-attachment/${module}/${id}/replace`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                inputEl.value = '';
+                if (data.success) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || `"${docType}" replaced successfully!`,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    throw new Error(data.message || 'Replace failed');
+                }
+            })
+            .catch(err => {
+                inputEl.value = '';
+                if (window.Swal) {
+                    Swal.fire({ icon: 'error', title: 'Replace Failed', text: err.message });
+                } else {
+                    alert('Error: ' + err.message);
+                }
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Replace Document?',
+                text: `Are you sure you want to replace "${docType}" with "${file.name}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: 'Yes, Replace',
+                cancelButtonText: 'Cancel'
+            }).then(r => {
+                if (r.isConfirmed) doUpload();
+                else inputEl.value = '';
+            });
+        } else {
+            if (confirm(`Are you sure you want to replace "${docType}" with "${file.name}"?`)) doUpload();
+            else inputEl.value = '';
+        }
+    };
+
+    window.rdwisDropdownDelete = window.rdwisDropdownDelete || function(module, id, docType, btnEl) {
+        const doDelete = () => {
+            const originalBtnHtml = btnEl.innerHTML;
+            btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+            btnEl.disabled = true;
+
+            fetch(`/universal-attachment/${module}/${id}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': @json(csrf_token()),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ _token: @json(csrf_token()) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const row = btnEl.closest('.d-flex.justify-content-between');
+                    if (row) row.remove();
+                    const countBadge = document.getElementById('pcCaseAttCountBadge');
+                    if (countBadge) {
+                        countBadge.textContent = Math.max(0, (parseInt(countBadge.textContent || '1', 10) - 1));
+                    }
+                    if (window.Swal) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || `"${docType}" deleted.`,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                } else {
+                    throw new Error(data.message || 'Delete failed');
+                }
+            })
+            .catch(err => {
+                btnEl.innerHTML = originalBtnHtml;
+                btnEl.disabled = false;
+                if (window.Swal) {
+                    Swal.fire({ icon: 'error', title: 'Delete Failed', text: err.message });
+                } else {
+                    alert('Error: ' + err.message);
+                }
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Delete Attachment?',
+                text: `Are you sure you want to delete "${docType}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then(r => {
+                if (r.isConfirmed) doDelete();
+            });
+        } else {
+            if (confirm(`Are you sure you want to delete "${docType}"?`)) doDelete();
         }
     };
 

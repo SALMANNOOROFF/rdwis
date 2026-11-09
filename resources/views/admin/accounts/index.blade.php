@@ -88,6 +88,9 @@
                                 <td style="white-space:nowrap;">
                                     @if($acc->acc_status === 'Active')
                                         <div class="d-flex" style="gap: 6px; flex-wrap:nowrap;">
+                                            <a href="{{ route('admin.accounts.edit', $acc->acc_id) }}" class="btn btn-xs btn-outline-primary" style="padding:3px 10px; border-radius:10px; font-size:11px;" title="Edit Account">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
                                             <form action="{{ route('admin.accounts.close', $acc->acc_id) }}" method="POST"
                                                   onsubmit="return confirm('Close this account?');">
                                                 @csrf
@@ -105,6 +108,9 @@
                                         </div>
                                     @else
                                         <div class="d-flex" style="gap: 6px; flex-wrap:nowrap;">
+                                            <a href="{{ route('admin.accounts.edit', $acc->acc_id) }}" class="btn btn-xs btn-outline-primary" style="padding:3px 10px; border-radius:10px; font-size:11px;" title="Edit Account">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
                                             <form action="{{ route('admin.accounts.reopen', $acc->acc_id) }}" method="POST"
                                                   onsubmit="return confirm('Re-open this account?');">
                                                 @csrf

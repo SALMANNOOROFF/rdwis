@@ -21,6 +21,11 @@
                         <a href="{{ route('nrdi.contract_cases_new.index') }}" class="btn btn-sm btn-primary shadow-sm" style="background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important; font-weight: 600; border-radius: 6px;">
                             <i class="fas fa-file-signature mr-1"></i> INITIATE CONTRACT CASE
                         </a>
+                        @if($mode === 'm' && (Auth::user()->isFinance() || in_array(strtolower(trim((string)(Auth::user()->acc_untarea ?? ''))), ['fin', 'finance', 'it'])))
+                        <a href="{{ route('fin.attendance.unlock_list') }}" class="btn btn-sm btn-outline-warning shadow-sm font-weight-bold" style="border-radius: 6px; border-width: 1.5px; background: rgba(245, 158, 11, 0.1); color: #d97706;">
+                            <i class="fas fa-unlock-alt mr-1"></i> UNLOCK ATTENDANCE
+                        </a>
+                        @endif
                     </div>
                     <div class="ml-sm-auto d-flex align-items-center flex-wrap" style="gap: 10px;">
                         @if(in_array(strtolower(trim((string) (Auth::user()->acc_untarea ?? ''))), ['fin', 'hr', 'nrdi', 'rdw', 'hqs', 'proc', 'prc']))
@@ -114,8 +119,8 @@
                                     $headCode = $latestCtr?->current_head_code ?: ($latestCtr?->hed_code ?: ($latestCtr?->prj_code ?: ($emp->hed_code ?: ($emp->prj_code ?? null))));
                                     $prjTitle = $latestCtr?->current_prj_title ?: ($latestCtr?->prj_title ?: ($emp->prj_title ?: ($latestCtr?->hed_name ?: ($emp->hed_name ?? null))));
                                     $distinctCount = (int)($latestCtr?->distinct_count ?? 0);
-                                    $plansList = $latestCtr?->plans_list ?? [];
-                                    $ctrEnd = $latestCtr?->ctr_enddt ? \Carbon\Carbon::parse($latestCtr->ctr_enddt) : null;
+                                    $effectiveEnd = $latestCtr?->ctr_termindt ?: $latestCtr?->ctr_enddt;
+                                    $ctrEnd = $effectiveEnd ? \Carbon\Carbon::parse($effectiveEnd) : null;
                                     $isExpiringSoon = false;
                                     $daysRemaining = null;
                                     if ($status === 'Current' && $ctrEnd) {

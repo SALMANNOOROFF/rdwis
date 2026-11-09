@@ -20,22 +20,45 @@ class PurchaseController extends Controller
         $this->approvalService = $approvalService;
     }
     /**
-     * Show list of purchases for logged-in user's unit
+     * Show list of purchases for logged-in user's unit (or project-filtered)
      */
-    public function index()
-{
-    $userUnitId = Auth::user()->acc_unt_id;
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $userUnitId = $user ? $user->acc_unt_id : null;
 
-    // Yahan 'project' lazmi load karein taake ID ke bajaye naam mil sakay
-    $purchases = Purchase::with(['project']) 
-                        ->where('pcs_unt_id', $userUnitId)
-                        ->orderBy('pcs_id', 'desc')
-                        ->get();
+        $query = Purchase::with(['project', 'items', 'quotes.firm']);
 
-    $detailsRouteName = 'purchasecasedetails';
-    $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
-    return view('purchase.new_case.viewpurchasecase', compact('purchases', 'detailsRouteName', 'unitNameMap'));
-}
+        // Check if project/head filter is applied
+        if ($request->filled('project_id') || $request->filled('prj_id') || $request->filled('head_id')) {
+            $projId = (int) $request->input('project_id', $request->input('prj_id', $request->input('head_id')));
+            $query->where(function($q) use ($projId) {
+                $q->where('pcs_hed_id', $projId)
+                  ->orWhere('pcs_effhed_id', $projId);
+            });
+        } elseif ($userUnitId) {
+            $query->where(function($q) use ($userUnitId) {
+                $q->where('pcs_unt_id', $userUnitId)
+                  ->orWhere('pcs_intunt_id', $userUnitId);
+            });
+        }
+
+        if ($request->filled('status')) {
+            $st = trim($request->status);
+            if (strtolower($st) !== 'all') {
+                $query->where('pcs_status', $st);
+            }
+        }
+
+        // Deduplicate rows with distinct to prevent child table joins from multiplying parent rows
+        $purchases = $query->distinct('pur.purcases.pcs_id')
+                            ->orderBy('pcs_id', 'desc')
+                            ->get();
+
+        $detailsRouteName = 'purchasecasedetails';
+        $unitNameMap = DB::table('cen.units')->pluck('unt_namesh', 'unt_id');
+        return view('purchase.new_case.viewpurchasecase', compact('purchases', 'detailsRouteName', 'unitNameMap'));
+    }
 
     public function nrdiIndex()
     {
@@ -686,18 +709,49 @@ class PurchaseController extends Controller
     }
 
     /**
-     * AJAX: Get next minute number for a specific head
+     * AJAX: Get next minute number for a specific head (audited to exclude deleted/draft/cancelled minutes)
      */
     public function getNextMinuteNumber($headId)
     {
+        // Audit minute count subquery so deleted, draft, and cancelled minutes are not counted
         $maxMinute = DB::table('pur.purcases')
-                        ->where('pcs_hed_id', $headId)
-                        ->max('pcs_minute');
+            ->where(function($q) use ($headId) {
+                $q->where('pcs_hed_id', $headId)
+                  ->orWhere('pcs_effhed_id', $headId);
+            })
+            ->whereNotIn('pcs_status', ['Cancelled', 'Rejected', 'Draft'])
+            ->where(function($q) {
+                $q->whereRaw("LOWER(TRIM(COALESCE(pcs_type, 'ps'))) = 'ps'")
+                  ->orWhereNull('pcs_type');
+            })
+            ->max('pcs_minute');
+
+        $minuteCount = DB::table('pur.purcases')
+            ->where(function($q) use ($headId) {
+                $q->where('pcs_hed_id', $headId)
+                  ->orWhere('pcs_effhed_id', $headId);
+            })
+            ->whereNotIn('pcs_status', ['Cancelled', 'Rejected', 'Draft'])
+            ->where(function($q) {
+                $q->whereRaw("LOWER(TRIM(COALESCE(pcs_type, 'ps'))) = 'ps'")
+                  ->orWhereNull('pcs_type');
+            })
+            ->distinct()
+            ->count('pcs_minute');
 
         return response()->json([
-            'next_minute' => $maxMinute ? ($maxMinute + 1) : 1,
-            'last_minute' => $maxMinute ?? 0
+            'next_minute'  => $maxMinute ? ($maxMinute + 1) : 1,
+            'last_minute'  => $maxMinute ?? 0,
+            'minute_count' => $minuteCount
         ]);
+    }
+
+    /**
+     * AJAX: Get last minute for a specific head
+     */
+    public function getLastMinute($headId)
+    {
+        return $this->getNextMinuteNumber($headId);
     }
 
     public function minuteView($id)

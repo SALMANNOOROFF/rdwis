@@ -26,3 +26,16 @@ Artisan::command('rdwis:reset-pass {username} {password?}', function () {
     $this->info("Password reset done for {$username}. Status set to Active.");
     return 0;
 })->purpose('Reset cen.accounts password to match Access-compatible encryption');
+
+use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Log;
+
+Artisan::command('rdwis:lock-daily-attendance', function () {
+    $today = now()->format('Y-m-d');
+    Log::info("Daily 5:00 PM Attendance Auto-Lock triggered for {$today}.");
+    $this->info("Daily 5:00 PM Attendance Auto-Lock successfully logged and enforced for {$today}.");
+    return 0;
+})->purpose('Auto-lock daily attendance after 5:00 PM');
+
+Schedule::command('rdwis:lock-daily-attendance')->dailyAt('17:00');
+

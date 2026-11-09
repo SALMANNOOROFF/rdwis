@@ -94,7 +94,7 @@
     $projectPlan = $case->casePlans->first();
     if ($isHrIsAdmin) {
         $projectCode = 'CSRF';
-        $projectName = 'Center Special Research Fund (CSRF)';
+        $projectName = 'Central Service Resource Fund (CSRF)';
     } else {
         $projectCode = $projectPlan?->project?->prj_code 
             ?? ($projectPlan?->ccp_hed_id ? \Illuminate\Support\Facades\DB::table('cen.heads')->where('hed_id', $projectPlan->ccp_hed_id)->value('hed_code') : null)
@@ -140,7 +140,7 @@
         $allocatedGroups->push([
             'hed_id' => null,
             'prj_code' => 'CSRF',
-            'prj_name' => 'Center Special Research Fund (CSRF)',
+            'prj_name' => 'Central Service Resource Fund (CSRF)',
             'start_dt' => $case->ctc_newstartdt,
             'end_dt' => $case->ctc_newenddt,
             'month_count' => $monthCount,
@@ -220,7 +220,11 @@
         $prjId = $alloc->hed_prj_id ?? ($headRecord->hed_prj_id ?? null);
         $prjCode = $ag['prj_code'] ?? ($alloc->prj_code ?? ($headRecord->hed_code ?? 'PRJ'));
         $prjName = $ag['prj_name'] ?? ($alloc->prj_name ?? ($headRecord->hed_name ?? 'Project'));
-        $hiredCount = $hId ? (int)($projectHiredCounts->get($hId, 0)) : 0;
+        $csrfHiredCount = \Illuminate\Support\Facades\DB::table('hr.emps')
+            ->whereRaw("LOWER(TRIM(emp_status)) IN ('active', 'current')")
+            ->whereIn('emp_unt_id', [820000, 840000, 880000, 10000, 100000, 800000, 810000, 860000])
+            ->count();
+        $hiredCount = $hId ? (int)($projectHiredCounts->get($hId, 0)) : ($isHrIsAdmin ? $csrfHiredCount : 0);
 
         $fin = $hId ? $finService->getHeadStatus($hId) : null;
         $fAlloc = $fin ? (float)($fin->pcc_share ?? ($fin->prj_share ?? ($fin->allocation ?? 0))) : 0;
@@ -988,6 +992,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                                         </span>
                                     </div>
 
+                                    @if(!$isHrIsAdmin)
                                     <div class="d-flex align-items-center">
                                         <strong style="color: #0f172a; width: 185px; display:inline-block; font-weight: 800; font-size: 13.5px; letter-spacing: 0.3px;">
                                             <i class="fas fa-layer-group text-primary mr-2"></i>SUBHEAD:
@@ -1036,6 +1041,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                                             </a>
                                         </div>
                                     </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -1045,7 +1051,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                                     <h6 class="rajdhani text-primary font-weight-bold mb-0" style="font-size: 15px; font-weight: 800; letter-spacing: 1px;">
                                         <i class="fas fa-chart-pie mr-1"></i> FINANCIAL REVIEW
                                     </h6>
-                                    @if(!empty($activeProjectCard['hed_id']))
+                                    @if(!$isHrIsAdmin && !empty($activeProjectCard['hed_id']))
                                     <button id="finReviewFullReportBtn" type="button" class="btn btn-xs btn-outline-primary rajdhani font-weight-bold py-0.5 px-2" data-toggle="modal" data-target="#financialIntelligenceModal_{{ $activeProjectCard['card_key'] }}" style="font-size: 11px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px;">
                                         <i class="fas fa-expand-arrows-alt mr-1"></i> FULL REPORT
                                     </button>
@@ -1056,6 +1062,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                                     @endif
                                 </div>
                                 
+                                @if(!$isHrIsAdmin)
                                 <div class="w-100 rajdhani" style="display: grid; grid-template-columns: auto 1fr; gap: 6px 28px; text-align: left;">
                                     <div class="text-muted font-weight-bold" style="font-size: 13px; letter-spacing: 0.6px;">ALLOCATED</div>
                                     <div class="text-dark font-weight-bold text-right" id="finReviewAllocated" style="font-size: 17px; color: #0f172a !important;">{{ number_format($activeProjectCard['allocation'] ?? 0) }}</div>
@@ -1108,6 +1115,22 @@ textarea::-webkit-scrollbar-thumb:hover {
 
                                 {{-- Separator --}}
                                 <div class="w-100 my-2.5" style="border-top: 1.5px dashed #cbd5e1;"></div>
+                                @else
+                                {{-- Central CSRF Notice --}}
+                                <div class="w-100 p-3 rounded mb-3 text-left shadow-sm" style="background: #f0fdf4; border: 1.5px solid #86efac;">
+                                    <div class="d-flex align-items-start" style="gap: 10px;">
+                                        <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 28px; height: 28px; background: #dcfce7; color: #166534; font-size: 13px;">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-weight-bold rajdhani" style="color: #166534; font-size: 13.5px; letter-spacing: 0.5px;">CENTRAL CSRF ALLOCATION NOTICE</div>
+                                            <div class="text-dark small mt-1 font-weight-medium" style="font-size: 12px; line-height: 1.45;">
+                                                Salaries for centrally hired personnel are determined on a monthly basis under the Central Service Resource Fund (CSRF) allocation.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
 
                                 {{-- Case Cost Summary Header --}}
                                 <div class="d-flex justify-content-between align-items-center w-100 mb-2">
@@ -1440,6 +1463,15 @@ textarea::-webkit-scrollbar-thumb:hover {
                                                             <a href="{{ route('universal.attachment.view', ['module' => 'ctc', 'id' => $cDoc->cat_id]) }}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 font-weight-bold d-inline-flex align-items-center" style="font-size: 11px; height: 22px; border-radius: 4px; gap: 4px;" title="View {{ $cName }}">
                                                                 <i class="fas fa-eye"></i> View
                                                             </a>
+                                                            @if(\App\Http\Controllers\AttachmentController::canManageAttachment(auth()->user(), 'ctc', $case->ctc_id, $cDoc))
+                                                                <label for="replace_ctc_dropdown_{{ $cDoc->cat_id }}" class="btn btn-xs btn-outline-warning py-0 px-1 font-weight-bold mb-0 d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px; cursor: pointer;" title="Replace {{ $cName }}">
+                                                                    <i class="fas fa-sync-alt"></i>
+                                                                </label>
+                                                                <input type="file" id="replace_ctc_dropdown_{{ $cDoc->cat_id }}" style="display:none;" onchange="window.rdwisDropdownReplace('ctc', '{{ $cDoc->cat_id }}', '{{ addslashes($cName) }}', this)">
+                                                                <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1 font-weight-bold d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px;" onclick="window.rdwisDropdownDelete('ctc', '{{ $cDoc->cat_id }}', '{{ addslashes($cName) }}', this)" title="Delete {{ $cName }}">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 @endforeach
@@ -1517,7 +1549,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                                                 </span>
                                             </div>
                                         </div>
-                                        <textarea id="decisionRemarks" class="form-control" placeholder="Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;"></textarea>
+                                        <textarea id="decisionRemarks" class="form-control" placeholder="Para {{ $nextRemarkNumber }}. Type your remarks or scrutiny observations here..." style="background: #ffffff; color: #0f172a; font-family: 'Arial', sans-serif; font-size: 13px; min-height: 110px; height: 110px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); resize: vertical; width: 100%;"></textarea>
                                         
                                         {{-- User Quick Remarks (Custom shortcuts) --}}
                                         <div class="mt-2">
@@ -2029,7 +2061,7 @@ textarea::-webkit-scrollbar-thumb:hover {
                                                 </span>
                                             </div>
                                             <span class="text-muted" style="font-size:10px; font-weight: 600;">
-                                                {{ \Carbon\Carbon::parse($rem->crr_dtg)->format('d M, h:i A') }}
+                                                {{ \Carbon\Carbon::parse($rem->crr_dtg)->format('d M Y, h:i A') }}
                                             </span>
                                         </div>
                                         <div class="mt-2" style="line-height: 1.5; font-size:13px; color: #1e293b !important; padding-left: 5px;">
@@ -2152,12 +2184,35 @@ body.fin-modal-open > .modal-backdrop {
 <div class="modal fade financial-intelligence-modal" id="financialIntelligenceModal_{{ $mKey }}" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1075 !important;">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable my-2" style="max-width: 96%; width: 1420px; z-index: 1076 !important;">
         <div class="modal-content shadow-2xl" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.18);">
-            <div class="modal-header border-bottom py-2.5 px-4 d-flex align-items-center justify-content-between flex-shrink-0" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+            <div class="modal-header border-bottom py-2.5 px-4 d-flex align-items-center justify-content-between flex-shrink-0 flex-wrap" style="background: #f8fafc; border-color: #e2e8f0 !important; gap: 10px;">
                 <div class="d-flex align-items-center flex-grow-1 mr-3">
-                    <div class="mr-3" style="font-size: 26px; color: var(--rd-accent, #5F7858);"><i class="fas fa-chart-line"></i></div>
+                    <div class="mr-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 44px; height: 44px; background: rgba(30,58,138,0.1); font-size: 22px; color: #1e3a8a; flex-shrink: 0;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
                     <div>
-                        <h4 class="modal-title rajdhani font-weight-bold text-dark mb-0" style="letter-spacing: 1.5px; font-size: 19px; font-weight: 800;">FINANCIAL INTELLIGENCE REPORT</h4>
-                        <div class="text-muted rajdhani font-weight-bold mt-0.5" style="font-size: 13px;">{{ $mHead->head_name ?? ($mHead->hed_name ?? ($mCard['prj_code'] ?? 'N/A')) }} | DATED {{ date('d M Y') }} <span class="ml-2 font-weight-bold text-primary">{{ ($mHead->trans_type ?? 1) == 1 ? '(Million PKR without GST)' : '(PKR with GST)' }}</span></div>
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+                            <h4 class="modal-title rajdhani font-weight-bold text-dark mb-0" style="letter-spacing: 1.2px; font-size: 20px; font-weight: 800;">
+                                FINANCIAL INTELLIGENCE REPORT
+                            </h4>
+                            @php
+                                $mCardCode = $mHead->head_code ?? ($mCard['prj_code'] ?? null);
+                            @endphp
+                            @if(!empty($mCardCode) && $mCardCode !== 'Project Not Yet Allocated')
+                                <span class="badge px-3 py-1 font-weight-bold rajdhani text-white shadow-sm" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); font-size: 13.5px; letter-spacing: 0.8px; border-radius: 6px;">
+                                    <i class="fas fa-barcode mr-1.5"></i> HEAD CODE: {{ $mCardCode }}
+                                </span>
+                            @endif
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap mt-1" style="gap: 8px;">
+                            <span class="font-weight-bold rajdhani" style="font-size: 16px; color: #1e293b; letter-spacing: 0.3px;">
+                                <i class="fas fa-project-diagram text-primary mr-1"></i> {{ $mCard['prj_name'] ?? ($mHead->head_name ?? ($mHead->hed_name ?? 'Project')) }}
+                            </span>
+                            <span class="text-muted">|</span>
+                            <span class="text-muted small rajdhani font-weight-bold" style="font-size: 13px;">DATED {{ date('d M Y') }}</span>
+                            <span class="badge badge-light border font-weight-bold rajdhani" style="color: #2563eb; font-size: 11.5px; border-color: #cbd5e1 !important; border-radius: 4px;">
+                                {{ ($mHead->trans_type ?? 1) == 1 ? 'Million PKR without GST' : 'PKR with GST' }}
+                            </span>
+                        </div>
                     </div>
                     <div class="ml-auto d-flex align-items-center mr-2" style="gap: 8px;">
                         @if(!empty($mPrjId))
@@ -2775,6 +2830,16 @@ body.fin-modal-open > .modal-backdrop {
                             </select>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-12 mt-2 mb-1">
+                            <label class="font-weight-bold text-dark small mb-1 rajdhani" style="font-size: 12px; text-transform: uppercase;">
+                                Remarks &amp; Scrutiny Notes <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="modalEmpRemarks" class="form-control" rows="2" style="border-radius: 6px; font-size: 13px;" placeholder="Remarks are required when adding employee record..."></textarea>
+                            <small class="text-muted" style="font-size: 11px;">Pre-filled from the scrutiny action box. You can also view or edit it here.</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer py-2.5 px-4" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px;">
                     <button type="button" class="btn btn-secondary px-3.5 py-1.5 font-weight-bold rajdhani" data-dismiss="modal" style="border-radius: 6px; font-size: 12.5px;">Cancel</button>
@@ -2938,20 +3003,28 @@ $(document).ready(function() {
     const inlineRemarks = document.getElementById('decisionRemarks');
     const btnReturn = document.getElementById('btnReturn');
     const btnForward = document.getElementById('btnForward');
+    const nextRemarkNum = {{ $nextRemarkNumber ?? 1 }};
 
     function getNextLocalNumber() {
-        if (!inlineRemarks) return 2;
+        if (!inlineRemarks) return nextRemarkNum + 1;
         const matches = inlineRemarks.value.match(/^\d+(?=\.)/gm);
         if (matches && matches.length > 0) {
             return Math.max(...matches.map(Number)) + 1;
         }
-        return 2;
+        return nextRemarkNum + 1;
     }
 
     if (inlineRemarks) {
+        const prefix = nextRemarkNum + ". ";
+
+        // Migrate any pre-loaded draft starting with 1. to nextRemarkNum. if nextRemarkNum > 1
+        if (inlineRemarks.value.trim().startsWith('1. ') && nextRemarkNum > 1) {
+            inlineRemarks.value = inlineRemarks.value.replace(/^1\.\s*/, prefix);
+        }
+
         inlineRemarks.addEventListener('focus', function() {
             if (this.value.trim() === '') {
-                this.value = "1. ";
+                this.value = prefix;
                 updateButtonState();
             }
         });
@@ -2990,7 +3063,6 @@ $(document).ready(function() {
         });
 
         inlineRemarks.addEventListener('input', function() {
-            const prefix = "1. ";
             if (!this.value.startsWith(prefix) && this.value.trim() !== '') {
                 const currentVal = this.value;
                 if (currentVal.length < prefix.length) {
@@ -3007,8 +3079,8 @@ $(document).ready(function() {
     function updateButtonState() {
         if (!inlineRemarks) return;
         const currentVal = inlineRemarks.value.trim();
-        const prefix = "1. ";
-        const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== "1.";
+        const prefix = nextRemarkNum + ". ";
+        const hasContent = currentVal.length > 0 && currentVal !== prefix.trim() && currentVal !== (nextRemarkNum + ".");
         if (btnReturn) btnReturn.disabled = !hasContent;
     }
 
@@ -3214,6 +3286,7 @@ $(document).ready(function() {
     // ── Open Add Employee Modal (Strictly Requires Remarks First) ─
     window.openAddEmployeeModal = function() {
         const userRemarks = ($('#decisionRemarks').val() || '').trim();
+        $('#modalEmpRemarks').val(userRemarks);
         if (!userRemarks) {
             Swal.fire({
                 title: 'Remarks Required!',
@@ -3227,20 +3300,23 @@ $(document).ready(function() {
         $('#modalAddEmployee').modal('show');
     };
 
+    $('#modalEmpRemarks').on('input', function() {
+        $('#decisionRemarks').val($(this).val());
+    });
+
     // ── Save Employee via AJAX (Strictly Saves User Remarks) ────────
     $('#formAddEmployee').on('submit', function(e) {
         e.preventDefault();
 
-        const userRemarks = ($('#decisionRemarks').val() || '').trim();
+        const userRemarks = ($('#modalEmpRemarks').val() || $('#decisionRemarks').val() || '').trim();
         if (!userRemarks) {
             Swal.fire({
                 title: 'Remarks Required!',
-                text: 'Please write your remarks in the Action Box above before adding the employee.',
+                text: 'Please write your remarks before adding the employee.',
                 icon: 'warning',
                 confirmButtonColor: '#2563eb'
             });
-            $('#modalAddEmployee').modal('hide');
-            $('#decisionRemarks').focus();
+            $('#modalEmpRemarks').focus();
             return;
         }
 
@@ -3763,6 +3839,13 @@ $(document).on('submit', '#formAddContractCaseAttachment', async function(e) {
                         <a href="${viewUrl}" target="_blank" class="btn btn-xs btn-outline-primary py-0 px-2 font-weight-bold d-inline-flex align-items-center" style="font-size: 11px; height: 22px; border-radius: 4px; gap: 4px;" title="View ${att.title}">
                             <i class="fas fa-eye"></i> View
                         </a>
+                        <label for="replace_ctc_dropdown_${att.id}" class="btn btn-xs btn-outline-warning py-0 px-1 font-weight-bold mb-0 d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px; cursor: pointer;" title="Replace ${att.title}">
+                            <i class="fas fa-sync-alt"></i>
+                        </label>
+                        <input type="file" id="replace_ctc_dropdown_${att.id}" style="display:none;" onchange="window.rdwisDropdownReplace('ctc', '${att.id}', '${att.title.replaceAll("'", "\\'")}', this)">
+                        <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1 font-weight-bold d-inline-flex align-items-center" style="font-size: 10px; height: 22px; border-radius: 4px;" onclick="window.rdwisDropdownDelete('ctc', '${att.id}', '${att.title.replaceAll("'", "\\'")}', this)" title="Delete ${att.title}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 </div>
             `;
@@ -3792,6 +3875,138 @@ $(document).on('submit', '#formAddContractCaseAttachment', async function(e) {
         }
     }
 });
+
+window.rdwisDropdownReplace = window.rdwisDropdownReplace || function(module, id, docType, inputEl) {
+    if (!inputEl.files || !inputEl.files[0]) return;
+    const file = inputEl.files[0];
+
+    const doUpload = () => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('doc_type', docType);
+        formData.append('_token', '{{ csrf_token() }}');
+
+        fetch(`/universal-attachment/${module}/${id}/replace`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            inputEl.value = '';
+            if (data.success) {
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message || `"${docType}" replaced successfully!`,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                throw new Error(data.message || 'Replace failed');
+            }
+        })
+        .catch(err => {
+            inputEl.value = '';
+            if (window.Swal) {
+                Swal.fire({ icon: 'error', title: 'Replace Failed', text: err.message });
+            } else {
+                alert('Error: ' + err.message);
+            }
+        });
+    };
+
+    if (window.Swal) {
+        Swal.fire({
+            title: 'Replace Document?',
+            text: `Are you sure you want to replace "${docType}" with "${file.name}"?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            confirmButtonText: 'Yes, Replace',
+            cancelButtonText: 'Cancel'
+        }).then(r => {
+            if (r.isConfirmed) doUpload();
+            else inputEl.value = '';
+        });
+    } else {
+        if (confirm(`Are you sure you want to replace "${docType}" with "${file.name}"?`)) doUpload();
+        else inputEl.value = '';
+    }
+};
+
+window.rdwisDropdownDelete = window.rdwisDropdownDelete || function(module, id, docType, btnEl) {
+    const doDelete = () => {
+        const originalBtnHtml = btnEl.innerHTML;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+        btnEl.disabled = true;
+
+        fetch(`/universal-attachment/${module}/${id}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ _token: '{{ csrf_token() }}' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const row = btnEl.closest('.d-flex.justify-content-between');
+                if (row) row.remove();
+                const $badge = $('#ctcCaseAttCountBadge');
+                const cur = parseInt($badge.text().trim(), 10) || 1;
+                $badge.text(Math.max(0, cur - 1));
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message || `"${docType}" deleted.`,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            } else {
+                throw new Error(data.message || 'Delete failed');
+            }
+        })
+        .catch(err => {
+            btnEl.innerHTML = originalBtnHtml;
+            btnEl.disabled = false;
+            if (window.Swal) {
+                Swal.fire({ icon: 'error', title: 'Delete Failed', text: err.message });
+            } else {
+                alert('Error: ' + err.message);
+            }
+        });
+    };
+
+    if (window.Swal) {
+        Swal.fire({
+            title: 'Delete Attachment?',
+            text: `Are you sure you want to delete "${docType}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'Yes, Delete',
+            cancelButtonText: 'Cancel'
+        }).then(r => {
+            if (r.isConfirmed) doDelete();
+        });
+    } else {
+        if (confirm(`Are you sure you want to delete "${docType}"?`)) doDelete();
+    }
+};
 </script>
 @endpush
 @endsection

@@ -244,13 +244,18 @@ class FundShiftingController extends Controller
         $user = auth()->user();
         $destinations = $this->shiftingService->getAvailableDestinations($user, $shift);
 
+        $attachments = \Illuminate\Support\Facades\DB::table('ina.inaattachments')
+            ->where('iat_objid', $shift->fsh_id)
+            ->get();
+
         return view('fund_shifting.show', compact(
             'shift',
             'subheads',
             'pastShifts',
             'fromLive',
             'toLive',
-            'destinations'
+            'destinations',
+            'attachments'
         ));
     }
 
@@ -273,7 +278,7 @@ class FundShiftingController extends Controller
         try {
             $this->shiftingService->forward($shift, auth()->user(), $request->remarks, $target, $request->edited_amount);
 
-            return redirect()->route('fund_shifting.show', $shift->fsh_id)
+            return redirect()->route('fund_shifting.index')
                 ->with('success', 'Case file successfully forwarded.');
         } catch (Throwable $e) {
             return back()->with('error', $e->getMessage());
@@ -295,7 +300,7 @@ class FundShiftingController extends Controller
         try {
             $this->shiftingService->approve($shift, auth()->user(), $request->remarks, $request->edited_amount);
 
-            return redirect()->route('fund_shifting.show', $shift->fsh_id)
+            return redirect()->route('fund_shifting.index')
                 ->with('success', 'Fund shifting case approved and routed to IT for implementation.');
         } catch (Throwable $e) {
             return back()->with('error', $e->getMessage());
@@ -317,7 +322,7 @@ class FundShiftingController extends Controller
         try {
             $this->shiftingService->return($shift, auth()->user(), $request->remarks, $request->target_stage);
 
-            return redirect()->route('fund_shifting.show', $shift->fsh_id)
+            return redirect()->route('fund_shifting.index')
                 ->with('success', 'Case file returned.');
         } catch (Throwable $e) {
             return back()->with('error', $e->getMessage());
@@ -338,7 +343,7 @@ class FundShiftingController extends Controller
         try {
             $this->shiftingService->cancel($shift, auth()->user(), $request->remarks);
 
-            return redirect()->route('fund_shifting.show', $shift->fsh_id)
+            return redirect()->route('fund_shifting.index')
                 ->with('success', 'Fund shifting case cancelled.');
         } catch (Throwable $e) {
             return back()->with('error', $e->getMessage());

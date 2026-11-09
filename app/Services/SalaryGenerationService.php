@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CenHead;
 use App\Models\FinCommitment;
 use App\Models\FinSalOrder;
 use App\Models\FinSalOrderShd;
@@ -35,7 +36,7 @@ class SalaryGenerationService
         // Check 1: Future month guard
         $isFutureMonth = Carbon::parse($salMonthDate)->isAfter(Carbon::now()->endOfMonth());
 
-        // Get candidates: active or last date in current month
+        // Get candidates: active, last date in current month, or expired contracts within past 12 months (for terminal clearance)
         $query = DB::table('hr.emps as e')
             ->leftJoin('cen.units as u', 'e.emp_unt_id', '=', 'u.unt_id')
             ->select(
@@ -52,12 +53,14 @@ class SalaryGenerationService
             );
 
         if ($user) {
-            $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
-            $userLower = $isMultiple ? (int)($user->acc_lowerm ?? 100000) : (int)($user->acc_lowers ?? 100000);
-            $userUpper = $isMultiple ? (int)($user->acc_upperm ?? 999999) : (int)($user->acc_uppers ?? 999999);
+            $userArea = strtolower(trim((string)($user->acc_untarea ?? '')));
+            $isCentralUser = in_array($userArea, ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi'], true) || ((int)($user->acc_unt_id ?? 0) >= 800000);
+            $isMultiple = ($user->acc_access ?? '') === 'multiple' || $isCentralUser;
+            $userLower = $isCentralUser ? 100000 : ($isMultiple ? (int)($user->acc_lowerm ?? 100000) : (int)($user->acc_lowers ?? 100000));
+            $userUpper = $isCentralUser ? 999999 : ($isMultiple ? (int)($user->acc_upperm ?? 999999) : (int)($user->acc_uppers ?? 999999));
 
             if ($unitScope !== null) {
-                if ($unitScope < $userLower || $unitScope > $userUpper) {
+                if (!$isCentralUser && ($unitScope < $userLower || $unitScope > $userUpper)) {
                     abort(403, "Access denied. Unit {$unitScope} is outside your assigned division scope.");
                 }
                 $query->where('e.emp_unt_id', $unitScope);
@@ -68,9 +71,17 @@ class SalaryGenerationService
             $query->where('e.emp_unt_id', $unitScope);
         }
 
-        $query->where(function ($q) use ($firstDayOfMonth) {
+        $query->where(function ($q) use ($firstDayOfMonth, $salMonthDate) {
             $q->where('e.emp_status', 'ILIKE', 'Active%')
-              ->orWhere('e.emp_lastdt', '>=', $firstDayOfMonth);
+              ->orWhere('e.emp_lastdt', '>=', $firstDayOfMonth)
+              ->orWhereExists(function ($sub) use ($salMonthDate) {
+                  $pastWindow = Carbon::parse($salMonthDate)->subMonths(12)->toDateString();
+                  $sub->select(DB::raw(1))
+                      ->from('hr.contracts as ctr')
+                      ->join('hr.contractplans as cpn', 'ctr.ctr_id', '=', 'cpn.cpn_ctr_id')
+                      ->whereColumn('ctr.ctr_num', 'e.emp_id')
+                      ->where('cpn.cpn_enddt', '>=', $pastWindow);
+              });
         });
 
         $candidates = $query->orderBy('e.emp_id')->get();
@@ -92,14 +103,24 @@ class SalaryGenerationService
                 continue;
             }
 
-            // Check 2: Already Generated duplicate guard
-            $alreadyExists = DB::table('hr.salreqs')
+            // Check 2: Already Generated duplicate guard (checks direct requisitions and past months settled in arrears)
+            $paidMonths = app(\App\Services\AttendanceService::class)->getPaidMonthsForEmployee($emp->emp_id);
+            $targetMonthStr = \Carbon\Carbon::parse($salMonthDate)->format('Y-m');
+
+            $regularAlreadyExists = in_array($targetMonthStr, $paidMonths, true) || DB::table('hr.salreqs')
                 ->where('srq_emp_id', $emp->emp_id)
                 ->where('srq_month', $salMonthDate)
                 ->whereIn('srq_status', ['Draft', 'In Process', 'Fulfilled'])
+                ->where(function($q) {
+                    $q->where('srq_grosalary', '>', 0)
+                      ->orWhere(function($sub) {
+                          $sub->whereNull('srq_remarks2')
+                              ->orWhereNotIn('srq_remarks2', ['ARREARS_ONLY', 'CLEARANCE']);
+                      });
+                })
                 ->exists();
 
-            if ($alreadyExists) {
+            if ($regularAlreadyExists) {
                 $excluded[] = [
                     'employee' => $emp,
                     'reason'   => 'Already Generated',
@@ -108,22 +129,58 @@ class SalaryGenerationService
             }
 
             // Check 3: Active contract/plan check (via FIS getSalaryMatrix)
-            // If employee has no active contract or contract plan, completely omit them from the list
             $matrix = $this->fis->getSalaryMatrix($emp->emp_id, $salMonthDate);
-            if (empty($matrix) || !isset($matrix[11])) {
-                continue;
-            }
-
-            // Check group rows (8, 9, ...)
+            $isExpiredClearance = false;
             $groupRows = [];
-            for ($i = 8; $i <= 10; $i++) {
-                if (isset($matrix[$i])) {
-                    $groupRows[$i] = $matrix[$i];
+
+            if (!empty($matrix)) {
+                for ($i = 8; $i <= 10; $i++) {
+                    if (isset($matrix[$i])) {
+                        $groupRows[$i] = $matrix[$i];
+                    }
                 }
             }
 
+            // If employee has NO active contract rows in the current month, check if they have past pending dues (Expired Contract Clearance)
             if (empty($groupRows)) {
-                continue;
+                $duesCheck = (float) $this->fis->calculateArrDues($emp->emp_id, $salMonthDate);
+                if ($duesCheck > 0) {
+                    $lastContract = DB::table('hr.contracts as ctr')
+                        ->leftJoin('hr.contractplans as cpn', 'ctr.ctr_id', '=', 'cpn.cpn_ctr_id')
+                        ->where('ctr.ctr_num', $emp->emp_id)
+                        ->orderByDesc('cpn.cpn_enddt')
+                        ->orderByDesc('ctr.ctr_id')
+                        ->select('ctr.ctr_id', 'ctr.ctr_salary', 'ctr.ctr_grade', 'cpn.cpn_hed_id')
+                        ->first();
+
+                    if ($lastContract) {
+                        $effHead = DB::table('fin.empeffheads')->where('eeh_emp_id', $emp->emp_id)->first();
+                        $effHedId = ($effHead && $effHead->eeh_emphed_id) ? (int)$effHead->eeh_emphed_id : ($lastContract->cpn_hed_id ?: (int)$emp->emp_hed_id);
+                        $sudoHed = ($effHead && !empty($effHead->eeh_sudohed)) ? $effHead->eeh_sudohed : null;
+                        $effHedStr = $effHedId . ($sudoHed ? ' ' . $sudoHed : '');
+
+                        $groupRows = [
+                            8 => [
+                                'type'            => 1,
+                                'ctr_id'          => $lastContract->ctr_id,
+                                'effhed_id'       => $effHedStr,
+                                'head_id'         => $lastContract->cpn_hed_id ?: (int)$emp->emp_hed_id,
+                                'salary'          => (float)$lastContract->ctr_salary,
+                                'prorated_salary' => 0.0,
+                                'start'           => null,
+                                'end'             => null,
+                                'underwork'       => 0.0,
+                                'absent'          => 0,
+                                'unpaid'          => 0,
+                            ]
+                        ];
+                        $isExpiredClearance = true;
+                    } else {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
             }
 
             // Check 4: Salary Head check
@@ -204,25 +261,175 @@ class SalaryGenerationService
                 ->whereIn('sor_status', ['Draft', 'In Process'])
                 ->sum('sor_salary');
 
+            // In-month standalone arrears requisitions (already created in draft/in process/fulfilled in hr.salreqs)
+            $existingInMonthArrears = (float) DB::table('hr.salreqs')
+                ->where('srq_emp_id', $emp->emp_id)
+                ->where('srq_month', $salMonthDate)
+                ->whereIn('srq_status', ['Draft', 'In Process', 'Fulfilled'])
+                ->where(function($q) {
+                    $q->whereIn('srq_remarks2', ['ARREARS_ONLY', 'CLEARANCE'])
+                      ->orWhereIn('srq_sudohed', ['ARREAR', 'CLEARANCE']);
+                })
+                ->sum('srq_salary');
+
+            $netArrearsDue = max(0.0, $dues - $existingInMonthArrears);
+
+            // Attendance Completeness Evaluation (Days 1..25)
+            $unmarkedDetails = [];
+            $totalEmptyCount = 0;
+            $joinDt = !empty($emp->emp_joindt) ? Carbon::parse($emp->emp_joindt) : null;
+
+            if (!$isExpiredClearance) {
+                // a. Check previous month (26th to end of month)
+                $prevMonthDate = Carbon::parse($firstDayOfMonth)->subMonth()->format('Y-m-01');
+                $prevDaysInMonth = (int) Carbon::parse($prevMonthDate)->daysInMonth;
+
+                if (!$joinDt || $joinDt->lte(Carbon::parse($prevMonthDate)->endOfMonth())) {
+                    $prevAttRecord = DB::table('hr.attendance')
+                        ->where('att_emp_id', $emp->emp_id)
+                        ->where('att_startdt', $prevMonthDate)
+                        ->first();
+
+                    if ($prevAttRecord) {
+                        $prevEmptyDays = [];
+                        $isPrevJoinMonth = $joinDt && ($joinDt->format('Y-m') === Carbon::parse($prevMonthDate)->format('Y-m'));
+                        $prevJoinDay = $isPrevJoinMonth ? (int)$joinDt->format('j') : 1;
+
+                        for ($d = 26; $d <= $prevDaysInMonth; $d++) {
+                            $dayDt = Carbon::parse($prevMonthDate)->copy()->addDays($d - 1);
+                            if ($isPrevJoinMonth && $d < $prevJoinDay) continue;
+                            if ($dayDt->isWeekend()) continue;
+                            $col = 'att_' . $d;
+                            $val = isset($prevAttRecord->$col) && $prevAttRecord->$col !== null ? trim($prevAttRecord->$col) : '';
+                            if ($val === '' || $val === 'Q') {
+                                $prevEmptyDays[] = $d;
+                            }
+                        }
+
+                        if (!empty($prevEmptyDays)) {
+                            $prevMonthName = Carbon::parse($prevMonthDate)->format('M');
+                            $unmarkedDetails[] = $this->formatDayRanges($prevEmptyDays, $prevMonthName);
+                            $totalEmptyCount += count($prevEmptyDays);
+                        }
+                    }
+                }
+
+                // b. Check current month (1st through 25th cutoff)
+                $attRecord = DB::table('hr.attendance')
+                    ->where('att_emp_id', $emp->emp_id)
+                    ->where('att_startdt', $firstDayOfMonth)
+                    ->first();
+
+                if ($attRecord) {
+                    $emptyDayNumbers = [];
+                    $cutoffDay = min(25, (int) Carbon::parse($salMonthDate)->daysInMonth);
+                    $isJoiningMonth = $joinDt && ($joinDt->format('Y-m') === Carbon::parse($firstDayOfMonth)->format('Y-m'));
+                    $joinDayOfMonth = $isJoiningMonth ? (int)$joinDt->format('j') : 1;
+
+                    for ($d = 1; $d <= $cutoffDay; $d++) {
+                        $dayDt = Carbon::parse($firstDayOfMonth)->copy()->addDays($d - 1);
+                        if ($isJoiningMonth && $d < $joinDayOfMonth) continue;
+                        if ($dayDt->isWeekend()) continue;
+                        $col = 'att_' . $d;
+                        $val = isset($attRecord->$col) && $attRecord->$col !== null ? trim($attRecord->$col) : '';
+                        if ($val === '' || $val === 'Q') {
+                            $emptyDayNumbers[] = $d;
+                        }
+                    }
+
+                    if (!empty($emptyDayNumbers)) {
+                        $currMonthName = Carbon::parse($salMonthDate)->format('M');
+                        $unmarkedDetails[] = $this->formatDayRanges($emptyDayNumbers, $currMonthName);
+                        $totalEmptyCount += count($emptyDayNumbers);
+                    }
+                } else {
+                    $totalEmptyCount += 25;
+                    $unmarkedDetails[] = "01-25 " . Carbon::parse($salMonthDate)->format('M');
+                }
+            }
+
+            // AUTOMATIC MODE RESOLUTION:
+            if ($isExpiredClearance) {
+                // Expired contract with pending arrears => Terminal Clearance
+                if (round($netArrearsDue, 0) <= 0) {
+                    continue;
+                }
+                $isArrearsRun = true;
+                $candRemarks2 = 'CLEARANCE';
+            } elseif ($totalEmptyCount > 0) {
+                // Attendance is incomplete (before 25th):
+                // If they have positive arrears => automatically qualify for Arrears-Only!
+                if (round($netArrearsDue, 0) > 0) {
+                    $arrearsReqOpen = DB::table('hr.salreqs')
+                        ->where('srq_emp_id', $emp->emp_id)
+                        ->where('srq_month', $salMonthDate)
+                        ->whereIn('srq_status', ['Draft', 'In Process'])
+                        ->whereIn('srq_remarks2', ['ARREARS_ONLY', 'CLEARANCE'])
+                        ->exists();
+
+                    if ($arrearsReqOpen) {
+                        $excluded[] = [
+                            'employee' => $emp,
+                            'reason'   => 'Already Generated (Arrears Requisition Open)',
+                        ];
+                        continue;
+                    }
+
+                    $isArrearsRun = true;
+                    $candRemarks2 = 'ARREARS_ONLY';
+                } else {
+                    // No arrears to pay early, and attendance incomplete => Excluded
+                    $dateRanges = implode(', ', $unmarkedDetails);
+                    $dayWord = $totalEmptyCount === 1 ? 'day' : 'days';
+                    $excluded[] = [
+                        'employee' => $emp,
+                        'reason'   => "Attendance Incomplete ({$totalEmptyCount} {$dayWord} unmarked: {$dateRanges})",
+                    ];
+                    continue;
+                }
+            } else {
+                // Attendance is complete (25th reached!) => Regular Monthly Payroll
+                $isArrearsRun = false;
+                $candRemarks2 = null;
+            }
+
             $totalNetSalary = 0;
             $breakdown = [];
 
             foreach ($groupRows as $idx => $g) {
-                $gross = (float) round($g['prorated_salary'], 0);
-                $underwork = (float) $g['underwork'];
-                $overwork = 0.0;
-                $award = 0.0;
-                $penalty = 0.0;
-                $withheld = 0.0;
-                $loaned = 0.0;
+                if ($isArrearsRun) {
+                    $gross = 0.0;
+                    $underwork = 0.0;
+                    $overwork = 0.0;
+                    $award = 0.0;
+                    $penalty = 0.0;
+                    $withheld = 0.0;
+                    $loaned = 0.0;
+                    $arrears = ($idx === 8) ? $netArrearsDue : 0.0;
+                    $dueDeduction = 0.0;
+                    $paidAlr = 0.0;
+                    $inProc = 0.0;
+                    $net = $arrears;
+                    $finalSal = $net;
+                    $candRemarks2 = $isExpiredClearance ? 'CLEARANCE' : 'ARREARS_ONLY';
+                } else {
+                    $gross = (float) round($g['prorated_salary'], 0);
+                    $underwork = (float) $g['underwork'];
+                    $overwork = 0.0;
+                    $award = 0.0;
+                    $penalty = 0.0;
+                    $withheld = 0.0;
+                    $loaned = 0.0;
 
-                $arrears = ($idx === 8 && $dues > 0) ? $dues : 0.0;
-                $dueDeduction = ($idx === 8 && $dues < 0) ? abs($dues) : 0.0;
-                $paidAlr = ($idx === 8) ? $paidAlready : 0.0;
-                $inProc = ($idx === 8) ? $inProcess : 0.0;
+                    $arrears = ($idx === 8 && $netArrearsDue > 0) ? $netArrearsDue : 0.0;
+                    $dueDeduction = ($idx === 8 && $dues < 0) ? abs($dues) : 0.0;
+                    $paidAlr = ($idx === 8) ? $paidAlready : 0.0;
+                    $inProc = ($idx === 8) ? $inProcess : 0.0;
 
-                $net = $gross + $overwork - $underwork + $award - $penalty + $arrears - $dueDeduction - $paidAlr - $inProc;
-                $finalSal = $net - $withheld + $loaned;
+                    $net = $gross + $overwork - $underwork + $award - $penalty + $arrears - $dueDeduction - $paidAlr - $inProc;
+                    $finalSal = $net - $withheld + $loaned;
+                    $candRemarks2 = null;
+                }
 
                 $totalNetSalary += $finalSal;
 
@@ -257,11 +464,24 @@ class SalaryGenerationService
 
                 $effUntId = (int) DB::table('cen.heads')->where('hed_id', $effHedId)->value('hed_unt_id');
 
-                $objection = $this->checkObjectionsOnExp($effHedId, $g['head_id'] ?? $emp->emp_hed_id, $sudoHed, $finalSal);
+                $forHedId = !empty($g['head_id']) ? (int)$g['head_id'] : ($effHedId ?: (int)$emp->emp_hed_id);
+                $objection = $this->checkObjectionsOnExp($effHedId, $forHedId, $sudoHed, $finalSal);
 
                 $ctrGrade = !empty($g['ctr_id']) 
                     ? (DB::table('hr.contracts')->where('ctr_id', (int)$g['ctr_id'])->value('ctr_grade') ?: $emp->emp_grade)
                     : $emp->emp_grade;
+
+                $ctrRow = !empty($g['ctr_id']) ? DB::table('hr.contracts')->where('ctr_id', (int)$g['ctr_id'])->first() : null;
+                $isProbation = false;
+                $probSal = null;
+                if ($ctrRow && !empty($ctrRow->ctr_prob) && !empty($ctrRow->ctr_startdt)) {
+                    $probMonths = (int)$ctrRow->ctr_prob;
+                    $probEnd = Carbon::parse($ctrRow->ctr_startdt)->addMonths($probMonths)->subDay()->toDateString();
+                    if ($salMonthDate <= $probEnd || (Carbon::parse($salMonthDate)->startOfMonth()->toDateString() <= $probEnd)) {
+                        $isProbation = true;
+                        $probSal = !empty($ctrRow->ctr_probsal) ? (float)$ctrRow->ctr_probsal : null;
+                    }
+                }
 
                 $breakdown[] = [
                     'group_idx'       => $idx,
@@ -273,6 +493,8 @@ class SalaryGenerationService
                     'ctrsalary'       => (int) round($g['salary'], 0),
                     'grosalary'       => (int) round($gross, 0),
                     'netsalary'       => (int) round($net, 0),
+                    'is_probation'    => $isProbation,
+                    'probsalary'      => $probSal,
                     'unpaiddays'      => (float) ($g['absent'] + $g['unpaid']),
                     'underwork'       => (int) round($underwork, 0),
                     'overwork'        => (int) round($overwork, 0),
@@ -286,13 +508,14 @@ class SalaryGenerationService
                     'effhed_id'       => $effHedId,
                     'effunt_id'       => $effUntId,
                     'sudohed'         => $sudoHed,
-                    'hed_id'          => $g['head_id'] ?? $emp->emp_hed_id,
+                    'hed_id'          => !empty($g['head_id']) ? (int)$g['head_id'] : ($effHedId ?: $emp->emp_hed_id),
                     'empnamecomp'     => $emp->emp_name,
                     'bnkaccdetail'    => $bankDetail,
                     'bnkacctitle'     => $bankTitle,
                     'absent'          => $g['absent'],
                     'unpaid'          => $g['unpaid'],
                     'budget_objection'=> $objection,
+                    'remarks2'        => $candRemarks2,
                 ];
             }
 
@@ -312,7 +535,9 @@ class SalaryGenerationService
                 'total_salary'     => (int) round($totalNetSalary, 0),
                 'breakdown'        => $breakdown,
                 'budget_objection' => !empty($candObjections) ? implode('; ', $candObjections) : null,
-                'matrix_summary'   => $matrix[11],
+                'matrix_summary'   => $matrix[11] ?? null,
+                'generation_type'  => $isExpiredClearance ? 'clearance' : ($isArrearsRun ? 'arrears_only' : 'regular'),
+                'is_arrears_only'  => $isArrearsRun,
             ];
         }
 
@@ -341,23 +566,27 @@ class SalaryGenerationService
      */
     public function generateSalary(string $salMonth, array $empIds, Authenticatable $user): array
     {
-        $isMultiple = ($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin';
-        $userLower = $isMultiple ? (int)($user->acc_lowerm ?? 100000) : (int)($user->acc_lowers ?? 100000);
-        $userUpper = $isMultiple ? (int)($user->acc_upperm ?? 999999) : (int)($user->acc_uppers ?? 999999);
+        $userArea = strtolower(trim((string)($user->acc_untarea ?? '')));
+        $isCentralUser = in_array($userArea, ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi'], true) || ((int)($user->acc_unt_id ?? 0) >= 800000);
+        $isMultiple = ($user->acc_access ?? '') === 'multiple' || $isCentralUser;
+        $userLower = $isCentralUser ? 100000 : ($isMultiple ? (int)($user->acc_lowerm ?? 100000) : (int)($user->acc_lowers ?? 100000));
+        $userUpper = $isCentralUser ? 999999 : ($isMultiple ? (int)($user->acc_upperm ?? 999999) : (int)($user->acc_uppers ?? 999999));
 
-        $outOfBounds = DB::table('hr.emps')
-            ->whereIn('emp_id', $empIds)
-            ->where(function ($q) use ($userLower, $userUpper) {
-                $q->where('emp_unt_id', '<', $userLower)
-                  ->orWhere('emp_unt_id', '>', $userUpper);
-            })
-            ->exists();
+        if (!$isCentralUser) {
+            $outOfBounds = DB::table('hr.emps')
+                ->whereIn('emp_id', $empIds)
+                ->where(function ($q) use ($userLower, $userUpper) {
+                    $q->where('emp_unt_id', '<', $userLower)
+                      ->orWhere('emp_unt_id', '>', $userUpper);
+                })
+                ->exists();
 
-        if ($outOfBounds) {
-            abort(403, 'Unauthorized. One or more selected employees are outside your division unit scope.');
+            if ($outOfBounds) {
+                abort(403, 'Unauthorized. One or more selected employees are outside your division unit scope.');
+            }
         }
 
-        $preview = $this->previewSalary($salMonth, (int) $user->acc_unt_id, $user);
+        $preview = $this->previewSalary($salMonth, null, $user);
         $eligibleMap = collect($preview['included'])->keyBy(fn($item) => $item['employee']->emp_id);
 
         $createdRequisitions = [];
@@ -371,9 +600,16 @@ class SalaryGenerationService
                 $item = $eligibleMap->get($empId);
                 $emp = $item['employee'];
                 $breakdowns = $item['breakdown'];
+                $isSplit = count($breakdowns) > 1;
+                $parentSrqId = null;
 
-                foreach ($breakdowns as $b) {
+                foreach ($breakdowns as $bIdx => $b) {
                     $remarks = $this->buildRemarksString($b);
+
+                    $srqParent = null;
+                    if ($isSplit) {
+                        $srqParent = ($bIdx === 0) ? 0 : $parentSrqId;
+                    }
 
                     $req = HrSalReq::create([
                         'srq_emp_id'       => $emp->emp_id,
@@ -392,6 +628,7 @@ class SalaryGenerationService
                         'srq_bnkaccdetail' => $b['bnkaccdetail'],
                         'srq_bnkacctitle'  => $b['bnkacctitle'],
                         'srq_remarks'      => $remarks ?: null,
+                        'srq_remarks2'     => $b['remarks2'] ?? null,
                         'srq_unpaiddays'   => $b['unpaiddays'],
                         'srq_paidholidays' => 0,
                         'srq_underwork'    => $b['underwork'],
@@ -405,8 +642,12 @@ class SalaryGenerationService
                         'srq_paidalready'  => $b['paidalready'],
                         'srq_sudohed'      => $b['sudohed'],
                         'srq_fulfilment'   => null,
-                        'srq_parent'       => null,
+                        'srq_parent'       => $srqParent,
                     ]);
+
+                    if ($isSplit && $bIdx === 0) {
+                        $parentSrqId = $req->srq_id;
+                    }
 
                     $createdRequisitions[] = $req;
                 }
@@ -505,20 +746,43 @@ class SalaryGenerationService
      */
     public function createSalaryOrders(int $srqId): array
     {
-        return DB::transaction(function () use ($srqId) {
-            $reqs = HrSalReq::where(function ($q) use ($srqId) {
-                $q->where('srq_id', $srqId)
-                  ->orWhere('srq_parent', $srqId);
-            })->orderBy('srq_parent', 'asc')->get();
+        $rootReq = HrSalReq::findOrFail($srqId);
+        $targetId = ($rootReq->srq_parent && $rootReq->srq_parent > 0) ? (int)$rootReq->srq_parent : (int)$rootReq->srq_id;
+
+        return DB::transaction(function () use ($targetId) {
+            $reqs = HrSalReq::where(function ($q) use ($targetId) {
+                $q->where('srq_id', $targetId)
+                  ->orWhere('srq_parent', $targetId);
+            })->orderBy('srq_parent', 'asc')->orderBy('srq_id', 'asc')->get();
 
             if ($reqs->isEmpty()) {
-                throw new \InvalidArgumentException("Salary requisition {$srqId} not found.");
+                throw new \InvalidArgumentException("Salary requisition {$targetId} not found.");
             }
 
             $createdOrders = [];
             $parentSorId = null;
 
+            // Check if master parent order already exists in Draft
+            $existingParentOrder = FinSalOrder::where('sor_srq_id', $targetId)
+                ->where('sor_status', 'Draft')
+                ->first();
+            if ($existingParentOrder) {
+                $parentSorId = $existingParentOrder->sor_id;
+            }
+
             foreach ($reqs as $rf) {
+                // If a draft order already exists for this requisition, reuse it to prevent duplicates
+                $existingOrder = FinSalOrder::where('sor_srq_id', $rf->srq_id)
+                    ->where('sor_status', 'Draft')
+                    ->first();
+                if ($existingOrder) {
+                    if ($rf->srq_parent === 0 || $rf->srq_parent === null) {
+                        $parentSorId = $existingOrder->sor_id;
+                    }
+                    $createdOrders[] = $existingOrder;
+                    continue;
+                }
+
                 $head = DB::table('cen.heads')->where('hed_id', $rf->srq_effhed_id)->first();
                 $transType = $head ? ($head->hed_transtype ?? 1) : 1;
                 $noLoan = (is_null($rf->srq_hed_id) || $rf->srq_sudohed === 'CHRF') ? true : false;
@@ -546,7 +810,7 @@ class SalaryGenerationService
                     'sor_contracts'    => $rf->srq_contracts,
                     'sor_status'       => 'Draft',
                     'sor_remarks'      => $rf->srq_remarks,
-                    'sor_remarks2'     => null,
+                    'sor_remarks2'     => $rf->srq_remarks2,
                     'sor_transtype'    => $transType,
                     'sor_grosalary'    => $rf->srq_grosalary,
                     'sor_arrears'      => $rf->srq_arrears,
@@ -568,8 +832,8 @@ class SalaryGenerationService
                     $parentSorId = $order->sor_id;
                 }
 
-                // Subhead ratio for project employees (when srq_hed_id is not null)
-                if (!is_null($rf->srq_hed_id)) {
+                // Subhead ratio strictly for project employees (never for CSRF/CHRF salaries)
+                if (!is_null($rf->srq_hed_id) && $rf->srq_sudohed !== 'CHRF') {
                     FinSalOrderShd::create([
                         'sod_sor_id'  => $order->sor_id,
                         'sod_type'    => 'Sa',
@@ -729,17 +993,17 @@ class SalaryGenerationService
      * FIX ITEM 4: Resolves to group root parent so child-initiated cancellation cascades to parent and siblings.
      * ALL-OR-NOTHING GROUP CHECK: Pre-flight check rejects entire group with 422 if ANY member is Fulfilled or has a Paid commitment.
      */
-    public function cancelOrder(int $sorId): array
+    public function cancelOrder(int $sorId, ?string $reason = null): array
     {
         $initialOrder = FinSalOrder::findOrFail($sorId);
 
         if ($initialOrder->sor_parent && $initialOrder->sor_parent > 0) {
-            abort(422, 'This requisition cannot be cancelled directly. Please cancel the parent requisition.');
+            abort(422, 'This requisition cannot be returned directly. Please return the parent requisition.');
         }
 
         $targetId = (int) $initialOrder->sor_id;
 
-        return DB::transaction(function () use ($targetId) {
+        return DB::transaction(function () use ($targetId, $reason) {
             $orders = FinSalOrder::where(function ($q) use ($targetId) {
                 $q->where('sor_id', $targetId)
                   ->orWhere('sor_parent', $targetId);
@@ -753,7 +1017,7 @@ class SalaryGenerationService
             // If ANY order in the group is Fulfilled or linked commitment is Paid, reject entire group with 422.
             foreach ($orders as $order) {
                 if ($order->sor_status === 'Fulfilled') {
-                    abort(422, "Cannot cancel salary order group: Cannot cancel a fulfilled salary order (order #{$order->sor_id} is already fulfilled).");
+                    abort(422, "Cannot return salary order group: Cannot return a fulfilled salary order (order #{$order->sor_id} is already fulfilled).");
                 }
 
                 $paidCommitment = FinCommitment::where('cmt_docid', $order->sor_id)
@@ -762,17 +1026,23 @@ class SalaryGenerationService
                     ->first();
 
                 if ($paidCommitment) {
-                    abort(422, "Cannot cancel salary order group: Cannot cancel an order whose commitment has already been paid (commitment #{$paidCommitment->cmt_id} for order #{$order->sor_id} is paid).");
+                    abort(422, "Cannot return salary order group: Cannot return an order whose commitment has already been paid (commitment #{$paidCommitment->cmt_id} for order #{$order->sor_id} is paid).");
                 }
             }
 
             $cancelledCommitments = [];
 
             foreach ($orders as $order) {
-                // 1. Reset requisition fulfillment
+                // 1. Revert requisition back to division in Draft status
+                // This clears it from fin.docs_ipc (In-Process) and restores funds to Remaining balance
                 if ($order->sor_srq_id) {
-                    HrSalReq::where('srq_id', $order->sor_srq_id)->update([
+                    HrSalReq::where(function($q) use ($order) {
+                        $q->where('srq_id', $order->sor_srq_id)
+                          ->orWhere('srq_parent', $order->sor_srq_id);
+                    })->update([
+                        'srq_status'     => 'Draft',
                         'srq_fulfilment' => null,
+                        'srq_releasedtg' => null,
                     ]);
                 }
 
@@ -980,6 +1250,14 @@ class SalaryGenerationService
     {
         $remarks = [];
 
+        if (!empty($b['remarks2'])) {
+            if ($b['remarks2'] === 'ARREARS_ONLY') {
+                $remarks[] = "Arrears Settlement: Past Unpaid Period (Current month regular salary excluded).";
+            } elseif ($b['remarks2'] === 'CLEARANCE') {
+                $remarks[] = "Terminal Arrears Clearance: Contract Ended.";
+            }
+        }
+
         if ($b['arrears'] > 0) {
             $remarks[] = "Arrears - " . number_format($b['arrears']) . ".";
         }
@@ -1011,6 +1289,10 @@ class SalaryGenerationService
         }
         if ($b['withheld'] > 0) {
             $remarks[] = "Withheld - " . number_format($b['withheld']) . ".";
+        }
+        if (!empty($b['is_probation'])) {
+            $probSalPart = !empty($b['probsalary']) ? " (Rs. " . number_format($b['probsalary']) . ")" : "";
+            $remarks[] = "Probation Period{$probSalPart}.";
         }
 
         return trim(implode(' ', $remarks));
@@ -1052,7 +1334,7 @@ class SalaryGenerationService
      * Get paginated salary orders scoped to user's unit bounds.
      * Supports exact sor_status and month filters.
      */
-    public function getOrders(Authenticatable $user, ?string $month = null, ?string $status = null, int $perPage = 25)
+    public function getOrders(Authenticatable $user, ?string $month = null, ?string $status = null, int $perPage = 25, ?string $search = null, array $colFilters = [])
     {
         $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
         $isMultiple = (($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin') && !$isMyDept;
@@ -1061,7 +1343,25 @@ class SalaryGenerationService
 
         $query = FinSalOrder::where(function ($q) use ($lower, $upper) {
             $q->whereBetween('sor_unt_id', [$lower, $upper])
-              ->orWhereBetween('sor_effunt_id', [$lower, $upper]);
+              ->orWhereBetween('sor_effunt_id', [$lower, $upper])
+              ->orWhereExists(function ($sub) use ($lower, $upper) {
+                  $sub->select(DB::raw(1))
+                      ->from('fin.salorders as p')
+                      ->whereColumn('p.sor_id', 'fin.salorders.sor_parent')
+                      ->where(function ($pq) use ($lower, $upper) {
+                          $pq->whereBetween('p.sor_unt_id', [$lower, $upper])
+                            ->orWhereBetween('p.sor_effunt_id', [$lower, $upper]);
+                      });
+              })
+              ->orWhereExists(function ($sub) use ($lower, $upper) {
+                  $sub->select(DB::raw(1))
+                      ->from('fin.salorders as c')
+                      ->whereColumn('c.sor_parent', 'fin.salorders.sor_id')
+                      ->where(function ($cq) use ($lower, $upper) {
+                          $cq->whereBetween('c.sor_unt_id', [$lower, $upper])
+                            ->orWhereBetween('c.sor_effunt_id', [$lower, $upper]);
+                      });
+              });
         })->with(['employee', 'unit', 'effectiveUnit', 'head', 'effectiveHead', 'commitment', 'subheads']);
 
         if (!empty($month)) {
@@ -1079,7 +1379,287 @@ class SalaryGenerationService
             }
         }
 
-        return $query->orderBy('sor_id', 'desc')->paginate($perPage);
+        // Global Search across all relevant columns and relationships
+        if (!empty($search)) {
+            $s = trim($search);
+            $query->where(function ($q) use ($s) {
+                if (is_numeric($s)) {
+                    $q->where('sor_id', (int)$s);
+                }
+                $q->orWhere('sor_emp_id', 'ilike', "%{$s}%")
+                  ->orWhere('sor_empnamecomp', 'ilike', "%{$s}%")
+                  ->orWhere('sor_bnkacctitle', 'ilike', "%{$s}%")
+                  ->orWhere('sor_bnkaccdetail', 'ilike', "%{$s}%")
+                  ->orWhere('sor_remarks', 'ilike', "%{$s}%")
+                  ->orWhere('sor_remarks2', 'ilike', "%{$s}%")
+                  ->orWhereHas('employee', function ($eq) use ($s) {
+                      $eq->where('emp_name', 'ilike', "%{$s}%");
+                  })
+                  ->orWhereHas('head', function ($hq) use ($s) {
+                      $hq->where('hed_code', 'ilike', "%{$s}%")
+                         ->orWhere('hed_name', 'ilike', "%{$s}%");
+                  })
+                  ->orWhereHas('effectiveHead', function ($ehq) use ($s) {
+                      $ehq->where('hed_code', 'ilike', "%{$s}%")
+                          ->orWhere('hed_name', 'ilike', "%{$s}%");
+                  })
+                  ->orWhereHas('unit', function ($uq) use ($s) {
+                      $uq->where('unt_name', 'ilike', "%{$s}%")
+                         ->orWhere('unt_namesh', 'ilike', "%{$s}%");
+                  });
+            });
+        }
+
+        // Column-level Server-side Filters
+        if (!empty($colFilters['col_order'])) {
+            $val = trim($colFilters['col_order']);
+            $query->where(function ($q) use ($val) {
+                if (is_numeric($val)) {
+                    $q->where('sor_id', (int)$val);
+                } else {
+                    $q->whereRaw("CAST(sor_id AS TEXT) ILIKE ?", ["%{$val}%"]);
+                }
+            });
+        }
+        if (!empty($colFilters['col_emp'])) {
+            $val = trim($colFilters['col_emp']);
+            $query->where(function ($q) use ($val) {
+                $q->where('sor_emp_id', 'ilike', "%{$val}%")
+                  ->orWhere('sor_empnamecomp', 'ilike', "%{$val}%")
+                  ->orWhereHas('employee', function ($eq) use ($val) {
+                      $eq->where('emp_name', 'ilike', "%{$val}%");
+                  });
+            });
+        }
+        if (!empty($colFilters['col_dept'])) {
+            $val = trim($colFilters['col_dept']);
+            $query->where(function ($q) use ($val) {
+                $q->whereHas('head', function ($hq) use ($val) {
+                    $hq->where('hed_code', 'ilike', "%{$val}%")->orWhere('hed_name', 'ilike', "%{$val}%");
+                })->orWhereHas('effectiveHead', function ($ehq) use ($val) {
+                    $ehq->where('hed_code', 'ilike', "%{$val}%")->orWhere('hed_name', 'ilike', "%{$val}%");
+                })->orWhereHas('unit', function ($uq) use ($val) {
+                    $uq->where('unt_namesh', 'ilike', "%{$val}%")->orWhere('unt_name', 'ilike', "%{$val}%");
+                });
+            });
+        }
+        if (!empty($colFilters['col_cont'])) {
+            $val = str_replace([',', ' '], '', trim($colFilters['col_cont']));
+            if (is_numeric($val)) {
+                $query->where(function ($q) use ($val) {
+                    $q->where('sor_ctrsalary', (float)$val)->orWhere('sor_salary', (float)$val);
+                });
+            }
+        }
+        if (!empty($colFilters['col_calc'])) {
+            $val = str_replace([',', ' '], '', trim($colFilters['col_calc']));
+            if (is_numeric($val)) {
+                $query->where('sor_netsalary', (float)$val);
+            }
+        }
+        if (!empty($colFilters['col_payable'])) {
+            $val = str_replace([',', ' '], '', trim($colFilters['col_payable']));
+            if (is_numeric($val)) {
+                $query->where('sor_salary', (float)$val);
+            }
+        }
+        if (!empty($colFilters['col_account'])) {
+            $val = trim($colFilters['col_account']);
+            $query->where(function ($q) use ($val) {
+                $q->where('sor_bnkaccdetail', 'ilike', "%{$val}%")
+                  ->orWhere('sor_bnkacctitle', 'ilike', "%{$val}%");
+            });
+        }
+        if (!empty($colFilters['col_remarks'])) {
+            $val = trim($colFilters['col_remarks']);
+            $query->where('sor_remarks', 'ilike', "%{$val}%");
+        }
+        if (!empty($colFilters['col_remarks2'])) {
+            $val = trim($colFilters['col_remarks2']);
+            $query->where('sor_remarks2', 'ilike', "%{$val}%");
+        }
+        if (!empty($colFilters['col_status'])) {
+            $val = trim($colFilters['col_status']);
+            $query->where('sor_status', 'ilike', "%{$val}%");
+        }
+        if (!empty($colFilters['col_cmt'])) {
+            $val = trim($colFilters['col_cmt']);
+            $query->whereHas('commitment', function ($cq) use ($val) {
+                $cq->where('cmt_status', 'ilike', "%{$val}%");
+            });
+        }
+
+        // Sorting: Group split orders of the same employee together consecutively
+        return $query->orderBy('sor_month', 'desc')
+                     ->orderBy('sor_emp_id', 'asc')
+                     ->orderByRaw("COALESCE(NULLIF(sor_parent, 0), sor_id) ASC")
+                     ->orderBy('sor_parent', 'asc')
+                     ->orderBy('sor_id', 'asc')
+                     ->paginate($perPage);
+    }
+
+    /**
+     * Get remaining active employees who do NOT have a Draft salary order in Finance for the month.
+     * STRICT REQUIREMENT: Exclude Released and Terminated employees (emp_status must be 'Active').
+     */
+    public function getRemainingEmployees(string $month, Authenticatable $user): array
+    {
+        $isMyDept = method_exists($user, 'isMyDepartmentMode') && $user->isMyDepartmentMode();
+        $isMultiple = (($user->acc_access ?? '') === 'multiple' || strtolower(trim((string)($user->acc_untarea ?? ''))) === 'fin') && !$isMyDept;
+        $lower = $isMultiple ? ($user->acc_lowerm ?? 100000) : ($user->acc_lowers ?? 100000);
+        $upper = $isMultiple ? ($user->acc_upperm ?? 999999) : ($user->acc_uppers ?? 999999);
+
+        $monthDate = Carbon::parse($month)->endOfMonth()->toDateString();
+        $mStart = Carbon::parse($month)->startOfMonth()->toDateString();
+        $cutoffDate = Carbon::parse($month)->startOfMonth()->addDays(24)->toDateString(); // 25th of month
+
+        // 1. Strictly ACTIVE employees only (never Released or Terminated)
+        $activeEmployees = DB::table('hr.emps as e')
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
+            ->whereRaw("LOWER(TRIM(e.emp_status)) = 'active'")
+            ->whereBetween('e.emp_unt_id', [$lower, $upper])
+            ->select('e.emp_id', 'e.emp_name', 'e.emp_unt_id', 'u.unt_name', 'u.unt_namesh')
+            ->orderBy('e.emp_name')
+            ->get();
+
+        // 2. Fetch existing Salary Orders for this month in Finance
+        $orders = FinSalOrder::where('sor_month', $monthDate)
+            ->where(function ($q) use ($lower, $upper) {
+                $q->whereBetween('sor_unt_id', [$lower, $upper])
+                  ->orWhereBetween('sor_effunt_id', [$lower, $upper]);
+            })
+            ->get()
+            ->groupBy('sor_emp_id');
+
+        // 3. Fetch existing Requisitions for this month at Division
+        $reqs = HrSalReq::where('srq_month', $monthDate)
+            ->where(function ($q) use ($lower, $upper) {
+                $q->whereBetween('srq_unt_id', [$lower, $upper])
+                  ->orWhereBetween('srq_effunt_id', [$lower, $upper]);
+            })
+            ->get()
+            ->groupBy('srq_emp_id');
+
+        $remaining = [];
+
+        foreach ($activeEmployees as $emp) {
+            $empOrders = $orders->get($emp->emp_id);
+            $hasDraftOrder = false;
+
+            if ($empOrders && $empOrders->isNotEmpty()) {
+                foreach ($empOrders as $ord) {
+                    if ($ord->sor_status === 'Draft') {
+                        $hasDraftOrder = true;
+                        break;
+                    }
+                }
+            }
+
+            // If employee already has a Draft order in Finance, they are NOT remaining!
+            if ($hasDraftOrder) {
+                continue;
+            }
+
+            // Determine specific reason/status for this active employee
+            $reason = 'Requisition pending generation at Division HR';
+            $category = 'Pending Generation';
+            $badgeClass = 'badge-secondary';
+
+            $firstOrder = $empOrders ? $empOrders->first() : null;
+            $empReqs = $reqs->get($emp->emp_id);
+            $firstReq = $empReqs ? $empReqs->first() : null;
+
+            if ($firstOrder) {
+                if ($firstOrder->sor_status === 'Approved') {
+                    $category = 'Already Approved';
+                    $reason = "Order #{$firstOrder->sor_id} Approved in Finance (Open Tab)";
+                    $badgeClass = 'badge-info';
+                } elseif ($firstOrder->sor_status === 'Fulfilled') {
+                    $category = 'Already Fulfilled';
+                    $reason = "Order #{$firstOrder->sor_id} Fulfilled / Paid (Closed Tab)";
+                    $badgeClass = 'badge-success';
+                } elseif ($firstOrder->sor_status === 'Cancelled') {
+                    $category = 'Cancelled in Finance';
+                    $reason = "Order #{$firstOrder->sor_id} Cancelled in Finance";
+                    $badgeClass = 'badge-danger';
+                }
+            } elseif ($firstReq) {
+                if ($firstReq->srq_status === 'Draft') {
+                    $category = 'Pending Division Release';
+                    $reason = "Requisition #{$firstReq->srq_id} Draft at Division HR (Not Released yet)";
+                    $badgeClass = 'badge-warning text-dark';
+                } elseif ($firstReq->srq_status === 'In Process') {
+                    $category = 'Orders Pending Creation';
+                    $reason = "Requisition #{$firstReq->srq_id} In Process (Finance orders not created yet)";
+                    $badgeClass = 'badge-primary';
+                } elseif ($firstReq->srq_status === 'Cancelled') {
+                    $category = 'Requisition Cancelled';
+                    $reason = "Requisition #{$firstReq->srq_id} Cancelled by Division HR";
+                    $badgeClass = 'badge-dark';
+                }
+            } else {
+                // No requisition generated yet; check contract expiry, attendance, and head status
+                $contract = DB::table('hr.contracts')
+                    ->where('ctr_num', $emp->emp_id)
+                    ->orderBy('ctr_enddt', 'desc')
+                    ->first();
+
+                if (!$contract) {
+                    $category = 'No Contract';
+                    $reason = 'No active service contract found';
+                    $badgeClass = 'badge-danger';
+                } elseif (!empty($contract->ctr_enddt) && Carbon::parse($contract->ctr_enddt)->lt(Carbon::parse($mStart))) {
+                    $category = 'Contract Expired';
+                    $reason = 'Contract expired on ' . Carbon::parse($contract->ctr_enddt)->format('d M Y');
+                    $badgeClass = 'badge-danger';
+                } else {
+                    // Check attendance marked between 1st and 25th
+                    $attRecord = DB::table('hr.attendance')
+                        ->where('att_emp_id', $emp->emp_id)
+                        ->where('att_startdt', $mStart)
+                        ->first();
+
+                    $unmarked = 0;
+                    if (!$attRecord) {
+                        $unmarked = 25;
+                    } else {
+                        for ($d = 1; $d <= 25; $d++) {
+                            $col = 'att_' . $d;
+                            if (empty($attRecord->$col)) {
+                                $unmarked++;
+                            }
+                        }
+                    }
+
+                    if ($unmarked > 0) {
+                        $category = 'Attendance Incomplete';
+                        $reason = "Attendance incomplete ({$unmarked} unmarked days between 1st & 25th)";
+                        $badgeClass = 'badge-warning text-dark';
+                    } else {
+                        // Check salary head
+                        $hasHead = DB::table('fin.empeffheads')->where('eeh_emp_id', $emp->emp_id)->exists()
+                            || ($contract && !empty($contract->ctr_hed_id));
+                        if (!$hasHead) {
+                            $category = 'Head Not Set';
+                            $reason = 'Project Salary Head not assigned';
+                            $badgeClass = 'badge-dark';
+                        }
+                    }
+                }
+            }
+
+            $remaining[] = [
+                'emp_id'      => $emp->emp_id,
+                'name'        => $emp->emp_name,
+                'designation' => $emp->emp_desig ?? 'Staff',
+                'division'    => $emp->unt_namesh ?? ($emp->unt_name ?? 'Division'),
+                'category'    => $category,
+                'reason'      => $reason,
+                'badge_class' => $badgeClass,
+            ];
+        }
+
+        return $remaining;
     }
 
     /**
@@ -1150,5 +1730,178 @@ class SalaryGenerationService
             'verified'       => $verified,
             'missing'        => $missing,
         ];
+    }
+
+    /**
+     * Split salary requisition across heads (Legacy hr_salreq_split.bas).
+     *
+     * @param int $srqId
+     * @param float $parentSalary Adjusted salary for the parent requisition
+     * @param array $splits Array of ['effhed_id' => int, 'salary' => float]
+     * @param Authenticatable $user
+     * @return array
+     */
+    public function splitRequisition(int $srqId, float $parentSalary, array $splits, Authenticatable $user): array
+    {
+        $parentReq = HrSalReq::findOrFail($srqId);
+
+        if ($parentReq->srq_status !== 'Draft') {
+            abort(422, "Cannot split requisition #{$srqId} with status '{$parentReq->srq_status}'. Only 'Draft' requisitions can be split.");
+        }
+
+        if ($parentReq->srq_parent !== null && (int)$parentReq->srq_parent > 0) {
+            abort(422, "Cannot split a child requisition directly. Only parent requisitions can be split.");
+        }
+
+        if (empty($splits)) {
+            abort(422, "At least one split head and amount is required.");
+        }
+
+        $totalOriginal = (float)$parentReq->srq_salary;
+        $splitSum = 0.0;
+        foreach ($splits as $s) {
+            $amt = (float)($s['salary'] ?? 0);
+            if ($amt <= 0) {
+                abort(422, "Each split amount must be greater than zero.");
+            }
+            if (empty($s['effhed_id'])) {
+                abort(422, "Head selection is mandatory for each split row.");
+            }
+            $splitSum += $amt;
+        }
+
+        if ($parentSalary <= 0) {
+            abort(422, "Remaining amount for the parent requisition must be greater than zero.");
+        }
+
+        if (abs(($parentSalary + $splitSum) - $totalOriginal) > 0.01) {
+            abort(422, "The sum of parent amount and split portions must equal the original payable amount (" . number_format($totalOriginal, 2) . ").");
+        }
+
+        $isCentral = ($parentReq->srq_unt_id >= 800000 || in_array((int)$parentReq->srq_unt_id, [800000, 810000, 820000, 840000, 860000, 880000], true));
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+
+        // Pre-validate heads, CSRF eligibility, and available balances
+        foreach ($splits as $s) {
+            $headId = (int)$s['effhed_id'];
+            $amt = (float)($s['salary'] ?? 0);
+            $head = CenHead::find($headId);
+            if (!$head) {
+                abort(422, "Invalid project/head selected (ID: {$headId}).");
+            }
+
+            if ($isCentral) {
+                $hasCsrf = DB::table('fin.sharesalloc')->where('sha_hed_id', $headId)->where('sha_cf', '>', 0)->exists();
+                if (!$hasCsrf) {
+                    abort(422, "Central Department employee salaries can only be split into CSRF-funded heads. Head [{$head->hed_code}] does not have CSRF allocation.");
+                }
+            }
+
+            $headStatus = $finService->getHeadStatus($headId);
+            $avail = $isCentral 
+                ? (float)($headStatus->cf_available ?? ($headStatus['cf_available'] ?? 0)) 
+                : (float)($headStatus->pcc_available ?? ($headStatus->available ?? ($headStatus['pcc_available'] ?? ($headStatus['available'] ?? 0))));
+
+            if ($amt > $avail) {
+                abort(422, "Insufficient funds in head [{$head->hed_code}]. Available balance is Rs. " . number_format($avail, 2) . ", but requested split is Rs. " . number_format($amt, 2) . ".");
+            }
+        }
+
+        return DB::transaction(function () use ($parentReq, $parentSalary, $splits, $isCentral) {
+            // 1. Update Parent Requisition
+            $parentReq->srq_salary = (int)round($parentSalary);
+            $parentReq->srq_parent = 0; // Legacy convention: 0 indicates parent of split
+            $existingRemarks = trim((string)$parentReq->srq_remarks);
+            $splitRemark = $isCentral ? 'Split Salary. (CSRF)' : 'Split Salary.';
+            $parentReq->srq_remarks = $existingRemarks !== '' 
+                ? (str_contains($existingRemarks, 'Split Salary.') ? $existingRemarks : $existingRemarks . ' ' . $splitRemark)
+                : $splitRemark;
+            $parentReq->save();
+
+            // 2. Insert Child Requisitions
+            $createdChildren = [];
+            foreach ($splits as $s) {
+                $headId = (int)$s['effhed_id'];
+                $childAmt = (int)round((float)$s['salary']);
+
+                $head = CenHead::find($headId);
+                $effUnitId = $head ? ($head->hed_unt_id ?: 160000) : 160000;
+                $hedId = !empty($parentReq->srq_hed_id) ? $headId : null;
+
+                $child = HrSalReq::create([
+                    'srq_emp_id'       => $parentReq->srq_emp_id,
+                    'srq_unt_id'       => $parentReq->srq_unt_id,
+                    'srq_hed_id'       => $hedId,
+                    'srq_effhed_id'    => $headId,
+                    'srq_effunt_id'    => $effUnitId,
+                    'srq_month'        => $parentReq->srq_month,
+                    'srq_status'       => 'Draft',
+                    'srq_salary'       => $childAmt,
+                    'srq_empnamecomp'  => $parentReq->srq_empnamecomp,
+                    'srq_ctrsalary'    => $parentReq->srq_ctrsalary,
+                    'srq_grosalary'    => $parentReq->srq_grosalary,
+                    'srq_netsalary'    => $parentReq->srq_netsalary,
+                    'srq_contracts'    => $parentReq->srq_contracts,
+                    'srq_bnkaccdetail' => $parentReq->srq_bnkaccdetail,
+                    'srq_bnkacctitle'  => $parentReq->srq_bnkacctitle,
+                    'srq_remarks'      => $isCentral ? 'Split Salary. (CSRF)' : 'Split Salary.',
+                    'srq_unpaiddays'   => $parentReq->srq_unpaiddays,
+                    'srq_paidholidays' => $parentReq->srq_paidholidays,
+                    'srq_underwork'    => $parentReq->srq_underwork,
+                    'srq_overwork'     => $parentReq->srq_overwork,
+                    'srq_award'        => $parentReq->srq_award,
+                    'srq_penalty'      => $parentReq->srq_penalty,
+                    'srq_loaned'       => $parentReq->srq_loaned,
+                    'srq_withheld'     => $parentReq->srq_withheld,
+                    'srq_arrears'      => $parentReq->srq_arrears,
+                    'srq_dues'         => $parentReq->srq_dues,
+                    'srq_paidalready'  => $parentReq->srq_paidalready,
+                    'srq_sudohed'      => $parentReq->srq_sudohed,
+                    'srq_fulfilment'   => null,
+                    'srq_parent'       => $parentReq->srq_id, // Link to parent
+                    'srq_remarks2'     => null,
+                ]);
+
+                $createdChildren[] = $child;
+            }
+
+            return [
+                'parent'   => $parentReq,
+                'children' => $createdChildren,
+            ];
+        });
+    }
+
+    /**
+     * Format list of day numbers into human-readable date ranges.
+     * E.g. [1, 2, 3, 4, 5, 10, 15, 16] -> "1-5 May, 10 May, 15-16 May"
+     *
+     * @param array<int> $days
+     * @param string $monthName
+     * @return string
+     */
+    public function formatDayRanges(array $days, string $monthName): string
+    {
+        if (empty($days)) {
+            return '';
+        }
+        sort($days);
+        $ranges = [];
+        $start = $days[0];
+        $prev = $days[0];
+
+        $count = count($days);
+        for ($i = 1; $i < $count; $i++) {
+            if ($days[$i] === $prev + 1) {
+                $prev = $days[$i];
+            } else {
+                $ranges[] = ($start === $prev) ? "{$start} {$monthName}" : "{$start}-{$prev} {$monthName}";
+                $start = $days[$i];
+                $prev = $days[$i];
+            }
+        }
+        $ranges[] = ($start === $prev) ? "{$start} {$monthName}" : "{$start}-{$prev} {$monthName}";
+
+        return implode(', ', $ranges);
     }
 }

@@ -32,6 +32,7 @@ class NotificationController extends Controller
                 'contract_cases' => $badges['ctr'],
                 'hr'             => $badges['hr'],
                 'hired_emps'     => $badges['hr'],
+                'case_files'     => $badges['gcs'] ?? 0,
             ]
         ]);
     }

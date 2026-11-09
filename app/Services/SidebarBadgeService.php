@@ -175,10 +175,50 @@ class SidebarBadgeService
             $hrCount = $expiringQuery->distinct('c.ctr_num')->count('c.ctr_num');
         }
 
+        // 4. GENERIC CASE FILES (E-OFFICE) PENDING COUNT (Action Required for this user / authority)
+        $gcsCount = 0;
+        try {
+            $uAccId = (int) $user->acc_id;
+            $desigShort = strtoupper(trim((string) ($user->acc_desigshort ?? '')));
+            $desig = strtoupper(trim((string) ($user->acc_desig ?? '')));
+
+            $gcsCount = \App\Models\GenericCase::where(function ($q) use ($user, $uAccId, $area, $desigShort, $desig) {
+                // Drafts created by this user
+                $q->where(function ($dq) use ($uAccId) {
+                    $dq->where('gcs_created_by', $uAccId)->where('gcs_status', 'Draft');
+                })
+                // OR Cases currently assigned directly to this user
+                ->orWhere(function ($fq) use ($uAccId) {
+                    $fq->where('gcs_current_holder_id', $uAccId)
+                       ->whereNotIn('gcs_status', ['Draft', 'Approved', 'Closed', 'Cancelled', 'Rejected']);
+                })
+                // OR Cases forwarded to this officer's authority stage (MD, DDG, DG, DLOG, Finance)
+                ->orWhere(function ($sq) use ($user, $area, $desigShort, $desig) {
+                    $sq->whereNotIn('gcs_status', ['Draft', 'Approved', 'Closed', 'Cancelled', 'Rejected']);
+                    $sq->where(function ($stq) use ($user, $area, $desigShort, $desig) {
+                        if ($user->isFinance() || in_array($area, ['fin', 'finance'], true) || ((int)($user->acc_unt_id ?? 0) === 800000)) {
+                            $stq->whereIn('gcs_current_stage', ['DFin', 'Finance', 'DFIN', 'FINANCE']);
+                        } elseif (in_array($desigShort, ['MD', 'MD RDW'], true) || in_array($area, ['rdw', 'md'], true) || str_contains($desig, 'MANAGING DIRECTOR')) {
+                            $stq->whereIn('gcs_current_stage', ['MD', 'MD RDW']);
+                        } elseif (in_array($desigShort, ['DDG', 'DDG NRDI', 'DDG NRD'], true) || $area === 'hqs' || str_contains($desig, 'DEPUTY DIRECTOR GENERAL')) {
+                            $stq->whereIn('gcs_current_stage', ['DDG', 'DDG NRDI']);
+                        } elseif (in_array($desigShort, ['DG', 'DG NRDI'], true) || in_array($area, ['nrdi', 'dg'], true) || str_contains($desig, 'DIRECTOR GENERAL')) {
+                            $stq->whereIn('gcs_current_stage', ['DG', 'DG NRDI']);
+                        } elseif ($user->isDlog() || in_array($desigShort, ['DLOG'], true) || in_array($area, ['log', 'dlog'], true)) {
+                            $stq->whereIn('gcs_current_stage', ['DLOG', 'DIR LOG']);
+                        } else {
+                            $stq->whereRaw('1=0');
+                        }
+                    });
+                });
+            })->count();
+        } catch (\Throwable $e) {}
+
         return [
             'pur' => (int) $purCount,
             'ctr' => (int) $ctrCount,
             'hr'  => (int) $hrCount,
+            'gcs' => (int) $gcsCount,
         ];
     }
 }

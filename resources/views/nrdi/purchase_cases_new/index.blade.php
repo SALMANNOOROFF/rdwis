@@ -846,62 +846,167 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ── Send to MTSS Toggle Handler (Finance Only) ──
+    // ── Send to MTSS Toggle Handler (Finance Only) with Confirmation & 'unsend' Protection ──
     $(document).on('click', '.btn-mtss-toggle', function(e) {
         e.preventDefault();
         const $btn = $(this);
         const caseId = $btn.data('id');
         const currentSent = parseInt($btn.data('sent') || 0);
-        const targetStatus = currentSent ? 0 : 1;
-        const origHtml = $btn.html();
 
-        $btn.prop('disabled', true).css('opacity', '0.6');
+        function doAjaxToggle(targetStatus, confirmPhrase) {
+            const origHtml = $btn.html();
+            $btn.prop('disabled', true).css('opacity', '0.6').html('<i class="fas fa-spinner fa-spin mr-1"></i> Processing...');
 
-        $.ajax({
-            url: `{{ url('purchase-cases-new') }}/${caseId}/toggle-mtss`,
-            method: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                status: targetStatus
-            },
-            dataType: 'json',
-            success: function(res) {
-                $btn.prop('disabled', false).css('opacity', '1');
-                if (res.success) {
-                    if (res.is_sent) {
-                        $btn.data('sent', 1);
-                        $btn.removeClass('btn-outline-secondary')
-                            .addClass('btn-success')
-                            .css({
-                                'background': '#16a34a',
-                                'border-color': '#16a34a',
-                                'color': '#ffffff'
-                            })
-                            .attr('title', 'Click to revert MTSS status')
-                            .html('<i class="fas fa-check-circle mr-1"></i> Sent to MTSS');
+            $.ajax({
+                url: `{{ url('purchase-cases-new') }}/${caseId}/toggle-mtss`,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    status: targetStatus,
+                    confirm_phrase: confirmPhrase || ''
+                },
+                dataType: 'json',
+                success: function(res) {
+                    $btn.prop('disabled', false).css('opacity', '1');
+                    if (res.success) {
+                        if (res.is_sent) {
+                            $btn.data('sent', 1);
+                            $btn.removeClass('btn-outline-secondary')
+                                .addClass('btn-success')
+                                .css({
+                                    'background': '#16a34a',
+                                    'border-color': '#16a34a',
+                                    'color': '#ffffff'
+                                })
+                                .attr('title', 'Click to revert MTSS status')
+                                .html('<i class="fas fa-check-circle mr-1"></i> Sent to MTSS');
+
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: 'Marked as Sent to MTSS',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            }
+                        } else {
+                            $btn.data('sent', 0);
+                            $btn.removeClass('btn-success')
+                                .addClass('btn-outline-secondary')
+                                .css({
+                                    'background': '#f8fafc',
+                                    'border-color': '#cbd5e1',
+                                    'color': '#475569'
+                                })
+                                .attr('title', 'Click to send documents to MTSS')
+                                .html('<i class="fas fa-paper-plane mr-1 text-secondary"></i> Send to MTSS');
+
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'info',
+                                    title: 'MTSS submission reverted to Unsent',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            }
+                        }
                     } else {
-                        $btn.data('sent', 0);
-                        $btn.removeClass('btn-success')
-                            .addClass('btn-outline-secondary')
-                            .css({
-                                'background': '#f8fafc',
-                                'border-color': '#cbd5e1',
-                                'color': '#475569'
-                            })
-                            .attr('title', 'Click to send documents to MTSS')
-                            .html('<i class="fas fa-paper-plane mr-1 text-secondary"></i> Send to MTSS');
+                        $btn.html(origHtml);
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire('Notice', res.message || 'Failed to update MTSS status.', 'warning');
+                        } else {
+                            alert(res.message || 'Failed to update MTSS status.');
+                        }
                     }
-                } else {
-                    $btn.html(origHtml);
-                    alert(res.message || 'Failed to update MTSS status.');
+                },
+                error: function(xhr) {
+                    $btn.prop('disabled', false).css('opacity', '1').html(origHtml);
+                    const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Error updating MTSS status.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Error', msg, 'error');
+                    } else {
+                        alert(msg);
+                    }
                 }
-            },
-            error: function(xhr) {
-                $btn.prop('disabled', false).css('opacity', '1').html(origHtml);
-                const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Error updating MTSS status.';
-                alert(msg);
+            });
+        }
+
+        if (currentSent === 1) {
+            // Already sent: require typing "unsend"
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Revert MTSS?',
+                    html: '<p class="text-muted small mb-2">Type <strong class="text-danger">unsend</strong> to confirm revert:</p>',
+                    icon: 'warning',
+                    width: '360px',
+                    padding: '1.25rem',
+                    input: 'text',
+                    inputPlaceholder: "unsend",
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocorrect: 'off',
+                        spellcheck: 'false',
+                        class: 'form-control text-center font-weight-bold font-monospace'
+                    },
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Unsend',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true,
+                    preConfirm: (inputValue) => {
+                        const val = (inputValue || '').trim().toLowerCase();
+                        if (val !== 'unsend') {
+                            Swal.showValidationMessage("Type 'unsend' to confirm");
+                            return false;
+                        }
+                        return val;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        doAjaxToggle(0, result.value);
+                    }
+                });
+            } else {
+                const phrase = prompt("Type 'unsend' to confirm revert:");
+                if (phrase && phrase.trim().toLowerCase() === 'unsend') {
+                    doAjaxToggle(0, 'unsend');
+                } else if (phrase !== null) {
+                    alert("Confirmation failed. You must type 'unsend' to revert.");
+                }
             }
-        });
+        } else {
+            // Send to MTSS confirmation
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Send to MTSS?',
+                    text: 'Mark this purchase case as sent to MTSS?',
+                    icon: 'question',
+                    width: '360px',
+                    padding: '1.25rem',
+                    showCancelButton: true,
+                    confirmButtonColor: '#16a34a',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, Send',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        doAjaxToggle(1, '');
+                    }
+                });
+            } else {
+                if (confirm("Mark this case as sent to MTSS?")) {
+                    doAjaxToggle(1, '');
+                }
+            }
+        }
     });
 });
 </script>

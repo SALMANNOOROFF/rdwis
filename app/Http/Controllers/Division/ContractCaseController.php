@@ -306,11 +306,11 @@ class ContractCaseController extends Controller
             ], 422);
         }
 
-        // Hg validation: candidate CNIC mandatory
-        if ($type === 'HG' && empty(trim((string)($validated['ctc_cnic'] ?? '')))) {
+        // Hiring validation: candidate CNIC mandatory for HG, HR, and HN
+        if (in_array($type, ['HG', 'HR', 'HN']) && empty(trim((string)($validated['ctc_cnic'] ?? '')))) {
             return response()->json([
                 'success' => false,
-                'message' => 'Candidate CNIC is mandatory for new hiring cases.'
+                'message' => 'Candidate CNIC is mandatory for hiring cases (HG, HR, HN).'
             ], 422);
         }
 

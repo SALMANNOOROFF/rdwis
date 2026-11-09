@@ -412,6 +412,114 @@ class SupportTicketController extends Controller
     }
 
     /**
+     * Print Complaints Sheet for SO IT (Resolve Desk)
+     */
+    public function printSheet(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isResolver = in_array($userArea, ['it', 'gomoe', 'godmode']) || session('impersonated_by_god');
+
+        if (!$isResolver) {
+            abort(403, 'Unauthorized. The complaints print desk is restricted to SO IT / Resolve Desk.');
+        }
+
+        $query = SupportTicket::with(['user', 'unit', 'solver']);
+
+        // Filter by Status: pending (Open), in_progress, returned, resolved (Resolved/Closed), or all
+        $status = strtolower(trim($request->get('status', 'all')));
+        if ($status && $status !== 'all') {
+            if ($status === 'pending' || $status === 'open') {
+                $query->where('tkt_status', 'Open');
+            } elseif ($status === 'in_progress' || $status === 'work_in_progress' || $status === 'wip') {
+                $query->where('tkt_status', 'In Progress');
+            } elseif ($status === 'returned') {
+                $query->where('tkt_status', 'Returned');
+            } elseif ($status === 'resolved' || $status === 'solved' || $status === 'closed') {
+                $query->whereIn('tkt_status', ['Resolved', 'Closed']);
+            } elseif ($status === 'active') {
+                $query->whereIn('tkt_status', ['Open', 'In Progress', 'Returned']);
+            } else {
+                $query->where('tkt_status', $request->status);
+            }
+        }
+
+        // Filter by Department / Unit
+        if ($request->filled('unt_id') && $request->unt_id !== 'all') {
+            $query->where('tkt_unt_id', $request->unt_id);
+        }
+
+        // Filter by Module
+        if ($request->filled('module') && $request->module !== 'all') {
+            $query->where('tkt_module', $request->module);
+        }
+
+        // Filter by Priority
+        if ($request->filled('priority') && $request->priority !== 'all') {
+            $query->where('tkt_priority', $request->priority);
+        }
+
+        // Date range
+        if ($request->filled('from_date')) {
+            $query->whereDate('tkt_created_at', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('tkt_created_at', '<=', $request->to_date);
+        }
+
+        // Search text
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('tkt_ref', 'ILIKE', "%{$s}%")
+                  ->orWhere('tkt_subject', 'ILIKE', "%{$s}%")
+                  ->orWhere('tkt_description', 'ILIKE', "%{$s}%")
+                  ->orWhere('tkt_user_name', 'ILIKE', "%{$s}%")
+                  ->orWhere('tkt_unt_name', 'ILIKE', "%{$s}%");
+            });
+        }
+
+        $tickets = $query->orderBy('tkt_id', 'desc')->get();
+        $departments = Unit::orderBy('unt_name')->get();
+
+        $counts = [
+            'all'         => SupportTicket::count(),
+            'pending'     => SupportTicket::where('tkt_status', 'Open')->count(),
+            'in_progress' => SupportTicket::where('tkt_status', 'In Progress')->count(),
+            'returned'    => SupportTicket::where('tkt_status', 'Returned')->count(),
+            'resolved'    => SupportTicket::whereIn('tkt_status', ['Resolved', 'Closed'])->count(),
+        ];
+
+        $modules = [
+            'Contract Cases',
+            'Purchase Cases',
+            'HR & Employees',
+            'Finance & Budget',
+            'Projects / MPR',
+            'Inventory & Assets',
+            'Suppliers & Firms',
+            'Accounts & Login',
+            'General / Other',
+        ];
+
+        $userRoleLabel = $this->getUserRoleLabel($user);
+
+        return view('support.tickets.print_sheet', compact(
+            'tickets',
+            'departments',
+            'modules',
+            'status',
+            'counts',
+            'user',
+            'userRoleLabel'
+        ));
+    }
+
+    /**
      * Helper to get user friendly role label
      */
     private function getUserRoleLabel($user): string
