@@ -96,6 +96,7 @@
                             @php $st = request('status','Current'); @endphp
                             <thead class="bg-white text-muted sticky-top shadow-sm" style="z-index: 1; background-color: var(--rd-surface2) !important; border-bottom: 2px solid var(--rd-border);">
                                 <tr>
+                                    <th class="text-center p-2" style="width: 45px; color: var(--rd-text2); font-weight: 700;">#</th>
                                     <th class="text-center p-2 col-eye" style="width: 65px; color: var(--rd-text2); font-weight: 700;"><i class="fas fa-eye mr-1"></i> View</th>
                                     <th class="p-2" style="width: 30%; color: var(--rd-text2);">Name</th>
                                     <th style="width: 15%; color: var(--rd-text2);" class="p-2">Employee ID</th>
@@ -135,6 +136,9 @@
                                     data-name="{{ strtolower($emp->emp_name) }}"
                                     data-id="{{ strtolower($emp->emp_id) }}"
                                     data-status="{{ strtolower($status) }}">
+                                    <td class="align-middle text-center p-2 text-muted font-weight-bold row-sr-no" style="width: 45px; font-size: 0.85rem;">
+                                        {{ $loop->iteration }}
+                                    </td>
                                     <td class="align-middle text-center p-2 col-eye" style="width: 65px;">
                                         <a href="{{ route('divhr.employeedetail', $emp->emp_id) }}" class="btn btn-xs btn-primary font-weight-bold px-2 py-1 shadow-sm" style="border-radius: 4px; font-size: 0.76rem; background-color: var(--rd-accent) !important; border-color: var(--rd-accent) !important; white-space: nowrap;" title="View Profile">
                                             <i class="fas fa-eye mr-1"></i> View
@@ -284,7 +288,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="{{ request('status','Current')==='Previous' ? 8 : 7 }}" class="text-center py-5 text-muted">
+                                    <td colspan="{{ request('status','Current')==='Previous' ? 9 : 8 }}" class="text-center py-5 text-muted">
                                         <i class="fas fa-user-times fa-3x mb-3 d-block text-gray-300"></i>
                                         No employees found.
                                     </td>
@@ -304,13 +308,18 @@ function applyEmpFilters(){
     const term = (document.querySelector('input[name="term"]')?.value || '').toLowerCase();
     const rows = document.querySelectorAll('.employee-row');
     let count = 0;
+    let visibleIndex = 1;
     rows.forEach(r=>{
         const name = r.dataset.name || '';
         const id = r.dataset.id || '';
         let show = true;
         if(term && !(name.includes(term) || id.includes(term))) show = false;
         r.style.display = show ? 'table-row' : 'none';
-        if(show) count++;
+        if(show) {
+            const srCell = r.querySelector('.row-sr-no');
+            if(srCell) srCell.textContent = visibleIndex++;
+            count++;
+        }
     });
     const head = document.getElementById('page-heading');
     const cnt = document.getElementById('emp-count');
