@@ -1,6 +1,6 @@
 {{-- Case File Tab Panel (HR Policy Ammended 2026 - RDWIS 2.0) --}}
 @php
-    $hrformsEnabled = config('hrforms.enabled', false);
+    $hrformsEnabled = \App\Services\HrForms\HrFormsSchema::available();
     $caseFormsCount = $hrformsEnabled ? \Illuminate\Support\Facades\DB::table('hrforms.case_forms')->where('case_id', $case->ctc_id)->count() : 0;
     $canShowTab = $hrformsEnabled && ($caseFormsCount > 0);
 @endphp

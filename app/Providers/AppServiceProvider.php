@@ -27,10 +27,16 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFour();
 
         view()->composer('md.contract-cases.show', function ($view) {
+            $case = $view->getData()['case'];
+
             $service = app(\App\Services\ContractCaseProjectService::class);
-            $projects = $service->allocations($view->getData()['case']);
+            $projects = $service->allocations($case);
             $view->with('allocatedProjects', $projects)
                 ->with('projectHiredCounts', $service->hiredCounts($projects));
+
+            // Self-healing: generate HR Policy forms for editable cases that have
+            // none yet (e.g. created before the hrforms schema was migrated).
+            app(\App\Services\HrForms\FormGenerationService::class)->ensureForms($case);
         });
 
         if (str_starts_with((string) config('app.url'), 'https://') || request()->server('HTTP_X_FORWARDED_PROTO') === 'https') {

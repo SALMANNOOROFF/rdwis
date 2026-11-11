@@ -405,6 +405,40 @@ class FormGenerationService
     }
 
     /**
+     * Lazily generate the forms for a case that has none yet.
+     *
+     * syncForms() only runs when a case is stored or revised, so cases that
+     * existed before the hrforms schema was migrated (or before the feature
+     * flag was switched on) would never get their forms. This is the
+     * self-healing path: it is a no-op unless the schema is present, the case
+     * is still editable, and the case currently has zero forms.
+     */
+    public function ensureForms(HrCtrCase $case): bool
+    {
+        if (! HrFormsSchema::available()) {
+            return false;
+        }
+
+        if (! in_array($case->ctc_status, ['Draft', 'Under Revision'], true)) {
+            return false;
+        }
+
+        try {
+            if (CaseForm::where('case_id', $case->ctc_id)->withTrashed()->exists()) {
+                return false;
+            }
+
+            $result = $this->syncForms($case);
+
+            return ($result['synced'] ?? 0) > 0;
+        } catch (\Throwable $e) {
+            Log::warning("HrForms ensureForms failed for case CC-{$case->ctc_id}: " . $e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
      * Resolve extractor instance for a form code.
      */
     protected function getExtractor(string $code)

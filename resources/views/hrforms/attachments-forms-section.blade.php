@@ -1,5 +1,5 @@
 @php
-    $hrformsEnabled = config('hrforms.enabled', false);
+    $hrformsEnabled = \App\Services\HrForms\HrFormsSchema::available();
     $caseId = $caseId ?? ($case->ctc_id ?? null);
     $caseForms = ($hrformsEnabled && $caseId)
         ? \App\Models\HrForms\CaseForm::where('case_id', $caseId)
