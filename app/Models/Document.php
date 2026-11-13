@@ -8,7 +8,28 @@ class Document extends Model
 {
     protected $table = 'doc.documents';
     protected $primaryKey = 'doc_id';
-    protected $fillable = ['prj_id', 'doc_type', 'doc_ref_no', 'current_owner_id', 'creator_id', 'status'];
+    protected $fillable = [
+        'prj_id', 'doc_type', 'doc_ref_no', 'current_owner_id', 'creator_id', 'status',
+        'doc_period', 'doc_period_label', 'doc_seq', 'doc_stage', 'doc_unt_id',
+        'doc_is_legacy', 'doc_legacy_group', 'doc_creator_name', 'doc_owner_name', 'doc_finalized_at',
+    ];
+
+    protected $casts = [
+        'doc_is_legacy'    => 'boolean',
+        'doc_finalized_at' => 'datetime',
+    ];
+
+    /** An MPR that is still travelling (not finalized / cancelled). */
+    public function isOpen(): bool
+    {
+        return ! in_array((string) $this->status, ['Finalized', 'Accepted', 'Cancelled', 'Closed'], true);
+    }
+
+    public function periodLabel(): string
+    {
+        return $this->doc_period_label
+            ?: ($this->doc_period ? \Carbon\Carbon::parse($this->doc_period . '-01')->format('M y') : '—');
+    }
 
     public function project() {
         return $this->belongsTo(Project::class, 'prj_id', 'prj_id');

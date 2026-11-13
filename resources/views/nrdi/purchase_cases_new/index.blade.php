@@ -299,6 +299,7 @@
                             <tr>
                                 <th style="width: 140px; text-align: center;"><i class="fas fa-cogs mr-1"></i> Actions</th>
                                 <th>Title / Description</th>
+                                <th style="width: 130px;">Project</th>
                                 <th style="width: 120px;">Date</th>
                                 <th style="width: 140px; text-align: right;">Est. Amount</th>
                                 <th style="width: 160px; text-align: center;">Status</th>
@@ -343,6 +344,18 @@
                                         @endif
                                     </div>
                                 </td>
+                                <td class="rajdhani" style="font-size: 12px;">
+                                    @php
+                                        $pcProject = isset($projectCodes[$p->pcs_id]) ? $projectCodes[$p->pcs_id] : null;
+                                    @endphp
+                                    @if(!empty($pcProject['code']))
+                                        <span class="badge badge-light border font-weight-bold text-dark" style="font-size: 11px; padding: 3px 7px; border-radius: 4px;" title="{{ $pcProject['title'] }}">
+                                            <i class="fas fa-project-diagram mr-1 text-primary"></i>{{ $pcProject['code'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">&mdash;</span>
+                                    @endif
+                                </td>
                                 <td class="text-muted small font-weight-bold rajdhani" style="font-size: 11.5px;">
                                     {{ \Carbon\Carbon::parse($p->pcs_date)->format('d M, Y') }}
                                 </td>
@@ -367,7 +380,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <div class="text-muted rajdhani" style="opacity: 0.7; font-size: 13px;">
                                         <i class="fas fa-check-double fa-2x mb-2 d-block text-primary" style="opacity: 0.4;"></i>
                                         NO PENDING CASES IN YOUR QUEUE
@@ -407,6 +420,7 @@
                             <tr>
                                 <th style="width: 140px; text-align: center;"><i class="fas fa-cogs mr-1"></i> Actions</th>
                                 <th>Title / Description</th>
+                                <th style="width: 130px;">Project</th>
                                 <th style="width: 130px;">Date</th>
                                 <th style="width: 135px; text-align: right;">Amount</th>
                                 <th style="width: 155px; text-align: center;">Status</th>
@@ -445,6 +459,18 @@
                                             </span>
                                         @endif
                                     </div>
+                                </td>
+                                <td class="rajdhani" style="font-size: 12px;">
+                                    @php
+                                        $pcProject = isset($projectCodes[$p->pcs_id]) ? $projectCodes[$p->pcs_id] : null;
+                                    @endphp
+                                    @if(!empty($pcProject['code']))
+                                        <span class="badge badge-light border font-weight-bold text-dark" style="font-size: 11px; padding: 3px 7px; border-radius: 4px;" title="{{ $pcProject['title'] }}">
+                                            <i class="fas fa-project-diagram mr-1 text-primary"></i>{{ $pcProject['code'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">&mdash;</span>
+                                    @endif
                                 </td>
                                 <td style="white-space: nowrap;">
                                     @if($isApproved)
@@ -513,7 +539,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     <div class="text-muted rajdhani" style="opacity: 0.7; font-size: 13px;">
                                         <i class="fas fa-folder-open fa-2x mb-2 d-block text-primary" style="opacity: 0.4;"></i>
                                         NO OPEN CASES IN PIPELINE
@@ -553,6 +579,7 @@
                             <tr>
                                 <th style="width: 65px; text-align: center;"><i class="fas fa-eye mr-1"></i> View</th>
                                 <th>Title / Description</th>
+                                <th style="width: 130px;">Project</th>
                                 <th style="width: 130px;">Date</th>
                                 <th style="width: 135px; text-align: right;">Amount</th>
                                 <th style="width: 155px; text-align: center;">Status</th>
@@ -590,6 +617,18 @@
                                             </span>
                                         @endif
                                     </div>
+                                </td>
+                                <td class="rajdhani" style="font-size: 12px;">
+                                    @php
+                                        $pcProject = isset($projectCodes[$p->pcs_id]) ? $projectCodes[$p->pcs_id] : null;
+                                    @endphp
+                                    @if(!empty($pcProject['code']))
+                                        <span class="badge badge-light border font-weight-bold text-dark" style="font-size: 11px; padding: 3px 7px; border-radius: 4px;" title="{{ $pcProject['title'] }}">
+                                            <i class="fas fa-project-diagram mr-1 text-primary"></i>{{ $pcProject['code'] }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">&mdash;</span>
+                                    @endif
                                 </td>
                                 <td style="white-space: nowrap;">
                                     @if($appDate)
@@ -644,7 +683,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     <div class="text-muted rajdhani" style="opacity: 0.7; font-size: 13px;">
                                         <i class="fas fa-check-circle fa-2x mb-2 d-block text-success" style="opacity: 0.4;"></i>
                                         NO CLOSED CASES

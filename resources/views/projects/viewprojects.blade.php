@@ -11,9 +11,21 @@
                     <h1 id="page-heading" class="m-0 font-weight-bold text-primary" style="font-size: 1.5rem; font-family:'Rajdhani',sans-serif; letter-spacing:1px;">
                         <i class="fas fa-folder-open mr-1"></i> ALL PROJECTS
                     </h1>
-                    <a href="{{ route('addnewproject') }}" class="btn btn-primary btn-sm shadow-sm px-4 rounded-pill">
-                        <i class="fas fa-plus-circle mr-1"></i> New Project
-                    </a>
+                    @php
+                        // A division never raises a project itself - it goes through SORD / DDPMO.
+                        $canRaiseProject = Auth::check()
+                            && ! \App\Services\Auth\UserAccessContext::forUser(Auth::user())->isDivision()
+                            && Auth::user()->can('create', \App\Models\Project::class);
+                    @endphp
+                    @if($canRaiseProject)
+                        <a href="{{ route('addnewproject') }}" class="btn btn-primary btn-sm shadow-sm px-4 rounded-pill">
+                            <i class="fas fa-plus-circle mr-1"></i> New Project
+                        </a>
+                    @else
+                        <button type="button" class="btn btn-primary btn-sm shadow-sm px-4 rounded-pill" data-toggle="modal" data-target="#contactSordModal">
+                            <i class="fas fa-plus-circle mr-1"></i> New Project
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -330,4 +342,21 @@
         box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
     }
 </style>
+    {{-- Projects are raised by SORD / DDPMO, not by the division --}}
+    <div class="modal fade" id="contactSordModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content" style="border-radius: 10px; border: 0;">
+                <div class="modal-body text-center px-4 py-4">
+                    <div class="mb-3"><i class="fas fa-user-tie fa-2x text-primary"></i></div>
+                    <h6 class="font-weight-bold text-dark mb-2">Contact SORD / DDPMO</h6>
+                    <p class="text-muted small mb-3">
+                        New projects are added by <strong>SORD / DDPMO</strong>. Please contact them to have a
+                        project opened for your division &mdash; it appears here as soon as they publish it.
+                    </p>
+                    <button type="button" class="btn btn-sm btn-primary px-4" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection

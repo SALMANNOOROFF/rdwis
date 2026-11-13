@@ -10,7 +10,10 @@ class DocumentVersion extends Model
     protected $primaryKey = 'ver_id';
     public $timestamps = false; // Hum apna 'action_date' use kar rahe hain
     
-    protected $fillable = ['doc_id', 'version_no', 'content_data', 'remarks', 'action_by', 'action_date'];
+    protected $fillable = [
+        'doc_id', 'version_no', 'content_data', 'remarks', 'action_by', 'action_date',
+        'ver_stage', 'ver_action', 'ver_status', 'ver_author_name', 'ver_is_legacy',
+    ];
 
     protected $casts = [
         'content_data' => 'array', // JSON data ko automatically Array bana dega

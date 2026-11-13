@@ -258,6 +258,24 @@
     @endphp
 
     <div class="container-fluid">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show shadow-sm mb-3">
+                <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3">
+                <i class="fas fa-exclamation-triangle mr-2"></i>{{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3">
+                <i class="fas fa-exclamation-circle mr-2"></i>{{ $errors->first() }}
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+        @endif
         <div class="card card-primary card-outline shadow-sm border-0">
             <div class="card-header p-3 bg-white border-bottom">
                 <div class="row align-items-center">
@@ -311,6 +329,15 @@
                                 <a href="{{ route('mpr.view', $project->prj_id) }}" class="btn btn-primary btn-sm shadow-sm font-weight-bold px-3">
                                     <i class="fas fa-plus-circle mr-1"></i> MPR
                                 </a>
+                                @can('update', $project)
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-sm shadow-sm font-weight-bold"
+                                            data-toggle="modal"
+                                            data-target="#editProjectDetailsModal"
+                                            title="Edit Project Details (Scope, Sponsor, Key Dates)">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                @endcan
                             @endif
                         </div>
                     </div>
@@ -841,6 +868,11 @@
             <h6 class="font-weight-bold m-0 text-dark" style="font-size: 0.96rem;">
                 <i class="fas fa-list-ol text-primary mr-2"></i> Milestones Detail
             </h6>
+            @if(!($readOnly ?? false) && Auth::check() && Auth::user()->can('update', $project) && !in_array(strtolower(trim($project->prj_status ?? '')), ['completed', 'cancelled'], true))
+                <button type="button" class="btn btn-sm btn-primary shadow-sm font-weight-bold px-3" onclick="openAddMilestoneModal()">
+                    <i class="fas fa-plus mr-1"></i> Add Milestone
+                </button>
+            @endif
         </div>
 
         <div class="milestone-container shadow-sm">
@@ -855,6 +887,7 @@
                             <th style="width: 140px;">Target</th>
                             <th style="width: 150px;" class="text-center">Achieved</th>
                             <th style="width: 150px;" class="text-center">Status</th>
+                            <th style="width: 100px;" class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -863,6 +896,10 @@
                                 $mStatus = strtolower(trim($milestone->msn_status ?? ''));
                                 $targetDt = $milestone->msn_targetdt ? \Carbon\Carbon::parse($milestone->msn_targetdt) : null;
                                 $achvDt = $milestone->msn_achvdt ? \Carbon\Carbon::parse($milestone->msn_achvdt) : null;
+                                $startDt = $milestone->msn_startdt ? \Carbon\Carbon::parse($milestone->msn_startdt) : null;
+                                $canManageMilestone = !($readOnly ?? false) && Auth::check() && Auth::user()->can('update', $project);
+                                $canEditMilestone = $canManageMilestone && $mStatus !== 'completed';
+                                $certUrl = !empty($milestone->msn_cc_path) ? route('milestone.certificate', $milestone->msn_idd) : '';
                             @endphp
                             <tr>
                                 <td class="font-weight-bold text-dark">MS-{{ $milestone->msn_id ?: $loop->iteration }}</td>
@@ -877,7 +914,7 @@
                                     @else
                                         @if(!($readOnly ?? false))
                                             <button class="btn btn-xs btn-outline-primary rounded-pill px-2.5 font-weight-bold"
-                                                    onclick="openAchieveModal('{{ $milestone->msn_id }}')">
+                                                    onclick="openAchieveModal('{{ $milestone->msn_idd }}')">
                                                 <i class="fas fa-calendar-check mr-1"></i> Mark
                                             </button>
                                         @else
@@ -892,16 +929,42 @@
                                         <span class="badge badge-primary px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-spinner fa-spin mr-1"></i> In Progress</span>
                                     @elseif($mStatus === 'awaited')
                                         <span class="badge badge-info px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-hourglass-half mr-1"></i> Awaited</span>
+                                    @elseif($mStatus === 'held up')
+                                        <span class="badge badge-danger px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-pause-circle mr-1"></i> Held Up</span>
                                     @elseif($mStatus === 'not started')
                                         <span class="badge badge-secondary px-3 py-1 font-weight-bold" style="font-size:0.76rem;"><i class="fas fa-circle mr-1" style="font-size: 7px;"></i> Not Started</span>
                                     @else
                                         <span class="badge badge-warning text-dark px-3 py-1 font-weight-bold" style="font-size:0.76rem;">{{ $milestone->msn_status ?: 'Pending' }}</span>
                                     @endif
                                 </td>
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn btn-xs {{ $canEditMilestone ? 'btn-outline-primary' : 'btn-outline-secondary' }} rounded-pill px-2.5 font-weight-bold"
+                                            onclick="openMilestonePopup(this)"
+                                            data-editable="{{ $canEditMilestone ? '1' : '0' }}"
+                                            data-msn-idd="{{ $milestone->msn_idd }}"
+                                            data-msn-id="{{ $milestone->msn_id }}"
+                                            data-msn-type="{{ $milestone->msn_type ?: 'Milestone' }}"
+                                            data-msn-desc="{{ $milestone->msn_desc }}"
+                                            data-msn-startdt="{{ $startDt ? $startDt->format('Y-m-d') : '' }}"
+                                            data-msn-startdt-label="{{ $startDt ? $startDt->format('d M y') : '—' }}"
+                                            data-msn-targetdt="{{ $targetDt ? $targetDt->format('Y-m-d') : '' }}"
+                                            data-msn-targetdt-label="{{ $targetDt ? $targetDt->format('d M y') : 'N/A' }}"
+                                            data-msn-achvdt="{{ $achvDt ? $achvDt->format('Y-m-d') : '' }}"
+                                            data-msn-achvdt-label="{{ $achvDt ? $achvDt->format('d M y') : '—' }}"
+                                            data-msn-comp="{{ $milestone->msn_comp ?? '' }}"
+                                            data-msn-status="{{ $milestone->msn_status ?: 'Not started' }}"
+                                            data-has-cert="{{ !empty($milestone->msn_cc_path) ? '1' : '0' }}"
+                                            data-cert-editable="{{ $canManageMilestone ? '1' : '0' }}"
+                                            data-cert-url="{{ $certUrl }}"
+                                            title="{{ $canEditMilestone ? 'Edit Milestone Details' : ($canManageMilestone ? 'View Details / Upload Completion Certificate' : 'View Milestone Details') }}">
+                                        <i class="fas {{ $canEditMilestone ? 'fa-edit' : 'fa-eye' }} mr-1"></i>{{ $canEditMilestone ? 'Edit' : 'View' }}
+                                    </button>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">
+                                <td colspan="7" class="text-center py-4 text-muted">
                                     <i class="fas fa-flag-checkered fa-2x mb-2 text-muted" style="opacity: 0.3;"></i>
                                     <p class="font-weight-bold mb-0">No milestones defined yet.</p>
                                 </td>
@@ -943,6 +1006,305 @@
 
 
     <!-- MODALS -->
+    <!-- Milestone View / Edit / Add Popup Modal (Legacy prj_milestones_details style) -->
+    <div class="modal fade glass-modal" id="milestonePopupModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title font-weight-bold text-dark" id="msPopupModalTitle">
+                        <i class="fas fa-flag-checkered text-primary mr-2"></i> Milestone Details
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+
+                {{-- READ-ONLY VIEW (for Completed milestones or read-only mode) --}}
+                <div id="msPopupReadOnly" style="display: none;">
+                    <div class="modal-body px-4 py-3">
+                        <div class="alert alert-info py-2 px-3 small mb-3">
+                            <i class="fas fa-lock mr-1"></i> Completed milestones are locked and cannot be edited directly.
+                        </div>
+                        <div class="row py-2 border-bottom">
+                            <div class="col-4 text-muted font-weight-bold">Number</div>
+                            <div class="col-8 font-weight-bold text-dark" id="ro_msn_id"></div>
+                        </div>
+                        <div class="row py-2 border-bottom">
+                            <div class="col-4 text-muted font-weight-bold">Type</div>
+                            <div class="col-8 text-dark" id="ro_msn_type"></div>
+                        </div>
+                        <div class="row py-2 border-bottom">
+                            <div class="col-4 text-muted font-weight-bold">Description</div>
+                            <div class="col-8 text-dark font-weight-bold" id="ro_msn_desc"></div>
+                        </div>
+                        <div class="row py-2 border-bottom" id="ro_activity_row" style="display: none;">
+                            <div class="col-4 text-muted font-weight-bold">Start Date / %</div>
+                            <div class="col-8 text-dark"><span id="ro_msn_startdt"></span> &nbsp;|&nbsp; <span id="ro_msn_comp"></span>%</div>
+                        </div>
+                        <div class="row py-2 border-bottom">
+                            <div class="col-4 text-muted font-weight-bold">Target Date</div>
+                            <div class="col-8 text-dark" id="ro_msn_targetdt"></div>
+                        </div>
+                        <div class="row py-2 border-bottom">
+                            <div class="col-4 text-muted font-weight-bold">Achieved Date</div>
+                            <div class="col-8 text-success font-weight-bold" id="ro_msn_achvdt"></div>
+                        </div>
+                        <div class="row py-2 align-items-center">
+                            <div class="col-4 text-muted font-weight-bold">Status</div>
+                            <div class="col-4"><span class="badge badge-success px-3 py-1" id="ro_msn_status"></span></div>
+                            <div class="col-4 text-right small">
+                                <span class="text-muted mr-1">Completion Certificate:</span>
+                                <span id="ro_cert_box"></span>
+                            </div>
+                        </div>
+
+                        {{-- Certificate-only upload: allowed even on locked (Completed) milestones --}}
+                        <form id="msCertForm" method="POST" enctype="multipart/form-data" class="mt-2 pt-3 border-top" style="display: none;">
+                            @csrf
+                            <div class="form-group row align-items-center mb-1">
+                                <label class="col-sm-4 col-form-label text-muted font-weight-bold" for="ro_cc_file">
+                                    <i class="fas fa-file-upload mr-1"></i> <span id="ro_cert_upload_label">Upload Certificate</span>
+                                </label>
+                                <div class="col-sm-8 d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                    <input type="file" name="completion_certificate" id="ro_cc_file" class="form-control-file form-control-sm" style="width: auto;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
+                                    <button type="submit" class="btn btn-sm btn-primary font-weight-bold px-3">
+                                        <i class="fas fa-upload mr-1"></i> Save
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block">Only the completion certificate is updated &mdash; all other milestone fields remain locked. (PDF / JPG / PNG / DOC, max 10 MB)</small>
+                        </form>
+                    </div>
+                    <div class="modal-footer justify-content-between bg-light">
+                        <small class="text-muted">Record ID: <span id="ro_msn_idd"></span></small>
+                        <button type="button" class="btn btn-secondary btn-sm px-3" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+                {{-- EDITABLE / ADD FORM (for In Progress / Not Started / Awaited / Held Up / New) --}}
+                <form id="msPopupForm" method="POST" enctype="multipart/form-data" style="display: none;">
+                    @csrf
+                    <div class="modal-body px-4 py-3">
+                        <div class="form-group row align-items-center mb-2">
+                            <label class="col-sm-3 col-form-label text-muted font-weight-bold">Number</label>
+                            <div class="col-sm-4">
+                                <input type="text" id="ed_msn_id_display" class="form-control form-control-sm bg-light font-weight-bold" readonly>
+                            </div>
+                            <label class="col-sm-2 col-form-label text-muted font-weight-bold text-sm-right">Type</label>
+                            <div class="col-sm-3">
+                                <select name="msn_type" id="ed_msn_type" class="form-control form-control-sm" onchange="toggleActivityFields()">
+                                    <option value="Milestone">Milestone</option>
+                                    <option value="Activity">Activity</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-2">
+                            <label class="col-sm-3 col-form-label text-muted font-weight-bold">Description <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <textarea name="msn_desc" id="ed_msn_desc" rows="2" class="form-control form-control-sm" required maxlength="255"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group row align-items-center mb-2" id="ed_activity_fields" style="display: none;">
+                            <label class="col-sm-3 col-form-label text-muted font-weight-bold">Start Date <span class="text-danger">*</span></label>
+                            <div class="col-sm-4">
+                                <input type="date" name="msn_startdt" id="ed_msn_startdt" class="form-control form-control-sm">
+                            </div>
+                            <label class="col-sm-2 col-form-label text-muted font-weight-bold text-sm-right">% Comp.</label>
+                            <div class="col-sm-3">
+                                <input type="number" name="msn_comp" id="ed_msn_comp" min="0" max="100" class="form-control form-control-sm" placeholder="0-100">
+                            </div>
+                        </div>
+
+                        <div class="form-group row align-items-center mb-2">
+                            <label class="col-sm-3 col-form-label text-muted font-weight-bold">Target Date</label>
+                            <div class="col-sm-4">
+                                <input type="date" name="msn_targetdt" id="ed_msn_targetdt" class="form-control form-control-sm">
+                            </div>
+                            <label class="col-sm-2 col-form-label text-muted font-weight-bold text-sm-right">Status</label>
+                            <div class="col-sm-3">
+                                <select name="msn_status" id="ed_msn_status" class="form-control form-control-sm" onchange="toggleAchievedField()">
+                                    <option value="Not started">Not started</option>
+                                    <option value="Awaited">Awaited</option>
+                                    <option value="Held up">Held up</option>
+                                    <option value="In progress">In progress</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row align-items-center mb-2">
+                            <label class="col-sm-3 col-form-label text-muted font-weight-bold">
+                                Achieved Date <span class="text-danger" id="ed_achv_req_star" style="display:none;">*</span>
+                            </label>
+                            <div class="col-sm-4">
+                                <input type="date" name="msn_achvdt" id="ed_msn_achvdt" class="form-control form-control-sm" max="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="col-sm-5">
+                                <small class="text-warning font-weight-bold" id="ed_complete_lock_note" style="display: none;">
+                                    <i class="fas fa-exclamation-circle mr-1"></i> Completing this milestone will lock it from further edits.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row align-items-center mb-0">
+                            <label class="col-sm-3 col-form-label text-muted font-weight-bold">Completion Certificate</label>
+                            <div class="col-sm-9 d-flex align-items-center flex-wrap" style="gap: 10px;">
+                                <input type="file" name="completion_certificate" id="ed_cc_file" class="form-control-file form-control-sm" style="width: auto;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                <span id="ed_existing_cert"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between bg-light">
+                        <small class="text-muted">Record ID: <span id="ed_msn_idd_label">—</span></small>
+                        <div>
+                            <button type="button" class="btn btn-secondary btn-sm px-3" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-4 font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Save Milestone
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Project Details Modal (triggered by Pencil Icon next to + MPR) -->
+    @if(!($readOnly ?? false) && Auth::check() && Auth::user()->can('update', $project))
+    <div class="modal fade glass-modal" id="editProjectDetailsModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title font-weight-bold text-dark">
+                        <i class="fas fa-pencil-alt text-primary mr-2"></i> Edit Project Details ({{ $project->prj_code }})
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <form action="{{ route('projects.update-details', $project->prj_id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body px-4 py-3">
+                        @php
+                            $pendingAmendmentCase = app(\App\Services\ProjectAmendmentService::class)->pendingCaseFor($project->prj_id);
+                        @endphp
+                        @if($pendingAmendmentCase)
+                            <div class="alert alert-warning py-2 px-3 small mb-3">
+                                <i class="fas fa-hourglass-half mr-1"></i>
+                                Amendment case <strong>{{ $pendingAmendmentCase->gcs_file_no }}</strong> for this project is already in process
+                                (currently with {{ $pendingAmendmentCase->currentHolder->acc_name ?? 'the initiating division' }}).
+                                <a href="{{ route('cases.show', $pendingAmendmentCase->gcs_id) }}" class="font-weight-bold">Open case file</a>
+                                to revise the proposed values.
+                            </div>
+                        @else
+                            <div class="alert alert-info py-2 px-3 small mb-3">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Changes made here are <strong>not saved directly</strong>. A case file is raised automatically with a
+                                system generated justification; the project record is updated only after the case is approved.
+                            </div>
+                        @endif
+                        <div class="row">
+                            <div class="col-md-8 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Project Title <span class="text-danger">*</span></label>
+                                <input type="text" name="prj_title" class="form-control form-control-sm" value="{{ old('prj_title', $project->prj_title) }}" required maxlength="255">
+                            </div>
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Status <span class="text-danger">*</span></label>
+                                @php
+                                    $prjStatuses = [
+                                        'Under assignment',
+                                        'Under feasibility',
+                                        'Approval awaited',
+                                        'Funds awaited',
+                                        'Work in progress',
+                                        'Warranty in progress',
+                                        'Final Acceptance Awaited',
+                                        'Completed',
+                                        'Cancelled',
+                                    ];
+                                    $currPrjStatus = $project->prj_status ?? '';
+                                    if ($currPrjStatus !== '' && !collect($prjStatuses)->contains(fn($s) => strcasecmp($s, $currPrjStatus) === 0)) {
+                                        array_unshift($prjStatuses, $currPrjStatus);
+                                    }
+                                @endphp
+                                <select name="prj_status" class="form-control form-control-sm" required>
+                                    @foreach($prjStatuses as $st)
+                                        <option value="{{ $st }}" {{ strcasecmp($currPrjStatus, $st) === 0 ? 'selected' : '' }}>{{ $st }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Sponsor / Agency</label>
+                                <input type="text" name="prj_sponsor" class="form-control form-control-sm" value="{{ old('prj_sponsor', $project->prj_sponsor) }}" maxlength="255">
+                            </div>
+                            <div class="col-md-6 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Proposed Cost (Rs.)</label>
+                                <input type="number" name="prj_propcost" class="form-control form-control-sm" value="{{ old('prj_propcost', $project->prj_propcost) }}" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold text-muted mb-1">Scope of Work</label>
+                            <textarea name="prj_scope" rows="2" class="form-control form-control-sm" maxlength="255">{{ old('prj_scope', $project->prj_scope) }}</textarea>
+                        </div>
+
+                        <h6 class="text-primary font-weight-bold small text-uppercase border-bottom pb-1 mb-2">
+                            <i class="fas fa-calendar-alt mr-1"></i> Key Dates
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Received Date</label>
+                                <input type="date" name="prj_rcptdt" class="form-control form-control-sm" value="{{ $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') : '' }}">
+                            </div>
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Assigned Date</label>
+                                <input type="date" name="prj_assigndt" class="form-control form-control-sm" value="{{ $project->prj_assigndt ? \Carbon\Carbon::parse($project->prj_assigndt)->format('Y-m-d') : '' }}">
+                            </div>
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Proposal Date</label>
+                                <input type="date" name="prj_propdt" class="form-control form-control-sm" value="{{ $project->prj_propdt ? \Carbon\Carbon::parse($project->prj_propdt)->format('Y-m-d') : '' }}">
+                            </div>
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Approval Date</label>
+                                <input type="date" name="prj_aprvdt" class="form-control form-control-sm" value="{{ $project->prj_aprvdt ? \Carbon\Carbon::parse($project->prj_aprvdt)->format('Y-m-d') : '' }}">
+                            </div>
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Start Date</label>
+                                <input type="date" name="prj_startdt" class="form-control form-control-sm" value="{{ $project->prj_startdt ? \Carbon\Carbon::parse($project->prj_startdt)->format('Y-m-d') : '' }}">
+                            </div>
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">EDC (Est. End Date)</label>
+                                <input type="date" name="prj_estenddt" class="form-control form-control-sm" value="{{ $project->prj_estenddt ? \Carbon\Carbon::parse($project->prj_estenddt)->format('Y-m-d') : '' }}">
+                            </div>
+                            <div class="col-md-4 form-group mb-2">
+                                <label class="small font-weight-bold text-muted mb-1">Actual Completion Date</label>
+                                <input type="date" name="prj_enddt" class="form-control form-control-sm" value="{{ $project->prj_enddt ? \Carbon\Carbon::parse($project->prj_enddt)->format('Y-m-d') : '' }}">
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-0 mt-1">
+                            <label class="small font-weight-bold text-muted mb-1">Remarks</label>
+                            <textarea name="prj_rem" rows="2" class="form-control form-control-sm">{{ old('prj_rem', $project->prj_rem) }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light justify-content-between">
+                        <small class="text-muted">
+                            <i class="fas fa-route mr-1"></i> Routed as an e-office case file for approval.
+                        </small>
+                        <div>
+                            <button type="button" class="btn btn-secondary btn-sm px-3" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn-sm px-4 font-weight-bold">
+                                <i class="fas fa-folder-plus mr-1"></i> Raise Amendment Case
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Achieve Date Modal -->
     <div class="modal fade glass-modal" id="achieveDateModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -1365,6 +1727,163 @@ function openAllStaffModal() { $('#allStaffModal').modal('show'); }
 function openAchieveModal(msnId) {
     document.getElementById('modal_msn_id').value = msnId;
     $('#achieveDateModal').modal('show');
+}
+
+function selectOptionCaseInsensitive(selectEl, val) {
+    const target = (val || '').trim().toLowerCase();
+    for (let i = 0; i < selectEl.options.length; i++) {
+        if (selectEl.options[i].value.trim().toLowerCase() === target) {
+            selectEl.selectedIndex = i;
+            return;
+        }
+    }
+    selectEl.selectedIndex = 0;
+}
+
+function toggleActivityFields() {
+    const typeVal = (document.getElementById('ed_msn_type').value || '').trim().toLowerCase();
+    const actRow = document.getElementById('ed_activity_fields');
+    const startInput = document.getElementById('ed_msn_startdt');
+    if (typeVal === 'activity') {
+        actRow.style.display = '';
+        startInput.required = true;
+    } else {
+        actRow.style.display = 'none';
+        startInput.required = false;
+        startInput.value = '';
+        document.getElementById('ed_msn_comp').value = '';
+    }
+}
+
+function toggleAchievedField() {
+    const statusVal = (document.getElementById('ed_msn_status').value || '').trim().toLowerCase();
+    const achvInput = document.getElementById('ed_msn_achvdt');
+    const star = document.getElementById('ed_achv_req_star');
+    const note = document.getElementById('ed_complete_lock_note');
+    const compInput = document.getElementById('ed_msn_comp');
+    if (statusVal === 'completed') {
+        achvInput.disabled = false;
+        achvInput.required = true;
+        star.style.display = 'inline';
+        note.style.display = 'block';
+        if ((document.getElementById('ed_msn_type').value || '').trim().toLowerCase() === 'activity') {
+            compInput.value = 100;
+        }
+    } else {
+        achvInput.value = '';
+        achvInput.disabled = true;
+        achvInput.required = false;
+        star.style.display = 'none';
+        note.style.display = 'none';
+    }
+}
+
+function openMilestonePopup(btn) {
+    const d = btn.dataset;
+    const isEditable = d.editable === '1';
+    const roBox = document.getElementById('msPopupReadOnly');
+    const formBox = document.getElementById('msPopupForm');
+    const titleEl = document.getElementById('msPopupModalTitle');
+
+    if (!isEditable) {
+        roBox.style.display = 'block';
+        formBox.style.display = 'none';
+        titleEl.innerHTML = '<i class="fas fa-lock text-success mr-2"></i> Milestone Details (Read-Only)';
+
+        document.getElementById('ro_msn_id').innerText = d.msnId || '—';
+        document.getElementById('ro_msn_type').innerText = d.msnType || 'Milestone';
+        document.getElementById('ro_msn_desc').innerText = d.msnDesc || '—';
+        document.getElementById('ro_msn_targetdt').innerText = d.msnTargetdtLabel || 'N/A';
+        document.getElementById('ro_msn_achvdt').innerText = d.msnAchvdtLabel || '—';
+        document.getElementById('ro_msn_status').innerText = d.msnStatus || 'Completed';
+        document.getElementById('ro_msn_idd').innerText = d.msnIdd || '—';
+
+        const roAct = document.getElementById('ro_activity_row');
+        if ((d.msnType || '').trim().toLowerCase() === 'activity') {
+            roAct.style.display = '';
+            document.getElementById('ro_msn_startdt').innerText = d.msnStartdtLabel || '—';
+            document.getElementById('ro_msn_comp').innerText = d.msnComp !== '' ? d.msnComp : '0';
+        } else {
+            roAct.style.display = 'none';
+        }
+
+        const certBox = document.getElementById('ro_cert_box');
+        if (d.hasCert === '1' && d.certUrl) {
+            certBox.innerHTML = '<a href="' + d.certUrl + '" target="_blank" class="badge badge-info px-2 py-1"><i class="fas fa-file-alt mr-1"></i> View Certificate</a>';
+        } else {
+            certBox.innerHTML = '<span class="badge badge-light border text-muted">Not Uploaded</span>';
+        }
+
+        // Certificate upload stays available on locked milestones (certificate column only)
+        const certForm = document.getElementById('msCertForm');
+        if (certForm) {
+            if (d.certEditable === '1' && d.msnIdd) {
+                certForm.action = "{{ url('/milestone') }}/" + encodeURIComponent(d.msnIdd) + "/certificate";
+                certForm.style.display = 'block';
+                document.getElementById('ro_cc_file').value = '';
+                document.getElementById('ro_cert_upload_label').innerText =
+                    (d.hasCert === '1' && d.certUrl) ? 'Replace Certificate' : 'Upload Certificate';
+            } else {
+                certForm.style.display = 'none';
+            }
+        }
+    } else {
+        roBox.style.display = 'none';
+        formBox.style.display = 'block';
+        titleEl.innerHTML = '<i class="fas fa-edit text-primary mr-2"></i> Edit Milestone (MS-' + (d.msnId || '') + ')';
+
+        formBox.action = "{{ url('/milestone') }}/" + encodeURIComponent(d.msnIdd) + "/update";
+        document.getElementById('ed_msn_id_display').value = d.msnId || '';
+        document.getElementById('ed_msn_idd_label').innerText = d.msnIdd || '—';
+
+        selectOptionCaseInsensitive(document.getElementById('ed_msn_type'), d.msnType || 'Milestone');
+        document.getElementById('ed_msn_desc').value = d.msnDesc || '';
+        document.getElementById('ed_msn_startdt').value = d.msnStartdt || '';
+        document.getElementById('ed_msn_comp').value = d.msnComp || '';
+        document.getElementById('ed_msn_targetdt').value = d.msnTargetdt || '';
+        selectOptionCaseInsensitive(document.getElementById('ed_msn_status'), d.msnStatus || 'Not started');
+        document.getElementById('ed_msn_achvdt').value = d.msnAchvdt || '';
+        document.getElementById('ed_cc_file').value = '';
+
+        const exCert = document.getElementById('ed_existing_cert');
+        if (d.hasCert === '1' && d.certUrl) {
+            exCert.innerHTML = '<a href="' + d.certUrl + '" target="_blank" class="badge badge-info px-2 py-1"><i class="fas fa-paperclip mr-1"></i> Current File</a>';
+        } else {
+            exCert.innerHTML = '';
+        }
+
+        toggleActivityFields();
+        toggleAchievedField();
+    }
+
+    $('#milestonePopupModal').modal('show');
+}
+
+function openAddMilestoneModal() {
+    const roBox = document.getElementById('msPopupReadOnly');
+    const formBox = document.getElementById('msPopupForm');
+    const titleEl = document.getElementById('msPopupModalTitle');
+
+    roBox.style.display = 'none';
+    formBox.style.display = 'block';
+    titleEl.innerHTML = '<i class="fas fa-plus-circle text-primary mr-2"></i> Add New Milestone';
+
+    formBox.action = "{{ route('projects.store-milestone', $project->prj_id) }}";
+    document.getElementById('ed_msn_id_display').value = "{{ ((int) ($milestones->max('msn_id') ?? 0)) + 1 }}";
+    document.getElementById('ed_msn_idd_label').innerText = 'New';
+    document.getElementById('ed_msn_type').value = 'Milestone';
+    document.getElementById('ed_msn_desc').value = '';
+    document.getElementById('ed_msn_startdt').value = '';
+    document.getElementById('ed_msn_comp').value = '';
+    document.getElementById('ed_msn_targetdt').value = '';
+    document.getElementById('ed_msn_status').value = 'Not started';
+    document.getElementById('ed_msn_achvdt').value = '';
+    document.getElementById('ed_cc_file').value = '';
+    document.getElementById('ed_existing_cert').innerHTML = '';
+
+    toggleActivityFields();
+    toggleAchievedField();
+    $('#milestonePopupModal').modal('show');
 }
 
 function initFinancialIntelligenceCharts() {

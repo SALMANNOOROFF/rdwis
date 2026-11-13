@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         
         $middleware->web(append: [
             \App\Http\Middleware\DataHorizonMiddleware::class,
+            // Pushes who/where/which-route into PostgreSQL session vars so the
+            // syslog audit triggers can attribute every write. Must run after
+            // authentication, hence append. See docs/SYSTEM_LOGS_SCHEMA_DESIGN.md §4.1
+            \App\Http\Middleware\AuditContext::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'api/*',

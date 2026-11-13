@@ -729,6 +729,7 @@ class PurchaseReceiptController extends Controller
                 'a.ias_pcs_id',
                 'a.ias_price',
                 'a.ias_type',
+                'a.ias_type2',
                 'a.ias_subtype',
                 'a.ias_chargedate',
                 'a.ias_unt_id',
@@ -739,11 +740,14 @@ class PurchaseReceiptController extends Controller
                 'h.hed_name'
             );
 
-        // Category filter (Assets = ias_type 7, Inventory = ias_type != 7)
+        // Category filter - the Asset / Inventory CLASS chosen on the purchase case
+        // item lives in ias_type2 (6 = Asset, 5 = Inventory). ias_type is only the
+        // nature of the item (7 Permanent / 2 Consumable / 3 Service), so it must not
+        // be used here. Rows with no class fall back to the old nature based split.
         if ($category === 'Assets') {
-            $query->where('a.ias_type', '7');
+            $query->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) = 6');
         } elseif ($category === 'Inventory') {
-            $query->where('a.ias_type', '!=', '7');
+            $query->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) <> 6');
         }
 
         // Group filter (OnCharge vs OffCharge)
@@ -794,14 +798,14 @@ class PurchaseReceiptController extends Controller
             $summaryQuery->where('a.ias_effhed_id', $headId);
         }
 
-        $assetsOnCharge = (clone $summaryQuery)->where('a.ias_type', '7')->whereIn('c.iac_status', ['Untagged', 'Tagged', 'Held'])
+        $assetsOnCharge = (clone $summaryQuery)->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) = 6')->whereIn('c.iac_status', ['Untagged', 'Tagged', 'Held'])
             ->selectRaw('COUNT(c.iac_id) as total_count, COALESCE(SUM(c.iac_qty * a.ias_price), 0) as total_value')->first();
-        $assetsOffCharge = (clone $summaryQuery)->where('a.ias_type', '7')->whereIn('c.iac_status', ['Issued to User', 'Installed', 'Consumed', 'Written Off'])
+        $assetsOffCharge = (clone $summaryQuery)->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) = 6')->whereIn('c.iac_status', ['Issued to User', 'Installed', 'Consumed', 'Written Off'])
             ->selectRaw('COUNT(c.iac_id) as total_count, COALESCE(SUM(c.iac_qty * a.ias_price), 0) as total_value')->first();
 
-        $invOnCharge = (clone $summaryQuery)->where('a.ias_type', '!=', '7')->whereIn('c.iac_status', ['Untagged', 'Tagged', 'Held'])
+        $invOnCharge = (clone $summaryQuery)->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) <> 6')->whereIn('c.iac_status', ['Untagged', 'Tagged', 'Held'])
             ->selectRaw('COUNT(c.iac_id) as total_count, COALESCE(SUM(c.iac_qty * a.ias_price), 0) as total_value')->first();
-        $invOffCharge = (clone $summaryQuery)->where('a.ias_type', '!=', '7')->whereIn('c.iac_status', ['Issued to User', 'Installed', 'Consumed', 'Written Off'])
+        $invOffCharge = (clone $summaryQuery)->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) <> 6')->whereIn('c.iac_status', ['Issued to User', 'Installed', 'Consumed', 'Written Off'])
             ->selectRaw('COUNT(c.iac_id) as total_count, COALESCE(SUM(c.iac_qty * a.ias_price), 0) as total_value')->first();
 
         $assets = $query->orderBy('c.iac_id', 'desc')->paginate(25);

@@ -164,8 +164,8 @@ wp{{-- resources/views/cases/show.blade.php --}}
                             <i class="fas fa-save mr-1"></i> Save Draft
                         </button>
                     @endif
-                    <a href="{{ route('cases.print', $case->gcs_id) }}" target="_blank" class="btn btn-sm btn-outline-dark font-weight-bold" style="border-radius: 6px; font-size: 11.5px; padding: 4px 10px;">
-                        <i class="fas fa-print mr-1"></i> Print Note
+                    <a href="{{ route('cases.print', $case->gcs_id) }}" target="_blank" class="btn btn-sm font-weight-bold" style="background: #0f172a; color: #ffffff; border: 1px solid #334155; border-radius: 6px; font-size: 11.5px; padding: 4px 10px;" title="Print Case Details, Remarks & Attachments">
+                        <i class="fas fa-print mr-1"></i> Print Case
                     </a>
                     <a href="{{ route('cases.index') }}" class="btn btn-sm btn-outline-secondary font-weight-bold" style="border-radius: 6px; font-size: 11.5px; padding: 4px 10px;">
                         <i class="fas fa-arrow-left mr-1"></i> Back
@@ -302,6 +302,134 @@ wp{{-- resources/views/cases/show.blade.php --}}
                     </div>
                 </form>
             </div>
+
+            {{-- ============================================================ --}}
+            {{-- PROPOSED AMENDMENT IN PROJECT DETAILS (auto-raised case file) --}}
+            {{-- ============================================================ --}}
+            @php $amd = $amendment ?? null; @endphp
+            @if(!empty($amd))
+                @php
+                    $amdSvc      = app(\App\Services\ProjectAmendmentService::class);
+                    $amdFields   = $amd['fields'] ?? [];
+                    $amdApplied  = ((($amd['status'] ?? 'pending')) === 'applied');
+                    $amdApproved = (strcasecmp(trim((string) $case->gcs_status), 'Approved') === 0);
+                    // Frozen until approval. Only after approval may the approving
+                    // authority correct the figures (saved straight to the project).
+                    $amdEditable = $amdApproved && $canApprove;
+                    $amdStatuses = \App\Services\ProjectAmendmentService::STATUSES;
+                @endphp
+                <div class="case-card mb-3">
+                    <div class="sec-hdr mb-2 d-flex justify-content-between align-items-center" style="font-size: 12px;">
+                        <span>
+                            <i class="fas fa-project-diagram text-primary mr-1"></i>
+                            PROPOSED AMENDMENT &mdash; PROJECT {{ $amd['project_code'] ?? '' }}
+                        </span>
+                        @if($amdApplied)
+                            <span class="badge badge-success px-2 py-1" style="font-size: 10.5px;">
+                                <i class="fas fa-check mr-1"></i> APPLIED TO PROJECT
+                            </span>
+                        @else
+                            <span class="badge badge-warning text-dark px-2 py-1" style="font-size: 10.5px;">
+                                <i class="fas fa-hourglass-half mr-1"></i> AWAITING APPROVAL
+                            </span>
+                        @endif
+                    </div>
+
+                    <div class="text-muted mb-2" style="font-size: 11.5px;">
+                        {{ $amd['project_title'] ?? '' }}
+                    </div>
+
+                    <form method="POST" action="{{ route('cases.update_amendment', $case->gcs_id) }}">
+                        @csrf
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-2" style="font-size: 12px;">
+                                <thead style="background: #f1f5f9;">
+                                    <tr>
+                                        <th style="width: 28%;">Particular</th>
+                                        <th style="width: 30%;">Existing</th>
+                                        <th>Proposed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @forelse($amdFields as $amdCol => $amdF)
+                                    <tr>
+                                        <td class="font-weight-bold text-dark">{{ $amdF['label'] }}</td>
+                                        <td class="text-muted">{{ $amdSvc->displayValue($amdF['type'], $amdF['old']) }}</td>
+                                        <td>
+                                            @if($amdEditable)
+                                                @if($amdF['type'] === 'date')
+                                                    <input type="date" name="values[{{ $amdCol }}]" value="{{ $amdF['new'] }}" class="form-control form-control-sm">
+                                                @elseif($amdF['type'] === 'money')
+                                                    <input type="number" min="0" name="values[{{ $amdCol }}]" value="{{ $amdF['new'] }}" class="form-control form-control-sm">
+                                                @elseif($amdF['type'] === 'status')
+                                                    @php
+                                                        $amdOpts = $amdStatuses;
+                                                        if (!empty($amdF['new']) && !collect($amdOpts)->contains(fn($s) => strcasecmp($s, $amdF['new']) === 0)) {
+                                                            array_unshift($amdOpts, $amdF['new']);
+                                                        }
+                                                    @endphp
+                                                    <select name="values[{{ $amdCol }}]" class="form-control form-control-sm">
+                                                        @foreach($amdOpts as $amdOpt)
+                                                            <option value="{{ $amdOpt }}" {{ strcasecmp((string) $amdF['new'], $amdOpt) === 0 ? 'selected' : '' }}>{{ $amdOpt }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                @elseif($amdF['type'] === 'textarea')
+                                                    <textarea name="values[{{ $amdCol }}]" rows="2" class="form-control form-control-sm">{{ $amdF['new'] }}</textarea>
+                                                @else
+                                                    <input type="text" name="values[{{ $amdCol }}]" value="{{ $amdF['new'] }}" class="form-control form-control-sm">
+                                                @endif
+                                            @else
+                                                <span class="font-weight-bold {{ $amdApplied ? 'text-success' : 'text-primary' }}">
+                                                    {{ $amdSvc->displayValue($amdF['type'], $amdF['new']) }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-2">No pending change in this amendment.</td>
+                                    </tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if($amdEditable)
+                            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Case approved &mdash; saving here writes these values to the project record at once.
+                                </small>
+                                <button type="submit" class="btn btn-sm btn-primary font-weight-bold px-3" style="border-radius: 6px; font-size: 11.5px;">
+                                    <i class="fas fa-save mr-1"></i> Save Proposed Values
+                                </button>
+                            </div>
+                            @if($amdApplied)
+                                <small class="text-success font-weight-bold d-block mt-1">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Applied to the project record on {{ $amd['applied_at'] ?? '' }}
+                                    @if(!empty($amd['applied_by_name'])) by {{ $amd['applied_by_name'] }} @endif.
+                                    @if(!empty($amd['revised_at']))
+                                        Last revised {{ $amd['revised_at'] }}@if(!empty($amd['revised_by_name'])) by {{ $amd['revised_by_name'] }}@endif.
+                                    @endif
+                                </small>
+                            @endif
+                        @elseif($amdApplied)
+                            <small class="text-success font-weight-bold">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Applied to the project record on {{ $amd['applied_at'] ?? '' }}
+                                @if(!empty($amd['applied_by_name'])) by {{ $amd['applied_by_name'] }} @endif.
+                            </small>
+                        @else
+                            <small class="text-muted">
+                                <i class="fas fa-lock mr-1"></i>
+                                Values are locked while the case is under approval. They will be written to the project
+                                record automatically the moment the case is approved.
+                            </small>
+                        @endif
+                    </form>
+                </div>
+            @endif
 
             {{-- Attached Documents Box on Left --}}
             @if($case->attachments->count() > 0)

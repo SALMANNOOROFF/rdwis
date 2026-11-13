@@ -195,16 +195,26 @@
             <i class="fas fa-folder-open text-sky-600"></i> Employee Documents
             <i class="fas fa-chevron-down text-[10px] ml-1 transition-transform duration-200" id="employeeDocsChevron"></i>
           </button>
-          <div id="employeeDocsDropdownMenu" class="origin-top-left absolute left-0 mt-1.5 w-72 rounded-xl shadow-2xl bg-white border border-slate-200 z-50 p-2.5" style="display: none;">
+          @php
+            // One shared list for the dropdown and the documents modal, so both always agree.
+            $attSlots = ['Appointment Letter', 'Form', 'CV', 'Minute'];
+            $empUploaded = collect($attachments ?? [])->filter(function ($a) {
+                return trim((string) ($a->eat_path ?? '')) !== '';
+            })->values();
+            $attMap = $empUploaded->keyBy('eat_type');
+            $empExtraDocs = $empUploaded->reject(function ($a) use ($attSlots) {
+                return in_array($a->eat_type, $attSlots, true);
+            })->values();
+            $empCaseDocs = collect($caseAttachments ?? []);
+            $ctcTypeLabels = ['Hg' => 'Hiring', 'Cr' => 'Renewal', 'Ce' => 'Extension'];
+            $empDocTotal = $empUploaded->count() + $empCaseDocs->count();
+          @endphp
+          <div id="employeeDocsDropdownMenu" class="origin-top-left absolute left-0 mt-1.5 w-80 rounded-xl shadow-2xl bg-white border border-slate-200 z-50 p-2.5" style="display: none;">
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 py-1 border-b border-slate-100 mb-1 flex justify-between items-center">
               <span>Attached Documents</span>
-              <span class="text-[9px] px-1.5 py-0.5 bg-sky-50 text-sky-600 rounded font-bold">{{ count($attachments ?? []) }} Files</span>
+              <span class="text-[9px] px-1.5 py-0.5 bg-sky-50 text-sky-600 rounded font-bold">{{ $empDocTotal }} Files</span>
             </div>
-            <div class="max-h-56 overflow-y-auto space-y-1 mb-2">
-              @php
-                $attSlots = ['Appointment Letter', 'Form', 'CV', 'Minute'];
-                $attMap = collect($attachments ?? [])->keyBy('eat_type');
-              @endphp
+            <div class="max-h-72 overflow-y-auto space-y-1 mb-2">
               @foreach($attSlots as $slot)
                 @php $existing = $attMap->get($slot); @endphp
                 @if($existing)
@@ -226,6 +236,37 @@
                   </div>
                 @endif
               @endforeach
+
+              @if($empExtraDocs->count())
+                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-2">Other Documents</div>
+                @foreach($empExtraDocs as $extra)
+                  <a href="{{ route('universal.attachment.view', ['module' => 'emp', 'id' => $extra->eat_id]) }}" target="_blank"
+                    class="flex items-center justify-between p-2 rounded text-xs hover:bg-sky-50 text-slate-700 transition">
+                    <span class="flex items-center gap-1.5 truncate">
+                      <i class="fas fa-paperclip text-slate-400"></i>
+                      <span class="truncate font-medium">{{ $extra->eat_type }}</span>
+                    </span>
+                    <span class="text-[10px] text-sky-600 font-bold flex-shrink-0">View <i class="fas fa-external-link-alt ml-0.5 text-[8px]"></i></span>
+                  </a>
+                @endforeach
+              @endif
+
+              @if($empCaseDocs->count())
+                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-2">From Hiring / Contract Cases</div>
+                @foreach($empCaseDocs as $cdoc)
+                  <a href="{{ route('universal.attachment.view', ['module' => 'ctc', 'id' => $cdoc->cat_id]) }}" target="_blank"
+                    class="flex items-center justify-between p-2 rounded text-xs hover:bg-sky-50 text-slate-700 transition">
+                    <span class="flex items-center gap-1.5 truncate">
+                      <i class="fas fa-file-contract text-amber-500"></i>
+                      <span class="truncate font-medium">{{ $cdoc->cat_type }}</span>
+                      <span class="text-[9px] text-slate-400 flex-shrink-0">
+                        {{ $ctcTypeLabels[$cdoc->ctc_type] ?? $cdoc->ctc_type }}#{{ $cdoc->ctc_id }}
+                      </span>
+                    </span>
+                    <span class="text-[10px] text-sky-600 font-bold flex-shrink-0">View <i class="fas fa-external-link-alt ml-0.5 text-[8px]"></i></span>
+                  </a>
+                @endforeach
+              @endif
             </div>
             <div class="pt-2 border-t border-slate-100 flex flex-col gap-1">
               <button type="button" onclick="document.getElementById('docsUploadModal').classList.remove('hidden'); document.getElementById('employeeDocsDropdownMenu').style.display='none';"
@@ -1088,6 +1129,37 @@
           'attachments' => $attachments ?? [],
           'canEdit' => Auth::check() && (Auth::user()->isApprover() || Auth::user()->acc_level >= 2),
       ])
+
+      @if(($empCaseDocs ?? collect())->count())
+        <div class="mt-4 pt-3 border-t border-border1">
+          <div class="text-xs font-bold text-text2 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <i class="fas fa-file-contract text-amber-500"></i>
+            Documents from Hiring / Contract Cases
+            <span class="text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded font-bold">{{ $empCaseDocs->count() }}</span>
+          </div>
+          <div class="space-y-1 max-h-48 overflow-y-auto">
+            @foreach($empCaseDocs as $cdoc)
+              <div class="flex items-center justify-between p-2 rounded border border-border1 text-xs">
+                <span class="flex items-center gap-2 truncate">
+                  <i class="fas fa-file-pdf text-rose-500"></i>
+                  <span class="font-semibold truncate">{{ $cdoc->cat_type }}</span>
+                  <span class="text-[10px] text-text2 flex-shrink-0">
+                    {{ ($ctcTypeLabels[$cdoc->ctc_type] ?? $cdoc->ctc_type) }} case #{{ $cdoc->ctc_id }}
+                    @if($cdoc->ctc_date) &middot; {{ \Carbon\Carbon::parse($cdoc->ctc_date)->format('d M, Y') }} @endif
+                  </span>
+                </span>
+                <a href="{{ route('universal.attachment.view', ['module' => 'ctc', 'id' => $cdoc->cat_id]) }}" target="_blank"
+                   class="text-[11px] font-bold text-sky-600 hover:underline flex-shrink-0">
+                  <i class="fas fa-eye mr-1"></i> View
+                </a>
+              </div>
+            @endforeach
+          </div>
+          <div class="text-[10px] text-text2 mt-2">
+            <i class="fas fa-info-circle mr-1"></i> These files live on the case and are managed there.
+          </div>
+        </div>
+      @endif
     </div>
   </div>
 
@@ -1166,7 +1238,7 @@
   </div>
 
   <!-- Employment Record Print Modal -->
-  <div id="employmentRecordModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-start sm:items-center justify-center p-2 sm:p-4 hidden">
+  <div id="employmentRecordModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 flex items-start sm:items-center justify-center p-2 sm:p-4 hidden">
     <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full my-auto sm:my-3 overflow-hidden flex flex-col border border-slate-300" style="max-height: 94vh;">
       <!-- Modal Toolbar (Not printed) -->
       <div class="no-print flex-shrink-0 bg-slate-100 border-b border-slate-200 px-5 py-2.5 flex justify-between items-center">
@@ -1491,7 +1563,7 @@
 
   @can('initiate', \App\Models\AudRev::class)
   {{-- Employee Reversal Modal --}}
-  <div id="reverseEmployeeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+  <div id="reverseEmployeeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto">
     <div class="bg-surface border border-border1 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
       {{-- Modal Header --}}
       <div class="px-6 py-4 border-b border-border1 flex items-center justify-between bg-surface2">

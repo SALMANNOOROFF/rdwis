@@ -595,6 +595,7 @@ class FinanceReportsController extends Controller
                     'c.iac_id',
                     'a.ias_desc',
                     'a.ias_type',
+                    'a.ias_type2',
                     'a.ias_subtype',
                     'c.iac_qty',
                     'a.ias_price',
@@ -621,11 +622,12 @@ class FinanceReportsController extends Controller
                 }
             }
             
-            // Category filter
+            // Category filter - Asset / Inventory class lives in ias_type2 (6 / 5),
+            // ias_type is only the nature of the item.
             if ($category === 'Assets') {
-                $query->where('a.ias_type', '7');
+                $query->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) = 6');
             } elseif ($category === 'Inventory') {
-                $query->where('a.ias_type', '!=', '7');
+                $query->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) <> 6');
             }
             
             // Status filter (Multiple Statuses supported)
@@ -654,7 +656,7 @@ class FinanceReportsController extends Controller
                 return [
                     'id' => $item->iac_id,
                     'desc' => $item->ias_desc,
-                    'category' => (int)$item->ias_type === 7 ? 'Asset' : 'Inventory',
+                    'category' => (int)($item->ias_type2 ?? ((int)$item->ias_type === 7 ? 6 : 5)) === 6 ? 'Asset' : 'Inventory',
                     'subtype' => $item->ias_subtype,
                     'qty' => (float)$item->iac_qty,
                     'price' => (float)$item->ias_price,
@@ -1702,5 +1704,202 @@ class FinanceReportsController extends Controller
         }
 
         return view('finance.reports.printable_csrf_status', compact('groupedRecords', 'grandTotals'));
+    }
+
+    /**
+     * "Allocations and Subhead Statuses" sheet.
+     *
+     * Project | Allocation | MTSS Share | NRDI Share | <subhead: Allocated / Expenditure / Balance> ... | Total Balance
+     * Subhead columns are built from whatever subheads the selected heads actually have.
+     */
+    public function printAllocSubheads(Request $request)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        $userArea = strtolower(trim((string) ($user->acc_untarea ?? '')));
+        $isHqUser = in_array($userArea, ['rdw', 'hqs', 'nrdi', 'rdwprj', 'prjrdw', 'it', 'fin'], true);
+
+        if ($isHqUser) {
+            $lower = $user->acc_lowerm ?: 0;
+            $upper = $user->acc_upperm ?: 99999999;
+        } else {
+            $lower = (int) $user->acc_lowers;
+            $upper = (int) $user->acc_uppers;
+            if ($lower === 0 && $upper === 0) {
+                $lower = (int) $user->acc_lowerm;
+                $upper = (int) $user->acc_upperm;
+            }
+            if ($lower === 0 && $upper === 0) {
+                $lower = (int) $user->acc_unt_id;
+                $upper = (int) $user->acc_unt_id;
+            }
+        }
+
+        $unitId    = $request->query('unit_id', 'All');
+        $projectId = $request->query('project_id', 'All');
+
+        $query = DB::table('cen.heads as h')
+            ->leftJoin('prj.projects as p', 'h.hed_prj_id', '=', 'p.prj_id')
+            ->leftJoin('cen.units as u', 'h.hed_unt_id', '=', 'u.unt_id')
+            ->select([
+                'h.hed_id', 'h.hed_code', 'h.hed_name', 'h.hed_unt_id',
+                'p.prj_id', 'p.prj_code', 'p.prj_title',
+                'u.unt_name', 'u.unt_namesh',
+            ]);
+
+        if (! $isHqUser) {
+            $query->whereBetween('h.hed_unt_id', [$lower, $upper]);
+        }
+        if ($unitId !== 'All' && $unitId !== null && $unitId !== '') {
+            $query->where('h.hed_unt_id', (int) $unitId);
+        }
+        if ($projectId !== 'All' && $projectId !== null && $projectId !== '') {
+            $query->where('p.prj_id', (int) $projectId);
+        }
+
+        $heads = $query->orderBy('u.unt_name')->orderBy('p.prj_code')->get();
+        $headIds = $heads->pluck('hed_id')->map(fn ($id) => (int) $id)->all();
+
+        // ---- Allocation & MTSS share (same source as the other finance reports) ----
+        $allocByHead = empty($headIds) ? collect() : DB::table('fin.transfers')
+            ->where('trf_type', 'FI')
+            ->where('trf_title', 'Project Funding')
+            ->whereIn('trf_tohed', $headIds)
+            ->groupBy('trf_tohed')
+            ->selectRaw('trf_tohed as hed, SUM(trf_amount) as amt')
+            ->pluck('amt', 'hed');
+
+        $mtssByHead = empty($headIds) ? collect() : DB::table('fin.transfers')
+            ->where('trf_type', 'FO')
+            ->where('trf_title', 'MTSS Share')
+            ->whereIn('trf_fromhed', $headIds)
+            ->groupBy('trf_fromhed')
+            ->selectRaw('trf_fromhed as hed, SUM(trf_amount) as amt')
+            ->pluck('amt', 'hed');
+
+        // ---- Subhead allocations ----
+        $subAllocRows = empty($headIds) ? collect() : DB::table('fin.subheads')
+            ->whereIn('sbh_hed_id', $headIds)
+            ->get(['sbh_hed_id', 'sbh_name', 'sbh_alloc']);
+
+        // ---- Subhead expenditure (same rules as FinancialIntelligenceService) ----
+        $subheadExpr = "COALESCE(NULLIF(TRIM(shd.subhead), ''), CASE WHEN c.cmt_type = 'Sa' THEN 'HR' ELSE NULL END)";
+        $subExpRows = empty($headIds) ? collect() : DB::table('fin.commitments as c')
+            ->join('fin.transactions as t', 'c.cmt_id', '=', 't.trn_cmt_id')
+            ->leftJoin('fin.docs_shd as shd', function ($join) {
+                $join->on('c.cmt_docid', '=', 'shd.doc_id')
+                     ->on('c.cmt_type', '=', 'shd.doc_type');
+            })
+            ->whereIn('c.cmt_hed_id', $headIds)
+            ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO'])
+            ->where(function ($q) {
+                $q->whereNull('c.cmt_sudohed')->orWhere('c.cmt_sudohed', '=', '');
+            })
+            ->groupBy('c.cmt_hed_id', DB::raw($subheadExpr))
+            ->select([
+                'c.cmt_hed_id',
+                DB::raw($subheadExpr . ' as subhead'),
+                DB::raw('SUM(ROUND((CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) * COALESCE(shd.ratio, 1.0), 2)) as total'),
+            ])
+            ->get();
+
+        // index: head => subhead => value
+        $allocMap = [];
+        foreach ($subAllocRows as $r) {
+            $allocMap[(int) $r->sbh_hed_id][trim((string) $r->sbh_name)] = (float) $r->sbh_alloc;
+        }
+
+        $expMap = [];
+        foreach ($subExpRows as $r) {
+            $hed = (int) $r->cmt_hed_id;
+            $name = trim((string) ($r->subhead ?? ''));
+            $known = array_keys($allocMap[$hed] ?? []);
+            if ($name === '' || ! in_array($name, $known, true)) {
+                $name = 'Misc'; // unmapped expenditure falls to Misc, as the service does
+            }
+            $expMap[$hed][$name] = ($expMap[$hed][$name] ?? 0.0) + round(abs((float) $r->total), 2);
+        }
+
+        // ---- Columns: every subhead present, Misc last ----
+        $subheadNames = [];
+        foreach ($allocMap as $perHead) {
+            foreach (array_keys($perHead) as $name) {
+                $subheadNames[$name] = true;
+            }
+        }
+        foreach ($expMap as $perHead) {
+            foreach (array_keys($perHead) as $name) {
+                $subheadNames[$name] = true;
+            }
+        }
+        $subheadNames = array_keys($subheadNames);
+        usort($subheadNames, function ($a, $b) {
+            if ($a === 'Misc') return 1;
+            if ($b === 'Misc') return -1;
+            return strcasecmp($a, $b);
+        });
+
+        // ---- Rows ----
+        $rows = [];
+        $totals = [
+            'allocation' => 0.0, 'mtss' => 0.0, 'nrdi' => 0.0, 'balance' => 0.0,
+            'subheads' => [],
+        ];
+        foreach ($subheadNames as $name) {
+            $totals['subheads'][$name] = ['allocated' => 0.0, 'expenditure' => 0.0, 'balance' => 0.0];
+        }
+
+        foreach ($heads as $h) {
+            $hedId = (int) $h->hed_id;
+            $allocation = (float) ($allocByHead[$hedId] ?? 0);
+            $mtss = (float) ($mtssByHead[$hedId] ?? 0);
+            $nrdi = $allocation - $mtss;
+
+            $subs = [];
+            $rowBalance = 0.0;
+            foreach ($subheadNames as $name) {
+                $a = (float) ($allocMap[$hedId][$name] ?? 0);
+                $e = (float) ($expMap[$hedId][$name] ?? 0);
+                $b = $a - $e;
+                $subs[$name] = ['allocated' => $a, 'expenditure' => $e, 'balance' => $b];
+                $rowBalance += $b;
+
+                $totals['subheads'][$name]['allocated']   += $a;
+                $totals['subheads'][$name]['expenditure'] += $e;
+                $totals['subheads'][$name]['balance']     += $b;
+            }
+
+            $rows[] = [
+                'division'   => $h->unt_namesh ?: ($h->unt_name ?: '—'),
+                'project'    => $h->prj_title ?: ($h->hed_name ?: $h->hed_code),
+                'code'       => $h->prj_code ?: $h->hed_code,
+                'allocation' => $allocation,
+                'mtss'       => $mtss,
+                'nrdi'       => $nrdi,
+                'subheads'   => $subs,
+                'balance'    => $rowBalance,
+            ];
+
+            $totals['allocation'] += $allocation;
+            $totals['mtss']       += $mtss;
+            $totals['nrdi']       += $nrdi;
+            $totals['balance']    += $rowBalance;
+        }
+
+        $unitName = 'All Divisions';
+        if ($unitId !== 'All' && $unitId !== null && $unitId !== '') {
+            $unitName = (string) DB::table('cen.units')->where('unt_id', (int) $unitId)->value('unt_name');
+        }
+
+        return view('fin.reports.alloc_subheads', [
+            'rows'         => $rows,
+            'subheadNames' => $subheadNames,
+            'totals'       => $totals,
+            'unitName'     => $unitName,
+            'generatedAt'  => now(),
+        ]);
     }
 }

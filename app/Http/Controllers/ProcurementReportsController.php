@@ -287,6 +287,7 @@ class ProcurementReportsController extends Controller
                     'a.ias_chargedate as charge_date',
                     'a.ias_price as price',
                     'a.ias_type',
+                    'a.ias_type2',
                     'a.ias_subtype as subtype',
                     'c.iac_parent_id as parent_item',
                     'c.iac_location as location',
@@ -303,11 +304,12 @@ class ProcurementReportsController extends Controller
                     'prj.prj_title as project_title'
                 );
 
-            // Category filter
+            // Category filter - Asset / Inventory class lives in ias_type2 (6 / 5),
+            // ias_type is only the nature of the item.
             if ($category === 'Assets' || $category === 'Asset') {
-                $query->where('a.ias_type', 7);
+                $query->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) = 6');
             } elseif ($category === 'Inventory') {
-                $query->where('a.ias_type', '!=', 7);
+                $query->whereRaw('COALESCE(a.ias_type2, CASE WHEN a.ias_type = 7 THEN 6 ELSE 5 END) <> 6');
             }
 
             // Status filter
@@ -364,7 +366,7 @@ class ProcurementReportsController extends Controller
                     'charge_denomination' => $r->charge_denomination ?: 'Nos',
                     'charge_date'         => $r->charge_date ?: 'N/A',
                     'price'               => (float)$r->price,
-                    'asset_inventory'     => (int)$r->ias_type === 7 ? 'Asset' : 'Inventory',
+                    'asset_inventory'     => (int)($r->ias_type2 ?? ((int)$r->ias_type === 7 ? 6 : 5)) === 6 ? 'Asset' : 'Inventory',
                     'subtype'             => $r->subtype ?: 'General',
                     'parent_item'         => $r->parent_item ? '#' . $r->parent_item : 'None',
                     'location'            => $r->location ?: 'Main Store',

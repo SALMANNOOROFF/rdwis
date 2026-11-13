@@ -276,6 +276,22 @@ $(function() {
             $('.badge-hr-parent').addClass('d-none');
             $('.badge-hr-child').addClass('d-none');
         }
+
+        // Case Files (E-Office), Fund Shifting and Salary Orders. These used to
+        // refresh only on a full page reload, so a case that had already been
+        // forwarded kept its red count until the officer reloaded the page.
+        applyBadge('.badge-gcs-child', badges.case_files);
+        applyBadge('.badge-fsh-child', badges.fund_shifting);
+        applyBadge('.badge-soc-child', badges.salary_cases);
+    }
+
+    function applyBadge(selector, value) {
+        const count = parseInt(value || 0, 10);
+        if (count > 0) {
+            $(selector).text(count).removeClass('d-none');
+        } else {
+            $(selector).addClass('d-none');
+        }
     }
 
     // Mark All As Read

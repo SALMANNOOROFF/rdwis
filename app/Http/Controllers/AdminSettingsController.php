@@ -238,6 +238,9 @@ class AdminSettingsController extends Controller
 
         $matrix = $rawMatrix ? (is_string($rawMatrix) ? json_decode($rawMatrix, true) : $rawMatrix) : $defaults;
 
+        $mdStageEnabled = (bool) SystemSetting::get('mpr_md_stage_enabled', false);
+        $allowClosedProjects = (bool) SystemSetting::get('mpr_allow_closed_projects', false);
+
         $mprStages = [
             'ProjectOfficer' => 'Project Investigator (PI / Division Initiator)',
             'SORD'           => 'Staff Officer R&D (SO R&D - Coordinator)',
@@ -245,7 +248,7 @@ class AdminSettingsController extends Controller
             'Accepted'       => 'Accepted & Finalized (Terminal Archive)',
         ];
 
-        return view('admin.mpr_workflow_settings', compact('matrix', 'mprStages'));
+        return view('admin.mpr_workflow_settings', compact('matrix', 'mprStages', 'mdStageEnabled', 'allowClosedProjects'));
     }
 
     /**
@@ -270,6 +273,12 @@ class AdminSettingsController extends Controller
             ];
             SystemSetting::set('mpr_workflow_matrix', json_encode($mprMatrix), 'Dynamic Workflow Matrix for MPR Reports');
         }
+
+        // Stage and scope switches
+        SystemSetting::set('mpr_md_stage_enabled', $request->boolean('mpr_md_stage_enabled') ? 1 : 0,
+            'MPR goes to MD after SORD when enabled');
+        SystemSetting::set('mpr_allow_closed_projects', $request->boolean('mpr_allow_closed_projects') ? 1 : 0,
+            'Allow MPR entry on completed / cancelled projects');
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([

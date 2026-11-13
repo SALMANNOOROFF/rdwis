@@ -88,6 +88,9 @@ class RolePermissionMap
 
             'SORD' => [
                 PermissionRegistry::PROJECT_VIEW,
+                // Projects are raised and published by SORD on behalf of divisions
+                PermissionRegistry::PROJECT_CREATE,
+                PermissionRegistry::PROJECT_EDIT,
                 PermissionRegistry::MPR_VIEW,
                 PermissionRegistry::MPR_REVIEW,
                 PermissionRegistry::MPR_RETURN,
@@ -102,7 +105,6 @@ class RolePermissionMap
 
             'DEPT_DIRECTOR_RD' => [
                 PermissionRegistry::PROJECT_VIEW,
-                PermissionRegistry::PROJECT_CREATE,
                 PermissionRegistry::PROJECT_EDIT,
                 PermissionRegistry::PURCHASE_VIEW,
                 PermissionRegistry::PURCHASE_CREATE,
@@ -123,7 +125,6 @@ class RolePermissionMap
 
             'DIV_DIRECTOR' => [
                 PermissionRegistry::PROJECT_VIEW,
-                PermissionRegistry::PROJECT_CREATE,
                 PermissionRegistry::PROJECT_EDIT,
                 PermissionRegistry::PURCHASE_VIEW,
                 PermissionRegistry::PURCHASE_CREATE,
@@ -152,7 +153,6 @@ class RolePermissionMap
 
             'DIV_OFFICER' => [
                 PermissionRegistry::PROJECT_VIEW,
-                PermissionRegistry::PROJECT_CREATE,
                 PermissionRegistry::PROJECT_EDIT,
                 PermissionRegistry::PURCHASE_VIEW,
                 PermissionRegistry::PURCHASE_CREATE,
@@ -266,6 +266,11 @@ class RolePermissionMap
             ],
 
             'IT_ADMIN' => [
+                PermissionRegistry::SYSLOG_VIEW,
+                PermissionRegistry::SYSLOG_VIEW_ALL,
+                PermissionRegistry::SYSLOG_EXPORT,
+                PermissionRegistry::SYSLOG_VERIFY,
+                PermissionRegistry::SYSLOG_RESTORE,
                 PermissionRegistry::ADMIN_SETTINGS_MANAGE,
                 PermissionRegistry::ADMIN_USERS_VIEW,
                 PermissionRegistry::ADMIN_USERS_MANAGE,
@@ -284,6 +289,9 @@ class RolePermissionMap
             ],
 
             'IT_OFFICER' => [
+                PermissionRegistry::SYSLOG_VIEW,
+                PermissionRegistry::SYSLOG_VIEW_ALL,
+                PermissionRegistry::SYSLOG_EXPORT,
                 PermissionRegistry::PURCHASE_VIEW,
                 PermissionRegistry::CONTRACT_VIEW,
                 PermissionRegistry::SUPPORT_TICKET_CREATE,
@@ -299,7 +307,6 @@ class RolePermissionMap
 
             'ADMIN_DEPT' => [
                 PermissionRegistry::PROJECT_VIEW,
-                PermissionRegistry::PROJECT_CREATE,
                 PermissionRegistry::PROJECT_EDIT,
                 PermissionRegistry::PURCHASE_VIEW,
                 PermissionRegistry::PURCHASE_CREATE,

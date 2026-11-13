@@ -581,6 +581,22 @@ class DivHrController extends Controller
         }
 
         $attachments = DB::table('hr.empattachments')->where('eat_objid', $id)->get();
+
+        // Documents attached to this employee's hiring / renewal / extension cases.
+        // They belong to the case, but must be visible on the employee profile too.
+        $caseAttachments = DB::table('hr.ctrcaseattachments as a')
+            ->join('hr.ctrcases as c', 'c.ctc_id', '=', 'a.cat_objid')
+            ->where('a.cat_objtype', 'ctc')
+            ->where('c.ctc_emp_id', $id)
+            ->whereNotNull('a.cat_path')
+            ->where('a.cat_path', '<>', '')
+            ->orderByDesc('c.ctc_date')
+            ->orderByDesc('a.cat_id')
+            ->select([
+                'a.cat_id', 'a.cat_type', 'a.cat_path',
+                'c.ctc_id', 'c.ctc_type', 'c.ctc_date', 'c.ctc_status',
+            ])
+            ->get();
         $canEdit = $this->checkCanEditEmployee(Auth::user());
 
         $salaryContracts = DB::table('hr.contracts as c')
@@ -681,6 +697,7 @@ class DivHrController extends Controller
             'jobs',
             'yearsInService',
             'attachments',
+            'caseAttachments',
             'canEdit',
             'currentContractPlans',
             'distinctPlanCount',

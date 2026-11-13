@@ -41,3 +41,6 @@ __pycache__/
 
 # Runtime backup logs
 storage_backup_latest_log.txt
+
+# local .env backups (never commit: they hold credentials)
+.env.backup*

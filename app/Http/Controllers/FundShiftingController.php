@@ -111,11 +111,14 @@ class FundShiftingController extends Controller
             } elseif ($stage === 'IT') {
                 return in_array($userArea, ['it', 'is'], true) || $user->isCentralDepartment();
             } elseif ($stage === 'MD') {
-                return $user->isMd();
+                // isMd()/isDdg()/isDg() live on UserAccessContext, not on the
+                // CenAccount model - calling them on $user threw a
+                // BadMethodCallException for stage-only (unassigned) cases.
+                return \App\Services\Auth\UserAccessContext::forUser($user)->isMd();
             } elseif ($stage === 'DDG') {
-                return $user->isDdg();
+                return \App\Services\Auth\UserAccessContext::forUser($user)->isDdg();
             } elseif ($stage === 'DG') {
-                return $user->isDg();
+                return \App\Services\Auth\UserAccessContext::forUser($user)->isDg();
             } elseif ($stage === 'DLOG') {
                 return (method_exists($user, 'isDlog') && $user->isDlog()) || in_array($userArea, ['log', 'dlog']);
             }
@@ -257,6 +260,76 @@ class FundShiftingController extends Controller
             'destinations',
             'attachments'
         ));
+    }
+
+    /**
+     * Render printable official A4 case sheet for Fund Shifting case.
+     */
+    public function printCase(int $id): View
+    {
+        $shift = FundShift::with(['project.unit', 'head', 'unit', 'creator', 'implementer', 'decisionsAsc'])
+            ->findOrFail($id);
+
+        $subheads = $this->shiftingService->getSubheadsForHead($shift->fsh_hed_id);
+        $attachments = \Illuminate\Support\Facades\DB::table('ina.inaattachments')
+            ->where('iat_objid', $shift->fsh_id)
+            ->orderBy('iat_id')
+            ->get();
+
+        // Chronological seat-wise remarks trail
+        $remarksList = $shift->decisionsAsc
+            ->where('fsd_action', '!=', 'Draft Created')
+            ->values()
+            ->map(function ($d) {
+                $actLower = strtolower(trim((string) $d->fsd_action));
+                $tone = 'normal';
+                if (str_contains($actLower, 'approv') || str_contains($actLower, 'implement')) {
+                    $tone = 'approve';
+                } elseif (str_contains($actLower, 'return')) {
+                    $tone = 'return';
+                } elseif (str_contains($actLower, 'reject') || str_contains($actLower, 'cancel')) {
+                    $tone = 'reject';
+                }
+
+                $actionLabel = $d->fsd_action . (!empty($d->fsd_to_stage) && !in_array($actLower, ['implemented by it', 'cancelled'], true) ? " → {$d->fsd_to_stage}" : '');
+
+                return [
+                    'actor'     => $d->fsd_user_name ?: 'Authorized Officer',
+                    'seat'      => strtoupper(trim((string) ($d->fsd_role ?: ($d->fsd_user_desig ?: 'Officer')))),
+                    'action'    => $actionLabel,
+                    'tone'      => $tone,
+                    'timestamp' => $d->fsd_dtg ? $d->fsd_dtg->format('d M Y, h:i A') : '—',
+                    'remarks'   => $d->fsd_remarks ?? '',
+                ];
+            })
+            ->all();
+
+        // Enclosures from ina.inaattachments
+        $enclosuresList = [];
+        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+        foreach ($attachments->filter(fn($a) => !empty(trim((string)$a->iat_path))) as $att) {
+            $normPath = str_replace('\\', '/', (string)$att->iat_path);
+            $fn = basename($normPath);
+            $ext = strtolower(pathinfo($normPath, PATHINFO_EXTENSION));
+            $label = trim((string)($att->iat_type ?: '')) ?: $fn;
+            $uploadedBy = null;
+            if (!empty($att->iat_acc_id)) {
+                $uploadedBy = \Illuminate\Support\Facades\DB::table('cen.accounts')->where('acc_id', $att->iat_acc_id)->value('acc_name');
+            }
+
+            $enclosuresList[] = [
+                'title'       => $label,
+                'filename'    => $fn,
+                'source'      => 'Fund Shifting Attachment',
+                'uploaded_by' => $uploadedBy ?: ($shift->fsh_created_name ?: ($shift->creator->acc_name ?? 'Initiator')),
+                'meta'        => strtoupper($ext ?: 'FILE'),
+                'url'         => route('universal.attachment.view', ['module' => 'ina', 'id' => $att->iat_id]),
+                'is_image'    => in_array($ext, $imageExts, true),
+                'is_pdf'      => $ext === 'pdf',
+            ];
+        }
+
+        return view('fund_shifting.print', compact('shift', 'subheads', 'remarksList', 'enclosuresList'));
     }
 
     /**

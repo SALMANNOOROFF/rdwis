@@ -649,9 +649,9 @@
 
         {{-- Official Sheet Header --}}
         <div class="sheet-header">
-            <div class="sheet-crest">Government of Balochistan &bull; Rural Development & Water Intervention Schemes</div>
-            <div class="sheet-main-title">RURAL DEVELOPMENT & WATER INTERVENTION SCHEMES (RDWIS 2.0)</div>
-            <div class="sheet-sub-title">SO IT RESOLVE DESK &mdash; COMPLAINTS & GRIEVANCE ACTION REGISTER</div>
+            <div class="sheet-crest">RDWIS 2.0)</div>
+            <div class="sheet-main-title">RESARCH AND DEVELOPMENT WING INFORMATION SYSTEM (RDWIS 2.0)</div>
+            <div class="sheet-sub-title">SO IT RESOLVE DESK &mdash; COMPLAINTS & SUGGESTIONS </div>
             
             <div class="sheet-meta-bar">
                 <div class="sheet-meta-item">

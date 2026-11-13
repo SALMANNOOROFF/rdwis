@@ -230,6 +230,7 @@
                     <option value="accounts_status">Accounts Status</option>
                     <option value="proj_shares_status">Proj Shares Status</option>
                     <option value="subheads_status">Subheads Status</option>
+                    <option value="alloc_subhead_status">Allocations and Subhead Statuses</option>
                     <option value="csrf_status">CSRF Status</option>
                     <option value="monthly_return">Monthly Return</option>
                     <option value="pcs_awaiting_payment">PCs Awaiting Payment</option>
@@ -1205,6 +1206,9 @@
             } else if (reportType === 'csrf_status') {
                 $('#btn-print-official').removeClass('d-none').attr('href', '{{ route("fin.reports.print_csrf_status") }}');
                 $('#btn-print-official').html('<i class="fas fa-print mr-1"></i> Print CSRF Status Sheet');
+            } else if (reportType === 'alloc_subhead_status') {
+                $('#btn-print-official').removeClass('d-none').attr('href', '{{ route("fin.reports.print_alloc_subheads") }}');
+                $('#btn-print-official').html('<i class="fas fa-table mr-1"></i> Open Allocations &amp; Subheads Sheet');
             } else {
                 $('#btn-print-official').addClass('d-none');
             }
@@ -1222,10 +1226,14 @@
                 base = '{{ route("fin.reports.print_monthly_return") }}';
             } else if (reportType === 'csrf_status') {
                 base = '{{ route("fin.reports.print_csrf_status") }}';
+            } else if (reportType === 'alloc_subhead_status') {
+                base = '{{ route("fin.reports.print_alloc_subheads") }}';
             }
             if (base) {
                 const qs = new URLSearchParams();
                 if (divId && divId !== 'All') qs.set('unit_id', divId);
+                const prjId = $('#project-dropdown').val();
+                if (prjId && prjId !== 'All') qs.set('project_id', prjId);
                 const startDt = $('#start-date').val();
                 if (startDt) qs.set('month', startDt);
                 const fullUrl = qs.toString() ? (base + '?' + qs.toString()) : base;

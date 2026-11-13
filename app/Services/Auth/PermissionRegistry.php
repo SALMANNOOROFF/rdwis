@@ -76,12 +76,26 @@ class PermissionRegistry
     public const REVERSAL_RETURN = 'reversal.return';
     public const REVERSAL_CANCEL = 'reversal.cancel';
 
+    // System Logs (audit trail) permissions -- read-only by design.
+    // There is deliberately no "edit" or "delete" permission: the trail is append-only
+    // at the database level too (syslog deny-triggers + privileges).
+    public const SYSLOG_VIEW = 'syslog.view';
+    public const SYSLOG_VIEW_ALL = 'syslog.view_all';
+    public const SYSLOG_EXPORT = 'syslog.export';
+    public const SYSLOG_VERIFY = 'syslog.verify';
+    public const SYSLOG_RESTORE = 'syslog.restore';
+
     /**
      * All registered permissions in the system.
      */
     public static function all(): array
     {
         return [
+            self::SYSLOG_VIEW,
+            self::SYSLOG_VIEW_ALL,
+            self::SYSLOG_EXPORT,
+            self::SYSLOG_VERIFY,
+            self::SYSLOG_RESTORE,
             self::REVERSAL_VIEW,
             self::REVERSAL_INITIATE,
             self::REVERSAL_RELEASE,

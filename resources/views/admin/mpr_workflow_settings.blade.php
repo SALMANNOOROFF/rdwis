@@ -121,6 +121,39 @@
         <form action="{{ route('admin.settings.workflows_mpr.update') }}" method="POST" id="mprWorkflowForm">
             @csrf
 
+            {{-- Stage & scope switches --}}
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px; background: #ffffff; border: 1.5px solid #e2e8f0 !important;">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-md-6 mb-2 mb-md-0">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="mprMdStage"
+                                       name="mpr_md_stage_enabled" value="1" {{ ($mdStageEnabled ?? false) ? 'checked' : '' }}>
+                                <label class="custom-control-label font-weight-bold text-dark" for="mprMdStage">
+                                    MD stage enabled
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-1" style="font-size: 11.5px;">
+                                On: after SO R&amp;D the MPR goes to <strong>MD</strong>, and MD sees it in
+                                <code>/md/mpr-inbox</code>. Off: SO R&amp;D finalizes it.
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="mprClosedPrj"
+                                       name="mpr_allow_closed_projects" value="1" {{ ($allowClosedProjects ?? false) ? 'checked' : '' }}>
+                                <label class="custom-control-label font-weight-bold text-dark" for="mprClosedPrj">
+                                    MPR allowed on closed projects
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-1" style="font-size: 11.5px;">
+                                On: Completed / Cancelled projects can still raise an MPR. Off: MPR entry is blocked for them.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 {{-- STEP 1: Project Investigator --}}
                 <div class="col-md-4 mb-4">

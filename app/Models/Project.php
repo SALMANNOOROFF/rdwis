@@ -17,6 +17,32 @@ class Project extends Model
     public function getHorizonColumn()
     {
         return 'prj_unt_id';
+    }
+
+    /**
+     * A project is raised by SORD and stays a "Draft" until SORD publishes it.
+     * Until then the owning division must not see it anywhere in the system,
+     * so drafts are filtered out for everyone except SORD / Super Admin.
+     *
+     * Escape hatch: Project::withoutGlobalScope('published')
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('published', function ($query) {
+            if (! \Illuminate\Support\Facades\Auth::check()) {
+                return; // console commands, jobs, migrations
+            }
+
+            $context = \App\Services\Auth\UserAccessContext::forUser(\Illuminate\Support\Facades\Auth::user());
+            if ($context->isSuperAdmin() || $context->isSord()) {
+                return;
+            }
+
+            $query->where(function ($q) {
+                $q->whereNull('prj_status')
+                  ->orWhereRaw("LOWER(TRIM(prj_status)) <> 'draft'");
+            });
+        });
     } 
 
     protected $fillable = [
@@ -24,10 +50,21 @@ class Project extends Model
         'prj_cost',
         'prj_startdt',
         'prj_enddt',
+        'prj_estenddt',
+        'prj_rcptdt',
+        'prj_assigndt',
+        'prj_propdt',
+        'prj_aprvdt',
         'prj_unt_id',
-    
-        'prj_title',  'prj_scope', 'prj_sponsor', 'prj_status',
-         'prj_reporting', 'prj_code', 'prj_propcost', 'prj_aprvcost'
+        'prj_scope',
+        'prj_sponsor',
+        'prj_status',
+        'prj_reporting',
+        'prj_code',
+        'prj_propcost',
+        'prj_aprvcost',
+        'prj_rem',
+        'prj_notes'
     ];
 
     // Relationships

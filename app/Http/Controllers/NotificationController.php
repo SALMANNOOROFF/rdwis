@@ -33,6 +33,8 @@ class NotificationController extends Controller
                 'hr'             => $badges['hr'],
                 'hired_emps'     => $badges['hr'],
                 'case_files'     => $badges['gcs'] ?? 0,
+                'fund_shifting'  => $badges['fsh'] ?? 0,
+                'salary_cases'   => $badges['soc'] ?? 0,
             ]
         ]);
     }

@@ -900,6 +900,9 @@ textarea::-webkit-scrollbar-thumb:hover {
                             <span class="font-weight-bold text-dark rajdhani" style="font-size: 16.5px; letter-spacing: 0.5px;">{{ $empName }}</span>
                         </div>
                         <div class="dg-box-hdr-right d-flex align-items-center gap-2">
+                            <a href="{{ route('contract-cases.print', $case->ctc_id) }}" target="_blank" class="btn btn-sm font-weight-bold rajdhani d-inline-flex align-items-center" style="background: #0f172a; color: #ffffff; border: 1px solid #334155; font-size: 11.5px; letter-spacing: 0.6px; padding: 5px 12px; border-radius: 6px; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.12); text-decoration: none;" title="Print Case Details, Remarks & Attachments">
+                                <i class="fas fa-print"></i> PRINT CASE
+                            </a>
                             <span class="badge border font-weight-bold px-3 py-1.5 rajdhani" style="font-size: 13px; letter-spacing: 0.5px; background: #ffffff; color: #0f172a; border-color: #cbd5e1 !important;">
                                 <i class="fas fa-tags text-primary mr-1"></i>
                                 @if($isHiring)

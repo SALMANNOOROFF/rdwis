@@ -562,6 +562,9 @@
                                     <i class="fas fa-pen"></i>
                                 </button>
                             @endif
+                            <a href="{{ route('nrdi.purchase_cases_new.print', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action rajdhani" style="border: 1px solid #334155 !important; background: #0f172a !important; color: #ffffff !important;" title="Print Case Details, Remarks & Attachments">
+                                <i class="fas fa-print mr-1"></i> PRINT CASE
+                            </a>
                             <a href="{{ route('purchase.case_detail', $purchase->pcs_id) }}" target="_blank" class="btn-hdr-action btn-hdr-case-detail rajdhani">
                                 <i class="fas fa-list-alt mr-1"></i> CASE DETAIL
                             </a>

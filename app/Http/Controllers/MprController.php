@@ -24,20 +24,44 @@ class MprController extends Controller
             abort(403, 'Unauthorized. SORD access required.');
         }
 
-        // Organizational Seat Logic:
-        // Shows all documents held by current SORD or in active SORD workflow statuses
-        $documents = Document::with(['project', 'creator.unit', 'latestVersion'])
-                             ->where(function($query) use ($user) {
-                                 $query->where('current_owner_id', $user->acc_id)
-                                       ->orWhere('status', 'Returned')
-                                       ->orWhere('status', 'Under Review by SORD')
-                                       ->orWhere('status', 'Submitted to SORD')
-                                       ->orWhere('status', 'Pending Review');
-                             })
-                             ->orderBy('updated_at', 'desc')
-                             ->get();
+        return $this->levelInbox($user, 'MPR Inbox — SO R&D');
+    }
 
-        return view('SORD.mpr_inbox', compact('documents'));
+    /**
+     * MPR inbox for whichever route stop the officer sits on (legacy engine).
+     * Lists the prj.prghistory rows parked at this level.
+     */
+    private function levelInbox($user, string $title)
+    {
+        $route = app(\App\Services\MprRouteService::class);
+        $myLevel = (int) ($user->acc_level ?? 0);
+
+        $rows = DB::table('prj.prghistory as h')
+            ->join('prj.projects as p', 'p.prj_id', '=', 'h.pgh_xprj_id')
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'p.prj_unt_id')
+            ->where('h.pgh_level', $myLevel)
+            ->whereRaw("LOWER(TRIM(h.pgh_status)) NOT IN ('finalized','cancelled','edited')")
+            ->orderByDesc('h.pgh_dtg')->orderByDesc('h.pgh_id')
+            ->select([
+                'h.pgh_id', 'h.pgh_xprj_id', 'h.pgh_group', 'h.pgh_status', 'h.pgh_author',
+                'h.pgh_dtg', 'h.pgh_trail', 'h.pgh_progress',
+                'p.prj_code', 'p.prj_title', 'u.unt_namesh',
+            ])
+            ->get();
+
+        $trail = DB::table('prj.prghistory_trail')
+            ->whereIn('pgt_pgh_id', $rows->pluck('pgh_id'))
+            ->orderByDesc('pgt_dtg')
+            ->get()
+            ->groupBy('pgt_pgh_id');
+
+        return view('SORD.mpr_inbox_legacy', [
+            'rows'    => $rows,
+            'trail'   => $trail,
+            'title'   => $title,
+            'myLevel' => $myLevel,
+            'route'   => $route,
+        ]);
     }
 
     // 2. Review Page (UPDATED: Locking Logic)
@@ -74,12 +98,20 @@ class MprController extends Controller
         $user = Auth::user();
         if (!$user) return redirect()->route('login');
 
-        $context = \App\Services\Auth\UserAccessContext::forUser($user);
-        if (!$context->isSuperAdmin() && !\App\Services\Auth\RolePermissionMap::hasPermission($user, \App\Services\Auth\PermissionRegistry::MPR_REVIEW)) {
-            abort(403, 'Unauthorized to perform SORD MPR action.');
-        }
         $docId = $request->doc_id;
         $action = $request->action;
+
+        $docForCheck = Document::find($docId);
+        $atMdStage = $docForCheck && ($docForCheck->doc_stage === 'MD' || $docForCheck->status === 'Forwarded to MD');
+
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        $mayAct = $context->isSuperAdmin()
+            || \App\Services\Auth\RolePermissionMap::hasPermission($user, \App\Services\Auth\PermissionRegistry::MPR_REVIEW)
+            || ($atMdStage && $context->isMd());
+
+        if (! $mayAct) {
+            abort(403, 'Unauthorized to perform this MPR action.');
+        }
 
         return DB::transaction(function () use ($request, $user, $docId, $action) {
             
@@ -112,18 +144,51 @@ class MprController extends Controller
                 'action_date' => now()
             ]);
 
+            $stage = $document->doc_stage ?: 'SORD';
+            $mdEnabled = (bool) \App\Models\SystemSetting::get('mpr_md_stage_enabled', false);
+
             if ($action == 'save') {
-                $document->status = 'Under Review by SORD';
+                $document->status = ($stage === 'MD') ? 'Forwarded to MD' : 'Under Review by SORD';
                 $document->save();
                 $msg = 'Draft saved successfully.';
-            } 
+            }
+            elseif ($action == 'forward' && $stage === 'SORD' && $mdEnabled) {
+                // MD stage is switched on: hand the file to MD instead of finalizing here.
+                $md = \App\Models\User::whereRaw("upper(trim(coalesce(acc_desigshort,''))) in ('MD','MD RDW')")
+                        ->orWhereRaw("upper(coalesce(acc_desig,'')) like '%MANAGING DIRECTOR%'")
+                        ->first();
+
+                $document->current_owner_id = $md->acc_id ?? $user->acc_id;
+                $document->status = 'Forwarded to MD';
+                $document->doc_stage = 'MD';
+                $document->save();
+
+                DocumentHistory::create([
+                    'doc_id' => $docId,
+                    'from_user_id' => $user->acc_id,
+                    'to_user_id' => $md->acc_id ?? $user->acc_id,
+                    'action_type' => 'Forwarded MD',
+                    'notes' => $request->remarks,
+                    'created_at' => now(),
+                    'stage' => 'MD',
+                ]);
+                $msg = 'MPR forwarded to MD.';
+            }
             elseif ($action == 'forward') {
                 // Forward Logic...
                 // FIX: Don't set owner to 0 as it violates FK. Keep it as current user (SORD) or use NULL if allowed.
                 // Assuming keeping it as SORD user is safer for now, status 'Finalized' will prevent edits.
-                $document->current_owner_id = $user->acc_id; 
+                $document->current_owner_id = $user->acc_id;
                 $document->status = 'Finalized';
+                $document->doc_stage = 'Accepted';
+                $document->doc_finalized_at = now();
                 $document->save();
+
+                // Legacy parity: the finalized progress goes back into the project remarks.
+                $finalText = trim((string) ($contentData['mpr_content'] ?? ''));
+                if ($finalText !== '') {
+                    DB::table('prj.projects')->where('prj_id', $document->prj_id)->update(['prj_rem' => $finalText]);
+                }
                 
                 DocumentHistory::create([
                     'doc_id' => $docId,
@@ -139,6 +204,7 @@ class MprController extends Controller
                 // Return Logic
                 $document->current_owner_id = $document->creator_id; // Wapis Division ko
                 $document->status = 'Returned'; // Status set
+                $document->doc_stage = 'ProjectOfficer';
                 $document->save();
 
                 DocumentHistory::create([
@@ -309,6 +375,31 @@ class MprController extends Controller
 
 
     // 5. Global MPR Log (New)
+    /**
+     * MD inbox - only when the MD stage is switched on in Admin -> Settings -> Workflows (MPR).
+     */
+    /**
+     * MD inbox - MD only sees MPRs when its level is part of the route
+     * (cen.globalvars.mpr_route, e.g. "-19-25-(29)-").
+     */
+    public function mdInbox()
+    {
+        $user = Auth::user();
+        if (!$user) return redirect()->route('login');
+
+        $context = \App\Services\Auth\UserAccessContext::forUser($user);
+        if (! $context->isSuperAdmin() && ! $context->isMd()) {
+            abort(403, 'Unauthorized. MD access required.');
+        }
+
+        $route = app(\App\Services\MprRouteService::class);
+        if (! $route->isOnRoute((int) ($user->acc_level ?? 0))) {
+            return redirect('/')->with('error', 'MD is not part of the MPR route (' . $route->describe() . '). Add the MD level to mpr_route in settings to switch this on.');
+        }
+
+        return $this->levelInbox($user, 'MPR Inbox — MD');
+    }
+
     public function sordLog()
     {
         // Fetch all history related to MPRs (Forwarded or Returned)

@@ -291,6 +291,7 @@ class DashboardController extends Controller
 
         $divisionParam = $request->query('division', 'all');
         $projectParam = $request->query('project_id');
+        $statusScope = strtolower(trim((string) $request->query('status_scope', 'all'))); // 'all' | 'active' | 'completed'
 
         $allDivisions = DB::table('cen.units')
             ->where('unt_type', 'Division')
@@ -333,236 +334,255 @@ class DashboardController extends Controller
         if (! $selectedProject) {
             if (is_numeric($divisionParam)) {
                 $selectedUnitIds = [(int) $divisionParam];
+            } elseif ($divisionParam !== 'all' && !empty($divisionParam)) {
+                $matchedDiv = $allDivisions->first(function($d) use ($divisionParam) {
+                    return strcasecmp((string)$d->unt_namesh, (string)$divisionParam) === 0 || strcasecmp((string)$d->unt_name, (string)$divisionParam) === 0;
+                });
+                if ($matchedDiv) {
+                    $selectedUnitIds = [(int) $matchedDiv->unt_id];
+                } else {
+                    $selectedUnitIds = $allDivisions->pluck('unt_id')->map(fn ($v) => (int) $v)->values()->all();
+                }
             } else {
                 $divisionParam = 'all';
                 $selectedUnitIds = $allDivisions->pluck('unt_id')->map(fn ($v) => (int) $v)->values()->all();
             }
         }
 
-        $closedProjectStatuses = ['Closed', 'Completed'];
-        $pendingCaseStatuses = ['Draft', 'Under Scrutiny', 'In Progress', 'Under Approval', 'Under Revision'];
-        $reviewedCaseStatuses = ['Approved', 'Fulfilled', 'Completed'];
-
-        $budgetReceivedQuery = DB::table('prj.projects');
-        $utilizedQuery = DB::table('pur.purcases');
-        $creditQuery = DB::table('pur.purcases');
+        // Fetch Heads and Projects in the current scope
+        $headsQuery = DB::table('cen.heads as h')
+            ->join('prj.projects as p', 'p.prj_id', '=', 'h.hed_prj_id')
+            ->leftJoin('cen.units as u', 'u.unt_id', '=', 'h.hed_unt_id')
+            ->whereBetween('h.hed_unt_id', [$lower, $upper]);
 
         if ($selectedProject) {
-            $budgetReceivedQuery->where('prj_id', $selectedProject['id']);
-            $utilizedQuery->where('pcs_hed_id', $selectedProject['id']);
-            $creditQuery->where('pcs_hed_id', $selectedProject['id']);
-        } else {
-            $budgetReceivedQuery->whereIn('prj_unt_id', $selectedUnitIds);
-            $utilizedQuery->whereIn('pcs_unt_id', $selectedUnitIds);
-            $creditQuery->whereIn('pcs_unt_id', $selectedUnitIds);
+            $headsQuery->where('p.prj_id', $selectedProject['id']);
+        } elseif (!empty($selectedUnitIds)) {
+            $headsQuery->whereIn('h.hed_unt_id', $selectedUnitIds);
         }
 
-        $budgetReceived = (float) $budgetReceivedQuery->sum('prj_aprvcost');
-        $utilized = (float) $utilizedQuery->sum('pcs_price');
+        if ($statusScope === 'active') {
+            $headsQuery->whereNotIn(DB::raw('LOWER(TRIM(COALESCE(p.prj_status, \'\')))'), ['closed', 'completed']);
+        } elseif ($statusScope === 'completed') {
+            $headsQuery->whereIn(DB::raw('LOWER(TRIM(COALESCE(p.prj_status, \'\')))'), ['closed', 'completed']);
+        }
 
-        $remaining = max(0, $budgetReceived - $utilized);
+        $heads = $headsQuery->select(
+            'h.hed_id', 'h.hed_prj_id', 'h.hed_code', 'h.hed_unt_id',
+            'p.prj_title', 'p.prj_code', 'p.prj_status', 'p.prj_startdt', 'p.prj_estenddt', 'p.prj_aprvcost',
+            'u.unt_namesh', 'u.unt_name'
+        )->get();
 
-        $creditTaken = (float) $creditQuery
-            ->where('pcs_noloan', false)
-            ->sum('pcs_intprice');
+        $headIds = $heads->pluck('hed_id')->toArray();
+        $prjIds = $heads->pluck('hed_prj_id')->unique()->toArray();
 
-        if ($selectedProject) {
-            $employeesTotal = (int) DB::table('cen.heads as h')
-                ->leftJoin('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
-                ->where('h.hed_prj_id', $selectedProject['id'])
-                ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current'])
-                ->count('e.emp_id');
+        // 1. Allocations & MTSS
+        $allocations = (float) DB::table('fin.transfers')
+            ->where('trf_type', 'FI')
+            ->where('trf_title', 'Project Funding')
+            ->whereIn('trf_tohed', $headIds)
+            ->sum('trf_amount');
 
-            $employeesHired = (int) DB::table('cen.heads as h')
-                ->leftJoin('hr.emps as e', 'e.emp_hed_id', '=', 'h.hed_id')
-                ->where('h.hed_prj_id', $selectedProject['id'])
-                ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current'])
-                ->where('e.emp_joindt', '>=', now()->subYear()->toDateString())
-                ->count('e.emp_id');
-        } else {
-            $employeesTotal = (int) DB::table('hr.emps')
+        $mtss = (float) DB::table('fin.transfers')
+            ->where('trf_type', 'FO')
+            ->where('trf_title', 'MTSS Share')
+            ->whereIn('trf_fromhed', $headIds)
+            ->sum('trf_amount');
+
+        $mtssReceived = (float) DB::table('fin.sharesinstall as si')
+            ->join('fin.transactions as t', 't.trn_id', '=', 'si.shi_fotrn_id')
+            ->whereIn('si.shi_hed_id', $headIds)
+            ->sum(DB::raw('COALESCE(t.trn_amount2, 0) * -1'));
+
+        $mtssPending = max(0, $mtss - $mtssReceived);
+
+        $shares = DB::table('fin.sharesalloc')->whereIn('sha_hed_id', $headIds)->select(
+            DB::raw('COALESCE(SUM(sha_cf), 0) as total_cf'),
+            DB::raw('COALESCE(SUM(sha_pcc), 0) as total_pcc'),
+            DB::raw('COALESCE(SUM(sha_prj), 0) as total_prj')
+        )->first();
+
+        $totalAllocation = $allocations > 0 ? $allocations : (float) $heads->sum('prj_aprvcost');
+        $totalMtss = $mtss;
+        $totalRdw = max(0, $totalAllocation - $totalMtss);
+        $csrfShare = (float) ($shares->total_cf ?? 0);
+        $pccShare = (float) ($shares->total_pcc ?? 0);
+        if ($pccShare <= 0) $pccShare = $totalRdw;
+
+        // 2. Expenditures
+        $expenditures = DB::table('fin.commitments as c')
+            ->join('fin.transactions as t', 'c.cmt_id', '=', 't.trn_cmt_id')
+            ->whereIn('c.cmt_effhed_id', $headIds)
+            ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO'])
+            ->select(
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NULL OR c.cmt_sudohed = '') THEN (CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) ELSE 0 END) * -1, 0) as pcc_exp"),
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NOT NULL AND c.cmt_sudohed <> '' AND c.cmt_type <> 'TO') THEN (CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) ELSE 0 END) * -1, 0) as cf_exp"),
+                DB::raw("COALESCE(SUM(CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) * -1, 0) as total_exp")
+            )->first();
+
+        // 3. Outstanding Commitments
+        $paidSub = DB::table('fin.transactions as t')
+            ->select('t.trn_cmt_id', DB::raw('SUM(CASE WHEN t.trn_transtype = 1 THEN COALESCE(t.trn_amount1, 0) ELSE COALESCE(t.trn_amount2, 0) END) as paid'))
+            ->groupBy('t.trn_cmt_id');
+
+        $commitments = DB::table('fin.commitments as c')
+            ->leftJoinSub($paidSub, 'p', 'c.cmt_id', '=', 'p.trn_cmt_id')
+            ->whereIn('c.cmt_effhed_id', $headIds)
+            ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa'])
+            ->where('c.cmt_status', 'Awaited')
+            ->select(
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NULL OR c.cmt_sudohed = '') THEN (c.cmt_amount - COALESCE(p.paid, 0)) ELSE 0 END) * -1, 0) as pcc_cmt"),
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NOT NULL AND c.cmt_sudohed <> '') THEN (c.cmt_amount - COALESCE(p.paid, 0)) ELSE 0 END) * -1, 0) as cf_cmt"),
+                DB::raw("COALESCE(SUM(c.cmt_amount - COALESCE(p.paid, 0)) * -1, 0) as total_cmt")
+            )->first();
+
+        // 4. In Process (from fin.docs_ipc)
+        $inProc = DB::table('fin.docs_ipc')
+            ->whereIn('effhed_id', $headIds)
+            ->select(
+                DB::raw("COALESCE(SUM(CASE WHEN (sudohed IS NULL OR sudohed = '') THEN (CASE WHEN transtype = 1 THEN amount1 ELSE amount2 END) ELSE 0 END), 0) as pcc_in_process"),
+                DB::raw("COALESCE(SUM(CASE WHEN (sudohed IS NOT NULL AND sudohed <> '') THEN (CASE WHEN transtype = 1 THEN amount1 ELSE amount2 END) ELSE 0 END), 0) as cf_in_process"),
+                DB::raw("COALESCE(SUM(CASE WHEN transtype = 1 THEN amount1 ELSE amount2 END), 0) as total_in_process")
+            )->first();
+
+        // 5. Staff Statistics
+        if ($statusScope === 'completed') {
+            $divStaff = (int) DB::table('hr.emps')
+                ->whereIn('emp_hed_id', $headIds)
+                ->whereRaw("LOWER(emp_status) IN ('active','current')")
+                ->count();
+            $csrfStaff = 0;
+            $totalStaff = $divStaff;
+        } elseif ($statusScope === 'active') {
+            $completedHeadIds = DB::table('cen.heads as h')
+                ->join('prj.projects as p', function ($j) {
+                    $j->on('h.hed_prj_id', '=', 'p.prj_id')->orOn('h.hed_id', '=', 'p.prj_id');
+                })
+                ->whereIn(DB::raw('LOWER(TRIM(COALESCE(p.prj_status, \'\')))'), ['closed', 'completed'])
+                ->pluck('h.hed_id')->toArray();
+
+            $divStaff = (int) DB::table('hr.emps')
                 ->whereIn('emp_unt_id', $selectedUnitIds)
-                ->whereRaw('LOWER(emp_status) IN (?, ?)', ['active', 'current'])
+                ->whereNotIn('emp_hed_id', $completedHeadIds)
+                ->whereRaw("LOWER(emp_status) IN ('active','current')")
                 ->count();
 
-            $employeesHired = (int) DB::table('hr.emps')
+            if ($divisionParam === 'all' && empty($selectedProject)) {
+                $csrfStaff = (int) DB::table('hr.emps as e')
+                    ->join('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
+                    ->whereRaw("LOWER(e.emp_status) IN ('active','current')")
+                    ->where(function ($q) {
+                        $q->where('e.emp_unt_id', '>=', 800000)
+                          ->orWhere('u.unt_type', 'Department')
+                          ->orWhereIn(DB::raw('LOWER(u.unt_area)'), ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi', 'csrf']);
+                    })
+                    ->count();
+                $totalStaff = $divStaff + $csrfStaff;
+            } else {
+                $csrfStaff = 0;
+                $totalStaff = $divStaff;
+            }
+        } else {
+            // 'all'
+            $divStaff = (int) DB::table('hr.emps')
                 ->whereIn('emp_unt_id', $selectedUnitIds)
-                ->whereRaw('LOWER(emp_status) IN (?, ?)', ['active', 'current'])
-                ->where('emp_joindt', '>=', now()->subYear()->toDateString())
+                ->whereRaw("LOWER(emp_status) IN ('active','current')")
                 ->count();
+
+            if ($divisionParam === 'all' && empty($selectedProject)) {
+                $csrfStaff = (int) DB::table('hr.emps as e')
+                    ->join('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
+                    ->whereRaw("LOWER(e.emp_status) IN ('active','current')")
+                    ->where(function ($q) {
+                        $q->where('e.emp_unt_id', '>=', 800000)
+                          ->orWhere('u.unt_type', 'Department')
+                          ->orWhereIn(DB::raw('LOWER(u.unt_area)'), ['hr', 'fin', 'adm', 'admin', 'is', 'it', 'hqs', 'rdw', 'nrdi', 'csrf']);
+                    })
+                    ->count();
+                $totalStaff = $divStaff + $csrfStaff;
+            } else {
+                $csrfStaff = 0;
+                $totalStaff = $divStaff;
+            }
         }
 
-        $projectsTotalQuery = DB::table('prj.projects');
-        if ($selectedProject) {
-            $projectsTotalQuery->where('prj_id', $selectedProject['id']);
-        } else {
-            $projectsTotalQuery->whereIn('prj_unt_id', $selectedUnitIds);
-        }
-        $projectsTotal = (int) $projectsTotalQuery->count();
-
-        $projectsCompletedQuery = DB::table('prj.projects')->whereIn('prj_status', $closedProjectStatuses);
-        if ($selectedProject) {
-            $projectsCompletedQuery->where('prj_id', $selectedProject['id']);
-        } else {
-            $projectsCompletedQuery->whereIn('prj_unt_id', $selectedUnitIds);
-        }
-        $projectsCompleted = (int) $projectsCompletedQuery->count();
-
-        $today = now()->toDateString();
-        $projectsDelayedQuery = DB::table('prj.projects')
-            ->whereNotIn('prj_status', $closedProjectStatuses)
-            ->whereNotNull('prj_estenddt')
-            ->where('prj_estenddt', '<', $today);
-        if ($selectedProject) {
-            $projectsDelayedQuery->where('prj_id', $selectedProject['id']);
-        } else {
-            $projectsDelayedQuery->whereIn('prj_unt_id', $selectedUnitIds);
-        }
-        $projectsDelayed = (int) $projectsDelayedQuery->count();
-
-        $projectsOngoing = max(0, $projectsTotal - $projectsCompleted);
-
-        // Generic Pending Purchase & Contract Cases across all active workflow stages
-        $purQuery = DB::table('pur.purcases')
-            ->whereNotIn('pcs_status', ['Fulfilled', 'Partially Fulfilled', 'Completed', 'Cancelled', 'Not Approved', 'Rejected']);
-        if ($selectedProject) {
-            $purQuery->where('pcs_hed_id', $selectedProject['id']);
-        } elseif (!empty($selectedUnitIds)) {
-            $purQuery->whereIn('pcs_unt_id', $selectedUnitIds);
-        }
-        $pendingPurchaseCases = (int) $purQuery->count();
-
-        $ctrQuery = DB::table('hr.ctrcases')
-            ->whereNotIn('ctc_status', ['Draft', 'Fulfilled', 'Closed', 'Rejected', 'Not Approved', 'Cancelled']);
-        if ($selectedProject) {
-            $ctrQuery->where('ctc_prj_id', $selectedProject['id']);
-        } elseif (!empty($selectedUnitIds)) {
-            $ctrQuery->where(function($q) use ($selectedUnitIds) {
-                $q->whereIn('ctc_unt_id', $selectedUnitIds)
-                  ->orWhereIn('ctc_divisionid', $selectedUnitIds);
-            });
-        }
-        $pendingContractCases = (int) $ctrQuery->count();
-
-        $pendingCases = $pendingPurchaseCases + $pendingContractCases;
-
-        $reviewedCasesQuery = DB::table('pur.purcases')->whereIn('pcs_status', $reviewedCaseStatuses);
-        if ($selectedProject) {
-            $reviewedCasesQuery->where('pcs_hed_id', $selectedProject['id']);
-        } else {
-            $reviewedCasesQuery->whereIn('pcs_unt_id', $selectedUnitIds);
-        }
-        $reviewedCases = (int) $reviewedCasesQuery->count();
-
-        $casesPerDivisionQuery = DB::table('pur.purcases as c')
-            ->join('cen.units as u', 'u.unt_id', '=', 'c.pcs_unt_id')
-            ->where('u.unt_type', 'Division')
-            ->select('u.unt_namesh as division', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('u.unt_namesh')
-            ->orderByDesc('cnt');
-
-        if ($selectedProject) {
-            $casesPerDivisionQuery->where('c.pcs_hed_id', $selectedProject['id']);
-        } else {
-            $casesPerDivisionQuery->whereIn('c.pcs_unt_id', $selectedUnitIds);
-        }
-
-        $casesPerDivision = $casesPerDivisionQuery->get()
-            ->map(fn ($r) => ['division' => (string) $r->division, 'count' => (int) $r->cnt])
-            ->values();
-
-        $employeesPerDivision = DB::table('hr.emps as e')
-            ->join('cen.units as u', 'u.unt_id', '=', 'e.emp_unt_id')
-            ->whereIn('e.emp_unt_id', $selectedUnitIds)
-            ->where('u.unt_type', 'Division')
-            ->whereRaw('LOWER(e.emp_status) IN (?, ?)', ['active', 'current'])
-            ->select('u.unt_namesh as division', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('u.unt_namesh')
-            ->orderByDesc('cnt')
+        // 6. Trend Timeline (Monthly & Quarterly Inflow vs Expenditure)
+        $monthlyInward = DB::table('fin.sharesinstall as si')
+            ->join('fin.transactions as t', 't.trn_id', '=', 'si.shi_fitrn_id')
+            ->whereIn('si.shi_hed_id', $headIds)
+            ->whereNotNull('t.trn_date')
+            ->select(
+                DB::raw("to_char(t.trn_date, 'YYYY-MM') as ym"),
+                DB::raw("COALESCE(SUM(si.shi_pcc), 0) as rdw_rcv"),
+                DB::raw("COALESCE(SUM(si.shi_cf), 0) as csrf_rcv"),
+                DB::raw("COALESCE(SUM(si.shi_pcc + si.shi_cf), 0) as total_rcv")
+            )
+            ->groupBy(DB::raw("to_char(t.trn_date, 'YYYY-MM')"))
             ->get()
-            ->map(fn ($r) => ['division' => (string) $r->division, 'count' => (int) $r->cnt])
-            ->values();
+            ->keyBy('ym');
 
-        $projectsPerDivision = DB::table('prj.projects as p')
-            ->join('cen.units as u', 'u.unt_id', '=', 'p.prj_unt_id')
-            ->whereIn('p.prj_unt_id', $selectedUnitIds)
-            ->where('u.unt_type', 'Division')
-            ->select('u.unt_namesh as division', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('u.unt_namesh')
-            ->orderByDesc('cnt')
+        $monthlyExp = DB::table('fin.commitments as c')
+            ->join('fin.transactions as t', 'c.cmt_id', '=', 't.trn_cmt_id')
+            ->whereIn('c.cmt_effhed_id', $headIds)
+            ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO'])
+            ->whereNotNull('t.trn_date')
+            ->select(
+                DB::raw("to_char(t.trn_date, 'YYYY-MM') as ym"),
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NULL OR c.cmt_sudohed = '') THEN (CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) ELSE 0 END) * -1, 0) as rdw_exp"),
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NOT NULL AND c.cmt_sudohed <> '' AND c.cmt_type <> 'TO') THEN (CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) ELSE 0 END) * -1, 0) as csrf_exp"),
+                DB::raw("COALESCE(SUM(CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) * -1, 0) as total_exp")
+            )
+            ->groupBy(DB::raw("to_char(t.trn_date, 'YYYY-MM')"))
             ->get()
-            ->map(fn ($r) => ['division' => (string) $r->division, 'count' => (int) $r->cnt])
-            ->values();
-
-        $budgetByDivision = DB::table('prj.projects as p')
-            ->join('cen.units as u', 'u.unt_id', '=', 'p.prj_unt_id')
-            ->whereIn('p.prj_unt_id', $selectedUnitIds)
-            ->where('u.unt_type', 'Division')
-            ->select('u.unt_namesh as division', DB::raw('SUM(p.prj_aprvcost) as budget'))
-            ->groupBy('u.unt_namesh')
-            ->pluck('budget', 'division');
-
-        $utilByDivision = DB::table('pur.purcases as c')
-            ->join('cen.units as u', 'u.unt_id', '=', 'c.pcs_unt_id')
-            ->whereIn('c.pcs_unt_id', $selectedUnitIds)
-            ->where('u.unt_type', 'Division')
-            ->select('u.unt_namesh as division', DB::raw('SUM(c.pcs_price) as utilized'))
-            ->groupBy('u.unt_namesh')
-            ->pluck('utilized', 'division');
-
-        $budgetVsUtilPerDivision = $allDivisions
-            ->filter(fn ($d) => in_array((int) $d->unt_id, $selectedUnitIds, true))
-            ->map(function ($d) use ($budgetByDivision, $utilByDivision) {
-                $key = (string) $d->unt_namesh;
-                return [
-                    'division' => $key,
-                    'budget' => (float) ($budgetByDivision[$key] ?? 0),
-                    'utilized' => (float) ($utilByDivision[$key] ?? 0),
-                ];
-            })
-            ->values();
+            ->keyBy('ym');
 
         $monthlyPeriods = collect(range(0, 11))->reverse()->map(function ($i) {
             return now()->subMonths($i)->format('Y-m');
         })->values();
 
-        if ($selectedProject) {
-            $budgetByMonth = DB::table('prj.projects')
-                ->where('prj_id', $selectedProject['id'])
-                ->whereNotNull('prj_aprvdt')
-                ->select(DB::raw("to_char(prj_aprvdt, 'YYYY-MM') as ym"), DB::raw('SUM(prj_aprvcost) as budget'))
-                ->groupBy(DB::raw("to_char(prj_aprvdt, 'YYYY-MM')"))
-                ->pluck('budget', 'ym');
-
-            $utilByMonth = DB::table('pur.purcases')
-                ->where('pcs_hed_id', $selectedProject['id'])
-                ->whereNotNull('pcs_date')
-                ->select(DB::raw("to_char(pcs_date, 'YYYY-MM') as ym"), DB::raw('SUM(pcs_price) as utilized'))
-                ->groupBy(DB::raw("to_char(pcs_date, 'YYYY-MM')"))
-                ->pluck('utilized', 'ym');
-        } else {
-            $budgetByMonth = DB::table('prj.projects')
-                ->whereIn('prj_unt_id', $selectedUnitIds)
-                ->whereNotNull('prj_aprvdt')
-                ->select(DB::raw("to_char(prj_aprvdt, 'YYYY-MM') as ym"), DB::raw('SUM(prj_aprvcost) as budget'))
-                ->groupBy(DB::raw("to_char(prj_aprvdt, 'YYYY-MM')"))
-                ->pluck('budget', 'ym');
-
-            $utilByMonth = DB::table('pur.purcases')
-                ->whereIn('pcs_unt_id', $selectedUnitIds)
-                ->whereNotNull('pcs_date')
-                ->select(DB::raw("to_char(pcs_date, 'YYYY-MM') as ym"), DB::raw('SUM(pcs_price) as utilized'))
-                ->groupBy(DB::raw("to_char(pcs_date, 'YYYY-MM')"))
-                ->pluck('utilized', 'ym');
-        }
-
-        $monthlySeries = $monthlyPeriods->map(function ($ym) use ($budgetByMonth, $utilByMonth) {
+        $monthlySeries = $monthlyPeriods->map(function ($ym) use ($monthlyInward, $monthlyExp, $totalRdw, $totalAllocation, $csrfShare) {
             return [
                 'period' => $ym,
-                'budget' => (float) ($budgetByMonth[$ym] ?? 0),
-                'utilized' => (float) ($utilByMonth[$ym] ?? 0),
+                'rdw_rcv' => (float)($monthlyInward[$ym]->rdw_rcv ?? 0),
+                'rdw_exp' => (float)($monthlyExp[$ym]->rdw_exp ?? 0),
+                'csrf_rcv' => (float)($monthlyInward[$ym]->csrf_rcv ?? 0),
+                'csrf_exp' => (float)($monthlyExp[$ym]->csrf_exp ?? 0),
+                'total_rcv' => (float)($monthlyInward[$ym]->total_rcv ?? 0),
+                'total_exp' => (float)($monthlyExp[$ym]->total_exp ?? 0),
+                'rdw_budget' => $totalRdw,
+                'total_budget' => $totalAllocation,
+                'csrf_budget' => $csrfShare,
             ];
         })->values();
+
+        $quarterlyInward = DB::table('fin.sharesinstall as si')
+            ->join('fin.transactions as t', 't.trn_id', '=', 'si.shi_fitrn_id')
+            ->whereIn('si.shi_hed_id', $headIds)
+            ->whereNotNull('t.trn_date')
+            ->select(
+                DB::raw("concat(extract(year from t.trn_date)::int, '-Q', extract(quarter from t.trn_date)::int) as yq"),
+                DB::raw("COALESCE(SUM(si.shi_pcc), 0) as rdw_rcv"),
+                DB::raw("COALESCE(SUM(si.shi_cf), 0) as csrf_rcv"),
+                DB::raw("COALESCE(SUM(si.shi_pcc + si.shi_cf), 0) as total_rcv")
+            )
+            ->groupBy(DB::raw("concat(extract(year from t.trn_date)::int, '-Q', extract(quarter from t.trn_date)::int)"))
+            ->get()
+            ->keyBy('yq');
+
+        $quarterlyExp = DB::table('fin.commitments as c')
+            ->join('fin.transactions as t', 'c.cmt_id', '=', 't.trn_cmt_id')
+            ->whereIn('c.cmt_effhed_id', $headIds)
+            ->whereIn('c.cmt_type', ['Ps', 'Pt', 'Rb', 'Sa', 'TO'])
+            ->whereNotNull('t.trn_date')
+            ->select(
+                DB::raw("concat(extract(year from t.trn_date)::int, '-Q', extract(quarter from t.trn_date)::int) as yq"),
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NULL OR c.cmt_sudohed = '') THEN (CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) ELSE 0 END) * -1, 0) as rdw_exp"),
+                DB::raw("COALESCE(SUM(CASE WHEN (c.cmt_sudohed IS NOT NULL AND c.cmt_sudohed <> '' AND c.cmt_type <> 'TO') THEN (CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) ELSE 0 END) * -1, 0) as csrf_exp"),
+                DB::raw("COALESCE(SUM(CASE WHEN t.trn_transtype = 1 THEN t.trn_amount1 ELSE t.trn_amount2 END) * -1, 0) as total_exp")
+            )
+            ->groupBy(DB::raw("concat(extract(year from t.trn_date)::int, '-Q', extract(quarter from t.trn_date)::int)"))
+            ->get()
+            ->keyBy('yq');
 
         $quarterPeriods = collect(range(0, 7))->reverse()->map(function ($i) {
             $d = now()->subQuarters($i);
@@ -570,58 +590,31 @@ class DashboardController extends Controller
             return $d->format('Y') . '-Q' . $q;
         })->values();
 
-        if ($selectedProject) {
-            $budgetByQuarter = DB::table('prj.projects')
-                ->where('prj_id', $selectedProject['id'])
-                ->whereNotNull('prj_aprvdt')
-                ->select(
-                    DB::raw("concat(extract(year from prj_aprvdt)::int, '-Q', extract(quarter from prj_aprvdt)::int) as yq"),
-                    DB::raw('SUM(prj_aprvcost) as budget')
-                )
-                ->groupBy(DB::raw("concat(extract(year from prj_aprvdt)::int, '-Q', extract(quarter from prj_aprvdt)::int)"))
-                ->pluck('budget', 'yq');
-
-            $utilByQuarter = DB::table('pur.purcases')
-                ->where('pcs_hed_id', $selectedProject['id'])
-                ->whereNotNull('pcs_date')
-                ->select(
-                    DB::raw("concat(extract(year from pcs_date)::int, '-Q', extract(quarter from pcs_date)::int) as yq"),
-                    DB::raw('SUM(pcs_price) as utilized')
-                )
-                ->groupBy(DB::raw("concat(extract(year from pcs_date)::int, '-Q', extract(quarter from pcs_date)::int)"))
-                ->pluck('utilized', 'yq');
-        } else {
-            $budgetByQuarter = DB::table('prj.projects')
-                ->whereIn('prj_unt_id', $selectedUnitIds)
-                ->whereNotNull('prj_aprvdt')
-                ->select(
-                    DB::raw("concat(extract(year from prj_aprvdt)::int, '-Q', extract(quarter from prj_aprvdt)::int) as yq"),
-                    DB::raw('SUM(prj_aprvcost) as budget')
-                )
-                ->groupBy(DB::raw("concat(extract(year from prj_aprvdt)::int, '-Q', extract(quarter from prj_aprvdt)::int)"))
-                ->pluck('budget', 'yq');
-
-            $utilByQuarter = DB::table('pur.purcases')
-                ->whereIn('pcs_unt_id', $selectedUnitIds)
-                ->whereNotNull('pcs_date')
-                ->select(
-                    DB::raw("concat(extract(year from pcs_date)::int, '-Q', extract(quarter from pcs_date)::int) as yq"),
-                    DB::raw('SUM(pcs_price) as utilized')
-                )
-                ->groupBy(DB::raw("concat(extract(year from pcs_date)::int, '-Q', extract(quarter from pcs_date)::int)"))
-                ->pluck('utilized', 'yq');
-        }
-
-        $quarterlySeries = $quarterPeriods->map(function ($yq) use ($budgetByQuarter, $utilByQuarter) {
+        $quarterlySeries = $quarterPeriods->map(function ($yq) use ($quarterlyInward, $quarterlyExp, $totalRdw, $totalAllocation, $csrfShare) {
             return [
                 'period' => $yq,
-                'budget' => (float) ($budgetByQuarter[$yq] ?? 0),
-                'utilized' => (float) ($utilByQuarter[$yq] ?? 0),
+                'rdw_rcv' => (float)($quarterlyInward[$yq]->rdw_rcv ?? 0),
+                'rdw_exp' => (float)($quarterlyExp[$yq]->rdw_exp ?? 0),
+                'csrf_rcv' => (float)($quarterlyInward[$yq]->csrf_rcv ?? 0),
+                'csrf_exp' => (float)($quarterlyExp[$yq]->csrf_exp ?? 0),
+                'total_rcv' => (float)($quarterlyInward[$yq]->total_rcv ?? 0),
+                'total_exp' => (float)($quarterlyExp[$yq]->total_exp ?? 0),
+                'rdw_budget' => $totalRdw,
+                'total_budget' => $totalAllocation,
+                'csrf_budget' => $csrfShare,
             ];
         })->values();
 
+        // 7. Projects Table & Projects Categorized (Delayed, Ongoing, Completed)
+        $closedProjectStatuses = ['Closed', 'Completed'];
+        $today = now()->toDateString();
+
         $projRowsQuery = DB::table('prj.projects as p')
             ->join('cen.units as u', 'u.unt_id', '=', 'p.prj_unt_id')
+            ->leftJoin('cen.heads as h', function($j) {
+                $j->on('h.hed_prj_id', '=', 'p.prj_id')->orOn('h.hed_id', '=', 'p.prj_id');
+            })
+            ->leftJoin('fin.sharesalloc as sa', 'sa.sha_hed_id', '=', 'h.hed_id')
             ->leftJoin('pur.purcases as c', 'c.pcs_hed_id', '=', 'p.prj_id')
             ->select(
                 'p.prj_id',
@@ -631,23 +624,16 @@ class DashboardController extends Controller
                 'p.prj_startdt',
                 'p.prj_estenddt',
                 'u.unt_namesh as division',
-                DB::raw('COALESCE(p.prj_aprvcost, 0) as budget'),
+                DB::raw('COALESCE(NULLIF(p.prj_aprvcost, 0), sa.sha_prj, sa.sha_pcc, 0) as budget'),
                 DB::raw('COALESCE(SUM(c.pcs_price), 0) as utilized'),
                 DB::raw("COALESCE(SUM(CASE WHEN c.pcs_noloan = false THEN c.pcs_intprice ELSE 0 END), 0) as credit")
             )
             ->groupBy(
-                'p.prj_id',
-                'p.prj_code',
-                'p.prj_title',
-                'p.prj_status',
-                'p.prj_startdt',
-                'p.prj_estenddt',
-                'u.unt_namesh',
-                'p.prj_aprvcost'
+                'p.prj_id', 'p.prj_code', 'p.prj_title', 'p.prj_status',
+                'p.prj_startdt', 'p.prj_estenddt', 'u.unt_namesh', 'p.prj_aprvcost', 'sa.sha_prj', 'sa.sha_pcc'
             )
             ->orderByDesc('p.prj_id')
-            ->limit(500)
-            ;
+            ->limit(500);
 
         if ($selectedProject) {
             $projRowsQuery->where('p.prj_id', $selectedProject['id']);
@@ -655,9 +641,15 @@ class DashboardController extends Controller
             $projRowsQuery->whereIn('p.prj_unt_id', $selectedUnitIds);
         }
 
+        if ($statusScope === 'active') {
+            $projRowsQuery->whereNotIn(DB::raw('LOWER(TRIM(COALESCE(p.prj_status, \'\')))'), ['closed', 'completed']);
+        } elseif ($statusScope === 'completed') {
+            $projRowsQuery->whereIn(DB::raw('LOWER(TRIM(COALESCE(p.prj_status, \'\')))'), ['closed', 'completed']);
+        }
+
         $projRows = $projRowsQuery->get();
 
-        $today = now()->toDateString();
+        // Staff count per project
         $activeEmployees = DB::table('hr.emps')
             ->whereRaw("LOWER(emp_status) IN ('active','current')")
             ->get(['emp_id', 'emp_hed_id']);
@@ -670,54 +662,21 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('emp_id');
 
-        $heads = DB::table('cen.heads')->get()->keyBy('hed_id');
-
+        $headsMap = DB::table('cen.heads')->get()->keyBy('hed_id');
         $projectStaffCounts = [];
         foreach ($activeEmployees as $emp) {
             $currentHeadId = $activePlans->has($emp->emp_id)
                 ? $activePlans[$emp->emp_id]->cpn_hed_id
                 : $emp->emp_hed_id;
 
-            $h = $heads->get($currentHeadId);
-            $prjId = null;
-            if ($h) {
-                $prjId = $h->hed_prj_id ?: $h->hed_id;
-            }
-
-            if ($prjId) {
-                $projectStaffCounts[$prjId] = ($projectStaffCounts[$prjId] ?? 0) + 1;
+            $h = $headsMap->get($currentHeadId);
+            $pId = $h ? ($h->hed_prj_id ?: $h->hed_id) : null;
+            if ($pId) {
+                $projectStaffCounts[$pId] = ($projectStaffCounts[$pId] ?? 0) + 1;
             }
         }
 
-        $employeesByProject = [];
-        foreach ($projRows as $p) {
-            $employeesByProject[(int)$p->prj_id] = (int) ($projectStaffCounts[$p->prj_id] ?? 0);
-        }
-
-        $projectProgressTop = $projRows
-            ->filter(fn ($p) => ! in_array((string) $p->prj_status, $closedProjectStatuses, true))
-            ->map(function ($p) use ($closedProjectStatuses) {
-                $progress = 0;
-                if (in_array((string) $p->prj_status, $closedProjectStatuses, true)) {
-                    $progress = 100;
-                } elseif ($p->prj_startdt && $p->prj_estenddt) {
-                    $start = \Carbon\Carbon::parse($p->prj_startdt);
-                    $end = \Carbon\Carbon::parse($p->prj_estenddt);
-                    if ($end->greaterThan($start)) {
-                        $progress = (int) round(min(100, max(0, $start->floatDiffInDays(now()) / max(1, $start->floatDiffInDays($end)) * 100)));
-                    }
-                }
-
-                return [
-                    'code' => (string) $p->prj_code,
-                    'percent' => $progress,
-                ];
-            })
-            ->sortByDesc('percent')
-            ->take(10)
-            ->values();
-
-        $tableProjects = $projRows->map(function ($p) use ($closedProjectStatuses, $employeesByProject) {
+        $tableProjects = $projRows->map(function ($p) use ($closedProjectStatuses, $projectStaffCounts, $today) {
             $budget = (float) $p->budget;
             $used = (float) $p->utilized;
             $remaining = max(0, $budget - $used);
@@ -726,7 +685,7 @@ class DashboardController extends Controller
             $isClosed = in_array((string) $p->prj_status, $closedProjectStatuses, true);
             if ($isClosed) {
                 $derivedStatus = 'Completed';
-            } elseif ($p->prj_estenddt && (string) $p->prj_estenddt < now()->toDateString()) {
+            } elseif ($p->prj_estenddt && (string) $p->prj_estenddt < $today) {
                 $derivedStatus = 'Delayed';
             }
 
@@ -753,57 +712,193 @@ class DashboardController extends Controller
                 'progress' => $progress,
                 'status' => $derivedStatus,
                 'statusRaw' => (string) $p->prj_status,
-                'employees' => (int) ($employeesByProject[(int) $p->prj_id] ?? 0),
+                'est_end' => $p->prj_estenddt ? \Carbon\Carbon::parse($p->prj_estenddt)->format('d-M-Y') : null,
+                'employees' => (int) ($projectStaffCounts[$p->prj_id] ?? 0),
             ];
         })->values();
 
-        $codesByDivision = collect($tableProjects)
-            ->groupBy('division')
-            ->map(function ($rows) {
-                return collect($rows)
-                    ->map(fn ($p) => ['id' => $p['id'], 'code' => $p['code'], 'status' => $p['status']])
-                    ->values();
-            })
-            ->toArray();
+        $delayedProjects = $tableProjects->where('status', 'Delayed')->values();
+        $ongoingProjects = $tableProjects->where('status', 'Ongoing')->values();
+        $completedProjects = $tableProjects->where('status', 'Completed')->values();
 
-        $employeesPerProjectTop = collect($tableProjects)
-            ->map(fn ($p) => ['code' => $p['code'], 'count' => (int) ($p['employees'] ?? 0)])
-            ->sortByDesc('count')
-            ->take(12)
-            ->values();
+        $codesByDivision = [];
+        $allProjectsList = DB::table('prj.projects as p')
+            ->join('cen.units as u', 'u.unt_id', '=', 'p.prj_unt_id')
+            ->whereBetween('p.prj_unt_id', [$lower, $upper])
+            ->select('p.prj_id', 'p.prj_code', 'p.prj_title', 'p.prj_status', 'p.prj_unt_id', 'u.unt_namesh')
+            ->orderBy('p.prj_code')
+            ->get();
+
+        foreach ($allDivisions as $d) {
+            $matching = $allProjectsList->where('prj_unt_id', $d->unt_id)->map(function($p) {
+                return [
+                    'id' => (int) $p->prj_id,
+                    'code' => (string) ($p->prj_code ?: $p->prj_title),
+                    'title' => (string) $p->prj_title,
+                    'status' => (string) ($p->prj_status ?: 'Ongoing')
+                ];
+            })->values()->all();
+
+            $codesByDivision[$d->unt_id] = $matching;
+            if (!empty($d->unt_namesh)) {
+                $codesByDivision[$d->unt_namesh] = $matching;
+            }
+        }
+
+        // Total Counts for Status Filter Badges (unfiltered by statusScope)
+        $badgeProjects = $allProjectsList;
+        if ($selectedProject) {
+            $badgeProjects = $badgeProjects->where('prj_id', $selectedProject['id']);
+        } elseif (!empty($selectedUnitIds)) {
+            $badgeProjects = $badgeProjects->whereIn('prj_unt_id', $selectedUnitIds);
+        }
+        $badgeAll = $badgeProjects->count();
+        $badgeCompleted = $badgeProjects->filter(function($p) use ($closedProjectStatuses) {
+            return in_array((string)$p->prj_status, $closedProjectStatuses, true);
+        })->count();
+        $badgeActive = max(0, $badgeAll - $badgeCompleted);
+
+        // 8. 5-Year Staff Hiring & Turnover History (Last 5 Years)
+        $historyYears = collect(range(0, 4))->reverse()->map(fn($i) => (int) now()->subYears($i)->format('Y'))->values();
+        $staffHistory = $historyYears->map(function($yr) use ($selectedUnitIds, $divisionParam) {
+            $joinedQ = DB::table('hr.emps')->whereYear('emp_joindt', $yr);
+            $releasedQ = DB::table('hr.emps')->whereYear('emp_lastdt', $yr);
+
+            if ($divisionParam !== 'all') {
+                $joinedQ->whereIn('emp_unt_id', $selectedUnitIds);
+                $releasedQ->whereIn('emp_unt_id', $selectedUnitIds);
+            }
+            $joined = (int) $joinedQ->count();
+            $released = (int) $releasedQ->count();
+
+            $endOfYear = "{$yr}-12-31";
+            if ($yr === (int) now()->format('Y')) {
+                $activeQ = DB::table('hr.emps')->whereRaw("LOWER(emp_status) IN ('active','current')");
+                if ($divisionParam !== 'all') {
+                    $activeQ->whereIn('emp_unt_id', $selectedUnitIds);
+                }
+                $active = (int) $activeQ->count();
+            } else {
+                $activeQ = DB::table('hr.emps')
+                    ->where('emp_joindt', '<=', $endOfYear)
+                    ->where(function($q) use ($endOfYear) {
+                        $q->whereNull('emp_lastdt')
+                          ->orWhere('emp_lastdt', '>', $endOfYear);
+                    });
+                if ($divisionParam !== 'all') {
+                    $activeQ->whereIn('emp_unt_id', $selectedUnitIds);
+                }
+                $active = (int) $activeQ->count();
+            }
+
+            return [
+                'year' => (string) $yr,
+                'joined' => $joined,
+                'released' => $released,
+                'active' => $active
+            ];
+        })->values();
+
+        // 9. Staff Distribution by Division (Active personnel)
+        $staffPerDivRows = DB::table('cen.units as u')
+            ->leftJoin('hr.emps as e', function($j) {
+                $j->on('e.emp_unt_id', '=', 'u.unt_id')
+                  ->whereRaw("LOWER(e.emp_status) IN ('active','current')");
+            })
+            ->where('u.unt_type', 'Division')
+            ->groupBy('u.unt_id', 'u.unt_name', 'u.unt_namesh')
+            ->select(
+                'u.unt_id',
+                'u.unt_namesh as division',
+                'u.unt_name as full_name',
+                DB::raw('COUNT(e.emp_id) as count')
+            )
+            ->orderByDesc('count')
+            ->get();
+
+        $staffDistribution = $staffPerDivRows->map(function($d) {
+            return [
+                'label' => (string) ($d->division ?: $d->full_name),
+                'count' => (int) $d->count,
+            ];
+        })->values();
+
+        if ($csrfStaff > 0) {
+            $staffDistribution->push([
+                'label' => 'CSRF Central',
+                'count' => (int) $csrfStaff,
+            ]);
+        }
 
         return response()->json([
             'divisions' => $divisions,
             'selectedProject' => $selectedProject,
             'kpis' => [
-                'budgetReceived' => $budgetReceived,
-                'utilized' => $utilized,
-                'remaining' => $remaining,
-                'creditTaken' => $creditTaken,
-                'employeesTotal' => $employeesTotal,
-                'employeesHired' => $employeesHired,
-                'projectsTotal' => $projectsTotal,
-                'reviewedCases' => $reviewedCases,
-                'pendingCases' => $pendingCases,
-                'pendingPurchaseCases' => $pendingPurchaseCases,
-                'pendingContractCases' => $pendingContractCases,
+                'rdw' => [
+                    'share' => (float)$totalRdw,
+                    'expenditure' => (float)($expenditures->pcc_exp ?? 0),
+                    'commitments' => (float)($commitments->pcc_cmt ?? 0),
+                    'utilized' => (float)(($expenditures->pcc_exp ?? 0) + ($commitments->pcc_cmt ?? 0)),
+                    'in_process' => (float)($inProc->pcc_in_process ?? 0),
+                    'remaining' => max(0, (float)$totalRdw - (($expenditures->pcc_exp ?? 0) + ($commitments->pcc_cmt ?? 0) + ($inProc->pcc_in_process ?? 0)))
+                ],
+                'total' => [
+                    'share' => (float)$totalAllocation,
+                    'expenditure' => (float)($expenditures->total_exp ?? 0),
+                    'commitments' => (float)($commitments->total_cmt ?? 0),
+                    'utilized' => (float)(($expenditures->total_exp ?? 0) + ($commitments->total_cmt ?? 0)),
+                    'in_process' => (float)($inProc->total_in_process ?? 0),
+                    'remaining' => max(0, (float)$totalAllocation - (($expenditures->total_exp ?? 0) + ($commitments->total_cmt ?? 0) + ($inProc->total_in_process ?? 0)))
+                ],
+                'csrf' => [
+                    'share' => (float)$csrfShare,
+                    'expenditure' => (float)($expenditures->cf_exp ?? 0),
+                    'commitments' => (float)($commitments->cf_cmt ?? 0),
+                    'utilized' => (float)(($expenditures->cf_exp ?? 0) + ($commitments->cf_cmt ?? 0)),
+                    'in_process' => (float)($inProc->cf_in_process ?? 0),
+                    'remaining' => max(0, (float)$csrfShare - (($expenditures->cf_exp ?? 0) + ($commitments->cf_cmt ?? 0) + ($inProc->cf_in_process ?? 0)))
+                ],
+                'mtss' => [
+                    'share' => (float)$totalMtss,
+                    'received' => (float)$mtssReceived,
+                    'pending' => (float)$mtssPending
+                ],
+                'staff' => [
+                    'total' => $totalStaff,
+                    'csrf' => $csrfStaff,
+                    'division' => $divStaff
+                ]
+            ],
+            'status_scope' => $statusScope,
+            'status_counts' => [
+                'all' => (int) $badgeAll,
+                'active' => (int) $badgeActive,
+                'completed' => (int) $badgeCompleted
+            ],
+            'status_scope' => $statusScope,
+            'status_counts' => [
+                'all' => (int) $badgeAll,
+                'active' => (int) $badgeActive,
+                'completed' => (int) $badgeCompleted
             ],
             'charts' => [
                 'finance' => [
                     'monthly' => $monthlySeries,
                     'quarterly' => $quarterlySeries,
                 ],
-                'casesPerDivision' => $casesPerDivision,
-                'employeesPerDivision' => $employeesPerDivision,
-                'projectsPerDivision' => $projectsPerDivision,
-                'budgetVsUtilPerDivision' => $budgetVsUtilPerDivision,
-                'projectStatus' => [
-                    'completed' => $projectsCompleted,
-                    'ongoing' => $projectsOngoing,
-                    'delayed' => $projectsDelayed,
-                ],
-                'projectProgress' => $projectProgressTop,
-                'employeesPerProject' => $employeesPerProjectTop,
+                'staff_history' => $staffHistory,
+                'staff_distribution' => $staffDistribution,
+                'projects_status' => [
+                    'ongoing' => $ongoingProjects->count(),
+                    'delayed' => $delayedProjects->count(),
+                    'completed' => $completedProjects->count(),
+                    'total' => $tableProjects->count(),
+                ]
+            ],
+            'projects_by_status' => [
+                'delayed' => $delayedProjects,
+                'ongoing' => $ongoingProjects,
+                'completed' => $completedProjects,
             ],
             'table' => [
                 'projects' => $tableProjects,

@@ -296,7 +296,9 @@
                     @forelse($assets as $a)
                         @php
                             $totalVal = ((float)($a->iac_qty ?? 0)) * ((float)($a->ias_price ?? 0));
-                            $isAsset = (string)$a->ias_type === '7';
+                            // Asset / Inventory class = ias_type2 (6 Asset / 5 Inventory);
+                            // ias_type is only the nature of the item (7 Permanent etc.)
+                            $isAsset = (int)($a->ias_type2 ?? ((int)$a->ias_type === 7 ? 6 : 5)) === 6;
                         @endphp
                         <tr>
                             <td class="rajdhani text-info font-weight-bold">#{{ $a->iac_id }}</td>

@@ -177,8 +177,8 @@ class SidebarBadgeService
 
         // 4. GENERIC CASE FILES (E-OFFICE) PENDING COUNT (Action Required for this user / authority)
         $gcsCount = 0;
+        $uAccId = (int) $user->acc_id;
         try {
-            $uAccId = (int) $user->acc_id;
             $desigShort = strtoupper(trim((string) ($user->acc_desigshort ?? '')));
             $desig = strtoupper(trim((string) ($user->acc_desig ?? '')));
 
@@ -193,8 +193,15 @@ class SidebarBadgeService
                        ->whereNotIn('gcs_status', ['Draft', 'Approved', 'Closed', 'Cancelled', 'Rejected']);
                 })
                 // OR Cases forwarded to this officer's authority stage (MD, DDG, DG, DLOG, Finance)
-                ->orWhere(function ($sq) use ($user, $area, $desigShort, $desig) {
+                ->orWhere(function ($sq) use ($user, $uAccId, $area, $desigShort, $desig) {
                     $sq->whereNotIn('gcs_status', ['Draft', 'Approved', 'Closed', 'Cancelled', 'Rejected']);
+                    // The case must still be in my hands: either nobody holds it
+                    // explicitly, or I am the current holder. Without this a case
+                    // forwarded onward kept blinking for the officer who sent it.
+                    $sq->where(function ($hq) use ($uAccId) {
+                        $hq->whereNull('gcs_current_holder_id')
+                           ->orWhere('gcs_current_holder_id', $uAccId);
+                    });
                     $sq->where(function ($stq) use ($user, $area, $desigShort, $desig) {
                         if ($user->isFinance() || in_array($area, ['fin', 'finance'], true) || ((int)($user->acc_unt_id ?? 0) === 800000)) {
                             $stq->whereIn('gcs_current_stage', ['DFin', 'Finance', 'DFIN', 'FINANCE']);
@@ -214,12 +221,116 @@ class SidebarBadgeService
             })->count();
         } catch (\Throwable $e) {}
 
+        // 5. FUND SHIFTING CASES (Pending action for this user only)
+        $fshCount = 0;
+        try {
+            $myStage = self::authorityStage($user);
+            if ($myStage) {
+                $fshCount = \App\Models\FundShift::query()
+                    ->whereNotIn(DB::raw("LOWER(TRIM(COALESCE(fsh_status, '')))"), ['implemented', 'cancelled', 'rejected', 'closed'])
+                    ->where(function ($w) use ($uAccId, $myStage, $user) {
+                        // Case handed to me personally
+                        $w->where('fsh_current_acc_id', $uAccId);
+                        // Or parked at my own stage without a named officer
+                        $w->orWhere(function ($sq) use ($myStage, $user, $uAccId) {
+                            $sq->whereNull('fsh_current_acc_id')
+                               ->whereRaw("UPPER(TRIM(COALESCE(fsh_current_stage, ''))) = ?", [strtoupper($myStage)]);
+                            if ($myStage === 'Division') {
+                                $sq->where(function ($dq) use ($user, $uAccId) {
+                                    $dq->where('fsh_unt_id', (int) ($user->acc_unt_id ?? 0))
+                                       ->orWhere('fsh_created_by', $uAccId);
+                                });
+                            }
+                        });
+                    })
+                    // If my own signature is the latest one on the file, it has
+                    // already left my desk - never count it as pending for me.
+                    ->whereRaw(
+                        "NOT EXISTS (SELECT 1 FROM fin.fund_shift_decisions d2"
+                        . " WHERE d2.fsd_fsh_id = fsh_id AND d2.fsd_acc_id = ?"
+                        . " AND d2.fsd_id = (SELECT MAX(d3.fsd_id) FROM fin.fund_shift_decisions d3 WHERE d3.fsd_fsh_id = fsh_id))",
+                        [$uAccId]
+                    )
+                    ->count();
+            }
+        } catch (\Throwable $e) {}
+
+        // 6. SALARY ORDER CASES (Pending action for this user only)
+        $socCount = 0;
+        try {
+            $myStage = self::authorityStage($user);
+            $socCount = \App\Models\SalOrderCase::query()
+                ->whereNotIn(DB::raw("LOWER(TRIM(COALESCE(soc_status, '')))"), ['approved', 'cancelled', 'closed'])
+                ->where(function ($w) use ($uAccId, $myStage) {
+                    $w->where('soc_current_acc_id', $uAccId);
+                    if ($myStage) {
+                        $w->orWhere(function ($sq) use ($myStage) {
+                            $sq->whereNull('soc_current_acc_id')
+                               ->whereRaw("UPPER(TRIM(COALESCE(soc_current_stage, ''))) = ?", [strtoupper($myStage)]);
+                        });
+                    }
+                })
+                ->count();
+
+            // Finance also owns the salary orders that arrive from the back end:
+            // every month that still has unassigned orders needs a case opened.
+            if ($myStage === 'Finance') {
+                $socCount += (int) DB::table('fin.salorders')
+                    ->whereIn(DB::raw("LOWER(TRIM(COALESCE(sor_status, '')))"), ['draft', 'approved', 'open'])
+                    ->whereNull('sor_soc_id')
+                    ->distinct()
+                    ->count(DB::raw("to_char(sor_month, 'YYYY-MM')"));
+            }
+        } catch (\Throwable $e) {}
+
         return [
             'pur' => (int) $purCount,
             'ctr' => (int) $ctrCount,
             'hr'  => (int) $hrCount,
             'gcs' => (int) $gcsCount,
+            'fsh' => (int) $fshCount,
+            'soc' => (int) $socCount,
         ];
+    }
+
+    /**
+     * The ONE workflow stage this user is responsible for.
+     *
+     * Badges must never be built from a list of stages (e.g. MD + DDG + DG):
+     * that is why a case forwarded by DDG to DG kept showing on the DDG
+     * sidebar. Returns null for areas that own no stage (HR, Procurement,
+     * Admin ...) so they get no pending-action badge at all.
+     */
+    private static function authorityStage($user): ?string
+    {
+        if (!$user) {
+            return null;
+        }
+
+        $ctx  = \App\Services\Auth\UserAccessContext::forUser($user);
+        $area = strtolower(trim((string) ($user->acc_untarea ?? '')));
+
+        if ($ctx->isMd())   return 'MD';
+        if ($ctx->isDdg())  return 'DDG';
+        if ($ctx->isDg())   return 'DG';
+        if ($ctx->isDlog()) return 'DLOG';
+
+        if ((method_exists($user, 'isFinance') && $user->isFinance())
+            || in_array($area, ['fin', 'finance'], true)
+            || (int) ($user->acc_unt_id ?? 0) === 800000) {
+            return 'Finance';
+        }
+
+        if (in_array($area, ['it', 'is'], true)) {
+            return 'IT';
+        }
+
+        if (method_exists($user, 'isDivision') && $user->isDivision()
+            && !(method_exists($user, 'isCentralDepartment') && $user->isCentralDepartment())) {
+            return 'Division';
+        }
+
+        return null;
     }
 }
 

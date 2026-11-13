@@ -873,43 +873,11 @@
               $sbCtr = $sbBadges['ctr'] ?? 0;
               $sbHr  = $sbBadges['hr'] ?? 0;
               $sbGcs = (int) ($sbBadges['gcs'] ?? 0);
-              $sbFsh = 0;
-              $sbSoc = 0;
-              try {
-                  $uFsh = Auth::user();
-                  if ($uFsh) {
-                      $fshQ = \App\Models\FundShift::query();
-                      if ($uFsh->isDivision() && !$uFsh->isCentralDepartment()) {
-                          $fshQ->where('fsh_current_stage', 'Division');
-                      } elseif ($uFsh->isFinance()) {
-                          $fshQ->where('fsh_current_stage', 'Finance');
-                      } elseif ($uFsh->isMdDdgDg()) {
-                          $fshQ->whereIn('fsh_current_stage', ['MD', 'DDG', 'DG']);
-                      }
-                      $sbFsh = $fshQ->count();
-
-                      // Salary Cases Pending Count
-                      $socQ = \App\Models\SalOrderCase::whereNotIn('soc_status', ['Approved', 'Cancelled', 'Closed']);
-                      $uAccId = (int)($uFsh->acc_id ?? 0);
-                      $uArea = strtolower(trim((string)($uFsh->acc_untarea ?? '')));
-                      $uDesigShort = strtoupper(trim((string)($uFsh->acc_desigshort ?? '')));
-                      $socQ->where(function($sq) use ($uFsh, $uAccId, $uArea, $uDesigShort) {
-                          $sq->where('soc_current_acc_id', $uAccId);
-                          if ($uFsh->isFinance() || in_array($uArea, ['fin', 'finance'], true) || ((int)($uFsh->acc_unt_id ?? 0) === 800000)) {
-                              $sq->orWhere('soc_current_stage', 'Finance');
-                          } elseif (in_array($uDesigShort, ['MD', 'MD RDW'], true) || $uAccId === 101 || in_array($uArea, ['rdw', 'md'], true)) {
-                              $sq->orWhere('soc_current_stage', 'MD');
-                          } elseif (in_array($uDesigShort, ['DDG', 'DDG NRDI'], true) || $uAccId === 108 || $uArea === 'hqs') {
-                              $sq->orWhere('soc_current_stage', 'DDG');
-                          } elseif (in_array($uDesigShort, ['DG', 'DG NRDI'], true) || $uAccId === 107 || $uArea === 'nrdi') {
-                              $sq->orWhere('soc_current_stage', 'DG');
-                          } elseif ($uFsh->isDlog() || $uAccId === 106 || in_array($uArea, ['log', 'dlog'], true)) {
-                              $sq->orWhere('soc_current_stage', 'DLOG');
-                          }
-                      });
-                      $sbSoc = $socQ->count();
-                  }
-              } catch (\Throwable $e) {}
+              // Fund Shifting & Salary Order pending counts now come from
+              // SidebarBadgeService so the sidebar, the 25s poll and the case
+              // listings all agree on what counts as a pending action.
+              $sbFsh = (int) ($sbBadges['fsh'] ?? 0);
+              $sbSoc = (int) ($sbBadges['soc'] ?? 0);
           @endphp
           
           @if(Auth::user()->acc_username === 'superadminrdw' || session('impersonated_by_god'))
@@ -1075,6 +1043,16 @@
           </a>
       </li>
 
+      {{-- Projects are raised by SORD on behalf of the divisions --}}
+      @can('create', \App\Models\Project::class)
+      <li class="nav-item">
+          <a href="{{ route('addnewproject') }}" class="nav-link {{ Request::routeIs('addnewproject') ? 'active' : '' }}">
+              <i class="fas fa-plus-circle nav-icon text-success"></i>
+              <p>Add Project</p>
+          </a>
+      </li>
+      @endcan
+
       <li class="nav-item">
           <a href="{{ route('division.finance-of-project.index') }}" class="nav-link {{ Request::routeIs('division.finance-of-project.*') ? 'active' : '' }}">
               <i class="fas fa-chart-pie nav-icon text-warning"></i>
@@ -1092,7 +1070,7 @@
       <li class="nav-item">
           <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
               <i class="fas fa-folder-open nav-icon text-warning"></i>
-              <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+              <p>Case Files (E-Office) <span class="badge badge-blinking-red badge-gcs-child {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
           </a>
       </li>
 
@@ -1143,21 +1121,21 @@
             <li class="nav-item">
                 <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
                     <i class="fas fa-random nav-icon text-info"></i>
-                    <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
+                    <p>Shifting of Funds <span class="badge badge-blinking-red badge-fsh-child {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('salary_cases.index') }}" class="nav-link {{ Request::routeIs('salary_cases.*') ? 'active' : '' }}">
                     <i class="fas fa-file-invoice-dollar nav-icon text-success"></i>
-                    <p>Salary Cases <span class="badge badge-blinking-red {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
+                    <p>Salary Cases <span class="badge badge-blinking-red badge-soc-child {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
                     <i class="fas fa-folder-open nav-icon text-warning"></i>
-                    <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+                    <p>Case Files (E-Office) <span class="badge badge-blinking-red badge-gcs-child {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
                 </a>
             </li>
 
@@ -1300,7 +1278,7 @@
            <li class="nav-item">
                <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
                    <i class="fas fa-folder-open nav-icon text-warning"></i>
-                   <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+                   <p>Case Files (E-Office) <span class="badge badge-blinking-red badge-gcs-child {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
                </a>
            </li>
 
@@ -1311,6 +1289,19 @@
               $isDlog = (Auth::user() && method_exists(Auth::user(), 'isDlog') && Auth::user()->isDlog()) || in_array($area, ['log', 'dlog', 'logistics'], true);
           @endphp
           <li class="nav-header">{{ $isProc ? 'Procurement Directorate' : 'Command View' }}</li>
+
+          {{-- MPR inbox for MD: only when the MD stage is switched on in Admin -> Settings -> Workflows (MPR) --}}
+          @php
+              $mdMprOn = $area === 'rdw' && (bool) \App\Models\SystemSetting::get('mpr_md_stage_enabled', false);
+          @endphp
+          @if($mdMprOn)
+          <li class="nav-item">
+              <a href="{{ route('md.mpr_inbox') }}" class="nav-link {{ Request::routeIs('md.mpr_inbox') ? 'active' : '' }}">
+                  <i class="fas fa-file-signature nav-icon text-warning"></i>
+                  <p>MPR Inbox</p>
+              </a>
+          </li>
+          @endif
 
           <li class="nav-item">
               @php
@@ -1366,21 +1357,21 @@
           <li class="nav-item">
               <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-random text-info"></i>
-                  <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
+                  <p>Shifting of Funds <span class="badge badge-blinking-red badge-fsh-child {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
               </a>
           </li>
 
           <li class="nav-item">
               <a href="{{ route('salary_cases.index') }}" class="nav-link {{ Request::routeIs('salary_cases.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-file-invoice-dollar text-success"></i>
-                  <p>Salary Cases <span class="badge badge-blinking-red {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
+                  <p>Salary Cases <span class="badge badge-blinking-red badge-soc-child {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
               </a>
           </li>
 
           <li class="nav-item">
               <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
                   <i class="fas fa-folder-open nav-icon text-warning"></i>
-                  <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+                  <p>Case Files (E-Office) <span class="badge badge-blinking-red badge-gcs-child {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
               </a>
           </li>
 
@@ -1563,21 +1554,21 @@
           <li class="nav-item">
               <a href="{{ route('fund_shifting.index') }}" class="nav-link {{ Request::routeIs('fund_shifting.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-random text-info"></i>
-                  <p>Shifting of Funds <span class="badge badge-blinking-red {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
+                  <p>Shifting of Funds <span class="badge badge-blinking-red badge-fsh-child {{ $sbFsh > 0 ? '' : 'd-none' }} ml-1">{{ $sbFsh }}</span></p>
               </a>
           </li>
 
           <li class="nav-item">
               <a href="{{ route('salary_cases.index') }}" class="nav-link {{ Request::routeIs('salary_cases.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-file-invoice-dollar text-success"></i>
-                  <p>Salary Cases <span class="badge badge-blinking-red {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
+                  <p>Salary Cases <span class="badge badge-blinking-red badge-soc-child {{ $sbSoc > 0 ? '' : 'd-none' }} ml-1">{{ $sbSoc }}</span></p>
               </a>
           </li>
 
           <li class="nav-item">
               <a href="{{ route('cases.index') }}" class="nav-link {{ Request::routeIs('cases.*') ? 'active' : '' }}">
                   <i class="fas fa-folder-open nav-icon text-warning"></i>
-                  <p>Case Files (E-Office) <span class="badge badge-blinking-red {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
+                  <p>Case Files (E-Office) <span class="badge badge-blinking-red badge-gcs-child {{ $sbGcs > 0 ? '' : 'd-none' }} ml-1">{{ $sbGcs }}</span></p>
               </a>
           </li>
 
@@ -1598,6 +1589,15 @@
                   </p>
               </a>
           </li>
+
+          @can('syslog.view')
+          <li class="nav-item">
+              <a href="{{ route('admin.syslog.home') }}" class="nav-link {{ Request::routeIs('admin.syslog.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-shield-alt text-primary"></i>
+                  <p>System Logs</p>
+              </a>
+          </li>
+          @endcan
 
           <!-- Dedicated REPORTS Dropdown for IT -->
           <li class="nav-item {{ Request::routeIs('hr.reports.*') || Request::routeIs('fin.reports.*') ? 'menu-open' : '' }}">
@@ -2286,6 +2286,87 @@
         });
     </script>
     @endif
+
+    {{-- ==========================================================
+         UNIVERSAL MODAL HYGIENE
+         Bootstrap 4 does not support stacked modals: every extra
+         .modal-backdrop stays behind, the screen turns darker and
+         darker and finally nothing is clickable (looks like a hang,
+         especially on slower machines). This keeps exactly one modal
+         and one backdrop alive, and clears anything left behind.
+         ========================================================== --}}
+    <script>
+    (function () {
+        if (typeof jQuery === 'undefined') { return; }
+
+        function clearStuck() {
+            if ($('.modal.show').length === 0) {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css({ 'padding-right': '', 'overflow': '' });
+            }
+        }
+
+        function trimBackdrops() {
+            var $b = $('.modal-backdrop');
+            if ($b.length > 1) { $b.slice(0, -1).remove(); }
+        }
+
+        $(function () {
+            // 1. Modals must sit directly under <body> (an ancestor with transform /
+            //    filter / overflow otherwise traps or hides them). Modals whose inputs
+            //    belong to an outer form are left where they are.
+            $('.modal').each(function () {
+                if (this.parentNode !== document.body && $(this).closest('form').length === 0) {
+                    document.body.appendChild(this);
+                }
+            });
+
+            // 2. One modal at a time - close whatever is already open.
+            $(document).on('show.bs.modal', '.modal', function () {
+                var current = this;
+                $('.modal.show').each(function () {
+                    if (this !== current) { $(this).modal('hide'); }
+                });
+            });
+
+            // 3. Never more than one backdrop.
+            $(document).on('shown.bs.modal', '.modal', trimBackdrops);
+
+            // 4. Clean up once the last modal closes.
+            $(document).on('hidden.bs.modal', '.modal', function () {
+                setTimeout(function () { trimBackdrops(); clearStuck(); }, 0);
+            });
+
+            // 5. Escape hatch: a backdrop with no modal behind it is removed.
+            setInterval(clearStuck, 1500);
+
+            // 5b. Tailwind-style full screen overlays (HR pages use <div id="...Modal"
+            //     class="fixed inset-0 ... hidden">): Esc or a click on the dark area
+            //     always closes them, so a dark overlay can never trap the screen.
+            function openOverlays() {
+                return document.querySelectorAll('div[id$="Modal"].fixed.inset-0:not(.hidden):not(.modal)');
+            }
+
+            $(document).on('keydown', function (e) {
+                if (e.key === 'Escape' || e.keyCode === 27) {
+                    openOverlays().forEach(function (el) { el.classList.add('hidden'); });
+                }
+            });
+
+            $(document).on('mousedown', 'div[id$="Modal"].fixed.inset-0', function (e) {
+                if (e.target === this && !this.classList.contains('modal')) {
+                    this.classList.add('hidden');
+                }
+            });
+
+            // 6. The frosted preloader must never be able to freeze the screen
+            //    (on a slow PC a pending asset can leave it covering everything).
+            setTimeout(function () {
+                $('.preloader').addClass('preloader-hidden').css({ display: 'none', height: 0 });
+            }, 2500);
+        });
+    })();
+    </script>
 
   </body>
 </html>

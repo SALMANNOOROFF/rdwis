@@ -67,9 +67,13 @@ class PurchaseFinanceController extends Controller
         $detailsRouteName = 'nrdi.purchase_cases_new.finance.show';
         $area = 'fin';
 
+        // Project code shown in the hub list (bulk resolved - 2 queries for all tabs)
+        $projectCodes = \App\Services\PurchaseProjectCodeService::mapFor($pending, $open, $closed, $actionTaken);
+
         return view('nrdi.purchase_cases_new.index', compact(
-            'pending', 'open', 'closed', 'actionTaken', 'pageTitle', 'totalVolume', 'caseCount', 
-            'openCount', 'closedCount', 'actionTakenCount', 'unitNameMap', 'detailsRouteName', 'area'
+            'pending', 'open', 'closed', 'actionTaken', 'pageTitle', 'totalVolume', 'caseCount',
+            'openCount', 'closedCount', 'actionTakenCount', 'unitNameMap', 'detailsRouteName', 'area',
+            'projectCodes'
         ));
     }
 

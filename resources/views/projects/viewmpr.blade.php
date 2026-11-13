@@ -3,322 +3,265 @@
 @section('content')
 <div class="content-wrapper pt-3">
     <style>
-        /* Layout Styles */
-        .mpr-wrapper { display: flex; gap: 20px; align-items: flex-start; }
-        .mpr-left { flex: 1; }
-        
-        /* Width fixed to 480px */
-        .mpr-right { flex: 0 0 480px; max-width: 480px; display: flex; flex-direction: column; gap: 15px; }
-        
-        .history-scroll-box { max-height: 600px; overflow-y: auto; padding-right: 8px; padding-left: 5px; padding-top: 5px; }
-        
-        /* History Card Standard */
-        .history-item {
-            background: var(--rd-surface); border-left: 4px solid var(--rd-info); border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); margin-bottom: 12px; padding: 15px; 
-            transition: all 0.2s; position: relative;
-        }
-        .history-item:hover { transform: translateX(2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        
-        /* Latest Item Style */
-        .history-item.latest {
-            border-left: 6px solid var(--rd-success);
-            background-color: var(--rd-success-soft);
-            transform: scale(1.01);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.2);
-            margin-bottom: 20px;
-            border: 1px solid var(--rd-border);
-            border-left: 6px solid var(--rd-success);
-        }
-        
-        .latest-badge {
-            font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;
-            background: var(--rd-success); color: white; padding: 2px 8px; border-radius: 4px;
-            margin-bottom: 8px; display: inline-block; font-weight: bold;
-        }
-
-        .history-date { font-size: 0.75rem; color: var(--rd-text3); font-weight: 700; text-transform: uppercase; }
-        .history-title { font-weight: 700; color: var(--rd-text1); font-size: 0.95rem; margin-bottom: 4px; }
-        .history-desc { font-size: 0.85rem; color: var(--rd-text2); white-space: pre-wrap; line-height: 1.5; }
-        
-        /* Copy Button */
-        .copy-btn {
-            position: absolute; top: 10px; right: 10px;
-            background: var(--rd-surface2); border: 1px solid var(--rd-border); color: var(--rd-text3);
-            width: 32px; height: 32px; border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s; z-index: 10;
-        }
-        .copy-btn:hover { background: var(--rd-surface3); color: var(--rd-accent); border-color: var(--rd-accent); }
-        .copy-btn:active { transform: scale(0.95); }
-
-        .milestone-context-box { background: var(--rd-surface); border-top: 4px solid var(--rd-warning); border-radius: 4px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .mpr-card { border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; }
+        .mpr-card > .card-header { background: #fff; border-bottom: 1px solid #eef0f3; }
+        .mpr-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; }
+        .mpr-scroll { max-height: 420px; overflow-y: auto; padding-right: 6px; }
+        .trail-item { border-left: 3px solid #cbd5e1; background: #f8fafc; border-radius: 0 6px 6px 0; padding: 7px 10px; margin-bottom: 7px; }
+        .trail-item.forward { border-left-color: #16a34a; }
+        .trail-item.return  { border-left-color: #f59e0b; }
+        .trail-item.final   { border-left-color: #2563eb; }
+        .trail-item.cancel  { border-left-color: #dc2626; }
+        .trail-meta { font-size: 10.5px; color: #64748b; text-transform: uppercase; letter-spacing: .3px; font-weight: 700; }
+        .trail-move { font-size: 12.5px; font-weight: 700; color: #1e293b; }
+        .trail-note { font-size: 12px; color: #334155; white-space: pre-wrap; margin-top: 2px; }
+        .hist-item { border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; margin-bottom: 7px; background: #fff; }
+        .hist-text { font-size: 12px; color: #334155; white-space: pre-wrap; line-height: 1.5; }
     </style>
 
-    <section class="content">
-        <div class="container-fluid">
+    <div class="container-fluid">
 
-            {{-- HEADER: BACK BUTTON LOGIC --}}
-            <div class="row mb-3">
-                <div class="col-12 col-md-6">
-                    @if(Auth::user()->isSORD())
-                        <a href="{{ route('sord.inbox') }}" class="btn btn-sm btn-secondary shadow-sm">
-                            <i class="fas fa-arrow-left mr-1"></i> Back to Inbox
-                        </a>
-                    @else
-                        <a href="{{ route('projects.show', $project->prj_id) }}" class="btn btn-sm btn-secondary shadow-sm">
-                            <i class="fas fa-arrow-left mr-1"></i> Back to Project Details
-                        </a>
-                    @endif
-                </div>
-                <div class="col-12 col-md-6 text-right">
-                    @if($document)
-                        <span class="badge badge-info p-2">Ref: {{ $document->doc_ref_no ?? $document->doc_id }}</span>
-                    @endif
-                </div>
+        {{-- HEADER --}}
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 10px;">
+            <div>
+                <h1 class="m-0 font-weight-bold text-primary" style="font-size: 1.3rem; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px;">
+                    <i class="fas fa-file-signature mr-1"></i> MONTHLY PROGRESS REPORT
+                </h1>
+                <small class="text-muted">
+                    <strong>{{ $project->prj_code }}</strong> &mdash; {{ $project->prj_title }}
+                    &middot; Route: {{ $routeService->describe() }}
+                </small>
             </div>
+            <a href="{{ route('projects.show', $project->prj_id) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                <i class="fas fa-arrow-left mr-1"></i> Back to project
+            </a>
+        </div>
 
-            {{-- VISUAL STATUS ALERT (SIGNS) --}}
-            <div class="mb-3">
-                @php
-                    $dStatus = $document->status ?? 'New';
-                    $alertClass = 'alert-secondary';
-                    $icon = 'fa-file';
-                    
-                    if($dStatus == 'Returned') { $alertClass = 'alert-danger'; $icon = 'fa-undo'; }
-                    elseif($dStatus == 'Pending Review' || $dStatus == 'Under Review by SORD') { $alertClass = 'alert-info'; $icon = 'fa-paper-plane'; }
-                    elseif($dStatus == 'Finalized' || $dStatus == 'Forwarded to MD') { $alertClass = 'alert-success'; $icon = 'fa-check-double'; }
-                    elseif($dStatus == 'Draft') { $alertClass = 'alert-warning'; $icon = 'fa-pencil-alt'; }
-                @endphp
-
-                <div class="alert {{ $alertClass }} shadow-sm border-0 d-flex align-items-center">
-                    <i class="fas {{ $icon }} fa-2x mr-3 opacity-75"></i>
-                    <div>
-                        <h5 class="mb-0 font-weight-bold">Status: {{ $dStatus }}</h5>
-                        @if($dStatus == 'Returned' && isset($document->latestVersion->remarks))
-                            <small class="d-block mt-1"><strong>Reason/Remarks:</strong> "{{ $document->latestVersion->remarks }}"</small>
-                        @elseif($dStatus != 'New' && $dStatus != 'Draft' && $document)
-                            <small class="d-block mt-1">Currently with: <strong>{{ $document->currentOwner->role->rol_desig ?? ($document->currentOwner->acc_username ?? 'System') }}</strong></small>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="mpr-wrapper">
-                
-                {{-- LEFT SIDE: FORM --}}
-                <div class="mpr-left">
-                    <div class="card card-success card-outline shadow">
-                        <div class="card-header">
-                            <h3 class="card-title text-bold"><i class="fas fa-edit mr-2"></i> Prepare Monthly Report</h3>
-                            <div class="card-tools">
-                                <span class="badge badge-light border">
-                                    Status: {{ $document->status ?? 'New' }}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <form action="{{ route('mpr.store', $project->prj_id) }}" method="POST">
-                            @csrf
-                            <div class="card-body">
-                                
-                                {{-- Retrieve Latest Data --}}
-                                @php
-                                    $latestVer = $document ? $document->latestVersion : null;
-                                    $latestData = $latestVer ? $latestVer->content_data : [];
-                                    $remarks = $latestVer ? $latestVer->remarks : '';
-
-                                    // FIX: If Returned and Content is Empty, fetch from Previous Version (Division's Draft)
-                                    if(isset($isReturned) && $isReturned && empty($latestData['mpr_content'])) {
-                                        $prevVer = $document->versions->take(2)->last(); 
-                                        if($prevVer && $prevVer->ver_id != $latestVer->ver_id) {
-                                             $latestData['mpr_content'] = $prevVer->content_data['mpr_content'] ?? '';
-                                        }
-                                    }
-                                @endphp
-
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <label>Report Month <span class="text-danger">*</span></label>
-                                        <input type="month" name="mpr_month" class="form-control shadow-sm" required
-                                               value="{{ $latestData['mpr_month'] ?? date('Y-m') }}" 
-                                               {{ !$isEditable ? 'disabled' : '' }}>
-                                    </div>
-                                    <div class="col-md-6 form-group">
-                                        <label>Last Updated</label>
-                                        <input type="text" class="form-control shadow-sm" disabled value="{{ $latestVer ? \Carbon\Carbon::parse($latestVer->updated_at)->format('d-M-Y') : 'N/A' }}">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>MPR Main Report Content <span class="text-danger">*</span></label>
-                                    <textarea name="mpr_content" class="form-control font-weight-bold shadow-sm" rows="12" 
-                                              placeholder="Enter the detailed Monthly Progress Report here..." required
-                                              {{ !$isEditable ? 'disabled' : '' }}>{{ $latestData['mpr_content'] ?? '' }}</textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Remarks / Issues (Optional)</label>
-                                    <textarea name="remarks" class="form-control" rows="3" 
-                                              placeholder="Any additional remarks or issues..."
-                                              {{ !$isEditable ? 'disabled' : '' }}>{{ $remarks }}</textarea>
-                                </div>
-
-                                <div class="alert alert-light border mt-3">
-                                   <small class="text-muted">
-                                        <i class="fas fa-info-circle mr-1"></i> Current User: 
-                                        <strong>{{ Auth::user()->role->rol_desig ?? Auth::user()->acc_username }}</strong>
-                                   </small>
-                                </div>
-                            </div>
-                            
-                            {{-- FOOTER BUTTONS (Dynamic based on Role) --}}
-                            @if($isEditable)
-                            <div class="card-footer bg-white border-top">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    
-                                    {{-- Save Draft (Everyone) --}}
-                                    <button type="submit" name="action" value="save" class="btn btn-secondary shadow-sm">
-                                        <i class="fas fa-save mr-1"></i> Save Draft
-                                    </button>
-
-                                    <div class="d-flex gap-2">
-                                        {{-- LOGIC: Are we SORD or Division? --}}
-                                        @if(Auth::user()->isSORD())
-                                            
-                                            {{-- SORD Actions --}}
-                                            <button type="submit" name="action" value="return" class="btn btn-warning text-white shadow-sm mr-2" 
-                                                onclick="return confirm('Return this document to Division for correction?');">
-                                                <i class="fas fa-undo-alt mr-1"></i> Return to Division
-                                            </button>
-                                            <button type="button" class="btn btn-dark shadow-sm" disabled title="Coming Soon">
-                                                Forward to MD <i class="fas fa-arrow-right ml-1"></i>
-                                            </button>
-
-                                        @else
-                                            
-                                            {{-- Division Actions --}}
-                                            <button type="submit" name="action" value="forward" class="btn btn-success px-4 shadow-sm" 
-                                                onclick="return confirm('Are you sure you want to forward this to SORD? You will not be able to edit it until returned.');">
-                                                <i class="fas fa-paper-plane mr-1"></i> Forward to SORD
-                                            </button>
-
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-
-               
-{{-- RIGHT SIDE HISTORY SECTION KO IS SE REPLACE KAREIN --}}
-
-<div class="mpr-right">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="font-weight-bold m-0 text-white"><i class="fas fa-history mr-1"></i> Workflow History</h6>
-    </div>
-
-    <div class="history-scroll-box">
-        @if($document && $document->history->count() > 0)
-            @foreach($document->history as $log)
-                
-                {{-- Dynamic Color based on Action --}}
-                @php
-                    $borderClass = 'border-left-primary'; // Default Blue
-                    $bgClass = 'bg-white';
-                    $icon = 'fa-paper-plane';
-
-                    if($log->action_type == 'Returned') {
-                        $borderClass = 'border-left-danger'; // Red for Return
-                        $bgClass = 'bg-light-danger'; // Light Red BG
-                        $icon = 'fa-undo';
-                    } elseif($log->action_type == 'Forwarded MD' || $log->action_type == 'Approved') {
-                        $borderClass = 'border-left-success'; // Green for Final
-                        $bgClass = 'bg-light-success';
-                        $icon = 'fa-check-circle';
-                    }
-                @endphp
-
-                <style>
-                    .border-left-primary { border-left: 4px solid var(--rd-accent); }
-                    .border-left-danger { border-left: 4px solid var(--rd-danger); }
-                    .border-left-success { border-left: 4px solid var(--rd-success); }
-                    .bg-light-danger { background-color: var(--rd-danger-soft); }
-                    .bg-light-success { background-color: var(--rd-success-soft); }
-                </style>
-
-                <div class="card shadow-sm mb-2 {{ $borderClass }} {{ $bgClass }}">
-                    <div class="card-body p-2">
-                        <div class="d-flex justify-content-between">
-                            <span class="text-xs text-muted font-weight-bold text-uppercase">
-                                {{ $log->action_type }}
-                            </span>
-                            <span class="text-xs text-muted">
-                                {{ \Carbon\Carbon::parse($log->created_at)->format('d M, h:i A') }}
-                            </span>
-                        </div>
-                        
-                        <div class="mt-1">
-                            <span class="font-weight-bold text-white" style="font-size: 0.9rem;">
-                                <i class="fas {{ $icon }} mr-1 text-secondary"></i>
-                                {{-- FROM: Sender Role --}}
-                                {{ $log->fromUser->role->rol_desig ?? ($log->fromUser->acc_username ?? 'System') }}
-                            </span>
-                            
-                            <i class="fas fa-arrow-right mx-1 text-muted text-xs"></i>
-                            
-                            <span class="font-weight-bold text-white" style="font-size: 0.9rem;">
-                                {{-- TO: Receiver Role --}}
-                                @if($log->to_user_id == 0 || $log->action_type == 'Finalized')
-                                    MD / Final
-                                @else
-                                    {{ $log->toUser->role->rol_desig ?? ($log->toUser->acc_username ?? 'User') }}
-                                @endif
-                            </span>
-                        </div>
-
-                        @if($log->notes)
-                            <div class="mt-2 p-2 rounded text-sm text-secondary font-italic" style="background: var(--rd-surface2); border: 1px solid var(--rd-border);">
-                                "{{ $log->notes }}"
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-            @endforeach
-        @else
-            <div class="text-center text-muted py-4">No history found.</div>
+        @if(session('success'))
+            <div class="alert alert-success py-2 px-3 small"><i class="fas fa-check-circle mr-1"></i> {{ session('success') }}</div>
         @endif
-    </div>
-</div>
+        @if(session('error'))
+            <div class="alert alert-danger py-2 px-3 small"><i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}</div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-danger py-2 px-3 small"><ul class="mb-0 pl-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
+        @endif
+
+        <div class="row">
+            {{-- ================= LEFT: CURRENT MPR ================= --}}
+            <div class="col-lg-7 mb-3">
+                <div class="card mpr-card shadow-sm">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+                        <h3 class="card-title font-weight-bold m-0" style="font-size: 14px;">
+                            @if($current)
+                                <span class="badge badge-dark mr-1">{{ $current->pgh_group }}</span>
+                                @php
+                                    $st = strtolower(trim((string) $current->pgh_status));
+                                    $stColor = $st === 'finalized' ? 'success'
+                                            : ($st === 'cancelled' ? 'secondary'
+                                            : ($st === 'under review' ? 'warning'
+                                            : ($st === 'under finalization' ? 'info' : 'primary')));
+                                @endphp
+                                <span class="badge badge-{{ $stColor }}">{{ $current->pgh_status }}</span>
+                                <span class="text-muted font-weight-normal ml-1" style="font-size: 12px;">
+                                    with {{ $routeService->desigForLevel((int) $current->pgh_level) ?: ('level ' . $current->pgh_level) }}
+                                </span>
+                            @else
+                                <i class="fas fa-plus-circle text-primary mr-1"></i> No MPR in progress
+                            @endif
+                        </h3>
+                        <small class="text-muted">Current cycle: <strong>{{ $group }}</strong></small>
+                    </div>
+
+                    <form method="POST" action="{{ route('mpr.action', $project->prj_id) }}">
+                        @csrf
+                        <input type="hidden" name="action" id="mprAction" value="save">
+
+                        <div class="card-body py-3">
+                            @if($current)
+                                <div class="mpr-label">Progress</div>
+                                <textarea name="pgh_progress" rows="14" class="form-control"
+                                          style="font-size: 13px; line-height: 1.6;"
+                                          {{ $rights['save'] || $rights['forward'] || $rights['finalize'] ? '' : 'readonly' }}
+                                          placeholder="1. ...">{{ old('pgh_progress', $current->pgh_progress) }}</textarea>
+                                <small class="text-muted d-block mt-1" style="font-size: 11px;">
+                                    Author: <strong>{{ $current->pgh_author }}</strong>
+                                    &middot; Trail: <code>{{ $current->pgh_trail }}</code>
+                                    &middot; Entry: {{ $current->pgh_dtg ? \Carbon\Carbon::parse($current->pgh_dtg)->format('d M, Y H:i') : '—' }}
+                                </small>
+
+                                <div class="mpr-label mt-3">Remarks / note for this action</div>
+                                <textarea name="remarks" rows="2" class="form-control" style="font-size: 12.5px;"
+                                          placeholder="Kept with the movement trail (who sent / returned, and why)">{{ old('remarks') }}</textarea>
+                            @else
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-file-alt fa-2x mb-2 d-block" style="opacity: .3;"></i>
+                                    @if($rights['create'])
+                                        No MPR is open for this project. Start the <strong>{{ $group }}</strong> report below &mdash;
+                                        it opens with the project's current remarks, exactly like the old system.
+                                    @else
+                                        No MPR is open for this project.
+                                        @if(! $rights['on_route'])
+                                            Your seat is not on the MPR route ({{ $routeService->describe() }}).
+                                        @endif
+                                    @endif
+                                </div>
+                                <div class="mpr-label">Remarks / note</div>
+                                <textarea name="remarks" rows="2" class="form-control" style="font-size: 12.5px;">{{ old('remarks') }}</textarea>
+                            @endif
+                        </div>
+
+                        <div class="card-footer d-flex justify-content-between align-items-center flex-wrap bg-white py-2" style="gap: 8px;">
+                            <small class="text-muted">
+                                @if($current && $rights['at_my_level'])
+                                    <i class="fas fa-user-check text-success mr-1"></i> This MPR is on your desk.
+                                @elseif($current)
+                                    <i class="fas fa-lock mr-1"></i> Currently with
+                                    {{ $routeService->desigForLevel((int) $current->pgh_level) ?: ('level ' . $current->pgh_level) }}.
+                                @endif
+                            </small>
+                            <div class="d-flex flex-wrap" style="gap: 6px;">
+                                @if($rights['create'])
+                                    <button type="submit" class="btn btn-sm btn-primary px-4 font-weight-bold" onclick="setAct('create')">
+                                        <i class="fas fa-plus mr-1"></i> Create MPR ({{ $group }})
+                                    </button>
+                                @endif
+                                @if($rights['save'])
+                                    <button type="submit" class="btn btn-sm btn-secondary px-3 font-weight-bold" onclick="setAct('save')">
+                                        <i class="fas fa-save mr-1"></i> Save
+                                    </button>
+                                @endif
+                                @if($rights['edit'])
+                                    <button type="submit" class="btn btn-sm btn-outline-primary px-3 font-weight-bold" onclick="setAct('edit')">
+                                        <i class="fas fa-pen mr-1"></i> Edit (new revision)
+                                    </button>
+                                @endif
+                                @if($rights['cancel'])
+                                    <button type="submit" class="btn btn-sm btn-outline-danger px-3 font-weight-bold" onclick="return setAct('cancel', 'Cancel this progress?')">
+                                        <i class="fas fa-ban mr-1"></i> Cancel
+                                    </button>
+                                @endif
+                                @if($rights['return'])
+                                    <button type="submit" class="btn btn-sm btn-warning text-white px-3 font-weight-bold" onclick="return setAct('return', 'Return this progress to the previous stop?')">
+                                        <i class="fas fa-undo mr-1"></i> Return
+                                    </button>
+                                @endif
+                                @if($rights['forward'])
+                                    <button type="submit" class="btn btn-sm btn-success px-4 font-weight-bold" onclick="return setAct('forward', 'Forward this progress?')">
+                                        <i class="fas fa-paper-plane mr-1"></i> Forward
+                                    </button>
+                                @endif
+                                @if($rights['finalize'])
+                                    <button type="submit" class="btn btn-sm btn-primary px-4 font-weight-bold" onclick="return setAct('finalize', 'Finalize this progress? It will also update the project remarks.')">
+                                        <i class="fas fa-check-double mr-1"></i> Finalize
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- ================= RIGHT: TRAIL + PREVIOUS ================= --}}
+            <div class="col-lg-5">
+                {{-- MOVEMENT TRAIL --}}
+                <div class="card mpr-card shadow-sm mb-3">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h3 class="card-title font-weight-bold m-0" style="font-size: 13.5px;">
+                            <i class="fas fa-route text-primary mr-1"></i> Movement Trail
+                        </h3>
+                        <span class="badge badge-light border">{{ $trail->count() }}</span>
+                    </div>
+                    <div class="card-body py-2 mpr-scroll">
+                        @forelse($trail as $t)
+                            @php
+                                $a = strtolower((string) $t->pgt_action);
+                                $cls = str_contains($a, 'forward') ? 'forward'
+                                     : (str_contains($a, 'return') ? 'return'
+                                     : (str_contains($a, 'final') ? 'final'
+                                     : (str_contains($a, 'cancel') ? 'cancel' : '')));
+                            @endphp
+                            <div class="trail-item {{ $cls }}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <span class="trail-move">
+                                        {{ $t->pgt_action }}
+                                        @if($t->pgt_from_desig || $t->pgt_to_desig)
+                                            <span class="text-muted font-weight-normal">
+                                                {{ $t->pgt_from_desig ?: '—' }} &rarr; {{ $t->pgt_to_desig ?: '—' }}
+                                            </span>
+                                        @endif
+                                    </span>
+                                    <span class="trail-meta">{{ $t->pgt_dtg ? \Carbon\Carbon::parse($t->pgt_dtg)->format('d M y H:i') : '' }}</span>
+                                </div>
+                                <div class="trail-meta">
+                                    {{ $t->pgt_group }}
+                                    @if($t->pgt_status_after) &middot; {{ $t->pgt_status_after }} @endif
+                                </div>
+                                @if(trim((string) $t->pgt_remarks) !== '')
+                                    <div class="trail-note">{{ $t->pgt_remarks }}</div>
+                                @endif
+                            </div>
+                        @empty
+                            <div class="text-center text-muted py-3">No movements recorded yet.</div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- PREVIOUS MPRs --}}
+                <div class="card mpr-card shadow-sm">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h3 class="card-title font-weight-bold m-0" style="font-size: 13.5px;">
+                            <i class="fas fa-layer-group text-success mr-1"></i> Previous MPRs
+                        </h3>
+                        <span class="badge badge-light border">{{ $history->count() }}</span>
+                    </div>
+                    <div class="card-body py-2 mpr-scroll">
+                        @forelse($history as $h)
+                            @php
+                                $hs = strtolower(trim((string) $h->pgh_status));
+                                $hc = $hs === 'finalized' ? 'success'
+                                    : ($hs === 'cancelled' ? 'secondary'
+                                    : ($hs === 'edited' ? 'light' : 'info'));
+                            @endphp
+                            <div class="hist-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>{{ $h->pgh_group ?: '—' }}</strong>
+                                        <span class="badge badge-{{ $hc }} ml-1">{{ $h->pgh_status }}</span>
+                                    </div>
+                                    <small class="text-muted">{{ $h->pgh_dtg ? \Carbon\Carbon::parse($h->pgh_dtg)->format('d M, Y') : '' }}</small>
+                                </div>
+                                <small class="text-muted d-block">
+                                    {{ $h->pgh_author }}
+                                    &middot; level {{ $h->pgh_level }}
+                                    @if($h->pgh_trail) &middot; <code>{{ $h->pgh_trail }}</code> @endif
+                                </small>
+                                @if(trim((string) $h->pgh_progress) !== '')
+                                    <a href="javascript:void(0)" class="small font-weight-bold text-primary" onclick="toggleHist('h{{ $h->pgh_id }}')">
+                                        <i class="fas fa-eye mr-1"></i> Show / hide
+                                    </a>
+                                    <div id="h{{ $h->pgh_id }}" class="hist-text mt-1" style="display: none;">{{ $h->pgh_progress }}</div>
+                                @endif
+                            </div>
+                        @empty
+                            <div class="text-center text-muted py-3">No earlier MPR for this project.</div>
+                        @endforelse
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 </div>
 
-{{-- ROBUST COPY SCRIPT --}}
 <script>
-    function copyToClipboard(btn, elementId) {
-        var textToCopy = document.getElementById(elementId).innerText;
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(textToCopy).then(() => { showCopiedFeedback(btn); }).catch(err => { fallbackCopyText(textToCopy, btn); });
-        } else { fallbackCopyText(textToCopy, btn); }
-    }
-    function fallbackCopyText(text, btn) {
-        var textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed"; textArea.style.left = "-9999px";
-        document.body.appendChild(textArea);
-        textArea.focus(); textArea.select();
-        try { document.execCommand('copy'); showCopiedFeedback(btn); } catch (err) { alert('Copy failed.'); }
-        document.body.removeChild(textArea);
-    }
-    function showCopiedFeedback(btn) {
-        var icon = btn.querySelector('i');
-        icon.classList.remove('fa-copy'); icon.classList.add('fa-check'); icon.style.color = '#28a745';
-        setTimeout(function() { icon.classList.remove('fa-check'); icon.classList.add('fa-copy'); icon.style.color = ''; }, 2000);
-    }
+function setAct(action, confirmText) {
+    if (confirmText && !confirm(confirmText)) { return false; }
+    document.getElementById('mprAction').value = action;
+    return true;
+}
+function toggleHist(id) {
+    var el = document.getElementById(id);
+    if (el) { el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none'; }
+}
 </script>
 @endsection

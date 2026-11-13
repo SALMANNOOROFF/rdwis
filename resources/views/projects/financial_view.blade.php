@@ -1260,6 +1260,24 @@
                         </div>
 
                         <div class="d-flex align-items-center">
+                            @php
+                                $fdUser = Auth::user();
+                                $fdArea = strtolower(trim((string) ($fdUser->acc_untarea ?? '')));
+                                $canAddFunding = $fdUser && (
+                                    in_array($fdArea, ['fin', 'finance'], true)
+                                    || (method_exists($fdUser, 'isFinance') && $fdUser->isFinance())
+                                    || (int) ($fdUser->acc_unt_id ?? 0) === 800000
+                                    || ($fdUser->acc_username ?? '') === 'superadminrdw'
+                                );
+                                $fdHeadId = $headRecord->hed_id ?? ($head->head_id ?? null);
+                            @endphp
+                            @if($canAddFunding && $fdHeadId)
+                                <a href="{{ route('finance.fundings.index', $fdHeadId) }}"
+                                   class="btn btn-success font-weight-bold px-3.5 py-1.5 rounded-pill shadow-sm mr-2"
+                                   style="font-size: 0.9rem;" title="Record funding received / milestone costs (Finance)">
+                                    <i class="fas fa-plus-circle mr-1.5"></i> Add Fundings
+                                </a>
+                            @endif
                             <button type="button" id="btnToggleFundingView" onclick="toggleFundingViewMode()" class="btn btn-outline-primary font-weight-bold px-3.5 py-1.5 rounded-pill shadow-sm" style="font-size: 0.9rem; transition: all 0.2s ease;">
                                 <i id="toggleBtnIcon" class="fas fa-tasks mr-1.5"></i>
                                 <span id="toggleBtnLabel">Milestone Costs</span>

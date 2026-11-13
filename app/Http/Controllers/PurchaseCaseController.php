@@ -311,9 +311,13 @@ class PurchaseCaseController extends Controller
         $openCount = $open->count();
         $closedCount = $closed->count();
 
+        // Project code shown in the hub list (bulk resolved - 2 queries for all tabs)
+        $projectCodes = \App\Services\PurchaseProjectCodeService::mapFor($pending, $open, $closed, $actionTaken);
+
         return view('nrdi.purchase_cases_new.index', compact(
-            'pending', 'open', 'closed', 'actionTaken', 'unitNameMap', 'area', 'pageTitle', 
-            'detailsRouteName', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'actionTakenCount'
+            'pending', 'open', 'closed', 'actionTaken', 'unitNameMap', 'area', 'pageTitle',
+            'detailsRouteName', 'totalVolume', 'caseCount', 'openCount', 'closedCount', 'actionTakenCount',
+            'projectCodes'
         ));
     }
 
@@ -433,6 +437,160 @@ class PurchaseCaseController extends Controller
             'purchase', 'head', 'canApprove', 'area', 'pageTitle', 
             'divisionName', 'canEdit', 'firms', 'subheads', 'currentAuthority', 'nextAuthority', 'recentApproved',
             'employees', 'projectSubheads'
+        ));
+    }
+
+    /**
+     * Render printable official A4 case sheet for any authorized viewer.
+     */
+    public function printCase($id)
+    {
+        $purchase = Purchase::with([
+            'unit',
+            'items.employee',
+            'quotes.firm',
+            'noQuotes.firm',
+            'project',
+            'attachments',
+            'decisions.account',
+            'currentSubstatus',
+            'firm',
+            'itLetter',
+        ])->findOrFail($id);
+
+        $this->authorize('view', $purchase);
+
+        $divisionName = DB::table('cen.units')->where('unt_id', $purchase->pcs_unt_id)->value('unt_name') ?? 'Division Office';
+        $headId = $purchase->pcs_hed_id ?: $purchase->pcs_effhed_id;
+        $finService = app(\App\Services\FinancialIntelligenceService::class);
+        $head = $headId ? $finService->getHeadStatus($headId) : (object)[];
+        $currentAuthority = $purchase->current_stage_display ?? $this->approvalService->getStatusDisplayName($purchase->pcs_status);
+
+        // Material / fulfillment receipts (if goods/services received)
+        $receipts = DB::table('pur.purreceipts')
+            ->where('prt_pcs_id', $purchase->pcs_id)
+            ->orderBy('prt_id')
+            ->get();
+
+        // Chronological seat-wise remarks trail
+        $remarksList = $purchase->decisions
+            ->where('pdec_action', '!=', 'save_draft')
+            ->sortBy(fn($d) => [$d->created_at ? strtotime((string)$d->created_at) : 0, $d->pdec_id])
+            ->values()
+            ->map(function ($d) {
+                $actionRaw = strtolower(trim((string) $d->pdec_action));
+                $tone = 'normal';
+                if (in_array($actionRaw, ['approve', 'approved', 'fulfill', 'fulfilled'], true)) {
+                    $tone = 'approve';
+                } elseif (in_array($actionRaw, ['return', 'returned', 'reverse_case', 'dproc_save'], true)) {
+                    $tone = 'return';
+                } elseif (in_array($actionRaw, ['reject', 'not_approved', 'cancel', 'cancelled'], true)) {
+                    $tone = 'reject';
+                }
+
+                $actionLabel = match($actionRaw) {
+                    'forward'         => 'Forwarded' . ($d->pdec_to_status ? ' → ' . $d->pdec_to_status : ''),
+                    'forward_negative'=> 'Forwarded (With Observations)' . ($d->pdec_to_status ? ' → ' . $d->pdec_to_status : ''),
+                    'return'          => 'Returned' . ($d->pdec_to_status ? ' → ' . $d->pdec_to_status : ''),
+                    'approve'         => 'Approved',
+                    'reject', 'not_approved' => 'Not Approved',
+                    'cancel'          => 'Cancelled',
+                    'float_to_proc'   => 'Floated to Procurement',
+                    'reshare_to_proc' => 'Re-shared with Procurement',
+                    'dproc_save'      => 'Procurement Scrutiny Completed',
+                    'reverse_case'    => 'Reversed Case',
+                    default           => ucwords(str_replace('_', ' ', (string) $d->pdec_action)),
+                };
+
+                return [
+                    'actor'     => $d->account->acc_name ?? 'Authorized Officer',
+                    'seat'      => strtoupper(trim((string) ($d->pdec_role ?: $d->pdec_from_status ?: 'Officer'))),
+                    'action'    => $actionLabel,
+                    'tone'      => $tone,
+                    'timestamp' => $d->created_at ? \Carbon\Carbon::parse($d->created_at)->format('d M Y, h:i A') : '—',
+                    'remarks'   => $d->pdec_remarks ?? '',
+                ];
+            })
+            ->all();
+
+        // Consolidated attached files (Case Attachments + Vendor Quotation Attachments)
+        $enclosuresList = [];
+        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+
+        foreach ($purchase->attachments->filter(fn($a) => !empty(trim((string)$a->pat_path))) as $att) {
+            $normPath = str_replace('\\', '/', (string)$att->pat_path);
+            $fn = basename($normPath);
+            $fnLower = strtolower($fn);
+            $typeLabel = trim((string)($att->pat_type ?: ''));
+            if ($typeLabel === '' || strtolower($typeLabel) === 'attachment') {
+                $typeLabel = match(true) {
+                    str_starts_with($fnLower, 'frm-') => 'Form',
+                    str_starts_with($fnLower, 'min-') => 'Minute',
+                    str_starts_with($fnLower, 'san-') => 'Sanction',
+                    str_starts_with($fnLower, 'fs-')  => 'Financial Status',
+                    str_starts_with($fnLower, 'app-') => 'Approval',
+                    str_starts_with($fnLower, 'aip-') => 'Approval in Principal',
+                    str_starts_with($fnLower, 'mrr-') => 'Market Research Report',
+                    str_starts_with($fnLower, 'wo-')  => 'Work Order',
+                    str_starts_with($fnLower, 'pcs-') => 'Case Document',
+                    default => $fn,
+                };
+            }
+            $ext = strtolower(pathinfo($normPath, PATHINFO_EXTENSION));
+            $uploadedBy = null;
+            if (!empty($att->pat_acc_id)) {
+                $uploadedBy = DB::table('cen.accounts')->where('acc_id', $att->pat_acc_id)->value('acc_name');
+            }
+            $enclosuresList[] = [
+                'title'       => $typeLabel,
+                'filename'    => $fn,
+                'source'      => 'Case Attachment',
+                'uploaded_by' => $uploadedBy ?: ($divisionName ?: 'Division / Office'),
+                'meta'        => strtoupper($ext ?: 'FILE'),
+                'url'         => route('purchase.quote_attachment.view', $att->pat_id),
+                'is_image'    => in_array($ext, $imageExts, true),
+                'is_pdf'      => $ext === 'pdf',
+            ];
+        }
+
+        // Vendor quote documents linked via pat_objtype = 'qte'
+        $quoteIds = $purchase->quotes->pluck('qte_id')->filter()->values()->all();
+        if (!empty($quoteIds)) {
+            $quotesById = $purchase->quotes->keyBy('qte_id');
+            $quoteAtts = DB::table('pur.purattachments')
+                ->where('pat_objtype', 'qte')
+                ->whereIn('pat_objid', $quoteIds)
+                ->whereNotNull('pat_path')
+                ->where('pat_path', '<>', '')
+                ->get();
+
+            foreach ($quoteAtts as $qAtt) {
+                $normPath = str_replace('\\', '/', (string)$qAtt->pat_path);
+                $fn = basename($normPath);
+                $ext = strtolower(pathinfo($normPath, PATHINFO_EXTENSION));
+                $qObj = $quotesById->get($qAtt->pat_objid);
+                $firmName = $qObj?->firm?->frm_name ?? $qObj?->qte_firmname ?? 'Vendor';
+                $isWinner = (bool)($qObj?->qte_recomm ?? false);
+                $qUploadedBy = null;
+                if (!empty($qAtt->pat_acc_id)) {
+                    $qUploadedBy = DB::table('cen.accounts')->where('acc_id', $qAtt->pat_acc_id)->value('acc_name');
+                }
+
+                $enclosuresList[] = [
+                    'title'       => 'Quotation: ' . $firmName . ($isWinner ? ' (Selected)' : ''),
+                    'filename'    => $fn,
+                    'source'      => $isWinner ? 'Winning Quote' : 'Vendor Quotation',
+                    'uploaded_by' => $qUploadedBy ?: ($purchase->decisions->where('pdec_action', 'dproc_save')->first()?->account?->acc_name ?? 'Procurement / Initiator'),
+                    'meta'        => strtoupper($ext ?: 'FILE'),
+                    'url'         => route('purchase.quote_attachment.view', $qAtt->pat_id),
+                    'is_image'    => in_array($ext, $imageExts, true),
+                    'is_pdf'      => $ext === 'pdf',
+                ];
+            }
+        }
+
+        return view('nrdi.purchase_cases_new.print', compact(
+            'purchase', 'head', 'divisionName', 'currentAuthority', 'receipts', 'remarksList', 'enclosuresList'
         ));
     }
 

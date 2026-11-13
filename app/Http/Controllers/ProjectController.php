@@ -768,16 +768,57 @@ class ProjectController extends Controller
         $this->authorize('create', Project::class);
 
         $project = null;
-        $step = 1;
 
-        if ($request->has('draft_id')) {
-            $project = Project::find($request->draft_id);
-            if($project && $project->prj_status == 'Draft') {
-                $step = 2; // Direct Phase 2
+        if ($request->filled('draft_id')) {
+            $project = Project::withoutGlobalScope('published')
+                ->with(['attachments', 'unit'])
+                ->where('prj_id', (int) $request->draft_id)
+                ->first();
+
+            // Only an unpublished draft is editable here.
+            if ($project && strcasecmp(trim((string) $project->prj_status), 'Draft') !== 0) {
+                return redirect()->route('projects.show', $project->prj_id)
+                    ->with('error', 'This project is already published. Use the project page to change it.');
             }
         }
 
-        return view('projects.addnewproject', compact('project', 'step'));
+        $draftMilestones = $project
+            ? Milestone::where('msn_xprj_id', $project->prj_id)->orderBy('msn_id')->get()
+            : collect();
+
+        $drafts = Project::withoutGlobalScope('published')
+            ->with('unit')
+            ->whereRaw("LOWER(TRIM(COALESCE(prj_status, ''))) = 'draft'")
+            ->orderByDesc('prj_id')
+            ->get();
+
+        $publishedProjects = Project::withoutGlobalScope('published')
+            ->with('unit')
+            ->whereRaw("LOWER(TRIM(COALESCE(prj_status, ''))) <> 'draft'")
+            ->orderBy('prj_unt_id')
+            ->orderBy('prj_code')
+            ->get();
+
+        // SORD raises a project on behalf of a division, so the division is picked here.
+        // Only units that own a real project-number block qualify (this leaves out
+        // SORD's own "Projects" directorate, whose block is empty).
+        $divisions = Unit::where('unt_area', 'prj')
+            ->where('unt_lowers', '>', 0)
+            ->whereColumn('unt_lowers', '<=', 'unt_uppers')
+            ->orderBy('unt_name')
+            ->get();
+
+        // The page opens on the Draft / Published lists; the form is shown only when
+        // a draft is opened or "Add New Project" is clicked.
+        $showForm = $project !== null || $request->boolean('new');
+
+        $hasWorkOrder = $project
+            ? $project->attachments->where('jat_type', 'Work Order')->isNotEmpty()
+            : false;
+
+        return view('projects.addnewproject', compact(
+            'project', 'divisions', 'drafts', 'publishedProjects', 'draftMilestones', 'showForm', 'hasWorkOrder'
+        ));
     }
 
     // --- STORE (Phase 1) ---
@@ -787,89 +828,394 @@ class ProjectController extends Controller
 
         $connection = config('database.default'); 
         
-        $request->validate([
-            'prj_code' => ['required', 'string', 'max:20', Rule::unique("$connection.prj.projects", 'prj_code')],
-            'prj_title' => 'required|string|max:255',
-            'prj_aprvdt' => 'required|date',
+        // Nothing is mandatory while it is only a draft - the full set (code, title,
+        // sponsor, received date, Work Order) is enforced at publish time instead.
+        $isPublish = $request->input('action') === 'publish';
+
+        $validated = $request->validate([
+            'prj_unt_id'   => 'required|integer',
+            'prj_code'     => [$isPublish ? 'required' : 'nullable', 'string', 'max:9', Rule::unique("$connection.prj.projects", 'prj_code')],
+            'prj_title'    => ($isPublish ? 'required' : 'nullable') . '|string|max:255',
+            'prj_sponsor'  => ($isPublish ? 'required' : 'nullable') . '|string|max:255',
+            'prj_rcptdt'   => ($isPublish ? 'required' : 'nullable') . '|date|before_or_equal:today',
+            'prj_propcost' => 'nullable|integer|min:0',
+            'prj_scope'    => 'nullable|string|max:255',
+            'prj_propdt'   => 'nullable|date',
+            'prj_assigndt' => 'nullable|date',
+            'prj_aprvdt'   => 'nullable|date',
+            'prj_startdt'  => 'nullable|date',
+            'prj_estenddt' => 'nullable|date|after_or_equal:prj_startdt',
+            'milestones'   => 'nullable|array',
+            'milestones.*.desc' => 'nullable|string|max:255',
+            'milestones.*.date' => 'nullable|date',
         ]);
 
-        $maxId = Project::max('prj_id');
-        $nextId = $maxId ? $maxId + 1 : 1;
+        $unit = Unit::where('unt_id', (int) $validated['prj_unt_id'])
+            ->where('unt_area', 'prj')
+            ->first();
+
+        if (! $unit) {
+            return redirect()->back()->withInput()->with('error', 'Please select a valid project division.');
+        }
+
+        if (! app(\App\Services\Auth\DataScopeService::class)->canAccessUnit(Auth::user(), (int) $unit->unt_id)) {
+            abort(403, 'You are not authorized to raise a project for this division.');
+        }
+
+        try {
+            $nextId = $this->nextProjectIdForUnit($unit);
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+
+        // prj_code / prj_title are NOT NULL in the database, so a draft left blank
+        // gets a placeholder that must be replaced before it can be published.
+        $code = strtoupper(trim((string) ($validated['prj_code'] ?? '')));
+        $title = trim((string) ($validated['prj_title'] ?? ''));
 
         $project = new Project();
         $project->prj_id = $nextId;
-        $project->prj_code = $request->prj_code;
-        $project->prj_title = $request->prj_title;
-        $project->prj_sponsor = $request->prj_sponsor;
-        $project->prj_propcost = $request->prj_propcost;
-        
-        $project->prj_scope = $request->prj_scope;
-        $project->prj_propdt = $request->prj_propdt;
-        $project->prj_assigndt = $request->prj_assigndt;
-        $project->prj_aprvdt = $request->prj_aprvdt;
-        
+        $project->prj_code = $code !== '' ? $code : substr('D-' . $nextId, 0, 9);
+        $project->prj_title = $title !== '' ? $title : 'Untitled project';
+        $project->prj_sponsor = $validated['prj_sponsor'] ?? null;
+        $project->prj_propcost = $validated['prj_propcost'] ?? null;
+
+        $project->prj_scope = $validated['prj_scope'] ?? null;
+        $project->prj_rcptdt = $validated['prj_rcptdt'] ?? null;
+        $project->prj_propdt = $validated['prj_propdt'] ?? null;
+        $project->prj_assigndt = $validated['prj_assigndt'] ?? null;
+        $project->prj_aprvdt = $validated['prj_aprvdt'] ?? null;
+        $project->prj_startdt = $validated['prj_startdt'] ?? null;
+        $project->prj_estenddt = $validated['prj_estenddt'] ?? null;
+
+        // Draft = SORD's working copy. The division sees nothing until it is published.
         $project->prj_status = 'Draft';
-        $project->prj_unt_id = Auth::check() ? Auth::user()->acc_unt_id : 200000;
-        $project->prj_rcptdt = now();
-        
+        $project->prj_unt_id = (int) $unit->unt_id;
+
         $project->save();
 
         // LOGGING ADDED HERE
-        $this->logActivity($project->prj_id, 'Initiation', 'Project Initiated with Draft status');
+        $this->logActivity($project->prj_id, 'Initiation', "Draft project raised for {$unit->unt_namesh} (id {$project->prj_id})");
 
-        // Handle Files
-        $this->handleUpload($request, $project, 'doc_ppf', 'PPF');
-        $this->handleUpload($request, $project, 'doc_urd', 'URD');
+        $this->saveProjectDocs($request, $project);
+        $this->syncDraftMilestones($request, $project);
+
+        if ($request->input('action') === 'publish') {
+            return $this->publishDraft($request, $project);
+        }
 
         return redirect()->route('addnewproject', ['draft_id' => $project->prj_id])
-                         ->with('success', 'Phase 1 Saved! Proceed to Work Order details.');
+                         ->with('success', "Draft saved as {$project->prj_code} (ID {$project->prj_id}). Add milestones and documents, then publish.");
+    }
+
+    /**
+     * Update an unpublished draft from the same single page.
+     */
+    public function updateDraftProject(Request $request, $id)
+    {
+        $project = Project::withoutGlobalScope('published')->where('prj_id', $id)->firstOrFail();
+
+        $this->authorize('create', Project::class);
+        $this->authorize('update', $project);
+
+        if (strcasecmp(trim((string) $project->prj_status), 'Draft') !== 0) {
+            return redirect()->route('projects.show', $project->prj_id)
+                ->with('error', 'This project is already published. Changes now go through an amendment case.');
+        }
+
+        $connection = config('database.default');
+
+        $isPublish = $request->input('action') === 'publish';
+
+        $validated = $request->validate([
+            'prj_code'     => [$isPublish ? 'required' : 'nullable', 'string', 'max:9', Rule::unique("$connection.prj.projects", 'prj_code')->ignore($project->prj_id, 'prj_id')],
+            'prj_title'    => ($isPublish ? 'required' : 'nullable') . '|string|max:255',
+            'prj_sponsor'  => ($isPublish ? 'required' : 'nullable') . '|string|max:255',
+            'prj_rcptdt'   => ($isPublish ? 'required' : 'nullable') . '|date|before_or_equal:today',
+            'prj_propcost' => 'nullable|integer|min:0',
+            'prj_scope'    => 'nullable|string|max:255',
+            'prj_propdt'   => 'nullable|date',
+            'prj_assigndt' => 'nullable|date',
+            'prj_aprvdt'   => 'nullable|date',
+            'prj_startdt'  => 'nullable|date',
+            'prj_estenddt' => 'nullable|date|after_or_equal:prj_startdt',
+            'milestones'   => 'nullable|array',
+            'milestones.*.desc' => 'nullable|string|max:255',
+            'milestones.*.date' => 'nullable|date',
+        ]);
+
+        // The division is fixed once the project number has been issued from its block.
+        $code = strtoupper(trim((string) ($validated['prj_code'] ?? '')));
+        $title = trim((string) ($validated['prj_title'] ?? ''));
+
+        $project->prj_code     = $code !== '' ? $code : $project->prj_code;
+        $project->prj_title    = $title !== '' ? $title : $project->prj_title;
+        $project->prj_sponsor  = $validated['prj_sponsor'] ?? null;
+        $project->prj_rcptdt   = $validated['prj_rcptdt'] ?? null;
+        $project->prj_propcost = $validated['prj_propcost'] ?? null;
+        $project->prj_scope    = $validated['prj_scope'] ?? null;
+        $project->prj_propdt   = $validated['prj_propdt'] ?? null;
+        $project->prj_assigndt = $validated['prj_assigndt'] ?? null;
+        $project->prj_aprvdt   = $validated['prj_aprvdt'] ?? null;
+        $project->prj_startdt  = $validated['prj_startdt'] ?? null;
+        $project->prj_estenddt = $validated['prj_estenddt'] ?? null;
+        $project->save();
+
+        $this->saveProjectDocs($request, $project);
+        $this->syncDraftMilestones($request, $project);
+
+        if ($request->input('action') === 'publish') {
+            return $this->publishDraft($request, $project);
+        }
+
+        return redirect()->route('addnewproject', ['draft_id' => $project->prj_id])
+                         ->with('success', 'Draft updated.');
+    }
+
+    /**
+     * Discard an unpublished draft (nothing else in the system points at it yet).
+     */
+    public function deleteDraftProject(Request $request, $id)
+    {
+        $project = Project::withoutGlobalScope('published')->where('prj_id', $id)->firstOrFail();
+
+        $this->authorize('create', Project::class);
+        $this->authorize('update', $project);
+
+        if (strcasecmp(trim((string) $project->prj_status), 'Draft') !== 0) {
+            return redirect()->back()->with('error', 'Only an unpublished draft can be discarded.');
+        }
+
+        $code = $project->prj_code;
+        Milestone::where('msn_xprj_id', $project->prj_id)->delete();
+        $project->delete();
+
+        return redirect()->route('addnewproject')->with('success', "Draft {$code} discarded.");
+    }
+
+    /**
+     * Upload the four standard project documents when they are supplied.
+     */
+    private function saveProjectDocs(Request $request, Project $project): void
+    {
+        $this->handleUpload($request, $project, 'doc_ppf', 'PPF');
+        $this->handleUpload($request, $project, 'doc_urd', 'URD');
+        $this->handleUpload($request, $project, 'doc_workorder', 'Work Order');
+        $this->handleUpload($request, $project, 'doc_approval_letter', 'Approval Letter');
+    }
+
+    /**
+     * Milestones of a draft are edited as one list, so they are rewritten on save.
+     * Only ever runs while the project is still an unpublished draft.
+     */
+    private function syncDraftMilestones(Request $request, Project $project): void
+    {
+        if (! $request->has('milestones')) {
+            return;
+        }
+
+        if (strcasecmp(trim((string) $project->prj_status), 'Draft') !== 0) {
+            return;
+        }
+
+        $rows = collect($request->input('milestones', []))
+            ->filter(fn ($row) => trim((string) ($row['desc'] ?? '')) !== '')
+            ->values();
+
+        Milestone::where('msn_xprj_id', $project->prj_id)->delete();
+
+        $serial = 1;
+        foreach ($rows as $row) {
+            $milestone = new Milestone();
+            $milestone->msn_id      = $serial++;
+            $milestone->msn_xprj_id = $project->prj_id;
+            $milestone->msn_desc    = trim((string) $row['desc']);
+            $milestone->msn_type    = 'Milestone';
+            $milestone->msn_status  = 'Not started';
+            $milestone->msn_targetdt = ! empty($row['date']) ? $row['date'] : null;
+            $milestone->save();
+        }
+    }
+
+    /**
+     * Publish a draft to its division with the chosen legacy status.
+     */
+    private function publishDraft(Request $request, Project $project)
+    {
+        $status = trim((string) $request->input('prj_status', 'Under assignment'));
+        if ($status === '' || strcasecmp($status, 'Draft') === 0) {
+            $status = 'Under assignment';
+        }
+
+        // Everything that was optional for the draft becomes mandatory now.
+        $missing = [];
+        if (trim((string) $project->prj_code) === '' || str_starts_with(strtoupper((string) $project->prj_code), 'D-')) {
+            $missing[] = 'project code';
+        }
+        if (trim((string) $project->prj_title) === '' || strcasecmp(trim((string) $project->prj_title), 'Untitled project') === 0) {
+            $missing[] = 'project title';
+        }
+        if (trim((string) $project->prj_sponsor) === '') {
+            $missing[] = 'sponsor';
+        }
+        if (empty($project->prj_rcptdt)) {
+            $missing[] = 'received date';
+        }
+
+        if (! empty($missing)) {
+            return redirect()->route('addnewproject', ['draft_id' => $project->prj_id])
+                             ->withInput()
+                             ->with('error', 'Cannot publish &mdash; please fill: ' . implode(', ', $missing) . '.');
+        }
+
+        // A project does not enter the system without its Work Order.
+        $hasWorkOrder = $project->attachments()->where('jat_type', 'Work Order')->exists();
+        if (! $hasWorkOrder) {
+            return redirect()->route('addnewproject', ['draft_id' => $project->prj_id])
+                             ->withInput()
+                             ->with('error', 'Work Order is mandatory. Upload the Work Order before publishing this project.');
+        }
+
+        if ($err = $this->projectStatusGate($project, $status)) {
+            return redirect()->route('addnewproject', ['draft_id' => $project->prj_id])
+                             ->withInput()
+                             ->with('error', $err);
+        }
+
+        $project->prj_status = $status;
+        $project->save();
+
+        $unitName = optional($project->unit)->unt_namesh ?: 'the division';
+        $this->logActivity($project->prj_id, 'Initiation', "Project published to {$unitName} with status '{$status}'");
+
+        $message = "Project {$project->prj_code} published. It is now visible to {$unitName}.";
+
+        // SORD is redirected away from the division project pages, so send it to its own view.
+        if (Auth::check() && \App\Services\Auth\UserAccessContext::forUser(Auth::user())->isSord()) {
+            return redirect()->route('sord.project_details', $project->prj_id)->with('success', $message);
+        }
+
+        return redirect()->route('projects.show', $project->prj_id)->with('success', $message);
+    }
+
+    /**
+     * Legacy numbering (NewIdForProjectOrAccount): a project id always belongs to
+     * its own division's block (cen.units.unt_lowers .. unt_uppers) and must not
+     * clash with a financial head id inside that block.
+     */
+    private function nextProjectIdForUnit($unit): int
+    {
+        $lower = (int) ($unit->unt_lowers ?? 0);
+        $upper = (int) ($unit->unt_uppers ?? 0);
+
+        if ($lower <= 0 || $upper < $lower) {
+            $lower = (int) $unit->unt_id;
+            $upper = $lower + 49999;
+        }
+
+        $maxProject = (int) DB::table('prj.projects')
+            ->whereBetween('prj_id', [$lower, $upper])
+            ->max('prj_id');
+
+        $maxHead = (int) DB::table('cen.heads')
+            ->whereBetween('hed_id', [$lower, $upper])
+            ->max('hed_id');
+
+        $next = max($lower, $maxProject, $maxHead) + 1;
+
+        if ($next > $upper) {
+            throw new \RuntimeException("No project number is left in the block of {$unit->unt_namesh} ({$lower}-{$upper}). Please contact IT.");
+        }
+
+        return $next;
+    }
+
+    /**
+     * Legacy status gates (prj_projects_detail Form_BeforeUpdate): a status can
+     * only be set once the dates - and for completion the milestones - support it.
+     * Returns an error message, or null when the status is allowed.
+     */
+    private function projectStatusGate(Project $project, string $status): ?string
+    {
+        $missing = function (array $columns) use ($project): bool {
+            foreach ($columns as $column) {
+                if (empty($project->{$column})) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        switch (strtolower(trim($status))) {
+            case 'under feasibility':
+                if ($missing(['prj_assigndt'])) {
+                    return 'Assignment date is required before the project can be "Under feasibility".';
+                }
+                break;
+
+            case 'approval awaited':
+                if ($missing(['prj_assigndt', 'prj_propdt'])) {
+                    return 'Assignment and proposal dates are required before the project can be "Approval awaited".';
+                }
+                break;
+
+            case 'funds awaited':
+                if ($missing(['prj_assigndt', 'prj_propdt', 'prj_aprvdt'])) {
+                    return 'Assignment, proposal and approval dates are required before the project can be "Funds awaited".';
+                }
+                break;
+
+            case 'work in progress':
+            case 'warranty in progress':
+            case 'final acceptance awaited':
+                if ($missing(['prj_assigndt', 'prj_propdt', 'prj_aprvdt', 'prj_startdt'])) {
+                    return 'Assignment, proposal, approval and start dates are required for this status.';
+                }
+                break;
+
+            case 'completed':
+                if ($missing(['prj_assigndt', 'prj_propdt', 'prj_aprvdt', 'prj_startdt', 'prj_enddt'])) {
+                    return 'Assignment, proposal, approval, start and completion dates are required before the project can be "Completed".';
+                }
+                $milestones = Milestone::where('msn_xprj_id', $project->prj_id)->get();
+                if ($milestones->isEmpty()) {
+                    return 'A project must have at least one milestone before it can be marked "Completed".';
+                }
+                foreach ($milestones as $milestone) {
+                    if (strcasecmp(trim((string) $milestone->msn_status), 'Completed') !== 0) {
+                        return 'Please close all milestones and activities before marking the project "Completed".';
+                    }
+                }
+                break;
+        }
+
+        return null;
     }
 
     // --- FINALIZE (Phase 2) ---
+    /**
+     * Publish endpoint (kept for direct posts): publishes an existing draft.
+     */
     public function finalizeProject(Request $request, $id)
     {
-        $project = Project::findOrFail($id);
+        $project = Project::withoutGlobalScope('published')->where('prj_id', $id)->firstOrFail();
+
+        $this->authorize('create', Project::class);
         $this->authorize('update', $project);
 
         $request->validate([
-            'prj_startdt' => 'required|date',
-            'prj_estenddt' => 'required|date|after:prj_startdt',
+            'prj_status'   => 'nullable|string|max:50',
+            'prj_startdt'  => 'nullable|date',
+            'prj_estenddt' => 'nullable|date|after_or_equal:prj_startdt',
         ]);
 
-        $project->prj_startdt = $request->prj_startdt;
-        $project->prj_estenddt = $request->prj_estenddt;
-        $project->prj_status = 'Open'; 
-        $project->save();
+        if ($request->filled('prj_startdt'))  { $project->prj_startdt = $request->prj_startdt; }
+        if ($request->filled('prj_estenddt')) { $project->prj_estenddt = $request->prj_estenddt; }
 
-        // LOGGING ADDED HERE
-        $this->logActivity($id, 'Execution', 'Project Finalized & Work Order Uploaded');
+        $this->saveProjectDocs($request, $project);
+        $this->syncDraftMilestones($request, $project);
 
-        // Handle Files (Including Approval Letter Fix)
-        $this->handleUpload($request, $project, 'doc_workorder', 'Work Order');
-        $this->handleUpload($request, $project, 'doc_approval_letter', 'Approval Letter');
-
-        // Milestone Logic
-        if ($request->has('milestones')) {
-            foreach ($request->milestones as $msData) {
-                if (!empty($msData['desc'])) {
-                    $mId = Milestone::max('msn_id') + 1;
-                    $ms = new Milestone();
-                    $ms->msn_id = $mId;
-                    $ms->msn_xprj_id = $project->prj_id;
-                    $ms->msn_desc = $msData['desc'];
-                    $ms->msn_targetdt = $msData['date'];
-                    $ms->msn_status = 'Pending';
-                    $ms->msn_type = 'Technical';
-                    $ms->save();
-                    
-                    // Log each milestone creation
-                    $this->logActivity($id, 'Milestone', "Created Milestone: {$msData['desc']}");
-                }
-            }
-        }
-
-        return redirect()->route('projects.show', $project->prj_id)
-                         ->with('success', 'Project Initiated Successfully!');
+        return $this->publishDraft($request, $project);
     }
 
     // --- FILE UPLOAD LOGIC ---
@@ -956,7 +1302,129 @@ class ProjectController extends Controller
         abort(403, 'Permission denied: Deletion of project documents is disabled.');
     }
 
+    // --- UPDATE PROJECT DETAILS ---
+    public function updateDetails(Request $request, $id)
+    {
+        $project = Project::where('prj_id', $id)->firstOrFail();
+        $this->authorize('update', $project);
+
+        $validated = $request->validate([
+            'prj_title'    => 'required|string|max:255',
+            'prj_sponsor'  => 'nullable|string|max:255',
+            'prj_scope'    => 'nullable|string|max:255',
+            'prj_status'   => 'required|string|max:255',
+            'prj_propcost' => 'nullable|integer|min:0',
+            'prj_aprvcost' => 'nullable|integer|min:0',
+            'prj_rcptdt'   => 'nullable|date',
+            'prj_assigndt' => 'nullable|date',
+            'prj_propdt'   => 'nullable|date',
+            'prj_aprvdt'   => 'nullable|date',
+            'prj_startdt'  => 'nullable|date',
+            'prj_estenddt' => 'nullable|date',
+            'prj_enddt'    => 'nullable|date',
+            'prj_rem'      => 'nullable|string',
+        ]);
+
+        // Project particulars are NOT saved directly any more. Every change travels the
+        // e-office case file route (Division -> Finance / MD -> Approval) and is written
+        // to the project record automatically the moment the case is approved.
+        $service = app(\App\Services\ProjectAmendmentService::class);
+
+        $submitted = array_intersect_key($validated, \App\Services\ProjectAmendmentService::FIELDS);
+
+        // Legacy status gates still apply, so an unsupported status cannot even be proposed.
+        if (array_key_exists('prj_status', $submitted)) {
+            $preview = clone $project;
+            foreach ($submitted as $column => $value) {
+                $preview->{$column} = $value;
+            }
+            if ($err = $this->projectStatusGate($preview, (string) $submitted['prj_status'])) {
+                return redirect()->back()->withInput()->with('error', $err);
+            }
+        }
+
+        $changes = $service->diff($project, $submitted);
+
+        if (empty($changes)) {
+            return redirect()->back()->with('error', 'No change detected in the project details.');
+        }
+
+        $existing = $service->pendingCaseFor($project->prj_id);
+        if ($existing) {
+            return redirect()->route('cases.show', $existing->gcs_id)->with(
+                'error',
+                "Amendment case {$existing->gcs_file_no} for this project is already in process. Please revise the proposed values in this case file instead of raising a new one."
+            );
+        }
+
+        $case = $service->createAmendmentCase($project, Auth::user(), $changes);
+
+        return redirect()->route('cases.show', $case->gcs_id)->with(
+            'success',
+            "Case File {$case->gcs_file_no} has been raised for the proposed amendment. Review the justification and send it onward — the project record will be updated automatically on approval."
+        );
+    }
+
     // --- MILESTONES ---
+    private function applyMilestonePayload(Request $request, Milestone $milestone): ?string
+    {
+        $type = trim((string) $request->input('msn_type', 'Milestone'));
+        $status = trim((string) $request->input('msn_status', 'Not started'));
+        $isCompleted = strcasecmp($status, 'Completed') === 0;
+        $isNotStarted = strcasecmp($status, 'Not started') === 0 || strcasecmp($status, 'Pending') === 0;
+
+        $milestone->msn_desc = trim((string) $request->input('msn_desc'));
+        $milestone->msn_type = $type;
+        $milestone->msn_status = $status;
+        $milestone->msn_targetdt = $request->filled('msn_targetdt') ? $request->input('msn_targetdt') : null;
+
+        if (strcasecmp($type, 'Activity') === 0) {
+            if (!$request->filled('msn_startdt')) {
+                return 'An activity must have a start date.';
+            }
+            $comp = $request->input('msn_comp');
+            if ($comp === null || $comp === '') {
+                $comp = $isCompleted ? 100 : 0;
+            }
+            $comp = (int) $comp;
+            if ($isCompleted && $comp < 100) {
+                $comp = 100;
+            }
+            if ((!$isCompleted && $comp >= 100) || ($isNotStarted && $comp > 0)) {
+                return 'Percentage completed and status do not match.';
+            }
+            $milestone->msn_startdt = $request->input('msn_startdt');
+            $milestone->msn_comp = $comp;
+        } else {
+            $milestone->msn_startdt = null;
+            $milestone->msn_comp = null;
+        }
+
+        if ($isCompleted) {
+            if (!$request->filled('msn_achvdt')) {
+                return 'Achieved date is required when status is Completed.';
+            }
+            $milestone->msn_achvdt = $request->input('msn_achvdt');
+        } else {
+            $milestone->msn_achvdt = null;
+        }
+
+        if ($request->hasFile('completion_certificate')) {
+            if (!empty($milestone->msn_cc_path)) {
+                app(\App\Services\FileStorageService::class)->delete($milestone->msn_cc_path);
+            }
+            $targetId = (string) ($milestone->msn_idd ?? $milestone->msn_id);
+            $milestone->msn_cc_path = app(\App\Services\FileStorageService::class)->store(
+                $request->file('completion_certificate'),
+                'prj',
+                'mcc-msn-',
+                $targetId
+            );
+        }
+
+        return null;
+    }
+
     public function createMilestone($id)
     {
         $project = Project::where('prj_id', $id)->firstOrFail();
@@ -965,34 +1433,72 @@ class ProjectController extends Controller
 
     public function storeMilestone(Request $request, $id)
     {
+        $project = Project::where('prj_id', $id)->firstOrFail();
+        $this->authorize('update', $project);
+
         $request->validate([
-            'msn_desc' => 'required',
-            'msn_targetdt' => 'required|date',
-            'msn_type' => 'required',
-            'msn_status' => 'required'
+            'msn_desc'               => 'required|string|max:255',
+            'msn_targetdt'           => 'nullable|date',
+            'msn_startdt'            => 'nullable|date',
+            'msn_achvdt'             => 'nullable|date',
+            'msn_comp'               => 'nullable|integer|min:0|max:100',
+            'msn_type'               => 'required|string|max:255',
+            'msn_status'             => 'required|string|max:255',
+            'completion_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ]);
 
-        $maxId = Milestone::max('msn_id');
-        $nextId = $maxId ? $maxId + 1 : 1;
+        $nextMsnId = ((int) Milestone::where('msn_xprj_id', $id)->max('msn_id')) + 1;
 
+        // msn_idd is GENERATED ALWAYS AS IDENTITY - the database issues it.
         $milestone = new Milestone();
-        $milestone->msn_id = $nextId;
+        $milestone->msn_id = $nextMsnId;
         $milestone->msn_xprj_id = $id;
-        $milestone->msn_desc = $request->msn_desc;
-        $milestone->msn_targetdt = $request->msn_targetdt;
-        $milestone->msn_type = $request->msn_type;
-        $milestone->msn_status = $request->msn_status;
+
+        if ($err = $this->applyMilestonePayload($request, $milestone)) {
+            return redirect()->back()->withErrors(['milestone' => $err])->with('error', $err);
+        }
+
         $milestone->save();
 
-        // LOGGING ADDED HERE
-        $this->logActivity($id, 'Milestone', "Added Milestone: {$request->msn_desc}");
+        $this->syncMilestoneCost($id, $milestone);
 
-        return redirect()->route('projects.show', $id)->with('success', 'Milestone Added!');
+        // LOGGING ADDED HERE
+        $this->logActivity($id, 'Milestone', "Added Milestone MS-{$milestone->msn_id}: {$milestone->msn_desc}");
+
+        return redirect()->route('projects.show', $id)->with('success', 'Milestone Added Successfully!');
+    }
+
+    /**
+     * Sync fin.msncosts for a new milestone when the project already has a
+     * financial head (legacy Form_AfterInsert behaviour).
+     */
+    private function syncMilestoneCost($projectId, Milestone $milestone): void
+    {
+        $head = DB::table('cen.heads')->where('hed_prj_id', $projectId)->first();
+        if (! $head) {
+            return;
+        }
+
+        $existsCost = DB::table('fin.msncosts')
+            ->where('mct_prj_id', $projectId)
+            ->where('mct_msn_id', $milestone->msn_id)
+            ->exists();
+
+        if (! $existsCost) {
+            DB::table('fin.msncosts')->insert([
+                'mct_prj_id'  => $projectId,
+                'mct_hed_id'  => $head->hed_id,
+                'mct_msn_id'  => $milestone->msn_id,
+                'mct_msn_idd' => $milestone->msn_idd,
+                'mct_cost'    => 0,
+            ]);
+        }
     }
 
     public function editMilestone($id)
     {
-        $milestone = Milestone::where('msn_id', $id)->firstOrFail();
+        $milestone = Milestone::where('msn_idd', $id)->first()
+            ?? Milestone::where('msn_id', $id)->firstOrFail();
         $project = Project::where('prj_id', $milestone->msn_xprj_id)->first();
         return view('projects.editmilestone', compact('milestone', 'project'));
     }
@@ -1000,38 +1506,32 @@ class ProjectController extends Controller
     public function updateMilestone(Request $request, $id)
     {
         $request->validate([
-            'msn_desc' => 'required',
-            'msn_targetdt' => 'required|date',
-            'msn_type' => 'required',
-            'msn_status' => 'required',
+            'msn_desc'               => 'required|string|max:255',
+            'msn_targetdt'           => 'nullable|date',
+            'msn_startdt'            => 'nullable|date',
+            'msn_achvdt'             => 'nullable|date',
+            'msn_comp'               => 'nullable|integer|min:0|max:100',
+            'msn_type'               => 'required|string|max:255',
+            'msn_status'             => 'required|string|max:255',
             'completion_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ]);
 
-        $milestone = Milestone::where('msn_id', $id)->firstOrFail();
-        
-        $milestone->msn_desc = $request->msn_desc;
-        $milestone->msn_targetdt = $request->msn_targetdt;
-        $milestone->msn_type = $request->msn_type;
-        $milestone->msn_status = $request->msn_status;
+        $milestone = Milestone::where('msn_idd', $id)->firstOrFail();
+        $project = Project::where('prj_id', $milestone->msn_xprj_id)->firstOrFail();
+        $this->authorize('update', $project);
 
-        if ($request->hasFile('completion_certificate')) {
-            if (!empty($milestone->msn_cc_path)) {
-                app(\App\Services\FileStorageService::class)->delete($milestone->msn_cc_path);
-            }
-            $targetId = (string) ($milestone->msn_idd ?? $milestone->msn_id);
-            $path = app(\App\Services\FileStorageService::class)->store(
-                $request->file('completion_certificate'),
-                'prj',
-                'mcc-msn-',
-                $targetId
-            );
-            $milestone->msn_cc_path = $path;
+        if (strcasecmp(trim((string) $milestone->msn_status), 'Completed') === 0) {
+            return redirect()->back()->with('error', 'Completed milestones are locked and cannot be edited.');
+        }
+
+        if ($err = $this->applyMilestonePayload($request, $milestone)) {
+            return redirect()->back()->withErrors(['milestone' => $err])->with('error', $err);
         }
 
         $milestone->save();
 
         // LOGGING ADDED HERE
-        $this->logActivity($milestone->msn_xprj_id, 'Milestone', "Updated Milestone: {$request->msn_desc}");
+        $this->logActivity($milestone->msn_xprj_id, 'Milestone', "Updated Milestone MS-{$milestone->msn_id}: {$milestone->msn_desc}");
 
         return redirect()->route('projects.show', $milestone->msn_xprj_id)
                          ->with('success', 'Milestone Updated Successfully!');
@@ -1040,15 +1540,27 @@ class ProjectController extends Controller
     public function markMilestoneComplete(Request $request)
     {
         $request->validate([
-            'msn_id' => ['required', Rule::exists(Milestone::class, 'msn_id')],
-            'achieved_date' => 'required|date',
+            'msn_id'                 => 'required|integer',
+            'achieved_date'          => 'required|date',
             'completion_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ]);
 
-        $milestone = Milestone::find($request->msn_id);
-        if($milestone) {
+        $milestone = Milestone::where('msn_idd', $request->msn_id)->first()
+            ?? Milestone::where('msn_id', $request->msn_id)->first();
+
+        if ($milestone) {
+            $project = Project::where('prj_id', $milestone->msn_xprj_id)->firstOrFail();
+            $this->authorize('update', $project);
+
+            if (strcasecmp(trim((string) $milestone->msn_status), 'Completed') === 0) {
+                return redirect()->back()->with('error', 'Milestone is already completed and locked.');
+            }
+
             $milestone->msn_achvdt = $request->achieved_date;
-            $milestone->msn_status = 'Completed'; // Status auto-update
+            $milestone->msn_status = 'Completed';
+            if (strcasecmp(trim((string) $milestone->msn_type), 'Activity') === 0) {
+                $milestone->msn_comp = 100;
+            }
 
             if ($request->hasFile('completion_certificate')) {
                 if (!empty($milestone->msn_cc_path)) {
@@ -1065,17 +1577,77 @@ class ProjectController extends Controller
             }
 
             $milestone->save();
+            $this->logActivity($milestone->msn_xprj_id, 'Milestone', "Completed Milestone MS-{$milestone->msn_id}: {$milestone->msn_desc}");
         }
 
         return redirect()->back()->with('success', 'Milestone marked as Completed!');
     }
 
+    public function viewMilestoneCertificate($id)
+    {
+        $milestone = Milestone::where('msn_idd', $id)->firstOrFail();
+        $project = Project::where('prj_id', $milestone->msn_xprj_id)->firstOrFail();
+        $this->authorize('view', $project);
+
+        if (empty($milestone->msn_cc_path)) {
+            abort(404, 'Completion certificate not uploaded.');
+        }
+
+        return app(\App\Services\FileStorageService::class)->response($milestone->msn_cc_path);
+    }
+
+    /**
+     * Upload (or replace) ONLY the completion certificate of a milestone.
+     * Allowed for completed / locked milestones as well: no other column is touched.
+     */
+    public function uploadMilestoneCertificate(Request $request, $id)
+    {
+        $request->validate([
+            'completion_certificate' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
+        ]);
+
+        $milestone = Milestone::where('msn_idd', $id)->firstOrFail();
+        $project = Project::where('prj_id', $milestone->msn_xprj_id)->firstOrFail();
+        $this->authorize('update', $project);
+
+        $oldPath = $milestone->msn_cc_path;
+
+        $newPath = app(\App\Services\FileStorageService::class)->store(
+            $request->file('completion_certificate'),
+            'prj',
+            'mcc-msn-',
+            (string) ($milestone->msn_idd ?? $milestone->msn_id)
+        );
+
+        // Certificate column only - description / dates / status stay exactly as they are.
+        Milestone::where('msn_idd', $milestone->msn_idd)->update(['msn_cc_path' => $newPath]);
+
+        if (!empty($oldPath) && $oldPath !== $newPath) {
+            app(\App\Services\FileStorageService::class)->delete($oldPath);
+        }
+
+        $action = $oldPath ? 'Replaced' : 'Uploaded';
+        $this->logActivity(
+            $milestone->msn_xprj_id,
+            'Milestone',
+            "{$action} Completion Certificate for Milestone MS-{$milestone->msn_id}"
+        );
+
+        return redirect()->back()->with('success', 'Completion certificate ' . strtolower($action) . ' successfully!');
+    }
+
     public function deleteMilestone($id)
     {
-        $milestone = Milestone::where('msn_id', $id)->firstOrFail();
+        $milestone = Milestone::where('msn_idd', $id)->first()
+            ?? Milestone::where('msn_id', $id)->firstOrFail();
         $projectId = $milestone->msn_xprj_id;
         $project = Project::findOrFail($projectId);
         $this->authorize('update', $project);
+
+        if (strcasecmp(trim((string) $milestone->msn_status), 'Completed') === 0) {
+            return redirect()->back()->with('error', 'Completed milestones cannot be deleted.');
+        }
+
         $desc = $milestone->msn_desc;
 
         if (!empty($milestone->msn_cc_path)) {

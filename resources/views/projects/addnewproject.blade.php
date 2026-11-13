@@ -3,446 +3,526 @@
 @section('content')
 <div class="content-wrapper pt-3">
     <style>
-        /* --- GLOBAL & CARD STYLES --- */
-        .card-add-project {
-            border-top: 4px solid var(--rd-accent);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .form-header {
-            background: var(--rd-surface);
-            border-bottom: 1px solid var(--rd-border);
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .form-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--rd-text1);
-            margin: 0;
-        }
-
-        /* --- STEPPER --- */
-        .stepper-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .step-pill {
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 20px;
-            color: var(--rd-text3);
-            background: var(--rd-surface2);
-            border: 1px solid var(--rd-border);
-            transition: all 0.3s;
-        }
-
-        .step-pill.active {
-            background: var(--rd-accent);
-            color: #fff;
-            border-color: var(--rd-accent);
-            box-shadow: 0 2px 5px rgba(79, 140, 255, 0.3);
-        }
-
-        .step-pill.completed {
-            background: var(--rd-success);
-            color: #fff;
-            border-color: var(--rd-success);
-        }
-
-        .step-line {
-            width: 30px;
-            height: 2px;
-            background: var(--rd-border);
-        }
-
-        .step-line.filled {
-            background: var(--rd-success);
-        }
-
-        /* --- DOC CARD --- */
-        .doc-card {
-            background: var(--rd-surface);
-            border: 1px solid var(--rd-border);
-            border-left: 3px solid var(--rd-accent);
-            border-radius: 6px;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.2s;
-        }
-
-        .doc-card:hover {
-            transform: translateX(3px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .doc-icon {
-            width: 35px;
-            height: 35px;
-            background: var(--rd-surface2);
-            color: var(--rd-accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-        }
-
-        .doc-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--rd-text1);
-        }
-
-        .doc-desc {
-            font-size: 0.75rem;
-            color: var(--rd-text3);
-        }
-
-        .file-input-hidden {
-            display: none;
-        }
-
-        /* --- TABLES --- */
-        .table-custom thead th {
-            background: var(--rd-surface2);
-            color: var(--rd-text3);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--rd-border);
-        }
-
-        .table-custom tbody td {
-            vertical-align: middle !important;
-            font-size: 0.9rem;
-        }
+        .ap-card { border-radius: 10px; border: 1px solid #e5e7eb; }
+        .ap-card > .card-header { background: #fff; border-bottom: 1px solid #eef0f3; }
+        .ap-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; }
+        .ap-sec { display: flex; align-items: center; gap: 8px; margin: 20px 0 12px; }
+        .ap-sec:first-of-type { margin-top: 0; }
+        .ap-sec .n { width: 20px; height: 20px; border-radius: 50%; background: #2563eb; color: #fff;
+                     font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .ap-sec .t { font-size: 12px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: .4px; }
+        .ap-sec .line { flex: 1; height: 1px; background: #eef0f3; }
+        .ap-doc { border: 1px dashed #cbd5e1; border-radius: 8px; padding: 9px 11px; background: #f8fafc; height: 100%; }
+        .ap-doc.req { border-color: #f59e0b; background: #fffbeb; }
+        .ap-doc.done { border-style: solid; border-color: #86efac; background: #f0fdf4; }
+        .ap-doc .t { font-size: 12px; font-weight: 700; color: #334155; }
+        .ap-list { max-height: 420px; overflow-y: auto; }
+        .ap-list table { font-size: 12.5px; }
+        .ap-list thead th { position: sticky; top: 0; background: #f1f5f9; z-index: 2; border-top: 0; font-size: 11px;
+                            text-transform: uppercase; letter-spacing: .3px; color: #475569; }
+        .form-control-sm { font-size: 12.5px; }
+        .ap-foot { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eef0f3; border-radius: 0 0 10px 10px; z-index: 3; }
     </style>
 
     <div class="container-fluid">
 
-        @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm">
-            <strong><i class="fas fa-exclamation-triangle mr-2"></i> Form Error:</strong> Please check fields.
-            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        {{-- ================= HEADER ================= --}}
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 10px;">
+            <h1 class="m-0 font-weight-bold text-primary" style="font-size: 1.35rem; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px;">
+                <i class="fas fa-folder-plus mr-1"></i> PROJECTS
+                <small class="text-muted font-weight-normal" style="font-size: .78rem;">&mdash; raised by SORD / DDPMO</small>
+            </h1>
+
+            @if($showForm)
+                <a href="{{ route('addnewproject') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to list
+                </a>
+            @else
+                <a href="{{ route('addnewproject', ['new' => 1]) }}" class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm font-weight-bold">
+                    <i class="fas fa-plus-circle mr-1"></i> Add New Project
+                </a>
+            @endif
         </div>
+
+        @if(session('success'))
+            <div class="alert alert-success py-2 px-3 small"><i class="fas fa-check-circle mr-1"></i> {{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger py-2 px-3 small"><i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}</div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-danger py-2 px-3 small mb-3">
+                <strong><i class="fas fa-exclamation-triangle mr-1"></i> Please correct:</strong>
+                <ul class="mb-0 mt-1 pl-3">
+                    @foreach($errors->all() as $e) <li>{{ $e }}</li> @endforeach
+                </ul>
+            </div>
         @endif
 
-        <div class="card card-outline card-add-project {{ $step == 1 ? 'card-primary' : 'card-success' }}">
+        {{-- ========================================================= --}}
+        {{-- LIST VIEW (default)                                       --}}
+        {{-- ========================================================= --}}
+        @if(! $showForm)
+            <div class="card ap-card shadow-sm">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active font-weight-bold" data-toggle="tab" href="#tabDrafts" role="tab" style="font-size: 12.5px;">
+                                <i class="fas fa-pen text-warning mr-1"></i> Drafts
+                                <span class="badge badge-warning ml-1">{{ $drafts->count() }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link font-weight-bold" data-toggle="tab" href="#tabPublished" role="tab" style="font-size: 12.5px;">
+                                <i class="fas fa-check-circle text-success mr-1"></i> Published
+                                <span class="badge badge-success ml-1">{{ $publishedProjects->count() }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-            <div class="form-header">
-                <h3 class="form-title">
-                    @if($step == 1) <i class="fas fa-file-signature text-primary mr-2"></i> Project Initiation @endif
-                    @if($step == 2) <i class="fas fa-cogs text-success mr-2"></i> Execution Planning @endif
-                </h3>
-
-                <div class="stepper-box">
-                    <div class="step-pill {{ $step >= 1 ? ($step > 1 ? 'completed' : 'active') : '' }}">
-                        <i class="fas {{ $step > 1 ? 'fa-check' : 'fa-1' }} mr-1"></i> Initiate
+                <div class="card-body p-0 tab-content">
+                    {{-- DRAFTS --}}
+                    <div class="tab-pane fade show active" id="tabDrafts" role="tabpanel">
+                        <div class="ap-list">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">Code</th>
+                                        <th>Title</th>
+                                        <th style="width: 140px;">Division</th>
+                                        <th style="width: 115px;">Received</th>
+                                        <th style="width: 95px;" class="text-center">Milestones</th>
+                                        <th style="width: 100px;" class="text-center">Work Order</th>
+                                        <th style="width: 95px;" class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($drafts as $d)
+                                        @php
+                                            $dWo = $d->attachments->where('jat_type', 'Work Order')->isNotEmpty();
+                                        @endphp
+                                        <tr>
+                                            <td class="font-weight-bold text-dark">{{ $d->prj_code }}</td>
+                                            <td>{{ \Illuminate\Support\Str::limit($d->prj_title, 70) }}</td>
+                                            <td class="text-muted">{{ optional($d->unit)->unt_namesh }}</td>
+                                            <td class="text-muted">{{ $d->prj_rcptdt ? \Carbon\Carbon::parse($d->prj_rcptdt)->format('d M, Y') : '—' }}</td>
+                                            <td class="text-center">
+                                                <span class="badge badge-light border">{{ $d->milestones->count() }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                @if($dWo)
+                                                    <span class="badge badge-success"><i class="fas fa-check"></i></span>
+                                                @else
+                                                    <span class="badge badge-warning text-dark" title="Required before publishing">Missing</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ route('addnewproject', ['draft_id' => $d->prj_id]) }}"
+                                                   class="btn btn-xs btn-outline-primary font-weight-bold px-2">
+                                                    <i class="fas fa-pen mr-1"></i> Open
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-5">
+                                                <i class="fas fa-folder-open fa-2x mb-2 d-block" style="opacity: .3;"></i>
+                                                No drafts yet. Use <strong>Add New Project</strong> to raise one.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="step-line {{ $step > 1 ? 'filled' : '' }}"></div>
-                    <div class="step-pill {{ $step == 2 ? 'active' : '' }}">
-                        <i class="fas fa-2 mr-1"></i> Work Order
+
+                    {{-- PUBLISHED --}}
+                    <div class="tab-pane fade" id="tabPublished" role="tabpanel">
+                        <div class="px-3 py-2 border-bottom">
+                            <input type="text" id="pubSearch" class="form-control form-control-sm" style="max-width: 340px;"
+                                   placeholder="Filter by code, title, division or status..." onkeyup="filterPublished()">
+                        </div>
+                        <div class="ap-list">
+                            <table class="table table-sm table-hover mb-0" id="pubTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">Code</th>
+                                        <th>Title</th>
+                                        <th style="width: 140px;">Division</th>
+                                        <th style="width: 170px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($publishedProjects as $p)
+                                        <tr>
+                                            <td class="font-weight-bold text-dark">{{ $p->prj_code }}</td>
+                                            <td>{{ \Illuminate\Support\Str::limit($p->prj_title, 70) }}</td>
+                                            <td class="text-muted">{{ optional($p->unit)->unt_namesh }}</td>
+                                            <td><span class="badge badge-light border text-dark">{{ $p->prj_status }}</span></td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="4" class="text-center text-muted py-5">No published projects.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
+        @endif
 
-            {{-- === PHASE 1 FORM: INITIATE === --}}
-            @if($step == 1)
-            <form action="{{ route('save-project') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="card-body">
+        {{-- ========================================================= --}}
+        {{-- FORM VIEW (Add New / Open draft)                          --}}
+        {{-- ========================================================= --}}
+        @if($showForm)
+        <form id="projectForm" method="POST" enctype="multipart/form-data"
+              action="{{ $project ? route('projects.save-draft', $project->prj_id) : route('save-project') }}">
+            @csrf
+            <input type="hidden" name="action" id="formAction" value="draft">
+            <input type="hidden" name="prj_status" id="publishStatusInput" value="Under assignment">
 
-                    {{-- Row 1: Basic --}}
-                    <div class="row">
-                        <div class="col-md-3 form-group">
-                            <label>Project Code <span class="text-danger">*</span></label>
-                            <input type="text" name="prj_code" class="form-control" placeholder="e.g. P-2026-01" required>
-                        </div>
-                        <div class="col-md-9 form-group">
-                            <label>Project Title <span class="text-danger">*</span></label>
-                            <input type="text" name="prj_title" class="form-control" placeholder="Enter Full Project Title" required>
-                        </div>
-                    </div>
-
-                    {{-- Row 2: Finance & Agency --}}
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label>Sponsor / Agency</label>
-                            <input type="text" name="prj_sponsor" class="form-control" placeholder="Funding Agency Name">
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Proposed Cost</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend"><span class="input-group-text">Rs.</span></div>
-                                <input type="number" name="prj_propcost" class="form-control" placeholder="0.00">
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Row 3: IMPORTANT DATES --}}
-                    <div class="row bg-light pt-2 pb-1 mb-3 rounded border">
-                        <div class="col-md-4 form-group">
-                            <label class="text-primary small text-uppercase">Proposal Date</label>
-                            <input type="date" name="prj_propdt" class="form-control form-control-sm">
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <label class="text-primary small text-uppercase">Assigned Date</label>
-                            <input type="date" name="prj_assigndt" class="form-control form-control-sm">
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <label class="text-danger small text-uppercase">Approval Date <span class="text-danger">*</span></label>
-                            <input type="date" name="prj_aprvdt" class="form-control form-control-sm" required>
-                        </div>
-                    </div>
-
-                    {{-- Row 4: Scope --}}
-                    <div class="form-group">
-                        <label>Scope of Work / Description</label>
-                        <textarea name="prj_scope" class="form-control" rows="3" placeholder="Brief details about the project scope..."></textarea>
-                    </div>
-
-                    <h6 class="text-muted font-weight-bold mt-4 mb-3"><i class="fas fa-paperclip mr-1"></i> Phase 1 Documents</h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="doc-card shadow-sm">
-                                <div class="d-flex align-items-center">
-                                    <div class="doc-icon"><i class="fas fa-file-invoice"></i></div>
-                                    <div>
-                                        <div class="doc-title">Project Proposal (PPF)</div>
-                                    </div>
-                                </div>
-                                <div style="width: 32px; height: 32px;">
-                                    <label for="file-ppf" class="btn btn-outline-primary rounded-circle p-0 d-flex align-items-center justify-content-center w-100 h-100" id="btn-ppf" style="cursor: pointer;">
-                                        <i class="fas fa-upload small"></i>
-                                    </label>
-                                    <input type="file" id="file-ppf" name="doc_ppf" class="file-input-hidden" onchange="updateUploadUI(this, 'btn-ppf')">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="doc-card shadow-sm">
-                                <div class="d-flex align-items-center">
-                                    <div class="doc-icon"><i class="fas fa-file-contract"></i></div>
-                                    <div>
-                                        <div class="doc-title">User Requirements (URD)</div>
-                                    </div>
-                                </div>
-                                <div style="width: 32px; height: 32px;">
-                                    <label for="file-urd" class="btn btn-outline-primary rounded-circle p-0 d-flex align-items-center justify-content-center w-100 h-100" id="btn-urd" style="cursor: pointer;">
-                                        <i class="fas fa-upload small"></i>
-                                    </label>
-                                    <input type="file" id="file-urd" name="doc_urd" class="file-input-hidden" onchange="updateUploadUI(this, 'btn-urd')">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+            <div class="card ap-card shadow-sm mb-3">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+                    <h3 class="card-title font-weight-bold m-0" style="font-size: 14px;">
+                        @if($project)
+                            <span class="badge badge-warning mr-1">DRAFT</span>
+                            {{ $project->prj_code }} &mdash; ID {{ $project->prj_id }}
+                            <span class="text-muted font-weight-normal ml-1">({{ optional($project->unit)->unt_namesh }})</span>
+                        @else
+                            <i class="fas fa-file-signature text-primary mr-1"></i> New Project
+                        @endif
+                    </h3>
+                    <small class="text-muted"><i class="fas fa-eye-slash mr-1"></i> Nothing is mandatory to save a draft &mdash; <strong>*</strong> fields are needed to publish.</small>
                 </div>
-                <div class="card-footer text-right bg-white border-top">
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm font-weight-bold">
-                        Save Draft & Next <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-            </form>
-            @endif
 
-            {{-- === PHASE 2 FORM: EXECUTION === --}}
-            @if($step == 2)
-            <form action="{{ route('finalize-project', $project->prj_id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="card-body">
+                <div class="card-body py-3">
 
-                    {{-- Summary Block --}}
-                    <div class="alert alert-secondary d-flex justify-content-between align-items-center py-2 px-3 mb-4 rounded">
-                        <div>
-                            <span class="badge badge-warning mr-2">DRAFT</span>
-                            <strong>{{ $project->prj_code }}</strong> - {{ $project->prj_title }}
-                        </div>
-                        <div>
-                            <span class="badge badge-light text-dark mr-2">
-                                Approval: {{ \Carbon\Carbon::parse($project->prj_aprvdt)->format('d M, Y') }}
-                            </span>
-                        </div>
-                    </div>
-
-                    {{-- Phase 1 Docs Status --}}
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h6 class="text-muted font-weight-bold mb-2 small text-uppercase">Phase 1 Attachments (View)</h6>
-                            <div class="d-flex gap-3">
-                                @php $ppf = $project->attachments->where('jat_type', 'PPF')->first(); @endphp
-                                @if($ppf)
-                                <a href="{{ route('attachment.view', $ppf->jat_id) }}" target="_blank" class="badge badge-success p-2 text-white text-decoration-none rd-live-file-view" data-file-url="{{ route('attachment.view', $ppf->jat_id) }}" data-file-title="PPF Document">
-                                    <i class="fas fa-check mr-1"></i> PPF Uploaded <i class="fas fa-eye ml-1"></i>
-                                </a>
-                                @else <span class="badge badge-secondary p-2">PPF Missing</span> @endif
-
-                                @php $urd = $project->attachments->where('jat_type', 'URD')->first(); @endphp
-                                @if($urd)
-                                <a href="{{ route('attachment.view', $urd->jat_id) }}" target="_blank" class="badge badge-success p-2 text-white text-decoration-none rd-live-file-view" data-file-url="{{ route('attachment.view', $urd->jat_id) }}" data-file-title="URD Document">
-                                    <i class="fas fa-check mr-1"></i> URD Uploaded <i class="fas fa-eye ml-1"></i>
-                                </a>
-                                @else <span class="badge badge-secondary p-2">URD Missing</span> @endif
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-
-                    {{-- Execution Dates --}}
+                    {{-- 1. PARTICULARS --}}
+                    <div class="ap-sec"><span class="n">1</span><span class="t">Particulars</span><span class="line"></span></div>
                     <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label>Project Start Date <span class="text-danger">*</span></label>
-                            <input type="date" name="prj_startdt" class="form-control" required>
+                        <div class="col-md-3 form-group mb-2">
+                            <div class="ap-label">Division <span class="text-danger">*</span></div>
+                            @if($project)
+                                <input type="text" class="form-control form-control-sm bg-light font-weight-bold"
+                                       value="{{ optional($project->unit)->unt_namesh ?: optional($project->unit)->unt_name }}" readonly>
+                                <small class="text-muted" style="font-size: 10.5px;">Fixed &mdash; the project number comes from this block.</small>
+                            @else
+                                <select name="prj_unt_id" class="form-control form-control-sm" required>
+                                    <option value="">Select division...</option>
+                                    @foreach(($divisions ?? collect()) as $div)
+                                        <option value="{{ $div->unt_id }}" {{ (string) old('prj_unt_id') === (string) $div->unt_id ? 'selected' : '' }}>
+                                            {{ $div->unt_namesh ?: $div->unt_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
-                        <div class="col-md-6 form-group">
-                            <label>Est. Completion (Target) <span class="text-danger">*</span></label>
-                            <input type="date" name="prj_estenddt" class="form-control" required>
+                        <div class="col-md-2 form-group mb-2">
+                            <div class="ap-label">Code <span class="text-danger">*</span></div>
+                            <input type="text" name="prj_code" class="form-control form-control-sm font-weight-bold"
+                                   style="text-transform: uppercase;" maxlength="9"
+                                   value="{{ old('prj_code', $project->prj_code ?? '') }}" placeholder="e.g. HAYSTACK">
+                        </div>
+                        <div class="col-md-7 form-group mb-2">
+                            <div class="ap-label">Title <span class="text-danger">*</span></div>
+                            <input type="text" name="prj_title" class="form-control form-control-sm"
+                                   value="{{ old('prj_title', $project->prj_title ?? '') }}" placeholder="Full project title">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group mb-2">
+                            <div class="ap-label">Sponsor / Agency <span class="text-danger">*</span></div>
+                            <input type="text" name="prj_sponsor" class="form-control form-control-sm"
+                                   value="{{ old('prj_sponsor', $project->prj_sponsor ?? '') }}" placeholder="Funding agency">
+                        </div>
+                        <div class="col-md-2 form-group mb-2">
+                            <div class="ap-label">Received <span class="text-danger">*</span></div>
+                            <input type="date" name="prj_rcptdt" class="form-control form-control-sm" max="{{ date('Y-m-d') }}"
+                                   value="{{ old('prj_rcptdt', isset($project->prj_rcptdt) && $project->prj_rcptdt ? \Carbon\Carbon::parse($project->prj_rcptdt)->format('Y-m-d') : '') }}">
+                        </div>
+                        <div class="col-md-3 form-group mb-2">
+                            <div class="ap-label">Proposed Cost (Rs.)</div>
+                            <input type="number" name="prj_propcost" min="0" class="form-control form-control-sm"
+                                   value="{{ old('prj_propcost', $project->prj_propcost ?? '') }}" placeholder="0">
+                        </div>
+                        <div class="col-md-3 form-group mb-2">
+                            <div class="ap-label">Scope of Work</div>
+                            <input type="text" name="prj_scope" maxlength="255" class="form-control form-control-sm"
+                                   value="{{ old('prj_scope', $project->prj_scope ?? '') }}" placeholder="Short scope">
                         </div>
                     </div>
 
-                    {{-- PHASE 2 DOCUMENTS (Split: Work Order & Approval Letter) --}}
-                    <div class="row mt-2">
-                        {{-- 1. Work Order --}}
-                        <div class="col-md-6">
-                            <div class="doc-card shadow-sm border-left-success" style="border-left-color: #28a745;">
-                                <div class="d-flex align-items-center">
-                                    <div class="doc-icon" style="color: #28a745; background-color: #e0fdf4;">
-                                        <i class="fas fa-briefcase"></i>
-                                    </div>
-                                    <div>
-                                        <div class="doc-title text-success">Work Order</div>
-                                        <div class="doc-desc">Upload official work order</div>
-                                    </div>
-                                </div>
-                                <div style="width: 32px; height: 32px;">
-                                    <label for="file-wo" class="btn btn-outline-success rounded-circle p-0 d-flex align-items-center justify-content-center w-100 h-100" id="btn-wo" style="cursor: pointer;">
-                                        <i class="fas fa-upload small"></i>
-                                    </label>
-                                    <input type="file" id="file-wo" name="doc_workorder" class="file-input-hidden" onchange="updateUploadUI(this, 'btn-wo')">
-                                </div>
+                    {{-- 2. DATES --}}
+                    <div class="ap-sec"><span class="n">2</span><span class="t">Key Dates</span><span class="line"></span></div>
+                    <div class="row">
+                        @php
+                            $dateFields = [
+                                'prj_propdt'   => 'Proposal',
+                                'prj_assigndt' => 'Assigned',
+                                'prj_aprvdt'   => 'Approval',
+                                'prj_startdt'  => 'Start',
+                                'prj_estenddt' => 'EDC (Est. End)',
+                            ];
+                        @endphp
+                        @foreach($dateFields as $field => $label)
+                            <div class="col-md-2 col-6 form-group mb-2">
+                                <div class="ap-label">{{ $label }}</div>
+                                <input type="date" name="{{ $field }}" class="form-control form-control-sm"
+                                       value="{{ old($field, isset($project->$field) && $project->$field ? \Carbon\Carbon::parse($project->$field)->format('Y-m-d') : '') }}">
                             </div>
-                        </div>
-
-                        {{-- 2. Approval Letter --}}
-                        <div class="col-md-6">
-                            <div class="doc-card shadow-sm border-left-success" style="border-left-color: #28a745;">
-                                <div class="d-flex align-items-center">
-                                    <div class="doc-icon" style="color: #28a745; background-color: #e0fdf4;">
-                                        <i class="fas fa-file-signature"></i>
-                                    </div>
-                                    <div>
-                                        <div class="doc-title text-success">Approval Letter</div>
-                                        <div class="doc-desc">Upload signed approval letter</div>
-                                    </div>
-                                </div>
-                                <div style="width: 32px; height: 32px;">
-                                    <label for="file-al" class="btn btn-outline-success rounded-circle p-0 d-flex align-items-center justify-content-center w-100 h-100" id="btn-al" style="cursor: pointer;">
-                                        <i class="fas fa-upload small"></i>
-                                    </label>
-                                    <input type="file" id="file-al" name="doc_approval_letter" class="file-input-hidden" onchange="updateUploadUI(this, 'btn-al')">
-                                </div>
-                            </div>
+                        @endforeach
+                        <div class="col-md-2 col-6 form-group mb-2">
+                            <div class="ap-label">Status on publish</div>
+                            <input type="text" class="form-control form-control-sm bg-light font-weight-bold" id="statusPreview"
+                                   value="Under assignment" readonly>
                         </div>
                     </div>
+                    <small class="text-muted d-block" style="font-size: 11px;">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Status needs its dates &mdash; Under feasibility: assigned &middot; Approval awaited: + proposal &middot;
+                        Funds awaited: + approval &middot; Work in progress: + start.
+                    </small>
 
+                    {{-- 3. DOCUMENTS --}}
+                    <div class="ap-sec"><span class="n">3</span><span class="t">Documents</span><span class="line"></span></div>
+                    <div class="row">
+                        @php
+                            $docs = [
+                                ['doc_workorder', 'Work Order', 'fa-briefcase', true],
+                                ['doc_ppf', 'PPF', 'fa-file-invoice', false],
+                                ['doc_urd', 'URD', 'fa-file-alt', false],
+                                ['doc_approval_letter', 'Approval Letter', 'fa-file-signature', false],
+                            ];
+                        @endphp
+                        @foreach($docs as [$input, $type, $icon, $required])
+                            @php
+                                $existing = $project ? $project->attachments->where('jat_type', $type)->first() : null;
+                            @endphp
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <div class="ap-doc {{ $existing ? 'done' : ($required ? 'req' : '') }}">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <span class="t">
+                                            <i class="fas {{ $icon }} {{ $existing ? 'text-success' : ($required ? 'text-warning' : 'text-primary') }} mr-1"></i>
+                                            {{ $type }}@if($required) <span class="text-danger">*</span>@endif
+                                        </span>
+                                        @if($existing)
+                                            <a href="{{ route('attachment.view', $existing->jat_id) }}" target="_blank"
+                                               class="badge badge-success"><i class="fas fa-eye mr-1"></i> View</a>
+                                        @endif
+                                    </div>
+                                    <input type="file" name="{{ $input }}" class="form-control-file" style="font-size: 10.5px; width: 100%;"
+                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                    @if($required && ! $existing)
+                                        <small class="text-warning font-weight-bold d-block mt-1" style="font-size: 10.5px;">
+                                            Mandatory to publish
+                                        </small>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <small class="text-muted d-block" style="font-size: 11px;">
+                        <i class="fas fa-paperclip mr-1"></i> Uploaded documents stay with the project and show on its page everywhere.
+                    </small>
 
-                    <h6 class="text-primary font-weight-bold mt-4 mb-3"><i class="fas fa-list-ol mr-1"></i> Define Initial Milestones</h6>
-                    <div class="rd-table-responsive">
-                        <table class="table table-bordered table-custom" id="msTable">
-                            <thead>
+                    {{-- 4. MILESTONES --}}
+                    <div class="ap-sec"><span class="n">4</span><span class="t">Milestones</span><span class="line"></span></div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-2" id="msTable" style="font-size: 12.5px;">
+                            <thead style="background: #f1f5f9;">
                                 <tr>
-                                    <th width="50" class="text-center">#</th>
-                                    <th>Milestone Description</th>
-                                    <th width="200">Target Date</th>
-                                    <th width="50"></th>
+                                    <th style="width: 50px;" class="text-center">#</th>
+                                    <th>Description</th>
+                                    <th style="width: 180px;">Target Date</th>
+                                    <th style="width: 50px;"></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-center font-weight-bold text-muted sn-cell">1</td>
-                                    <td><input type="text" name="milestones[0][desc]" class="form-control form-control-sm border-0 bg-light" placeholder="e.g. Requirement Analysis" required style="min-width: 250px;"></td>
-                                    <td><input type="date" name="milestones[0][date]" class="form-control form-control-sm border-0 bg-light" required style="min-width: 150px;"></td>
-                                    <td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger disabled"><i class="fas fa-trash"></i></button></td>
-                                </tr>
+                            <tbody id="msBody">
+                                @php
+                                    $msRows = old('milestones');
+                                    if (!is_array($msRows)) {
+                                        $msRows = collect($draftMilestones ?? [])->map(fn ($m) => [
+                                            'desc' => $m->msn_desc,
+                                            'date' => $m->msn_targetdt ? \Carbon\Carbon::parse($m->msn_targetdt)->format('Y-m-d') : '',
+                                        ])->all();
+                                    }
+                                    if (empty($msRows)) { $msRows = [['desc' => '', 'date' => '']]; }
+                                @endphp
+                                @foreach($msRows as $i => $row)
+                                    <tr>
+                                        <td class="text-center text-muted font-weight-bold sn">{{ $i + 1 }}</td>
+                                        <td><input type="text" name="milestones[{{ $i }}][desc]" class="form-control form-control-sm border-0 bg-light"
+                                                   value="{{ $row['desc'] ?? '' }}" placeholder="e.g. Procurement of hardware"></td>
+                                        <td><input type="date" name="milestones[{{ $i }}][date]" class="form-control form-control-sm border-0 bg-light"
+                                                   value="{{ $row['date'] ?? '' }}"></td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-xs btn-outline-danger" onclick="msRemove(this)"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <button type="button" class="btn btn-sm btn-secondary shadow-sm" onclick="addRow()">
-                        <i class="fas fa-plus mr-1"></i> Add Another Row
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="msAdd()">
+                        <i class="fas fa-plus mr-1"></i> Add milestone
                     </button>
-
+                    <small class="text-muted ml-2" style="font-size: 11px;">Saved with the draft; more can be added on the project page after publishing.</small>
                 </div>
-                <div class="card-footer text-right bg-white border-top">
-                    <button type="submit" class="btn btn-success px-4 font-weight-bold shadow-sm">
-                        <i class="fas fa-rocket mr-2"></i> Start Working on Project
+
+                <div class="card-footer ap-foot d-flex justify-content-between align-items-center flex-wrap py-2" style="gap: 8px;">
+                    <div>
+                        @if($project)
+                            <button type="button" class="btn btn-sm btn-outline-danger px-3" data-toggle="modal" data-target="#discardDraftModal">
+                                <i class="fas fa-trash mr-1"></i> Discard draft
+                            </button>
+                        @endif
+                    </div>
+                    <div class="d-flex align-items-center" style="gap: 8px;">
+                        <button type="submit" class="btn btn-sm btn-primary px-4 font-weight-bold" onclick="document.getElementById('formAction').value='draft';">
+                            <i class="fas fa-save mr-1"></i> Save as Draft
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success px-4 font-weight-bold" data-toggle="modal" data-target="#publishModal">
+                            <i class="fas fa-paper-plane mr-1"></i> Publish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        @endif
+    </div>
+
+    {{-- ================= PUBLISH MODAL ================= --}}
+    @if($showForm)
+    <div class="modal fade" id="publishModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius: 10px;">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title font-weight-bold" style="font-size: 15px;">
+                        <i class="fas fa-paper-plane text-success mr-2"></i> Publish to Division
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <div id="woWarning" class="alert alert-danger py-2 px-3 small mb-3" style="display: none;">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        <strong>Work Order is mandatory.</strong> Upload it in the Documents section before publishing.
+                    </div>
+                    <p class="small text-muted mb-3">
+                        The project will be saved and handed over to the division. From then on it appears in their
+                        project list and every change goes through an amendment case.
+                    </p>
+                    <div class="form-group mb-2">
+                        <div class="ap-label">Publish with status</div>
+                        <select id="publishStatusSelect" class="form-control form-control-sm">
+                            @foreach(['Under assignment', 'Under feasibility', 'Approval awaited', 'Funds awaited', 'Work in progress'] as $st)
+                                <option value="{{ $st }}">{{ $st }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <small class="text-muted">If the required dates or the Work Order are missing, the publish is refused and nothing changes.</small>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary px-3" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-success px-4 font-weight-bold" onclick="confirmPublish()">
+                        <i class="fas fa-check mr-1"></i> Yes, Publish
                     </button>
                 </div>
-            </form>
-            @endif
-
+            </div>
         </div>
     </div>
+    @endif
+
+    {{-- ================= DISCARD MODAL ================= --}}
+    @if($showForm && $project)
+    <div class="modal fade" id="discardDraftModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content" style="border-radius: 10px;">
+                <div class="modal-body text-center px-4 py-4">
+                    <i class="fas fa-trash fa-2x text-danger mb-3"></i>
+                    <h6 class="font-weight-bold">Discard draft {{ $project->prj_code }}?</h6>
+                    <p class="text-muted small mb-3">The draft and its milestones are deleted. This cannot be undone.</p>
+                    <form method="POST" action="{{ route('projects.delete-draft', $project->prj_id) }}">
+                        @csrf
+                        <button type="button" class="btn btn-sm btn-secondary px-3 mr-1" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-danger px-3">Discard</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 <script>
-    let msCount = 1;
+@if($showForm)
+const HAS_WORK_ORDER = {{ $hasWorkOrder ? 'true' : 'false' }};
 
-    function addRow() {
-        const table = document.getElementById('msTable').getElementsByTagName('tbody')[0];
-        const newRow = table.insertRow();
-        msCount++;
-        newRow.innerHTML = `
-            <td class="text-center font-weight-bold text-muted sn-cell">${msCount}</td>
-            <td><input type="text" name="milestones[${msCount}][desc]" class="form-control form-control-sm border-0 bg-light" placeholder="Next Milestone..."></td>
-            <td><input type="date" name="milestones[${msCount}][date]" class="form-control form-control-sm border-0 bg-light"></td>
-            <td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger" onclick="removeRow(this)"><i class="fas fa-trash"></i></button></td>
-        `;
+function msAdd() {
+    const body = document.getElementById('msBody');
+    const i = body.querySelectorAll('tr').length;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+        '<td class="text-center text-muted font-weight-bold sn">' + (i + 1) + '</td>' +
+        '<td><input type="text" name="milestones[' + i + '][desc]" class="form-control form-control-sm border-0 bg-light" placeholder="Milestone description"></td>' +
+        '<td><input type="date" name="milestones[' + i + '][date]" class="form-control form-control-sm border-0 bg-light"></td>' +
+        '<td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger" onclick="msRemove(this)"><i class="fas fa-trash"></i></button></td>';
+    body.appendChild(tr);
+}
+
+function msRemove(btn) {
+    const body = document.getElementById('msBody');
+    btn.closest('tr').remove();
+    if (body.querySelectorAll('tr').length === 0) { msAdd(); }
+    renumber();
+}
+
+function renumber() {
+    document.querySelectorAll('#msBody tr').forEach(function (tr, i) {
+        tr.querySelector('.sn').innerText = i + 1;
+        const d = tr.querySelector('input[type="text"]');
+        const t = tr.querySelector('input[type="date"]');
+        if (d) d.name = 'milestones[' + i + '][desc]';
+        if (t) t.name = 'milestones[' + i + '][date]';
+    });
+}
+
+function workOrderReady() {
+    if (HAS_WORK_ORDER) return true;
+    const input = document.querySelector('input[name="doc_workorder"]');
+    return !!(input && input.files && input.files.length > 0);
+}
+
+function confirmPublish() {
+    if (!workOrderReady()) {
+        document.getElementById('woWarning').style.display = 'block';
+        return;
     }
+    document.getElementById('publishStatusInput').value = document.getElementById('publishStatusSelect').value;
+    document.getElementById('formAction').value = 'publish';
+    document.getElementById('projectForm').submit();
+}
 
-    function removeRow(btn) {
-        btn.closest('tr').remove();
-        updateSerialNumbers();
-    }
-
-    function updateSerialNumbers() {
-        const rows = document.querySelectorAll('#msTable tbody tr');
-        rows.forEach((row, index) => {
-            row.querySelector('.sn-cell').innerText = index + 1;
+document.addEventListener('DOMContentLoaded', function () {
+    const sel = document.getElementById('publishStatusSelect');
+    const preview = document.getElementById('statusPreview');
+    if (sel && preview) {
+        sel.addEventListener('change', function () {
+            preview.value = sel.value;
+            document.getElementById('publishStatusInput').value = sel.value;
         });
-        msCount = rows.length;
     }
-
-    function updateUploadUI(input, btnId) {
-        if (input.files && input.files[0]) {
-            const labelBtn = document.getElementById(btnId);
-            const parent = labelBtn.closest('.doc-card');
-            labelBtn.classList.remove('btn-outline-primary', 'btn-outline-success');
-            labelBtn.classList.add('btn-success');
-            labelBtn.innerHTML = '<i class="fas fa-check"></i>';
-            labelBtn.style.color = '#fff';
-            parent.style.borderColor = 'var(--rd-success)';
-            parent.style.backgroundColor = 'var(--rd-success-soft)';
-            parent.querySelector('.doc-icon').style.color = 'var(--rd-success)';
-            parent.querySelector('.doc-icon').style.backgroundColor = 'var(--rd-surface2)';
-            parent.querySelector('.doc-desc').innerText = input.files[0].name;
-            parent.querySelector('.doc-desc').style.color = 'var(--rd-success)';
-        }
-    }
+    $('#publishModal').on('show.bs.modal', function () {
+        document.getElementById('woWarning').style.display = workOrderReady() ? 'none' : 'block';
+    });
+});
+@else
+function filterPublished() {
+    const q = (document.getElementById('pubSearch').value || '').toLowerCase();
+    document.querySelectorAll('#pubTable tbody tr').forEach(function (tr) {
+        tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+@endif
 </script>
 @endsection

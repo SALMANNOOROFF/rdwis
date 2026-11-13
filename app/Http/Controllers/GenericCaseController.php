@@ -287,6 +287,9 @@ class GenericCaseController extends Controller
         // Available destinations for Search Dropdown
         $destinations = $this->caseService->getAvailableDestinations($user);
 
+        // Project Details Amendment payload (null for ordinary cases)
+        $amendment = app(\App\Services\ProjectAmendmentService::class)->amendmentFor($case);
+
         // Latest decisions on top
         $decisions = $allMovementsAsc->sortByDesc('gcm_dtg');
 
@@ -310,6 +313,7 @@ class GenericCaseController extends Controller
             'decisions'          => $decisions,
             'recentCases'        => $recentCases,
             'categories'         => $this->getCategories(),
+            'amendment'          => $amendment,
             'user'               => $user,
         ]);
     }
@@ -412,9 +416,63 @@ class GenericCaseController extends Controller
 
         try {
             $this->caseService->approveCase($case, $user, $request->input('remarks'));
-            return redirect()->route('cases.index')->with('success', "Case {$case->gcs_file_no} approved successfully.");
+
+            $message = "Case {$case->gcs_file_no} approved successfully.";
+
+            // Auto-apply linked Project Details amendment (no effect on ordinary cases).
+            $applied = app(\App\Services\ProjectAmendmentService::class)
+                ->applyApprovedAmendment($case->fresh(), $user);
+
+            if ($applied) {
+                $message .= ' Approved changes have been applied to the project record automatically.';
+            }
+
+            return redirect()->route('cases.index')->with('success', $message);
         } catch (Throwable $e) {
             return back()->with('error', 'Error approving case: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Revise the values of a linked Project Details amendment AFTER approval.
+     *
+     * Before approval the values are frozen (what is approved is exactly what was
+     * put up). Once the case is approved, an approving authority may correct the
+     * figures here and the project record is updated immediately.
+     */
+    public function updateAmendment(Request $request, $id): RedirectResponse
+    {
+        $user = Auth::user();
+        $case = GenericCase::findOrFail($id);
+
+        $service = app(\App\Services\ProjectAmendmentService::class);
+        $payload = $service->amendmentFor($case);
+
+        if (!$payload) {
+            return back()->with('error', 'This case file does not carry a project amendment.');
+        }
+
+        if (!$service->isApproved($case)) {
+            return back()->with('error', 'Values are locked until the case is approved.');
+        }
+
+        if (!$this->canApprove($user)) {
+            return back()->with('error', 'Unauthorized. Only the approving authority can revise an approved amendment.');
+        }
+
+        $request->validate([
+            'values'   => 'required|array',
+            'values.*' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $done = $service->applyRevisedValues($case, $request->input('values', []), $user);
+
+            return $done
+                ? back()->with('success', 'Revised values saved and applied to the project record.')
+                : back()->with('error', 'Nothing to save for this amendment.');
+        } catch (Throwable $e) {
+            return back()->with('error', 'Error saving revised values: ' . $e->getMessage());
         }
     }
 
@@ -479,15 +537,64 @@ class GenericCaseController extends Controller
     {
         $case = GenericCase::with([
             'creator',
+            'currentHolder',
             'notes.author',
             'movements' => function ($q) {
                 $q->orderBy('gcm_dtg', 'asc');
             },
             'movements.actor',
-            'attachments',
+            'movements.toHolder',
+            'attachments.uploader',
             'unit'
         ])->findOrFail($id);
 
-        return view('cases.print', compact('case'));
+        // Seat-wise movement & remarks trail
+        $remarksList = $case->movements->map(function ($mov) {
+            $actLower = strtolower(trim((string) $mov->gcm_action));
+            $tone = 'normal';
+            if (str_contains($actLower, 'approv') || str_contains($actLower, 'clos') || str_contains($actLower, 'fulfill')) {
+                $tone = 'approve';
+            } elseif (str_contains($actLower, 'return')) {
+                $tone = 'return';
+            } elseif (str_contains($actLower, 'reject') || str_contains($actLower, 'cancel')) {
+                $tone = 'reject';
+            }
+
+            $seat = trim((string) ($mov->actor->acc_desigshort ?? ($mov->gcm_from_stage ?: ($mov->actor->acc_desig ?? 'Officer'))));
+            $toLabel = $mov->toHolder->acc_name ?? $mov->gcm_to_stage;
+            $actionLabel = $mov->gcm_action . (!empty($toLabel) && !in_array($actLower, ['approved', 'closed', 'rejected', 'cancelled'], true) ? " → {$toLabel}" : '');
+
+            return [
+                'actor'     => $mov->gcm_actor_name ?: ($mov->actor->acc_name ?? 'Officer'),
+                'seat'      => strtoupper($seat),
+                'action'    => $actionLabel,
+                'tone'      => $tone,
+                'timestamp' => $mov->gcm_dtg ? $mov->gcm_dtg->format('d M Y, h:i A') : '—',
+                'remarks'   => $mov->gcm_remarks ?? '',
+            ];
+        })->all();
+
+        // Attached files register from gen.case_attachments
+        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+        $enclosuresList = $case->attachments->map(function ($att) use ($imageExts) {
+            $fn = $att->gca_filename ?: basename((string) $att->gca_path);
+            $ext = strtolower(pathinfo($fn, PATHINFO_EXTENSION));
+            $sizeKb = $att->gca_size ? number_format($att->gca_size / 1024, 1) . ' KB' : strtoupper($ext ?: 'FILE');
+            $uploader = $att->uploader->acc_name ?? 'User';
+            $dt = $att->created_at ? \Carbon\Carbon::parse($att->created_at)->format('d M Y') : '';
+
+            return [
+                'title'       => $att->gca_title ?: $fn,
+                'filename'    => $fn,
+                'source'      => 'E-Office Enclosure',
+                'uploaded_by' => $uploader,
+                'meta'        => trim("{$sizeKb}" . ($dt ? " • {$dt}" : '')),
+                'url'         => !empty($att->gca_path) ? asset('storage/' . ltrim($att->gca_path, '/')) : null,
+                'is_image'    => in_array($ext, $imageExts, true),
+                'is_pdf'      => $ext === 'pdf',
+            ];
+        })->all();
+
+        return view('cases.print', compact('case', 'remarksList', 'enclosuresList'));
     }
 }

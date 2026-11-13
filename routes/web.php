@@ -35,6 +35,12 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// A stray GET /logout (typed URL, old bookmark, browser prefetch) used to blow up with a
+// 405 page. Logging out stays POST + CSRF; a GET just sends the visitor on their way.
+Route::get('/logout', function () {
+    return auth()->check() ? redirect('/') : redirect()->route('login');
+});
+
 
 // ====================================================
 // 2. PROTECTED ROUTES (LOGGED IN USERS)
@@ -119,6 +125,8 @@ Route::middleware('auth')->group(function () {
         ->name('contract-cases.attachments.store');
 
     Route::middleware('force_password_change')->group(function () {
+        Route::get('/contract-cases/{id}/print', [\App\Http\Controllers\ContractCaseController::class, 'printCase'])
+            ->whereNumber('id')->name('contract-cases.print');
         Route::get('/contract-cases/{id}/projects/{headId}/panel', [\App\Http\Controllers\ContractCaseController::class, 'projectPanel'])
             ->whereNumber(['id', 'headId'])->name('contract-cases.project-panel');
 
@@ -301,6 +309,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('/it-template/save', [\App\Http\Controllers\PurchaseController::class, 'saveItTemplate'])->name('it_template.save');
 
                 // Wildcard routes must come last
+                Route::get('/{id}/print', [\App\Http\Controllers\PurchaseCaseController::class, 'printCase'])->name('print');
                 Route::get('/{id}', [\App\Http\Controllers\PurchaseCaseController::class, 'show'])->name('show');
                 Route::post('/{id}/action', [\App\Http\Controllers\PurchaseCaseController::class, 'action'])->name('action');
                 Route::post('/{id}/reverse', [\App\Http\Controllers\PurchaseCaseController::class, 'reverse'])->name('reverse');
@@ -417,6 +426,8 @@ Route::middleware('auth')->group(function () {
 
         // --- MD CONTRACT CASE ROUTES ---
         Route::prefix('md')->middleware('area:rdw')->group(function () {
+            // MPR inbox for MD - only reachable when the MD stage is switched on in settings
+            Route::get('/mpr-inbox', [\App\Http\Controllers\MprController::class, 'mdInbox'])->name('md.mpr_inbox');
             Route::get('/contract-cases', [\App\Http\Controllers\MD\ContractCaseController::class, 'index'])
                 ->name('md.contract-cases.index');
             Route::get('/contract-cases/{id}', [\App\Http\Controllers\MD\ContractCaseController::class, 'show'])
@@ -494,6 +505,28 @@ Route::middleware('auth')->group(function () {
         });
 
 
+        // --- RAISING A PROJECT (SORD / DDPMO) ---
+        // Projects are raised by SORD on behalf of a division, so these routes must
+        // stay reachable for SORD, who is redirected away from the division pages.
+        // Division users are stopped by ProjectPolicy@create (project.create).
+        Route::group(['middleware' => ['area:prj,rdwprj']], function () {
+            Route::get('/addnewproject', [ProjectController::class, 'create'])
+                ->name('addnewproject')
+                ->middleware('approver');
+            Route::post('/save-project', [ProjectController::class, 'store'])
+                ->name('save-project')
+                ->middleware('approver');
+            Route::post('/project/{id}/save-draft', [ProjectController::class, 'updateDraftProject'])
+                ->name('projects.save-draft')
+                ->middleware('approver');
+            Route::post('/project/{id}/delete-draft', [ProjectController::class, 'deleteDraftProject'])
+                ->name('projects.delete-draft')
+                ->middleware('approver');
+            Route::post('/finalize-project/{id}', [ProjectController::class, 'finalizeProject'])
+                ->name('finalize-project')
+                ->middleware('approver');
+        });
+
         Route::group([
             'middleware' => [
                 \App\Http\Middleware\RedirectIfSord::class,
@@ -503,24 +536,20 @@ Route::middleware('auth')->group(function () {
 
         // --- PROJECTS ---
         Route::get('/view-projects', [ProjectController::class, 'index'])->name('view-projects');
-        Route::get('/addnewproject', [ProjectController::class, 'create'])
-            ->name('addnewproject')
-            ->middleware('approver');
-        Route::post('/save-project', [ProjectController::class, 'store'])
-            ->name('save-project')
-            ->middleware('approver');
-        Route::post('/finalize-project/{id}', [ProjectController::class, 'finalizeProject'])
-            ->name('finalize-project')
+        Route::put('/project/{id}/update-details', [ProjectController::class, 'updateDetails'])
+            ->name('projects.update-details')
             ->middleware('approver');
         Route::get('/openprojectdetails/{id}', [ProjectController::class, 'show'])->name('projects.show');
 
         // --- NEW MPR SYSTEM (USING DocMprController) ---
         // (Yeh line replace kar rahi hai purane ProjectController logic ko)
-        Route::get('/project/{id}/view-mpr', [DocMprController::class, 'view'])->name('mpr.view');
-        Route::get('/project/{id}/mpr-report', [DocMprController::class, 'generateReport'])->name('mpr.report');
-        Route::post('/project/{id}/mpr/store', [DocMprController::class, 'store'])
-            ->name('mpr.store')
+        // MPR runs on the legacy engine (prj.prghistory) with its own movement trail
+        Route::get('/project/{id}/view-mpr', [\App\Http\Controllers\MprLegacyController::class, 'view'])->name('mpr.view');
+        Route::post('/project/{id}/mpr/action', [\App\Http\Controllers\MprLegacyController::class, 'action'])
+            ->name('mpr.action')
             ->middleware('approver');
+        Route::get('/project/{id}/mpr-report', [DocMprController::class, 'generateReport'])->name('mpr.report');
+        // (the doc-engine MPR writer is retired: prj.prghistory is the single source)
 
         // Old History Route (Keep if needed for other things)
         Route::get('/projecthistory', [ProjectController::class, 'projectHistory'])->name('projecthistory');
@@ -554,6 +583,14 @@ Route::middleware('auth')->group(function () {
             ->name('division.finance-of-project.projects-by-division');
 
         Route::get('/milestone/{id}/edit', [ProjectController::class, 'editMilestone'])->name('milestone.edit');
+        Route::post('/milestone/{id}/update', [ProjectController::class, 'updateMilestone'])
+            ->name('milestone.update')
+            ->middleware('approver');
+        Route::get('/milestone/{id}/certificate', [ProjectController::class, 'viewMilestoneCertificate'])
+            ->name('milestone.certificate');
+        Route::post('/milestone/{id}/certificate', [ProjectController::class, 'uploadMilestoneCertificate'])
+            ->name('milestone.certificate.upload')
+            ->middleware('approver');
         Route::match(['get', 'post', 'delete'], '/milestone/{id}/delete', [ProjectController::class, 'deleteMilestone'])
             ->name('milestone.delete')
             ->middleware('approver');
@@ -858,6 +895,29 @@ Route::middleware('auth')->group(function () {
             Route::get('/crypto-test', [SystemAdminAccountController::class, 'cryptoTest'])->name('crypto.test');
         });
 
+    // ====================================================
+    // SYSTEM LOGS -- read-only audit trail (syslog schema)
+    // Only GET routes exist here, on purpose: the trail is append-only at the
+    // database level too. See docs/SYSTEM_LOGS_SCHEMA_DESIGN.md §5E
+    // ====================================================
+    Route::prefix('admin/system-logs')
+        ->name('admin.syslog.')
+        ->middleware('can:syslog.view')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\SystemLogController::class, 'home'])->name('home');
+            Route::get('/verify', [\App\Http\Controllers\Admin\SystemLogController::class, 'verify'])->name('verify');
+            Route::get('/event/{sevId}', [\App\Http\Controllers\Admin\SystemLogController::class, 'event'])
+                ->name('event')->whereNumber('sevId');
+            Route::get('/export/{category}', [\App\Http\Controllers\Admin\SystemLogController::class, 'export'])
+                ->name('export');
+            Route::get('/{category}', [\App\Http\Controllers\Admin\SystemLogController::class, 'category'])
+                ->name('category');
+            Route::get('/{category}/{object}/{id}/print', [\App\Http\Controllers\Admin\SystemLogController::class, 'print'])
+                ->name('print')->where('id', '.*');
+            Route::get('/{category}/{object}/{id}', [\App\Http\Controllers\Admin\SystemLogController::class, 'record'])
+                ->name('record')->where('id', '.*');
+        });
+
     Route::prefix('admin/reversals')
         ->name('admin.reversals.')
         ->group(function () {
@@ -975,6 +1035,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('/reports/export', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'exportExcel'])->name('reports.export');
                 Route::get('/reports/print-monthly-return', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'printMonthlyReturn'])->name('reports.print_monthly_return');
                 Route::get('/reports/print-csrf-status', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'printCsrfStatus'])->name('reports.print_csrf_status');
+                Route::get('/reports/print-alloc-subheads', [\App\Http\Controllers\Finance\FinanceReportsController::class, 'printAllocSubheads'])->name('reports.print_alloc_subheads');
             });
         });
 
@@ -992,6 +1053,22 @@ Route::middleware('auth')->group(function () {
             Route::post('/{hedId}/reopen', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'reopenAccount'])->name('reopen');
             Route::get('/ajax/projects/{unitId}', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'getProjectsByUnit'])->name('projects');
             Route::get('/ajax/project-details/{prjId}', [\App\Http\Controllers\Finance\AccountOpeningController::class, 'getProjectDetails'])->name('project-details');
+        });
+
+    // ====================================================
+    // FINANCE - FUNDING RECEIPTS & MILESTONE COSTS
+    // (legacy fin_sharesinstall_add + fin_msncosts_plus)
+    // ====================================================
+    Route::prefix('finance/fundings')
+        ->name('finance.fundings.')
+        ->middleware(['area:fin'])
+        ->group(function () {
+            Route::get('/{hedId}', [\App\Http\Controllers\Finance\FundingController::class, 'index'])
+                ->whereNumber('hedId')->name('index');
+            Route::post('/{hedId}', [\App\Http\Controllers\Finance\FundingController::class, 'store'])
+                ->whereNumber('hedId')->name('store');
+            Route::post('/{hedId}/milestone-costs', [\App\Http\Controllers\Finance\FundingController::class, 'storeMilestoneCosts'])
+                ->whereNumber('hedId')->name('milestone_costs');
         });
 
     // Unified Group for Approvals & Scrutiny (Redirect old routes to modern purchase_cases_new hub)
@@ -1031,6 +1108,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [\App\Http\Controllers\FundShiftingController::class, 'store'])->name('store');
             Route::get('/subheads/{headId}', [\App\Http\Controllers\FundShiftingController::class, 'getSubheads'])->name('subheads');
             Route::get('/history/{projectId}', [\App\Http\Controllers\FundShiftingController::class, 'history'])->name('history');
+            Route::get('/{id}/print', [\App\Http\Controllers\FundShiftingController::class, 'printCase'])->name('print');
             Route::get('/{id}', [\App\Http\Controllers\FundShiftingController::class, 'show'])->name('show');
             Route::post('/{id}/forward', [\App\Http\Controllers\FundShiftingController::class, 'forward'])->name('forward');
             Route::post('/{id}/approve', [\App\Http\Controllers\FundShiftingController::class, 'approve'])->name('approve');
@@ -1071,6 +1149,7 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{id}/draft', [\App\Http\Controllers\GenericCaseController::class, 'updateDraft'])->name('update_draft');
             Route::post('/{id}/send', [\App\Http\Controllers\GenericCaseController::class, 'sendCase'])->name('send');
             Route::post('/{id}/approve', [\App\Http\Controllers\GenericCaseController::class, 'approve'])->name('approve');
+            Route::post('/{id}/amendment', [\App\Http\Controllers\GenericCaseController::class, 'updateAmendment'])->name('update_amendment');
             Route::post('/{id}/cancel', [\App\Http\Controllers\GenericCaseController::class, 'cancel'])->name('cancel');
             Route::post('/{id}/attachments', [\App\Http\Controllers\GenericCaseController::class, 'uploadAttachment'])->name('upload_attachment');
             Route::get('/{id}/print', [\App\Http\Controllers\GenericCaseController::class, 'print'])->name('print');

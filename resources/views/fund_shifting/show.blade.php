@@ -205,6 +205,11 @@
                         <div class="dg-sec-label" style="margin-bottom:0;">
                             <i class="fas fa-exchange-alt fa-xs"></i> Shifting of Funds Case #FS-{{ $shift->fsh_rev_id ?: $shift->fsh_id }}
                         </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{{ route('fund_shifting.print', $shift->fsh_id) }}" target="_blank" class="btn btn-sm font-weight-bold rajdhani d-inline-flex align-items-center" style="background: #0f172a; color: #ffffff; border: 1px solid #334155; font-size: 11px; letter-spacing: 0.6px; padding: 4px 11px; border-radius: 6px; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.12); text-decoration: none;" title="Print Case Details, Remarks & Attachments">
+                                <i class="fas fa-print"></i> PRINT CASE
+                            </a>
+                        </div>
                     </div>
 
                     {{-- 1. Case Details Grid --}}
